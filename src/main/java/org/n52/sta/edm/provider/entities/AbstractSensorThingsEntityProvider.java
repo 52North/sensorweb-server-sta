@@ -31,7 +31,10 @@ public abstract class AbstractSensorThingsEntityProvider implements Initializing
     public static final String PROP_NAME = "name";
     public static final String PROP_DESCRIPTION = "description";
     public static final String PROP_PROPERTIES = "properties";
-
+    public static final String PROP_LOCATION = "location";
+    public static final String PROP_ENCODINGTYPE = "encodingType";
+    public static final String PROP_TIME = "time";
+    
     private CsdlEntityType entityType;
     private CsdlEntitySet entitySet;
 

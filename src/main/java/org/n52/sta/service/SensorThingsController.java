@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/sta")
 public class SensorThingsController {
 
-    private static String URI = "sta/";
+    private static String URI = "sta";
 
 //    @Autowired
 //    ApplicationContext ctx;

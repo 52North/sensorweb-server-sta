@@ -7,6 +7,7 @@ package org.n52.sta.service.processor;
 
 import java.io.InputStream;
 import java.util.List;
+
 import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
@@ -27,6 +28,8 @@ import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
+import org.n52.sta.data.HistoricalLocationService;
+import org.n52.sta.data.LocationService;
 import org.n52.sta.data.ThingService;
 import org.n52.sta.utils.EntityAnnotator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,52 +42,84 @@ import org.springframework.stereotype.Component;
 @Component
 public class SensorThingsEntityCollectionProcessor implements EntityCollectionProcessor {
 
-    private static final ContentType ET_COLLECTION_PROCESSOR_CONTENT_TYPE = ContentType.JSON_FULL_METADATA;
+	private static final ContentType ET_COLLECTION_PROCESSOR_CONTENT_TYPE = ContentType.JSON_FULL_METADATA;
 
-    @Autowired
-    ThingService thingService;
+	@Autowired
+	ThingService thingService;
 
-    @Autowired
-    EntityAnnotator entityAnnotator;
+	@Autowired
+	LocationService locationService;
 
-    private OData odata;
-    private ServiceMetadata serviceMetadata;
+	@Autowired
+	HistoricalLocationService historicalLocationService;
+	
+	@Autowired
+	EntityAnnotator entityAnnotator;
 
-    @Override
-    public void readEntityCollection(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType contentType) throws ODataApplicationException, ODataLibraryException {
-        // 1st retrieve the requested EntitySet from the uriInfo (representation of the parsed URI)
-        List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
-        UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0); // in our example, the first segment is the EntitySet
-        EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
+	private OData odata;
+	private ServiceMetadata serviceMetadata;
 
-        // 2nd: fetch the data from backend for this requested EntitySetName and deliver as EntitySet
-        EntityCollection entityCollection = null;
-        entityCollection = thingService.getThings();
-        entityCollection.forEach(e -> entityAnnotator.annotateEntity(e, edmEntitySet.getEntityType()));
+	@Override
+	public void readEntityCollection(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType contentType) throws ODataApplicationException, ODataLibraryException {
+		// 1st retrieve the requested EntitySet from the uriInfo (representation of the parsed URI)
+		List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
+		UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0); // in our example, the first segment is the EntitySet
+		EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
 
-        // 3rd: create a serializer based on the requested format (json)
-        ODataSerializer serializer = odata.createSerializer(ET_COLLECTION_PROCESSOR_CONTENT_TYPE);
+		
+		// 2nd: fetch the data from backend for this requested EntitySetName and deliver as EntitySet
+		EntityCollection entityCollection = this.getEntityCollection(uriInfo.getUriResourceParts().get(0).toString());
+		
+		entityCollection.forEach(e -> entityAnnotator.annotateEntity(e, edmEntitySet.getEntityType()));
+		// 3rd: create a serializer based on the requested format (json)
+		ODataSerializer serializer = odata.createSerializer(ET_COLLECTION_PROCESSOR_CONTENT_TYPE);
 
-        // and serialize the content: transform from the EntitySet object to InputStream
-        EdmEntityType edmEntityType = edmEntitySet.getEntityType();
-        ContextURL contextUrl = ContextURL.with().entitySet(edmEntitySet).build();
+		// and serialize the content: transform from the EntitySet object to InputStream
+		EdmEntityType edmEntityType = edmEntitySet.getEntityType();
+		ContextURL contextUrl = ContextURL.with().entitySet(edmEntitySet).build();
 
-        final String id = request.getRawBaseUri() + "/" + edmEntitySet.getName();
-        EntityCollectionSerializerOptions opts
-                = EntityCollectionSerializerOptions.with().id(id).contextURL(contextUrl).build();
-        SerializerResult serializerResult = serializer.entityCollection(serviceMetadata, edmEntityType, entityCollection, opts);
-        InputStream serializedContent = serializerResult.getContent();
+		final String id = request.getRawBaseUri() + "/" + edmEntitySet.getName();
+		EntityCollectionSerializerOptions opts
+		= EntityCollectionSerializerOptions.with().id(id).contextURL(contextUrl).build();
+		SerializerResult serializerResult = serializer.entityCollection(serviceMetadata, edmEntityType, entityCollection, opts);
+		InputStream serializedContent = serializerResult.getContent();
 
-        // 4th: configure the response object: set the body, headers and status code
-        response.setContent(serializedContent);
-        response.setStatusCode(HttpStatusCode.OK.getStatusCode());
-        response.setHeader(HttpHeader.CONTENT_TYPE, ET_COLLECTION_PROCESSOR_CONTENT_TYPE.toContentTypeString());
-    }
+		// 4th: configure the response object: set the body, headers and status code
+		response.setContent(serializedContent);
+		response.setStatusCode(HttpStatusCode.OK.getStatusCode());
+		response.setHeader(HttpHeader.CONTENT_TYPE, ET_COLLECTION_PROCESSOR_CONTENT_TYPE.toContentTypeString());
+	}
 
-    @Override
-    public void init(OData odata, ServiceMetadata serviceMetadata) {
-        this.odata = odata;
-        this.serviceMetadata = serviceMetadata;
-    }
+	@Override
+	public void init(OData odata, ServiceMetadata serviceMetadata) {
+		this.odata = odata;
+		this.serviceMetadata = serviceMetadata;
+	}
+
+	/**
+	 * Multiplexes Request to different Service Implementations based on requested Entity
+	 * 
+	 * @param Name of Entity requested
+ 	 * @return EntityCollection retrieved from backend
+	 */
+	private EntityCollection getEntityCollection(String name) {
+		EntityCollection entityCollection = null;
+		
+		switch(name) {
+		case "Things" : {
+			entityCollection = thingService.getThings();
+			break;
+		}
+		case "Locations" : {
+			entityCollection = locationService.getLocations();
+			break;
+		}
+		case "HistoricalLocations" : {
+			entityCollection = historicalLocationService.getLocations();
+			break;
+		}
+		}
+		return entityCollection;
+	}
 
 }

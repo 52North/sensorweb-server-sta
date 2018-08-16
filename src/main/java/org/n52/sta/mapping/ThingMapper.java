@@ -34,8 +34,8 @@ public class ThingMapper {
     @Autowired
     EntityCreationHelper entityCreationHelper;
 
-    @Autowired
-    EntityAnnotator entityAnnotator;
+//    @Autowired
+//    EntityAnnotator entityAnnotator;
 
     public Entity createThingEntity(ThingEntity thing) {
         Entity entity = new Entity();
