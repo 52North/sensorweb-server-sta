@@ -69,8 +69,8 @@ public class SensorThingsEntityCollectionProcessor implements EntityCollectionPr
 		
 		// 2nd: fetch the data from backend for this requested EntitySetName and deliver as EntitySet
 		EntityCollection entityCollection = this.getEntityCollection(uriInfo.getUriResourceParts().get(0).toString());
-		
 		entityCollection.forEach(e -> entityAnnotator.annotateEntity(e, edmEntitySet.getEntityType()));
+		
 		// 3rd: create a serializer based on the requested format (json)
 		ODataSerializer serializer = odata.createSerializer(ET_COLLECTION_PROCESSOR_CONTENT_TYPE);
 

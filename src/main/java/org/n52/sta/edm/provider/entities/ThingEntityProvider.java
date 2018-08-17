@@ -1,7 +1,30 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2012-2018 52°North Initiative for Geospatial Open Source
+ * Software GmbH
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation.
+ *
+ * If the program is linked with libraries which are licensed under one of
+ * the following licenses, the combination of the program with the linked
+ * library is not considered a "derivative work" of the program:
+ *
+ *     - Apache License, version 2.0
+ *     - Apache Software License, version 1.0
+ *     - GNU Lesser General Public License, version 3
+ *     - Mozilla Public License, versions 1.0, 1.1 and 2.0
+ *     - Common Development and Distribution License (CDDL), version 1.0
+ *
+ * Therefore the distribution of the program linked with libraries licensed
+ * under the aforementioned licenses, is permitted by the copyright holders
+ * if the distribution is compliant with both the GNU General Public
+ * License version 2 and the aforementioned licenses.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details.
  */
 package org.n52.sta.edm.provider.entities;
 
@@ -40,9 +63,6 @@ public class ThingEntityProvider extends AbstractSensorThingsEntityProvider {
     // Entity Set Name
     public static final String ES_THINGS_NAME = "Things";
 
-    // Entity Property Names
-    private static final String PROP_PROPERTIES = "properties";
-
     // Entity Navigation Property Names
     private static final String NAV_LINK_NAME_DATASTREAMS = ES_DATASTREAMS_NAME + NAVIGATION_LINK_ANNOTATION;
     private static final String NAV_LINK_NAME_LOCATIONS = ES_LOCATIONS_NAME + NAVIGATION_LINK_ANNOTATION;
@@ -61,19 +81,21 @@ public class ThingEntityProvider extends AbstractSensorThingsEntityProvider {
         CsdlProperty navLinkLocations = new CsdlProperty().setName(NAV_LINK_NAME_LOCATIONS).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
         CsdlProperty navLinkHistoricalLocations = new CsdlProperty().setName(NAV_LINK_NAME_HISTORICAL_LOCATIONS).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
 
-        // navigation property: one-to-many
+        // navigation property: many optional to many optional
         CsdlNavigationProperty navPropLocations = new CsdlNavigationProperty()
                 .setName(ES_LOCATIONS_NAME)
                 .setType(ET_LOCATION_FQN)
                 .setCollection(true)
                 .setPartner(ES_THINGS_NAME);
-
+        
+        // navigation property: one mandatory to many optional
         CsdlNavigationProperty navPropDatastreams = new CsdlNavigationProperty()
                 .setName(ES_DATASTREAMS_NAME)
                 .setType(ET_DATASTREAM_FQN)
                 .setCollection(true)
                 .setPartner(ET_THING_NAME);
-
+        
+        // navigation property: one mandatory to many optional
         CsdlNavigationProperty navPropHistoricalLocations = new CsdlNavigationProperty()
                 .setName(ES_HISTORICAL_LOCATIONS_NAME)
                 .setType(ET_HISTORICAL_LOCATION_FQN)
@@ -101,7 +123,7 @@ public class ThingEntityProvider extends AbstractSensorThingsEntityProvider {
 
     @Override
     protected CsdlEntitySet createEntitySet() {
-        CsdlEntitySet entitySet = new CsdlEntitySet();
+    	CsdlEntitySet entitySet = new CsdlEntitySet();
         entitySet.setName(ES_THINGS_NAME);
         entitySet.setType(ET_THING_FQN);
 

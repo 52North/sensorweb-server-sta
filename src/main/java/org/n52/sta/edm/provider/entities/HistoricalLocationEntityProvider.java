@@ -1,14 +1,45 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2012-2018 52°North Initiative for Geospatial Open Source
+ * Software GmbH
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation.
+ *
+ * If the program is linked with libraries which are licensed under one of
+ * the following licenses, the combination of the program with the linked
+ * library is not considered a "derivative work" of the program:
+ *
+ *     - Apache License, version 2.0
+ *     - Apache Software License, version 1.0
+ *     - GNU Lesser General Public License, version 3
+ *     - Mozilla Public License, versions 1.0, 1.1 and 2.0
+ *     - Common Development and Distribution License (CDDL), version 1.0
+ *
+ * Therefore the distribution of the program linked with libraries licensed
+ * under the aforementioned licenses, is permitted by the copyright holders
+ * if the distribution is compliant with both the GNU General Public
+ * License version 2 and the aforementioned licenses.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details.
  */
 package org.n52.sta.edm.provider.entities;
+
+import static org.n52.sta.edm.provider.SensorThingsEdmConstants.NAMESPACE;
+import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ES_LOCATIONS_NAME;
+import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATION_FQN;
+import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ES_THINGS_NAME;
+import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_FQN;
+import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
@@ -17,13 +48,6 @@ import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
-import static org.n52.sta.edm.provider.SensorThingsEdmConstants.NAMESPACE;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.NAVIGATION_LINK_ANNOTATION;
-import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ES_LOCATIONS_NAME;
-import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATION_FQN;
-import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ES_THINGS_NAME;
-import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_FQN;
-import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
 import org.springframework.stereotype.Component;
 
 /**
@@ -40,13 +64,11 @@ public class HistoricalLocationEntityProvider extends AbstractSensorThingsEntity
     //Entity Set Name
     public static final String ES_HISTORICAL_LOCATIONS_NAME = "HistoricalLocations";
 
-    // Entity Property Names
-    private static final String PROP_TIME = "time";
-
     // Entity Navigation Property Names
     private static final String NAV_LINK_NAME_THING = ET_THING_NAME + NAVIGATION_LINK_ANNOTATION;
     private static final String NAV_LINK_NAME_LOCATIONS = ES_LOCATIONS_NAME + NAVIGATION_LINK_ANNOTATION;
 
+    
     @Override
     protected CsdlEntityType createEntityType() {
         //create EntityType properties
@@ -64,14 +86,14 @@ public class HistoricalLocationEntityProvider extends AbstractSensorThingsEntity
                 .setNullable(false)
                 .setPartner(ES_HISTORICAL_LOCATIONS_NAME);
 
-        CsdlNavigationProperty navPropHistoricalLocations = new CsdlNavigationProperty()
+        CsdlNavigationProperty navPropLocations = new CsdlNavigationProperty()
                 .setName(ES_LOCATIONS_NAME)
                 .setType(ET_LOCATION_FQN)
                 .setCollection(true)
                 .setPartner(ES_HISTORICAL_LOCATIONS_NAME);
 
         List<CsdlNavigationProperty> navPropList = new ArrayList<CsdlNavigationProperty>();
-        navPropList.addAll(Arrays.asList(navPropThings, navPropHistoricalLocations));
+        navPropList.addAll(Arrays.asList(navPropThings, navPropLocations));
 
         // create CsdlPropertyRef for Key element
         CsdlPropertyRef propertyRef = new CsdlPropertyRef();
