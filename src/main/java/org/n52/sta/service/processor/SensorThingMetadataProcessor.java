@@ -35,28 +35,12 @@ public class SensorThingMetadataProcessor implements MetadataProcessor {
 
     @Override
     public void readMetadata(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType ct) throws ODataApplicationException, ODataLibraryException {
-        // 1st we have retrieve the requested EntitySet from the uriInfo object (representation of the parsed service URI)
-        List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
-//        UriResourceEntitySet uriResourceEntitySet = (UriResourceEntitySet) resourcePaths.get(0); // in our example, the first segment is the EntitySet
-//        EdmEntitySet edmEntitySet = uriResourceEntitySet.getEntitySet();
-//
-//        // 2nd: fetch the data from backend for this requested EntitySetName
-//        // it has to be delivered as EntitySet object
-////        EntityCollection entitySet = getData(edmEntitySet);
-//
-//        // 3rd: create a serializer based on the requested format (json)
+
         ODataSerializer serializer = odata.createSerializer(ct);
-//
-//        // 4th: Now serialize the content: transform from the EntitySet object to InputStream
-//        EdmEntityType edmEntityType = edmEntitySet.getEntityType();
-//        ContextURL contextUrl = ContextURL.with().entitySet(edmEntitySet).build();
-//
-//        final String id = request.getRawBaseUri() + "/" + edmEntitySet.getName();
-//        EntityCollectionSerializerOptions opts = EntityCollectionSerializerOptions.with().id(id).contextURL(contextUrl).build();
+
         SerializerResult serializerResult = serializer.metadataDocument(serviceMetadata);
         InputStream serializedContent = serializerResult.getContent();
 
-        // Finally: configure the response object: set the body, headers and status code
         response.setContent(serializedContent);
         response.setStatusCode(HttpStatusCode.OK.getStatusCode());
         response.setHeader(HttpHeader.CONTENT_TYPE, ct.toContentTypeString());
