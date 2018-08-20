@@ -28,47 +28,39 @@
  */
 package org.n52.sta.mapping;
 
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DESCRIPTION;
+import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ES_SENSORS_NAME;
+import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ET_SENSOR_FQN;
+
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
-import org.apache.olingo.commons.api.edm.EdmEntityType;
-import org.n52.series.db.beans.sta.AbstractStaEntity;
-import org.n52.series.db.beans.sta.ThingEntity;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DESCRIPTION;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_NAME;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PROPERTIES;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.SELF_LINK_ANNOTATION;
-import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ES_THINGS_NAME;
-import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_FQN;
-import org.n52.sta.utils.EntityAnnotator;
+import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 /**
+ * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
- * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
-public class ThingMapper {
+public class SensorMapper {
 
     @Autowired
     EntityCreationHelper entityCreationHelper;
 
-//    @Autowired
-//    EntityAnnotator entityAnnotator;
-
-    public Entity createThingEntity(ThingEntity thing) {
+    public Entity createSensorEntity(ProcedureEntity sensor) {
         Entity entity = new Entity();
-        entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, thing.getId()));
-        entity.addProperty(new Property(null, PROP_NAME, ValueType.PRIMITIVE, thing.getName()));
-        entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, thing.getDescription()));
-        entity.addProperty(new Property(null, PROP_PROPERTIES, ValueType.PRIMITIVE, thing.getProperties()));
-
-        entity.setType(ET_THING_FQN.getFullQualifiedNameAsString());
-        entity.setId(entityCreationHelper.createId(entity, ES_THINGS_NAME, ID_ANNOTATION));
+        entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, sensor.getId()));
+        entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, sensor.getDescription()));
+        
+        //TODO: encodingType property
+        //TODO: metadata property
+        
+        entity.setType(ET_SENSOR_FQN.getFullQualifiedNameAsString());
+        entity.setId(entityCreationHelper.createId(entity, ES_SENSORS_NAME, ID_ANNOTATION));
 
         return entity;
     }
