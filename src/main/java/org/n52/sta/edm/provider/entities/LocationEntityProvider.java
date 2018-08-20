@@ -81,7 +81,7 @@ public class LocationEntityProvider extends AbstractSensorThingsEntityProvider {
         CsdlProperty navLinkThings = new CsdlProperty().setName(NAV_LINK_NAME_THINGS).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
         CsdlProperty navLinkHistoricalLocations = new CsdlProperty().setName(NAV_LINK_NAME_HISTORICAL_LOCATIONS).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
 
-        // navigation property: Many mandatory to many optional
+        // navigation property: Many optional to many optional
         CsdlNavigationProperty navPropThings = new CsdlNavigationProperty()
                 .setName(ES_THINGS_NAME)
                 .setType(ET_THING_FQN)
@@ -105,7 +105,14 @@ public class LocationEntityProvider extends AbstractSensorThingsEntityProvider {
         // configure EntityType
         CsdlEntityType entityType = new CsdlEntityType();
         entityType.setName(ET_LOCATION_NAME);
-        entityType.setProperties(Arrays.asList(id, selfLink, name, description, encodingType, location, navLinkThings, navLinkHistoricalLocations));
+        entityType.setProperties(Arrays.asList(id, 
+                selfLink, 
+                name,
+                description,
+                encodingType,
+                location,
+                navLinkThings,
+                navLinkHistoricalLocations));
         entityType.setKey(Collections.singletonList(propertyRef));
         entityType.setNavigationProperties(navPropList);
 

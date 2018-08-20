@@ -88,14 +88,14 @@ public class ObservationEntityProvider extends AbstractSensorThingsEntityProvide
         CsdlNavigationProperty navPropDatastreams = new CsdlNavigationProperty()
                 .setName(ET_DATASTREAM_NAME)
                 .setType(ET_DATASTREAM_FQN)
-                .setCollection(true)
+                .setNullable(false)
                 .setPartner(ES_OBSERVATIONS_NAME);
         
         // navigation property: Many optional to one mandatory
         CsdlNavigationProperty navPropFeatureOfInterest = new CsdlNavigationProperty()
                 .setName(ET_FEATURE_OF_INTEREST_NAME)
                 .setType(ET_FEATURE_OF_INTEREST_FQN)
-                .setCollection(true)
+                .setNullable(false)
                 .setPartner(ES_OBSERVATIONS_NAME);
         
         List<CsdlNavigationProperty> navPropList = new ArrayList<CsdlNavigationProperty>();

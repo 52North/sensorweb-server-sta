@@ -54,6 +54,7 @@ import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
+import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
 import org.springframework.stereotype.Component;
 
 /**
@@ -100,28 +101,28 @@ public class DatastreamEntityProvider extends AbstractSensorThingsEntityProvider
         
         // navigation property: Many optional to one mandatory
         CsdlNavigationProperty navPropThings = new CsdlNavigationProperty()
-                .setName(ES_THINGS_NAME)
+                .setName(ET_THING_NAME)
                 .setType(ET_THING_FQN)
-                .setCollection(true)
-                .setPartner(ET_DATASTREAM_NAME);
+                .setNullable(false)
+                .setPartner(ES_DATASTREAMS_NAME);
         
         // navigation property: Many optional to one mandatory        
         CsdlNavigationProperty navPropSensor = new CsdlNavigationProperty()
                 .setName(ET_SENSOR_NAME)
                 .setType(ET_SENSOR_FQN)
-                .setCollection(true)
+                .setNullable(false)
                 .setPartner(ES_DATASTREAMS_NAME);
         
         // navigation property: Many optional to one mandatory
         CsdlNavigationProperty navPropObservedProperty = new CsdlNavigationProperty()
                 .setName(ET_OBSERVED_PROPERTY_NAME)
                 .setType(ET_OBSERVED_PROPERTY_FQN)
-                .setCollection(true)
+                .setNullable(false)
                 .setPartner(ES_DATASTREAMS_NAME);
         
         // navigation property: One mandatory to many optional
         CsdlNavigationProperty navPropObservation = new CsdlNavigationProperty()
-                .setName(ET_OBSERVATION_NAME)
+                .setName(ES_OBSERVATIONS_NAME)
                 .setType(ET_OBSERVATION_FQN)
                 .setCollection(true)
                 .setPartner(ET_DATASTREAM_NAME);
@@ -163,7 +164,7 @@ public class DatastreamEntityProvider extends AbstractSensorThingsEntityProvider
         entitySet.setType(ET_DATASTREAM_FQN);
 
         CsdlNavigationPropertyBinding navPropThingBinding = new CsdlNavigationPropertyBinding();
-        navPropThingBinding.setPath(ES_THINGS_NAME); // the path from entity type to navigation property
+        navPropThingBinding.setPath(ET_THING_NAME); // the path from entity type to navigation property
         navPropThingBinding.setTarget(ES_THINGS_NAME); //target entitySet, where the nav prop points to
 
         CsdlNavigationPropertyBinding navPropSensorBinding = new CsdlNavigationPropertyBinding();
@@ -175,7 +176,7 @@ public class DatastreamEntityProvider extends AbstractSensorThingsEntityProvider
         navPropObservedPropertyBinding.setTarget(ES_OBSERVED_PROPERTIES_NAME);
         
         CsdlNavigationPropertyBinding navPropObservationBinding = new CsdlNavigationPropertyBinding();
-        navPropObservationBinding.setPath(ET_OBSERVATION_NAME);
+        navPropObservationBinding.setPath(ES_OBSERVATIONS_NAME);
         navPropObservationBinding.setTarget(ES_OBSERVATIONS_NAME);
 
         List<CsdlNavigationPropertyBinding> navPropBindingList = new ArrayList<CsdlNavigationPropertyBinding>();

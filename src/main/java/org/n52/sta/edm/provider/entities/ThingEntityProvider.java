@@ -104,7 +104,6 @@ public class ThingEntityProvider extends AbstractSensorThingsEntityProvider {
 
         List<CsdlNavigationProperty> navPropList = new ArrayList<CsdlNavigationProperty>();
         navPropList.addAll(Arrays.asList(navPropLocations, navPropDatastreams, navPropHistoricalLocations));
-        navPropList.addAll(Arrays.asList(navPropLocations, navPropHistoricalLocations));
 
         // create CsdlPropertyRef for Key element
         CsdlPropertyRef propertyRef = new CsdlPropertyRef();
@@ -113,8 +112,15 @@ public class ThingEntityProvider extends AbstractSensorThingsEntityProvider {
         // configure EntityType
         CsdlEntityType entityType = new CsdlEntityType();
         entityType.setName(ET_THING_NAME);
-        entityType.setProperties(Arrays.asList(id, selfLink, name, description, properties, navLinkDatastreams, navLinkLocations, navLinkHistoricalLocations));
-        entityType.setProperties(Arrays.asList(id, selfLink, name, description, properties, navLinkLocations, navLinkHistoricalLocations));
+        entityType.setProperties(Arrays.asList(
+                id,
+                selfLink,
+                name,
+                description,
+                properties,
+                navLinkDatastreams,
+                navLinkLocations,
+                navLinkHistoricalLocations));
         entityType.setKey(Collections.singletonList(propertyRef));
         entityType.setNavigationProperties(navPropList);
 
@@ -141,7 +147,6 @@ public class ThingEntityProvider extends AbstractSensorThingsEntityProvider {
 
         List<CsdlNavigationPropertyBinding> navPropBindingList = new ArrayList<CsdlNavigationPropertyBinding>();
         navPropBindingList.addAll(Arrays.asList(navPropLocationBinding, navPropDatastreamBinding, navPropHistoricalLocationBinding));
-        navPropBindingList.addAll(Arrays.asList(navPropLocationBinding, navPropHistoricalLocationBinding));
         entitySet.setNavigationPropertyBindings(navPropBindingList);
 
         return entitySet;

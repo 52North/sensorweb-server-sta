@@ -79,13 +79,14 @@ public class HistoricalLocationEntityProvider extends AbstractSensorThingsEntity
         CsdlProperty navLinkThing = new CsdlProperty().setName(NAV_LINK_NAME_THING).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
         CsdlProperty navLinkLocations = new CsdlProperty().setName(NAV_LINK_NAME_LOCATIONS).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
 
-        // navigation property: one-to-many
+        // navigation property: many optional to one mandatory
         CsdlNavigationProperty navPropThings = new CsdlNavigationProperty()
                 .setName(ET_THING_NAME)
                 .setType(ET_THING_FQN)
                 .setNullable(false)
                 .setPartner(ES_HISTORICAL_LOCATIONS_NAME);
 
+        // navigation property: many optional to many mandatory
         CsdlNavigationProperty navPropLocations = new CsdlNavigationProperty()
                 .setName(ES_LOCATIONS_NAME)
                 .setType(ET_LOCATION_FQN)
