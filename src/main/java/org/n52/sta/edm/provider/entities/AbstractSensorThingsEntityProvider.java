@@ -68,6 +68,7 @@ public abstract class AbstractSensorThingsEntityProvider implements Initializing
     public static final String PROP_TIME = "time";
     public static final String PROP_UOM= "unitOfMeasurement";
     public static final String PROP_VALID_TIME = "validTime";
+    public static final String PROP_METADATA = "metadata";
 	
     
     private CsdlEntityType entityType;

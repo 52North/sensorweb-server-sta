@@ -71,6 +71,7 @@ public class SensorEntityProvider extends AbstractSensorThingsEntityProvider {
         CsdlProperty name = new CsdlProperty().setName(PROP_NAME).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
         CsdlProperty description = new CsdlProperty().setName(PROP_DESCRIPTION).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
         CsdlProperty encodingType = new CsdlProperty().setName(PROP_ENCODINGTYPE).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+        CsdlProperty metadata = new CsdlProperty().setName(PROP_METADATA).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
         
         CsdlProperty selfLink = new CsdlProperty().setName(SELF_LINK_ANNOTATION).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
         CsdlProperty navLinkDatastreams = new CsdlProperty().setName(NAV_LINK_NAME_DATASTREAMS).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
@@ -97,6 +98,7 @@ public class SensorEntityProvider extends AbstractSensorThingsEntityProvider {
         		name,
         		description,
         		encodingType,
+                        metadata,
         		selfLink,
         		navLinkDatastreams));
         entityType.setKey(Collections.singletonList(propertyRef));
