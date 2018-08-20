@@ -15,6 +15,7 @@ import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataHttpHandler;
 import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.api.processor.EntityCollectionProcessor;
+import org.apache.olingo.server.api.processor.ErrorProcessor;
 import org.apache.olingo.server.api.processor.ServiceDocumentProcessor;
 import static org.n52.sta.service.SensorThingsController.URI;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,9 @@ public class SensorThingsController {
 
     @Autowired
     private EntityCollectionProcessor entityCollectionProcessor;
+    
+    @Autowired
+    private ErrorProcessor errorProcessor;
 
     @RequestMapping("**")
     protected void process(HttpServletRequest request, HttpServletResponse response) {
@@ -50,6 +54,7 @@ public class SensorThingsController {
         ODataHttpHandler handler = odata.createHandler(edm);
         handler.register(serviceDocumentProcessor);
         handler.register(entityCollectionProcessor);
+        handler.register(errorProcessor);
 
         // let the handler do the work
         handler.process(new HttpServletRequestWrapper(request) {
