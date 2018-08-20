@@ -30,6 +30,7 @@ import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.n52.sta.data.HistoricalLocationService;
 import org.n52.sta.data.LocationService;
+import org.n52.sta.data.SensorService;
 import org.n52.sta.data.ThingService;
 import org.n52.sta.utils.EntityAnnotator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,9 @@ public class SensorThingsEntityCollectionProcessor implements EntityCollectionPr
 
 	@Autowired
 	HistoricalLocationService historicalLocationService;
+
+	@Autowired
+	SensorService sensorService;
 	
 	@Autowired
 	EntityAnnotator entityAnnotator;
@@ -117,6 +121,14 @@ public class SensorThingsEntityCollectionProcessor implements EntityCollectionPr
 		case "HistoricalLocations" : {
 			entityCollection = historicalLocationService.getLocations();
 			break;
+		}
+		case "Sensors" : {
+			entityCollection = sensorService.getSensors();
+			break;
+		}
+		default: {
+			//TODO: check if we need to do error handling for invalid endpoints
+			
 		}
 		}
 		return entityCollection;
