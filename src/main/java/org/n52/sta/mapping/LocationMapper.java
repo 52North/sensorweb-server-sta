@@ -39,6 +39,7 @@ import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATI
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
+import org.n52.series.db.beans.sta.LocationEncodingEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 //import org.n52.sta.utils.EntityAnnotator;
 import org.n52.sta.utils.EntityCreationHelper;
@@ -58,14 +59,14 @@ public class LocationMapper {
 //	@Autowired
 //    EntityAnnotator entityAnnotator;
 
-    public Entity createLocationEntity(LocationEntity location) {
+    public Entity createLocationEntity(LocationEntity location, LocationEncodingEntity encoding) {
     	Entity entity = new Entity();
         entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, location.getId()));
         entity.addProperty(new Property(null, PROP_NAME, ValueType.PRIMITIVE, location.getName()));
         entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, location.getDescription()));
         
-        entity.addProperty(new Property(null, PROP_LOCATION, ValueType.PRIMITIVE, location.getGeometry()));
-        entity.addProperty(new Property(null, PROP_ENCODINGTYPE, ValueType.PRIMITIVE, location.getLocationEncoding().getEncodingType()));        
+        entity.addProperty(new Property(null, PROP_LOCATION, ValueType.PRIMITIVE, encoding.getLocation()));
+        entity.addProperty(new Property(null, PROP_ENCODINGTYPE, ValueType.PRIMITIVE, encoding.getEncodingType()));        
         
         entity.setType(ET_LOCATION_FQN.getFullQualifiedNameAsString());
         entity.setId(entityCreationHelper.createId(entity, ES_LOCATIONS_NAME, ID_ANNOTATION));

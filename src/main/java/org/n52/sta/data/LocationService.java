@@ -40,6 +40,8 @@ import org.springframework.stereotype.Component;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -54,9 +56,9 @@ public class LocationService {
 	public EntityCollection getLocations() {
 		EntityCollection retEntitySet = new EntityCollection();
 
-		this.createLocationEntities().forEach(t -> retEntitySet.getEntities().add(locationMapper.createLocationEntity(t)));
-		return retEntitySet;
-	}
+        this.createLocationEntities().forEach(t -> t.getLocationEncodings().forEach(e -> retEntitySet.getEntities().add(locationMapper.createLocationEntity(t, e))));
+        return retEntitySet;
+    }
 
 	protected List<LocationEntity> createLocationEntities() {
 		List<LocationEntity> locations = new ArrayList<>();
@@ -66,8 +68,10 @@ public class LocationService {
 		loc1.setName("Demo Name 1");
 		loc1.setDescription("Demo Location 1");
 		loc1.setGeometry(new GeometryFactory().createPoint(new Coordinate(Math.random() * 90,Math.random() * 180)));
-		loc1.setLocationEncoding(createEncoding());
 		locations.add(loc1);
+        Set<LocationEncodingEntity> encodings = new HashSet();
+        encodings.add(createEncoding());
+        loc1.setLocationEncodings(encodings);
 
 		return locations;
 	}
