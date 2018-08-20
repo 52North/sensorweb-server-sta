@@ -36,7 +36,7 @@ import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ET_SENSOR_F
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
-import org.n52.series.db.beans.ProcedureEntity;
+import org.n52.series.db.beans.FeatureEntity;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -51,18 +51,17 @@ public class FeatureOfInterestMapper {
     @Autowired
     EntityCreationHelper entityCreationHelper;
 
-    public Entity createSensorEntity(Entity sensor) {
+    public Entity createFeatureOfInterestEntity(FeatureEntity feature) {
         Entity entity = new Entity();
-        entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, sensor.getId()));
-        entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, sensor.getDescription()));
-        
+        entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, feature.getId()));
+        entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, feature.getDescription()));
+
         //TODO: encodingType property
-        //TODO: metadata property
-        
+        //TODO: feature property
         entity.setType(ET_SENSOR_FQN.getFullQualifiedNameAsString());
         entity.setId(entityCreationHelper.createId(entity, ES_SENSORS_NAME, ID_ANNOTATION));
 
         return entity;
     }
-    
+
 }
