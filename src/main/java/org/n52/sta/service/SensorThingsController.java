@@ -40,7 +40,7 @@ public class SensorThingsController {
 
     @Autowired
     private EntityCollectionProcessor entityCollectionProcessor;
-    
+
     @Autowired
     private ErrorProcessor errorProcessor;
 

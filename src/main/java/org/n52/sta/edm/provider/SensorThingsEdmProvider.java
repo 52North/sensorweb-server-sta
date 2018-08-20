@@ -102,5 +102,4 @@ public class SensorThingsEdmProvider extends CsdlAbstractEdmProvider {
 //        this.entityProviderRepository = entityProviderRepository;
 //    }
 //    
-    
 }

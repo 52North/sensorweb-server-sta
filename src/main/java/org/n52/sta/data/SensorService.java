@@ -39,17 +39,18 @@ import org.springframework.stereotype.Component;
 
 /**
  * Mock of Data Access Layer to retrieve Sensor
+ *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
 @Component
 public class SensorService {
-	
-	@Autowired
+
+    @Autowired
     private SensorMapper sensorMapper;
 
     public EntityCollection getSensors() {
-    	String name;
+        String name;
         EntityCollection retEntitySet = new EntityCollection();
         List<ProcedureEntity> things = new ArrayList<>();
 

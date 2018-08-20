@@ -50,36 +50,36 @@ import java.util.Set;
 @Component
 public class LocationService {
 
-	@Autowired
-	private LocationMapper locationMapper;
+    @Autowired
+    private LocationMapper locationMapper;
 
-	public EntityCollection getLocations() {
-		EntityCollection retEntitySet = new EntityCollection();
+    public EntityCollection getLocations() {
+        EntityCollection retEntitySet = new EntityCollection();
 
         this.createLocationEntities().forEach(t -> t.getLocationEncodings().forEach(e -> retEntitySet.getEntities().add(locationMapper.createLocationEntity(t, e))));
         return retEntitySet;
     }
 
-	protected List<LocationEntity> createLocationEntities() {
-		List<LocationEntity> locations = new ArrayList<>();
+    protected List<LocationEntity> createLocationEntities() {
+        List<LocationEntity> locations = new ArrayList<>();
 
-		LocationEntity loc1 = new LocationEntity();
-		loc1.setId(42L);
-		loc1.setName("Demo Name 1");
-		loc1.setDescription("Demo Location 1");
-		loc1.setGeometry(new GeometryFactory().createPoint(new Coordinate(Math.random() * 90,Math.random() * 180)));
-		locations.add(loc1);
+        LocationEntity loc1 = new LocationEntity();
+        loc1.setId(42L);
+        loc1.setName("Demo Name 1");
+        loc1.setDescription("Demo Location 1");
+        loc1.setGeometry(new GeometryFactory().createPoint(new Coordinate(Math.random() * 90, Math.random() * 180)));
+        locations.add(loc1);
         Set<LocationEncodingEntity> encodings = new HashSet();
         encodings.add(createEncoding());
         loc1.setLocationEncodings(encodings);
 
-		return locations;
-	}
+        return locations;
+    }
 
-	private LocationEncodingEntity createEncoding() {
-		LocationEncodingEntity encoding = new LocationEncodingEntity();
-		encoding.setId(43L);
-		encoding.setEncodingType("DemoEncoding");
-		return encoding;
-	}
+    private LocationEncodingEntity createEncoding() {
+        LocationEncodingEntity encoding = new LocationEncodingEntity();
+        encoding.setId(43L);
+        encoding.setEncodingType("DemoEncoding");
+        return encoding;
+    }
 }

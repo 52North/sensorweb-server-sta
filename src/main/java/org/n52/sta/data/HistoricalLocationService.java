@@ -46,24 +46,24 @@ import org.springframework.stereotype.Component;
 @Component
 public class HistoricalLocationService {
 
-	@Autowired
-	private HistoricalLocationMapper locationMapper;
+    @Autowired
+    private HistoricalLocationMapper locationMapper;
 
-	@Autowired
-	private LocationService locationService;
+    @Autowired
+    private LocationService locationService;
 
-	public EntityCollection getLocations() {
-		EntityCollection retEntitySet = new EntityCollection();
-		List<HistoricalLocationEntity> locations = new ArrayList<>();
+    public EntityCollection getLocations() {
+        EntityCollection retEntitySet = new EntityCollection();
+        List<HistoricalLocationEntity> locations = new ArrayList<>();
 
-		HistoricalLocationEntity loc = new HistoricalLocationEntity();
-		loc.setTime(new Date());
-		loc.setId(44L);
-		loc.setLocationEntity((LocationEntity)locationService.createLocationEntities().get(0));
-		locations.add(loc);
-		
-		locations.forEach(t -> retEntitySet.getEntities().add(locationMapper.createHistoricalLocationEntity(t)));
+        HistoricalLocationEntity loc = new HistoricalLocationEntity();
+        loc.setTime(new Date());
+        loc.setId(44L);
+        loc.setLocationEntity((LocationEntity) locationService.createLocationEntities().get(0));
+        locations.add(loc);
 
-		return retEntitySet;
-	}
+        locations.forEach(t -> retEntitySet.getEntities().add(locationMapper.createHistoricalLocationEntity(t)));
+
+        return retEntitySet;
+    }
 }

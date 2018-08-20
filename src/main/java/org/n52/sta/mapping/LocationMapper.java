@@ -52,27 +52,26 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class LocationMapper {
-	
-	@Autowired
-	EntityCreationHelper entityCreationHelper; 
-	
+
+    @Autowired
+    EntityCreationHelper entityCreationHelper;
+
 //	@Autowired
 //    EntityAnnotator entityAnnotator;
-
     public Entity createLocationEntity(LocationEntity location, LocationEncodingEntity encoding) {
-    	Entity entity = new Entity();
+        Entity entity = new Entity();
         entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, location.getId()));
         entity.addProperty(new Property(null, PROP_NAME, ValueType.PRIMITIVE, location.getName()));
         entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, location.getDescription()));
-        
+
         entity.addProperty(new Property(null, PROP_LOCATION, ValueType.PRIMITIVE, encoding.getLocation()));
-        entity.addProperty(new Property(null, PROP_ENCODINGTYPE, ValueType.PRIMITIVE, encoding.getEncodingType()));        
-        
+        entity.addProperty(new Property(null, PROP_ENCODINGTYPE, ValueType.PRIMITIVE, encoding.getEncodingType()));
+
         entity.setType(ET_LOCATION_FQN.getFullQualifiedNameAsString());
         entity.setId(entityCreationHelper.createId(entity, ES_LOCATIONS_NAME, ID_ANNOTATION));
 
         return entity;
-    
-    } 	
-	
+
+    }
+
 }

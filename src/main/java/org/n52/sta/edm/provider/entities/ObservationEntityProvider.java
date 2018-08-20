@@ -68,10 +68,10 @@ public class ObservationEntityProvider extends AbstractSensorThingsEntityProvide
     // Entity Navigation Property Names
     private static final String NAV_LINK_NAME_DATASTREAM = ET_DATASTREAM_NAME + NAVIGATION_LINK_ANNOTATION;
     private static final String NAV_LINK_NAME_FEATURE_OF_INTEREST = ET_FEATURE_OF_INTEREST_NAME + NAVIGATION_LINK_ANNOTATION;
-    
-	@Override
-	protected CsdlEntityType createEntityType() {
-		//create EntityType properties
+
+    @Override
+    protected CsdlEntityType createEntityType() {
+        //create EntityType properties
         CsdlProperty id = new CsdlProperty().setName(ID_ANNOTATION).setType(EdmPrimitiveTypeKind.Int32.getFullQualifiedName());
         CsdlProperty phenomenonTime = new CsdlProperty().setName(PROP_PHENOMENON_TIME).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
         CsdlProperty result = new CsdlProperty().setName(PROP_RESULT).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
@@ -79,29 +79,29 @@ public class ObservationEntityProvider extends AbstractSensorThingsEntityProvide
         CsdlProperty resultQuality = new CsdlProperty().setName(PROP_RESULT_QUALITY).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
         CsdlProperty validTime = new CsdlProperty().setName(PROP_VALID_TIME).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
         CsdlProperty parameters = new CsdlProperty().setName(PROP_PARAMETERS).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        
+
         CsdlProperty selfLink = new CsdlProperty().setName(SELF_LINK_ANNOTATION).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
         CsdlProperty navLinkDatastreams = new CsdlProperty().setName(NAV_LINK_NAME_DATASTREAM).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
         CsdlProperty navLinkFeatureOfInterests = new CsdlProperty().setName(NAV_LINK_NAME_FEATURE_OF_INTEREST).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        
+
         // navigation property: Many optional to one mandatory
         CsdlNavigationProperty navPropDatastreams = new CsdlNavigationProperty()
                 .setName(ET_DATASTREAM_NAME)
                 .setType(ET_DATASTREAM_FQN)
                 .setNullable(false)
                 .setPartner(ES_OBSERVATIONS_NAME);
-        
+
         // navigation property: Many optional to one mandatory
         CsdlNavigationProperty navPropFeatureOfInterest = new CsdlNavigationProperty()
                 .setName(ET_FEATURE_OF_INTEREST_NAME)
                 .setType(ET_FEATURE_OF_INTEREST_FQN)
                 .setNullable(false)
                 .setPartner(ES_OBSERVATIONS_NAME);
-        
+
         List<CsdlNavigationProperty> navPropList = new ArrayList<CsdlNavigationProperty>();
         navPropList.add(navPropDatastreams);
         navPropList.add(navPropFeatureOfInterest);
-        
+
         // create CsdlPropertyRef for Key element
         CsdlPropertyRef propertyRef = new CsdlPropertyRef();
         propertyRef.setName(ID_ANNOTATION);
@@ -110,27 +110,26 @@ public class ObservationEntityProvider extends AbstractSensorThingsEntityProvide
         CsdlEntityType entityType = new CsdlEntityType();
         entityType.setName(ET_OBSERVATION_NAME);
         entityType.setProperties(Arrays.asList(
-        		id,
-        		phenomenonTime,
-        		result,
-        		resultTime,
-        		resultQuality,
-        		validTime,
-        		parameters,
-        		selfLink,
-        		navLinkDatastreams,
-        		navLinkFeatureOfInterests));
+                id,
+                phenomenonTime,
+                result,
+                resultTime,
+                resultQuality,
+                validTime,
+                parameters,
+                selfLink,
+                navLinkDatastreams,
+                navLinkFeatureOfInterests));
         entityType.setKey(Collections.singletonList(propertyRef));
         entityType.setNavigationProperties(navPropList);
 
         return entityType;
-        
-	}
 
+    }
 
-	@Override
-	protected CsdlEntitySet createEntitySet() {
-		CsdlEntitySet entitySet = new CsdlEntitySet();
+    @Override
+    protected CsdlEntitySet createEntitySet() {
+        CsdlEntitySet entitySet = new CsdlEntitySet();
         entitySet.setName(ES_OBSERVATIONS_NAME);
         entitySet.setType(ET_OBSERVATION_FQN);
 
@@ -148,10 +147,10 @@ public class ObservationEntityProvider extends AbstractSensorThingsEntityProvide
         entitySet.setNavigationPropertyBindings(navPropBindingList);
 
         return entitySet;
-	}
+    }
 
-	@Override
-	public FullQualifiedName getFullQualifiedTypeName() {
-		return ET_OBSERVATION_FQN;
-	}
+    @Override
+    public FullQualifiedName getFullQualifiedTypeName() {
+        return ET_OBSERVATION_FQN;
+    }
 }

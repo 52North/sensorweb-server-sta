@@ -29,7 +29,7 @@ public class ThingService {
     private ThingMapper thingMapper;
 
     public EntityCollection getThings() {
-    	String name;
+        String name;
         EntityCollection retEntitySet = new EntityCollection();
         List<ThingEntity> things = new ArrayList<>();
 
@@ -56,12 +56,12 @@ public class ThingService {
 
         return retEntitySet;
     }
-    
+
     private LocationEntity createLocation(String name) {
-    	LocationEntity loc = new LocationEntity();
-    	loc.setId(42L);
-    	loc.setDescription("Demo Location for " + name);
-    	loc.setGeometry(new GeometryFactory().createPoint(new Coordinate(12,12)));
-    	return loc;
+        LocationEntity loc = new LocationEntity();
+        loc.setId(42L);
+        loc.setDescription("Demo Location for " + name);
+        loc.setGeometry(new GeometryFactory().createPoint(new Coordinate(12, 12)));
+        return loc;
     }
 }

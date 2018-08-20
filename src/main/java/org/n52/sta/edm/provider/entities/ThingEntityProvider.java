@@ -87,14 +87,14 @@ public class ThingEntityProvider extends AbstractSensorThingsEntityProvider {
                 .setType(ET_LOCATION_FQN)
                 .setCollection(true)
                 .setPartner(ES_THINGS_NAME);
-        
+
         // navigation property: one mandatory to many optional
         CsdlNavigationProperty navPropDatastreams = new CsdlNavigationProperty()
                 .setName(ES_DATASTREAMS_NAME)
                 .setType(ET_DATASTREAM_FQN)
                 .setCollection(true)
                 .setPartner(ET_THING_NAME);
-        
+
         // navigation property: one mandatory to many optional
         CsdlNavigationProperty navPropHistoricalLocations = new CsdlNavigationProperty()
                 .setName(ES_HISTORICAL_LOCATIONS_NAME)
@@ -129,7 +129,7 @@ public class ThingEntityProvider extends AbstractSensorThingsEntityProvider {
 
     @Override
     protected CsdlEntitySet createEntitySet() {
-    	CsdlEntitySet entitySet = new CsdlEntitySet();
+        CsdlEntitySet entitySet = new CsdlEntitySet();
         entitySet.setName(ES_THINGS_NAME);
         entitySet.setType(ET_THING_FQN);
 

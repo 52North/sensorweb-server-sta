@@ -48,24 +48,23 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class HistoricalLocationMapper {
-	
-	@Autowired
-	EntityCreationHelper entityCreationHelper; 
-	
+
+    @Autowired
+    EntityCreationHelper entityCreationHelper;
+
 //	@Autowired
 //    EntityAnnotator entityAnnotator;
-
     public Entity createHistoricalLocationEntity(HistoricalLocationEntity location) {
-    	Entity entity = new Entity();
-    	
+        Entity entity = new Entity();
+
         entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, location.getId()));
         entity.addProperty(new Property(null, PROP_TIME, ValueType.PRIMITIVE, location.getTime()));
-        
+
         entity.setType(ET_HISTORICAL_LOCATION_FQN.getFullQualifiedNameAsString());
         entity.setId(entityCreationHelper.createId(entity, ES_HISTORICAL_LOCATIONS_NAME, ID_ANNOTATION));
 
         return entity;
-    
-    } 	
-	
+
+    }
+
 }

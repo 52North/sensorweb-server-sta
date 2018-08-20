@@ -54,38 +54,38 @@ import org.springframework.stereotype.Component;
 @Component
 public class SensorEntityProvider extends AbstractSensorThingsEntityProvider {
 
-	// Entity Type Name
+    // Entity Type Name
     public static final String ET_SENSOR_NAME = "Sensor";
     public static final FullQualifiedName ET_SENSOR_FQN = new FullQualifiedName(NAMESPACE, ET_SENSOR_NAME);
 
     // Entity Set Name
     public static final String ES_SENSORS_NAME = "Sensors";
-    
+
     // Entity Navigation Property Names
     private static final String NAV_LINK_NAME_DATASTREAMS = ES_DATASTREAMS_NAME + NAVIGATION_LINK_ANNOTATION;
-    
+
     @Override
-	protected CsdlEntityType createEntityType() {
-    	//create EntityType properties
+    protected CsdlEntityType createEntityType() {
+        //create EntityType properties
         CsdlProperty id = new CsdlProperty().setName(ID_ANNOTATION).setType(EdmPrimitiveTypeKind.Int32.getFullQualifiedName());
         CsdlProperty name = new CsdlProperty().setName(PROP_NAME).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
         CsdlProperty description = new CsdlProperty().setName(PROP_DESCRIPTION).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
         CsdlProperty encodingType = new CsdlProperty().setName(PROP_ENCODINGTYPE).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
         CsdlProperty metadata = new CsdlProperty().setName(PROP_METADATA).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        
+
         CsdlProperty selfLink = new CsdlProperty().setName(SELF_LINK_ANNOTATION).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
         CsdlProperty navLinkDatastreams = new CsdlProperty().setName(NAV_LINK_NAME_DATASTREAMS).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        
+
         // navigation property: one mandatory to many optional
         CsdlNavigationProperty navPropDatastreams = new CsdlNavigationProperty()
                 .setName(ES_DATASTREAMS_NAME)
                 .setType(ET_DATASTREAM_FQN)
                 .setCollection(true)
                 .setPartner(ET_SENSOR_NAME);
-        
+
         List<CsdlNavigationProperty> navPropList = new ArrayList<CsdlNavigationProperty>();
         navPropList.add(navPropDatastreams);
-       
+
         // create CsdlPropertyRef for Key element
         CsdlPropertyRef propertyRef = new CsdlPropertyRef();
         propertyRef.setName(ID_ANNOTATION);
@@ -94,23 +94,22 @@ public class SensorEntityProvider extends AbstractSensorThingsEntityProvider {
         CsdlEntityType entityType = new CsdlEntityType();
         entityType.setName(ET_SENSOR_NAME);
         entityType.setProperties(Arrays.asList(
-        		id,
-        		name,
-        		description,
-        		encodingType,
-                        metadata,
-        		selfLink,
-        		navLinkDatastreams));
+                id,
+                name,
+                description,
+                encodingType,
+                metadata,
+                selfLink,
+                navLinkDatastreams));
         entityType.setKey(Collections.singletonList(propertyRef));
         entityType.setNavigationProperties(navPropList);
 
         return entityType;
-	}
+    }
 
-
-	@Override
-	protected CsdlEntitySet createEntitySet() {
-		CsdlEntitySet entitySet = new CsdlEntitySet();
+    @Override
+    protected CsdlEntitySet createEntitySet() {
+        CsdlEntitySet entitySet = new CsdlEntitySet();
         entitySet.setName(ES_SENSORS_NAME);
         entitySet.setType(ET_SENSOR_FQN);
 
@@ -121,13 +120,13 @@ public class SensorEntityProvider extends AbstractSensorThingsEntityProvider {
         List<CsdlNavigationPropertyBinding> navPropBindingList = new ArrayList<CsdlNavigationPropertyBinding>();
         navPropBindingList.add(navPropDatastreamBinding);
         entitySet.setNavigationPropertyBindings(navPropBindingList);
-        
-        return entitySet;
-	}
 
-	@Override
-	public FullQualifiedName getFullQualifiedTypeName() {
-		return ET_SENSOR_FQN;
-	}
+        return entitySet;
+    }
+
+    @Override
+    public FullQualifiedName getFullQualifiedTypeName() {
+        return ET_SENSOR_FQN;
+    }
 
 }

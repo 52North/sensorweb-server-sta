@@ -57,20 +57,19 @@ public abstract class AbstractSensorThingsEntityProvider implements Initializing
     public static final String PROP_FEATURE = "feature";
     public static final String PROP_LOCATION = "location";
     public static final String PROP_NAME = "name";
-    public static final String PROP_OBSERVATION_TYPE= "observationType";
-    public static final String PROP_OBSERVED_AREA= "observedArea";
+    public static final String PROP_OBSERVATION_TYPE = "observationType";
+    public static final String PROP_OBSERVED_AREA = "observedArea";
     public static final String PROP_PARAMETERS = "parameters";
-    public static final String PROP_PHENOMENON_TIME= "phenomenonTime";
+    public static final String PROP_PHENOMENON_TIME = "phenomenonTime";
     public static final String PROP_PROPERTIES = "properties";
     public static final String PROP_RESULT = "result";
     public static final String PROP_RESULT_QUALITY = "resultQuality";
-    public static final String PROP_RESULT_TIME= "resultTime";
+    public static final String PROP_RESULT_TIME = "resultTime";
     public static final String PROP_TIME = "time";
-    public static final String PROP_UOM= "unitOfMeasurement";
+    public static final String PROP_UOM = "unitOfMeasurement";
     public static final String PROP_VALID_TIME = "validTime";
     public static final String PROP_METADATA = "metadata";
-	
-    
+
     private CsdlEntityType entityType;
     private CsdlEntitySet entitySet;
 
@@ -93,5 +92,5 @@ public abstract class AbstractSensorThingsEntityProvider implements Initializing
     protected abstract CsdlEntityType createEntityType();
 
     protected abstract CsdlEntitySet createEntitySet();
-		
+
 }

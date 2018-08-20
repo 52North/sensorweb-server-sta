@@ -34,7 +34,6 @@ import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider
 import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ES_THINGS_NAME;
 import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_FQN;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -105,8 +104,8 @@ public class LocationEntityProvider extends AbstractSensorThingsEntityProvider {
         // configure EntityType
         CsdlEntityType entityType = new CsdlEntityType();
         entityType.setName(ET_LOCATION_NAME);
-        entityType.setProperties(Arrays.asList(id, 
-                selfLink, 
+        entityType.setProperties(Arrays.asList(id,
+                selfLink,
                 name,
                 description,
                 encodingType,

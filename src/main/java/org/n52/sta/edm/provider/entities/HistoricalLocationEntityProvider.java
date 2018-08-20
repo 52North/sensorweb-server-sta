@@ -68,7 +68,6 @@ public class HistoricalLocationEntityProvider extends AbstractSensorThingsEntity
     private static final String NAV_LINK_NAME_THING = ET_THING_NAME + NAVIGATION_LINK_ANNOTATION;
     private static final String NAV_LINK_NAME_LOCATIONS = ES_LOCATIONS_NAME + NAVIGATION_LINK_ANNOTATION;
 
-    
     @Override
     protected CsdlEntityType createEntityType() {
         //create EntityType properties
