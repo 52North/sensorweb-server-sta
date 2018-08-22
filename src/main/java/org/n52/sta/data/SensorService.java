@@ -30,6 +30,7 @@ package org.n52.sta.data;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.olingo.commons.api.data.Entity;
 
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.n52.series.db.beans.ProcedureEntity;
@@ -44,12 +45,13 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-public class SensorService {
+public class SensorService implements AbstractSensorThingsEntityService {
 
     @Autowired
     private SensorMapper sensorMapper;
 
-    public EntityCollection getSensors() {
+    @Override
+    public EntityCollection getEntityCollection() {
         String name;
         EntityCollection retEntitySet = new EntityCollection();
         List<ProcedureEntity> things = new ArrayList<>();
@@ -65,5 +67,16 @@ public class SensorService {
         things.forEach(t -> retEntitySet.getEntities().add(sensorMapper.createSensorEntity(t)));
 
         return retEntitySet;
+    }
+
+    @Override
+    public Entity getEntityForId(String id) {
+        String name;
+        ProcedureEntity e1 = new ProcedureEntity();
+        name = "Sensor 1";
+        e1.setId(Long.parseLong(id));
+        e1.setName(name);
+        e1.setDescription("Nice Sensor");
+        return sensorMapper.createSensorEntity(e1);
     }
 }

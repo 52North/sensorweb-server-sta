@@ -31,6 +31,7 @@ package org.n52.sta.data;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import org.apache.olingo.commons.api.data.Entity;
 
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
@@ -44,15 +45,16 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-public class HistoricalLocationService {
+public class HistoricalLocationService implements AbstractSensorThingsEntityService {
 
     @Autowired
-    private HistoricalLocationMapper locationMapper;
+    private HistoricalLocationMapper historicalLocationMapper;
 
     @Autowired
     private LocationService locationService;
 
-    public EntityCollection getLocations() {
+    @Override
+    public EntityCollection getEntityCollection() {
         EntityCollection retEntitySet = new EntityCollection();
         List<HistoricalLocationEntity> locations = new ArrayList<>();
 
@@ -62,8 +64,17 @@ public class HistoricalLocationService {
         loc.setLocationEntity((LocationEntity) locationService.createLocationEntities().get(0));
         locations.add(loc);
 
-        locations.forEach(t -> retEntitySet.getEntities().add(locationMapper.createHistoricalLocationEntity(t)));
+        locations.forEach(t -> retEntitySet.getEntities().add(historicalLocationMapper.createHistoricalLocationEntity(t)));
 
         return retEntitySet;
+    }
+
+    @Override
+    public Entity getEntityForId(String id) {
+        HistoricalLocationEntity loc = new HistoricalLocationEntity();
+        loc.setTime(new Date());
+        loc.setId(Long.parseLong(id));
+        loc.setLocationEntity((LocationEntity) locationService.createLocationEntities().get(0));
+        return historicalLocationMapper.createHistoricalLocationEntity(loc);
     }
 }

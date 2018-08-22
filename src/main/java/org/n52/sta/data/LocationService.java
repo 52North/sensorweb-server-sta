@@ -42,23 +42,17 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import java.util.HashSet;
 import java.util.Set;
+import org.apache.olingo.commons.api.data.Entity;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
 @Component
-public class LocationService {
+public class LocationService implements AbstractSensorThingsEntityService {
 
     @Autowired
     private LocationMapper locationMapper;
-
-    public EntityCollection getLocations() {
-        EntityCollection retEntitySet = new EntityCollection();
-
-        this.createLocationEntities().forEach(t -> t.getLocationEncodings().forEach(e -> retEntitySet.getEntities().add(locationMapper.createLocationEntity(t, e))));
-        return retEntitySet;
-    }
 
     protected List<LocationEntity> createLocationEntities() {
         List<LocationEntity> locations = new ArrayList<>();
@@ -68,11 +62,10 @@ public class LocationService {
         loc1.setName("Demo Name 1");
         loc1.setDescription("Demo Location 1");
         loc1.setGeometry(new GeometryFactory().createPoint(new Coordinate(Math.random() * 90, Math.random() * 180)));
-        locations.add(loc1);
-        Set<LocationEncodingEntity> encodings = new HashSet();
-        encodings.add(createEncoding());
-        loc1.setLocationEncodings(encodings);
 
+        loc1.setLocationEncodings(createEncoding());
+
+        locations.add(loc1);
         return locations;
     }
 
@@ -81,5 +74,24 @@ public class LocationService {
         encoding.setId(43L);
         encoding.setEncodingType("DemoEncoding");
         return encoding;
+    }
+
+    @Override
+    public EntityCollection getEntityCollection() {
+        EntityCollection retEntitySet = new EntityCollection();
+
+        this.createLocationEntities().forEach(t -> retEntitySet.getEntities().add(locationMapper.createLocationEntity(t)));
+        return retEntitySet;
+    }
+
+    @Override
+    public Entity getEntityForId(String id) {
+        LocationEntity loc1 = new LocationEntity();
+        loc1.setId(42L);
+        loc1.setName("Demo Name 1");
+        loc1.setDescription("Demo Location 1");
+        loc1.setGeometry(new GeometryFactory().createPoint(new Coordinate(Math.random() * 90, Math.random() * 180)));
+
+        return locationMapper.createLocationEntity(loc1);
     }
 }
