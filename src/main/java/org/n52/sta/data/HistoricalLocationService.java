@@ -28,15 +28,15 @@
  */
 package org.n52.sta.data;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import org.apache.olingo.commons.api.data.Entity;
 
 import org.apache.olingo.commons.api.data.EntityCollection;
-import org.n52.series.db.beans.sta.HistoricalLocationEntity;
-import org.n52.series.db.beans.sta.LocationEntity;
+import org.apache.olingo.server.api.uri.UriParameter;
+import org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider;
 import org.n52.sta.mapping.HistoricalLocationMapper;
+import org.n52.sta.utils.DummyEntityCreator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -51,30 +51,34 @@ public class HistoricalLocationService implements AbstractSensorThingsEntityServ
     private HistoricalLocationMapper historicalLocationMapper;
 
     @Autowired
-    private LocationService locationService;
+    private DummyEntityCreator entityCreator;
 
     @Override
     public EntityCollection getEntityCollection() {
-        EntityCollection retEntitySet = new EntityCollection();
-        List<HistoricalLocationEntity> locations = new ArrayList<>();
-
-        HistoricalLocationEntity loc = new HistoricalLocationEntity();
-        loc.setTime(new Date());
-        loc.setId(44L);
-        loc.setLocationEntity((LocationEntity) locationService.createLocationEntities().get(0));
-        locations.add(loc);
-
-        locations.forEach(t -> retEntitySet.getEntities().add(historicalLocationMapper.createHistoricalLocationEntity(t)));
-
-        return retEntitySet;
+        return entityCreator.createEntityCollection(HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME);
     }
 
     @Override
-    public Entity getEntityForId(String id) {
-        HistoricalLocationEntity loc = new HistoricalLocationEntity();
-        loc.setTime(new Date());
-        loc.setId(Long.parseLong(id));
-        loc.setLocationEntity((LocationEntity) locationService.createLocationEntities().get(0));
-        return historicalLocationMapper.createHistoricalLocationEntity(loc);
+    public Entity getEntity(List<UriParameter> keyPredicates) {
+        return getEntityForId(keyPredicates.get(0).getText());
+    }
+
+    @Override
+    public Entity getRelatedEntity(Entity sourceEntity) {
+        return getEntityForId(String.valueOf(ThreadLocalRandom.current().nextInt()));
+    }
+
+    @Override
+    public Entity getRelatedEntity(Entity sourceEntity, List<UriParameter> keyPredicates) {
+        return getEntityForId(keyPredicates.get(0).getText());
+    }
+
+    @Override
+    public EntityCollection getRelatedEntityCollection(Entity sourceEntity) {
+        return getEntityCollection();
+    }
+
+    private Entity getEntityForId(String id) {
+        return entityCreator.createEntity(HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME, id);
     }
 }

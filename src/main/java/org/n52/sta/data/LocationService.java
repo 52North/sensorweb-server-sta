@@ -28,21 +28,18 @@
  */
 package org.n52.sta.data;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.olingo.commons.api.data.EntityCollection;
-import org.n52.series.db.beans.sta.LocationEncodingEntity;
-import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.mapping.LocationMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 import org.apache.olingo.commons.api.data.Entity;
+import org.apache.olingo.server.api.uri.UriParameter;
+import org.n52.sta.edm.provider.entities.LocationEntityProvider;
+import org.n52.sta.utils.DummyEntityCreator;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -54,44 +51,35 @@ public class LocationService implements AbstractSensorThingsEntityService {
     @Autowired
     private LocationMapper locationMapper;
 
-    protected List<LocationEntity> createLocationEntities() {
-        List<LocationEntity> locations = new ArrayList<>();
-
-        LocationEntity loc1 = new LocationEntity();
-        loc1.setId(42L);
-        loc1.setName("Demo Name 1");
-        loc1.setDescription("Demo Location 1");
-        loc1.setGeometry(new GeometryFactory().createPoint(new Coordinate(Math.random() * 90, Math.random() * 180)));
-
-        loc1.setLocationEncodings(createEncoding());
-
-        locations.add(loc1);
-        return locations;
-    }
-
-    private LocationEncodingEntity createEncoding() {
-        LocationEncodingEntity encoding = new LocationEncodingEntity();
-        encoding.setId(43L);
-        encoding.setEncodingType("DemoEncoding");
-        return encoding;
-    }
+    @Autowired
+    private DummyEntityCreator entityCreator;
 
     @Override
     public EntityCollection getEntityCollection() {
-        EntityCollection retEntitySet = new EntityCollection();
-
-        this.createLocationEntities().forEach(t -> retEntitySet.getEntities().add(locationMapper.createLocationEntity(t)));
-        return retEntitySet;
+        return entityCreator.createEntityCollection(LocationEntityProvider.ET_LOCATION_NAME);
     }
 
     @Override
-    public Entity getEntityForId(String id) {
-        LocationEntity loc1 = new LocationEntity();
-        loc1.setId(42L);
-        loc1.setName("Demo Name 1");
-        loc1.setDescription("Demo Location 1");
-        loc1.setGeometry(new GeometryFactory().createPoint(new Coordinate(Math.random() * 90, Math.random() * 180)));
+    public Entity getEntity(List<UriParameter> keyPredicates) {
+        return getEntityForId(keyPredicates.get(0).getText());
+    }
 
-        return locationMapper.createLocationEntity(loc1);
+    @Override
+    public Entity getRelatedEntity(Entity sourceEntity) {
+        return getEntityForId(String.valueOf(ThreadLocalRandom.current().nextInt()));
+    }
+
+    @Override
+    public Entity getRelatedEntity(Entity sourceEntity, List<UriParameter> keyPredicates) {
+        return getEntityForId(keyPredicates.get(0).getText());
+    }
+
+    @Override
+    public EntityCollection getRelatedEntityCollection(Entity sourceEntity) {
+        return getEntityCollection();
+    }
+
+    private Entity getEntityForId(String id) {
+        return entityCreator.createEntity(LocationEntityProvider.ET_LOCATION_NAME, id);
     }
 }

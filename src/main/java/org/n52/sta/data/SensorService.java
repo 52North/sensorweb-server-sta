@@ -28,13 +28,15 @@
  */
 package org.n52.sta.data;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import org.apache.olingo.commons.api.data.Entity;
 
 import org.apache.olingo.commons.api.data.EntityCollection;
-import org.n52.series.db.beans.ProcedureEntity;
+import org.apache.olingo.server.api.uri.UriParameter;
+import org.n52.sta.edm.provider.entities.SensorEntityProvider;
 import org.n52.sta.mapping.SensorMapper;
+import org.n52.sta.utils.DummyEntityCreator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -50,33 +52,35 @@ public class SensorService implements AbstractSensorThingsEntityService {
     @Autowired
     private SensorMapper sensorMapper;
 
+    @Autowired
+    private DummyEntityCreator entityCreator;
+
     @Override
     public EntityCollection getEntityCollection() {
-        String name;
-        EntityCollection retEntitySet = new EntityCollection();
-        List<ProcedureEntity> things = new ArrayList<>();
-
-        ProcedureEntity e1 = new ProcedureEntity();
-        name = "Sensor 1";
-        e1.setId(48L);
-        e1.setName(name);
-        e1.setDescription("Nice Sensor");
-
-        things.add(e1);
-
-        things.forEach(t -> retEntitySet.getEntities().add(sensorMapper.createSensorEntity(t)));
-
-        return retEntitySet;
+        return entityCreator.createEntityCollection(SensorEntityProvider.ET_SENSOR_NAME);
     }
 
     @Override
-    public Entity getEntityForId(String id) {
-        String name;
-        ProcedureEntity e1 = new ProcedureEntity();
-        name = "Sensor 1";
-        e1.setId(Long.parseLong(id));
-        e1.setName(name);
-        e1.setDescription("Nice Sensor");
-        return sensorMapper.createSensorEntity(e1);
+    public Entity getEntity(List<UriParameter> keyPredicates) {
+        return getEntityForId(keyPredicates.get(0).getText());
+    }
+
+    @Override
+    public Entity getRelatedEntity(Entity sourceEntity) {
+        return getEntityForId(String.valueOf(ThreadLocalRandom.current().nextInt()));
+    }
+
+    @Override
+    public Entity getRelatedEntity(Entity sourceEntity, List<UriParameter> keyPredicates) {
+        return getEntityForId(keyPredicates.get(0).getText());
+    }
+
+    @Override
+    public EntityCollection getRelatedEntityCollection(Entity sourceEntity) {
+        return getEntityCollection();
+    }
+
+    private Entity getEntityForId(String id) {
+        return entityCreator.createEntity(SensorEntityProvider.ET_SENSOR_NAME, id);
     }
 }
