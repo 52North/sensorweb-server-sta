@@ -37,6 +37,7 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.n52.series.db.beans.FeatureEntity;
+import org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -48,6 +49,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class FeatureOfInterestMapper {
 
+    private static final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
+
     @Autowired
     EntityCreationHelper entityCreationHelper;
 
@@ -55,9 +58,11 @@ public class FeatureOfInterestMapper {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, feature.getId()));
         entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, feature.getDescription()));
+        entity.addProperty(new Property(null, AbstractSensorThingsEntityProvider.PROP_NAME, ValueType.PRIMITIVE, feature.getName()));
+        //TODO: generate GeoJSON from feature.getGeometry()
+        entity.addProperty(new Property(null, AbstractSensorThingsEntityProvider.PROP_FEATURE, ValueType.PRIMITIVE, feature.getXml()));
 
-        //TODO: encodingType property
-        //TODO: feature property
+        entity.addProperty(new Property(null, AbstractSensorThingsEntityProvider.PROP_ENCODINGTYPE, ValueType.PRIMITIVE, ENCODINGTYPE_GEOJSON));
         entity.setType(ET_SENSOR_FQN.getFullQualifiedNameAsString());
         entity.setId(entityCreationHelper.createId(entity, ES_SENSORS_NAME, ID_ANNOTATION));
 

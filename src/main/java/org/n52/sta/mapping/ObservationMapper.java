@@ -28,10 +28,34 @@
  */
 package org.n52.sta.mapping;
 
+import org.apache.olingo.commons.api.data.Entity;
+import org.apache.olingo.commons.api.data.Property;
+import org.apache.olingo.commons.api.data.ValueType;
+import org.n52.series.db.beans.CountDataEntity;
+import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.PhenomenonEntity;
+import org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
+import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ES_OBSERVED_PROPERTIES_NAME;
+import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_FQN;
+
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
 public class ObservationMapper {
+
+    public Entity createObservationEntity(DataEntity observation) {
+        Entity entity = new Entity();
+        entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, observation.getId()));
+        //TODO: check observation type, cast and get value
+        entity.addProperty(new Property(null, AbstractSensorThingsEntityProvider.PROP_RESULT, ValueType.PRIMITIVE, observation.getValue().toString()));
+        //TODO: use DateTimeUtils from Arctic Sea to format date to string
+        entity.addProperty(new Property(null, AbstractSensorThingsEntityProvider.PROP_RESULT_TIME, ValueType.PRIMITIVE, observation.getResultTime().toString()));
+        //TODO: if start time equals end time set only start time, otherwise construct time period
+        entity.addProperty(new Property(null, AbstractSensorThingsEntityProvider.PROP_PHENOMENON_TIME, ValueType.PRIMITIVE, observation.getSamplingTimeStart()));
+
+        return entity;
+    }
 
 }
