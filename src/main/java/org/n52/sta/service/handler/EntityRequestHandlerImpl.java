@@ -47,11 +47,11 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
         List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
 
         // handle request depending on the number of UriResource paths
-        // e.g the case: sta/Things
+        // e.g the case: sta/Things(id)
         if (resourcePaths.size() == 1) {
             response = createResponseForEntity(resourcePaths);
 
-            // e.g. the case: sta/Things(id)/Locations
+            // e.g. the case: sta/Things(id)/Locations(id)
         } else {
             response = createResponseForNavigation(resourcePaths);
 
@@ -68,18 +68,23 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
         // fetch the data from backend for this requested Entity and deliver as Entity
         List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
         AbstractSensorThingsEntityService responseService = serviceRepository.getEntityService(uriResourceEntitySet.getEntityType().getName());
-        Entity responseEntityCollection = responseService.getEntity(keyPredicates);
+        Entity responseEntity = responseService.getEntity(keyPredicates);
+
+        if (responseEntity == null) {
+            throw new ODataApplicationException("Entity not found.",
+                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
+        }
 
         // set Entity response information
         EntityResponse response = new EntityResponse();
         response.setEntitySet(responseEntitySet);
-        response.setEntityCollection(responseEntityCollection);
+        response.setEntityCollection(responseEntity);
 
         return response;
     }
 
     private EntityResponse createResponseForNavigation(List<UriResource> resourcePaths) throws ODataApplicationException {
-        // determine the last NavigationLink and fetch EntityCollection for it
+        // determine the last NavigationLink and fetch Entity for it
         NavigationLink lastNavigationLink = navigationResolver.resolveUriResourceNavigationPaths(resourcePaths);
 
         UriResource lastSegment = resourcePaths.get(resourcePaths.size() - 1);
