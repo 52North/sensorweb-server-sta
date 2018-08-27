@@ -6,17 +6,22 @@
 package org.n52.sta.data;
 
 import java.util.List;
-
-import org.apache.olingo.commons.api.data.EntityCollection;
-import org.n52.sta.mapping.ThingMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.util.concurrent.ThreadLocalRandom;
+
 import org.apache.olingo.commons.api.data.Entity;
+import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.server.api.uri.UriParameter;
+import org.n52.io.response.OfferingOutput;
+import org.n52.series.db.DatasetRepository;
+import org.n52.series.db.OfferingRepository;
+import org.n52.series.db.assembler.OfferingAssembler;
+import org.n52.series.db.beans.DatasetEntity;
+import org.n52.series.db.beans.OfferingEntity;
+import org.n52.series.db.old.dao.DefaultDbQueryFactory;
 import org.n52.sta.edm.provider.entities.ThingEntityProvider;
 import org.n52.sta.utils.DummyEntityCreator;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  *
@@ -26,11 +31,8 @@ import org.n52.sta.utils.DummyEntityCreator;
 public class ThingService implements AbstractSensorThingsEntityService {
 
     @Autowired
-    private ThingMapper thingMapper;
-
-    @Autowired
     private DummyEntityCreator entityCreator;
-
+    
     @Override
     public EntityCollection getEntityCollection() {
         return entityCreator.createEntityCollection(ThingEntityProvider.ET_THING_NAME);

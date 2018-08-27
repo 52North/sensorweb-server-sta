@@ -56,8 +56,6 @@ public class LocationMapper {
     @Autowired
     EntityCreationHelper entityCreationHelper;
 
-//	@Autowired
-//    EntityAnnotator entityAnnotator;
     public Entity createLocationEntity(LocationEntity location) {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, location.getId()));

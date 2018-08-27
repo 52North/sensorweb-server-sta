@@ -34,61 +34,47 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.server.api.uri.UriParameter;
-import org.n52.series.db.ProcedureRepository;
-import org.n52.sta.edm.provider.entities.SensorEntityProvider;
-import org.n52.sta.mapping.SensorMapper;
-import org.n52.sta.mapping.ThingMapper;
+import org.n52.sta.edm.provider.entities.ObservationEntityProvider;
 import org.n52.sta.utils.DummyEntityCreator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Mock of Data Access Layer to retrieve Sensor
- *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
 @Component
-public class SensorService implements AbstractSensorThingsEntityService {
+public class ObservationService implements AbstractSensorThingsEntityService {
 
-    @Autowired
-    private DummyEntityCreator entityCreator;
-    
-    @Autowired
-    private ProcedureRepository procedureRepository;
-    
-    @Autowired
-    private SensorMapper mapper;
-    
-    @Override
-    public EntityCollection getEntityCollection() {
-        EntityCollection retEntitySet = new EntityCollection();
-        procedureRepository.findAll().forEach(t -> retEntitySet.getEntities().add(mapper.createSensorEntity(t)));
-        
-        return retEntitySet;
-    }
+	@Autowired
+	private DummyEntityCreator entityCreator;
 
-    @Override
-    public Entity getEntity(List<UriParameter> keyPredicates) {
-        return getEntityForId(keyPredicates.get(0).getText());
-    }
+	@Override
+	public EntityCollection getEntityCollection() {
+		return entityCreator.createEntityCollection(ObservationEntityProvider.ET_OBSERVATION_NAME);
+	}
 
-    @Override
-    public Entity getRelatedEntity(Entity sourceEntity) {
-        return getEntityForId(String.valueOf(ThreadLocalRandom.current().nextInt()));
-    }
+	@Override
+	public Entity getEntity(List<UriParameter> keyPredicates) {
+		return getEntityForId(keyPredicates.get(0).getText());
+	}
 
-    @Override
-    public Entity getRelatedEntity(Entity sourceEntity, List<UriParameter> keyPredicates) {
-        return getEntityForId(keyPredicates.get(0).getText());
-    }
+	@Override
+	public Entity getRelatedEntity(Entity sourceEntity) {
+		return getEntityForId(String.valueOf(ThreadLocalRandom.current().nextInt()));
+	}
 
-    @Override
-    public EntityCollection getRelatedEntityCollection(Entity sourceEntity) {
-        return getEntityCollection();
-    }
+	@Override
+	public Entity getRelatedEntity(Entity sourceEntity, List<UriParameter> keyPredicates) {
+		return getEntityForId(keyPredicates.get(0).getText());
+	}
 
-    private Entity getEntityForId(String id) {
-        return entityCreator.createEntity(SensorEntityProvider.ET_SENSOR_NAME, id);
-    }
+	@Override
+	public EntityCollection getRelatedEntityCollection(Entity sourceEntity) {
+		return getEntityCollection();
+	}
+
+	private Entity getEntityForId(String id) {
+		return entityCreator.createEntity(ObservationEntityProvider.ET_OBSERVATION_NAME, id);
+	}
 }
