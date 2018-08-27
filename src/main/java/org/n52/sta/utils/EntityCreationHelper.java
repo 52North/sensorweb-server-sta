@@ -15,6 +15,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 /**
+ * Helper class for Entity creation
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
@@ -24,6 +25,14 @@ public class EntityCreationHelper {
     @Autowired
     ApplicationContext ctx;
 
+    /**
+     * Creates an ID for an entity
+     *
+     * @param entity the Entity to create the ID for
+     * @param entitySetName the name of the EntitySet the Entity belongs to
+     * @param idPropertyName name of the ID property
+     * @return the ID as URI
+     */
     public URI createId(Entity entity, String entitySetName, String idPropertyName) {
         return createId(entity, entitySetName, idPropertyName, null);
     }
@@ -41,17 +50,5 @@ public class EntityCreationHelper {
             throw new ODataRuntimeException("Unable to create (Atom) id for entity: " + entity, e);
         }
     }
-
-//
-//    public String createNavigationLink() {
-//        String navigationLink = "";
-//
-//        return navigationLink;
-//    }
-//    public Object createNavigationSelfLink(String contextPath, Entity entity) {
-//        StringBuilder builder = new StringBuilder();
-//        builder.append(entity.getId().getPath());
-//        return builder.toString();
-//    }
 
 }

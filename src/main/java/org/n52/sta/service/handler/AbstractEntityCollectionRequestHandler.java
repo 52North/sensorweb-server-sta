@@ -10,6 +10,7 @@ import org.apache.olingo.server.api.uri.UriInfo;
 import org.n52.sta.service.response.EntityCollectionResponse;
 
 /**
+ * Abstract class to handle EntityCollection requests
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */

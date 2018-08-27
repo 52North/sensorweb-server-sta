@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
+ * Implementation for handling EntityCollection requests
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */

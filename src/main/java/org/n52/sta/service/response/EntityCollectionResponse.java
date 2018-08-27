@@ -9,6 +9,7 @@ import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 
 /**
+ * Represents response data for a EntityCollection request
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */

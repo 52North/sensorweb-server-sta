@@ -112,12 +112,12 @@ public class UriResourceNavigationResolver {
     }
 
     /**
-     * Determines the target EdmEntitySet for a navigation property
+     * Determines the target EntitySet for a navigation property
      *
-     * @param startEdmEntitySet the EdmEntitySet to start with
+     * @param startEdmEntitySet the EntitySet to start with
      * @param edmNavigationProperty the navigation property from one entity type
      * to another
-     * @return the target EdmEntitySet for the navigation property
+     * @return the target EntitySet for the navigation property
      * @throws ODataApplicationException
      */
     public static EdmEntitySet getNavigationTargetEntitySet(EdmEntitySet startEdmEntitySet,
