@@ -28,26 +28,26 @@
  */
 package org.n52.sta.mapping;
 
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DEFINITION;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DESCRIPTION;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_NAME;
+import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ES_OBSERVED_PROPERTIES_NAME;
+import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_FQN;
+
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
-import org.n52.series.db.beans.DataEntity;
-import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
-import org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DESCRIPTION;
-import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ES_OBSERVED_PROPERTIES_NAME;
-import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_FQN;
-import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ES_SENSORS_NAME;
-import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ET_SENSOR_FQN;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
+@Component
 public class ObservedPropertyMapper {
 
     @Autowired
@@ -57,8 +57,8 @@ public class ObservedPropertyMapper {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, observedProperty.getId()));
         entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, observedProperty.getDescription()));
-        entity.addProperty(new Property(null, AbstractSensorThingsEntityProvider.PROP_NAME, ValueType.PRIMITIVE, observedProperty.getName()));
-        entity.addProperty(new Property(null, AbstractSensorThingsEntityProvider.PROP_DEFINITION, ValueType.PRIMITIVE, observedProperty.getIdentifier()));
+        entity.addProperty(new Property(null, PROP_NAME, ValueType.PRIMITIVE, observedProperty.getName()));
+        entity.addProperty(new Property(null, PROP_DEFINITION, ValueType.PRIMITIVE, observedProperty.getIdentifier()));
 
         entity.setType(ET_OBSERVED_PROPERTY_FQN.getFullQualifiedNameAsString());
         entity.setId(entityCreationHelper.createId(entity, ES_OBSERVED_PROPERTIES_NAME, ID_ANNOTATION));

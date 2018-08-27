@@ -30,17 +30,21 @@ package org.n52.sta.mapping;
 
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DESCRIPTION;
-import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ES_SENSORS_NAME;
-import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ET_SENSOR_FQN;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ENCODINGTYPE;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_FEATURE;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_NAME;
+import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ES_FEATURES_OF_INTEREST_NAME;
+import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ET_FEATURE_OF_INTEREST_FQN;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.n52.series.db.beans.FeatureEntity;
-import org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.vividsolutions.jts.io.geojson.GeoJsonWriter;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -58,13 +62,15 @@ public class FeatureOfInterestMapper {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, feature.getId()));
         entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, feature.getDescription()));
-        entity.addProperty(new Property(null, AbstractSensorThingsEntityProvider.PROP_NAME, ValueType.PRIMITIVE, feature.getName()));
-        //TODO: generate GeoJSON from feature.getGeometry()
-        entity.addProperty(new Property(null, AbstractSensorThingsEntityProvider.PROP_FEATURE, ValueType.PRIMITIVE, feature.getXml()));
+        entity.addProperty(new Property(null, PROP_NAME, ValueType.PRIMITIVE, feature.getName()));
+        entity.addProperty(new Property(null, PROP_ENCODINGTYPE, ValueType.PRIMITIVE, ENCODINGTYPE_GEOJSON));
 
-        entity.addProperty(new Property(null, AbstractSensorThingsEntityProvider.PROP_ENCODINGTYPE, ValueType.PRIMITIVE, ENCODINGTYPE_GEOJSON));
-        entity.setType(ET_SENSOR_FQN.getFullQualifiedNameAsString());
-        entity.setId(entityCreationHelper.createId(entity, ES_SENSORS_NAME, ID_ANNOTATION));
+        //TODO: check if there is an easier way to write to GeoJSON and get rid of dependency
+        GeoJsonWriter converter = new GeoJsonWriter();
+        entity.addProperty(new Property(null, PROP_FEATURE, ValueType.PRIMITIVE, converter.write(feature.getGeometry())));
+
+        entity.setType(ET_FEATURE_OF_INTEREST_FQN.getFullQualifiedNameAsString());
+        entity.setId(entityCreationHelper.createId(entity, ES_FEATURES_OF_INTEREST_NAME, ID_ANNOTATION));
 
         return entity;
     }
