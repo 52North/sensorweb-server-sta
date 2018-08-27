@@ -257,7 +257,7 @@ public class DummyEntityCreator {
         loc1.setDescription("Demo Location 1");
         loc1.setGeometry(new GeometryFactory().createPoint(new Coordinate(Math.random() * 90, Math.random() * 180)));
 
-        loc1.setLocationEncodings(createEncoding());
+        loc1.setLocationEncoding(createEncoding());
 
         locations.add(loc1);
         return locations;
