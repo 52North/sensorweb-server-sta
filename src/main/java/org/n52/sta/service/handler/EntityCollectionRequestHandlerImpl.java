@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
-public class EntityCollectionRequestHandlerImpl extends AbstractEntityCollectionRequestHandler {
+public class EntityCollectionRequestHandlerImpl implements AbstractEntityCollectionRequestHandler {
 
     @Autowired
     private EntityServiceRepository serviceRepository;

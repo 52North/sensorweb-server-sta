@@ -14,8 +14,15 @@ import org.n52.sta.service.response.EntityCollectionResponse;
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
-public abstract class AbstractEntityCollectionRequestHandler {
+public interface AbstractEntityCollectionRequestHandler {
 
+    /**
+     * Handle a request for a EntityCollection an creates a response
+     *
+     * @param uriInfo information for the EntityCollection request URI
+     * @return response that contains data for the EntityCollection reponse
+     * @throws ODataApplicationException
+     */
     public abstract EntityCollectionResponse handleEntityCollectionRequest(UriInfo uriInfo) throws ODataApplicationException;
 
 }
