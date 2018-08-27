@@ -1,0 +1,43 @@
+
+# Log Bean initiation process
+debug: false
+trace: false
+
+#TODO: Check if this is needed. 
+database:
+  jpa:
+    persistence-location: classpath:META-INF/persistence.xml
+#entitymanager:
+#  packagesToScan: 
+
+# Copied from dao-series-api
+spring:
+  datasource:
+    platform: postgres
+    username: pgadmin
+    password: pgadmin
+    url: jdbc:postgresql://localhost:5432/reference_db
+    #data: classpath:/META-INF/data-${spring.datasource.platform}.sql
+    initialization-mode: always
+  jpa:
+    properties:
+      hibernate: 
+        hbm2ddl:
+          # hbm2ddl values: validate | update | create | create-drop
+          auto: update
+        jdbc:
+          time_zone: UTC
+          # https://hibernate.atlassian.net/browse/HHH-12368
+          lob.non_contextual_creation: true
+        format_sql: true
+        default_schema: public
+        dialect: org.hibernate.spatial.dialect.postgis.PostgisDialect
+
+        # disable driver's feature detection
+        # see https://stackoverflow.com/questions/46493500/hibernate-with-c3p0-createclob-is-not-yet-implemented
+        temp.use_jdbc_metadata_defaults: false
+
+        
+#logging:
+#  level:
+#    org.springframework: DEBUG

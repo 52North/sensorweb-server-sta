@@ -30,12 +30,14 @@ package org.n52.sta.data;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
-import org.apache.olingo.commons.api.data.Entity;
 
+import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.server.api.uri.UriParameter;
+import org.n52.series.db.ProcedureRepository;
 import org.n52.sta.edm.provider.entities.SensorEntityProvider;
 import org.n52.sta.mapping.SensorMapper;
+import org.n52.sta.mapping.ThingMapper;
 import org.n52.sta.utils.DummyEntityCreator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -50,14 +52,20 @@ import org.springframework.stereotype.Component;
 public class SensorService implements AbstractSensorThingsEntityService {
 
     @Autowired
-    private SensorMapper sensorMapper;
-
-    @Autowired
     private DummyEntityCreator entityCreator;
-
+    
+    @Autowired
+    private ProcedureRepository procedureRepository;
+    
+    @Autowired
+    private SensorMapper mapper;
+    
     @Override
     public EntityCollection getEntityCollection() {
-        return entityCreator.createEntityCollection(SensorEntityProvider.ET_SENSOR_NAME);
+        EntityCollection retEntitySet = new EntityCollection();
+        procedureRepository.findAll().forEach(t -> retEntitySet.getEntities().add(mapper.createSensorEntity(t)));
+        
+        return retEntitySet;
     }
 
     @Override
