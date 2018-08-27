@@ -134,7 +134,7 @@ public class DummyEntityCreator {
     
     private Entity createLocationEntityForId(String id) {
         LocationEntity loc1 = new LocationEntity();
-        loc1.setId(42L);
+        loc1.setId(Long.parseLong(id));
         loc1.setName("Demo Name 1");
         loc1.setDescription("Demo Location 1");
         loc1.setGeometry(new GeometryFactory().createPoint(new Coordinate(Math.random() * 90, Math.random() * 180)));
