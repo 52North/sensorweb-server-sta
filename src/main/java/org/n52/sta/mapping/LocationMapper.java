@@ -62,8 +62,10 @@ public class LocationMapper {
         entity.addProperty(new Property(null, PROP_NAME, ValueType.PRIMITIVE, location.getName()));
         entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, location.getDescription()));
 
-        entity.addProperty(new Property(null, PROP_LOCATION, ValueType.PRIMITIVE, location.getLocationEncoding().getLocation()));
-        entity.addProperty(new Property(null, PROP_ENCODINGTYPE, ValueType.PRIMITIVE, location.getLocationEncoding().getEncodingType()));
+        if (location.getLocationEncoding() != null) {
+            entity.addProperty(new Property(null, PROP_LOCATION, ValueType.PRIMITIVE, location.getLocationEncoding().getLocation()));
+            entity.addProperty(new Property(null, PROP_ENCODINGTYPE, ValueType.PRIMITIVE, location.getLocationEncoding().getEncodingType()));
+        }
 
         entity.setType(ET_LOCATION_FQN.getFullQualifiedNameAsString());
         entity.setId(entityCreationHelper.createId(entity, ES_LOCATIONS_NAME, ID_ANNOTATION));
