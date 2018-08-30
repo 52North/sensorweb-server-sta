@@ -33,6 +33,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
+import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.server.api.uri.UriParameter;
 import org.n52.sta.edm.provider.entities.DatastreamEntityProvider;
 import org.n52.sta.utils.DummyEntityCreator;
@@ -46,35 +47,50 @@ import org.springframework.stereotype.Component;
 @Component
 public class DatastreamService implements AbstractSensorThingsEntityService {
 
-	@Autowired
-	private DummyEntityCreator entityCreator;
+    @Autowired
+    private DummyEntityCreator entityCreator;
 
-	@Override
-	public EntityCollection getEntityCollection() {
-		return entityCreator.createEntityCollection(DatastreamEntityProvider.ET_DATASTREAM_NAME);
-	}
+    @Override
+    public EntityCollection getEntityCollection() {
+        return entityCreator.createEntityCollection(DatastreamEntityProvider.ET_DATASTREAM_NAME);
+    }
 
-	@Override
-	public Entity getEntity(List<UriParameter> keyPredicates) {
-		return getEntityForId(keyPredicates.get(0).getText());
-	}
+    @Override
+    public Entity getEntity(List<UriParameter> keyPredicates) {
+        return getEntityForId(keyPredicates.get(0).getText());
+    }
 
-	@Override
-	public Entity getRelatedEntity(Entity sourceEntity) {
-		return getEntityForId(String.valueOf(ThreadLocalRandom.current().nextInt()));
-	}
+    @Override
+    public Entity getRelatedEntity(Entity sourceEntity) {
+        return getEntityForId(String.valueOf(ThreadLocalRandom.current().nextInt()));
+    }
 
-	@Override
-	public Entity getRelatedEntity(Entity sourceEntity, List<UriParameter> keyPredicates) {
-		return getEntityForId(keyPredicates.get(0).getText());
-	}
+    @Override
+    public Entity getRelatedEntity(Entity sourceEntity, List<UriParameter> keyPredicates) {
+        return getEntityForId(keyPredicates.get(0).getText());
+    }
 
-	@Override
-	public EntityCollection getRelatedEntityCollection(Entity sourceEntity) {
-		return getEntityCollection();
-	}
+    @Override
+    public EntityCollection getRelatedEntityCollection(Entity sourceEntity) {
+        return getEntityCollection();
+    }
 
-	private Entity getEntityForId(String id) {
-		return entityCreator.createEntity(DatastreamEntityProvider.ET_DATASTREAM_NAME, id);
-	}
+    private Entity getEntityForId(String id) {
+        return entityCreator.createEntity(DatastreamEntityProvider.ET_DATASTREAM_NAME, id);
+    }
+
+    @Override
+    public boolean existsEntity(Long id) {
+        return true;
+    }
+
+    @Override
+    public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
+        return true;
+    }
+
+    @Override
+    public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+        return true;
+    }
 }

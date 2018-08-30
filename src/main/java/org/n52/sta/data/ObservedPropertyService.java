@@ -33,6 +33,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
+import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.server.api.uri.UriParameter;
 import org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider;
 import org.n52.sta.utils.DummyEntityCreator;
@@ -45,7 +46,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ObservedPropertyService implements AbstractSensorThingsEntityService {
-
 
     @Autowired
     private DummyEntityCreator entityCreator;
@@ -78,5 +78,19 @@ public class ObservedPropertyService implements AbstractSensorThingsEntityServic
     private Entity getEntityForId(String id) {
         return entityCreator.createEntity(ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_NAME, id);
     }
-}
 
+    @Override
+    public boolean existsEntity(Long id) {
+        return true;
+    }
+
+    @Override
+    public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
+        return true;
+    }
+
+    @Override
+    public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+        return true;
+    }
+}

@@ -33,6 +33,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.apache.olingo.commons.api.data.Entity;
 
 import org.apache.olingo.commons.api.data.EntityCollection;
+import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.server.api.uri.UriParameter;
 import org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider;
 import org.n52.sta.mapping.HistoricalLocationMapper;
@@ -80,5 +81,20 @@ public class HistoricalLocationService implements AbstractSensorThingsEntityServ
 
     private Entity getEntityForId(String id) {
         return entityCreator.createEntity(HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME, id);
+    }
+
+    @Override
+    public boolean existsEntity(Long id) {
+        return true;
+    }
+
+    @Override
+    public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
+        return true;
+    }
+
+    @Override
+    public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+        return true;
     }
 }

@@ -8,6 +8,7 @@ package org.n52.sta.data;
 import java.util.List;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
+import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.server.api.uri.UriParameter;
 
 /**
@@ -58,5 +59,41 @@ public interface AbstractSensorThingsEntityService {
      * the given key predicates
      */
     public Entity getRelatedEntity(Entity sourceEntity, List<UriParameter> keyPredicates);
+
+    /**
+     * Checks if an Entity exists in accordance to a given list of key
+     * predicates
+     *
+     * @param id the ID to check the existance of an Entity for
+     *
+     * @return true if an Entity that is conform to the given key predicates
+     * exists
+     */
+    public boolean existsEntity(Long id);
+
+    /**
+     * Checks if an Entity exists that is related to a single Entity of the
+     * given EntityType and with the given KeyPredicates
+     *
+     * @param sourceId ID of the related Entity
+     * @param sourceEntityType EntityType of the related Entity
+     * @return true if an Entity exists that is related to a single Entity of
+     * the given EntityType and with the given KeyPredicates
+     */
+    public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType);
+
+    /**
+     * Checks if an Entity exists that is conform to given KeyPredicates and is
+     * related to a single Entity of the given EntityType and with the given
+     * KeyPredicates in accordance
+     *
+     * @param sourceId ID of the related Entity
+     * @param sourceEntityType EntityType of the related Entity
+     * @param targetId the ID to check the existance of an Entity for
+     * @return true if an Entity exists that is conform to the given
+     * KeyPredicates and is related to a single Entity of the given EntityType
+     * and with the given KeyPredicates
+     */
+    public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId);
 
 }

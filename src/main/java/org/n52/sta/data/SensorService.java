@@ -33,6 +33,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
+import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.server.api.uri.UriParameter;
 import org.n52.series.db.ProcedureRepository;
 import org.n52.sta.edm.provider.entities.SensorEntityProvider;
@@ -53,18 +54,18 @@ public class SensorService implements AbstractSensorThingsEntityService {
 
     @Autowired
     private DummyEntityCreator entityCreator;
-    
+
     @Autowired
     private ProcedureRepository procedureRepository;
-    
+
     @Autowired
     private SensorMapper mapper;
-    
+
     @Override
     public EntityCollection getEntityCollection() {
         EntityCollection retEntitySet = new EntityCollection();
         procedureRepository.findAll().forEach(t -> retEntitySet.getEntities().add(mapper.createSensorEntity(t)));
-        
+
         return retEntitySet;
     }
 
@@ -90,5 +91,20 @@ public class SensorService implements AbstractSensorThingsEntityService {
 
     private Entity getEntityForId(String id) {
         return entityCreator.createEntity(SensorEntityProvider.ET_SENSOR_NAME, id);
+    }
+
+    @Override
+    public boolean existsEntity(Long id) {
+        return true;
+    }
+
+    @Override
+    public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
+        return true;
+    }
+
+    @Override
+    public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+        return true;
     }
 }

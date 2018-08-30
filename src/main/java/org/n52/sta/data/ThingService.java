@@ -10,6 +10,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
+import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.server.api.uri.UriParameter;
 import org.n52.io.response.OfferingOutput;
 import org.n52.series.db.DatasetRepository;
@@ -32,7 +33,7 @@ public class ThingService implements AbstractSensorThingsEntityService {
 
     @Autowired
     private DummyEntityCreator entityCreator;
-    
+
     @Override
     public EntityCollection getEntityCollection() {
         return entityCreator.createEntityCollection(ThingEntityProvider.ET_THING_NAME);
@@ -60,5 +61,20 @@ public class ThingService implements AbstractSensorThingsEntityService {
 
     private Entity getEntityForId(String id) {
         return entityCreator.createEntity(ThingEntityProvider.ET_THING_NAME, id);
+    }
+
+    @Override
+    public boolean existsEntity(Long id) {
+        return true;
+    }
+
+    @Override
+    public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
+        return true;
+    }
+
+    @Override
+    public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+        return true;
     }
 }

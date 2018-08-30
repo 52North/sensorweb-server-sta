@@ -37,6 +37,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ThreadLocalRandom;
 import org.apache.olingo.commons.api.data.Entity;
+import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.server.api.uri.UriParameter;
 import org.n52.sta.edm.provider.entities.LocationEntityProvider;
 import org.n52.sta.utils.DummyEntityCreator;
@@ -81,5 +82,20 @@ public class LocationService implements AbstractSensorThingsEntityService {
 
     private Entity getEntityForId(String id) {
         return entityCreator.createEntity(LocationEntityProvider.ET_LOCATION_NAME, id);
+    }
+
+    @Override
+    public boolean existsEntity(Long id) {
+        return true;
+    }
+
+    @Override
+    public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
+        return true;
+    }
+
+    @Override
+    public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+        return true;
     }
 }
