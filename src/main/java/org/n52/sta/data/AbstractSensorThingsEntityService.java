@@ -6,6 +6,8 @@
 package org.n52.sta.data;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.OptionalLong;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
@@ -34,6 +36,15 @@ public interface AbstractSensorThingsEntityService {
     public EntityCollection getRelatedEntityCollection(Entity sourceEntity);
 
     /**
+     * Requests the EntityCollection that is related to a single Entity with the
+     * given ID
+     *
+     * @param sourceId the ID of the Entity the EntityCollection is related to
+     * @return the EntityCollection that is related to the given Entity
+     */
+    public EntityCollection getRelatedEntityCollection(Long sourceId);
+
+    /**
      * Requests the Entity in accordance to a given ID
      *
      * @param id the ID to determine the Entity for
@@ -44,7 +55,7 @@ public interface AbstractSensorThingsEntityService {
     /**
      * Requests the Entity that is related to a single Entity
      *
-     * @param sourceEntity the Entity the Entity is related to
+     * @param sourceEntity the Entity the requested Entity is related to
      * @return the Entity that is related to the given Entity
      */
     public Entity getRelatedEntity(Entity sourceEntity);
@@ -59,6 +70,27 @@ public interface AbstractSensorThingsEntityService {
      * the given key predicates
      */
     public Entity getRelatedEntity(Entity sourceEntity, List<UriParameter> keyPredicates);
+
+    /**
+     * Requests the ID for an Entity that is related to a single Entity with the
+     * given ID
+     *
+     * @param sourceId the ID for the Entity the requested Entity is related to
+     * @return the ID for the Entity that is related to the Entity with the
+     * given Id
+     */
+    public OptionalLong getIdForRelatedEntity(Long sourceId);
+
+    /**
+     * Requests the ID for the Entity that is related to a single Entity with a
+     * given ID and in accordance to a given ID
+     *
+     * @param sourceId the ID for the Entity the requested Entity is related to
+     * @param targetId the ID for the requested Entity
+     * @return the Entity that is related to the given Entity and is conform to
+     * the given ID
+     */
+    public OptionalLong getIdForRelatedEntity(Long sourceId, Long targetId);
 
     /**
      * Checks if an Entity exists in accordance to a given list of key

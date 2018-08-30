@@ -29,6 +29,7 @@
 package org.n52.sta.data;
 
 import java.util.List;
+import java.util.OptionalLong;
 import java.util.concurrent.ThreadLocalRandom;
 import org.apache.olingo.commons.api.data.Entity;
 
@@ -58,8 +59,8 @@ public class HistoricalLocationService implements AbstractSensorThingsEntityServ
     public EntityCollection getEntityCollection() {
         return entityCreator.createEntityCollection(HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME);
     }
-    
-    @Override  
+
+    @Override
     public Entity getEntity(Long id) {
         return getEntityForId(String.valueOf(id));
     }
@@ -96,5 +97,20 @@ public class HistoricalLocationService implements AbstractSensorThingsEntityServ
     @Override
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         return true;
+    }
+
+    @Override
+    public EntityCollection getRelatedEntityCollection(Long sourceId) {
+        return getEntityCollection();
+    }
+
+    @Override
+    public OptionalLong getIdForRelatedEntity(Long sourceId) {
+        return entityCreator.createId(sourceId);
+    }
+
+    @Override
+    public OptionalLong getIdForRelatedEntity(Long sourceId, Long targetId) {
+        return entityCreator.createId(targetId);
     }
 }

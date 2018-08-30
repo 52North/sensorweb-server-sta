@@ -29,6 +29,7 @@
 package org.n52.sta.data;
 
 import java.util.List;
+import java.util.OptionalLong;
 
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.n52.sta.mapping.LocationMapper;
@@ -97,5 +98,20 @@ public class LocationService implements AbstractSensorThingsEntityService {
     @Override
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         return true;
+    }
+
+    @Override
+    public EntityCollection getRelatedEntityCollection(Long sourceId) {
+        return getEntityCollection();
+    }
+
+    @Override
+    public OptionalLong getIdForRelatedEntity(Long sourceId) {
+        return entityCreator.createId(sourceId);
+    }
+
+    @Override
+    public OptionalLong getIdForRelatedEntity(Long sourceId, Long targetId) {
+        return entityCreator.createId(targetId);
     }
 }
