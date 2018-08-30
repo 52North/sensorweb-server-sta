@@ -3,7 +3,7 @@
     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence
              http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd"
     version="2.1">
-    <persistence-unit name="sensorthings-mapping2">
+    <persistence-unit name="sensorthingsapi-mapping">
         <description>Sensor Things API Mappings</description>
         <mapping-file>/hbm/core/ProcedureResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/core/OfferingResource.hbm.xml</mapping-file>

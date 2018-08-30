@@ -26,16 +26,17 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data;
+package org.n52.sta.data.service;
 
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.Optional;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.server.api.uri.UriParameter;
-import org.n52.sta.edm.provider.entities.ObservationEntityProvider;
-import org.n52.sta.utils.DummyEntityCreator;
+import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.sta.data.repositories.DatastreamRepository;
+import org.n52.sta.mapping.DatastreamMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -44,14 +45,19 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-public class ObservationService implements AbstractSensorThingsEntityService {
+public class DatastreamService implements AbstractSensorThingsEntityService {
 
 	@Autowired
-	private DummyEntityCreator entityCreator;
+    private DatastreamRepository repository;
 
+    @Autowired
+    private DatastreamMapper mapper;
+    
 	@Override
 	public EntityCollection getEntityCollection() {
-		return entityCreator.createEntityCollection(ObservationEntityProvider.ET_OBSERVATION_NAME);
+        EntityCollection retEntitySet = new EntityCollection();
+        repository.findAll().forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        return retEntitySet;
 	}
 
 	@Override
@@ -61,20 +67,28 @@ public class ObservationService implements AbstractSensorThingsEntityService {
 
 	@Override
 	public Entity getRelatedEntity(Entity sourceEntity) {
-		return getEntityForId(String.valueOf(ThreadLocalRandom.current().nextInt()));
+        //TODO: implement
+        return null;
 	}
 
 	@Override
 	public Entity getRelatedEntity(Entity sourceEntity, List<UriParameter> keyPredicates) {
-		return getEntityForId(keyPredicates.get(0).getText());
+        //TODO: implement
+        return null;
 	}
 
 	@Override
 	public EntityCollection getRelatedEntityCollection(Entity sourceEntity) {
-		return getEntityCollection();
+        //TODO: implement
+        return null;
 	}
 
-	private Entity getEntityForId(String id) {
-		return entityCreator.createEntity(ObservationEntityProvider.ET_OBSERVATION_NAME, id);
-	}
+    private Entity getEntityForId(String id) {
+        Optional<DatastreamEntity> entity = getRawEntityForId(Long.valueOf(id));
+        return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
+    }
+
+    protected Optional<DatastreamEntity> getRawEntityForId(Long id) {
+        return repository.findById(id);
+    }
 }

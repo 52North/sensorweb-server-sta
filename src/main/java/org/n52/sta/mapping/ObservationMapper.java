@@ -67,7 +67,7 @@ public class ObservationMapper {
 	@Autowired
 	EntityCreationHelper entityCreationHelper;
 
-	public Entity createObservationEntity(DataEntity observation) {
+	public Entity createEntity(DataEntity< ? > observation) {
 		Entity entity = new Entity();
 		entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, observation.getId()));
 

@@ -8,7 +8,7 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
-@EnableJpaRepositories(basePackages = "org.n52.series.db",
+@EnableJpaRepositories(basePackages = { "org.n52.series.db", "org.n52.sta.data.repositories"},
                        excludeFilters = @Filter(type = FilterType.REGEX, pattern = "org\\.n52\\.series\\.db\\.old\\..*"))
 @ComponentScan(basePackages = {"org.n52.series.srv", "org.n52.series.db", "org.n52.sta"},
                excludeFilters = @Filter(type = FilterType.REGEX, pattern = "org\\.n52\\.series\\.db\\.old\\.da\\.[^EntityCounter]"))

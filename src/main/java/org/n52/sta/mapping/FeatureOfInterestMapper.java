@@ -58,7 +58,7 @@ public class FeatureOfInterestMapper {
     @Autowired
     EntityCreationHelper entityCreationHelper;
 
-    public Entity createFeatureOfInterestEntity(FeatureEntity feature) {
+    public Entity createEntity(FeatureEntity feature) {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, feature.getId()));
         entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, feature.getDescription()));

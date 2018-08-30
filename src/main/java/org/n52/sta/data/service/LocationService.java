@@ -26,17 +26,21 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data;
+package org.n52.sta.data.service;
+
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
 
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
-import org.apache.olingo.commons.api.data.Entity;
+import java.util.Optional;
 
+import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.server.api.uri.UriParameter;
-import org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider;
-import org.n52.sta.mapping.HistoricalLocationMapper;
-import org.n52.sta.utils.DummyEntityCreator;
+import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.series.db.beans.sta.QLocationEntity;
+import org.n52.series.db.beans.sta.ThingEntity;
+import org.n52.sta.data.repositories.LocationRepository;
+import org.n52.sta.mapping.LocationMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -45,17 +49,24 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-public class HistoricalLocationService implements AbstractSensorThingsEntityService {
+public class LocationService implements AbstractSensorThingsEntityService {
 
     @Autowired
-    private HistoricalLocationMapper historicalLocationMapper;
+    private LocationRepository repository;
 
     @Autowired
-    private DummyEntityCreator entityCreator;
+    private LocationMapper mapper;
+    
+    @Autowired
+    private ThingService thingService;
+
+    private static QLocationEntity qloc = QLocationEntity.locationEntity;
 
     @Override
     public EntityCollection getEntityCollection() {
-        return entityCreator.createEntityCollection(HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME);
+        EntityCollection retEntitySet = new EntityCollection();
+        repository.findAll().forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        return retEntitySet;
     }
 
     @Override
@@ -65,20 +76,41 @@ public class HistoricalLocationService implements AbstractSensorThingsEntityServ
 
     @Override
     public Entity getRelatedEntity(Entity sourceEntity) {
-        return getEntityForId(String.valueOf(ThreadLocalRandom.current().nextInt()));
+        //TODO: implement
+        return null;
     }
 
     @Override
     public Entity getRelatedEntity(Entity sourceEntity, List<UriParameter> keyPredicates) {
-        return getEntityForId(keyPredicates.get(0).getText());
+        //TODO: implement
+        return null;
     }
 
     @Override
     public EntityCollection getRelatedEntityCollection(Entity sourceEntity) {
-        return getEntityCollection();
+        Iterable<LocationEntity> locations;
+        switch(sourceEntity.getType()) {
+            case "iot.Thing": {
+                Long thingId = (Long)sourceEntity.getProperty(ID_ANNOTATION).getValue();
+    
+                // Source Entity should always exists (checked beforehand in Request Handler)
+                Optional<ThingEntity> thing = thingService.getRawEntityForId(thingId);
+                locations = repository.findAll(qloc.in(thing.get().getLocationEntities()));
+                break;
+            }
+            default: return null;
+        }
+        EntityCollection retEntitySet = new EntityCollection();
+        locations.forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        return retEntitySet;
     }
 
     private Entity getEntityForId(String id) {
-        return entityCreator.createEntity(HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME, id);
+        Optional<LocationEntity> entity = getRawEntityForId(Long.valueOf(id));
+        return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
+    }
+
+    protected Optional<LocationEntity> getRawEntityForId(Long id) {
+        return repository.findById(id);
     }
 }

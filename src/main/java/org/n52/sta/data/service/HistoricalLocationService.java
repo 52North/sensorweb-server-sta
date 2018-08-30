@@ -26,37 +26,39 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data;
+package org.n52.sta.data.service;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
-import org.n52.sta.mapping.LocationMapper;
+import org.apache.olingo.server.api.uri.UriParameter;
+import org.n52.series.db.beans.sta.HistoricalLocationEntity;
+import org.n52.sta.data.repositories.HistoricalLocationRepository;
+import org.n52.sta.mapping.HistoricalLocationMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.concurrent.ThreadLocalRandom;
-import org.apache.olingo.commons.api.data.Entity;
-import org.apache.olingo.server.api.uri.UriParameter;
-import org.n52.sta.edm.provider.entities.LocationEntityProvider;
-import org.n52.sta.utils.DummyEntityCreator;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
 @Component
-public class LocationService implements AbstractSensorThingsEntityService {
+public class HistoricalLocationService implements AbstractSensorThingsEntityService {
 
     @Autowired
-    private LocationMapper locationMapper;
+    private HistoricalLocationRepository repository;
 
     @Autowired
-    private DummyEntityCreator entityCreator;
+    private HistoricalLocationMapper mapper;
+    
 
     @Override
     public EntityCollection getEntityCollection() {
-        return entityCreator.createEntityCollection(LocationEntityProvider.ET_LOCATION_NAME);
+        EntityCollection retEntitySet = new EntityCollection();
+        repository.findAll().forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        return retEntitySet;
     }
 
     @Override
@@ -66,20 +68,28 @@ public class LocationService implements AbstractSensorThingsEntityService {
 
     @Override
     public Entity getRelatedEntity(Entity sourceEntity) {
-        return getEntityForId(String.valueOf(ThreadLocalRandom.current().nextInt()));
+        //TODO: implement
+        return null;
     }
 
     @Override
     public Entity getRelatedEntity(Entity sourceEntity, List<UriParameter> keyPredicates) {
-        return getEntityForId(keyPredicates.get(0).getText());
+        //TODO: implement
+        return null;
     }
 
     @Override
     public EntityCollection getRelatedEntityCollection(Entity sourceEntity) {
-        return getEntityCollection();
+        //TODO: implement
+        return null;
+    }
+    
+    private Entity getEntityForId(String id) {
+        Optional<HistoricalLocationEntity> entity = getRawEntityForId(Long.valueOf(id));
+        return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
 
-    private Entity getEntityForId(String id) {
-        return entityCreator.createEntity(LocationEntityProvider.ET_LOCATION_NAME, id);
+    protected Optional<HistoricalLocationEntity> getRawEntityForId(Long id) {
+        return repository.findById(id);
     }
 }
