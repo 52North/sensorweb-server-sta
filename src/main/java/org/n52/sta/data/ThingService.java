@@ -40,8 +40,8 @@ public class ThingService implements AbstractSensorThingsEntityService {
     }
 
     @Override
-    public Entity getEntity(List<UriParameter> keyPredicates) {
-        return getEntityForId(keyPredicates.get(0).getText());
+    public Entity getEntity(Long id) {
+        return getEntityForId(String.valueOf(id));
     }
 
     @Override

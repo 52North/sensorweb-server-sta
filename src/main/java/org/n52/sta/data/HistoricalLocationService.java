@@ -58,10 +58,10 @@ public class HistoricalLocationService implements AbstractSensorThingsEntityServ
     public EntityCollection getEntityCollection() {
         return entityCreator.createEntityCollection(HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME);
     }
-
-    @Override
-    public Entity getEntity(List<UriParameter> keyPredicates) {
-        return getEntityForId(keyPredicates.get(0).getText());
+    
+    @Override  
+    public Entity getEntity(Long id) {
+        return getEntityForId(String.valueOf(id));
     }
 
     @Override

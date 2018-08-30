@@ -34,12 +34,12 @@ public interface AbstractSensorThingsEntityService {
     public EntityCollection getRelatedEntityCollection(Entity sourceEntity);
 
     /**
-     * Requests the Entity in accordance to a given list of key predicates
+     * Requests the Entity in accordance to a given ID
      *
-     * @param keyPredicates the key predicates to determine the Entity for
+     * @param id the ID to determine the Entity for
      * @return the Entity that is conform to the given key predicates
      */
-    public Entity getEntity(List<UriParameter> keyPredicates);
+    public Entity getEntity(Long id);
 
     /**
      * Requests the Entity that is related to a single Entity
@@ -64,7 +64,7 @@ public interface AbstractSensorThingsEntityService {
      * Checks if an Entity exists in accordance to a given list of key
      * predicates
      *
-     * @param id the ID to check the existance of an Entity for
+     * @param id the ID to check the existence of an Entity for
      *
      * @return true if an Entity that is conform to the given key predicates
      * exists
@@ -89,7 +89,7 @@ public interface AbstractSensorThingsEntityService {
      *
      * @param sourceId ID of the related Entity
      * @param sourceEntityType EntityType of the related Entity
-     * @param targetId the ID to check the existance of an Entity for
+     * @param targetId the ID to check the existence of an Entity for
      * @return true if an Entity exists that is conform to the given
      * KeyPredicates and is related to a single Entity of the given EntityType
      * and with the given KeyPredicates
