@@ -31,10 +31,12 @@ package org.n52.sta.data.service;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
 
 import java.util.List;
+import java.util.OptionalLong;
 import java.util.Optional;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
+import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.server.api.uri.UriParameter;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.QLocationEntity;
@@ -56,7 +58,7 @@ public class LocationService implements AbstractSensorThingsEntityService {
 
     @Autowired
     private LocationMapper mapper;
-    
+
     @Autowired
     private ThingService thingService;
 
@@ -70,8 +72,8 @@ public class LocationService implements AbstractSensorThingsEntityService {
     }
 
     @Override
-    public Entity getEntity(List<UriParameter> keyPredicates) {
-        return getEntityForId(keyPredicates.get(0).getText());
+    public Entity getEntity(Long id) {
+        return getEntityForId(String.valueOf(id));
     }
 
     @Override
@@ -89,16 +91,17 @@ public class LocationService implements AbstractSensorThingsEntityService {
     @Override
     public EntityCollection getRelatedEntityCollection(Entity sourceEntity) {
         Iterable<LocationEntity> locations;
-        switch(sourceEntity.getType()) {
+        switch (sourceEntity.getType()) {
             case "iot.Thing": {
-                Long thingId = (Long)sourceEntity.getProperty(ID_ANNOTATION).getValue();
-    
+                Long thingId = (Long) sourceEntity.getProperty(ID_ANNOTATION).getValue();
+
                 // Source Entity should always exists (checked beforehand in Request Handler)
                 Optional<ThingEntity> thing = thingService.getRawEntityForId(thingId);
                 locations = repository.findAll(qloc.in(thing.get().getLocationEntities()));
                 break;
             }
-            default: return null;
+            default:
+                return null;
         }
         EntityCollection retEntitySet = new EntityCollection();
         locations.forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
@@ -112,5 +115,45 @@ public class LocationService implements AbstractSensorThingsEntityService {
 
     protected Optional<LocationEntity> getRawEntityForId(Long id) {
         return repository.findById(id);
+    }
+
+    @Override
+    public boolean existsEntity(Long id) {
+        return true;
+    }
+
+    @Override
+    public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
+        return true;
+    }
+
+    @Override
+    public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+        return true;
+    }
+
+    @Override
+    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType) {
+        return getEntityCollection();
+    }
+
+    @Override
+    public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

@@ -5,7 +5,6 @@
  */
 package org.n52.sta.service.handler;
 
-import org.n52.sta.utils.NavigationLink;
 import java.util.List;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
@@ -16,6 +15,7 @@ import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.service.response.EntityCollectionResponse;
+import org.n52.sta.utils.EntityQueryParams;
 import org.n52.sta.utils.UriResourceNavigationResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -73,14 +73,15 @@ public class EntityCollectionRequestHandlerImpl implements AbstractEntityCollect
 
     private EntityCollectionResponse createResponseForNavigation(List<UriResource> resourcePaths) throws ODataApplicationException {
 
-        // determine the last NavigationLink and fetch EntityCollection for it
-        NavigationLink lastNavigationLink = navigationResolver.resolveUriResourceNavigationPaths(resourcePaths);
-        EntityCollection responseEntityCollection = serviceRepository.getEntityService(lastNavigationLink.getTargetEntitySet().getEntityType().getName())
-                .getRelatedEntityCollection(lastNavigationLink.getSourceEntity());
+        // determine the target query parameters and fetch EntityCollection for it
+        EntityQueryParams queryParams = navigationResolver.resolveUriResourceNavigationPaths(resourcePaths);
+
+        EntityCollection responseEntityCollection = serviceRepository.getEntityService(queryParams.getTargetEntitySet().getEntityType().getName())
+                .getRelatedEntityCollection(queryParams.getSourceId(), queryParams.getSourceEntityType());
 
         // set EntityCollection response information
         EntityCollectionResponse response = new EntityCollectionResponse();
-        response.setEntitySet(lastNavigationLink.getTargetEntitySet());
+        response.setEntitySet(queryParams.getTargetEntitySet());
         response.setEntityCollection(responseEntityCollection);
         return response;
     }

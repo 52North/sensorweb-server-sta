@@ -30,9 +30,11 @@ package org.n52.sta.data.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalLong;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
+import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.server.api.uri.UriParameter;
 import org.n52.series.db.PhenomenonRepository;
 import org.n52.series.db.beans.PhenomenonEntity;
@@ -49,10 +51,10 @@ public class ObservedPropertyService implements AbstractSensorThingsEntityServic
 
     @Autowired
     private ObservedPropertyMapper mapper;
-    
+
     @Autowired
     private PhenomenonRepository repository;
-    
+
     @Override
     public EntityCollection getEntityCollection() {
         EntityCollection retEntitySet = new EntityCollection();
@@ -61,15 +63,15 @@ public class ObservedPropertyService implements AbstractSensorThingsEntityServic
     }
 
     @Override
-    public Entity getEntity(List<UriParameter> keyPredicates) {
-        return getEntityForId(keyPredicates.get(0).getText());
+    public Entity getEntity(Long id) {
+        return getEntityForId(String.valueOf(id));
     }
 
     @Override
     public Entity getRelatedEntity(Entity sourceEntity) {
         //TODO: implement
         return null;
-     }
+    }
 
     @Override
     public Entity getRelatedEntity(Entity sourceEntity, List<UriParameter> keyPredicates) {
@@ -87,9 +89,48 @@ public class ObservedPropertyService implements AbstractSensorThingsEntityServic
         Optional<PhenomenonEntity> entity = getRawEntityForId(Long.valueOf(id));
         return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
-    
+
     protected Optional<PhenomenonEntity> getRawEntityForId(Long id) {
         return repository.findById(id);
     }
-}
 
+    @Override
+    public boolean existsEntity(Long id) {
+        return true;
+    }
+
+    @Override
+    public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
+        return true;
+    }
+
+    @Override
+    public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+        return true;
+    }
+
+    @Override
+    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType) {
+        return getEntityCollection();
+    }
+
+    @Override
+    public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+}

@@ -32,9 +32,11 @@ import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvid
 
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalLong;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
+import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.server.api.uri.UriParameter;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
@@ -52,13 +54,13 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ThingService implements AbstractSensorThingsEntityService {
-    
+
     @Autowired
     private ThingMapper mapper;
-    
+
     @Autowired
     private ThingRepository repository;
-    
+
     @Autowired
     private LocationService locationService;
 
@@ -67,9 +69,9 @@ public class ThingService implements AbstractSensorThingsEntityService {
 
     @Autowired
     private DatastreamService datastreamService;
-    
+
     private static QThingEntity qthing = QThingEntity.thingEntity;
-    
+
     @Override
     public EntityCollection getEntityCollection() {
         EntityCollection retEntitySet = new EntityCollection();
@@ -78,8 +80,8 @@ public class ThingService implements AbstractSensorThingsEntityService {
     }
 
     @Override
-    public Entity getEntity(List<UriParameter> keyPredicates) {
-        return getEntityForId(keyPredicates.get(0).getText());
+    public Entity getEntity(Long id) {
+        return getEntityForId(String.valueOf(id));
     }
 
     @Override
@@ -99,11 +101,11 @@ public class ThingService implements AbstractSensorThingsEntityService {
     @Override
     public EntityCollection getRelatedEntityCollection(Entity sourceEntity) {
         Iterable<ThingEntity> things;
-        Long sourceId = (Long)sourceEntity.getProperty(ID_ANNOTATION).getValue();
-        
+        Long sourceId = (Long) sourceEntity.getProperty(ID_ANNOTATION).getValue();
+
         switch (sourceEntity.getType()) {
             case "iot.Location": {
-                
+
                 // source Entity (loc) should always exists (checked beforehand in Request Handler)
                 //TODO: Refactor to use 1 query instead of 2
                 Optional<LocationEntity> loc = locationService.getRawEntityForId(sourceId);
@@ -111,14 +113,15 @@ public class ThingService implements AbstractSensorThingsEntityService {
                 break;
             }
             case "iot.HistoricalLocation": {
-                
+
                 // source Entity (loc) should always exists (checked beforehand in Request Handler)
                 Optional<HistoricalLocationEntity> loc = historicalLocationService.getRawEntityForId(sourceId);
                 //TODO: Refactor to use 1 query instead of 2
                 things = repository.findAll(qthing.historicalLocationEntities.contains(loc.get()));
                 break;
             }
-            default: return null;
+            default:
+                return null;
         }
         EntityCollection retEntitySet = new EntityCollection();
         things.forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
@@ -129,8 +132,48 @@ public class ThingService implements AbstractSensorThingsEntityService {
         Optional<ThingEntity> entity = getRawEntityForId(Long.valueOf(id));
         return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
-    
+
     protected Optional<ThingEntity> getRawEntityForId(Long id) {
         return repository.findById(id);
+    }
+
+    @Override
+    public boolean existsEntity(Long id) {
+        return true;
+    }
+
+    @Override
+    public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
+        return true;
+    }
+
+    @Override
+    public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+        return true;
+    }
+
+    @Override
+    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType) {
+        return getEntityCollection();
+    }
+
+    @Override
+    public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

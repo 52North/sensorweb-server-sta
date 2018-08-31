@@ -8,7 +8,6 @@ package org.n52.sta.service.handler;
 import java.util.List;
 import java.util.Locale;
 import org.apache.olingo.commons.api.data.Entity;
-import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
@@ -21,7 +20,7 @@ import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.service.response.EntityCollectionResponse;
 import org.n52.sta.service.response.EntityResponse;
-import org.n52.sta.utils.NavigationLink;
+import org.n52.sta.utils.EntityQueryParams;
 import org.n52.sta.utils.UriResourceNavigationResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -68,7 +67,7 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
         // fetch the data from backend for this requested Entity and deliver as Entity
         List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
         AbstractSensorThingsEntityService responseService = serviceRepository.getEntityService(uriResourceEntitySet.getEntityType().getName());
-        Entity responseEntity = responseService.getEntity(keyPredicates);
+        Entity responseEntity = responseService.getEntity(navigationResolver.getEntityIdFromKeyParams(keyPredicates));
 
         if (responseEntity == null) {
             throw new ODataApplicationException("Entity not found.",
@@ -84,23 +83,24 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
     }
 
     private EntityResponse createResponseForNavigation(List<UriResource> resourcePaths) throws ODataApplicationException {
-        // determine the last NavigationLink and fetch Entity for it
-        NavigationLink lastNavigationLink = navigationResolver.resolveUriResourceNavigationPaths(resourcePaths);
+        // determine the target query parameters and fetch Entity for it
+        EntityQueryParams requestParams = navigationResolver.resolveUriResourceNavigationPaths(resourcePaths);
 
         UriResource lastSegment = resourcePaths.get(resourcePaths.size() - 1);
         Entity responseEntity = null;
+
         if (lastSegment instanceof UriResourceNavigation) {
 
             List<UriParameter> navKeyPredicates = ((UriResourceNavigation) lastSegment).getKeyPredicates();
 
             // e.g. /Things(1)/Location
             if (navKeyPredicates.isEmpty()) {
-                responseEntity = serviceRepository.getEntityService(lastNavigationLink.getTargetEntitySet().getEntityType().getName())
-                        .getRelatedEntity(lastNavigationLink.getSourceEntity());
+                responseEntity = serviceRepository.getEntityService(requestParams.getTargetEntitySet().getEntityType().getName())
+                        .getRelatedEntity(requestParams.getSourceId(), requestParams.getSourceEntityType());
 
             } else { // e.g. /Things(1)/Locations(1)
-                responseEntity = serviceRepository.getEntityService(lastNavigationLink.getTargetEntitySet().getEntityType().getName())
-                        .getRelatedEntity(lastNavigationLink.getSourceEntity(), navKeyPredicates);
+                responseEntity = serviceRepository.getEntityService(requestParams.getTargetEntitySet().getEntityType().getName())
+                        .getRelatedEntity(requestParams.getSourceId(), requestParams.getSourceEntityType(), navigationResolver.getEntityIdFromKeyParams(navKeyPredicates));
             }
             if (responseEntity == null) {
                 throw new ODataApplicationException("Entity not found.",
@@ -110,7 +110,7 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
 
         // set EntityCollection response information
         EntityResponse response = new EntityResponse();
-        response.setEntitySet(lastNavigationLink.getTargetEntitySet());
+        response.setEntitySet(requestParams.getTargetEntitySet());
         response.setEntityCollection(responseEntity);
         return response;
     }

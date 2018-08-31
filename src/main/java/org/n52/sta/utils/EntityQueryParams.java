@@ -5,26 +5,37 @@
  */
 package org.n52.sta.utils;
 
-import org.apache.olingo.commons.api.data.Entity;
+import java.util.List;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
+import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.server.api.uri.UriParameter;
 
 /**
- * Represents a navigation link between an entity set and its soruce entity.
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
-public class NavigationLink {
+public class EntityQueryParams {
 
-    private Entity sourceEntity;
+    private EdmEntityType sourceEntityType;
+
+    private Long sourceId;
 
     private EdmEntitySet targetEntitySet;
 
-    public Entity getSourceEntity() {
-        return sourceEntity;
+    public EdmEntityType getSourceEntityType() {
+        return sourceEntityType;
     }
 
-    public void setSourceEntity(Entity sourceEntity) {
-        this.sourceEntity = sourceEntity;
+    public void setSourceEntityType(EdmEntityType sourceEntityType) {
+        this.sourceEntityType = sourceEntityType;
+    }
+
+    public Long getSourceId() {
+        return sourceId;
+    }
+
+    public void setSourceKeyPredicates(Long sourceId) {
+        this.sourceId = sourceId;
     }
 
     public EdmEntitySet getTargetEntitySet() {

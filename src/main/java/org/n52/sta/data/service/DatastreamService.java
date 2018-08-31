@@ -30,9 +30,12 @@ package org.n52.sta.data.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalLong;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
+import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.server.api.uri.UriParameter;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.sta.data.repositories.DatastreamRepository;
@@ -47,41 +50,41 @@ import org.springframework.stereotype.Component;
 @Component
 public class DatastreamService implements AbstractSensorThingsEntityService {
 
-	@Autowired
+    @Autowired
     private DatastreamRepository repository;
 
     @Autowired
     private DatastreamMapper mapper;
-    
-	@Override
-	public EntityCollection getEntityCollection() {
+
+    @Override
+    public EntityCollection getEntityCollection() {
         EntityCollection retEntitySet = new EntityCollection();
         repository.findAll().forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
-	}
+    }
 
-	@Override
-	public Entity getEntity(List<UriParameter> keyPredicates) {
-		return getEntityForId(keyPredicates.get(0).getText());
-	}
+    @Override
+    public Entity getEntity(Long id) {
+        return getEntityForId(String.valueOf(id));
+    }
 
-	@Override
-	public Entity getRelatedEntity(Entity sourceEntity) {
+    @Override
+    public Entity getRelatedEntity(Entity sourceEntity) {
         //TODO: implement
         return null;
-	}
+    }
 
-	@Override
-	public Entity getRelatedEntity(Entity sourceEntity, List<UriParameter> keyPredicates) {
+    @Override
+    public Entity getRelatedEntity(Entity sourceEntity, List<UriParameter> keyPredicates) {
         //TODO: implement
         return null;
-	}
+    }
 
-	@Override
-	public EntityCollection getRelatedEntityCollection(Entity sourceEntity) {
+    @Override
+    public EntityCollection getRelatedEntityCollection(Entity sourceEntity) {
         //TODO: implement
         return null;
-	}
+    }
 
     private Entity getEntityForId(String id) {
         Optional<DatastreamEntity> entity = getRawEntityForId(Long.valueOf(id));
@@ -90,5 +93,45 @@ public class DatastreamService implements AbstractSensorThingsEntityService {
 
     protected Optional<DatastreamEntity> getRawEntityForId(Long id) {
         return repository.findById(id);
+    }
+
+    @Override
+    public boolean existsEntity(Long id) {
+        return true;
+    }
+
+    @Override
+    public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
+        return true;
+    }
+
+    @Override
+    public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+        return true;
+    }
+
+    @Override
+    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType) {
+        return getEntityCollection();
+    }
+
+    @Override
+    public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
