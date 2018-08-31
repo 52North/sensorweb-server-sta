@@ -51,6 +51,7 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
     public <T> BooleanExpression selectFrom(JPQLQuery<T> subquery) {
         return qhistoricallocation.id.in(subquery.select(qhistoricallocation.id));
     }
+    
     public BooleanExpression matchesId(Long id) {
         return  qhistoricallocation.id.eq(id);
     }

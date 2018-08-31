@@ -28,8 +28,8 @@
  */
 package org.n52.sta.data.query;
 
-import org.n52.series.db.beans.sta.DatastreamEntity;
-import org.n52.series.db.beans.sta.QDatastreamEntity;
+import org.n52.series.db.beans.ProcedureEntity;
+import org.n52.series.db.beans.QProcedureEntity;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
@@ -39,21 +39,20 @@ import com.querydsl.jpa.JPQLQuery;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
-public class DatastreamQuerySpecifications extends EntityQuerySpecifications {
+public class SensorQuerySpecifications extends EntityQuerySpecifications {
     
-    final QDatastreamEntity qdatastream = QDatastreamEntity.datastreamEntity;
-
-    public JPQLQuery<DatastreamEntity> toSubquery(final BooleanExpression filter) {
-        return JPAExpressions.selectFrom(qdatastream)
-                .where(filter);
+    private final static QProcedureEntity qsensor = QProcedureEntity.procedureEntity;
+    
+    public JPQLQuery<ProcedureEntity> toSubquery(final BooleanExpression filter) {
+        return JPAExpressions.selectFrom(qsensor)
+                             .where(filter);
     }
     
     public <T> BooleanExpression selectFrom(JPQLQuery<T> subquery) {
-        return qdatastream.id.in(subquery.select(qdatastream.id));
+        return qsensor.id.in(subquery.select(qsensor.id));
     }
     
     public BooleanExpression matchesId(Long id) {
-        return  qdatastream.id.eq(id);
+        return qsensor.id.eq(id);
     }
-
 }

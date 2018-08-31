@@ -55,5 +55,4 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications {
     public BooleanExpression matchesId(Long id) {
         return qlocation.id.eq(id);
     }
-    
 }

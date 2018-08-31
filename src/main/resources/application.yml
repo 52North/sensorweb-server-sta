@@ -38,6 +38,8 @@ spring:
         temp.use_jdbc_metadata_defaults: false
 
         
-#logging:
-#  level:
-#    org.springframework: DEBUG
+logging:
+  level:
+    org.hibernate: INFO
+    org.hibernate.type: INFO
+    org.hibernate.SQL: DEBUG

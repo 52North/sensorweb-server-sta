@@ -145,9 +145,9 @@ public class HistoricalLocationService implements AbstractSensorThingsEntityServ
     
     @Override
     public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-        Optional<HistoricalLocationEntity> thing = this.getRelatedEntityRaw(targetId, sourceEntityType, targetId);
-        if (thing.isPresent()) {
-            return OptionalLong.of(thing.get().getId());
+        Optional<HistoricalLocationEntity> historicalLocation = this.getRelatedEntityRaw(targetId, sourceEntityType, targetId);
+        if (historicalLocation.isPresent()) {
+            return OptionalLong.of(historicalLocation.get().getId());
         } else {
             return OptionalLong.empty();
         }
@@ -164,13 +164,13 @@ public class HistoricalLocationService implements AbstractSensorThingsEntityServ
     }
     
     /**
-     * Retrieves Thing Entity with Relation to sourceEntity from Database.
-     * Returns empty if Thing is not found or Entities are not related.
+     * Retrieves HistoricalLocation Entity with Relation to sourceEntity from Database.
+     * Returns empty if HistoricalLocation is not found or Entities are not related.
      * 
      * @param sourceId Id of the Source Entity
      * @param sourceEntityType Type of the Source Entity
      * @param targetId Id of the Thing to be retrieved
-     * @return Optional<ThingEntity> Requested Entity
+     * @return Optional<HistoricalLocationEntity> Requested Entity
      */
     private Optional<HistoricalLocationEntity> getRelatedEntityRaw(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         // In Theory there are only related Collections
