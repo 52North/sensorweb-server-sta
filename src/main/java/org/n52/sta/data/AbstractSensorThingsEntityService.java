@@ -37,12 +37,13 @@ public interface AbstractSensorThingsEntityService {
 
     /**
      * Requests the EntityCollection that is related to a single Entity with the
-     * given ID
+     * given ID and type
      *
      * @param sourceId the ID of the Entity the EntityCollection is related to
+     * @param sourceEntityType EntityType of the related Entity
      * @return the EntityCollection that is related to the given Entity
      */
-    public EntityCollection getRelatedEntityCollection(Long sourceId);
+    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType);
 
     /**
      * Requests the Entity in accordance to a given ID
@@ -76,21 +77,23 @@ public interface AbstractSensorThingsEntityService {
      * given ID
      *
      * @param sourceId the ID for the Entity the requested Entity is related to
+     * @param sourceEntityType EntityType of the related Entity
      * @return the ID for the Entity that is related to the Entity with the
      * given Id
      */
-    public OptionalLong getIdForRelatedEntity(Long sourceId);
+    public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType);
 
     /**
      * Requests the ID for the Entity that is related to a single Entity with a
      * given ID and in accordance to a given ID
      *
      * @param sourceId the ID for the Entity the requested Entity is related to
+     * @param sourceEntityType EntityType of the related Entity
      * @param targetId the ID for the requested Entity
      * @return the Entity that is related to the given Entity and is conform to
      * the given ID
      */
-    public OptionalLong getIdForRelatedEntity(Long sourceId, Long targetId);
+    public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId);
 
     /**
      * Checks if an Entity exists in accordance to a given list of key
@@ -121,11 +124,33 @@ public interface AbstractSensorThingsEntityService {
      *
      * @param sourceId ID of the related Entity
      * @param sourceEntityType EntityType of the related Entity
-     * @param targetId the ID to check the existence of an Entity for
+     * @param targetId ID of the requested Entity
      * @return true if an Entity exists that is conform to the given
      * KeyPredicates and is related to a single Entity of the given EntityType
      * and with the given KeyPredicates
      */
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId);
+
+    /**
+     * Requests the Entity that is related to a single Entity with a given ID
+     * and type
+     *
+     * @param sourceId ID of the related Entity
+     * @param sourceEntityType EntityType of the related Entity
+     * @return the Entity that is related to the Entity with given ID and type
+     */
+    public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType);
+
+    /**
+     * Requests the Entity that is related to a single Entity with a given ID
+     * and type and that is conform to a given ID
+     *
+     * @param sourceId ID of the related Entity
+     * @param sourceEntityType EntityType of the related Entity
+     * @param targetId ID of the requested Entity
+     * @return the Entity that is related to the given Entity and is conform to
+     * the given ID
+     */
+    public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId);
 
 }

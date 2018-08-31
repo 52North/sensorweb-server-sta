@@ -100,17 +100,28 @@ public class HistoricalLocationService implements AbstractSensorThingsEntityServ
     }
 
     @Override
-    public EntityCollection getRelatedEntityCollection(Long sourceId) {
+    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType) {
         return getEntityCollection();
     }
 
     @Override
-    public OptionalLong getIdForRelatedEntity(Long sourceId) {
+    public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
         return entityCreator.createId(sourceId);
     }
 
     @Override
-    public OptionalLong getIdForRelatedEntity(Long sourceId, Long targetId) {
+    public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         return entityCreator.createId(targetId);
+    }
+
+
+    @Override
+    public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
