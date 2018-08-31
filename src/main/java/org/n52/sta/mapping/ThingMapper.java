@@ -60,7 +60,7 @@ public class ThingMapper {
 //    @Autowired
 //    EntityAnnotator entityAnnotator;
 
-    public Entity createThingEntity(ThingEntity thing) {
+    public Entity createEntity(ThingEntity thing) {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, thing.getId()));
         entity.addProperty(new Property(null, PROP_NAME, ValueType.PRIMITIVE, thing.getName()));

@@ -56,19 +56,20 @@ public class DatastreamMapper {
     @Autowired
     EntityCreationHelper entityCreationHelper;
 
-    public Entity createDatastreamEntity(DatastreamEntity datastream) {
+    public Entity createEntity(DatastreamEntity datastream) {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, datastream.getId()));
         entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, datastream.getDescription()));
         entity.addProperty(new Property(null, PROP_NAME, ValueType.PRIMITIVE, datastream.getName()));
         entity.addProperty(new Property(null, PROP_OBSERVATION_TYPE, ValueType.PRIMITIVE, datastream.getObservationType().getFormat()));
       
-        String uom = Json.createObjectBuilder()
-                .add("name", datastream.getUnitOfMeasurement().getName())
-                .add("symbol", datastream.getUnitOfMeasurement().getSymbol())
-                .add("definition", datastream.getUnitOfMeasurement().getLink())
-                .build()
-                .toString();
+        String uom = "";
+//        String uom = Json.createObjectBuilder()
+//                .add("name", datastream.getUnitOfMeasurement().getName())
+//                .add("symbol", datastream.getUnitOfMeasurement().getSymbol())
+//                .add("definition", datastream.getUnitOfMeasurement().getLink())
+//                .build()
+//                .toString();
         entity.addProperty(new Property(null, PROP_UOM, ValueType.PRIMITIVE, uom));
         
         entity.setType(ET_DATASTREAM_FQN.getFullQualifiedNameAsString());

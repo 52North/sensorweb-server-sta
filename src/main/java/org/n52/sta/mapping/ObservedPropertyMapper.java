@@ -53,7 +53,7 @@ public class ObservedPropertyMapper {
     @Autowired
     EntityCreationHelper entityCreationHelper;
 
-    public Entity createObservedPropertyEntity(PhenomenonEntity observedProperty) {
+    public Entity createEntity(PhenomenonEntity observedProperty) {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, observedProperty.getId()));
         entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, observedProperty.getDescription()));

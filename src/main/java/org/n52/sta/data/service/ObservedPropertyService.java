@@ -26,19 +26,19 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data;
+package org.n52.sta.data.service;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
-import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.server.api.uri.UriParameter;
-import org.n52.sta.edm.provider.entities.DatastreamEntityProvider;
-import org.n52.sta.utils.DummyEntityCreator;
+import org.n52.series.db.PhenomenonRepository;
+import org.n52.series.db.beans.PhenomenonEntity;
+import org.n52.sta.mapping.ObservedPropertyMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -47,14 +47,19 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-public class DatastreamService implements AbstractSensorThingsEntityService {
+public class ObservedPropertyService implements AbstractSensorThingsEntityService {
 
     @Autowired
-    private DummyEntityCreator entityCreator;
+    private ObservedPropertyMapper mapper;
+
+    @Autowired
+    private PhenomenonRepository repository;
 
     @Override
     public EntityCollection getEntityCollection() {
-        return entityCreator.createEntityCollection(DatastreamEntityProvider.ET_DATASTREAM_NAME);
+        EntityCollection retEntitySet = new EntityCollection();
+        repository.findAll().forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        return retEntitySet;
     }
 
     @Override
@@ -64,21 +69,29 @@ public class DatastreamService implements AbstractSensorThingsEntityService {
 
     @Override
     public Entity getRelatedEntity(Entity sourceEntity) {
-        return getEntityForId(String.valueOf(ThreadLocalRandom.current().nextInt()));
+        //TODO: implement
+        return null;
     }
 
     @Override
     public Entity getRelatedEntity(Entity sourceEntity, List<UriParameter> keyPredicates) {
-        return getEntityForId(keyPredicates.get(0).getText());
+        //TODO: implement
+        return null;
     }
 
     @Override
     public EntityCollection getRelatedEntityCollection(Entity sourceEntity) {
-        return getEntityCollection();
+        //TODO: implement
+        return null;
     }
 
     private Entity getEntityForId(String id) {
-        return entityCreator.createEntity(DatastreamEntityProvider.ET_DATASTREAM_NAME, id);
+        Optional<PhenomenonEntity> entity = getRawEntityForId(Long.valueOf(id));
+        return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
+    }
+
+    protected Optional<PhenomenonEntity> getRawEntityForId(Long id) {
+        return repository.findById(id);
     }
 
     @Override
@@ -103,12 +116,12 @@ public class DatastreamService implements AbstractSensorThingsEntityService {
 
     @Override
     public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
-        return entityCreator.createId(sourceId);
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-        return entityCreator.createId(targetId);
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override

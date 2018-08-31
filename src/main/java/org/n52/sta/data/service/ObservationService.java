@@ -26,47 +26,40 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data;
+package org.n52.sta.data.service;
 
 import java.util.List;
 import java.util.OptionalLong;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.Optional;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.server.api.uri.UriParameter;
-import org.n52.series.db.ProcedureRepository;
-import org.n52.sta.edm.provider.entities.SensorEntityProvider;
-import org.n52.sta.mapping.SensorMapper;
-import org.n52.sta.mapping.ThingMapper;
-import org.n52.sta.utils.DummyEntityCreator;
+import org.n52.series.db.DataRepository;
+import org.n52.series.db.beans.DataEntity;
+import org.n52.sta.mapping.ObservationMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Mock of Data Access Layer to retrieve Sensor
- *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
 @Component
-public class SensorService implements AbstractSensorThingsEntityService {
+public class ObservationService implements AbstractSensorThingsEntityService {
 
     @Autowired
-    private DummyEntityCreator entityCreator;
+    private ObservationMapper mapper;
 
     @Autowired
-    private ProcedureRepository procedureRepository;
-
-    @Autowired
-    private SensorMapper mapper;
+    private DataRepository<?> repository;
 
     @Override
     public EntityCollection getEntityCollection() {
         EntityCollection retEntitySet = new EntityCollection();
-        procedureRepository.findAll().forEach(t -> retEntitySet.getEntities().add(mapper.createSensorEntity(t)));
-
+        repository.findAll().forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
 
@@ -77,21 +70,29 @@ public class SensorService implements AbstractSensorThingsEntityService {
 
     @Override
     public Entity getRelatedEntity(Entity sourceEntity) {
-        return getEntityForId(String.valueOf(ThreadLocalRandom.current().nextInt()));
+        //TODO: implement
+        return null;
     }
 
     @Override
     public Entity getRelatedEntity(Entity sourceEntity, List<UriParameter> keyPredicates) {
-        return getEntityForId(keyPredicates.get(0).getText());
+        //TODO: implement
+        return null;
     }
 
     @Override
     public EntityCollection getRelatedEntityCollection(Entity sourceEntity) {
-        return getEntityCollection();
+        //TODO: implement
+        return null;
     }
 
     private Entity getEntityForId(String id) {
-        return entityCreator.createEntity(SensorEntityProvider.ET_SENSOR_NAME, id);
+        Optional< ?> entity = getRawEntityForId(Long.valueOf(id));
+        return entity.isPresent() ? mapper.createEntity((DataEntity< ?>) entity.get()) : null;
+    }
+
+    protected Optional< ?> getRawEntityForId(Long id) {
+        return repository.findById(id);
     }
 
     @Override
@@ -116,12 +117,12 @@ public class SensorService implements AbstractSensorThingsEntityService {
 
     @Override
     public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
-        return entityCreator.createId(sourceId);
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-        return entityCreator.createId(targetId);
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override

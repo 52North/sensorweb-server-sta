@@ -26,9 +26,10 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data;
+package org.n52.sta.data.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -36,24 +37,31 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.server.api.uri.UriParameter;
-import org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider;
-import org.n52.sta.utils.DummyEntityCreator;
+import org.n52.series.db.ProcedureRepository;
+import org.n52.series.db.beans.ProcedureEntity;
+import org.n52.sta.mapping.SensorMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
+ *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
 @Component
-public class ObservedPropertyService implements AbstractSensorThingsEntityService {
+public class SensorService implements AbstractSensorThingsEntityService {
 
     @Autowired
-    private DummyEntityCreator entityCreator;
+    private ProcedureRepository repository;
+
+    @Autowired
+    private SensorMapper mapper;
 
     @Override
     public EntityCollection getEntityCollection() {
-        return entityCreator.createEntityCollection(ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_NAME);
+        EntityCollection retEntitySet = new EntityCollection();
+        repository.findAll().forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        return retEntitySet;
     }
 
     @Override
@@ -63,21 +71,29 @@ public class ObservedPropertyService implements AbstractSensorThingsEntityServic
 
     @Override
     public Entity getRelatedEntity(Entity sourceEntity) {
-        return getEntityForId(String.valueOf(ThreadLocalRandom.current().nextInt()));
+        //TODO: implement
+        return null;
     }
 
     @Override
     public Entity getRelatedEntity(Entity sourceEntity, List<UriParameter> keyPredicates) {
-        return getEntityForId(keyPredicates.get(0).getText());
+        //TODO: implement
+        return null;
     }
 
     @Override
     public EntityCollection getRelatedEntityCollection(Entity sourceEntity) {
-        return getEntityCollection();
+        //TODO: implement
+        return null;
     }
 
     private Entity getEntityForId(String id) {
-        return entityCreator.createEntity(ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_NAME, id);
+        Optional<ProcedureEntity> entity = getRawEntityForId(Long.valueOf(id));
+        return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
+    }
+
+    protected Optional<ProcedureEntity> getRawEntityForId(Long id) {
+        return repository.findById(id);
     }
 
     @Override
@@ -102,12 +118,12 @@ public class ObservedPropertyService implements AbstractSensorThingsEntityServic
 
     @Override
     public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
-        return entityCreator.createId(sourceId);
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-        return entityCreator.createId(targetId);
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override

@@ -54,7 +54,7 @@ public class SensorMapper {
     @Autowired
     EntityCreationHelper entityCreationHelper;
 
-    public Entity createSensorEntity(ProcedureEntity sensor) {
+    public Entity createEntity(ProcedureEntity sensor) {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, sensor.getId()));
         entity.addProperty(new Property(null, PROP_NAME, ValueType.PRIMITIVE, sensor.getIdentifier()));
