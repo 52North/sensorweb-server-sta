@@ -5,6 +5,7 @@
  */
 package org.n52.sta.utils;
 
+import com.google.common.base.Optional;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -54,6 +55,7 @@ import org.springframework.stereotype.Component;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import java.util.OptionalLong;
 
 /**
  *
@@ -78,7 +80,7 @@ public class DummyEntityCreator {
     private ObservationMapper observationMapper;
     @Autowired
     private FeatureOfInterestMapper featureOfInterestMapper;
-    
+
     public Entity createEntity(String type, String id) {
         Entity entity = null;
 
@@ -119,7 +121,12 @@ public class DummyEntityCreator {
 
         return entityCollection;
     }
-    
+
+    public OptionalLong createId(Long id) {
+        OptionalLong idOpt = OptionalLong.of(id);
+        return idOpt;
+    }
+
     private Entity createThingEntityForId(String id) {
         String name;
         ThingEntity e1 = new ThingEntity();
@@ -131,7 +138,7 @@ public class DummyEntityCreator {
         e1.setLocationEntities(new HashSet<LocationEntity>(createLocationEntities()));
         return thingMapper.createThingEntity(e1);
     }
-    
+
     private Entity createLocationEntityForId(String id) {
         LocationEntity loc1 = new LocationEntity();
         loc1.setId(Long.parseLong(id));
@@ -140,7 +147,7 @@ public class DummyEntityCreator {
         loc1.setGeometry(new GeometryFactory().createPoint(new Coordinate(Math.random() * 90, Math.random() * 180)));
         return locationMapper.createLocationEntity(loc1);
     }
-    
+
     private Entity createHistoricalLocationEntityForId(String id) {
         HistoricalLocationEntity loc = new HistoricalLocationEntity();
         loc.setTime(new Date());
@@ -148,7 +155,7 @@ public class DummyEntityCreator {
         loc.setLocationEntity((LocationEntity) createLocationEntities().get(0));
         return historicalLocationMapper.createHistoricalLocationEntity(loc);
     }
-    
+
     private Entity createSensorEntityForId(String id) {
         ProcedureEntity e1 = new ProcedureEntity();
         e1.setId(Long.parseLong(id));
@@ -158,7 +165,7 @@ public class DummyEntityCreator {
         e1.setFormat(new FormatEntity().setFormat("Demo Sensor Format"));
         return sensorMapper.createSensorEntity(e1);
     }
-    
+
     private Entity createDatastreamEntityForId(String id) {
         String name;
         DatastreamEntity e1 = new DatastreamEntity();
@@ -167,16 +174,16 @@ public class DummyEntityCreator {
         e1.setName(name);
         e1.setDescription("Nice Datastream");
         e1.setObservationType(new FormatEntity().setFormat("Test Format"));
-        
+
         UnitEntity uom = new UnitEntity();
         uom.setName("Test UOM");
         uom.setSymbol("Test UOM Symbol");
         uom.setLink("Test UOM Link");
         e1.setUnitOfMeasurement(uom);
-        
+
         return datastreamMapper.createDatastreamEntity(e1);
     }
-    
+
     private Entity createObservedPropertyEntityForId(String id) {
         String name;
         PhenomenonEntity e1 = new PhenomenonEntity();
@@ -187,7 +194,7 @@ public class DummyEntityCreator {
         e1.setIdentifier("Test Identifier");
         return observedPropertyMapper.createObservedPropertyEntity(e1);
     }
-    
+
     private Entity createObservationEntityForId(String id) {
         String name;
         CountDataEntity e1 = new CountDataEntity();
@@ -200,7 +207,7 @@ public class DummyEntityCreator {
         e1.setValue(42);
         return observationMapper.createObservationEntity(e1);
     }
-    
+
     private Entity createFeatureOfInterestEntityForId(String id) {
         String name;
         FeatureEntity e1 = new FeatureEntity();
@@ -211,7 +218,7 @@ public class DummyEntityCreator {
         e1.setGeometry(new GeometryFactory().createPoint(new Coordinate(Math.random() * 90, Math.random() * 180)));
         return featureOfInterestMapper.createFeatureOfInterestEntity(e1);
     }
-    
+
     private EntityCollection createThingEntityCollection() {
         String name;
         EntityCollection retEntitySet = new EntityCollection();
@@ -240,14 +247,14 @@ public class DummyEntityCreator {
 
         return retEntitySet;
     }
-    
+
     private EntityCollection createLocationEntityCollection() {
         EntityCollection retEntitySet = new EntityCollection();
-        
+
         createLocationEntities().forEach(t -> retEntitySet.getEntities().add(locationMapper.createLocationEntity(t)));
         return retEntitySet;
     }
-    
+
     private List<LocationEntity> createLocationEntities() {
         List<LocationEntity> locations = new ArrayList<>();
 
@@ -270,7 +277,6 @@ public class DummyEntityCreator {
         return encoding;
     }
 
-
     private EntityCollection createHistoricalLocationEntityCollection() {
         EntityCollection retEntitySet = new EntityCollection();
 
@@ -288,13 +294,13 @@ public class DummyEntityCreator {
         retEntitySet.getEntities().add(this.createSensorEntityForId("53"));
         return retEntitySet;
     }
-    
+
     private EntityCollection createObservationEntityCollection() {
         EntityCollection retEntitySet = new EntityCollection();
 
         GeometryEntity geom = new GeometryEntity();
         geom.setGeometry(new GeometryFactory().createPoint(new Coordinate(58, 58)));
-        
+
         retEntitySet.getEntities().add(this.createObservationEntity("52", new QuantityDataEntity(), new BigDecimal(52)));
         retEntitySet.getEntities().add(this.createObservationEntity("53", new BlobDataEntity(), 53));
         retEntitySet.getEntities().add(this.createObservationEntity("54", new BooleanDataEntity(), true));
@@ -310,16 +316,16 @@ public class DummyEntityCreator {
 //      retEntitySet.getEntities().add(this.createObservationEntity("61", new ProfileDataEntity(), ));
         return retEntitySet;
     }
-    
+
     @SuppressWarnings("unchecked")
-	private <T extends DataEntity, V> Entity createObservationEntity(String id, T element, V value) {
-    	Date timestamp = new Date((long) (Math.random() * 100000));
-    	element.setId(Long.parseLong(id));
-    	element.setResultTime(timestamp);
-    	element.setSamplingTimeStart(timestamp);
-    	element.setSamplingTimeEnd(timestamp);
-    	element.setValue(value);
-        return observationMapper.createObservationEntity(element);	
+    private <T extends DataEntity, V> Entity createObservationEntity(String id, T element, V value) {
+        Date timestamp = new Date((long) (Math.random() * 100000));
+        element.setId(Long.parseLong(id));
+        element.setResultTime(timestamp);
+        element.setSamplingTimeStart(timestamp);
+        element.setSamplingTimeEnd(timestamp);
+        element.setValue(value);
+        return observationMapper.createObservationEntity(element);
     }
 
     private EntityCollection createFeatureOfInterestEntityCollection() {
@@ -329,6 +335,5 @@ public class DummyEntityCreator {
         retEntitySet.getEntities().add(this.createFeatureOfInterestEntityForId("73"));
         return retEntitySet;
     }
-
 
 }

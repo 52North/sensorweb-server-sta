@@ -7,6 +7,7 @@ package org.n52.sta.utils;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.OptionalLong;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.edm.EdmBindingTarget;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
@@ -59,18 +60,23 @@ public class UriResourceNavigationResolver {
      * @return the target {@link NavigationLink}
      * @throws ODataApplicationException
      */
-    public NavigationLink resolveUriResourceNavigationPaths(List<UriResource> navigationResourcePaths) throws ODataApplicationException {
+    public EntityQueryParams resolveUriResourceNavigationPaths(List<UriResource> navigationResourcePaths) throws ODataApplicationException {
         UriResourceEntitySet uriResourceEntitySet = resolveRootUriResource(navigationResourcePaths.get(0));
         EdmEntitySet targetEntitySet = uriResourceEntitySet.getEntitySet();
 
-        List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
-        Entity sourceEntity = serviceRepository.getEntityService(uriResourceEntitySet.getEntityType().getName()).getEntity(keyPredicates);
-        EdmEntityType targetEntityType = null;
+        List<UriParameter> sourceKeyPredicates = uriResourceEntitySet.getKeyPredicates();
+        EdmEntityType sourceEntityType = uriResourceEntitySet.getEntityType();
 
-        if (sourceEntity == null) {
+        Long sourceEntityId = getEntityIdFromKeyParams(sourceKeyPredicates);
+        boolean entityExists = serviceRepository.getEntityService(uriResourceEntitySet.getEntityType().getName())
+                .existsEntity(sourceEntityId);
+
+        if (!entityExists) {
             throw new ODataApplicationException("Entity not found.",
                     HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
         }
+
+        EdmEntityType targetEntityType = null;
 
         for (int navigationCount = 1; navigationCount < navigationResourcePaths.size() - 1; navigationCount++) {
             UriResource targetSegment = navigationResourcePaths.get(navigationCount);
@@ -81,21 +87,26 @@ public class UriResourceNavigationResolver {
                 targetEntityType = edmNavigationProperty.getType();
 
                 List<UriParameter> navKeyPredicates = uriResourceNavigation.getKeyPredicates();
-                Entity targetEntity = null;
+                OptionalLong targetIdOpt = OptionalLong.empty();
 
                 // e.g. /Things(1)/Location
                 if (navKeyPredicates.isEmpty()) {
-                    targetEntity = serviceRepository.getEntityService(targetEntityType.getName()).getRelatedEntity(sourceEntity);
 
+                    targetIdOpt = serviceRepository.getEntityService(targetEntityType.getName())
+                            .getIdForRelatedEntity(sourceEntityId, sourceEntityType);
                 } else { // e.g. /Things(1)/Locations(1)
-                    targetEntity = serviceRepository.getEntityService(targetEntityType.getName()).getRelatedEntity(sourceEntity, navKeyPredicates);
+
+                    targetIdOpt = serviceRepository.getEntityService(targetEntityType.getName())
+                            .getIdForRelatedEntity(sourceEntityId, sourceEntityType, getEntityIdFromKeyParams(navKeyPredicates));
                 }
-                if (targetEntity == null) {
+                if (!targetIdOpt.isPresent()) {
                     throw new ODataApplicationException("Entity not found.",
                             HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
                 }
 
-                sourceEntity = targetEntity;
+                sourceEntityType = targetEntityType;
+                sourceEntityId = targetIdOpt.getAsLong();
+
                 targetEntitySet = getNavigationTargetEntitySet(targetEntitySet, edmNavigationProperty);
             }
         }
@@ -104,11 +115,12 @@ public class UriResourceNavigationResolver {
             EdmNavigationProperty edmNavigationProperty = ((UriResourceNavigation) lastSegment).getProperty();
             targetEntitySet = getNavigationTargetEntitySet(targetEntitySet, edmNavigationProperty);
         }
-        NavigationLink link = new NavigationLink();
-        link.setSourceEntity(sourceEntity);
-        link.setTargetEntitySet(targetEntitySet);
+        EntityQueryParams params = new EntityQueryParams();
+        params.setSourceEntityType(sourceEntityType);
+        params.setSourceKeyPredicates(sourceEntityId);
+        params.setTargetEntitySet(targetEntitySet);
 
-        return link;
+        return params;
     }
 
     /**
@@ -141,6 +153,10 @@ public class UriResourceNavigationResolver {
         }
 
         return navigationTargetEntitySet;
+    }
+
+    public Long getEntityIdFromKeyParams(List<UriParameter> keyParams) {
+        return Long.parseLong(keyParams.get(0).getText());
     }
 
 }

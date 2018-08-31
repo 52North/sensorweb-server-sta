@@ -22,7 +22,7 @@ import org.apache.olingo.server.api.uri.UriResourceProperty;
 import org.n52.sta.data.AbstractSensorThingsEntityService;
 import org.n52.sta.data.EntityServiceRepository;
 import org.n52.sta.service.response.PropertyResponse;
-import org.n52.sta.utils.NavigationLink;
+import org.n52.sta.utils.EntityQueryParams;
 import org.n52.sta.utils.UriResourceNavigationResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -68,7 +68,7 @@ public class PropertyRequestHandlerImpl implements AbstractPropertyRequestHandle
         // fetch the data from backend for this requested Entity and deliver as Entity
         List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
         AbstractSensorThingsEntityService responseService = serviceRepository.getEntityService(uriResourceEntitySet.getEntityType().getName());
-        Entity targetEntity = responseService.getEntity(keyPredicates);
+        Entity targetEntity = responseService.getEntity(navigationResolver.getEntityIdFromKeyParams(keyPredicates));
 
         if (targetEntity == null) {
             throw new ODataApplicationException("Entity not found.",
@@ -82,8 +82,8 @@ public class PropertyRequestHandlerImpl implements AbstractPropertyRequestHandle
     }
 
     private PropertyResponse resolvePropertyForNavigation(List<UriResource> resourcePaths) throws ODataApplicationException {
-        // determine the last NavigationLink and fetch Entity for it
-        NavigationLink lastNavigationLink = navigationResolver.resolveUriResourceNavigationPaths(resourcePaths.subList(0, resourcePaths.size()));
+        // determine the target query parameters and fetch Entity for it
+        EntityQueryParams queryParams = navigationResolver.resolveUriResourceNavigationPaths(resourcePaths.subList(0, resourcePaths.size()));
 
         UriResource lastEntitySegment = resourcePaths.get(resourcePaths.size() - 2);
         Entity targetEntity = null;
@@ -94,12 +94,12 @@ public class PropertyRequestHandlerImpl implements AbstractPropertyRequestHandle
 
             // e.g. /HistoricalLocations(id)/Thing/description
             if (navKeyPredicates.isEmpty()) {
-                targetEntity = serviceRepository.getEntityService(lastNavigationLink.getTargetEntitySet().getEntityType().getName())
-                        .getRelatedEntity(lastNavigationLink.getSourceEntity());
+                targetEntity = serviceRepository.getEntityService(queryParams.getTargetEntitySet().getEntityType().getName())
+                        .getRelatedEntity(queryParams.getSourceId(), queryParams.getSourceEntityType());
 
             } else { // e.g. /Things(id)/Locations(id)/description
-                targetEntity = serviceRepository.getEntityService(lastNavigationLink.getTargetEntitySet().getEntityType().getName())
-                        .getRelatedEntity(lastNavigationLink.getSourceEntity(), navKeyPredicates);
+                targetEntity = serviceRepository.getEntityService(queryParams.getTargetEntitySet().getEntityType().getName())
+                        .getRelatedEntity(queryParams.getSourceId(), queryParams.getSourceEntityType(), navigationResolver.getEntityIdFromKeyParams(navKeyPredicates));
             }
             if (targetEntity == null) {
                 throw new ODataApplicationException("Entity not found.",
@@ -108,7 +108,7 @@ public class PropertyRequestHandlerImpl implements AbstractPropertyRequestHandle
 
             UriResourceProperty uriProperty = (UriResourceProperty) resourcePaths.get(resourcePaths.size() - 1);
 
-            response = resolveProperty(targetEntity, uriProperty, lastNavigationLink.getTargetEntitySet());
+            response = resolveProperty(targetEntity, uriProperty, queryParams.getTargetEntitySet());
 
         }
         return response;
