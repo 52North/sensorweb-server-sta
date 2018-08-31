@@ -28,13 +28,8 @@
  */
 package org.n52.sta.data.query;
 
-import org.n52.series.db.beans.DatasetEntity;
-import org.n52.series.db.beans.QDatasetEntity;
-import org.n52.series.db.beans.QProcedureEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.QLocationEntity;
-import org.n52.series.db.beans.sta.QThingEntity;
-import org.n52.series.db.query.DatasetQuerySpecifications;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
@@ -44,7 +39,7 @@ import com.querydsl.jpa.JPQLQuery;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
-public class LocationQuerySpecifications {
+public class LocationQuerySpecifications extends EntityQuerySpecifications {
 
     final QLocationEntity qlocation = QLocationEntity.locationEntity;
 
@@ -53,7 +48,12 @@ public class LocationQuerySpecifications {
                              .where(filter);
     }
     
+    public <T> BooleanExpression selectFrom(JPQLQuery<T> subquery) {
+        return qlocation.id.in(subquery.select(qlocation.id));
+    }
+    
     public BooleanExpression matchesId(Long id) {
         return qlocation.id.eq(id);
     }
+    
 }

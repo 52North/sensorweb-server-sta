@@ -29,20 +29,20 @@
 package org.n52.sta.data.service;
 
 import java.util.List;
-import java.util.OptionalLong;
 import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
-import org.apache.olingo.commons.api.data.Entity;
+import java.util.OptionalLong;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.server.api.uri.UriParameter;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
+import org.n52.sta.data.query.HistoricalLocationQuerySpecifications;
 import org.n52.sta.data.repositories.HistoricalLocationRepository;
 import org.n52.sta.mapping.HistoricalLocationMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.querydsl.core.types.dsl.BooleanExpression;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -51,90 +51,129 @@ import org.springframework.stereotype.Component;
 @Component
 public class HistoricalLocationService implements AbstractSensorThingsEntityService {
 
-    @Autowired
     private HistoricalLocationRepository repository;
 
-    @Autowired
     private HistoricalLocationMapper mapper;
     
+    private HistoricalLocationQuerySpecifications hlQS = new HistoricalLocationQuerySpecifications();
+    
+    //TODO: remove deprecated Methods
+    @Override
+    public Entity getRelatedEntity(Entity sourceEntity) {throw new UnsupportedOperationException("Not supported anymore.");}
+    //TODO: remove deprecated Methods
+    @Override
+    public Entity getRelatedEntity(Entity sourceEntity, List<UriParameter> keyPredicates) {throw new UnsupportedOperationException("Not supported anymore.");}
+    //TODO: remove deprecated Methods
+    @Override
+    public EntityCollection getRelatedEntityCollection(Entity sourceEntity) {throw new UnsupportedOperationException("Not supported anymore.");}
 
+    
+    public HistoricalLocationService(HistoricalLocationRepository repository, HistoricalLocationMapper mapper) {
+        this.repository = repository;
+        this.mapper = mapper;
+    }
+    
     @Override
     public EntityCollection getEntityCollection() {
         EntityCollection retEntitySet = new EntityCollection();
         repository.findAll().forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
-
+    
     @Override
     public Entity getEntity(Long id) {
-        return getEntityForId(String.valueOf(id));
-    }
-
-    @Override
-    public Entity getRelatedEntity(Entity sourceEntity) {
-        //TODO: implement
-        return null;
-    }
-
-    @Override
-    public Entity getRelatedEntity(Entity sourceEntity, List<UriParameter> keyPredicates) {
-        //TODO: implement
-        return null;
-    }
-
-    @Override
-    public EntityCollection getRelatedEntityCollection(Entity sourceEntity) {
-        //TODO: implement
-        return null;
-    }
-    
-    private Entity getEntityForId(String id) {
-        Optional<HistoricalLocationEntity> entity = getRawEntityForId(Long.valueOf(id));
+        Optional<HistoricalLocationEntity> entity = repository.findById(Long.valueOf(id));
         return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
-
-    protected Optional<HistoricalLocationEntity> getRawEntityForId(Long id) {
-        return repository.findById(id);
+ 
+    @Override
+    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType) {
+        BooleanExpression filter;
+        switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
+            case "iot.Location": {
+                filter = hlQS.getLocationEntityById(sourceId);
+                break;
+            }
+            case "iot.Thing": {
+                filter = hlQS.getThingEntityById(sourceId);
+                break;
+            }
+            default: return null;
+        }
+        
+        Iterable<HistoricalLocationEntity> locations = repository.findAll(filter);
+        EntityCollection retEntitySet = new EntityCollection();
+        locations.forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        return retEntitySet;
     }
 
     @Override
     public boolean existsEntity(Long id) {
-        return true;
+        return repository.existsById(id);
     }
-
+    
     @Override
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
-        return true;
+        return this.existsRelatedEntity(sourceId, sourceEntityType, null);
     }
 
     @Override
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-        return true;
-    }
+        BooleanExpression filter;
+        switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
+            case "iot.Location": {
+                filter = hlQS.getLocationEntityById(sourceId);
+                break;
+            }
+            case "iot.Thing": {
+                filter = hlQS.getThingEntityById(sourceId);
+                break;
+            }
 
-    @Override
-    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType) {
-        return getEntityCollection();
+        default: return false;
+        }
+        if (targetId != null) {
+            filter = filter.and(hlQS.matchesId(targetId));
+        }
+        return repository.exists(filter);
     }
 
     @Override
     public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return this.getIdForRelatedEntity(sourceId, sourceEntityType, null);
     }
-
+    
     @Override
     public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Optional<HistoricalLocationEntity> thing = this.getRelatedEntityRaw(targetId, sourceEntityType, targetId);
+        if (thing.isPresent()) {
+            return OptionalLong.of(thing.get().getId());
+        } else {
+            return OptionalLong.empty();
+        }
     }
-
-
+    
     @Override
     public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return null;
     }
 
     @Override
     public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return null;
+    }
+    
+    /**
+     * Retrieves Thing Entity with Relation to sourceEntity from Database.
+     * Returns empty if Thing is not found or Entities are not related.
+     * 
+     * @param sourceId Id of the Source Entity
+     * @param sourceEntityType Type of the Source Entity
+     * @param targetId Id of the Thing to be retrieved
+     * @return Optional<ThingEntity> Requested Entity
+     */
+    private Optional<HistoricalLocationEntity> getRelatedEntityRaw(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+        // In Theory there are only related Collections
+        return Optional.empty();
     }
 }

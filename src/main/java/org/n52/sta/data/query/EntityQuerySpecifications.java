@@ -28,15 +28,6 @@
  */
 package org.n52.sta.data.query;
 
-import java.util.Optional;
-
-import org.n52.series.db.beans.sta.LocationEntity;
-import org.n52.series.db.beans.sta.QLocationEntity;
-import org.n52.series.db.beans.sta.QThingEntity;
-import org.n52.series.db.beans.sta.ThingEntity;
-import org.n52.series.db.old.dao.DbQuery;
-import org.n52.series.db.query.OfferingQuerySpecifications;
-
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
@@ -45,22 +36,27 @@ import com.querydsl.jpa.JPQLQuery;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
-public class ThingQuerySpecifications extends EntityQuerySpecifications {
+public abstract class EntityQuerySpecifications {
 
-    final QThingEntity qthing = QThingEntity.thingEntity;
-    
-    public JPQLQuery<ThingEntity> toSubquery(final BooleanExpression filter) {
-        return JPAExpressions.selectFrom(qthing)
-                             .where(filter);
-    }
-    
-    public <T> BooleanExpression selectFrom(JPQLQuery<T> subquery) {
-        return qthing.id.in(subquery.select(qthing.id));
-    }
-    
-    public BooleanExpression matchesId(Long id) {
-        return qthing.id.eq(id);
-    }
-    
+    public abstract <T> BooleanExpression selectFrom(JPQLQuery<T> subquery);
 
+    public BooleanExpression getLocationEntityById(Long id) {
+        LocationQuerySpecifications locQS = new LocationQuerySpecifications();
+        return selectFrom(locQS.toSubquery(locQS.matchesId(id)));
+    }
+    
+    public BooleanExpression getDatastreamEntityById(Long id) {
+        DatastreamQuerySpecifications datastreamQS = new DatastreamQuerySpecifications();
+        return selectFrom(datastreamQS.toSubquery(datastreamQS.matchesId(id)));
+    }
+    
+    public BooleanExpression getHistoricalLocationEntityById(Long id) {
+        HistoricalLocationQuerySpecifications historicalLocationQS = new HistoricalLocationQuerySpecifications();
+        return selectFrom(historicalLocationQS.toSubquery(historicalLocationQS.matchesId(id)));
+    }
+    
+    public BooleanExpression getThingEntityById(Long id) {
+        ThingQuerySpecifications thingQS = new ThingQuerySpecifications();
+        return selectFrom(thingQS.toSubquery(thingQS.matchesId(id)));
+    }
 }

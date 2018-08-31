@@ -127,7 +127,7 @@ public class ThingService implements AbstractSensorThingsEntityService {
     
     @Override
     public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-        Optional<ThingEntity> thing = this.getRelatedEntityRaw(targetId, sourceEntityType, targetId);
+        Optional<ThingEntity> thing = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
         if (thing.isPresent()) {
             return OptionalLong.of(thing.get().getId());
         } else {
@@ -163,11 +163,15 @@ public class ThingService implements AbstractSensorThingsEntityService {
         BooleanExpression filter;
         switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
             case "iot.HistoricalLocation": {
-                filter = tQS.getHistoricalLocationById(sourceId);
+                filter = tQS.getHistoricalLocationEntityById(sourceId);
                 break;
             }
             case "iot.Datastream": {
-                filter = tQS.getDatastreamById(sourceId);
+                filter = tQS.getDatastreamEntityById(sourceId);
+                break;
+            }
+            case "iot.Location": {
+                filter = tQS.getLocationEntityById(sourceId);
                 break;
             }
             default: return Optional.empty();

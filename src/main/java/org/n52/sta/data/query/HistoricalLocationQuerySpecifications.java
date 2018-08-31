@@ -39,7 +39,7 @@ import com.querydsl.jpa.JPQLQuery;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
-public class HistoricalLocationQuerySpecification {
+public class HistoricalLocationQuerySpecifications extends EntityQuerySpecifications {
 
     final QHistoricalLocationEntity qhistoricallocation = QHistoricalLocationEntity.historicalLocationEntity;
 
@@ -48,6 +48,9 @@ public class HistoricalLocationQuerySpecification {
                 .where(filter);
     }
 
+    public <T> BooleanExpression selectFrom(JPQLQuery<T> subquery) {
+        return qhistoricallocation.id.in(subquery.select(qhistoricallocation.id));
+    }
     public BooleanExpression matchesId(Long id) {
         return  qhistoricallocation.id.eq(id);
     }
