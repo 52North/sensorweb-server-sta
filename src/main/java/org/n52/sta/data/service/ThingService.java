@@ -28,8 +28,6 @@
  */
 package org.n52.sta.data.service;
 
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -38,15 +36,13 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.server.api.uri.UriParameter;
-import org.n52.series.db.beans.sta.DatastreamEntity;
-import org.n52.series.db.beans.sta.HistoricalLocationEntity;
-import org.n52.series.db.beans.sta.LocationEntity;
-import org.n52.series.db.beans.sta.QThingEntity;
 import org.n52.series.db.beans.sta.ThingEntity;
+import org.n52.sta.data.query.ThingQuerySpecifications;
 import org.n52.sta.data.repositories.ThingRepository;
 import org.n52.sta.mapping.ThingMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.querydsl.core.types.dsl.BooleanExpression;
 
 /**
  *
@@ -55,22 +51,27 @@ import org.springframework.stereotype.Component;
 @Component
 public class ThingService implements AbstractSensorThingsEntityService {
 
-    @Autowired
     private ThingMapper mapper;
 
-    @Autowired
     private ThingRepository repository;
+    
+    private final static ThingQuerySpecifications tQS = new ThingQuerySpecifications();
+    
+    //TODO: remove deprecated Methods
+    @Override
+    public Entity getRelatedEntity(Entity sourceEntity) {throw new UnsupportedOperationException("Not supported anymore.");}
+    //TODO: remove deprecated Methods
+    @Override
+    public Entity getRelatedEntity(Entity sourceEntity, List<UriParameter> keyPredicates) {throw new UnsupportedOperationException("Not supported anymore.");}
+    //TODO: remove deprecated Methods
+    @Override
+    public EntityCollection getRelatedEntityCollection(Entity sourceEntity) {throw new UnsupportedOperationException("Not supported anymore.");}
 
-    @Autowired
-    private LocationService locationService;
-
-    @Autowired
-    private HistoricalLocationService historicalLocationService;
-
-    @Autowired
-    private DatastreamService datastreamService;
-
-    private static QThingEntity qthing = QThingEntity.thingEntity;
+    
+    public ThingService(ThingRepository repository, ThingMapper mapper) {
+        this.repository = repository;
+        this.mapper = mapper;
+    }
 
     @Override
     public EntityCollection getEntityCollection() {
@@ -78,102 +79,103 @@ public class ThingService implements AbstractSensorThingsEntityService {
         repository.findAll().forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
-
+    
     @Override
     public Entity getEntity(Long id) {
-        return getEntityForId(String.valueOf(id));
+        Optional<ThingEntity> entity = repository.findById(Long.valueOf(id));
+        return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
-
+ 
     @Override
-    public Entity getRelatedEntity(Entity sourceEntity) {
-        // source Entity (datastream) should always exists (checked beforehand in Request Handler)
-        Long sourceId = (Long)sourceEntity.getProperty(ID_ANNOTATION).getValue();
-        Optional<DatastreamEntity> datastream = datastreamService.getRawEntityForId(sourceId);
-        return mapper.createEntity(datastream.get().getThing());        
-    }
-
-    @Override
-    public Entity getRelatedEntity(Entity sourceEntity, List<UriParameter> keyPredicates) {
-        //TODO: Implement
-        return null;
-    }
-
-    @Override
-    public EntityCollection getRelatedEntityCollection(Entity sourceEntity) {
-        Iterable<ThingEntity> things;
-        Long sourceId = (Long) sourceEntity.getProperty(ID_ANNOTATION).getValue();
-
-        switch (sourceEntity.getType()) {
-            case "iot.Location": {
-
-                // source Entity (loc) should always exists (checked beforehand in Request Handler)
-                //TODO: Refactor to use 1 query instead of 2
-                Optional<LocationEntity> loc = locationService.getRawEntityForId(sourceId);
-                things = repository.findAll(qthing.locationEntities.contains(loc.get()));
-                break;
-            }
-            case "iot.HistoricalLocation": {
-
-                // source Entity (loc) should always exists (checked beforehand in Request Handler)
-                Optional<HistoricalLocationEntity> loc = historicalLocationService.getRawEntityForId(sourceId);
-                //TODO: Refactor to use 1 query instead of 2
-                things = repository.findAll(qthing.historicalLocationEntities.contains(loc.get()));
-                break;
-            }
-            default:
-                return null;
-        }
+    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType) {
+        BooleanExpression filter = tQS.getLocationEntityById(sourceId);
+        Iterable<ThingEntity> things = repository.findAll(filter);
+        
         EntityCollection retEntitySet = new EntityCollection();
         things.forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
 
-    private Entity getEntityForId(String id) {
-        Optional<ThingEntity> entity = getRawEntityForId(Long.valueOf(id));
-        return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
-    }
-
-    protected Optional<ThingEntity> getRawEntityForId(Long id) {
-        return repository.findById(id);
-    }
-
     @Override
     public boolean existsEntity(Long id) {
-        return true;
+        return repository.existsById(id);
     }
-
+    
     @Override
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
-        return true;
+        return this.existsRelatedEntity(sourceId, sourceEntityType, null);
     }
 
     @Override
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-        return true;
-    }
-
-    @Override
-    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType) {
-        return getEntityCollection();
+      switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
+          case "iot.Location": {
+              BooleanExpression filter = tQS.getLocationEntityById(sourceId);
+              if (targetId != null) {
+                  filter = filter.and(tQS.matchesId(targetId));
+              }
+              return repository.exists(filter);
+              }
+          default: return false;
+          }
     }
 
     @Override
     public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return this.getIdForRelatedEntity(sourceId, sourceEntityType, null);
     }
-
+    
     @Override
     public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Optional<ThingEntity> thing = this.getRelatedEntityRaw(targetId, sourceEntityType, targetId);
+        if (thing.isPresent()) {
+            return OptionalLong.of(thing.get().getId());
+        } else {
+            return OptionalLong.empty();
+        }
     }
-
+    
     @Override
     public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return this.getRelatedEntity(sourceId, sourceEntityType, null);
     }
 
     @Override
     public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Optional<ThingEntity> thing = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
+        if (thing.isPresent()) {
+            return mapper.createEntity(thing.get());
+        } else {
+            return null;
+        }
+    }
+    
+    /**
+     * Retrieves Thing Entity with Relation to sourceEntity from Database.
+     * Returns empty if Thing is not found or Entities are not related.
+     * 
+     * @param sourceId Id of the Source Entity
+     * @param sourceEntityType Type of the Source Entity
+     * @param targetId Id of the Thing to be retrieved
+     * @return Optional<ThingEntity> Requested Entity
+     */
+    private Optional<ThingEntity> getRelatedEntityRaw(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+        BooleanExpression filter;
+        switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
+            case "iot.HistoricalLocation": {
+                filter = tQS.getHistoricalLocationById(sourceId);
+                break;
+            }
+            case "iot.Datastream": {
+                filter = tQS.getDatastreamById(sourceId);
+                break;
+            }
+            default: return Optional.empty();
+        }
+        
+        if (targetId != null) {
+            filter = filter.and(tQS.matchesId(targetId));
+        }
+        return repository.findOne(filter);
     }
 }

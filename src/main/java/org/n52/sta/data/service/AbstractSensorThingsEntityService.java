@@ -33,6 +33,7 @@ public interface AbstractSensorThingsEntityService {
      * @param sourceEntity the Entity the EntityCollection is related to
      * @return the EntityCollection that is related to the given Entity
      */
+    @Deprecated
     public EntityCollection getRelatedEntityCollection(Entity sourceEntity);
 
     /**
@@ -59,6 +60,7 @@ public interface AbstractSensorThingsEntityService {
      * @param sourceEntity the Entity the requested Entity is related to
      * @return the Entity that is related to the given Entity
      */
+    @Deprecated
     public Entity getRelatedEntity(Entity sourceEntity);
 
     /**
@@ -70,6 +72,7 @@ public interface AbstractSensorThingsEntityService {
      * @return the Entity that is related to the given Entity and is conform to
      * the given key predicates
      */
+    @Deprecated
     public Entity getRelatedEntity(Entity sourceEntity, List<UriParameter> keyPredicates);
 
     /**
@@ -108,7 +111,7 @@ public interface AbstractSensorThingsEntityService {
 
     /**
      * Checks if an Entity exists that is related to a single Entity of the
-     * given EntityType and with the given KeyPredicates
+     * given EntityType
      *
      * @param sourceId ID of the related Entity
      * @param sourceEntityType EntityType of the related Entity
