@@ -5,8 +5,8 @@
  */
 package org.n52.sta.data.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 
 /**
  * Repository for all Sensor Things entity data services
@@ -16,17 +16,38 @@ import org.springframework.stereotype.Component;
 @Component
 public class EntityServiceRepository {
 
-    @Autowired
     private ThingService thingService;
-
-    @Autowired
     private LocationService locationService;
-
-    @Autowired
     private HistoricalLocationService historicalLocationService;
-
-    @Autowired
     private SensorService sensorService;
+    private DatastreamService datastreamService;
+    private ObservationService observationService;
+    private ObservedPropertyService observedPropertyService;
+    
+    public EntityServiceRepository(ThingService thingService,
+                                   LocationService locationService,
+                                   HistoricalLocationService historicalLocationService,
+                                   SensorService sensorService,
+                                   DatastreamService datastreamService,
+                                   ObservationService observationService,
+                                   ObservedPropertyService observedPropertyService) {
+        this.thingService = thingService;
+        this.locationService = locationService;
+        this.historicalLocationService = historicalLocationService;
+        this.sensorService = sensorService;
+        this.datastreamService = datastreamService;
+        this.observationService = observationService;
+        this.observedPropertyService = observedPropertyService;
+        
+        final String message = "Unable to get Service Implementation: "; 
+        Assert.notNull(thingService, message + thingService.getClass().getName());
+        Assert.notNull(locationService, message + locationService.getClass().getName());
+        Assert.notNull(historicalLocationService, message + historicalLocationService.getClass().getName());
+        Assert.notNull(sensorService, message + sensorService.getClass().getName());
+        Assert.notNull(datastreamService, message + datastreamService.getClass().getName());
+        Assert.notNull(observationService, message + observationService.getClass().getName());
+        Assert.notNull(observedPropertyService, message + observedPropertyService.getClass().getName());
+    }
 
     /**
      * Provides an entity data service for a entity type
@@ -54,9 +75,20 @@ public class EntityServiceRepository {
                 entityService = sensorService;
                 break;
             }
+            case "Datastream": {
+                entityService = datastreamService;
+                break;
+            }
+            case "Observation": {
+                entityService = observationService;
+                break;
+            }
+            case "ObservedProperty": {
+                entityService = observedPropertyService;
+                break;
+            }
             default: {
                 //TODO: check if we need to do error handling for invalid endpoints
-
             }
         }
         return entityService;
