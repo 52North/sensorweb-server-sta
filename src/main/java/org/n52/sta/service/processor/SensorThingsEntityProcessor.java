@@ -26,7 +26,10 @@ import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
+import org.n52.sta.service.handler.AbstractEntityRequestHandler;
 import org.n52.sta.service.handler.EntityRequestHandlerImpl;
+import org.n52.sta.service.query.handler.AbstractPropertySelectionHandler;
+import org.n52.sta.service.query.handler.PropertySelectionOptions;
 import org.n52.sta.service.response.EntityResponse;
 import org.n52.sta.utils.EntityAnnotator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +45,10 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
     private static final ContentType ET_PROCESSOR_CONTENT_TYPE = ContentType.JSON_NO_METADATA;
 
     @Autowired
-    EntityRequestHandlerImpl requestHandler;
+    AbstractEntityRequestHandler requestHandler;
+
+    @Autowired
+    AbstractPropertySelectionHandler propertySelectionHandler;
 
     @Autowired
     EntityAnnotator entityAnnotator;
@@ -52,9 +58,9 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
 
     @Override
     public void readEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-        EntityResponse entityCollectionResponse = requestHandler.handleEntityCollectionRequest(uriInfo);
+        EntityResponse entityResponse = requestHandler.handleEntityCollectionRequest(uriInfo);
 
-        InputStream serializedContent = createResponseContent(entityCollectionResponse.getEntityCollection(), entityCollectionResponse.getEntitySet(), request.getRawBaseUri());
+        InputStream serializedContent = createResponseContent(entityResponse, request.getRawBaseUri(), uriInfo);
 
         // configure the response object: set the body, headers and status code
         response.setContent(serializedContent);
@@ -83,20 +89,32 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
         this.serviceMetadata = serviceMetadata;
     }
 
-    private InputStream createResponseContent(Entity responseEntity, EdmEntitySet responseEdmEntitySet, String rawBaseUri) throws SerializerException {
+    private InputStream createResponseContent(EntityResponse response, String rawBaseUri, UriInfo uriInfo) throws SerializerException {
+
         // annotate the entity
-        entityAnnotator.annotateEntity(responseEntity, responseEdmEntitySet.getEntityType(), rawBaseUri);
+        entityAnnotator.annotateEntity(response.getEntity(),
+                response.getEntitySet().getEntityType(), rawBaseUri);
 
         // 3rd: create a serializer based on the requested format (json)
         ODataSerializer serializer = odata.createSerializer(ET_PROCESSOR_CONTENT_TYPE);
 
+        //determine property selections
+        PropertySelectionOptions selectOptions = propertySelectionHandler
+                .evaluatePropertySelectionOptions(uriInfo, response.getEntitySet().getEntityType());
+
         // and serialize the content: transform from the EntitySet object to InputStream
-        EdmEntityType edmEntityType = responseEdmEntitySet.getEntityType();
-        ContextURL contextUrl = ContextURL.with().entitySet(responseEdmEntitySet).suffix(ContextURL.Suffix.ENTITY).build();
+        ContextURL contextUrl = ContextURL.with()
+                .entitySet(response.getEntitySet())
+                .suffix(ContextURL.Suffix.ENTITY)
+                .selectList(selectOptions.getSelectionList())
+                .build();
 
-        EntitySerializerOptions opts = EntitySerializerOptions.with().contextURL(contextUrl).build();
+        EntitySerializerOptions opts = EntitySerializerOptions.with()
+                .contextURL(contextUrl)
+                .select(selectOptions.getSelectOption())
+                .build();
 
-        SerializerResult serializerResult = serializer.entity(serviceMetadata, edmEntityType, responseEntity, opts);
+        SerializerResult serializerResult = serializer.entity(serviceMetadata, response.getEntitySet().getEntityType(), response.getEntity(), opts);
         InputStream serializedContent = serializerResult.getContent();
 
         return serializedContent;

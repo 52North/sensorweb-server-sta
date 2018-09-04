@@ -26,6 +26,7 @@ import org.apache.olingo.server.api.serializer.PrimitiveSerializerOptions;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
+import org.n52.sta.service.handler.AbstractPropertyRequestHandler;
 import org.n52.sta.service.handler.PropertyRequestHandlerImpl;
 import org.n52.sta.service.response.PropertyResponse;
 import org.n52.sta.utils.EntityAnnotator;
@@ -40,7 +41,7 @@ import org.springframework.stereotype.Component;
 public class SensorThingsPropertyProcessor implements PrimitiveProcessor {
 
     @Autowired
-    PropertyRequestHandlerImpl requestHandler;
+    AbstractPropertyRequestHandler requestHandler;
 
     @Autowired
     EntityAnnotator entityAnnotator;
