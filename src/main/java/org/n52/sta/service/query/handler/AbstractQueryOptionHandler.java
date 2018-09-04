@@ -28,29 +28,45 @@
  */
 package org.n52.sta.service.query.handler;
 
+import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.server.api.serializer.SerializerException;
+import org.apache.olingo.server.api.uri.UriHelper;
 import org.apache.olingo.server.api.uri.UriInfo;
-import org.apache.olingo.server.api.uri.queryoption.SelectOption;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
-@Component
-public class PropertySelectionHandlerImpl extends AbstractPropertySelectionHandler {
+public abstract class AbstractQueryOptionHandler {
 
-    @Override
-    public PropertySelectionOptions evaluatePropertySelectionOptions(UriInfo uriInfo, EdmEntityType edmEntityType) throws SerializerException {
-        SelectOption selectOption = uriInfo.getSelectOption();
-        String selectList = uriHelper.buildContextURLSelectList(edmEntityType,
-                null, selectOption);
+    protected UriHelper uriHelper;
 
-        PropertySelectionOptions selectOptions = new PropertySelectionOptions();
-        selectOptions.setSelectOption(selectOption);
-        selectOptions.setSelectionList(selectList);
-        return selectOptions;
+    public UriHelper getUriHelper() {
+        return uriHelper;
     }
 
+    public void setUriHelper(UriHelper uriHelper) {
+        this.uriHelper = uriHelper;
+    }
+
+    /**
+     * Evaluates selection options for Entity properties from the URI
+     *
+     * @param uriInfo information provided for the request URI
+     * @param edmEntityType EntityType to evaluate the property select options
+     * for
+     * @return options for Entity property selections
+     */
+    public abstract PropertySelectionOptions evaluatePropertySelectionOptions(UriInfo uriInfo, EdmEntityType edmEntityType) throws SerializerException;
+
+    /**
+     * Evaluates count options from the URI
+     *
+     * @param uriInfo information provided for the request URI
+     * @param entityCollection EntityCollection to evaluate the count options
+     * for
+     * @return count options
+     */
+    public abstract CountOptions evaluateCountOptions(UriInfo uriInfo, EntityCollection entityCollection);
 }

@@ -28,35 +28,47 @@
  */
 package org.n52.sta.service.query.handler;
 
+import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.server.api.serializer.SerializerException;
-import org.apache.olingo.server.api.uri.UriHelper;
 import org.apache.olingo.server.api.uri.UriInfo;
+import org.apache.olingo.server.api.uri.queryoption.CountOption;
+import org.apache.olingo.server.api.uri.queryoption.SelectOption;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
-public abstract class AbstractPropertySelectionHandler {
+@Component
+public class QueryOptionHandlerImpl extends AbstractQueryOptionHandler {
 
-    protected UriHelper uriHelper;
+    @Override
+    public PropertySelectionOptions evaluatePropertySelectionOptions(UriInfo uriInfo, EdmEntityType edmEntityType) throws SerializerException {
+        SelectOption selectOption = uriInfo.getSelectOption();
+        String selectList = uriHelper.buildContextURLSelectList(edmEntityType,
+                null, selectOption);
 
-    public UriHelper getUriHelper() {
-        return uriHelper;
+        PropertySelectionOptions selectOptions = new PropertySelectionOptions();
+        selectOptions.setSelectOption(selectOption);
+        selectOptions.setSelectionList(selectList);
+        return selectOptions;
     }
 
-    public void setUriHelper(UriHelper uriHelper) {
-        this.uriHelper = uriHelper;
-    }
+    @Override
+    public CountOptions evaluateCountOptions(UriInfo uriInfo, EntityCollection entityCollection) {
+        CountOptions countOptions = new CountOptions();
+        CountOption countOption = uriInfo.getCountOption();
+        countOptions.setCountOption(countOption);
+        countOptions.setCount(entityCollection.getEntities().size());
 
-    /**
-     * Evaluates selection options for Entity properties from the URI
-     *
-     * @param uriInfo information provided for the request URI
-     * @param edmEntityType EntityType to evaluate the property select options
-     * for
-     * @return options for Entity property selections
-     */
-    public abstract PropertySelectionOptions evaluatePropertySelectionOptions(UriInfo uriInfo, EdmEntityType edmEntityType) throws SerializerException;
+        if (countOption != null) {
+            boolean isCount = countOption.getValue();
+            countOptions.setIsCount(isCount);
+        } else {
+            countOptions.setIsCount(false);
+        }
+        return countOptions;
+    }
 
 }

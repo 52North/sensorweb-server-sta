@@ -25,8 +25,10 @@ import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
+import org.apache.olingo.server.api.uri.queryoption.CountOption;
 import org.n52.sta.service.handler.AbstractEntityCollectionRequestHandler;
-import org.n52.sta.service.query.handler.AbstractPropertySelectionHandler;
+import org.n52.sta.service.query.handler.AbstractQueryOptionHandler;
+import org.n52.sta.service.query.handler.CountOptions;
 import org.n52.sta.service.query.handler.PropertySelectionOptions;
 import org.n52.sta.service.response.EntityCollectionResponse;
 import org.n52.sta.utils.EntityAnnotator;
@@ -46,7 +48,7 @@ public class SensorThingsEntityCollectionProcessor implements EntityCollectionPr
     AbstractEntityCollectionRequestHandler requestHandler;
 
     @Autowired
-    AbstractPropertySelectionHandler propertySelectionHandler;
+    AbstractQueryOptionHandler propertySelectionHandler;
 
     @Autowired
     EntityAnnotator entityAnnotator;
@@ -86,8 +88,12 @@ public class SensorThingsEntityCollectionProcessor implements EntityCollectionPr
 
         EdmEntityType edmEntityType = response.getEntitySet().getEntityType();
 
-        //determine property selections
+        //evaluate property selections
         PropertySelectionOptions selectOptions = propertySelectionHandler.evaluatePropertySelectionOptions(uriInfo, edmEntityType);
+
+        //evaluate count options
+        CountOptions countOptions = propertySelectionHandler.evaluateCountOptions(uriInfo, response.getEntityCollection());
+        response.getEntityCollection().setCount(countOptions.getCount());
 
         // serialize the content: transform from the EntitySet object to InputStream
         ContextURL contextUrl = ContextURL.with()
@@ -102,6 +108,7 @@ public class SensorThingsEntityCollectionProcessor implements EntityCollectionPr
                         .id(id)
                         .contextURL(contextUrl)
                         .select(selectOptions.getSelectOption())
+                        .count(countOptions.getCountOption())
                         .build();
         SerializerResult serializerResult = serializer.entityCollection(serviceMetadata, edmEntityType, response.getEntityCollection(), opts);
         InputStream serializedContent = serializerResult.getContent();

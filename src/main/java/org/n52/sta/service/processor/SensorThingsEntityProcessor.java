@@ -28,7 +28,7 @@ import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
 import org.n52.sta.service.handler.AbstractEntityRequestHandler;
 import org.n52.sta.service.handler.EntityRequestHandlerImpl;
-import org.n52.sta.service.query.handler.AbstractPropertySelectionHandler;
+import org.n52.sta.service.query.handler.AbstractQueryOptionHandler;
 import org.n52.sta.service.query.handler.PropertySelectionOptions;
 import org.n52.sta.service.response.EntityResponse;
 import org.n52.sta.utils.EntityAnnotator;
@@ -48,7 +48,7 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
     AbstractEntityRequestHandler requestHandler;
 
     @Autowired
-    AbstractPropertySelectionHandler propertySelectionHandler;
+    AbstractQueryOptionHandler propertySelectionHandler;
 
     @Autowired
     EntityAnnotator entityAnnotator;
