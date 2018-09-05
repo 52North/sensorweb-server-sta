@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
+import org.apache.olingo.commons.api.edm.provider.CsdlComplexType;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainerInfo;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
@@ -30,6 +31,9 @@ public class SensorThingsEdmProvider extends CsdlAbstractEdmProvider {
 
     @Autowired
     private SensorThingsEntityProviderRepository entityProviderRepository;
+
+    @Autowired
+    private SensorThingsComplexTypeProvider complexTypeProvider;
 
     // EDM Container
     public static final String CONTAINER_NAME = "sensorThingsEntitySets";
@@ -63,6 +67,9 @@ public class SensorThingsEdmProvider extends CsdlAbstractEdmProvider {
 
         // add EntityContainer
         schema.setEntityContainer(getEntityContainer());
+
+        // add ComplexTypes
+        schema.setComplexTypes(complexTypeProvider.getComplexTypes());
 
         // finally
         List<CsdlSchema> schemas = new ArrayList<CsdlSchema>();
