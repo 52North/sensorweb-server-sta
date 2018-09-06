@@ -132,7 +132,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
             CircleStreamBuffer buffer = new CircleStreamBuffer();
             outputStream = buffer.getOutputStream();
             JsonGenerator json = new JsonFactory().createGenerator(outputStream);
-            new ServiceDocumentJsonSerializer(metadata, serviceRoot, isODataMetadataNone).writeServiceDocument(json);
+            new SensorThingsServiceDocumentSerializer(metadata, serviceRoot, isODataMetadataNone).writeServiceDocument(json);
 
             json.close();
             outputStream.close();

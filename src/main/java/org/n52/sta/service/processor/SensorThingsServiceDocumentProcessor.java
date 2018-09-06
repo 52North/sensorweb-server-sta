@@ -19,6 +19,7 @@ import org.apache.olingo.server.api.processor.ServiceDocumentProcessor;
 import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
+import org.n52.sta.service.serializer.SensorThingsSerializer;
 import org.springframework.stereotype.Component;
 
 /**
@@ -36,9 +37,10 @@ public class SensorThingsServiceDocumentProcessor implements ServiceDocumentProc
     @Override
     public void readServiceDocument(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType contentType) throws ODataApplicationException, ODataLibraryException {
         // create a serializer based on json format
-        ODataSerializer serializer = odata.createSerializer(ET_SERVICE_DOCUMENT_PROCESSOR_CONTENT_TYPE);
+//        ODataSerializer serializer = odata.createSerializer(ET_SERVICE_DOCUMENT_PROCESSOR_CONTENT_TYPE);
+        ODataSerializer serializer = new SensorThingsSerializer(contentType);
 
-        SerializerResult serializerResult = serializer.serviceDocument(serviceMetadata, null);
+        SerializerResult serializerResult = serializer.serviceDocument(serviceMetadata, request.getRawBaseUri());
         InputStream serializedContent = serializerResult.getContent();
 
         // Finally: configure the response object: set the body, headers and status code
