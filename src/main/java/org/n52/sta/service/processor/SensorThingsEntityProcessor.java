@@ -31,6 +31,7 @@ import org.n52.sta.service.handler.EntityRequestHandlerImpl;
 import org.n52.sta.service.query.handler.AbstractQueryOptionHandler;
 import org.n52.sta.service.query.handler.PropertySelectionOptions;
 import org.n52.sta.service.response.EntityResponse;
+import org.n52.sta.service.serializer.SensorThingsSerializer;
 import org.n52.sta.utils.EntityAnnotator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -87,6 +88,7 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
     public void init(OData odata, ServiceMetadata sm) {
         this.odata = odata;
         this.serviceMetadata = serviceMetadata;
+        this.propertySelectionHandler.setUriHelper(odata.createUriHelper());
     }
 
     private InputStream createResponseContent(EntityResponse response, String rawBaseUri, UriInfo uriInfo) throws SerializerException {
@@ -96,7 +98,8 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
                 response.getEntitySet().getEntityType(), rawBaseUri);
 
         // 3rd: create a serializer based on the requested format (json)
-        ODataSerializer serializer = odata.createSerializer(ET_PROCESSOR_CONTENT_TYPE);
+//        ODataSerializer serializer = odata.createSerializer(ET_PROCESSOR_CONTENT_TYPE);
+        ODataSerializer serializer = new SensorThingsSerializer(ET_PROCESSOR_CONTENT_TYPE);
 
         //determine property selections
         PropertySelectionOptions selectOptions = propertySelectionHandler
