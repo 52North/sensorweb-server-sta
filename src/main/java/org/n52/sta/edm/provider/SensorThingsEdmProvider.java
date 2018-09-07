@@ -105,6 +105,11 @@ public class SensorThingsEdmProvider extends CsdlAbstractEdmProvider {
         return entityProvider.getEntityType();
     }
 
+    @Override
+    public CsdlComplexType getComplexType(FullQualifiedName complexTypeName) throws ODataException {
+        return complexTypeProvider.getComplexType(complexTypeName);
+    }
+
 //    public void setEntityProviderRepository(SensorThingsEntityProviderRepository entityProviderRepository) {
 //        this.entityProviderRepository = entityProviderRepository;
 //    }
