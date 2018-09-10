@@ -67,7 +67,6 @@ public class ThingService implements AbstractSensorThingsEntityService {
     @Override
     public EntityCollection getRelatedEntityCollection(Entity sourceEntity) {throw new UnsupportedOperationException("Not supported anymore.");}
 
-    
     public ThingService(ThingRepository repository, ThingMapper mapper) {
         this.repository = repository;
         this.mapper = mapper;
@@ -76,13 +75,13 @@ public class ThingService implements AbstractSensorThingsEntityService {
     @Override
     public EntityCollection getEntityCollection() {
         EntityCollection retEntitySet = new EntityCollection();
-        repository.findAll().forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        repository.findAll(tQS.isValidEntity()).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
     
     @Override
     public Entity getEntity(Long id) {
-        Optional<ThingEntity> entity = repository.findById(Long.valueOf(id));
+        Optional<ThingEntity> entity = repository.findOne(byId(id));
         return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
  
@@ -98,7 +97,7 @@ public class ThingService implements AbstractSensorThingsEntityService {
 
     @Override
     public boolean existsEntity(Long id) {
-        return repository.existsById(id);
+        return repository.exists(byId(id));
     }
     
     @Override
@@ -181,5 +180,15 @@ public class ThingService implements AbstractSensorThingsEntityService {
             filter = filter.and(tQS.matchesId(targetId));
         }
         return repository.findOne(filter);
+    }
+    
+    /**
+     * Constructs SQL Expression to request Entity by ID.
+     * 
+     * @param id id of the requested entity
+     * @return BooleanExpression evaluating to true if Entity is found and valid
+     */
+    private BooleanExpression byId(Long id) {
+        return tQS.isValidEntity().and(tQS.matchesId(id));
     }
 }

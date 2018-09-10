@@ -76,13 +76,13 @@ public class FeatureOfInterestService implements AbstractSensorThingsEntityServi
     @Override
     public EntityCollection getEntityCollection() {
         EntityCollection retEntitySet = new EntityCollection();
-        repository.findAll().forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        repository.findAll(foiQS.isValidEntity()).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
 
     @Override
     public Entity getEntity(Long id) {
-        Optional<FeatureEntity> entity = repository.findById(Long.valueOf(id));
+        Optional<FeatureEntity> entity = repository.findOne(byId(id));
         return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
 
@@ -93,7 +93,7 @@ public class FeatureOfInterestService implements AbstractSensorThingsEntityServi
 
     @Override
     public boolean existsEntity(Long id) {
-        return repository.existsById(id);
+        return repository.exists(byId(id));
     }
 
     @Override
@@ -168,5 +168,15 @@ public class FeatureOfInterestService implements AbstractSensorThingsEntityServi
             filter = filter.and(foiQS.matchesId(targetId));
         }
         return repository.findOne(filter);
+    }
+    
+    /**
+     * Constructs SQL Expression to request Entity by ID.
+     * 
+     * @param id id of the requested entity
+     * @return BooleanExpression evaluating to true if Entity is found and valid
+     */
+    private BooleanExpression byId(Long id) {
+        return foiQS.isValidEntity().and(foiQS.matchesId(id));
     }
 }

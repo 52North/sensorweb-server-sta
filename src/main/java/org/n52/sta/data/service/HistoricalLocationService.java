@@ -76,13 +76,13 @@ public class HistoricalLocationService implements AbstractSensorThingsEntityServ
     @Override
     public EntityCollection getEntityCollection() {
         EntityCollection retEntitySet = new EntityCollection();
-        repository.findAll().forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        repository.findAll(hlQS.isValidEntity()).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
     
     @Override
     public Entity getEntity(Long id) {
-        Optional<HistoricalLocationEntity> entity = repository.findById(Long.valueOf(id));
+        Optional<HistoricalLocationEntity> entity = repository.findOne(byId(id));
         return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
  
@@ -109,7 +109,7 @@ public class HistoricalLocationService implements AbstractSensorThingsEntityServ
 
     @Override
     public boolean existsEntity(Long id) {
-        return repository.existsById(id);
+        return repository.exists(byId(id));
     }
     
     @Override
@@ -175,5 +175,15 @@ public class HistoricalLocationService implements AbstractSensorThingsEntityServ
     private Optional<HistoricalLocationEntity> getRelatedEntityRaw(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         // In Theory there are only related Collections
         return Optional.empty();
+    }
+    
+    /**
+     * Constructs SQL Expression to request Entity by ID.
+     * 
+     * @param id id of the requested entity
+     * @return BooleanExpression evaluating to true if Entity is found and valid
+     */
+    private BooleanExpression byId(Long id) {
+        return hlQS.isValidEntity().and(hlQS.matchesId(id));
     }
 }

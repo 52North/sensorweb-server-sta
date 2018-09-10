@@ -28,14 +28,8 @@
  */
 package org.n52.sta.data.query;
 
-import java.util.Optional;
-
-import org.n52.series.db.beans.sta.LocationEntity;
-import org.n52.series.db.beans.sta.QLocationEntity;
 import org.n52.series.db.beans.sta.QThingEntity;
 import org.n52.series.db.beans.sta.ThingEntity;
-import org.n52.series.db.old.dao.DbQuery;
-import org.n52.series.db.query.OfferingQuerySpecifications;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
@@ -62,5 +56,14 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications {
         return qthing.id.eq(id);
     }
     
-
+    /**
+     * Assures that Entity is valid.
+     * Entity is valid if:
+     * - always
+     * 
+     * @return BooleanExpression evaluating to true if Entity is valid
+     */
+    public BooleanExpression isValidEntity() {
+        return istrue;
+    }
 }

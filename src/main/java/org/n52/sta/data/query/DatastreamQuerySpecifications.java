@@ -55,5 +55,15 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications {
     public BooleanExpression matchesId(Long id) {
         return  qdatastream.id.eq(id);
     }
-
+    
+    /**
+     * Assures that Entity is valid.
+     * Entity is valid if:
+     * - always
+     * 
+     * @return BooleanExpression evaluating to true if Entity is valid
+     */
+    public BooleanExpression isValidEntity() {
+        return istrue;
+    }
 }

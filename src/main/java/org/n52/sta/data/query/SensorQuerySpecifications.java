@@ -30,6 +30,7 @@ package org.n52.sta.data.query;
 
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.QProcedureEntity;
+import org.n52.series.db.beans.sta.QDatastreamEntity;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
@@ -40,19 +41,30 @@ import com.querydsl.jpa.JPQLQuery;
  *
  */
 public class SensorQuerySpecifications extends EntityQuerySpecifications {
-    
+
     private final static QProcedureEntity qsensor = QProcedureEntity.procedureEntity;
-    
+
     public JPQLQuery<ProcedureEntity> toSubquery(final BooleanExpression filter) {
         return JPAExpressions.selectFrom(qsensor)
                              .where(filter);
     }
-    
+
     public <T> BooleanExpression selectFrom(JPQLQuery<T> subquery) {
         return qsensor.id.in(subquery.select(qsensor.id));
     }
-    
+
     public BooleanExpression matchesId(Long id) {
         return qsensor.id.eq(id);
+    }
+
+    /**
+     * Assures that Entity is valid.
+     * Entity is valid if:
+     * - has Datastream associated with it
+     * 
+     * @return BooleanExpression evaluating to true if Entity is valid
+     */
+    public BooleanExpression isValidEntity() {
+        return qsensor.id.in(dQS.toSubquery(qdatastream.procedure.eq(qsensor)).select(qsensor.id));
     }
 }

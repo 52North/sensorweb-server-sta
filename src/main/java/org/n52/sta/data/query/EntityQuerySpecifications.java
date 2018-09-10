@@ -28,7 +28,10 @@
  */
 package org.n52.sta.data.query;
 
+import org.n52.series.db.beans.sta.QDatastreamEntity;
+
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPQLQuery;
 
 /**
@@ -37,40 +40,46 @@ import com.querydsl.jpa.JPQLQuery;
  */
 public abstract class EntityQuerySpecifications {
 
+    final static BooleanExpression istrue = Expressions.asBoolean(true).isTrue();
+    
+    final static DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
+    final static QDatastreamEntity qdatastream = QDatastreamEntity.datastreamEntity;
+    
     public abstract <T> BooleanExpression selectFrom(JPQLQuery<T> subquery);
+    public abstract BooleanExpression isValidEntity();
 
     public BooleanExpression getLocationEntityById(Long id) {
         LocationQuerySpecifications locQS = new LocationQuerySpecifications();
-        return selectFrom(locQS.toSubquery(locQS.matchesId(id)));
+        return selectFrom(locQS.toSubquery(locQS.matchesId(id))).and(isValidEntity());
     }
     
     public BooleanExpression getDatastreamEntityById(Long id) {
         DatastreamQuerySpecifications datastreamQS = new DatastreamQuerySpecifications();
-        return selectFrom(datastreamQS.toSubquery(datastreamQS.matchesId(id)));
+        return selectFrom(datastreamQS.toSubquery(datastreamQS.matchesId(id))).and(isValidEntity());
     }
     
     public BooleanExpression getHistoricalLocationEntityById(Long id) {
         HistoricalLocationQuerySpecifications historicalLocationQS = new HistoricalLocationQuerySpecifications();
-        return selectFrom(historicalLocationQS.toSubquery(historicalLocationQS.matchesId(id)));
+        return selectFrom(historicalLocationQS.toSubquery(historicalLocationQS.matchesId(id))).and(isValidEntity());
     }
     
     public BooleanExpression getThingEntityById(Long id) {
         ThingQuerySpecifications thingQS = new ThingQuerySpecifications();
-        return selectFrom(thingQS.toSubquery(thingQS.matchesId(id)));
+        return selectFrom(thingQS.toSubquery(thingQS.matchesId(id))).and(isValidEntity());
     }
 
     public BooleanExpression getSensorEntityById(Long id) {
         SensorQuerySpecifications sensorQS = new SensorQuerySpecifications();
-        return selectFrom(sensorQS.toSubquery(sensorQS.matchesId(id)));
+        return selectFrom(sensorQS.toSubquery(sensorQS.matchesId(id))).and(isValidEntity());
     }
 
     public BooleanExpression getObservedPropertyEntityById(Long id) {
         ObservedPropertyQuerySpecifications observedPropertyQS = new ObservedPropertyQuerySpecifications();
-        return selectFrom(observedPropertyQS.toSubquery(observedPropertyQS.matchesId(id)));
+        return selectFrom(observedPropertyQS.toSubquery(observedPropertyQS.matchesId(id))).and(isValidEntity());
     }
     
     public BooleanExpression getObservationEntityById(Long id) {
         ObservationQuerySpecifications observationQS = new ObservationQuerySpecifications();
-        return selectFrom(observationQS.toSubquery(observationQS.matchesId(id)));
+        return selectFrom(observationQS.toSubquery(observationQS.matchesId(id))).and(isValidEntity());
     }
 }

@@ -55,4 +55,15 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
     public BooleanExpression matchesId(Long id) {
         return qobservedproperty.id.eq(id);
     }
+    
+    /**
+     * Assures that Entity is valid.
+     * Entity is valid if:
+     * - has associated Datastream
+     * 
+     * @return BooleanExpression evaluating to true if Entity is valid
+     */
+    public BooleanExpression isValidEntity() {
+        return qobservedproperty.id.in(dQS.toSubquery(qdatastream.observableProperty.eq(qobservedproperty)).select(qobservedproperty.id));
+    }
 }

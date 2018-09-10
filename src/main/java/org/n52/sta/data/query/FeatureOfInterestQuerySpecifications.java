@@ -43,6 +43,8 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
 
     final QFeatureEntity qfeature = QFeatureEntity.featureEntity;
     
+    private static final ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
+    
     public JPQLQuery<FeatureEntity> toSubquery(final BooleanExpression filter) {
         return JPAExpressions.selectFrom(qfeature)
                 .where(filter);
@@ -54,6 +56,17 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
     
     public BooleanExpression matchesId(Long id) {
         return  qfeature.id.eq(id);
+    }
+    
+    /**
+     * Assures that Entity is valid.
+     * Entity is valid if:
+     * - has valid Observation associated with it
+     * 
+     * @return BooleanExpression evaluating to true if Entity is valid
+     */
+    public BooleanExpression isValidEntity() {
+        return qfeature.id.in(oQS.toSubquery(oQS.isValidEntity()).select(qfeature.id));
     }
     
 }

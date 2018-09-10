@@ -76,13 +76,13 @@ public class LocationService implements AbstractSensorThingsEntityService {
     @Override
     public EntityCollection getEntityCollection() {
         EntityCollection retEntitySet = new EntityCollection();
-        repository.findAll().forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        repository.findAll(lQS.isValidEntity()).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
     
     @Override
     public Entity getEntity(Long id) {
-        Optional<LocationEntity> entity = repository.findById(Long.valueOf(id));
+        Optional<LocationEntity> entity = repository.findOne(byId(id));
         return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
  
@@ -109,7 +109,7 @@ public class LocationService implements AbstractSensorThingsEntityService {
 
     @Override
     public boolean existsEntity(Long id) {
-        return repository.existsById(id);
+        return repository.exists(byId(id));
     }
     
     @Override
@@ -194,5 +194,15 @@ public class LocationService implements AbstractSensorThingsEntityService {
             filter = filter.and(lQS.matchesId(targetId));
         }
         return repository.findOne(filter);
+    }
+    
+    /**
+     * Constructs SQL Expression to request Entity by ID.
+     * 
+     * @param id id of the requested entity
+     * @return BooleanExpression evaluating to true if Entity is found and valid
+     */
+    private BooleanExpression byId(Long id) {
+        return lQS.isValidEntity().and(lQS.matchesId(id));
     }
 }
