@@ -28,14 +28,12 @@
  */
 package org.n52.sta.data.service;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
-import org.apache.olingo.server.api.uri.UriParameter;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.repositories.DatastreamRepository;
@@ -56,16 +54,6 @@ public class DatastreamService implements AbstractSensorThingsEntityService {
     private DatastreamMapper mapper;
     
     private final static DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
-
-    //TODO: remove deprecated Methods
-    @Override
-    public Entity getRelatedEntity(Entity sourceEntity) {throw new UnsupportedOperationException("Not supported anymore.");}
-    //TODO: remove deprecated Methods
-    @Override
-    public Entity getRelatedEntity(Entity sourceEntity, List<UriParameter> keyPredicates) {throw new UnsupportedOperationException("Not supported anymore.");}
-    //TODO: remove deprecated Methods
-    @Override
-    public EntityCollection getRelatedEntityCollection(Entity sourceEntity) {throw new UnsupportedOperationException("Not supported anymore.");}
 
     public DatastreamService(DatastreamRepository repository, DatastreamMapper mapper) {
         this.repository = repository;

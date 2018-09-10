@@ -28,15 +28,6 @@ public interface AbstractSensorThingsEntityService {
     public EntityCollection getEntityCollection();
 
     /**
-     * Requests the EntityCollection that is related to a single Entity
-     *
-     * @param sourceEntity the Entity the EntityCollection is related to
-     * @return the EntityCollection that is related to the given Entity
-     */
-    @Deprecated
-    public EntityCollection getRelatedEntityCollection(Entity sourceEntity);
-
-    /**
      * Requests the EntityCollection that is related to a single Entity with the
      * given ID and type
      *
@@ -53,27 +44,6 @@ public interface AbstractSensorThingsEntityService {
      * @return the Entity that is conform to the given key predicates
      */
     public Entity getEntity(Long id);
-
-    /**
-     * Requests the Entity that is related to a single Entity
-     *
-     * @param sourceEntity the Entity the requested Entity is related to
-     * @return the Entity that is related to the given Entity
-     */
-    @Deprecated
-    public Entity getRelatedEntity(Entity sourceEntity);
-
-    /**
-     * Requests the Entity that is related to a single Entity and in accordance
-     * to a given list of key predicates
-     *
-     * @param sourceEntity he Entity the Entity is related to
-     * @param keyPredicates the key predicates to determine the Entity for
-     * @return the Entity that is related to the given Entity and is conform to
-     * the given key predicates
-     */
-    @Deprecated
-    public Entity getRelatedEntity(Entity sourceEntity, List<UriParameter> keyPredicates);
 
     /**
      * Requests the ID for an Entity that is related to a single Entity with the

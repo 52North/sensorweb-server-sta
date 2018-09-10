@@ -28,14 +28,12 @@
  */
 package org.n52.sta.data.service;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
-import org.apache.olingo.server.api.uri.UriParameter;
 import org.n52.series.db.FeatureRepository;
 import org.n52.series.db.beans.FeatureEntity;
 import org.n52.sta.data.query.FeatureOfInterestQuerySpecifications;
@@ -57,16 +55,6 @@ public class FeatureOfInterestService implements AbstractSensorThingsEntityServi
     private FeatureOfInterestMapper mapper;
 
     private final static FeatureOfInterestQuerySpecifications foiQS = new FeatureOfInterestQuerySpecifications();
-
-    //TODO: remove deprecated Methods
-    @Override
-    public Entity getRelatedEntity(Entity sourceEntity) {throw new UnsupportedOperationException("Not supported anymore.");}
-    //TODO: remove deprecated Methods
-    @Override
-    public Entity getRelatedEntity(Entity sourceEntity, List<UriParameter> keyPredicates) {throw new UnsupportedOperationException("Not supported anymore.");}
-    //TODO: remove deprecated Methods
-    @Override
-    public EntityCollection getRelatedEntityCollection(Entity sourceEntity) {throw new UnsupportedOperationException("Not supported anymore.");}
 
     public FeatureOfInterestService(FeatureRepository repository, FeatureOfInterestMapper mapper) {
         this.repository = repository;

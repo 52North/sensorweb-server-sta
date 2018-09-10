@@ -28,14 +28,12 @@
  */
 package org.n52.sta.data.service;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
-import org.apache.olingo.server.api.uri.UriParameter;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.sta.data.query.HistoricalLocationQuerySpecifications;
 import org.n52.sta.data.repositories.HistoricalLocationRepository;
@@ -56,17 +54,6 @@ public class HistoricalLocationService implements AbstractSensorThingsEntityServ
     private HistoricalLocationMapper mapper;
     
     private HistoricalLocationQuerySpecifications hlQS = new HistoricalLocationQuerySpecifications();
-    
-    //TODO: remove deprecated Methods
-    @Override
-    public Entity getRelatedEntity(Entity sourceEntity) {throw new UnsupportedOperationException("Not supported anymore.");}
-    //TODO: remove deprecated Methods
-    @Override
-    public Entity getRelatedEntity(Entity sourceEntity, List<UriParameter> keyPredicates) {throw new UnsupportedOperationException("Not supported anymore.");}
-    //TODO: remove deprecated Methods
-    @Override
-    public EntityCollection getRelatedEntityCollection(Entity sourceEntity) {throw new UnsupportedOperationException("Not supported anymore.");}
-
     
     public HistoricalLocationService(HistoricalLocationRepository repository, HistoricalLocationMapper mapper) {
         this.repository = repository;

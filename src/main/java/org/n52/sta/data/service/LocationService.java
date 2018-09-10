@@ -28,14 +28,12 @@
  */
 package org.n52.sta.data.service;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
-import org.apache.olingo.server.api.uri.UriParameter;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.data.query.LocationQuerySpecifications;
 import org.n52.sta.data.repositories.LocationRepository;
@@ -57,17 +55,6 @@ public class LocationService implements AbstractSensorThingsEntityService {
     
     private final static LocationQuerySpecifications lQS= new LocationQuerySpecifications();
 
-    //TODO: remove deprecated Methods
-    @Override
-    public Entity getRelatedEntity(Entity sourceEntity) {throw new UnsupportedOperationException("Not supported anymore.");}
-    //TODO: remove deprecated Methods
-    @Override
-    public Entity getRelatedEntity(Entity sourceEntity, List<UriParameter> keyPredicates) {throw new UnsupportedOperationException("Not supported anymore.");}
-    //TODO: remove deprecated Methods
-    @Override
-    public EntityCollection getRelatedEntityCollection(Entity sourceEntity) {throw new UnsupportedOperationException("Not supported anymore.");}
-
-    
     public LocationService(LocationRepository repository, LocationMapper mapper) {
         this.repository = repository;
         this.mapper = mapper;

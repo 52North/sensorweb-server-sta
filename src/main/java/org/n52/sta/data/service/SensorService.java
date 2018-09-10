@@ -28,14 +28,12 @@
  */
 package org.n52.sta.data.service;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
-import org.apache.olingo.server.api.uri.UriParameter;
 import org.n52.series.db.ProcedureRepository;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.sta.data.query.SensorQuerySpecifications;
@@ -57,16 +55,6 @@ public class SensorService implements AbstractSensorThingsEntityService {
     private SensorMapper mapper;
     
     private final static SensorQuerySpecifications sQS = new SensorQuerySpecifications();
-
-    //TODO: remove deprecated Methods
-    @Override
-    public Entity getRelatedEntity(Entity sourceEntity) {throw new UnsupportedOperationException("Not supported anymore.");}
-    //TODO: remove deprecated Methods
-    @Override
-    public Entity getRelatedEntity(Entity sourceEntity, List<UriParameter> keyPredicates) {throw new UnsupportedOperationException("Not supported anymore.");}
-    //TODO: remove deprecated Methods
-    @Override
-    public EntityCollection getRelatedEntityCollection(Entity sourceEntity) {throw new UnsupportedOperationException("Not supported anymore.");}
 
     public SensorService(ProcedureRepository repository, SensorMapper mapper) {
         this.repository = repository;
