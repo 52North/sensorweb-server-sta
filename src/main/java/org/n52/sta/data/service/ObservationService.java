@@ -29,9 +29,8 @@
 package org.n52.sta.data.service;
 
 import java.util.List;
-import java.util.OptionalLong;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.Optional;
+import java.util.OptionalLong;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
@@ -39,9 +38,12 @@ import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.server.api.uri.UriParameter;
 import org.n52.series.db.DataRepository;
 import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.ProcedureEntity;
+import org.n52.sta.data.query.ObservationQuerySpecifications;
 import org.n52.sta.mapping.ObservationMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.querydsl.core.types.dsl.BooleanExpression;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -50,88 +52,151 @@ import org.springframework.stereotype.Component;
 @Component
 public class ObservationService implements AbstractSensorThingsEntityService {
 
-    @Autowired
-    private ObservationMapper mapper;
-
-    @Autowired
     private DataRepository<?> repository;
 
+    private ObservationMapper mapper;
+    
+    private ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
+    
+    //TODO: remove deprecated Methods
+    @Override
+    public Entity getRelatedEntity(Entity sourceEntity) {throw new UnsupportedOperationException("Not supported anymore.");}
+    //TODO: remove deprecated Methods
+    @Override
+    public Entity getRelatedEntity(Entity sourceEntity, List<UriParameter> keyPredicates) {throw new UnsupportedOperationException("Not supported anymore.");}
+    //TODO: remove deprecated Methods
+    @Override
+    public EntityCollection getRelatedEntityCollection(Entity sourceEntity) {throw new UnsupportedOperationException("Not supported anymore.");}
+
+    
+    public ObservationService(DataRepository<?> repository, ObservationMapper mapper) {
+        this.repository = repository;
+        this.mapper = mapper;
+    }
+    
     @Override
     public EntityCollection getEntityCollection() {
         EntityCollection retEntitySet = new EntityCollection();
         repository.findAll().forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
-
+    
     @Override
     public Entity getEntity(Long id) {
-        return getEntityForId(String.valueOf(id));
+        //TODO: check if this cast is possible
+        Optional<DataEntity<?>> entity = (Optional<DataEntity< ? >>) repository.findById(Long.valueOf(id));
+        return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
-
+ 
     @Override
-    public Entity getRelatedEntity(Entity sourceEntity) {
-        //TODO: implement
-        return null;
-    }
-
-    @Override
-    public Entity getRelatedEntity(Entity sourceEntity, List<UriParameter> keyPredicates) {
-        //TODO: implement
-        return null;
-    }
-
-    @Override
-    public EntityCollection getRelatedEntityCollection(Entity sourceEntity) {
-        //TODO: implement
-        return null;
-    }
-
-    private Entity getEntityForId(String id) {
-        Optional< ?> entity = getRawEntityForId(Long.valueOf(id));
-        return entity.isPresent() ? mapper.createEntity((DataEntity< ?>) entity.get()) : null;
-    }
-
-    protected Optional< ?> getRawEntityForId(Long id) {
-        return repository.findById(id);
+    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType) {
+        BooleanExpression filter;
+        switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
+            case "iot.Datastream": {
+                filter = oQS.getDatastreamEntityById(sourceId);
+                break;
+            }
+            case "iot.FeatureOfInterest": {
+                filter = oQS.getDatastreamEntityById(sourceId);
+                break;
+            }
+            default: return null;
+        }
+        
+        //TODO: check cast
+        Iterable<DataEntity<?>> observations = (Iterable<DataEntity< ? >>) repository.findAll(filter);
+        EntityCollection retEntitySet = new EntityCollection();
+        observations.forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        return retEntitySet;
     }
 
     @Override
     public boolean existsEntity(Long id) {
-        return true;
+        return repository.existsById(id);
     }
-
+    
     @Override
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
-        return true;
+        return this.existsRelatedEntity(sourceId, sourceEntityType, null);
     }
 
     @Override
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-        return true;
-    }
-
-    @Override
-    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType) {
-        return getEntityCollection();
+        BooleanExpression filter;
+        switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
+            case "iot.Datastream": {
+                filter = oQS.getDatastreamEntityById(sourceId);
+                break;
+            }
+            case "iot.FeatureOfInterest": {
+                filter = oQS.getDatastreamEntityById(sourceId);
+                break;
+            }
+            default: return false;
+        }
+        if (targetId != null) {
+            filter = filter.and(oQS.matchesId(targetId));
+        }
+        return repository.exists(filter);
     }
 
     @Override
     public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return this.getIdForRelatedEntity(sourceId, sourceEntityType, null);
     }
-
+    
     @Override
     public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        Optional<DataEntity<?>> historicalLocation = this.getRelatedEntityRaw(targetId, sourceEntityType, targetId);
+        if (historicalLocation.isPresent()) {
+            return OptionalLong.of(historicalLocation.get().getId());
+        } else {
+            return OptionalLong.empty();
+        }
     }
-
+    
     @Override
     public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return this.getRelatedEntity(sourceId, sourceEntityType, null);
     }
 
     @Override
     public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Optional<DataEntity<?>> observation = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
+        if (observation.isPresent()) {
+            return mapper.createEntity(observation.get());
+        } else {
+            return null;
+        }
+    }
+    
+    /**
+     * Retrieves Observation Entity with Relation to sourceEntity from Database.
+     * Returns empty if Observation is not found or Entities are not related.
+     * 
+     * @param sourceId Id of the Source Entity
+     * @param sourceEntityType Type of the Source Entity
+     * @param targetId Id of the Thing to be retrieved
+     * @return Optional<DataEntity<?>> Requested Entity
+     */
+    private Optional<DataEntity<?>> getRelatedEntityRaw(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+        BooleanExpression filter;
+        switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
+            case "iot.Datastream": {
+                filter = oQS.getDatastreamEntityById(sourceId);
+                break;
+            }
+            case "iot.FeatureOfInterest": {
+                filter = oQS.getDatastreamEntityById(sourceId);
+                break;
+            }
+            default: return Optional.empty();
+        }
+
+        if (targetId != null) {
+            filter = filter.and(oQS.matchesId(targetId));
+        }
+        return (Optional<DataEntity< ? >>) repository.findOne(filter);
+        
     }
 }

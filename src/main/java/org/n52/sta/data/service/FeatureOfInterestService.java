@@ -36,10 +36,10 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.server.api.uri.UriParameter;
-import org.n52.series.db.ProcedureRepository;
-import org.n52.series.db.beans.ProcedureEntity;
-import org.n52.sta.data.query.SensorQuerySpecifications;
-import org.n52.sta.mapping.SensorMapper;
+import org.n52.series.db.FeatureRepository;
+import org.n52.series.db.beans.FeatureEntity;
+import org.n52.sta.data.query.FeatureOfInterestQuerySpecifications;
+import org.n52.sta.mapping.FeatureOfInterestMapper;
 import org.springframework.stereotype.Component;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -50,13 +50,13 @@ import com.querydsl.core.types.dsl.BooleanExpression;
  *
  */
 @Component
-public class SensorService implements AbstractSensorThingsEntityService {
+public class FeatureOfInterestService implements AbstractSensorThingsEntityService {
 
-    private ProcedureRepository repository;
-    
-    private SensorMapper mapper;
-    
-    private final static SensorQuerySpecifications sQS = new SensorQuerySpecifications();
+    private FeatureRepository repository;
+
+    private FeatureOfInterestMapper mapper;
+
+    private final static FeatureOfInterestQuerySpecifications foiQS = new FeatureOfInterestQuerySpecifications();
 
     //TODO: remove deprecated Methods
     @Override
@@ -68,7 +68,7 @@ public class SensorService implements AbstractSensorThingsEntityService {
     @Override
     public EntityCollection getRelatedEntityCollection(Entity sourceEntity) {throw new UnsupportedOperationException("Not supported anymore.");}
 
-    public SensorService(ProcedureRepository repository, SensorMapper mapper) {
+    public FeatureOfInterestService(FeatureRepository repository, FeatureOfInterestMapper mapper) {
         this.repository = repository;
         this.mapper = mapper;
     }
@@ -79,13 +79,13 @@ public class SensorService implements AbstractSensorThingsEntityService {
         repository.findAll().forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
-    
+
     @Override
     public Entity getEntity(Long id) {
-        Optional<ProcedureEntity> entity = repository.findById(Long.valueOf(id));
+        Optional<FeatureEntity> entity = repository.findById(Long.valueOf(id));
         return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
- 
+
     @Override
     public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType) {
         return null;
@@ -95,7 +95,7 @@ public class SensorService implements AbstractSensorThingsEntityService {
     public boolean existsEntity(Long id) {
         return repository.existsById(id);
     }
-    
+
     @Override
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
         return this.existsRelatedEntity(sourceId, sourceEntityType, null);
@@ -103,33 +103,33 @@ public class SensorService implements AbstractSensorThingsEntityService {
 
     @Override
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-      switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-          case "iot.Datastream": {
-              BooleanExpression filter = sQS.getDatastreamEntityById(sourceId);
-              if (targetId != null) {
-                  filter = filter.and(sQS.matchesId(targetId));
-              }
-              return repository.exists(filter);
-              }
-          default: return false;
-          }
+        switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
+        case "iot.Observation": {
+            BooleanExpression filter = foiQS.getObservationEntityById(sourceId);
+            if (targetId != null) {
+                filter = filter.and(foiQS.matchesId(targetId));
+            }
+            return repository.exists(filter);
+        }
+        default: return false;
+        }
     }
 
     @Override
     public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
         return this.getIdForRelatedEntity(sourceId, sourceEntityType, null);
     }
-    
+
     @Override
     public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-        Optional<ProcedureEntity> sensor = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
-        if (sensor.isPresent()) {
-            return OptionalLong.of(sensor.get().getId());
+        Optional<FeatureEntity> foi = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
+        if (foi.isPresent()) {
+            return OptionalLong.of(foi.get().getId());
         } else {
             return OptionalLong.empty();
         }
     }
-    
+
     @Override
     public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
         return this.getRelatedEntity(sourceId, sourceEntityType, null);
@@ -137,35 +137,35 @@ public class SensorService implements AbstractSensorThingsEntityService {
 
     @Override
     public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-        Optional<ProcedureEntity> sensor = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
-        if (sensor.isPresent()) {
-            return mapper.createEntity(sensor.get());
+        Optional<FeatureEntity> feature = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
+        if (feature.isPresent()) {
+            return mapper.createEntity(feature.get());
         } else {
             return null;
         }
     }
-    
+
     /**
-     * Retrieves Sensor Entity (aka Procedure Entity) with Relation to sourceEntity from Database.
-     * Returns empty if Sensor is not found or Entities are not related.
+     * Retrieves FeatureOfInterest Entity (aka Feature Entity) with Relation to sourceEntity from Database.
+     * Returns empty if Feature is not found or Entities are not related.
      * 
      * @param sourceId Id of the Source Entity
      * @param sourceEntityType Type of the Source Entity
      * @param targetId Id of the Entity to be retrieved
-     * @return Optional<ProcedureEntity> Requested Entity
+     * @return Optional<FeatureEntity> Requested Entity
      */
-    private Optional<ProcedureEntity> getRelatedEntityRaw(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+    private Optional<FeatureEntity> getRelatedEntityRaw(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         BooleanExpression filter;
         switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-            case "iot.Datastream": {
-                filter = sQS.getDatastreamEntityById(sourceId);
-                break;
-            }
-            default: return Optional.empty();
+        case "iot.Observation": {
+            filter = foiQS.getObservationEntityById(sourceId);
+            break;
         }
-        
+        default: return Optional.empty();
+        }
+
         if (targetId != null) {
-            filter = filter.and(sQS.matchesId(targetId));
+            filter = filter.and(foiQS.matchesId(targetId));
         }
         return repository.findOne(filter);
     }

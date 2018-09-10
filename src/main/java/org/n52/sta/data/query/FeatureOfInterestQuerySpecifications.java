@@ -28,8 +28,8 @@
  */
 package org.n52.sta.data.query;
 
-import org.n52.series.db.beans.DataEntity;
-import org.n52.series.db.beans.QDataEntity;
+import org.n52.series.db.beans.FeatureEntity;
+import org.n52.series.db.beans.QFeatureEntity;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
@@ -39,25 +39,21 @@ import com.querydsl.jpa.JPQLQuery;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
-public class ObservationQuerySpecifications extends EntityQuerySpecifications {
+public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecifications {
+
+    final QFeatureEntity qfeature = QFeatureEntity.featureEntity;
     
-    private final static QDataEntity qobservation= QDataEntity.dataEntity;
-    
-    public JPQLQuery<DataEntity<?>> toSubquery(final BooleanExpression filter) {
-        return JPAExpressions.selectFrom(qobservation)
-                             .where(filter);
+    public JPQLQuery<FeatureEntity> toSubquery(final BooleanExpression filter) {
+        return JPAExpressions.selectFrom(qfeature)
+                .where(filter);
     }
-    
+
     public <T> BooleanExpression selectFrom(JPQLQuery<T> subquery) {
-        return qobservation.id.in(subquery.select(qobservation.id));
+        return qfeature.id.in(subquery.select(qfeature.id));
     }
     
     public BooleanExpression matchesId(Long id) {
-        return qobservation.id.eq(id);
+        return  qfeature.id.eq(id);
     }
     
-    public BooleanExpression getFeatureOfInterestEntityById(Long id) {
-        DatastreamQuerySpecifications datastreamQS = new DatastreamQuerySpecifications();
-        return selectFrom(datastreamQS.toSubquery(datastreamQS.matchesId(id)));
-    }
 }
