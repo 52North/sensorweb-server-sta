@@ -23,6 +23,7 @@ public class EntityServiceRepository {
     private DatastreamService datastreamService;
     private ObservationService observationService;
     private ObservedPropertyService observedPropertyService;
+    private FeatureOfInterestService featureOfInterestService;
     
     public EntityServiceRepository(ThingService thingService,
                                    LocationService locationService,
@@ -30,7 +31,8 @@ public class EntityServiceRepository {
                                    SensorService sensorService,
                                    DatastreamService datastreamService,
                                    ObservationService observationService,
-                                   ObservedPropertyService observedPropertyService) {
+                                   ObservedPropertyService observedPropertyService,
+                                   FeatureOfInterestService featureOfInterestService) {
         this.thingService = thingService;
         this.locationService = locationService;
         this.historicalLocationService = historicalLocationService;
@@ -38,6 +40,7 @@ public class EntityServiceRepository {
         this.datastreamService = datastreamService;
         this.observationService = observationService;
         this.observedPropertyService = observedPropertyService;
+        this.featureOfInterestService = featureOfInterestService;
         
         final String message = "Unable to get Service Implementation: "; 
         Assert.notNull(thingService, message + thingService.getClass().getName());
@@ -47,6 +50,7 @@ public class EntityServiceRepository {
         Assert.notNull(datastreamService, message + datastreamService.getClass().getName());
         Assert.notNull(observationService, message + observationService.getClass().getName());
         Assert.notNull(observedPropertyService, message + observedPropertyService.getClass().getName());
+        Assert.notNull(featureOfInterestService, message + featureOfInterestService.getClass().getName());
     }
 
     /**
@@ -85,6 +89,10 @@ public class EntityServiceRepository {
             }
             case "ObservedProperty": {
                 entityService = observedPropertyService;
+                break;
+            }
+            case "FeatureOfInterest": {
+                entityService = featureOfInterestService;
                 break;
             }
             default: {
