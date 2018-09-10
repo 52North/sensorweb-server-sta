@@ -5,12 +5,12 @@
  */
 package org.n52.sta.utils;
 
-import java.util.List;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
-import org.apache.olingo.server.api.uri.UriParameter;
 
 /**
+ * Contains parameters that are required to determine the repsponse content for
+ * a specific request.
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */

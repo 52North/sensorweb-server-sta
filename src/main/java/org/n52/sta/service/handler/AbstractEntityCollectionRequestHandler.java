@@ -17,7 +17,7 @@ import org.n52.sta.service.response.EntityCollectionResponse;
 public interface AbstractEntityCollectionRequestHandler {
 
     /**
-     * Handle a request for a EntityCollection an creates a response
+     * Handles a request for a EntityCollection and creates a response
      *
      * @param uriInfo information for the EntityCollection request URI
      * @return response that contains data for the EntityCollection reponse

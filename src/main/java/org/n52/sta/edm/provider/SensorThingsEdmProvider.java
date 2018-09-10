@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
+import org.apache.olingo.commons.api.edm.provider.CsdlComplexType;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainerInfo;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
@@ -30,6 +31,9 @@ public class SensorThingsEdmProvider extends CsdlAbstractEdmProvider {
 
     @Autowired
     private SensorThingsEntityProviderRepository entityProviderRepository;
+
+    @Autowired
+    private SensorThingsComplexTypeProvider complexTypeProvider;
 
     // EDM Container
     public static final String CONTAINER_NAME = "sensorThingsEntitySets";
@@ -64,6 +68,9 @@ public class SensorThingsEdmProvider extends CsdlAbstractEdmProvider {
         // add EntityContainer
         schema.setEntityContainer(getEntityContainer());
 
+        // add ComplexTypes
+        schema.setComplexTypes(complexTypeProvider.getComplexTypes());
+
         // finally
         List<CsdlSchema> schemas = new ArrayList<CsdlSchema>();
         schemas.add(schema);
@@ -96,6 +103,11 @@ public class SensorThingsEdmProvider extends CsdlAbstractEdmProvider {
     public CsdlEntityType getEntityType(FullQualifiedName entityTypeName) throws ODataException {
         AbstractSensorThingsEntityProvider entityProvider = entityProviderRepository.getEntityProvider(entityTypeName);
         return entityProvider.getEntityType();
+    }
+
+    @Override
+    public CsdlComplexType getComplexType(FullQualifiedName complexTypeName) throws ODataException {
+        return complexTypeProvider.getComplexType(complexTypeName);
     }
 
 //    public void setEntityProviderRepository(SensorThingsEntityProviderRepository entityProviderRepository) {

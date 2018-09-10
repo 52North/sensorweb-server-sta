@@ -77,7 +77,7 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
         // set Entity response information
         EntityResponse response = new EntityResponse();
         response.setEntitySet(responseEntitySet);
-        response.setEntityCollection(responseEntity);
+        response.setEntity(responseEntity);
 
         return response;
     }
@@ -111,7 +111,7 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
         // set EntityCollection response information
         EntityResponse response = new EntityResponse();
         response.setEntitySet(requestParams.getTargetEntitySet());
-        response.setEntityCollection(responseEntity);
+        response.setEntity(responseEntity);
         return response;
     }
 }

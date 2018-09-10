@@ -19,12 +19,12 @@ public class EntityResponse {
 
     private EdmEntitySet entitySet;
 
-    public Entity getEntityCollection() {
+    public Entity getEntity() {
         return entity;
     }
 
-    public void setEntityCollection(Entity entityCollection) {
-        this.entity = entityCollection;
+    public void setEntity(Entity entity) {
+        this.entity = entity;
     }
 
     public EdmEntitySet getEntitySet() {

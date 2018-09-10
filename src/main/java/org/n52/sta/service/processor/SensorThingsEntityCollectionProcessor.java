@@ -9,8 +9,6 @@ import java.io.InputStream;
 
 import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.data.Entity;
-import org.apache.olingo.commons.api.data.EntityCollection;
-import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
@@ -27,7 +25,11 @@ import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
-import org.n52.sta.service.handler.EntityCollectionRequestHandlerImpl;
+import org.apache.olingo.server.api.uri.queryoption.CountOption;
+import org.n52.sta.service.handler.AbstractEntityCollectionRequestHandler;
+import org.n52.sta.service.query.handler.AbstractQueryOptionHandler;
+import org.n52.sta.service.query.handler.CountOptions;
+import org.n52.sta.service.query.handler.PropertySelectionOptions;
 import org.n52.sta.service.response.EntityCollectionResponse;
 import org.n52.sta.utils.EntityAnnotator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +45,10 @@ public class SensorThingsEntityCollectionProcessor implements EntityCollectionPr
     private static final ContentType ET_COLLECTION_PROCESSOR_CONTENT_TYPE = ContentType.JSON_NO_METADATA;
 
     @Autowired
-    EntityCollectionRequestHandlerImpl requestHandler;
+    AbstractEntityCollectionRequestHandler requestHandler;
+
+    @Autowired
+    AbstractQueryOptionHandler propertySelectionHandler;
 
     @Autowired
     EntityAnnotator entityAnnotator;
@@ -56,7 +61,7 @@ public class SensorThingsEntityCollectionProcessor implements EntityCollectionPr
 
         EntityCollectionResponse entityCollectionResponse = requestHandler.handleEntityCollectionRequest(uriInfo);
 
-        InputStream serializedContent = createResponseContent(entityCollectionResponse.getEntityCollection(), entityCollectionResponse.getEntitySet(), request.getRawBaseUri());
+        InputStream serializedContent = createResponseContent(entityCollectionResponse, uriInfo, request.getRawBaseUri());
 
         // configure the response object: set the body, headers and status code
         response.setContent(serializedContent);
@@ -68,25 +73,44 @@ public class SensorThingsEntityCollectionProcessor implements EntityCollectionPr
     public void init(OData odata, ServiceMetadata serviceMetadata) {
         this.odata = odata;
         this.serviceMetadata = serviceMetadata;
+        this.propertySelectionHandler.setUriHelper(odata.createUriHelper());
+
     }
 
-    private InputStream createResponseContent(EntityCollection responseEntityCollection, EdmEntitySet responseEdmEntitySet, String rawBaseUri) throws SerializerException {
+    private InputStream createResponseContent(EntityCollectionResponse response, UriInfo uriInfo, String rawBaseUri) throws SerializerException {
         // annotate the entities
-        for (Entity e : responseEntityCollection.getEntities()) {
-            entityAnnotator.annotateEntity(e, responseEdmEntitySet.getEntityType(), rawBaseUri);
+        for (Entity e : response.getEntityCollection().getEntities()) {
+            entityAnnotator.annotateEntity(e, response.getEntitySet().getEntityType(), rawBaseUri);
         }
 
-        // 3rd: create a serializer based on the requested format (json)
+        // create a serializer based on JSON format
         ODataSerializer serializer = odata.createSerializer(ET_COLLECTION_PROCESSOR_CONTENT_TYPE);
 
-        // and serialize the content: transform from the EntitySet object to InputStream
-        EdmEntityType edmEntityType = responseEdmEntitySet.getEntityType();
-        ContextURL contextUrl = ContextURL.with().entitySet(responseEdmEntitySet).build();
+        EdmEntityType edmEntityType = response.getEntitySet().getEntityType();
 
-        final String id = rawBaseUri + "/" + responseEdmEntitySet.getName();
+        //evaluate property selections
+        PropertySelectionOptions selectOptions = propertySelectionHandler.evaluatePropertySelectionOptions(uriInfo, edmEntityType);
+
+        //evaluate count options
+        CountOptions countOptions = propertySelectionHandler.evaluateCountOptions(uriInfo, response.getEntityCollection());
+        response.getEntityCollection().setCount(countOptions.getCount());
+
+        // serialize the content: transform from the EntitySet object to InputStream
+        ContextURL contextUrl = ContextURL.with()
+                .entitySet(response.getEntitySet())
+                .selectList(selectOptions.getSelectionList())
+                .build();
+
+        final String id = rawBaseUri + "/" + response.getEntitySet().getName();
         EntityCollectionSerializerOptions opts
-                = EntityCollectionSerializerOptions.with().id(id).contextURL(contextUrl).build();
-        SerializerResult serializerResult = serializer.entityCollection(serviceMetadata, edmEntityType, responseEntityCollection, opts);
+                = EntityCollectionSerializerOptions
+                        .with()
+                        .id(id)
+                        .contextURL(contextUrl)
+                        .select(selectOptions.getSelectOption())
+                        .count(countOptions.getCountOption())
+                        .build();
+        SerializerResult serializerResult = serializer.entityCollection(serviceMetadata, edmEntityType, response.getEntityCollection(), opts);
         InputStream serializedContent = serializerResult.getContent();
 
         return serializedContent;

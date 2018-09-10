@@ -40,6 +40,7 @@ import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
+import org.n52.sta.edm.provider.SensorThingsComplexTypeProvider;
 import static org.n52.sta.edm.provider.SensorThingsEdmConstants.*;
 import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ES_LOCATIONS_NAME;
 import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATION_FQN;
@@ -74,8 +75,9 @@ public class ThingEntityProvider extends AbstractSensorThingsEntityProvider {
         CsdlProperty id = new CsdlProperty().setName(ID_ANNOTATION).setType(EdmPrimitiveTypeKind.Int32.getFullQualifiedName());
         CsdlProperty name = new CsdlProperty().setName(PROP_NAME).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
         CsdlProperty description = new CsdlProperty().setName(PROP_DESCRIPTION).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        CsdlProperty properties = new CsdlProperty().setName(PROP_PROPERTIES).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+//        CsdlProperty properties = new CsdlProperty().setName(PROP_PROPERTIES).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
 
+        CsdlProperty properties = new CsdlProperty().setName(PROP_PROPERTIES).setType(SensorThingsComplexTypeProvider.CT_PROPERTIES_FQN);
         CsdlProperty selfLink = new CsdlProperty().setName(SELF_LINK_ANNOTATION).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
         CsdlProperty navLinkDatastreams = new CsdlProperty().setName(NAV_LINK_NAME_DATASTREAMS).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
         CsdlProperty navLinkLocations = new CsdlProperty().setName(NAV_LINK_NAME_LOCATIONS).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
@@ -121,6 +123,7 @@ public class ThingEntityProvider extends AbstractSensorThingsEntityProvider {
                 navLinkDatastreams,
                 navLinkLocations,
                 navLinkHistoricalLocations));
+        entityType.setOpenType(true);
         entityType.setKey(Collections.singletonList(propertyRef));
         entityType.setNavigationProperties(navPropList);
 

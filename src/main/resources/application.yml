@@ -40,6 +40,7 @@ spring:
         
 logging:
   level:
+    org.n52.sta: DEBUG
     org.hibernate: INFO
     org.hibernate.type: INFO
     org.hibernate.SQL: DEBUG
