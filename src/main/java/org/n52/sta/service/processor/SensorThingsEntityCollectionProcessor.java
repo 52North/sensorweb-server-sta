@@ -31,6 +31,7 @@ import org.n52.sta.service.query.handler.AbstractQueryOptionHandler;
 import org.n52.sta.service.query.handler.CountOptions;
 import org.n52.sta.service.query.handler.PropertySelectionOptions;
 import org.n52.sta.service.response.EntityCollectionResponse;
+import org.n52.sta.service.serializer.SensorThingsSerializer;
 import org.n52.sta.utils.EntityAnnotator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -84,7 +85,8 @@ public class SensorThingsEntityCollectionProcessor implements EntityCollectionPr
         }
 
         // create a serializer based on JSON format
-        ODataSerializer serializer = odata.createSerializer(ET_COLLECTION_PROCESSOR_CONTENT_TYPE);
+//        ODataSerializer serializer = odata.createSerializer(ET_COLLECTION_PROCESSOR_CONTENT_TYPE);
+        ODataSerializer serializer = new SensorThingsSerializer(ET_COLLECTION_PROCESSOR_CONTENT_TYPE);
 
         EdmEntityType edmEntityType = response.getEntitySet().getEntityType();
 

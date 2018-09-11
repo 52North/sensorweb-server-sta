@@ -93,8 +93,8 @@ import org.apache.olingo.server.core.uri.queryoption.ExpandOptionImpl;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.olingo.server.core.serializer.json.ODataErrorSerializer;
-import org.apache.olingo.server.core.serializer.json.ServiceDocumentJsonSerializer;
 
 public class SensorThingsSerializer extends AbstractODataSerializer {
 
@@ -692,6 +692,10 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
             } else if (property.isComplex()) {
                 if (edmProperty.isCollection()) {
                     writeComplexCollection(metadata, (EdmComplexType) type, property, selectedPaths, json);
+                } else if (((EdmComplexType) type).isOpenType()
+                        && (((EdmComplexType) type).getPropertyNames() == null
+                        || ((EdmComplexType) type).getPropertyNames().isEmpty())) {
+                    writeOpenTypeComplex(metadata, (EdmComplexType) type, property, selectedPaths, json);
                 } else {
                     writeComplex(metadata, (EdmComplexType) type, property, selectedPaths, json);
                 }
@@ -732,6 +736,35 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
         writeComplexValue(metadata, resolvedType, property.asComplex().getValue(), selectedPaths,
                 json);
         json.writeEndObject();
+    }
+
+    private void writeOpenTypeComplex(ServiceMetadata metadata, EdmComplexType type, Property property, Set<List<String>> selectedPaths, JsonGenerator json) throws SerializerException, IOException {
+        String derivedName = property.getType();
+        EdmComplexType resolvedType = null;
+        if (!type.getFullQualifiedName().getFullQualifiedNameAsString().
+                equals(derivedName)) {
+            if (type.getBaseType() != null
+                    && type.getBaseType().getFullQualifiedName().getFullQualifiedNameAsString().
+                            equals(derivedName)) {
+                resolvedType = resolveComplexType(metadata, type.getBaseType(),
+                        type.getFullQualifiedName().getFullQualifiedNameAsString());
+            } else {
+                resolvedType = resolveComplexType(metadata, type, derivedName);
+            }
+        } else {
+            resolvedType = resolveComplexType(metadata, type, derivedName);
+        }
+        if (!isODataMetadataNone && !resolvedType.equals(type) || isODataMetadataFull) {
+            json.writeStringField(Constants.JSON_TYPE, "#"
+                    + resolvedType.getFullQualifiedName().getFullQualifiedNameAsString());
+        }
+        if (property.getValue() instanceof ObjectNode) {
+            ObjectNode value = (ObjectNode) property.getValue();
+            json.writeRawValue(value.toString());
+        } else {
+            throw new SerializerException("Property type value not yet supported!",
+                    SerializerException.MessageKeys.UNSUPPORTED_PROPERTY_TYPE, property.getName());
+        }
     }
 
     private void writePrimitiveCollection(final EdmPrimitiveType type, final Property property,
