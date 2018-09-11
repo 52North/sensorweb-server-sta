@@ -29,27 +29,22 @@
 package org.n52.sta.mapping;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import java.util.Iterator;
-import java.util.Map.Entry;
-import org.apache.olingo.commons.api.data.ComplexValue;
+import java.io.IOException;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
-import org.apache.olingo.commons.api.edm.EdmEntityType;
-import org.n52.janmayen.Json;
-import org.n52.series.db.beans.sta.AbstractStaEntity;
 import org.n52.series.db.beans.sta.ThingEntity;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DESCRIPTION;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_NAME;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PROPERTIES;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.SELF_LINK_ANNOTATION;
 import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ES_THINGS_NAME;
 import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_FQN;
-import org.n52.sta.utils.EntityAnnotator;
 import org.n52.sta.utils.EntityCreationHelper;
+import org.n52.sta.utils.JsonHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 /**
@@ -59,17 +54,21 @@ import org.springframework.stereotype.Component;
 @Component
 public class ThingMapper {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ThingMapper.class);
+
     @Autowired
     EntityCreationHelper entityCreationHelper;
 
-//    @Autowired
-//    EntityAnnotator entityAnnotator;
+    @Autowired
+    JsonHelper jsonHelper;
+
     public Entity createEntity(ThingEntity thing) {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, thing.getId()));
         entity.addProperty(new Property(null, PROP_NAME, ValueType.PRIMITIVE, thing.getName()));
         entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, thing.getDescription()));
-        entity.addProperty(new Property(null, PROP_PROPERTIES, ValueType.COMPLEX, createProperties(thing.getProperties())));
+
+        entity.addProperty(new Property(null, PROP_PROPERTIES, ValueType.COMPLEX, createJsonProperty(thing)));
 
         entity.setType(ET_THING_FQN.getFullQualifiedNameAsString());
         entity.setId(entityCreationHelper.createId(entity, ES_THINGS_NAME, ID_ANNOTATION));
@@ -77,17 +76,19 @@ public class ThingMapper {
         return entity;
     }
 
-    public ComplexValue createProperties(String properties) {
-        ComplexValue value = new ComplexValue();
-        JsonNode propertyNode = Json.loadString(properties);
-        Iterator<Entry<String, JsonNode>> iterator = propertyNode.fields();
-        while (iterator.hasNext()) {
-            Entry<String, JsonNode> entry = iterator.next();
-            value.getValue().add(new Property(null, entry.getKey(), ValueType.PRIMITIVE, entry.getValue().asText()));
+    private JsonNode createJsonProperty(ThingEntity thing) {
+        JsonNode node = null;
+        try {
+            node = jsonHelper.readJsonString(thing.getProperties());
+        } catch (IOException ex) {
+            LOG.warn("Could not parse properties for ThingEntity: {}", thing.getId(), ex.getMessage());
+            LOG.debug(ex.getMessage(), ex);
+        } finally {
+            if (node == null) {
+                return jsonHelper.createEmptyObjectNode();
+            } else {
+                return node;
+            }
         }
-
-        return value;
-
     }
-
 }
