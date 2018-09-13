@@ -145,7 +145,7 @@ public class ObservedPropertyService implements AbstractSensorThingsEntityServic
         BooleanExpression filter;
         switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
             case "iot.Datastream": {
-                filter = oQS.getHistoricalLocationEntityById(sourceId);
+                filter = oQS.getDatastreamEntityById(sourceId);
                 break;
             }
             default: return Optional.empty();
