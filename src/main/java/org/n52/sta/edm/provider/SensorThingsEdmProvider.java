@@ -17,6 +17,7 @@ import org.apache.olingo.commons.api.edm.provider.CsdlEntityType;
 import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
 import org.apache.olingo.commons.api.ex.ODataException;
 import static org.n52.sta.edm.provider.SensorThingsEdmConstants.NAMESPACE;
+import org.n52.sta.edm.provider.complextypes.ComplexTypeRepository;
 import org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider;
 import org.n52.sta.edm.provider.entities.SensorThingsEntityProviderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,8 +111,4 @@ public class SensorThingsEdmProvider extends CsdlAbstractEdmProvider {
         return complexTypeProvider.getComplexType(complexTypeName);
     }
 
-//    public void setEntityProviderRepository(SensorThingsEntityProviderRepository entityProviderRepository) {
-//        this.entityProviderRepository = entityProviderRepository;
-//    }
-//    
 }
