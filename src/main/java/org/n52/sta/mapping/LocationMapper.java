@@ -28,6 +28,7 @@
  */
 package org.n52.sta.mapping;
 
+import org.apache.olingo.commons.api.data.ComplexValue;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DESCRIPTION;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ENCODINGTYPE;
@@ -36,19 +37,17 @@ import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvid
 import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ES_LOCATIONS_NAME;
 import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATION_FQN;
 
-import javax.json.Json;
-
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.n52.series.db.beans.sta.LocationEntity;
-//import org.n52.sta.utils.EntityAnnotator;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.vividsolutions.jts.geom.Coordinate;
-
+import org.apache.olingo.commons.api.edm.geo.Geospatial;
+import org.apache.olingo.commons.api.edm.geo.Point;
+import org.n52.sta.edm.provider.complextypes.FeatureComplexType;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -56,6 +55,8 @@ import com.vividsolutions.jts.geom.Coordinate;
  */
 @Component
 public class LocationMapper {
+
+    private static final String LOCATION_TYPE = "Feature";
 
     @Autowired
     EntityCreationHelper entityCreationHelper;
@@ -65,25 +66,25 @@ public class LocationMapper {
         entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, location.getId()));
         entity.addProperty(new Property(null, PROP_NAME, ValueType.PRIMITIVE, location.getName()));
         entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, location.getDescription()));
-
-        String geojson = "";
-//        Coordinate coord = location.getGeometry().getCoordinate();
-//        String geojson = Json.createObjectBuilder()
-//                .add("type", "Feature")
-//                .add("geometry", Json.createObjectBuilder()
-//                                     .add("type", location.getGeometry().getGeometryType())
-//                                     .add("coordinates", "[" + coord.x + "," + coord.y + "]"))
-//                .build()
-//                .toString();
-        
-        
-        entity.addProperty(new Property(null, PROP_LOCATION, ValueType.PRIMITIVE, geojson));
-        entity.addProperty(new Property(null, PROP_ENCODINGTYPE, ValueType.PRIMITIVE, "application/vnd.geo+json"));
+        entity.addProperty(new Property(null, PROP_LOCATION, ValueType.COMPLEX, resolveLocation(location)));
+        entity.addProperty(new Property(null, PROP_ENCODINGTYPE, ValueType.PRIMITIVE, location.getLocationEncoding().getEncodingType()));
 
         entity.setType(ET_LOCATION_FQN.getFullQualifiedNameAsString());
         entity.setId(entityCreationHelper.createId(entity, ES_LOCATIONS_NAME, ID_ANNOTATION));
 
         return entity;
+    }
+
+    private ComplexValue resolveLocation(LocationEntity location) {
+        Point point = new Point(Geospatial.Dimension.GEOMETRY, null);
+        point.setX(location.getGeometry().getCoordinate().x);
+        point.setY(location.getGeometry().getCoordinate().y);
+
+        ComplexValue value = new ComplexValue();
+        value.getValue().add(new Property(null, FeatureComplexType.PROP_TYPE, ValueType.PRIMITIVE, LOCATION_TYPE));
+        value.getValue().add(new Property(null, FeatureComplexType.PROP_GEOMETRY, ValueType.GEOSPATIAL, point));
+
+        return value;
 
     }
 
