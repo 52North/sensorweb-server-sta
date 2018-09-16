@@ -50,7 +50,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 public class LocationService implements AbstractSensorThingsEntityService {
 
     private LocationRepository repository;
-
+    
     private LocationMapper mapper;
     
     private final static LocationQuerySpecifications lQS= new LocationQuerySpecifications();
@@ -63,7 +63,7 @@ public class LocationService implements AbstractSensorThingsEntityService {
     @Override
     public EntityCollection getEntityCollection() {
         EntityCollection retEntitySet = new EntityCollection();
-        repository.findAll(lQS.isValidEntity()).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        repository.findAll().forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
     
@@ -76,19 +76,21 @@ public class LocationService implements AbstractSensorThingsEntityService {
     @Override
     public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType) {
         BooleanExpression filter;
+        Iterable<LocationEntity> locations;
         switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
             case "iot.HistoricalLocation": {
-                filter = lQS.getHistoricalLocationEntityById(sourceId);
+                filter = lQS.withRelatedHistoricalLocation(sourceId);
+                locations = repository.findAll(filter);
                 break;
             }
             case "iot.Thing": {
-                filter = lQS.getThingEntityById(sourceId);
+                filter = lQS.withRelatedThing(sourceId);
+                locations = repository.findAll(filter);               
                 break;
             }
             default: return null;
         }
         
-        Iterable<LocationEntity> locations = repository.findAll(filter);
         EntityCollection retEntitySet = new EntityCollection();
         locations.forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
@@ -109,17 +111,17 @@ public class LocationService implements AbstractSensorThingsEntityService {
         BooleanExpression filter;
         switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
             case "iot.Thing": {
-                filter = lQS.getThingEntityById(sourceId);
+                filter = lQS.withRelatedThing(sourceId);
                 break;
             }
             case "iot.HistoricalLocation": {
-                filter = lQS.getHistoricalLocationEntityById(sourceId);
+                filter = lQS.withRelatedHistoricalLocation(sourceId);
                 break;
             }
             default: return false;
         }
         if (targetId != null) {
-            filter = filter.and(lQS.matchesId(targetId));
+            filter = filter.and(lQS.withId(targetId));
         }
         return repository.exists(filter);
     }
@@ -167,18 +169,18 @@ public class LocationService implements AbstractSensorThingsEntityService {
         BooleanExpression filter;
         switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
             case "iot.HistoricalLocation": {
-                filter = lQS.getHistoricalLocationEntityById(sourceId);
+                filter = lQS.withRelatedHistoricalLocation(sourceId);
                 break;
             }
             case "iot.Thing": {
-                filter = lQS.getThingEntityById(sourceId);
+                filter = lQS.withRelatedThing(sourceId);
                 break;
             }
             default: return Optional.empty();
         }
         
         if (targetId != null) {
-            filter = filter.and(lQS.matchesId(targetId));
+            filter = filter.and(lQS.withId(targetId));
         }
         return repository.findOne(filter);
     }
@@ -190,6 +192,6 @@ public class LocationService implements AbstractSensorThingsEntityService {
      * @return BooleanExpression evaluating to true if Entity is found and valid
      */
     private BooleanExpression byId(Long id) {
-        return lQS.isValidEntity().and(lQS.matchesId(id));
+        return lQS.withId(id);
     }
 }

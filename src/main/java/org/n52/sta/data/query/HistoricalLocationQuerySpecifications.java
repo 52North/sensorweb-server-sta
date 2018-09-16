@@ -28,12 +28,9 @@
  */
 package org.n52.sta.data.query;
 
-import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.QHistoricalLocationEntity;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.JPAExpressions;
-import com.querydsl.jpa.JPQLQuery;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -43,16 +40,15 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
 
     final QHistoricalLocationEntity qhistoricallocation = QHistoricalLocationEntity.historicalLocationEntity;
 
-    public JPQLQuery<HistoricalLocationEntity> toSubquery(final BooleanExpression filter) {
-        return JPAExpressions.selectFrom(qhistoricallocation)
-                .where(filter);
-    }
-
-    public <T> BooleanExpression selectFrom(JPQLQuery<T> subquery) {
-        return qhistoricallocation.id.in(subquery.select(qhistoricallocation.id));
+    public BooleanExpression withRelatedLocation(Long historicalId) {
+        return qhistoricallocation.locationEntities.any().id.eq(historicalId);
     }
     
-    public BooleanExpression matchesId(Long id) {
+    public BooleanExpression withRelatedThing(Long thingId) {
+        return qhistoricallocation.thingEntity.id.eq(thingId);
+    }
+    
+    public BooleanExpression withId(Long id) {
         return  qhistoricallocation.id.eq(id);
     }
     

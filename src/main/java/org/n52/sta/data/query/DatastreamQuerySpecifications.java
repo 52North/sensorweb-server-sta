@@ -56,6 +56,10 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications {
         return  qdatastream.id.eq(id);
     }
     
+    public BooleanExpression withObservedProperty(Long observedPropertyid) {
+        return qdatastream.observableProperty.id.eq(observedPropertyid);
+    }
+    
     /**
      * Assures that Entity is valid.
      * Entity is valid if:

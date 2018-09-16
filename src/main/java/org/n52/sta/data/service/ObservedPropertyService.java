@@ -91,13 +91,13 @@ public class ObservedPropertyService implements AbstractSensorThingsEntityServic
     @Override
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
       switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-          case "iot.Datastream": {
-              BooleanExpression filter = oQS.getDatastreamEntityById(sourceId);
-              if (targetId != null) {
-                  filter = filter.and(oQS.matchesId(targetId));
-              }
-              return repository.exists(filter);
-              }
+//          case "iot.Datastream": {
+//              BooleanExpression filter = oQS.getDatastreamEntityById(sourceId);
+//              if (targetId != null) {
+//                  filter = filter.and(oQS.matchesId(targetId));
+//              }
+//              return repository.exists(filter);
+//              }
           default: return false;
           }
     }
@@ -144,17 +144,17 @@ public class ObservedPropertyService implements AbstractSensorThingsEntityServic
     private Optional<PhenomenonEntity> getRelatedEntityRaw(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         BooleanExpression filter;
         switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-            case "iot.Datastream": {
-                filter = oQS.getDatastreamEntityById(sourceId);
-                break;
-            }
+//            case "iot.Datastream": {
+//                filter = oQS.getDatastreamEntityById(sourceId);
+//                break;
+//            }
             default: return Optional.empty();
         }
-        
-        if (targetId != null) {
-            filter = filter.and(oQS.matchesId(targetId));
-        }
-        return repository.findOne(filter);
+//        
+//        if (targetId != null) {
+//            filter = filter.and(oQS.matchesId(targetId));
+//        }
+//        return repository.findOne(filter);
     }
     
     /**
