@@ -77,25 +77,25 @@ public class DatastreamService implements AbstractSensorThingsEntityService {
     public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType) {
         BooleanExpression filter;
         switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-            case "iot.Thing": {
-                filter = dQS.getThingEntityById(sourceId);
-                break;
-            }
-            case "iot.Sensor": {
-                filter = dQS.getSensorEntityById(sourceId);
-                break;
-            }
-            case "iot.ObservedProperty": {
-                filter = dQS.getObservedPropertyEntityById(sourceId);
-                break;
-            }
+//            case "iot.Thing": {
+//                filter = dQS.getThingEntityById(sourceId);
+//                break;
+//            }
+//            case "iot.Sensor": {
+//                filter = dQS.getSensorEntityById(sourceId);
+//                break;
+//            }
+//            case "iot.ObservedProperty": {
+//                filter = dQS.getObservedPropertyEntityById(sourceId);
+//                break;
+//            }
             default: return null;
         }
-        Iterable<DatastreamEntity> datastreams = repository.findAll(filter);
-        
-        EntityCollection retEntitySet = new EntityCollection();
-        datastreams.forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
-        return retEntitySet;
+//        Iterable<DatastreamEntity> datastreams = repository.findAll(filter);
+//        
+//        EntityCollection retEntitySet = new EntityCollection();
+//        datastreams.forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+//        return retEntitySet;
     }
 
     @Override
@@ -181,25 +181,25 @@ public class DatastreamService implements AbstractSensorThingsEntityService {
     private BooleanExpression getFilter(Long sourceId, EdmEntityType sourceEntityType) {
         BooleanExpression filter;
         switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-            case "iot.Thing": {
-                filter = dQS.getThingEntityById(sourceId);
-                break;
-            }
-            case "iot.Sensor": {
-                filter = dQS.getSensorEntityById(sourceId);
-                break;
-            }
-            case "iot.ObservedProperty": {
-                filter = dQS.getObservedPropertyEntityById(sourceId);
-                break;
-            }
-            case "iot.Observation": {
-                filter = dQS.getObservationEntityById(sourceId);
-                break;
-            }
+//            case "iot.Thing": {
+//                filter = dQS.getThingEntityById(sourceId);
+//                break;
+//            }
+//            case "iot.Sensor": {
+//                filter = dQS.getSensorEntityById(sourceId);
+//                break;
+//            }
+//            case "iot.ObservedProperty": {
+//                filter = dQS.getObservedPropertyEntityById(sourceId);
+//                break;
+//            }
+//            case "iot.Observation": {
+//                filter = dQS.getObservationEntityById(sourceId);
+//                break;
+//            }
             default: return null;
         }
-        return filter;
+//        return filter;
     }
     
     /**

@@ -16,7 +16,7 @@ spring:
     platform: postgres
     username: pgadmin
     password: pgadmin
-    url: jdbc:postgresql://localhost:5432/reference_db
+    url: jdbc:postgresql://localhost:5432/ets_sta10_2
     #data: classpath:/META-INF/data-${spring.datasource.platform}.sql
     initialization-mode: always
   jpa:
@@ -41,6 +41,6 @@ spring:
 logging:
   level:
     org.n52.sta: DEBUG
-    org.hibernate: TRACE
+    org.hibernate: INFO
     org.hibernate.type: INFO
-    org.hibernate.SQL: TRACE
+    org.hibernate.SQL: DEBUG

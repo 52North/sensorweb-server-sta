@@ -56,6 +56,10 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
         return qobservedproperty.id.eq(id);
     }
     
+    public BooleanExpression withDatastream(Long datastreamId) {
+        return qobservedproperty.id.in(dQS.toSubquery(qdatastream.id.eq(datastreamId)).select(qdatastream.observableProperty.id));
+    }
+    
     /**
      * Assures that Entity is valid.
      * Entity is valid if:
@@ -64,6 +68,6 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
      * @return BooleanExpression evaluating to true if Entity is valid
      */
     public BooleanExpression isValidEntity() {
-        return qobservedproperty.id.in(dQS.toSubquery(qdatastream.observableProperty.eq(qobservedproperty)).select(qobservedproperty.id));
+        return qobservedproperty.id.in(dQS.toSubquery(qdatastream.isNotNull()).select(qdatastream.observableProperty.id));
     }
 }

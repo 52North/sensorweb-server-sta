@@ -78,22 +78,22 @@ public class ObservationService implements AbstractSensorThingsEntityService {
     public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType) {
         BooleanExpression filter;
         switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-            case "iot.Datastream": {
-                filter = oQS.getDatastreamEntityById(sourceId);
-                break;
-            }
-            case "iot.FeatureOfInterest": {
-                filter = oQS.getDatastreamEntityById(sourceId);
-                break;
-            }
+//            case "iot.Datastream": {
+//                filter = oQS.getDatastreamEntityById(sourceId);
+//                break;
+//            }
+//            case "iot.FeatureOfInterest": {
+//                filter = oQS.getDatastreamEntityById(sourceId);
+//                break;
+//            }
             default: return null;
         }
         
-        //TODO: check cast
-        Iterable<DataEntity<?>> observations = (Iterable<DataEntity< ? >>) repository.findAll(filter);
-        EntityCollection retEntitySet = new EntityCollection();
-        observations.forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
-        return retEntitySet;
+//        //TODO: check cast
+//        Iterable<DataEntity<?>> observations = (Iterable<DataEntity< ? >>) repository.findAll(filter);
+//        EntityCollection retEntitySet = new EntityCollection();
+//        observations.forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+//        return retEntitySet;
     }
 
     @Override
@@ -110,20 +110,20 @@ public class ObservationService implements AbstractSensorThingsEntityService {
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         BooleanExpression filter;
         switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-            case "iot.Datastream": {
-                filter = oQS.getDatastreamEntityById(sourceId);
-                break;
-            }
-            case "iot.FeatureOfInterest": {
-                filter = oQS.getDatastreamEntityById(sourceId);
-                break;
-            }
+//            case "iot.Datastream": {
+//                filter = oQS.getDatastreamEntityById(sourceId);
+//                break;
+//            }
+//            case "iot.FeatureOfInterest": {
+//                filter = oQS.getDatastreamEntityById(sourceId);
+//                break;
+//            }
             default: return false;
         }
-        if (targetId != null) {
-            filter = filter.and(oQS.matchesId(targetId));
-        }
-        return repository.exists(filter);
+//        if (targetId != null) {
+//            filter = filter.and(oQS.matchesId(targetId));
+//        }
+//        return repository.exists(filter);
     }
 
     @Override
@@ -168,21 +168,21 @@ public class ObservationService implements AbstractSensorThingsEntityService {
     private Optional<DataEntity<?>> getRelatedEntityRaw(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         BooleanExpression filter;
         switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-            case "iot.Datastream": {
-                filter = oQS.getDatastreamEntityById(sourceId);
-                break;
-            }
-            case "iot.FeatureOfInterest": {
-                filter = oQS.getDatastreamEntityById(sourceId);
-                break;
-            }
+//            case "iot.Datastream": {
+//                filter = oQS.getDatastreamEntityById(sourceId);
+//                break;
+//            }
+//            case "iot.FeatureOfInterest": {
+//                filter = oQS.getDatastreamEntityById(sourceId);
+//                break;
+//            }
             default: return Optional.empty();
         }
 
-        if (targetId != null) {
-            filter = filter.and(oQS.matchesId(targetId));
-        }
-        return (Optional<DataEntity< ? >>) repository.findOne(filter);
+//        if (targetId != null) {
+//            filter = filter.and(oQS.matchesId(targetId));
+//        }
+//        return (Optional<DataEntity< ? >>) repository.findOne(filter);
     }
     
     /**

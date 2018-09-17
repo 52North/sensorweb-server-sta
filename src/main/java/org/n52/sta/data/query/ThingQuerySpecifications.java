@@ -28,12 +28,7 @@
  */
 package org.n52.sta.data.query;
 
-import org.n52.series.db.beans.sta.QThingEntity;
-import org.n52.series.db.beans.sta.ThingEntity;
-
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.JPAExpressions;
-import com.querydsl.jpa.JPQLQuery;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -41,29 +36,19 @@ import com.querydsl.jpa.JPQLQuery;
  */
 public class ThingQuerySpecifications extends EntityQuerySpecifications {
 
-    final QThingEntity qthing = QThingEntity.thingEntity;
-    
-    public JPQLQuery<ThingEntity> toSubquery(final BooleanExpression filter) {
-        return JPAExpressions.selectFrom(qthing)
-                             .where(filter);
+    public BooleanExpression withRelatedLocation(Long locationId) {
+        return qthing.locationEntities.any().id.eq(locationId);
     }
     
-    public <T> BooleanExpression selectFrom(JPQLQuery<T> subquery) {
-        return qthing.id.in(subquery.select(qthing.id));
+    public BooleanExpression withRelatedHistoricalLocation(Long historicalId) {
+        return qthing.historicalLocationEntities.any().id.eq(historicalId);
     }
     
-    public BooleanExpression matchesId(Long id) {
+    public BooleanExpression withRelatedDatastream(Long datastreamId) {
+        return qthing.datastreamEntities.any().id.eq(datastreamId);
+    }
+    
+    public BooleanExpression withId(Long id) {
         return qthing.id.eq(id);
-    }
-    
-    /**
-     * Assures that Entity is valid.
-     * Entity is valid if:
-     * - always
-     * 
-     * @return BooleanExpression evaluating to true if Entity is valid
-     */
-    public BooleanExpression isValidEntity() {
-        return istrue;
     }
 }

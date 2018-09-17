@@ -78,11 +78,11 @@ public class HistoricalLocationService implements AbstractSensorThingsEntityServ
         BooleanExpression filter;
         switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
             case "iot.Location": {
-                filter = hlQS.getLocationEntityById(sourceId);
+                filter = hlQS.withRelatedLocation(sourceId);
                 break;
             }
             case "iot.Thing": {
-                filter = hlQS.getThingEntityById(sourceId);
+                filter = hlQS.withRelatedThing(sourceId);
                 break;
             }
             default: return null;
@@ -109,18 +109,18 @@ public class HistoricalLocationService implements AbstractSensorThingsEntityServ
         BooleanExpression filter;
         switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
             case "iot.Location": {
-                filter = hlQS.getLocationEntityById(sourceId);
+                filter = hlQS.withRelatedLocation(sourceId);
                 break;
             }
             case "iot.Thing": {
-                filter = hlQS.getThingEntityById(sourceId);
+                filter = hlQS.withRelatedThing(sourceId);
                 break;
             }
 
         default: return false;
         }
         if (targetId != null) {
-            filter = filter.and(hlQS.matchesId(targetId));
+            filter = filter.and(hlQS.withId(targetId));
         }
         return repository.exists(filter);
     }
@@ -171,6 +171,6 @@ public class HistoricalLocationService implements AbstractSensorThingsEntityServ
      * @return BooleanExpression evaluating to true if Entity is found and valid
      */
     private BooleanExpression byId(Long id) {
-        return hlQS.isValidEntity().and(hlQS.matchesId(id));
+        return hlQS.withId(id);
     }
 }

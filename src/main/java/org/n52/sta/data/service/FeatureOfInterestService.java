@@ -92,13 +92,13 @@ public class FeatureOfInterestService implements AbstractSensorThingsEntityServi
     @Override
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-        case "iot.Observation": {
-            BooleanExpression filter = foiQS.getObservationEntityById(sourceId);
-            if (targetId != null) {
-                filter = filter.and(foiQS.matchesId(targetId));
-            }
-            return repository.exists(filter);
-        }
+//        case "iot.Observation": {
+//            BooleanExpression filter = foiQS.getObservationEntityById(sourceId);
+//            if (targetId != null) {
+//                filter = filter.and(foiQS.matchesId(targetId));
+//            }
+//            return repository.exists(filter);
+//        }
         default: return false;
         }
     }
@@ -145,17 +145,17 @@ public class FeatureOfInterestService implements AbstractSensorThingsEntityServi
     private Optional<FeatureEntity> getRelatedEntityRaw(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         BooleanExpression filter;
         switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-        case "iot.Observation": {
-            filter = foiQS.getObservationEntityById(sourceId);
-            break;
-        }
+//        case "iot.Observation": {
+//            filter = foiQS.getObservationEntityById(sourceId);
+//            break;
+//        }
         default: return Optional.empty();
         }
 
-        if (targetId != null) {
-            filter = filter.and(foiQS.matchesId(targetId));
-        }
-        return repository.findOne(filter);
+//        if (targetId != null) {
+//            filter = filter.and(foiQS.matchesId(targetId));
+//        }
+//        return repository.findOne(filter);
     }
     
     /**
