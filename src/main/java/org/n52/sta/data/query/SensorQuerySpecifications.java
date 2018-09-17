@@ -40,10 +40,9 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications {
 
     private final static QProcedureEntity qsensor = QProcedureEntity.procedureEntity;
 
-    public BooleanExpression matchesId(Long id) {
+    public BooleanExpression withId(Long id) {
         return qsensor.id.eq(id);
     }
-
     
     public BooleanExpression withDatastream(Long datastreamId) {
         return qsensor.id.in(dQS.toSubquery(qdatastream.id.eq(datastreamId)).select(qdatastream.procedure.id));

@@ -28,77 +28,29 @@
  */
 package org.n52.sta.data.query;
 
+import org.n52.series.db.beans.QDataEntity;
+import org.n52.series.db.beans.QDatasetEntity;
+import org.n52.series.db.beans.QFeatureEntity;
 import org.n52.series.db.beans.QProcedureEntity;
 import org.n52.series.db.beans.sta.QDatastreamEntity;
 import org.n52.series.db.beans.sta.QHistoricalLocationEntity;
 import org.n52.series.db.beans.sta.QLocationEntity;
 import org.n52.series.db.beans.sta.QThingEntity;
 
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.NumberPath;
-import com.querydsl.jpa.JPQLQuery;
-
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
 public abstract class EntityQuerySpecifications {
-
-    final static BooleanExpression istrue = Expressions.asBoolean(true).isTrue();
     
     final static DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
-    
     
     final static QDatastreamEntity qdatastream = QDatastreamEntity.datastreamEntity;
     final static QLocationEntity qlocation = QLocationEntity.locationEntity;
     final static QHistoricalLocationEntity qhistoricallocation = QHistoricalLocationEntity.historicalLocationEntity;
     final static QProcedureEntity qsensor = QProcedureEntity.procedureEntity;
-
-    final QThingEntity qthing = QThingEntity.thingEntity;
-     
-//    public abstract BooleanExpression isValidEntity();
-//
-//    private <T> BooleanExpression selectFrom(JPQLQuery<T> subquery, NumberPath<Long> element, NumberPath<Long> in) {
-//        return in.in(subquery.select(element));
-//    }
-//    
-//    public BooleanExpression getLocationEntityByThingId(Long id) {
-//        LocationQuerySpecifications locQS = new LocationQuerySpecifications();
-//        ThingQuerySpecifications thingQS = new ThingQuerySpecifications();
-//        
-//        return (thingQS.toSubquery(thingQS.matchesId(id)) .contains(qlocation));
-//    }
-//    
-//    public BooleanExpression getDatastreamEntityById(Long id) {
-//        DatastreamQuerySpecifications datastreamQS = new DatastreamQuerySpecifications();
-//        return selectFrom(datastreamQS.toSubquery(datastreamQS.matchesId(id))).and(isValidEntity());
-//    }
-//    
-//    public BooleanExpression getHistoricalLocationEntityById(Long id) {
-//        HistoricalLocationQuerySpecifications historicalLocationQS = new HistoricalLocationQuerySpecifications();
-//        return selectFrom(historicalLocationQS.toSubquery(historicalLocationQS.matchesId(id))).and(isValidEntity());
-//    }
-//    
-//    public BooleanExpression getThingEntityById(Long id) {
-//        ThingQuerySpecifications thingQS = new ThingQuerySpecifications();
-//        
-//        return (thingQS.test(thingQS.matchesId(id)).select(qthing.locationEntities));
-//    }
-//    
-//
-//    public BooleanExpression getSensorEntityById(Long id) {
-//        SensorQuerySpecifications sensorQS = new SensorQuerySpecifications();
-//        return selectFrom(sensorQS.toSubquery(sensorQS.matchesId(id))).and(isValidEntity());
-//    }
-//
-//    public BooleanExpression getObservedPropertyEntityById(Long id) {
-//        ObservedPropertyQuerySpecifications observedPropertyQS = new ObservedPropertyQuerySpecifications();
-//        return selectFrom(observedPropertyQS.toSubquery(observedPropertyQS.matchesId(id))).and(isValidEntity());
-//    }
-//    
-//    public BooleanExpression getObservationEntityById(Long id) {
-//        ObservationQuerySpecifications observationQS = new ObservationQuerySpecifications();
-//        return selectFrom(observationQS.toSubquery(observationQS.matchesId(id))).and(isValidEntity());
-//    }
+    final static QDataEntity qobservation = QDataEntity.dataEntity;
+    final static QFeatureEntity qfeature = QFeatureEntity.featureEntity;
+    final static QDatasetEntity qdataset = QDatasetEntity.datasetEntity;
+    final static QThingEntity qthing = QThingEntity.thingEntity;
 }

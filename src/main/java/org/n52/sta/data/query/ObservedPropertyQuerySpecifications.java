@@ -28,12 +28,9 @@
  */
 package org.n52.sta.data.query;
 
-import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.QPhenomenonEntity;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.JPAExpressions;
-import com.querydsl.jpa.JPQLQuery;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -42,17 +39,8 @@ import com.querydsl.jpa.JPQLQuery;
 public class ObservedPropertyQuerySpecifications extends EntityQuerySpecifications {
     
     private final static QPhenomenonEntity qobservedproperty = QPhenomenonEntity.phenomenonEntity;
-    
-    public JPQLQuery<PhenomenonEntity> toSubquery(final BooleanExpression filter) {
-        return JPAExpressions.selectFrom(qobservedproperty)
-                             .where(filter);
-    }
-    
-    public <T> BooleanExpression selectFrom(JPQLQuery<T> subquery) {
-        return qobservedproperty.id.in(subquery.select(qobservedproperty.id));
-    }
-    
-    public BooleanExpression matchesId(Long id) {
+        
+    public BooleanExpression withId(Long id) {
         return qobservedproperty.id.eq(id);
     }
     

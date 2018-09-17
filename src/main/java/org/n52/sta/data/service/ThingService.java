@@ -52,9 +52,9 @@ public class ThingService implements AbstractSensorThingsEntityService {
     private ThingMapper mapper;
 
     private ThingRepository repository;
-    
+
     private final static ThingQuerySpecifications tQS = new ThingQuerySpecifications();
-    
+
     public ThingService(ThingRepository repository, ThingMapper mapper) {
         this.repository = repository;
         this.mapper = mapper;
@@ -66,18 +66,18 @@ public class ThingService implements AbstractSensorThingsEntityService {
         repository.findAll().forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
-    
+
     @Override
     public Entity getEntity(Long id) {
         Optional<ThingEntity> entity = repository.findOne(tQS.withId(id));
         return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
- 
+
     @Override
     public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType) {
         BooleanExpression filter = tQS.withRelatedLocation(sourceId);
         Iterable<ThingEntity> things = repository.findAll(filter);
-        
+
         EntityCollection retEntitySet = new EntityCollection();
         things.forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
@@ -87,7 +87,7 @@ public class ThingService implements AbstractSensorThingsEntityService {
     public boolean existsEntity(Long id) {
         return repository.exists(tQS.withId(id));
     }
-    
+
     @Override
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
         return this.existsRelatedEntity(sourceId, sourceEntityType, null);
@@ -95,23 +95,23 @@ public class ThingService implements AbstractSensorThingsEntityService {
 
     @Override
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-      switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-          case "iot.Location": {
-              BooleanExpression filter = tQS.withRelatedLocation(sourceId);
-              if (targetId != null) {
-                  filter = filter.and(tQS.withId(targetId));
-              }
-              return repository.exists(filter);
-              }
-          default: return false;
-          }
+        switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
+        case "iot.Location": {
+            BooleanExpression filter = tQS.withRelatedLocation(sourceId);
+            if (targetId != null) {
+                filter = filter.and(tQS.withId(targetId));
+            }
+            return repository.exists(filter);
+        }
+        default: return false;
+        }
     }
 
     @Override
     public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
         return this.getIdForRelatedEntity(sourceId, sourceEntityType, null);
     }
-    
+
     @Override
     public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         Optional<ThingEntity> thing = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
@@ -121,7 +121,7 @@ public class ThingService implements AbstractSensorThingsEntityService {
             return OptionalLong.empty();
         }
     }
-    
+
     @Override
     public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
         return this.getRelatedEntity(sourceId, sourceEntityType, null);
@@ -136,7 +136,7 @@ public class ThingService implements AbstractSensorThingsEntityService {
             return null;
         }
     }
-    
+
     /**
      * Retrieves Thing Entity with Relation to sourceEntity from Database.
      * Returns empty if Thing is not found or Entities are not related.
@@ -149,21 +149,21 @@ public class ThingService implements AbstractSensorThingsEntityService {
     private Optional<ThingEntity> getRelatedEntityRaw(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         BooleanExpression filter;
         switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-            case "iot.HistoricalLocation": {
-                filter = tQS.withRelatedHistoricalLocation(sourceId);
-                break;
-            }
-            case "iot.Datastream": {
-                filter = tQS.withRelatedDatastream(sourceId);
-                break;
-            }
-            case "iot.Location": {
-                filter = tQS.withRelatedLocation(sourceId);
-                break;
-            }
-            default: return Optional.empty();
+        case "iot.HistoricalLocation": {
+            filter = tQS.withRelatedHistoricalLocation(sourceId);
+            break;
         }
-        
+        case "iot.Datastream": {
+            filter = tQS.withRelatedDatastream(sourceId);
+            break;
+        }
+        case "iot.Location": {
+            filter = tQS.withRelatedLocation(sourceId);
+            break;
+        }
+        default: return Optional.empty();
+        }
+
         if (targetId != null) {
             filter = filter.and(tQS.withId(targetId));
         }

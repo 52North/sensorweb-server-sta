@@ -92,13 +92,13 @@ public class FeatureOfInterestService implements AbstractSensorThingsEntityServi
     @Override
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-//        case "iot.Observation": {
-//            BooleanExpression filter = foiQS.getObservationEntityById(sourceId);
-//            if (targetId != null) {
-//                filter = filter.and(foiQS.matchesId(targetId));
-//            }
-//            return repository.exists(filter);
-//        }
+        case "iot.Observation": {
+            BooleanExpression filter = foiQS.withObservation(sourceId);
+            if (targetId != null) {
+                filter = filter.and(foiQS.withId(targetId));
+            }
+            return repository.exists(filter);
+        }
         default: return false;
         }
     }
@@ -145,19 +145,19 @@ public class FeatureOfInterestService implements AbstractSensorThingsEntityServi
     private Optional<FeatureEntity> getRelatedEntityRaw(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         BooleanExpression filter;
         switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-//        case "iot.Observation": {
-//            filter = foiQS.getObservationEntityById(sourceId);
-//            break;
-//        }
+        case "iot.Observation": {
+            filter = foiQS.withObservation(sourceId);
+            break;
+        }
         default: return Optional.empty();
         }
 
-//        if (targetId != null) {
-//            filter = filter.and(foiQS.matchesId(targetId));
-//        }
-//        return repository.findOne(filter);
+        if (targetId != null) {
+            filter = filter.and(foiQS.withId(targetId));
+        }
+        return repository.findOne(filter);
     }
-    
+
     /**
      * Constructs SQL Expression to request Entity by ID.
      * 
@@ -165,6 +165,6 @@ public class FeatureOfInterestService implements AbstractSensorThingsEntityServi
      * @return BooleanExpression evaluating to true if Entity is found and valid
      */
     private BooleanExpression byId(Long id) {
-        return foiQS.isValidEntity().and(foiQS.matchesId(id));
+        return foiQS.isValidEntity().and(foiQS.withId(id));
     }
 }

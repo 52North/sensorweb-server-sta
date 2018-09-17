@@ -51,16 +51,4 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
     public BooleanExpression withId(Long id) {
         return  qhistoricallocation.id.eq(id);
     }
-    
-    /**
-     * Assures that Entity is valid.
-     * Entity is valid if:
-     * - always
-     * 
-     * @return BooleanExpression evaluating to true if Entity is valid
-     */
-    public BooleanExpression isValidEntity() {
-        return istrue;
-    }
-    
 }

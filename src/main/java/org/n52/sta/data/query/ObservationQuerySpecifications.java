@@ -28,13 +28,8 @@
  */
 package org.n52.sta.data.query;
 
-import org.n52.series.db.beans.DataEntity;
-import org.n52.series.db.beans.QDataEntity;
-import org.n52.series.db.beans.sta.QDatastreamEntity;
-
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
-import com.querydsl.jpa.JPQLQuery;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -42,26 +37,22 @@ import com.querydsl.jpa.JPQLQuery;
  */
 public class ObservationQuerySpecifications extends EntityQuerySpecifications {
     
-    private final static QDataEntity qobservation = QDataEntity.dataEntity;
-    private final static QDatastreamEntity qdatastream = QDatastreamEntity.datastreamEntity;
-    
-    private final static FeatureOfInterestQuerySpecifications foiQS = new FeatureOfInterestQuerySpecifications(); 
-    
-    public JPQLQuery<DataEntity<?>> toSubquery(final BooleanExpression filter) {
-        return JPAExpressions.selectFrom(qobservation)
-                             .where(filter);
-    }
-    
-    public <T> BooleanExpression selectFrom(JPQLQuery<T> subquery) {
-        return qobservation.id.in(subquery.select(qobservation.id));
-    }
-    
-    public BooleanExpression matchesId(Long id) {
+    public BooleanExpression withId(Long id) {
         return qobservation.id.eq(id);
     }
     
-    public BooleanExpression getFeatureOfInterestEntityById(Long id) {
-        return selectFrom(foiQS.toSubquery(foiQS.matchesId(id))).and(isValidEntity());
+    public BooleanExpression withFeatureOfInterest(Long featureId) {
+        return qobservation.dataset.id.in(JPAExpressions
+                                          .selectFrom(qdataset)
+                                          .where(qdataset.feature.id.eq(featureId))
+                                          .select(qdataset.id));
+    }
+    
+    public BooleanExpression withDatastream(Long datastreamId) {
+        return qobservation.dataset.id.in(JPAExpressions
+                                          .selectFrom(qdatastream)
+                                          .where(qdatastream.datasets.any().id.eq(datastreamId))
+                                          .select(qdatastream.datasets.any().id));
     }
     
     /**
@@ -72,6 +63,6 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications {
      * @return BooleanExpression evaluating to true if Entity is valid
      */
     public BooleanExpression isValidEntity() {
-        return qobservation.id.in(dQS.toSubquery(qdatastream.datasets.contains(qobservation.dataset)).select(qobservation.id));
+        return qobservation.dataset.id.in(dQS.toSubquery(qdatastream.datasets.contains(qobservation.dataset)).select(qdatastream.datasets.any().id));
     }
 }

@@ -5,13 +5,11 @@
  */
 package org.n52.sta.data.service;
 
-import java.util.List;
-import java.util.Optional;
 import java.util.OptionalLong;
+
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
-import org.apache.olingo.server.api.uri.UriParameter;
 
 /**
  * Interface for requesting Sensor Things entities

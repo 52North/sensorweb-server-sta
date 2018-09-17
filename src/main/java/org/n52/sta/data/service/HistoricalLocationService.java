@@ -52,42 +52,42 @@ public class HistoricalLocationService implements AbstractSensorThingsEntityServ
     private HistoricalLocationRepository repository;
 
     private HistoricalLocationMapper mapper;
-    
+
     private HistoricalLocationQuerySpecifications hlQS = new HistoricalLocationQuerySpecifications();
-    
+
     public HistoricalLocationService(HistoricalLocationRepository repository, HistoricalLocationMapper mapper) {
         this.repository = repository;
         this.mapper = mapper;
     }
-    
+
     @Override
     public EntityCollection getEntityCollection() {
         EntityCollection retEntitySet = new EntityCollection();
-        repository.findAll(hlQS.isValidEntity()).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        repository.findAll().forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
-    
+
     @Override
     public Entity getEntity(Long id) {
         Optional<HistoricalLocationEntity> entity = repository.findOne(byId(id));
         return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
- 
+
     @Override
     public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType) {
         BooleanExpression filter;
         switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-            case "iot.Location": {
-                filter = hlQS.withRelatedLocation(sourceId);
-                break;
-            }
-            case "iot.Thing": {
-                filter = hlQS.withRelatedThing(sourceId);
-                break;
-            }
-            default: return null;
+        case "iot.Location": {
+            filter = hlQS.withRelatedLocation(sourceId);
+            break;
         }
-        
+        case "iot.Thing": {
+            filter = hlQS.withRelatedThing(sourceId);
+            break;
+        }
+        default: return null;
+        }
+
         Iterable<HistoricalLocationEntity> locations = repository.findAll(filter);
         EntityCollection retEntitySet = new EntityCollection();
         locations.forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
@@ -98,7 +98,7 @@ public class HistoricalLocationService implements AbstractSensorThingsEntityServ
     public boolean existsEntity(Long id) {
         return repository.exists(byId(id));
     }
-    
+
     @Override
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
         return this.existsRelatedEntity(sourceId, sourceEntityType, null);
@@ -108,14 +108,14 @@ public class HistoricalLocationService implements AbstractSensorThingsEntityServ
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         BooleanExpression filter;
         switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-            case "iot.Location": {
-                filter = hlQS.withRelatedLocation(sourceId);
-                break;
-            }
-            case "iot.Thing": {
-                filter = hlQS.withRelatedThing(sourceId);
-                break;
-            }
+        case "iot.Location": {
+            filter = hlQS.withRelatedLocation(sourceId);
+            break;
+        }
+        case "iot.Thing": {
+            filter = hlQS.withRelatedThing(sourceId);
+            break;
+        }
 
         default: return false;
         }
@@ -129,7 +129,7 @@ public class HistoricalLocationService implements AbstractSensorThingsEntityServ
     public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
         return this.getIdForRelatedEntity(sourceId, sourceEntityType, null);
     }
-    
+
     @Override
     public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         Optional<HistoricalLocationEntity> historicalLocation = this.getRelatedEntityRaw(targetId, sourceEntityType, targetId);
@@ -139,7 +139,7 @@ public class HistoricalLocationService implements AbstractSensorThingsEntityServ
             return OptionalLong.empty();
         }
     }
-    
+
     @Override
     public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
         return null;
@@ -149,7 +149,7 @@ public class HistoricalLocationService implements AbstractSensorThingsEntityServ
     public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         return null;
     }
-    
+
     /**
      * Retrieves HistoricalLocation Entity with Relation to sourceEntity from Database.
      * Returns empty if HistoricalLocation is not found or Entities are not related.
@@ -163,7 +163,7 @@ public class HistoricalLocationService implements AbstractSensorThingsEntityServ
         // In Theory there are only related Collections
         return Optional.empty();
     }
-    
+
     /**
      * Constructs SQL Expression to request Entity by ID.
      * 

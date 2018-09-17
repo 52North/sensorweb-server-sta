@@ -66,13 +66,13 @@ public class ObservedPropertyService implements AbstractSensorThingsEntityServic
         repository.findAll(oQS.isValidEntity()).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
-    
+
     @Override
     public Entity getEntity(Long id) {
         Optional<PhenomenonEntity> entity = repository.findOne(byId(id));
         return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
- 
+
     @Override
     public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType) {
         return null;
@@ -82,7 +82,7 @@ public class ObservedPropertyService implements AbstractSensorThingsEntityServic
     public boolean existsEntity(Long id) {
         return repository.exists(byId(id));
     }
-    
+
     @Override
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
         return this.existsRelatedEntity(sourceId, sourceEntityType, null);
@@ -90,23 +90,23 @@ public class ObservedPropertyService implements AbstractSensorThingsEntityServic
 
     @Override
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-      switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-//          case "iot.Datastream": {
-//              BooleanExpression filter = oQS.getDatastreamEntityById(sourceId);
-//              if (targetId != null) {
-//                  filter = filter.and(oQS.matchesId(targetId));
-//              }
-//              return repository.exists(filter);
-//              }
-          default: return false;
-          }
+        switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
+        case "iot.Datastream": {
+            BooleanExpression filter = oQS.withDatastream(sourceId);
+            if (targetId != null) {
+                filter = filter.and(oQS.withId(targetId));
+            }
+            return repository.exists(filter);
+        }
+        default: return false;
+        }
     }
 
     @Override
     public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
         return this.getIdForRelatedEntity(sourceId, sourceEntityType, null);
     }
-    
+
     @Override
     public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         Optional<PhenomenonEntity> sensor = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
@@ -116,7 +116,7 @@ public class ObservedPropertyService implements AbstractSensorThingsEntityServic
             return OptionalLong.empty();
         }
     }
-    
+
     @Override
     public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
         return this.getRelatedEntity(sourceId, sourceEntityType, null);
@@ -131,7 +131,7 @@ public class ObservedPropertyService implements AbstractSensorThingsEntityServic
             return null;
         }
     }
-    
+
     /**
      * Retrieves ObservedPropertyEntity (aka PhenomenonEntity) with Relation to sourceEntity from Database.
      * Returns empty if Entity is not found or Entities are not related.
@@ -144,19 +144,19 @@ public class ObservedPropertyService implements AbstractSensorThingsEntityServic
     private Optional<PhenomenonEntity> getRelatedEntityRaw(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         BooleanExpression filter;
         switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-//            case "iot.Datastream": {
-//                filter = oQS.getDatastreamEntityById(sourceId);
-//                break;
-//            }
-            default: return Optional.empty();
+        case "iot.Datastream": {
+            filter = oQS.withDatastream(sourceId);
+            break;
         }
-//        
-//        if (targetId != null) {
-//            filter = filter.and(oQS.matchesId(targetId));
-//        }
-//        return repository.findOne(filter);
+        default: return Optional.empty();
+        }
+        
+        if (targetId != null) {
+            filter = filter.and(oQS.withId(targetId));
+        }
+        return repository.findOne(filter);
     }
-    
+
     /**
      * Constructs SQL Expression to request Entity by ID.
      * 
@@ -164,6 +164,6 @@ public class ObservedPropertyService implements AbstractSensorThingsEntityServic
      * @return BooleanExpression evaluating to true if Entity is found and valid
      */
     private BooleanExpression byId(Long id) {
-        return oQS.isValidEntity().and(oQS.matchesId(id));
+        return oQS.isValidEntity().and(oQS.withId(id));
     }
 }
