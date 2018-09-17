@@ -52,7 +52,7 @@ public class DatastreamService implements AbstractSensorThingsEntityService {
     private DatastreamRepository repository;
 
     private DatastreamMapper mapper;
-    
+
     private final static DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
 
     public DatastreamService(DatastreamRepository repository, DatastreamMapper mapper) {
@@ -63,46 +63,46 @@ public class DatastreamService implements AbstractSensorThingsEntityService {
     @Override
     public EntityCollection getEntityCollection() {
         EntityCollection retEntitySet = new EntityCollection();
-        repository.findAll(dQS.isValidEntity()).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        repository.findAll().forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
-    
+
     @Override
     public Entity getEntity(Long id) {
         Optional<DatastreamEntity> entity = repository.findOne(byId(id));
         return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
- 
+
     @Override
     public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType) {
         BooleanExpression filter;
         switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-//            case "iot.Thing": {
-//                filter = dQS.getThingEntityById(sourceId);
-//                break;
-//            }
-//            case "iot.Sensor": {
-//                filter = dQS.getSensorEntityById(sourceId);
-//                break;
-//            }
-//            case "iot.ObservedProperty": {
-//                filter = dQS.getObservedPropertyEntityById(sourceId);
-//                break;
-//            }
-            default: return null;
+        case "iot.Thing": {
+            filter = dQS.withThing(sourceId);
+            break;
         }
-//        Iterable<DatastreamEntity> datastreams = repository.findAll(filter);
-//        
-//        EntityCollection retEntitySet = new EntityCollection();
-//        datastreams.forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
-//        return retEntitySet;
+        case "iot.Sensor": {
+            filter = dQS.withSensor(sourceId);
+            break;
+        }
+        case "iot.ObservedProperty": {
+            filter = dQS.withObservedProperty(sourceId);
+            break;
+        }
+        default: return null;
+        }
+        Iterable<DatastreamEntity> datastreams = repository.findAll(filter);
+
+        EntityCollection retEntitySet = new EntityCollection();
+        datastreams.forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        return retEntitySet;
     }
 
     @Override
     public boolean existsEntity(Long id) {
         return repository.exists(byId(id));
     }
-    
+
     @Override
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
         return this.existsRelatedEntity(sourceId, sourceEntityType, null);
@@ -124,7 +124,7 @@ public class DatastreamService implements AbstractSensorThingsEntityService {
     public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
         return this.getIdForRelatedEntity(sourceId, sourceEntityType, null);
     }
-    
+
     @Override
     public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         Optional<DatastreamEntity> thing = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
@@ -134,7 +134,7 @@ public class DatastreamService implements AbstractSensorThingsEntityService {
             return OptionalLong.empty();
         }
     }
-    
+
     @Override
     public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
         return this.getRelatedEntity(sourceId, sourceEntityType, null);
@@ -149,7 +149,7 @@ public class DatastreamService implements AbstractSensorThingsEntityService {
             return null;
         }
     }
-    
+
     /**
      * Retrieves Datastream Entity with Relation to sourceEntity from Database.
      * Returns empty if Entity is not found or Entities are not related.
@@ -164,13 +164,13 @@ public class DatastreamService implements AbstractSensorThingsEntityService {
         if (filter == null) {
             return Optional.empty();
         }
-        
+
         if (targetId != null) {
             filter = filter.and(dQS.matchesId(targetId));
         }
         return repository.findOne(filter);
     }
-    
+
     /**
      * Creates BooleanExpression to Filter Queries depending on source Entity Type
      * 
@@ -181,27 +181,27 @@ public class DatastreamService implements AbstractSensorThingsEntityService {
     private BooleanExpression getFilter(Long sourceId, EdmEntityType sourceEntityType) {
         BooleanExpression filter;
         switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-//            case "iot.Thing": {
-//                filter = dQS.getThingEntityById(sourceId);
-//                break;
-//            }
-//            case "iot.Sensor": {
-//                filter = dQS.getSensorEntityById(sourceId);
-//                break;
-//            }
-//            case "iot.ObservedProperty": {
-//                filter = dQS.getObservedPropertyEntityById(sourceId);
-//                break;
-//            }
-//            case "iot.Observation": {
-//                filter = dQS.getObservationEntityById(sourceId);
-//                break;
-//            }
-            default: return null;
+        case "iot.Thing": {
+            filter = dQS.withThing(sourceId);
+            break;
         }
-//        return filter;
+        case "iot.Sensor": {
+            filter = dQS.withSensor(sourceId);
+            break;
+        }
+        case "iot.ObservedProperty": {
+            filter = dQS.withObservedProperty(sourceId);
+            break;
+        }
+        case "iot.Observation": {
+            filter = dQS.withObservation(sourceId);
+            break;
+        }
+        default: return null;
+        }
+        return filter;
     }
-    
+
     /**
      * Constructs SQL Expression to request Entity by ID.
      * 
@@ -209,6 +209,6 @@ public class DatastreamService implements AbstractSensorThingsEntityService {
      * @return BooleanExpression evaluating to true if Entity is found and valid
      */
     private BooleanExpression byId(Long id) {
-        return dQS.isValidEntity().and(dQS.matchesId(id));
+        return dQS.matchesId(id);
     }
 }

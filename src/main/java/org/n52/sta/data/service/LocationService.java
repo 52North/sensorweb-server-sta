@@ -50,47 +50,47 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 public class LocationService implements AbstractSensorThingsEntityService {
 
     private LocationRepository repository;
-    
+
     private LocationMapper mapper;
-    
+
     private final static LocationQuerySpecifications lQS= new LocationQuerySpecifications();
 
     public LocationService(LocationRepository repository, LocationMapper mapper) {
         this.repository = repository;
         this.mapper = mapper;
     }
-    
+
     @Override
     public EntityCollection getEntityCollection() {
         EntityCollection retEntitySet = new EntityCollection();
         repository.findAll().forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
-    
+
     @Override
     public Entity getEntity(Long id) {
         Optional<LocationEntity> entity = repository.findOne(byId(id));
         return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
- 
+
     @Override
     public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType) {
         BooleanExpression filter;
         Iterable<LocationEntity> locations;
         switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-            case "iot.HistoricalLocation": {
-                filter = lQS.withRelatedHistoricalLocation(sourceId);
-                locations = repository.findAll(filter);
-                break;
-            }
-            case "iot.Thing": {
-                filter = lQS.withRelatedThing(sourceId);
-                locations = repository.findAll(filter);               
-                break;
-            }
-            default: return null;
+        case "iot.HistoricalLocation": {
+            filter = lQS.withRelatedHistoricalLocation(sourceId);
+            locations = repository.findAll(filter);
+            break;
         }
-        
+        case "iot.Thing": {
+            filter = lQS.withRelatedThing(sourceId);
+            locations = repository.findAll(filter);               
+            break;
+        }
+        default: return null;
+        }
+
         EntityCollection retEntitySet = new EntityCollection();
         locations.forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
@@ -100,7 +100,7 @@ public class LocationService implements AbstractSensorThingsEntityService {
     public boolean existsEntity(Long id) {
         return repository.exists(byId(id));
     }
-    
+
     @Override
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
         return this.existsRelatedEntity(sourceId, sourceEntityType, null);
@@ -110,15 +110,15 @@ public class LocationService implements AbstractSensorThingsEntityService {
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         BooleanExpression filter;
         switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-            case "iot.Thing": {
-                filter = lQS.withRelatedThing(sourceId);
-                break;
-            }
-            case "iot.HistoricalLocation": {
-                filter = lQS.withRelatedHistoricalLocation(sourceId);
-                break;
-            }
-            default: return false;
+        case "iot.Thing": {
+            filter = lQS.withRelatedThing(sourceId);
+            break;
+        }
+        case "iot.HistoricalLocation": {
+            filter = lQS.withRelatedHistoricalLocation(sourceId);
+            break;
+        }
+        default: return false;
         }
         if (targetId != null) {
             filter = filter.and(lQS.withId(targetId));
@@ -130,7 +130,7 @@ public class LocationService implements AbstractSensorThingsEntityService {
     public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
         return this.getIdForRelatedEntity(sourceId, sourceEntityType, null);
     }
-    
+
     @Override
     public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         Optional<LocationEntity> location = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
@@ -140,7 +140,7 @@ public class LocationService implements AbstractSensorThingsEntityService {
             return OptionalLong.empty();
         }
     }
-    
+
     @Override
     public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
         return this.getRelatedEntity(sourceId, sourceEntityType, null);
@@ -155,7 +155,7 @@ public class LocationService implements AbstractSensorThingsEntityService {
             return null;
         }
     }
-    
+
     /**
      * Retrieves Thing Entity with Relation to sourceEntity from Database.
      * Returns empty if Thing is not found or Entities are not related.
@@ -168,23 +168,23 @@ public class LocationService implements AbstractSensorThingsEntityService {
     private Optional<LocationEntity> getRelatedEntityRaw(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         BooleanExpression filter;
         switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-            case "iot.HistoricalLocation": {
-                filter = lQS.withRelatedHistoricalLocation(sourceId);
-                break;
-            }
-            case "iot.Thing": {
-                filter = lQS.withRelatedThing(sourceId);
-                break;
-            }
-            default: return Optional.empty();
+        case "iot.HistoricalLocation": {
+            filter = lQS.withRelatedHistoricalLocation(sourceId);
+            break;
         }
-        
+        case "iot.Thing": {
+            filter = lQS.withRelatedThing(sourceId);
+            break;
+        }
+        default: return Optional.empty();
+        }
+
         if (targetId != null) {
             filter = filter.and(lQS.withId(targetId));
         }
         return repository.findOne(filter);
     }
-    
+
     /**
      * Constructs SQL Expression to request Entity by ID.
      * 

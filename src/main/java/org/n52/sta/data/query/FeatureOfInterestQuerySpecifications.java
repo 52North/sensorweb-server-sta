@@ -28,12 +28,8 @@
  */
 package org.n52.sta.data.query;
 
-import org.n52.series.db.beans.FeatureEntity;
-import org.n52.series.db.beans.QFeatureEntity;
-
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
-import com.querydsl.jpa.JPQLQuery;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -41,21 +37,19 @@ import com.querydsl.jpa.JPQLQuery;
  */
 public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecifications {
 
-    final QFeatureEntity qfeature = QFeatureEntity.featureEntity;
-    
-    private static final ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
-    
-    public JPQLQuery<FeatureEntity> toSubquery(final BooleanExpression filter) {
-        return JPAExpressions.selectFrom(qfeature)
-                .where(filter);
-    }
-
-    public <T> BooleanExpression selectFrom(JPQLQuery<T> subquery) {
-        return qfeature.id.in(subquery.select(qfeature.id));
-    }
-    
-    public BooleanExpression matchesId(Long id) {
+    public BooleanExpression withId(Long id) {
         return  qfeature.id.eq(id);
+    }
+    
+    public BooleanExpression withObservation(Long observationId) {
+        return qfeature.id.in(JPAExpressions
+                              .selectFrom(qdataset)
+                              .where(qdataset.id.in(
+                                                    JPAExpressions
+                                                    .selectFrom(qobservation)
+                                                    .where(qobservation.id.eq(observationId))
+                                                    .select(qobservation.dataset.id)))
+                              .select(qdataset.feature.id));
     }
     
     /**
@@ -66,7 +60,10 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
      * @return BooleanExpression evaluating to true if Entity is valid
      */
     public BooleanExpression isValidEntity() {
-        return qfeature.id.in(oQS.toSubquery(oQS.isValidEntity()).select(qfeature.id));
+        return qfeature.id.in(JPAExpressions
+                              .selectFrom(qdataset)
+                              .where(qdataset.feature.isNotNull())
+                              .select(qdataset.feature.id));
     }
-    
+
 }

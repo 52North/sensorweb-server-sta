@@ -51,9 +51,9 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 public class SensorService implements AbstractSensorThingsEntityService {
 
     private ProcedureRepository repository;
-    
+
     private SensorMapper mapper;
-    
+
     private final static SensorQuerySpecifications sQS = new SensorQuerySpecifications();
 
     public SensorService(ProcedureRepository repository, SensorMapper mapper) {
@@ -67,13 +67,13 @@ public class SensorService implements AbstractSensorThingsEntityService {
         repository.findAll(sQS.isValidEntity()).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
-    
+
     @Override
     public Entity getEntity(Long id) {
         Optional<ProcedureEntity> entity = repository.findOne(byId(id));
         return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
- 
+
     @Override
     public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType) {
         return null;
@@ -83,7 +83,7 @@ public class SensorService implements AbstractSensorThingsEntityService {
     public boolean existsEntity(Long id) {
         return repository.exists(byId(id));
     }
-    
+
     @Override
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
         return this.existsRelatedEntity(sourceId, sourceEntityType, null);
@@ -91,23 +91,23 @@ public class SensorService implements AbstractSensorThingsEntityService {
 
     @Override
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-      switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-//          case "iot.Datastream": {
-//              BooleanExpression filter = sQS.getDatastreamEntityById(sourceId);
-//              if (targetId != null) {
-//                  filter = filter.and(sQS.matchesId(targetId));
-//              }
-//              return repository.exists(filter);
-//              }
-          default: return false;
-          }
+        switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
+        case "iot.Datastream": {
+            BooleanExpression filter = sQS.withDatastream(sourceId);
+            if (targetId != null) {
+                filter = filter.and(sQS.withId(targetId));
+            }
+            return repository.exists(filter);
+        }
+        default: return false;
+        }
     }
 
     @Override
     public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
         return this.getIdForRelatedEntity(sourceId, sourceEntityType, null);
     }
-    
+
     @Override
     public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         Optional<ProcedureEntity> sensor = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
@@ -117,7 +117,7 @@ public class SensorService implements AbstractSensorThingsEntityService {
             return OptionalLong.empty();
         }
     }
-    
+
     @Override
     public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
         return this.getRelatedEntity(sourceId, sourceEntityType, null);
@@ -132,7 +132,7 @@ public class SensorService implements AbstractSensorThingsEntityService {
             return null;
         }
     }
-    
+
     /**
      * Retrieves Sensor Entity (aka Procedure Entity) with Relation to sourceEntity from Database.
      * Returns empty if Sensor is not found or Entities are not related.
@@ -145,19 +145,19 @@ public class SensorService implements AbstractSensorThingsEntityService {
     private Optional<ProcedureEntity> getRelatedEntityRaw(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         BooleanExpression filter;
         switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-//            case "iot.Datastream": {
-//                filter = sQS.getDatastreamEntityById(sourceId);
-//                break;
-//            }
-            default: return Optional.empty();
+        case "iot.Datastream": {
+            filter = sQS.withDatastream(sourceId);
+            break;
         }
-//        
-//        if (targetId != null) {
-//            filter = filter.and(sQS.matchesId(targetId));
-//        }
-//        return repository.findOne(filter);
+        default: return Optional.empty();
+        }
+
+        if (targetId != null) {
+            filter = filter.and(sQS.withId(targetId));
+        }
+        return repository.findOne(filter);
     }
-    
+
     /**
      * Constructs SQL Expression to request Entity by ID.
      * 
@@ -165,6 +165,6 @@ public class SensorService implements AbstractSensorThingsEntityService {
      * @return BooleanExpression evaluating to true if Entity is found and valid
      */
     private BooleanExpression byId(Long id) {
-        return sQS.isValidEntity().and(sQS.matchesId(id));
+        return sQS.isValidEntity().and(sQS.withId(id));
     }
 }

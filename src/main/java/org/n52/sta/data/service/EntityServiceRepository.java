@@ -24,7 +24,7 @@ public class EntityServiceRepository {
     private ObservationService observationService;
     private ObservedPropertyService observedPropertyService;
     private FeatureOfInterestService featureOfInterestService;
-    
+
     public EntityServiceRepository(ThingService thingService,
                                    LocationService locationService,
                                    HistoricalLocationService historicalLocationService,
@@ -41,7 +41,7 @@ public class EntityServiceRepository {
         this.observationService = observationService;
         this.observedPropertyService = observedPropertyService;
         this.featureOfInterestService = featureOfInterestService;
-        
+
         final String message = "Unable to get Service Implementation: "; 
         Assert.notNull(thingService, message + thingService.getClass().getName());
         Assert.notNull(locationService, message + locationService.getClass().getName());
@@ -63,41 +63,41 @@ public class EntityServiceRepository {
         AbstractSensorThingsEntityService entityService = null;
 
         switch (entityTypeName) {
-            case "Thing": {
-                entityService = thingService;
-                break;
-            }
-            case "Location": {
-                entityService = locationService;
-                break;
-            }
-            case "HistoricalLocation": {
-                entityService = historicalLocationService;
-                break;
-            }
-            case "Sensor": {
-                entityService = sensorService;
-                break;
-            }
-            case "Datastream": {
-                entityService = datastreamService;
-                break;
-            }
-            case "Observation": {
-                entityService = observationService;
-                break;
-            }
-            case "ObservedProperty": {
-                entityService = observedPropertyService;
-                break;
-            }
-            case "FeatureOfInterest": {
-                entityService = featureOfInterestService;
-                break;
-            }
-            default: {
-                //TODO: check if we need to do error handling for invalid endpoints
-            }
+        case "Thing": {
+            entityService = thingService;
+            break;
+        }
+        case "Location": {
+            entityService = locationService;
+            break;
+        }
+        case "HistoricalLocation": {
+            entityService = historicalLocationService;
+            break;
+        }
+        case "Sensor": {
+            entityService = sensorService;
+            break;
+        }
+        case "Datastream": {
+            entityService = datastreamService;
+            break;
+        }
+        case "Observation": {
+            entityService = observationService;
+            break;
+        }
+        case "ObservedProperty": {
+            entityService = observedPropertyService;
+            break;
+        }
+        case "FeatureOfInterest": {
+            entityService = featureOfInterestService;
+            break;
+        }
+        default: {
+            //TODO: check if we need to do error handling for invalid endpoints
+        }
         }
         return entityService;
     }

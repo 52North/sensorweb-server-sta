@@ -47,27 +47,27 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications {
         return JPAExpressions.selectFrom(qdatastream)
                 .where(filter);
     }
-    
-    public <T> BooleanExpression selectFrom(JPQLQuery<T> subquery) {
-        return qdatastream.id.in(subquery.select(qdatastream.id));
-    }
-    
+
     public BooleanExpression matchesId(Long id) {
         return  qdatastream.id.eq(id);
     }
     
-    public BooleanExpression withObservedProperty(Long observedPropertyid) {
-        return qdatastream.observableProperty.id.eq(observedPropertyid);
+    public BooleanExpression withObservedProperty(Long observedPropertyId) {
+        return qdatastream.observableProperty.id.eq(observedPropertyId);
     }
     
-    /**
-     * Assures that Entity is valid.
-     * Entity is valid if:
-     * - always
-     * 
-     * @return BooleanExpression evaluating to true if Entity is valid
-     */
-    public BooleanExpression isValidEntity() {
-        return istrue;
+    public BooleanExpression withThing(Long thingId) {
+        return qdatastream.thing.id.eq(thingId);
+    }
+    
+    public BooleanExpression withSensor(Long sensorId) {
+        return qdatastream.procedure.id.eq(sensorId);
+    }
+
+    public BooleanExpression withObservation(Long observationId) {
+        return qdatastream.datasets.any().id.in(JPAExpressions
+                                          .selectFrom(qobservation)
+                                          .where(qobservation.id.eq(observationId))
+                                          .select(qobservation.dataset.id));
     }
 }
