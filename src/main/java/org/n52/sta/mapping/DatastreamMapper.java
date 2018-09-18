@@ -28,6 +28,9 @@
  */
 package org.n52.sta.mapping;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DESCRIPTION;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_NAME;
@@ -36,12 +39,19 @@ import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvid
 import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ES_DATASTREAMS_NAME;
 import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_FQN;
 
-import javax.json.Json;
+import org.apache.olingo.commons.api.data.ComplexValue;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
+import org.apache.olingo.commons.api.edm.geo.Geospatial;
+import org.apache.olingo.commons.api.edm.geo.Point;
+import org.apache.olingo.commons.api.edm.geo.Polygon;
+import org.n52.series.db.beans.GeometryEntity;
+import org.n52.series.db.beans.UnitEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.sta.edm.provider.complextypes.UnitOfMeasurementComplexType;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_OBSERVED_AREA;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -62,20 +72,40 @@ public class DatastreamMapper {
         entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, datastream.getDescription()));
         entity.addProperty(new Property(null, PROP_NAME, ValueType.PRIMITIVE, datastream.getName()));
         entity.addProperty(new Property(null, PROP_OBSERVATION_TYPE, ValueType.PRIMITIVE, datastream.getObservationType().getFormat()));
-      
-        String uom = "";
-//        String uom = Json.createObjectBuilder()
-//                .add("name", datastream.getUnitOfMeasurement().getName())
-//                .add("symbol", datastream.getUnitOfMeasurement().getSymbol())
-//                .add("definition", datastream.getUnitOfMeasurement().getLink())
-//                .build()
-//                .toString();
-        entity.addProperty(new Property(null, PROP_UOM, ValueType.PRIMITIVE, uom));
-        
+
+        entity.addProperty(new Property(null, PROP_UOM, ValueType.COMPLEX, resolveUnitOfMeasurement(datastream.getUnitOfMeasurement())));
+        entity.addProperty(new Property(null, PROP_OBSERVED_AREA, ValueType.GEOSPATIAL, resolveObservedArea(datastream.getGeometryEntity())));
+
         entity.setType(ET_DATASTREAM_FQN.getFullQualifiedNameAsString());
         entity.setId(entityCreationHelper.createId(entity, ES_DATASTREAMS_NAME, ID_ANNOTATION));
 
         return entity;
+    }
+
+    private ComplexValue resolveUnitOfMeasurement(UnitEntity uom) {
+        ComplexValue value = new ComplexValue();
+        if (uom != null) {
+            value.getValue().add(new Property(null, UnitOfMeasurementComplexType.PROP_NAME, ValueType.PRIMITIVE, uom.getName()));
+            value.getValue().add(new Property(null, UnitOfMeasurementComplexType.PROP_SYMBOL, ValueType.PRIMITIVE, uom.getSymbol()));
+            value.getValue().add(new Property(null, UnitOfMeasurementComplexType.PROP_DEFINITION, ValueType.PRIMITIVE, uom.getLink()));
+
+        }
+        return value;
+    }
+
+    private Polygon resolveObservedArea(GeometryEntity geometryEntity) {
+        Polygon polygon = null;
+        if (geometryEntity != null && geometryEntity.getGeometry().getGeometryType().equals("Polygon")) {
+            List<Point> points = Arrays.stream(geometryEntity.getGeometry().getCoordinates()).map(c -> {
+                Point p = new Point(Geospatial.Dimension.GEOMETRY, null);
+                p.setX(c.x);
+                p.setY(c.y);
+                return p;
+            }).collect(Collectors.toList());
+            polygon = new Polygon(Geospatial.Dimension.GEOMETRY, null, null, points);
+
+        }
+        return polygon;
     }
 
 }
