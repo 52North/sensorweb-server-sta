@@ -54,6 +54,9 @@ import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
+import org.n52.sta.edm.provider.complextypes.FeatureComplexType;
+import org.n52.sta.edm.provider.complextypes.UnitOfMeasurementComplexType;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_LOCATION;
 import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
 import org.springframework.stereotype.Component;
 
@@ -73,10 +76,10 @@ public class DatastreamEntityProvider extends AbstractSensorThingsEntityProvider
     public static final String ES_DATASTREAMS_NAME = "Datastreams";
 
     // Entity Navigation Property Names
-    private static final String NAV_LINK_NAME_THINGS = ES_THINGS_NAME + NAVIGATION_LINK_ANNOTATION;
-    private static final String NAV_LINK_NAME_SENSORS = ET_SENSOR_NAME + NAVIGATION_LINK_ANNOTATION;
+    private static final String NAV_LINK_NAME_THING = ET_THING_NAME + NAVIGATION_LINK_ANNOTATION;
+    private static final String NAV_LINK_NAME_SENSOR = ET_SENSOR_NAME + NAVIGATION_LINK_ANNOTATION;
     private static final String NAV_LINK_NAME_OBSERVED_PROPERTY = ET_OBSERVED_PROPERTY_NAME + NAVIGATION_LINK_ANNOTATION;
-    private static final String NAV_LINK_NAME_OBSERVATION = ET_OBSERVATION_NAME + NAVIGATION_LINK_ANNOTATION;
+    private static final String NAV_LINK_NAME_OBSERVATIONS = ES_OBSERVATIONS_NAME + NAVIGATION_LINK_ANNOTATION;
 
     @Override
     protected CsdlEntityType createEntityType() {
@@ -86,17 +89,20 @@ public class DatastreamEntityProvider extends AbstractSensorThingsEntityProvider
         CsdlProperty description = new CsdlProperty().setName(PROP_DESCRIPTION).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
 
         //TODO: Change to correct Type (JSON instead of String)
-        CsdlProperty unitOfMeasurement = new CsdlProperty().setName(PROP_UOM).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
         CsdlProperty observationType = new CsdlProperty().setName(PROP_OBSERVATION_TYPE).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        CsdlProperty observedArea = new CsdlProperty().setName(PROP_OBSERVED_AREA).setType(EdmPrimitiveTypeKind.Geometry.getFullQualifiedName());
         CsdlProperty phenomenonTime = new CsdlProperty().setName(PROP_PHENOMENON_TIME).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
         CsdlProperty resultTime = new CsdlProperty().setName(PROP_RESULT_TIME).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
 
+        //create EntityType complex properties
+        CsdlProperty unitOfMeasurement = new CsdlProperty().setName(PROP_UOM).setType(UnitOfMeasurementComplexType.CT_UOM_FQN);
+        CsdlProperty observedArea = new CsdlProperty().setName(PROP_OBSERVED_AREA).setType(EdmPrimitiveTypeKind.Geometry.getFullQualifiedName());
+
+        //create EntityType navigation links
         CsdlProperty selfLink = new CsdlProperty().setName(SELF_LINK_ANNOTATION).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        CsdlProperty navLinkThings = new CsdlProperty().setName(NAV_LINK_NAME_THINGS).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        CsdlProperty navLinkSensor = new CsdlProperty().setName(NAV_LINK_NAME_SENSORS).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+        CsdlProperty navLinkThings = new CsdlProperty().setName(NAV_LINK_NAME_THING).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+        CsdlProperty navLinkSensor = new CsdlProperty().setName(NAV_LINK_NAME_SENSOR).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
         CsdlProperty navLinkObservedProperty = new CsdlProperty().setName(NAV_LINK_NAME_OBSERVED_PROPERTY).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        CsdlProperty navLinkObservation = new CsdlProperty().setName(NAV_LINK_NAME_OBSERVATION).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+        CsdlProperty navLinkObservation = new CsdlProperty().setName(NAV_LINK_NAME_OBSERVATIONS).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
 
         // navigation property: Many optional to one mandatory
         CsdlNavigationProperty navPropThings = new CsdlNavigationProperty()

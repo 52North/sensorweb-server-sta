@@ -72,18 +72,11 @@ public class HistoricalLocationEntityProvider extends AbstractSensorThingsEntity
     protected CsdlEntityType createEntityType() {
         //create EntityType properties
         CsdlProperty id = new CsdlProperty().setName(ID_ANNOTATION).setType(EdmPrimitiveTypeKind.Int32.getFullQualifiedName());
-        CsdlProperty time = new CsdlProperty().setName(PROP_TIME).setType(EdmPrimitiveTypeKind.Date.getFullQualifiedName());
+        CsdlProperty time = new CsdlProperty().setName(PROP_TIME).setType(EdmPrimitiveTypeKind.DateTimeOffset.getFullQualifiedName());
 
         CsdlProperty selfLink = new CsdlProperty().setName(SELF_LINK_ANNOTATION).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
         CsdlProperty navLinkThing = new CsdlProperty().setName(NAV_LINK_NAME_THING).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
         CsdlProperty navLinkLocations = new CsdlProperty().setName(NAV_LINK_NAME_LOCATIONS).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-
-        // navigation property: many optional to one mandatory
-        CsdlNavigationProperty navPropThings = new CsdlNavigationProperty()
-                .setName(ET_THING_NAME)
-                .setType(ET_THING_FQN)
-                .setNullable(false)
-                .setPartner(ES_HISTORICAL_LOCATIONS_NAME);
 
         // navigation property: many optional to many mandatory
         CsdlNavigationProperty navPropLocations = new CsdlNavigationProperty()
@@ -92,8 +85,15 @@ public class HistoricalLocationEntityProvider extends AbstractSensorThingsEntity
                 .setCollection(true)
                 .setPartner(ES_HISTORICAL_LOCATIONS_NAME);
 
+        // navigation property: many optional to one mandatory
+        CsdlNavigationProperty navPropThings = new CsdlNavigationProperty()
+                .setName(ET_THING_NAME)
+                .setType(ET_THING_FQN)
+                .setNullable(false)
+                .setPartner(ES_HISTORICAL_LOCATIONS_NAME);
+
         List<CsdlNavigationProperty> navPropList = new ArrayList<CsdlNavigationProperty>();
-        navPropList.addAll(Arrays.asList(navPropThings, navPropLocations));
+        navPropList.addAll(Arrays.asList(navPropLocations, navPropThings));
 
         // create CsdlPropertyRef for Key element
         CsdlPropertyRef propertyRef = new CsdlPropertyRef();
@@ -116,15 +116,15 @@ public class HistoricalLocationEntityProvider extends AbstractSensorThingsEntity
         entitySet.setType(ET_HISTORICAL_LOCATION_FQN);
 
         CsdlNavigationPropertyBinding navPropLocationBinding = new CsdlNavigationPropertyBinding();
-        navPropLocationBinding.setPath(ET_THING_NAME); // the path from entity type to navigation property
-        navPropLocationBinding.setTarget(ES_THINGS_NAME); //target entitySet, where the nav prop points to
+        navPropLocationBinding.setPath(ES_LOCATIONS_NAME);
+        navPropLocationBinding.setTarget(ES_LOCATIONS_NAME);
 
-        CsdlNavigationPropertyBinding navPropHistoricalLocationBinding = new CsdlNavigationPropertyBinding();
-        navPropHistoricalLocationBinding.setPath(ES_LOCATIONS_NAME);
-        navPropHistoricalLocationBinding.setTarget(ES_LOCATIONS_NAME);
+        CsdlNavigationPropertyBinding navPropThingBinding = new CsdlNavigationPropertyBinding();
+        navPropThingBinding.setPath(ET_THING_NAME); // the path from entity type to navigation property
+        navPropThingBinding.setTarget(ES_THINGS_NAME); //target entitySet, where the nav prop points to
 
         List<CsdlNavigationPropertyBinding> navPropBindingList = new ArrayList<CsdlNavigationPropertyBinding>();
-        navPropBindingList.addAll(Arrays.asList(navPropLocationBinding, navPropHistoricalLocationBinding));
+        navPropBindingList.addAll(Arrays.asList(navPropLocationBinding, navPropThingBinding));
         entitySet.setNavigationPropertyBindings(navPropBindingList);
 
         return entitySet;
