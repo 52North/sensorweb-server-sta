@@ -20,29 +20,33 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class FeatureComplexType implements AbstractComplexType {
-
+    
     public static final String CT_FEATURE_NAME = "Feature";
     public static final FullQualifiedName CT_FEATURE_FQN = new FullQualifiedName(SensorThingsEdmConstants.NAMESPACE, CT_FEATURE_NAME);
     public static final String PROP_TYPE = "type";
     public static final String PROP_GEOMETRY = "geometry";
-
+    
     @Override
     public CsdlComplexType createComplexType() {
         CsdlComplexType complexType = new CsdlComplexType();
         complexType.setName(CT_FEATURE_FQN.getFullQualifiedNameAsString());
-
+        
         List<CsdlProperty> properties = new ArrayList();
-        properties.add(new CsdlProperty().setName(PROP_TYPE).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName()));
-        properties.add(new CsdlProperty().setName(PROP_GEOMETRY).setType(EdmPrimitiveTypeKind.Geometry.getFullQualifiedName()));
-
+        properties.add(new CsdlProperty().setName(PROP_TYPE)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(false));
+        properties.add(new CsdlProperty().setName(PROP_GEOMETRY)
+                .setType(EdmPrimitiveTypeKind.Geometry.getFullQualifiedName())
+                .setNullable(false));
+        
         complexType.setProperties(properties);
-
+        
         return complexType;
     }
-
+    
     @Override
     public FullQualifiedName getFullQualifiedTypeName() {
         return CT_FEATURE_FQN;
     }
-
+    
 }

@@ -78,16 +78,17 @@ public class LocationMapper {
 
     private ComplexValue resolveLocation(LocationEntity location) {
         //TODO: geometry creation dependend on the GeometryType
-        Point point = new Point(Geospatial.Dimension.GEOMETRY, null);
-        point.setX(location.getGeometry().getCoordinate().x);
-        point.setY(location.getGeometry().getCoordinate().y);
+        ComplexValue value = null;
+        if (location.getGeometry() != null) {
+            value = new ComplexValue();
+            Point point = new Point(Geospatial.Dimension.GEOMETRY, null);
+            point.setX(location.getGeometry().getCoordinate().x);
+            point.setY(location.getGeometry().getCoordinate().y);
 
-        ComplexValue value = new ComplexValue();
-        value.getValue().add(new Property(null, FeatureComplexType.PROP_TYPE, ValueType.PRIMITIVE, LOCATION_TYPE));
-        value.getValue().add(new Property(null, FeatureComplexType.PROP_GEOMETRY, ValueType.GEOSPATIAL, point));
-
+            value.getValue().add(new Property(null, FeatureComplexType.PROP_TYPE, ValueType.PRIMITIVE, LOCATION_TYPE));
+            value.getValue().add(new Property(null, FeatureComplexType.PROP_GEOMETRY, ValueType.GEOSPATIAL, point));
+        }
         return value;
-
     }
 
 }
