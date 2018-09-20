@@ -30,7 +30,6 @@ package org.n52.sta.edm.provider.entities;
 
 import static org.n52.sta.edm.provider.SensorThingsEdmConstants.NAMESPACE;
 import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ET_OBSERVATION_FQN;
-import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ET_OBSERVATION_NAME;
 import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ES_OBSERVATIONS_NAME;
 import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_FQN;
 import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_NAME;
@@ -54,9 +53,7 @@ import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
-import org.n52.sta.edm.provider.complextypes.FeatureComplexType;
 import org.n52.sta.edm.provider.complextypes.UnitOfMeasurementComplexType;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_LOCATION;
 import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
 import org.springframework.stereotype.Component;
 
@@ -84,25 +81,49 @@ public class DatastreamEntityProvider extends AbstractSensorThingsEntityProvider
     @Override
     protected CsdlEntityType createEntityType() {
         //create EntityType properties
-        CsdlProperty id = new CsdlProperty().setName(ID_ANNOTATION).setType(EdmPrimitiveTypeKind.Int32.getFullQualifiedName());
-        CsdlProperty name = new CsdlProperty().setName(PROP_NAME).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        CsdlProperty description = new CsdlProperty().setName(PROP_DESCRIPTION).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-
-        //TODO: Change to correct Type (JSON instead of String)
-        CsdlProperty observationType = new CsdlProperty().setName(PROP_OBSERVATION_TYPE).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        CsdlProperty phenomenonTime = new CsdlProperty().setName(PROP_PHENOMENON_TIME).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        CsdlProperty resultTime = new CsdlProperty().setName(PROP_RESULT_TIME).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+        CsdlProperty id = new CsdlProperty().setName(ID_ANNOTATION)
+                .setType(EdmPrimitiveTypeKind.Int32.getFullQualifiedName())
+                .setNullable(false);
+        CsdlProperty name = new CsdlProperty().setName(PROP_NAME)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(false);
+        CsdlProperty description = new CsdlProperty().setName(PROP_DESCRIPTION)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(false);
+        CsdlProperty observationType = new CsdlProperty().setName(PROP_OBSERVATION_TYPE)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(false);
+        CsdlProperty phenomenonTime = new CsdlProperty().setName(PROP_PHENOMENON_TIME)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(true);
+        CsdlProperty resultTime = new CsdlProperty().setName(PROP_RESULT_TIME)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(true);
 
         //create EntityType complex properties
-        CsdlProperty unitOfMeasurement = new CsdlProperty().setName(PROP_UOM).setType(UnitOfMeasurementComplexType.CT_UOM_FQN);
-        CsdlProperty observedArea = new CsdlProperty().setName(PROP_OBSERVED_AREA).setType(EdmPrimitiveTypeKind.Geometry.getFullQualifiedName());
+        CsdlProperty unitOfMeasurement = new CsdlProperty().setName(PROP_UOM)
+                .setType(UnitOfMeasurementComplexType.CT_UOM_FQN)
+                .setNullable(false);
+        CsdlProperty observedArea = new CsdlProperty().setName(PROP_OBSERVED_AREA)
+                .setType(EdmPrimitiveTypeKind.Geometry.getFullQualifiedName())
+                .setNullable(true);
 
         //create EntityType navigation links
-        CsdlProperty selfLink = new CsdlProperty().setName(SELF_LINK_ANNOTATION).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        CsdlProperty navLinkThings = new CsdlProperty().setName(NAV_LINK_NAME_THING).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        CsdlProperty navLinkSensor = new CsdlProperty().setName(NAV_LINK_NAME_SENSOR).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        CsdlProperty navLinkObservedProperty = new CsdlProperty().setName(NAV_LINK_NAME_OBSERVED_PROPERTY).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        CsdlProperty navLinkObservation = new CsdlProperty().setName(NAV_LINK_NAME_OBSERVATIONS).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+        CsdlProperty selfLink = new CsdlProperty().setName(SELF_LINK_ANNOTATION)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(false);
+        CsdlProperty navLinkThings = new CsdlProperty().setName(NAV_LINK_NAME_THING)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(false);
+        CsdlProperty navLinkSensor = new CsdlProperty().setName(NAV_LINK_NAME_SENSOR)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(false);
+        CsdlProperty navLinkObservedProperty = new CsdlProperty().setName(NAV_LINK_NAME_OBSERVED_PROPERTY)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(false);
+        CsdlProperty navLinkObservation = new CsdlProperty().setName(NAV_LINK_NAME_OBSERVATIONS)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(false);
 
         // navigation property: Many optional to one mandatory
         CsdlNavigationProperty navPropThings = new CsdlNavigationProperty()

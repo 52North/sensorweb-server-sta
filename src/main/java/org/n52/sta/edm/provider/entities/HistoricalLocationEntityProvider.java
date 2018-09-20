@@ -71,12 +71,22 @@ public class HistoricalLocationEntityProvider extends AbstractSensorThingsEntity
     @Override
     protected CsdlEntityType createEntityType() {
         //create EntityType properties
-        CsdlProperty id = new CsdlProperty().setName(ID_ANNOTATION).setType(EdmPrimitiveTypeKind.Int32.getFullQualifiedName());
-        CsdlProperty time = new CsdlProperty().setName(PROP_TIME).setType(EdmPrimitiveTypeKind.DateTimeOffset.getFullQualifiedName());
+        CsdlProperty id = new CsdlProperty().setName(ID_ANNOTATION)
+                .setType(EdmPrimitiveTypeKind.Int32.getFullQualifiedName())
+                .setNullable(false);
+        CsdlProperty time = new CsdlProperty().setName(PROP_TIME)
+                .setType(EdmPrimitiveTypeKind.DateTimeOffset.getFullQualifiedName())
+                .setNullable(false);
 
-        CsdlProperty selfLink = new CsdlProperty().setName(SELF_LINK_ANNOTATION).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        CsdlProperty navLinkThing = new CsdlProperty().setName(NAV_LINK_NAME_THING).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        CsdlProperty navLinkLocations = new CsdlProperty().setName(NAV_LINK_NAME_LOCATIONS).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+        CsdlProperty selfLink = new CsdlProperty().setName(SELF_LINK_ANNOTATION)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(false);
+        CsdlProperty navLinkThing = new CsdlProperty().setName(NAV_LINK_NAME_THING)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(false);
+        CsdlProperty navLinkLocations = new CsdlProperty().setName(NAV_LINK_NAME_LOCATIONS)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(false);
 
         // navigation property: many optional to many mandatory
         CsdlNavigationProperty navPropLocations = new CsdlNavigationProperty()
