@@ -120,6 +120,9 @@ public class DatastreamMapper {
     }
 
     private String resolveTimeInterval(Date timeIntervalStart, Date timeIntervalEnd) {
+        if (timeIntervalStart == null || timeIntervalEnd == null) {
+            return null;
+        }
         return new Interval(timeIntervalStart.getTime(), timeIntervalEnd.getTime(), DateTimeZone.UTC).toString();
     }
 
