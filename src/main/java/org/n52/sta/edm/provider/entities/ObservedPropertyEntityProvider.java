@@ -63,17 +63,29 @@ public class ObservedPropertyEntityProvider extends AbstractSensorThingsEntityPr
 
     // Entity Navigation Property Names
     private static final String NAV_LINK_NAME_DATASTREAMS = ES_DATASTREAMS_NAME + NAVIGATION_LINK_ANNOTATION;
-
+    
     @Override
     protected CsdlEntityType createEntityType() {
         //create EntityType properties
-        CsdlProperty id = new CsdlProperty().setName(ID_ANNOTATION).setType(EdmPrimitiveTypeKind.Int32.getFullQualifiedName());
-        CsdlProperty name = new CsdlProperty().setName(PROP_NAME).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        CsdlProperty description = new CsdlProperty().setName(PROP_DESCRIPTION).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        CsdlProperty definition = new CsdlProperty().setName(PROP_DEFINITION).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-
-        CsdlProperty selfLink = new CsdlProperty().setName(SELF_LINK_ANNOTATION).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        CsdlProperty navLinkDatastreams = new CsdlProperty().setName(NAV_LINK_NAME_DATASTREAMS).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+        CsdlProperty id = new CsdlProperty().setName(ID_ANNOTATION)
+                .setType(EdmPrimitiveTypeKind.Int64.getFullQualifiedName())
+                .setNullable(false);
+        CsdlProperty name = new CsdlProperty().setName(PROP_NAME)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(false);
+        CsdlProperty description = new CsdlProperty().setName(PROP_DESCRIPTION)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(false);
+        CsdlProperty definition = new CsdlProperty().setName(PROP_DEFINITION)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(true);
+        
+        CsdlProperty selfLink = new CsdlProperty().setName(SELF_LINK_ANNOTATION)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(false);
+        CsdlProperty navLinkDatastreams = new CsdlProperty().setName(NAV_LINK_NAME_DATASTREAMS)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(false);
 
         // navigation property: one mandatory to many optional
         CsdlNavigationProperty navPropDatastreams = new CsdlNavigationProperty()
@@ -81,7 +93,7 @@ public class ObservedPropertyEntityProvider extends AbstractSensorThingsEntityPr
                 .setType(ET_DATASTREAM_FQN)
                 .setCollection(true)
                 .setPartner(ET_OBSERVED_PROPERTY_NAME);
-
+        
         List<CsdlNavigationProperty> navPropList = new ArrayList<CsdlNavigationProperty>();
         navPropList.add(navPropDatastreams);
 
@@ -101,30 +113,30 @@ public class ObservedPropertyEntityProvider extends AbstractSensorThingsEntityPr
                 navLinkDatastreams));
         entityType.setKey(Collections.singletonList(propertyRef));
         entityType.setNavigationProperties(navPropList);
-
+        
         return entityType;
     }
-
+    
     @Override
     protected CsdlEntitySet createEntitySet() {
         CsdlEntitySet entitySet = new CsdlEntitySet();
         entitySet.setName(ES_OBSERVED_PROPERTIES_NAME);
         entitySet.setType(ET_OBSERVED_PROPERTY_FQN);
-
+        
         CsdlNavigationPropertyBinding navPropDatastreamBinding = new CsdlNavigationPropertyBinding();
         navPropDatastreamBinding.setPath(ES_DATASTREAMS_NAME);
         navPropDatastreamBinding.setTarget(ES_DATASTREAMS_NAME);
-
+        
         List<CsdlNavigationPropertyBinding> navPropBindingList = new ArrayList<CsdlNavigationPropertyBinding>();
         navPropBindingList.add(navPropDatastreamBinding);
         entitySet.setNavigationPropertyBindings(navPropBindingList);
-
+        
         return entitySet;
     }
-
+    
     @Override
     public FullQualifiedName getFullQualifiedTypeName() {
         return ET_OBSERVED_PROPERTY_FQN;
     }
-
+    
 }

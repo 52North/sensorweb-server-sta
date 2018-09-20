@@ -67,7 +67,7 @@ public class FeatureOfInterestEntityProvider extends AbstractSensorThingsEntityP
     @Override
     protected CsdlEntityType createEntityType() {
         //create EntityType properties
-        CsdlProperty id = new CsdlProperty().setName(ID_ANNOTATION).setType(EdmPrimitiveTypeKind.Int32.getFullQualifiedName());
+        CsdlProperty id = new CsdlProperty().setName(ID_ANNOTATION).setType(EdmPrimitiveTypeKind.Int64.getFullQualifiedName());
         CsdlProperty name = new CsdlProperty().setName(PROP_NAME).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
         CsdlProperty description = new CsdlProperty().setName(PROP_DESCRIPTION).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
         CsdlProperty encodingType = new CsdlProperty().setName(PROP_ENCODINGTYPE).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());

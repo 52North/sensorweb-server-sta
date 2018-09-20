@@ -72,7 +72,7 @@ public class ObservationEntityProvider extends AbstractSensorThingsEntityProvide
     @Override
     protected CsdlEntityType createEntityType() {
         //create EntityType properties
-        CsdlProperty id = new CsdlProperty().setName(ID_ANNOTATION).setType(EdmPrimitiveTypeKind.Int32.getFullQualifiedName());
+        CsdlProperty id = new CsdlProperty().setName(ID_ANNOTATION).setType(EdmPrimitiveTypeKind.Int64.getFullQualifiedName());
         CsdlProperty phenomenonTime = new CsdlProperty().setName(PROP_PHENOMENON_TIME).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
         CsdlProperty result = new CsdlProperty().setName(PROP_RESULT).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
         CsdlProperty resultTime = new CsdlProperty().setName(PROP_RESULT_TIME).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());

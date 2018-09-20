@@ -82,7 +82,7 @@ public class DatastreamEntityProvider extends AbstractSensorThingsEntityProvider
     protected CsdlEntityType createEntityType() {
         //create EntityType properties
         CsdlProperty id = new CsdlProperty().setName(ID_ANNOTATION)
-                .setType(EdmPrimitiveTypeKind.Int32.getFullQualifiedName())
+                .setType(EdmPrimitiveTypeKind.Int64.getFullQualifiedName())
                 .setNullable(false);
         CsdlProperty name = new CsdlProperty().setName(PROP_NAME)
                 .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())

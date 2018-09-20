@@ -72,7 +72,7 @@ public class HistoricalLocationEntityProvider extends AbstractSensorThingsEntity
     protected CsdlEntityType createEntityType() {
         //create EntityType properties
         CsdlProperty id = new CsdlProperty().setName(ID_ANNOTATION)
-                .setType(EdmPrimitiveTypeKind.Int32.getFullQualifiedName())
+                .setType(EdmPrimitiveTypeKind.Int64.getFullQualifiedName())
                 .setNullable(false);
         CsdlProperty time = new CsdlProperty().setName(PROP_TIME)
                 .setType(EdmPrimitiveTypeKind.DateTimeOffset.getFullQualifiedName())
