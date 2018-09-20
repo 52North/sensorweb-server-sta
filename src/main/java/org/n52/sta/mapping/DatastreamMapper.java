@@ -29,6 +29,7 @@
 package org.n52.sta.mapping;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
@@ -47,11 +48,16 @@ import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.edm.geo.Geospatial;
 import org.apache.olingo.commons.api.edm.geo.Point;
 import org.apache.olingo.commons.api.edm.geo.Polygon;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.Interval;
 import org.n52.series.db.beans.GeometryEntity;
 import org.n52.series.db.beans.UnitEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.sta.edm.provider.complextypes.UnitOfMeasurementComplexType;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_OBSERVED_AREA;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PHENOMENON_TIME;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_RESULT_TIME;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -72,6 +78,11 @@ public class DatastreamMapper {
         entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, datastream.getDescription()));
         entity.addProperty(new Property(null, PROP_NAME, ValueType.PRIMITIVE, datastream.getName()));
         entity.addProperty(new Property(null, PROP_OBSERVATION_TYPE, ValueType.PRIMITIVE, datastream.getObservationType().getFormat()));
+
+        entity.addProperty(new Property(null, PROP_PHENOMENON_TIME, ValueType.PRIMITIVE,
+                resolveTimeInterval(datastream.getSamplingTimeStart(), datastream.getSamplingTimeEnd())));
+        entity.addProperty(new Property(null, PROP_RESULT_TIME, ValueType.PRIMITIVE,
+                resolveTimeInterval(datastream.getResultTimeStart(), datastream.getResultTimeEnd())));
 
         entity.addProperty(new Property(null, PROP_UOM, ValueType.COMPLEX, resolveUnitOfMeasurement(datastream.getUnitOfMeasurement())));
         entity.addProperty(new Property(null, PROP_OBSERVED_AREA, ValueType.GEOSPATIAL, resolveObservedArea(datastream.getGeometryEntity())));
@@ -106,6 +117,10 @@ public class DatastreamMapper {
 
         }
         return polygon;
+    }
+
+    private String resolveTimeInterval(Date timeIntervalStart, Date timeIntervalEnd) {
+        return new Interval(timeIntervalStart.getTime(), timeIntervalEnd.getTime(), DateTimeZone.UTC).toString();
     }
 
 }

@@ -66,8 +66,9 @@ public class LocationMapper {
         entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, location.getId()));
         entity.addProperty(new Property(null, PROP_NAME, ValueType.PRIMITIVE, location.getName()));
         entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, location.getDescription()));
-        entity.addProperty(new Property(null, PROP_LOCATION, ValueType.COMPLEX, resolveLocation(location)));
         entity.addProperty(new Property(null, PROP_ENCODINGTYPE, ValueType.PRIMITIVE, location.getLocationEncoding().getEncodingType()));
+
+        entity.addProperty(new Property(null, PROP_LOCATION, ValueType.COMPLEX, resolveLocation(location)));
 
         entity.setType(ET_LOCATION_FQN.getFullQualifiedNameAsString());
         entity.setId(entityCreationHelper.createId(entity, ES_LOCATIONS_NAME, ID_ANNOTATION));
@@ -76,6 +77,7 @@ public class LocationMapper {
     }
 
     private ComplexValue resolveLocation(LocationEntity location) {
+        //TODO: geometry creation dependend on the GeometryType
         Point point = new Point(Geospatial.Dimension.GEOMETRY, null);
         point.setX(location.getGeometry().getCoordinate().x);
         point.setY(location.getGeometry().getCoordinate().y);
