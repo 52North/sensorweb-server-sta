@@ -29,6 +29,7 @@ import org.apache.olingo.server.api.uri.UriInfo;
 import org.n52.sta.service.handler.AbstractPropertyRequestHandler;
 import org.n52.sta.service.handler.PropertyRequestHandlerImpl;
 import org.n52.sta.service.response.PropertyResponse;
+import org.n52.sta.service.serializer.SensorThingsSerializer;
 import org.n52.sta.utils.EntityAnnotator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -39,6 +40,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class SensorThingsPropertyProcessor implements PrimitiveProcessor {
+
+    private static final ContentType ET_PROPERTY_PROCESSOR_CONTENT_TYPE = ContentType.JSON_NO_METADATA;
 
     @Autowired
     AbstractPropertyRequestHandler requestHandler;
@@ -90,11 +93,11 @@ public class SensorThingsPropertyProcessor implements PrimitiveProcessor {
 
     private InputStream createReponseContent(Property property, EdmPrimitiveType edmPropertyType, EdmEntitySet responseEdmEntitySet) throws SerializerException {
 
-        ODataSerializer serializer = odata.createSerializer(ContentType.JSON_FULL_METADATA);
+        ODataSerializer serializer = new SensorThingsSerializer(ET_PROPERTY_PROCESSOR_CONTENT_TYPE);
 
         ContextURL contextUrl = ContextURL.with().entitySet(responseEdmEntitySet).navOrPropertyPath(property.getName()).build();
         PrimitiveSerializerOptions options = PrimitiveSerializerOptions.with().contextURL(contextUrl).build();
-        // 3.2. serialize
+        // serialize
         SerializerResult serializerResult = serializer.primitive(serviceMetadata, edmPropertyType, property, options);
         InputStream propertyStream = serializerResult.getContent();
         return propertyStream;

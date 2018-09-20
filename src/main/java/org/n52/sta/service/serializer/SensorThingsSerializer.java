@@ -1019,7 +1019,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
             if (property.isNull()) {
                 throw new SerializerException("Property value can not be null.", SerializerException.MessageKeys.NULL_INPUT);
             } else {
-                json.writeFieldName(Constants.VALUE);
+                json.writeFieldName(property.getName());
                 writePrimitive(type, property,
                         options == null ? null : options.isNullable(),
                         options == null ? null : options.getMaxLength(),
