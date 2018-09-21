@@ -55,15 +55,14 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
     /**
      * Assures that Entity is valid.
      * Entity is valid if:
-     * - has valid Observation associated with it
+     * - is associated with Dataset associated with any Datastream
      * 
      * @return BooleanExpression evaluating to true if Entity is valid
      */
     public BooleanExpression isValidEntity() {
         return qfeature.id.in(JPAExpressions
-                              .selectFrom(qdataset)
-                              .where(qdataset.feature.isNotNull())
-                              .select(qdataset.feature.id));
+                              .selectFrom(qdatastream)
+                              .select(qdatastream.datasets.any().feature.id));
     }
 
 }

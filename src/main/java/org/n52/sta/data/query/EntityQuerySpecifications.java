@@ -44,6 +44,7 @@ import org.n52.series.db.beans.sta.QThingEntity;
 public abstract class EntityQuerySpecifications {
     
     final static DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
+    final static ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
     
     final static QDatastreamEntity qdatastream = QDatastreamEntity.datastreamEntity;
     final static QLocationEntity qlocation = QLocationEntity.locationEntity;

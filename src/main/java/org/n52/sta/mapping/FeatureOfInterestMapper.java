@@ -65,10 +65,13 @@ public class FeatureOfInterestMapper {
         entity.addProperty(new Property(null, PROP_NAME, ValueType.PRIMITIVE, feature.getName()));
         entity.addProperty(new Property(null, PROP_ENCODINGTYPE, ValueType.PRIMITIVE, ENCODINGTYPE_GEOJSON));
 
-        //TODO: check if there is an easier way to write to GeoJSON and get rid of dependency
-        GeoJsonWriter converter = new GeoJsonWriter();
-        entity.addProperty(new Property(null, PROP_FEATURE, ValueType.PRIMITIVE, converter.write(feature.getGeometry())));
-
+        
+        if (feature.getGeometry() != null) {
+            //TODO: check if there is an easier way to write to GeoJSON and get rid of dependency
+            GeoJsonWriter converter = new GeoJsonWriter();
+            entity.addProperty(new Property(null, PROP_FEATURE, ValueType.PRIMITIVE, converter.write(feature.getGeometry())));
+        }
+        
         entity.setType(ET_FEATURE_OF_INTEREST_FQN.getFullQualifiedNameAsString());
         entity.setId(entityCreationHelper.createId(entity, ES_FEATURES_OF_INTEREST_NAME, ID_ANNOTATION));
 
