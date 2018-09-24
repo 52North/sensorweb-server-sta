@@ -7,6 +7,8 @@ package org.n52.sta.service.handler;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
+import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
@@ -16,6 +18,7 @@ import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.UriParameter;
 import org.apache.olingo.server.api.uri.UriResource;
+import org.apache.olingo.server.api.uri.UriResourceComplexProperty;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
 import org.apache.olingo.server.api.uri.UriResourceProperty;
@@ -48,13 +51,13 @@ public class PropertyRequestHandlerImpl implements AbstractPropertyRequestHandle
         List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
 
         // handle request depending on the number of UriResource paths
-        // e.g the case: sta/Things(id)/description
-        if (resourcePaths.size() <= 3) {
-            response = resolvePropertyForEntity(resourcePaths);
-
-            // e.g. the case: sta/Things(id)/Locations(id)/name
-        } else {
+        // e.g. the case: sta/Things(id)/Locations(id)/name
+        if (resourcePaths.get(1) instanceof UriResourceNavigation) {
             response = resolvePropertyForNavigation(resourcePaths);
+
+            // e.g the case: sta/Things(id)/description
+        } else {
+            response = resolvePropertyForEntity(resourcePaths);
 
         }
         return response;
@@ -74,9 +77,8 @@ public class PropertyRequestHandlerImpl implements AbstractPropertyRequestHandle
             throw new ODataApplicationException("Entity not found.",
                     HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
         }
-        UriResourceProperty uriProperty = (UriResourceProperty) resourcePaths.get(1);
 
-        PropertyResponse response = resolveProperty(targetEntity, uriProperty, responseEntitySet);
+        PropertyResponse response = resolveProperty(targetEntity, resourcePaths.subList(1, resourcePaths.size()), responseEntitySet);
 
         return response;
     }
@@ -90,10 +92,8 @@ public class PropertyRequestHandlerImpl implements AbstractPropertyRequestHandle
             lastEntitySegment = resourcePaths.get(i);
         }
         // determine the target query parameters and fetch Entity for it
-//        EntityQueryParams queryParams = navigationResolver.resolveUriResourceNavigationPaths(resourcePaths.subList(0, resourcePaths.size() - 1));
         EntityQueryParams queryParams = navigationResolver.resolveUriResourceNavigationPaths(resourcePaths.subList(0, i));
 
-//        UriResource lastEntitySegment = resourcePaths.get(resourcePaths.size() - 2);
         Entity targetEntity = null;
         PropertyResponse response = null;
         if (lastEntitySegment instanceof UriResourceNavigation) {
@@ -114,25 +114,36 @@ public class PropertyRequestHandlerImpl implements AbstractPropertyRequestHandle
                         HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
             }
 
-            // use the index from the loop above to get the 
-            // UriResourceProperty element
-            UriResourceProperty uriProperty = (UriResourceProperty) resourcePaths.get(i);
-
-            response = resolveProperty(targetEntity, uriProperty, queryParams.getTargetEntitySet());
+            // use the index from the loop above to get the sublist from the
+            // resource paths that contain UriResourceProperty elements
+            response = resolveProperty(targetEntity, resourcePaths.subList(i, resourcePaths.size()), queryParams.getTargetEntitySet());
 
         }
         return response;
     }
 
-    private PropertyResponse resolveProperty(Entity targetEntity, UriResourceProperty uriProperty, EdmEntitySet targetEntitySet) throws ODataApplicationException {
-        EdmProperty edmProperty = uriProperty.getProperty();
-        String edmPropertyName = edmProperty.getName();
+    private PropertyResponse resolveProperty(Entity targetEntity, List<UriResource> resourcePaths, EdmEntitySet targetEntitySet) throws ODataApplicationException {
+        int i = 0;
+        EdmProperty edmProperty = ((UriResourceProperty) resourcePaths.get(i)).getProperty();
 
         // retrieve the property data from the entity
-        Property property = targetEntity.getProperty(edmPropertyName);
+        Property property = targetEntity.getProperty(edmProperty.getName());
         if (property == null) {
             throw new ODataApplicationException("Property not found",
                     HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ENGLISH);
+        }
+        while (resourcePaths.get(i) instanceof UriResourceComplexProperty) {
+            ComplexValue complexValue = (ComplexValue) property.getValue();
+            edmProperty = ((UriResourceProperty) resourcePaths.get(++i)).getProperty();
+            final String edmPropertyName = edmProperty.getName();
+            Optional<Property> optProperty = complexValue.getValue().stream()
+                    .filter(p -> p.getName().equals(edmPropertyName))
+                    .findFirst();
+            if (!optProperty.isPresent()) {
+                throw new ODataApplicationException("Property not found",
+                        HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ENGLISH);
+            }
+            property = optProperty.get();
         }
 
         // set Entity response information
@@ -143,5 +154,4 @@ public class PropertyRequestHandlerImpl implements AbstractPropertyRequestHandle
 
         return response;
     }
-
 }
