@@ -5,11 +5,16 @@
  */
 package org.n52.sta.service.processor;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveType;
+import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
+import org.apache.olingo.commons.api.edm.EdmProperty;
+import org.apache.olingo.commons.api.edm.EdmReturnType;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
@@ -20,8 +25,10 @@ import org.apache.olingo.server.api.ODataRequest;
 import org.apache.olingo.server.api.ODataResponse;
 import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.api.processor.PrimitiveValueProcessor;
+import org.apache.olingo.server.api.serializer.FixedFormatSerializer;
 import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.PrimitiveSerializerOptions;
+import org.apache.olingo.server.api.serializer.PrimitiveValueSerializerOptions;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
@@ -48,7 +55,24 @@ public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcess
 
     @Override
     public void readPrimitiveValue(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        PropertyResponse primitiveResponse = requestHandler.handlePrimitiveRequest(uriInfo);
+
+        // serialize
+        Object propertyValue = primitiveResponse.getProperty().getValue();
+        if (propertyValue != null) {
+            //TODO: check for other than primitive types for the property
+
+            final FixedFormatSerializer serializer = odata.createFixedFormatSerializer();
+            PrimitiveValueSerializerOptions options = PrimitiveValueSerializerOptions.with().build();
+            InputStream serializedContent = serializer.primitiveValue((EdmPrimitiveType) primitiveResponse.getEdmPropertyType(), primitiveResponse.getProperty().getValue(), options); //            EdmPrimitiveType type == odata.createPrimitiveTypeInstance(EdmPrimitiveTypeKind.Binary);
+
+            response.setContent(serializedContent);
+            response.setStatusCode(HttpStatusCode.OK.getStatusCode());
+            response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.TEXT_PLAIN.toContentTypeString());
+        } else {
+            // in case there's no value for the property, we can skip the serialization
+            response.setStatusCode(HttpStatusCode.NO_CONTENT.getStatusCode());
+        }
     }
 
     @Override
@@ -73,7 +97,6 @@ public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcess
                     (EdmPrimitiveType) primitiveResponse.getEdmPropertyType(),
                     primitiveResponse.getResponseEdmEntitySet());
 
-            //TODO: check for other than primitive types for the property
             response.setContent(serializedContent);
             response.setStatusCode(HttpStatusCode.OK.getStatusCode());
             response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.JSON_NO_METADATA.toContentTypeString());
@@ -105,6 +128,7 @@ public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcess
 
         ContextURL contextUrl = ContextURL.with().entitySet(responseEdmEntitySet).navOrPropertyPath(property.getName()).build();
         PrimitiveSerializerOptions options = PrimitiveSerializerOptions.with().contextURL(contextUrl).build();
+
         // serialize
         SerializerResult serializerResult = serializer.primitive(serviceMetadata, edmPropertyType, property, options);
         InputStream propertyStream = serializerResult.getContent();
