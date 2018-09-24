@@ -44,16 +44,18 @@ import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.vividsolutions.jts.io.geojson.GeoJsonWriter;
-
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
+ * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  *
  */
 @Component
 public class FeatureOfInterestMapper {
 
     private static final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
+
+    @Autowired
+    GeometryMapper geometryMapper;
 
     @Autowired
     EntityCreationHelper entityCreationHelper;
@@ -65,13 +67,8 @@ public class FeatureOfInterestMapper {
         entity.addProperty(new Property(null, PROP_NAME, ValueType.PRIMITIVE, feature.getName()));
         entity.addProperty(new Property(null, PROP_ENCODINGTYPE, ValueType.PRIMITIVE, ENCODINGTYPE_GEOJSON));
 
-        
-        if (feature.getGeometry() != null) {
-            //TODO: check if there is an easier way to write to GeoJSON and get rid of dependency
-            GeoJsonWriter converter = new GeoJsonWriter();
-            entity.addProperty(new Property(null, PROP_FEATURE, ValueType.PRIMITIVE, converter.write(feature.getGeometry())));
-        }
-        
+        entity.addProperty(new Property(null, PROP_FEATURE, ValueType.COMPLEX, geometryMapper.resolveGeometry(feature.getGeometryEntity())));
+
         entity.setType(ET_FEATURE_OF_INTEREST_FQN.getFullQualifiedNameAsString());
         entity.setId(entityCreationHelper.createId(entity, ES_FEATURES_OF_INTEREST_NAME, ID_ANNOTATION));
 
