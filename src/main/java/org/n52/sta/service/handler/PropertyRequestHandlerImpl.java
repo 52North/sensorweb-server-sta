@@ -49,7 +49,7 @@ public class PropertyRequestHandlerImpl implements AbstractPropertyRequestHandle
 
         // handle request depending on the number of UriResource paths
         // e.g the case: sta/Things(id)/description
-        if (resourcePaths.size() == 2) {
+        if (resourcePaths.size() <= 3) {
             response = resolvePropertyForEntity(resourcePaths);
 
             // e.g. the case: sta/Things(id)/Locations(id)/name
@@ -74,7 +74,7 @@ public class PropertyRequestHandlerImpl implements AbstractPropertyRequestHandle
             throw new ODataApplicationException("Entity not found.",
                     HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
         }
-        UriResourceProperty uriProperty = (UriResourceProperty) resourcePaths.get(resourcePaths.size() - 1);
+        UriResourceProperty uriProperty = (UriResourceProperty) resourcePaths.get(1);
 
         PropertyResponse response = resolveProperty(targetEntity, uriProperty, responseEntitySet);
 
@@ -82,10 +82,18 @@ public class PropertyRequestHandlerImpl implements AbstractPropertyRequestHandle
     }
 
     private PropertyResponse resolvePropertyForNavigation(List<UriResource> resourcePaths) throws ODataApplicationException {
+        int i = 0;
+        UriResource lastEntitySegment = resourcePaths.get(i);
+        // note that the last value for i at the end of the loop is the index
+        // fot the UriResourceProperty element
+        while (resourcePaths.get(++i) instanceof UriResourceNavigation) {
+            lastEntitySegment = resourcePaths.get(i);
+        }
         // determine the target query parameters and fetch Entity for it
-        EntityQueryParams queryParams = navigationResolver.resolveUriResourceNavigationPaths(resourcePaths.subList(0, resourcePaths.size()));
+//        EntityQueryParams queryParams = navigationResolver.resolveUriResourceNavigationPaths(resourcePaths.subList(0, resourcePaths.size() - 1));
+        EntityQueryParams queryParams = navigationResolver.resolveUriResourceNavigationPaths(resourcePaths.subList(0, i));
 
-        UriResource lastEntitySegment = resourcePaths.get(resourcePaths.size() - 2);
+//        UriResource lastEntitySegment = resourcePaths.get(resourcePaths.size() - 2);
         Entity targetEntity = null;
         PropertyResponse response = null;
         if (lastEntitySegment instanceof UriResourceNavigation) {
@@ -106,7 +114,9 @@ public class PropertyRequestHandlerImpl implements AbstractPropertyRequestHandle
                         HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
             }
 
-            UriResourceProperty uriProperty = (UriResourceProperty) resourcePaths.get(resourcePaths.size() - 1);
+            // use the index from the loop above to get the 
+            // UriResourceProperty element
+            UriResourceProperty uriProperty = (UriResourceProperty) resourcePaths.get(i);
 
             response = resolveProperty(targetEntity, uriProperty, queryParams.getTargetEntitySet());
 
