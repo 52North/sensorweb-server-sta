@@ -45,6 +45,7 @@ import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
+import org.n52.sta.edm.provider.complextypes.FeatureComplexType;
 import org.springframework.stereotype.Component;
 
 /**
@@ -63,18 +64,35 @@ public class FeatureOfInterestEntityProvider extends AbstractSensorThingsEntityP
 
     // Entity Navigation Property Names
     private static final String NAV_LINK_NAME_OBSERVATIONS = ES_OBSERVATIONS_NAME + NAVIGATION_LINK_ANNOTATION;
-
+    
     @Override
     protected CsdlEntityType createEntityType() {
-        //create EntityType properties
-        CsdlProperty id = new CsdlProperty().setName(ID_ANNOTATION).setType(EdmPrimitiveTypeKind.Int64.getFullQualifiedName());
-        CsdlProperty name = new CsdlProperty().setName(PROP_NAME).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        CsdlProperty description = new CsdlProperty().setName(PROP_DESCRIPTION).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        CsdlProperty encodingType = new CsdlProperty().setName(PROP_ENCODINGTYPE).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        CsdlProperty feature = new CsdlProperty().setName(PROP_FEATURE).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+        //create EntityType primitive properties
+        CsdlProperty id = new CsdlProperty().setName(ID_ANNOTATION)
+                .setType(EdmPrimitiveTypeKind.Int64.getFullQualifiedName())
+                .setNullable(false);
+        CsdlProperty name = new CsdlProperty().setName(PROP_NAME)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(false);
+        CsdlProperty description = new CsdlProperty().setName(PROP_DESCRIPTION)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(false);
+        CsdlProperty encodingType = new CsdlProperty().setName(PROP_ENCODINGTYPE)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(false);
 
-        CsdlProperty selfLink = new CsdlProperty().setName(SELF_LINK_ANNOTATION).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        CsdlProperty navLinkObservations = new CsdlProperty().setName(NAV_LINK_NAME_OBSERVATIONS).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+        //create EntityType complex properties
+        CsdlProperty feature = new CsdlProperty().setName(PROP_FEATURE)
+                .setType(FeatureComplexType.CT_FEATURE_FQN)
+                .setNullable(false);
+
+        //create EntityType navigation links
+        CsdlProperty selfLink = new CsdlProperty().setName(SELF_LINK_ANNOTATION)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(false);
+        CsdlProperty navLinkObservations = new CsdlProperty().setName(NAV_LINK_NAME_OBSERVATIONS)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(false);
 
         // navigation property: one mandatory to many optional
         CsdlNavigationProperty navPropFeatureOfInterest = new CsdlNavigationProperty()
@@ -82,7 +100,7 @@ public class FeatureOfInterestEntityProvider extends AbstractSensorThingsEntityP
                 .setType(ET_OBSERVATION_FQN)
                 .setCollection(true)
                 .setPartner(ET_FEATURE_OF_INTEREST_NAME);
-
+        
         List<CsdlNavigationProperty> navPropList = new ArrayList<CsdlNavigationProperty>();
         navPropList.add(navPropFeatureOfInterest);
 
@@ -103,27 +121,27 @@ public class FeatureOfInterestEntityProvider extends AbstractSensorThingsEntityP
                 navLinkObservations));
         entityType.setKey(Collections.singletonList(propertyRef));
         entityType.setNavigationProperties(navPropList);
-
+        
         return entityType;
     }
-
+    
     @Override
     protected CsdlEntitySet createEntitySet() {
         CsdlEntitySet entitySet = new CsdlEntitySet();
         entitySet.setName(ES_FEATURES_OF_INTEREST_NAME);
         entitySet.setType(ET_FEATURE_OF_INTEREST_FQN);
-
+        
         CsdlNavigationPropertyBinding navPropFeatureOfInterestBinding = new CsdlNavigationPropertyBinding();
         navPropFeatureOfInterestBinding.setPath(ES_OBSERVATIONS_NAME);
         navPropFeatureOfInterestBinding.setTarget(ES_OBSERVATIONS_NAME);
-
+        
         List<CsdlNavigationPropertyBinding> navPropBindingList = new ArrayList<CsdlNavigationPropertyBinding>();
         navPropBindingList.add(navPropFeatureOfInterestBinding);
         entitySet.setNavigationPropertyBindings(navPropBindingList);
-
+        
         return entitySet;
     }
-
+    
     @Override
     public FullQualifiedName getFullQualifiedTypeName() {
         return ET_FEATURE_OF_INTEREST_FQN;
