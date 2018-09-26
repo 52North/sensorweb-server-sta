@@ -63,8 +63,16 @@ public class FeatureOfInterestMapper {
     public Entity createEntity(FeatureEntity feature) {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, feature.getId()));
-        entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, feature.getDescription()));
-        entity.addProperty(new Property(null, PROP_NAME, ValueType.PRIMITIVE, feature.getName()));
+        String description =  "Description of " + feature.getIdentifier();
+        if (feature.isSetDescription()) {
+            description = feature.getDescription();
+        }
+        entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, description));
+        String name =  "Description of " + feature.getIdentifier();
+        if (feature.isSetName()) {
+            name = feature.getName();
+        }
+        entity.addProperty(new Property(null, PROP_NAME, ValueType.PRIMITIVE, name));
         entity.addProperty(new Property(null, PROP_ENCODINGTYPE, ValueType.PRIMITIVE, ENCODINGTYPE_GEOJSON));
 
         entity.addProperty(new Property(null, PROP_FEATURE, ValueType.COMPLEX, geometryMapper.resolveGeometry(feature.getGeometryEntity())));

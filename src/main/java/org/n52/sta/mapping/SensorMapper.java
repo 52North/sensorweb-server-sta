@@ -58,10 +58,17 @@ public class SensorMapper {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, sensor.getId()));
         entity.addProperty(new Property(null, PROP_NAME, ValueType.PRIMITIVE, sensor.getIdentifier()));
-        entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, sensor.getDescription()));
+        String description =  "Description of " + sensor.getIdentifier();
+        if (sensor.isSetDescription()) {
+            description = sensor.getDescription();
+        }
+        entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, description));
         entity.addProperty(new Property(null, PROP_ENCODINGTYPE, ValueType.PRIMITIVE, sensor.getFormat().getFormat()));
-        entity.addProperty(new Property(null, PROP_METADATA, ValueType.PRIMITIVE, sensor.getDescriptionFile()));
-
+        String metadata = "metadata";
+        if (sensor.getDescriptionFile() != null && !sensor.getDescriptionFile().isEmpty()) {
+            metadata = sensor.getDescriptionFile();
+        }
+        entity.addProperty(new Property(null, PROP_METADATA, ValueType.PRIMITIVE, metadata));
         entity.setType(ET_SENSOR_FQN.getFullQualifiedNameAsString());
         entity.setId(entityCreationHelper.createId(entity, ES_SENSORS_NAME, ID_ANNOTATION));
 
