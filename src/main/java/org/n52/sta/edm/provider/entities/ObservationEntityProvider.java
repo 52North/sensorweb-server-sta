@@ -49,6 +49,7 @@ import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
+import org.n52.sta.edm.provider.complextypes.OpenComplexType;
 import org.springframework.stereotype.Component;
 
 /**
@@ -71,18 +72,40 @@ public class ObservationEntityProvider extends AbstractSensorThingsEntityProvide
 
     @Override
     protected CsdlEntityType createEntityType() {
-        //create EntityType properties
-        CsdlProperty id = new CsdlProperty().setName(ID_ANNOTATION).setType(EdmPrimitiveTypeKind.Int64.getFullQualifiedName());
-        CsdlProperty phenomenonTime = new CsdlProperty().setName(PROP_PHENOMENON_TIME).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        CsdlProperty result = new CsdlProperty().setName(PROP_RESULT).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        CsdlProperty resultTime = new CsdlProperty().setName(PROP_RESULT_TIME).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        CsdlProperty resultQuality = new CsdlProperty().setName(PROP_RESULT_QUALITY).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        CsdlProperty validTime = new CsdlProperty().setName(PROP_VALID_TIME).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        CsdlProperty parameters = new CsdlProperty().setName(PROP_PARAMETERS).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+        //create EntityType primitive properties
+        CsdlProperty id = new CsdlProperty().setName(ID_ANNOTATION)
+                .setType(EdmPrimitiveTypeKind.Int64.getFullQualifiedName())
+                .setNullable(false);
+        CsdlProperty phenomenonTime = new CsdlProperty().setName(PROP_PHENOMENON_TIME)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(false);
+        CsdlProperty result = new CsdlProperty().setName(PROP_RESULT)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(false);
+        CsdlProperty resultTime = new CsdlProperty().setName(PROP_RESULT_TIME)
+                .setType(EdmPrimitiveTypeKind.DateTimeOffset.getFullQualifiedName())
+                .setNullable(false);
+        CsdlProperty resultQuality = new CsdlProperty().setName(PROP_RESULT_QUALITY)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(true);
+        CsdlProperty validTime = new CsdlProperty().setName(PROP_VALID_TIME)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(true);
+        CsdlProperty parameters = new CsdlProperty().setName(PROP_PARAMETERS)
+                .setType(OpenComplexType.CT_OPEN_TYPE_FQN)
+                .setCollection(true)
+                .setNullable(true);
 
-        CsdlProperty selfLink = new CsdlProperty().setName(SELF_LINK_ANNOTATION).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        CsdlProperty navLinkDatastreams = new CsdlProperty().setName(NAV_LINK_NAME_DATASTREAM).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-        CsdlProperty navLinkFeatureOfInterests = new CsdlProperty().setName(NAV_LINK_NAME_FEATURE_OF_INTEREST).setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
+        //create EntityType navigation links
+        CsdlProperty selfLink = new CsdlProperty().setName(SELF_LINK_ANNOTATION)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(false);
+        CsdlProperty navLinkDatastreams = new CsdlProperty().setName(NAV_LINK_NAME_DATASTREAM)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(false);
+        CsdlProperty navLinkFeatureOfInterests = new CsdlProperty().setName(NAV_LINK_NAME_FEATURE_OF_INTEREST)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(false);
 
         // navigation property: Many optional to one mandatory
         CsdlNavigationProperty navPropDatastreams = new CsdlNavigationProperty()
