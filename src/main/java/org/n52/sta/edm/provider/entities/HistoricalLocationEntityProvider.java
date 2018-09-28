@@ -76,7 +76,7 @@ public class HistoricalLocationEntityProvider extends AbstractSensorThingsEntity
                 .setNullable(false);
         CsdlProperty time = new CsdlProperty().setName(PROP_TIME)
                 .setType(EdmPrimitiveTypeKind.DateTimeOffset.getFullQualifiedName())
-                .setNullable(false);
+                .setNullable(false).setPrecision(9);
 
         CsdlProperty selfLink = new CsdlProperty().setName(SELF_LINK_ANNOTATION)
                 .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
