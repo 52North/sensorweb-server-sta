@@ -801,16 +801,27 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
         json.writeStartArray();
         EdmComplexType derivedType = type;
         for (Object value : property.asCollection()) {
-            derivedType = ((ComplexValue) value).getTypeName() != null ? metadata.getEdm().getComplexType(new FullQualifiedName(((ComplexValue) value).getTypeName())) : type;
+
             switch (property.getValueType()) {
                 case COLLECTION_COMPLEX:
-                    json.writeStartObject();
-                    if (isODataMetadataFull || (!isODataMetadataNone && !derivedType.equals(type))) {
-                        json.writeStringField(Constants.JSON_TYPE, "#"
-                                + derivedType.getFullQualifiedName().getFullQualifiedNameAsString());
+                    derivedType = ((ComplexValue) value).getTypeName() != null ? metadata.getEdm().getComplexType(new FullQualifiedName(((ComplexValue) value).getTypeName())) : type;
+                    if (((EdmComplexType) derivedType).isOpenType()
+                            && (((EdmComplexType) derivedType).getPropertyNames() == null
+                            || ((EdmComplexType) derivedType).getPropertyNames().isEmpty())) {
+                        for (Property p : ((ComplexValue) value).getValue()) {
+                            writeOpenTypeComplex(metadata, (EdmComplexType) derivedType, p, selectedPaths, json);
+                        }
+
+                    } else {
+                        json.writeStartObject();
+                        if (isODataMetadataFull || (!isODataMetadataNone && !derivedType.equals(type))) {
+                            json.writeStringField(Constants.JSON_TYPE, "#"
+                                    + derivedType.getFullQualifiedName().getFullQualifiedNameAsString());
+                        }
+                        writeComplexValue(metadata, derivedType, ((ComplexValue) value).getValue(), selectedPaths, json);
+                        json.writeEndObject();
                     }
-                    writeComplexValue(metadata, derivedType, ((ComplexValue) value).getValue(), selectedPaths, json);
-                    json.writeEndObject();
+
                     break;
                 default:
                     throw new SerializerException("Property type not yet supported!",
