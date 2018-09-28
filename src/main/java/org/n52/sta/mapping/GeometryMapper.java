@@ -87,6 +87,9 @@ public class GeometryMapper {
         Point point = new Point(Geospatial.Dimension.GEOMETRY, srid);
         point.setX(coordinate.x);
         point.setY(coordinate.y);
+        if (!Double.isNaN(coordinate.z)) {
+            point.setZ(coordinate.z);
+        }
         return point;
     }
     
@@ -120,6 +123,7 @@ public class GeometryMapper {
         return list;
     }
 
+   // would be used for Olingo 4.6.0
     private List<LineString> createLineStringList(com.vividsolutions.jts.geom.Polygon poly, SRID srid) {
         List<LineString> list = new LinkedList<>();
         for (int i = 0; i < poly.getNumInteriorRing(); i++) {
@@ -145,9 +149,10 @@ public class GeometryMapper {
     }
 
     private SRID getSRID(Geometry geometry) {
-        if (geometry.getSRID() > 0) {
-            return SRID.valueOf(Integer.toString(geometry.getSRID()));
-        }
+        // Olingo checks for default by checking if value is null
+//        if (geometry.getSRID() > 0) {
+//            return SRID.valueOf(Integer.toString(geometry.getSRID()));
+//        }
         return null;
     }
 
