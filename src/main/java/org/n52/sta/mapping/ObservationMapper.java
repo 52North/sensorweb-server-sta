@@ -46,6 +46,7 @@ import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
+import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.n52.janmayen.Json;
@@ -62,6 +63,11 @@ import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.ReferencedDataEntity;
 import org.n52.series.db.beans.TextDataEntity;
 import org.n52.series.db.beans.parameter.Parameter;
+import org.n52.shetland.ogc.gml.time.Time;
+import org.n52.shetland.ogc.gml.time.TimeInstant;
+import org.n52.shetland.ogc.gml.time.TimePeriod;
+import org.n52.shetland.util.DateTimeHelper;
+
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PARAMETERS;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PROPERTIES;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_VALID_TIME;
@@ -79,27 +85,28 @@ public class ObservationMapper {
     @Autowired
     EntityCreationHelper entityCreationHelper;
 
-    public Entity createEntity(DataEntity< ?> observation) {
+    public Entity createEntity(DataEntity<?> observation) {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, observation.getId()));
         entity.addProperty(new Property(null, PROP_RESULT, ValueType.PRIMITIVE, this.getResult(observation)));
         entity.addProperty(new Property(null, PROP_RESULT_TIME, ValueType.PRIMITIVE, observation.getResultTime()));
 
-        String phenomenonTime = (observation.getSamplingTimeStart().equals(observation.getSamplingTimeEnd()))
-                ? observation.getSamplingTimeStart().toString()
-                : resolveTimeInterval(observation.getSamplingTimeStart(), observation.getSamplingTimeEnd());
+        String phenomenonTime = DateTimeHelper.format(createTime(observation));
         entity.addProperty(new Property(null, PROP_PHENOMENON_TIME, ValueType.PRIMITIVE, phenomenonTime));
 
-        entity.addProperty(new Property(null, PROP_VALID_TIME, ValueType.PRIMITIVE,
-                resolveTimeInterval(observation.getValidTimeStart(), observation.getValidTimeEnd())));
+        if (observation.isSetValidTime()) {
+            entity.addProperty(new Property(null, PROP_VALID_TIME, ValueType.PRIMITIVE,
+                    DateTimeHelper.format(createTime(createDateTime(observation.getValidTimeStart()),
+                            createDateTime(observation.getValidTimeEnd())))));
+        }
 
         // TODO: check for quality property
-        // entity.addProperty(new Property(null, PROP_RESULT_QUALITY, ValueType.PRIMITIVE, null));
-//        List<JsonNode> parameters = observation.getParameters().stream()
-//                .map(p -> createParameterProperty(p))
-//                .collect(Collectors.toList());
-        List<ComplexValue> parameters = observation.getParameters().stream()
-                .map(p -> createParameterComplexValue(p))
+        // entity.addProperty(new Property(null, PROP_RESULT_QUALITY,
+        // ValueType.PRIMITIVE, null));
+        // List<JsonNode> parameters = observation.getParameters().stream()
+        // .map(p -> createParameterProperty(p))
+        // .collect(Collectors.toList());
+        List<ComplexValue> parameters = observation.getParameters().stream().map(p -> createParameterComplexValue(p))
                 .collect(Collectors.toList());
 
         entity.addProperty(new Property(null, PROP_PARAMETERS, ValueType.COLLECTION_COMPLEX, parameters));
@@ -122,29 +129,29 @@ public class ObservationMapper {
             return ((CategoryDataEntity) o).getValue();
         } else if (o instanceof ComplexDataEntity) {
 
-            //TODO: implement
-            //return ((ComplexDataEntity)o).getValue();
+            // TODO: implement
+            // return ((ComplexDataEntity)o).getValue();
             return null;
 
         } else if (o instanceof CountDataEntity) {
             return ((CountDataEntity) o).getValue().toString();
         } else if (o instanceof GeometryDataEntity) {
 
-            //TODO: check if we want WKT here
+            // TODO: check if we want WKT here
             return ((GeometryDataEntity) o).getValue().getGeometry().toText();
 
         } else if (o instanceof TextDataEntity) {
             return ((TextDataEntity) o).getValue();
         } else if (o instanceof DataArrayDataEntity) {
 
-            //TODO: implement
-            //return ((DataArrayDataEntity)o).getValue();
+            // TODO: implement
+            // return ((DataArrayDataEntity)o).getValue();
             return null;
 
         } else if (o instanceof ProfileDataEntity) {
 
-            //TODO: implement
-            //return ((ProfileDataEntity)o).getValue();
+            // TODO: implement
+            // return ((ProfileDataEntity)o).getValue();
             return null;
 
         } else if (o instanceof ReferencedDataEntity) {
@@ -168,5 +175,38 @@ public class ObservationMapper {
         ComplexValue cv = new ComplexValue();
         cv.getValue().add(new Property(null, null, ValueType.PRIMITIVE, createParameterProperty(p)));
         return cv;
+    }
+
+    private Time createTime(DataEntity<?> observation) {
+        // create time element
+        final DateTime start = createDateTime(observation.getSamplingTimeStart());
+        DateTime end;
+        if (observation.getSamplingTimeEnd() != null) {
+            end = createDateTime(observation.getSamplingTimeEnd());
+        } else {
+            end = start;
+        }
+        return createTime(start, end);
+    }
+
+    private DateTime createDateTime(Date date) {
+        return new DateTime(date, DateTimeZone.UTC);
+    }
+
+    /**
+     * Create {@link Time} from {@link DateTime}s
+     *
+     * @param start
+     *            Start {@link DateTime}
+     * @param end
+     *            End {@link DateTime}
+     * @return Resulting {@link Time}
+     */
+    protected Time createTime(DateTime start, DateTime end) {
+        if (start.equals(end)) {
+            return new TimeInstant(start);
+        } else {
+            return new TimePeriod(start, end);
+        }
     }
 }
