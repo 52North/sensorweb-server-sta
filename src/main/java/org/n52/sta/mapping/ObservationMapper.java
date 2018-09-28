@@ -28,27 +28,22 @@
  */
 package org.n52.sta.mapping;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PARAMETERS;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PHENOMENON_TIME;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_RESULT;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_RESULT_TIME;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_VALID_TIME;
 import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ES_OBSERVATIONS_NAME;
 import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ET_OBSERVATION_FQN;
 
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import org.apache.olingo.commons.api.data.ComplexValue;
 
+import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.Interval;
 import org.n52.janmayen.Json;
 import org.n52.series.db.beans.BlobDataEntity;
 import org.n52.series.db.beans.BooleanDataEntity;
@@ -63,27 +58,17 @@ import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.ReferencedDataEntity;
 import org.n52.series.db.beans.TextDataEntity;
 import org.n52.series.db.beans.parameter.Parameter;
-import org.n52.shetland.ogc.gml.time.Time;
-import org.n52.shetland.ogc.gml.time.TimeInstant;
-import org.n52.shetland.ogc.gml.time.TimePeriod;
 import org.n52.shetland.util.DateTimeHelper;
-
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PARAMETERS;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PROPERTIES;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_VALID_TIME;
-import org.n52.sta.utils.EntityCreationHelper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
 @Component
-public class ObservationMapper {
-
-    @Autowired
-    EntityCreationHelper entityCreationHelper;
+public class ObservationMapper extends AbstractMapper{
 
     public Entity createEntity(DataEntity<?> observation) {
         Entity entity = new Entity();
@@ -160,13 +145,6 @@ public class ObservationMapper {
         return "";
     }
 
-    private String resolveTimeInterval(Date timeIntervalStart, Date timeIntervalEnd) {
-        if (timeIntervalStart == null || timeIntervalEnd == null) {
-            return null;
-        }
-        return new Interval(timeIntervalStart.getTime(), timeIntervalEnd.getTime(), DateTimeZone.UTC).toString();
-    }
-
     private JsonNode createParameterProperty(Parameter<?> p) {
         return Json.nodeFactory().objectNode().put(p.getName(), p.getValueAsString());
     }
@@ -177,36 +155,4 @@ public class ObservationMapper {
         return cv;
     }
 
-    private Time createTime(DataEntity<?> observation) {
-        // create time element
-        final DateTime start = createDateTime(observation.getSamplingTimeStart());
-        DateTime end;
-        if (observation.getSamplingTimeEnd() != null) {
-            end = createDateTime(observation.getSamplingTimeEnd());
-        } else {
-            end = start;
-        }
-        return createTime(start, end);
-    }
-
-    private DateTime createDateTime(Date date) {
-        return new DateTime(date, DateTimeZone.UTC);
-    }
-
-    /**
-     * Create {@link Time} from {@link DateTime}s
-     *
-     * @param start
-     *            Start {@link DateTime}
-     * @param end
-     *            End {@link DateTime}
-     * @return Resulting {@link Time}
-     */
-    protected Time createTime(DateTime start, DateTime end) {
-        if (start.equals(end)) {
-            return new TimeInstant(start);
-        } else {
-            return new TimePeriod(start, end);
-        }
-    }
 }
