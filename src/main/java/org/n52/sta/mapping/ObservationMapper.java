@@ -28,6 +28,8 @@
  */
 package org.n52.sta.mapping;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PHENOMENON_TIME;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_RESULT;
@@ -35,12 +37,18 @@ import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvid
 import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ES_OBSERVATIONS_NAME;
 import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ET_OBSERVATION_FQN;
 
-import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.apache.olingo.commons.api.data.ComplexValue;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
+import org.joda.time.DateTimeZone;
+import org.joda.time.Interval;
+import org.n52.janmayen.Json;
 import org.n52.series.db.beans.BlobDataEntity;
 import org.n52.series.db.beans.BooleanDataEntity;
 import org.n52.series.db.beans.CategoryDataEntity;
@@ -53,6 +61,10 @@ import org.n52.series.db.beans.ProfileDataEntity;
 import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.ReferencedDataEntity;
 import org.n52.series.db.beans.TextDataEntity;
+import org.n52.series.db.beans.parameter.Parameter;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PARAMETERS;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PROPERTIES;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_VALID_TIME;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -64,71 +76,97 @@ import org.springframework.stereotype.Component;
 @Component
 public class ObservationMapper {
 
-	@Autowired
-	EntityCreationHelper entityCreationHelper;
+    @Autowired
+    EntityCreationHelper entityCreationHelper;
 
-	public Entity createEntity(DataEntity< ? > observation) {
-		Entity entity = new Entity();
-		entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, observation.getId()));
+    public Entity createEntity(DataEntity< ?> observation) {
+        Entity entity = new Entity();
+        entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, observation.getId()));
+        entity.addProperty(new Property(null, PROP_RESULT, ValueType.PRIMITIVE, this.getResult(observation)));
+        entity.addProperty(new Property(null, PROP_RESULT_TIME, ValueType.PRIMITIVE, observation.getResultTime()));
 
-		//TODO: check observation type, cast and get value
-		entity.addProperty(new Property(null, PROP_RESULT, ValueType.PRIMITIVE, this.getResult(observation)));
+        String phenomenonTime = (observation.getSamplingTimeStart().equals(observation.getSamplingTimeEnd()))
+                ? observation.getSamplingTimeStart().toString()
+                : resolveTimeInterval(observation.getSamplingTimeStart(), observation.getSamplingTimeEnd());
+        entity.addProperty(new Property(null, PROP_PHENOMENON_TIME, ValueType.PRIMITIVE, phenomenonTime));
 
+        entity.addProperty(new Property(null, PROP_VALID_TIME, ValueType.PRIMITIVE,
+                resolveTimeInterval(observation.getValidTimeStart(), observation.getValidTimeEnd())));
 
-		SimpleDateFormat converter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-		entity.addProperty(new Property(null, PROP_RESULT_TIME, ValueType.PRIMITIVE, converter.format(observation.getResultTime())));
+        // TODO: check for quality property
+        // entity.addProperty(new Property(null, PROP_RESULT_QUALITY, ValueType.PRIMITIVE, null));
+//        List<JsonNode> parameters = observation.getParameters().stream()
+//                .map(p -> createParameterProperty(p))
+//                .collect(Collectors.toList());
+        List<ComplexValue> parameters = observation.getParameters().stream()
+                .map(p -> createParameterComplexValue(p))
+                .collect(Collectors.toList());
 
-		String phenomenonTime = (observation.getSamplingTimeStart().equals(observation.getSamplingTimeEnd())) ?
-				converter.format(observation.getSamplingTimeStart()) :
-				converter.format(observation.getSamplingTimeStart()) + "/" + converter.format(observation.getSamplingTimeEnd());
-		entity.addProperty(new Property(null, PROP_PHENOMENON_TIME, ValueType.PRIMITIVE, phenomenonTime));
+        entity.addProperty(new Property(null, PROP_PARAMETERS, ValueType.COLLECTION_COMPLEX, parameters));
 
-		entity.setType(ET_OBSERVATION_FQN.getFullQualifiedNameAsString());
-		entity.setId(entityCreationHelper.createId(entity, ES_OBSERVATIONS_NAME, ID_ANNOTATION));
+        entity.setType(ET_OBSERVATION_FQN.getFullQualifiedNameAsString());
+        entity.setId(entityCreationHelper.createId(entity, ES_OBSERVATIONS_NAME, ID_ANNOTATION));
 
-		return entity;
-	}
+        return entity;
+    }
 
-	private String getResult(DataEntity o) {
-		if (o instanceof QuantityDataEntity) {
-			return 	((QuantityDataEntity)o).getValue().toString();
-		} else if (o instanceof BlobDataEntity) {
-			// TODO: check if Object.tostring is what we want here
-			return ((BlobDataEntity)o).getValue().toString();
-		} else if (o instanceof BooleanDataEntity) {
-			return ((BooleanDataEntity)o).getValue().toString();
-		} else if (o instanceof CategoryDataEntity) {
-			return ((CategoryDataEntity)o).getValue();
-		} else if (o instanceof ComplexDataEntity) {
+    private String getResult(DataEntity o) {
+        if (o instanceof QuantityDataEntity) {
+            return ((QuantityDataEntity) o).getValue().toString();
+        } else if (o instanceof BlobDataEntity) {
+            // TODO: check if Object.tostring is what we want here
+            return ((BlobDataEntity) o).getValue().toString();
+        } else if (o instanceof BooleanDataEntity) {
+            return ((BooleanDataEntity) o).getValue().toString();
+        } else if (o instanceof CategoryDataEntity) {
+            return ((CategoryDataEntity) o).getValue();
+        } else if (o instanceof ComplexDataEntity) {
 
-			//TODO: implement
-			//return ((ComplexDataEntity)o).getValue();
-			return null;
+            //TODO: implement
+            //return ((ComplexDataEntity)o).getValue();
+            return null;
 
-		} else if (o instanceof CountDataEntity) {
-			return ((CountDataEntity)o).getValue().toString();
-		} else if (o instanceof GeometryDataEntity) {
+        } else if (o instanceof CountDataEntity) {
+            return ((CountDataEntity) o).getValue().toString();
+        } else if (o instanceof GeometryDataEntity) {
 
-			//TODO: check if we want WKT here
-			return ((GeometryDataEntity)o).getValue().getGeometry().toText();
+            //TODO: check if we want WKT here
+            return ((GeometryDataEntity) o).getValue().getGeometry().toText();
 
-		} else if (o instanceof TextDataEntity) {
-			return ((TextDataEntity)o).getValue();
-		} else if (o instanceof DataArrayDataEntity) {
+        } else if (o instanceof TextDataEntity) {
+            return ((TextDataEntity) o).getValue();
+        } else if (o instanceof DataArrayDataEntity) {
 
-			//TODO: implement
-			//return ((DataArrayDataEntity)o).getValue();
-			return null;
+            //TODO: implement
+            //return ((DataArrayDataEntity)o).getValue();
+            return null;
 
-		} else if (o instanceof ProfileDataEntity) {
+        } else if (o instanceof ProfileDataEntity) {
 
-			//TODO: implement
-			//return ((ProfileDataEntity)o).getValue();
-			return null;
+            //TODO: implement
+            //return ((ProfileDataEntity)o).getValue();
+            return null;
 
-		} else if (o instanceof ReferencedDataEntity) {
-			return ((ReferencedDataEntity)o).getValue();
-		}
-		return "";
-	}
+        } else if (o instanceof ReferencedDataEntity) {
+            return ((ReferencedDataEntity) o).getValue();
+        }
+        return "";
+    }
+
+    private String resolveTimeInterval(Date timeIntervalStart, Date timeIntervalEnd) {
+        if (timeIntervalStart == null || timeIntervalEnd == null) {
+            return null;
+        }
+        return new Interval(timeIntervalStart.getTime(), timeIntervalEnd.getTime(), DateTimeZone.UTC).toString();
+    }
+
+    private JsonNode createParameterProperty(Parameter<?> p) {
+        return Json.nodeFactory().objectNode().put(p.getName(), p.getValueAsString());
+    }
+
+    private ComplexValue createParameterComplexValue(Parameter<?> p) {
+        ComplexValue cv = new ComplexValue();
+        cv.getValue().add(new Property(null, null, ValueType.PRIMITIVE, createParameterProperty(p)));
+        return cv;
+    }
 }
