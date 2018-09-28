@@ -40,9 +40,8 @@ import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
-import org.n52.sta.edm.provider.SensorThingsComplexTypeProvider;
 import static org.n52.sta.edm.provider.SensorThingsEdmConstants.*;
-import org.n52.sta.edm.provider.complextypes.PropertiesComplexType;
+import org.n52.sta.edm.provider.complextypes.OpenComplexType;
 import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ES_LOCATIONS_NAME;
 import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATION_FQN;
 import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ES_DATASTREAMS_NAME;
@@ -85,7 +84,7 @@ public class ThingEntityProvider extends AbstractSensorThingsEntityProvider {
 
         //create EntityType complex properties
         CsdlProperty properties = new CsdlProperty().setName(PROP_PROPERTIES)
-                .setType(PropertiesComplexType.CT_PROPERTIES_FQN)
+                .setType(OpenComplexType.CT_OPEN_TYPE_FQN)
                 .setNullable(true);
 
         //create EntityType navigation links

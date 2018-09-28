@@ -15,22 +15,22 @@ import org.springframework.stereotype.Component;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
-public class PropertiesComplexType implements AbstractComplexType {
+public class OpenComplexType implements AbstractComplexType {
 
-    public static final String CT_PROPERTIES_NAME = "Properties";
-    public static final FullQualifiedName CT_PROPERTIES_FQN = new FullQualifiedName(SensorThingsEdmConstants.NAMESPACE, CT_PROPERTIES_NAME);
+    public static final String CT_OPEN_TYPE_NAME = "OpenComplexType";
+    public static final FullQualifiedName CT_OPEN_TYPE_FQN = new FullQualifiedName(SensorThingsEdmConstants.NAMESPACE, CT_OPEN_TYPE_NAME);
 
     @Override
     public CsdlComplexType createComplexType() {
         CsdlComplexType complexType = new CsdlComplexType();
-        complexType.setName(CT_PROPERTIES_FQN.getFullQualifiedNameAsString());
+        complexType.setName(CT_OPEN_TYPE_FQN.getFullQualifiedNameAsString());
         complexType.setOpenType(true);
         return complexType;
     }
 
     @Override
     public FullQualifiedName getFullQualifiedTypeName() {
-        return CT_PROPERTIES_FQN;
+        return CT_OPEN_TYPE_FQN;
     }
 
 }
