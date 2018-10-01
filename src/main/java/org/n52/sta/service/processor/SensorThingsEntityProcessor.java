@@ -59,7 +59,7 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
 
     @Override
     public void readEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-        EntityResponse entityResponse = requestHandler.handleEntityCollectionRequest(uriInfo);
+        EntityResponse entityResponse = requestHandler.handleEntityCollectionRequest(uriInfo.getUriResourceParts());
 
         InputStream serializedContent = createResponseContent(entityResponse, request.getRawBaseUri(), uriInfo);
 

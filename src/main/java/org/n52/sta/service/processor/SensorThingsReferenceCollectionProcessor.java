@@ -74,17 +74,13 @@ public class SensorThingsReferenceCollectionProcessor implements ReferenceCollec
         }
 
         // create a serializer based on JSON format
-//        ODataSerializer serializer = odata.createSerializer(ET_COLLECTION_PROCESSOR_CONTENT_TYPE);
         ODataSerializer serializer = new SensorThingsSerializer(ET_REFERENCE_COLLECTION_PROCESSOR_CONTENT_TYPE);
-
-        EdmEntityType edmEntityType = response.getEntitySet().getEntityType();
 
         // serialize the content: transform from the EntitySet object to InputStream
         ContextURL contextUrl = ContextURL.with()
                 .entitySet(response.getEntitySet())
                 .build();
 
-        final String id = rawBaseUri + "/" + response.getEntitySet().getName();
         ReferenceCollectionSerializerOptions opts
                 = ReferenceCollectionSerializerOptions
                         .with()
