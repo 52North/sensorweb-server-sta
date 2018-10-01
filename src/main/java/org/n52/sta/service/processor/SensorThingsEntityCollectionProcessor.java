@@ -60,7 +60,7 @@ public class SensorThingsEntityCollectionProcessor implements EntityCollectionPr
     @Override
     public void readEntityCollection(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType contentType) throws ODataApplicationException, ODataLibraryException {
 
-        EntityCollectionResponse entityCollectionResponse = requestHandler.handleEntityCollectionRequest(uriInfo);
+        EntityCollectionResponse entityCollectionResponse = requestHandler.handleEntityCollectionRequest(uriInfo.getUriResourceParts());
 
         InputStream serializedContent = createResponseContent(entityCollectionResponse, uriInfo, request.getRawBaseUri());
 

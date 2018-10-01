@@ -5,8 +5,10 @@
  */
 package org.n52.sta.service.handler;
 
+import java.util.List;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriInfo;
+import org.apache.olingo.server.api.uri.UriResource;
 import org.n52.sta.service.response.EntityCollectionResponse;
 
 /**
@@ -23,6 +25,6 @@ public interface AbstractEntityCollectionRequestHandler {
      * @return response that contains data for the EntityCollection reponse
      * @throws ODataApplicationException
      */
-    public abstract EntityCollectionResponse handleEntityCollectionRequest(UriInfo uriInfo) throws ODataApplicationException;
+    public abstract EntityCollectionResponse handleEntityCollectionRequest(List<UriResource> resourcePaths) throws ODataApplicationException;
 
 }

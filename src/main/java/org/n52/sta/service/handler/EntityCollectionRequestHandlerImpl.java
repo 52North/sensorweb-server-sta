@@ -35,10 +35,10 @@ public class EntityCollectionRequestHandlerImpl implements AbstractEntityCollect
     private UriResourceNavigationResolver navigationResolver;
 
     @Override
-    public EntityCollectionResponse handleEntityCollectionRequest(UriInfo uriInfo) throws ODataApplicationException {
+    public EntityCollectionResponse handleEntityCollectionRequest(List<UriResource> resourcePaths) throws ODataApplicationException {
         EntityCollectionResponse response = null;
 
-        List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
+//        List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
 
         // handle request depending on the number of UriResource paths
         // e.g the case: sta/Things
