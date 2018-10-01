@@ -18,6 +18,7 @@ import org.apache.olingo.commons.api.edmx.EdmxReference;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataHttpHandler;
 import org.apache.olingo.server.api.ServiceMetadata;
+import org.apache.olingo.server.api.processor.ComplexProcessor;
 import org.apache.olingo.server.api.processor.EntityCollectionProcessor;
 import org.apache.olingo.server.api.processor.EntityProcessor;
 import org.apache.olingo.server.api.processor.ErrorProcessor;
@@ -25,6 +26,7 @@ import org.apache.olingo.server.api.processor.PrimitiveProcessor;
 import org.apache.olingo.server.api.processor.PrimitiveValueProcessor;
 import org.apache.olingo.server.api.processor.ServiceDocumentProcessor;
 import static org.n52.sta.service.SensorThingsController.URI;
+import org.n52.sta.service.processor.SensorThingsComplexProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -57,6 +59,9 @@ public class SensorThingsController {
     @Autowired
     private ErrorProcessor errorProcessor;
 
+    @Autowired
+    private ComplexProcessor complexProcessor;
+
     @RequestMapping("**")
     protected void process(HttpServletRequest request, HttpServletResponse response) {
 
@@ -71,6 +76,7 @@ public class SensorThingsController {
         handler.register(entityProcessor);
         handler.register(errorProcessor);
         handler.register(primitiveValueProcessor);
+        handler.register(complexProcessor);
 
         // let the handler do the work
         handler.process(new HttpServletRequestWrapper(request) {
