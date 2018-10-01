@@ -38,6 +38,7 @@ import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.mapping.DatastreamMapper;
+import org.n52.sta.service.query.QueryOptions;
 import org.springframework.stereotype.Component;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -47,60 +48,47 @@ import com.querydsl.core.types.dsl.BooleanExpression;
  *
  */
 @Component
-public class DatastreamService implements AbstractSensorThingsEntityService {
-
-    private DatastreamRepository repository;
+public class DatastreamService extends AbstractSensorThingsEntityService<DatastreamRepository> {
 
     private DatastreamMapper mapper;
 
     private final static DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
 
     public DatastreamService(DatastreamRepository repository, DatastreamMapper mapper) {
-        this.repository = repository;
+        super(repository);
         this.mapper = mapper;
     }
 
     @Override
-    public EntityCollection getEntityCollection() {
+    public EntityCollection getEntityCollection(QueryOptions queryOptions) {
         EntityCollection retEntitySet = new EntityCollection();
-        repository.findAll().forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        getRepository().findAll(createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
 
     @Override
     public Entity getEntity(Long id) {
-        Optional<DatastreamEntity> entity = repository.findOne(byId(id));
+        Optional<DatastreamEntity> entity = getRepository().findOne(byId(id));
         return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
 
     @Override
-    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType) {
-        BooleanExpression filter;
-        switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-        case "iot.Thing": {
-            filter = dQS.withThing(sourceId);
-            break;
-        }
-        case "iot.Sensor": {
-            filter = dQS.withSensor(sourceId);
-            break;
-        }
-        case "iot.ObservedProperty": {
-            filter = dQS.withObservedProperty(sourceId);
-            break;
-        }
-        default: return null;
-        }
-        Iterable<DatastreamEntity> datastreams = repository.findAll(filter);
+    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType, QueryOptions queryOptions) {
+        Iterable<DatastreamEntity> datastreams = getRepository().findAll(getFilter(sourceId, sourceEntityType), createPageableRequest(queryOptions));
 
         EntityCollection retEntitySet = new EntityCollection();
         datastreams.forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
-
+    
+    @Override
+    public long getRelatedEntityCollectionCount(Long sourceId, EdmEntityType sourceEntityType) {
+        return getRepository().count(getFilter(sourceId, sourceEntityType));
+    }
+    
     @Override
     public boolean existsEntity(Long id) {
-        return repository.exists(byId(id));
+        return getRepository().exists(byId(id));
     }
 
     @Override
@@ -117,7 +105,7 @@ public class DatastreamService implements AbstractSensorThingsEntityService {
         if (targetId != null) {
             filter = filter.and(dQS.matchesId(targetId));
         }
-        return repository.exists(filter);
+        return getRepository().exists(filter);
     }
 
     @Override
@@ -168,7 +156,7 @@ public class DatastreamService implements AbstractSensorThingsEntityService {
         if (targetId != null) {
             filter = filter.and(dQS.matchesId(targetId));
         }
-        return repository.findOne(filter);
+        return getRepository().findOne(filter);
     }
 
     /**

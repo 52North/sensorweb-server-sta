@@ -38,6 +38,7 @@ import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.sta.data.query.ThingQuerySpecifications;
 import org.n52.sta.data.repositories.ThingRepository;
 import org.n52.sta.mapping.ThingMapper;
+import org.n52.sta.service.query.QueryOptions;
 import org.springframework.stereotype.Component;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -47,36 +48,34 @@ import com.querydsl.core.types.dsl.BooleanExpression;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
-public class ThingService implements AbstractSensorThingsEntityService {
+public class ThingService extends AbstractSensorThingsEntityService<ThingRepository> {
 
     private ThingMapper mapper;
-
-    private ThingRepository repository;
 
     private final static ThingQuerySpecifications tQS = new ThingQuerySpecifications();
 
     public ThingService(ThingRepository repository, ThingMapper mapper) {
-        this.repository = repository;
+        super(repository);
         this.mapper = mapper;
     }
 
     @Override
-    public EntityCollection getEntityCollection() {
+    public EntityCollection getEntityCollection(QueryOptions queryOptions) {
         EntityCollection retEntitySet = new EntityCollection();
-        repository.findAll().forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        getRepository().findAll(createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
 
     @Override
     public Entity getEntity(Long id) {
-        Optional<ThingEntity> entity = repository.findOne(tQS.withId(id));
+        Optional<ThingEntity> entity = getRepository().findOne(tQS.withId(id));
         return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
 
     @Override
-    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType) {
+    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType, QueryOptions queryOptions) {
         BooleanExpression filter = tQS.withRelatedLocation(sourceId);
-        Iterable<ThingEntity> things = repository.findAll(filter);
+        Iterable<ThingEntity> things = getRepository().findAll(filter, createPageableRequest(queryOptions));
 
         EntityCollection retEntitySet = new EntityCollection();
         things.forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
@@ -84,8 +83,13 @@ public class ThingService implements AbstractSensorThingsEntityService {
     }
 
     @Override
+    public long getRelatedEntityCollectionCount(Long sourceId, EdmEntityType sourceEntityType) {
+        return getRepository().count(tQS.withRelatedLocation(sourceId));
+    }
+
+    @Override
     public boolean existsEntity(Long id) {
-        return repository.exists(tQS.withId(id));
+        return getRepository().exists(tQS.withId(id));
     }
 
     @Override
@@ -101,7 +105,7 @@ public class ThingService implements AbstractSensorThingsEntityService {
             if (targetId != null) {
                 filter = filter.and(tQS.withId(targetId));
             }
-            return repository.exists(filter);
+            return getRepository().exists(filter);
         }
         default: return false;
         }
@@ -167,6 +171,6 @@ public class ThingService implements AbstractSensorThingsEntityService {
         if (targetId != null) {
             filter = filter.and(tQS.withId(targetId));
         }
-        return repository.findOne(filter);
+        return getRepository().findOne(filter);
     }
 }

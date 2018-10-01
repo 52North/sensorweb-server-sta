@@ -46,7 +46,7 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper {
+public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper<FeatureEntity> {
 
     @Autowired
     EntityCreationHelper entityCreationHelper;

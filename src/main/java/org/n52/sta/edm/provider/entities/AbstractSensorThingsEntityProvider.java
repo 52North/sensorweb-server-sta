@@ -49,6 +49,8 @@ public abstract class AbstractSensorThingsEntityProvider implements Initializing
     public static final String SELF_LINK_ANNOTATION = CONTROL_ANNOTATION_PREFIX + ".selfLink";
 
     public static final String NAVIGATION_LINK_ANNOTATION = CONTROL_ANNOTATION_PREFIX + ".navigationLink";
+    
+    public static final String NEXT_LINK_ANNOTATION = CONTROL_ANNOTATION_PREFIX + ".nextLink";
 
     // Entity Property Names
     public static final String PROP_DEFINITION = "definition";

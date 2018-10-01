@@ -38,6 +38,7 @@ import org.n52.series.db.FeatureRepository;
 import org.n52.series.db.beans.FeatureEntity;
 import org.n52.sta.data.query.FeatureOfInterestQuerySpecifications;
 import org.n52.sta.mapping.FeatureOfInterestMapper;
+import org.n52.sta.service.query.QueryOptions;
 import org.springframework.stereotype.Component;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -48,40 +49,40 @@ import com.querydsl.core.types.dsl.BooleanExpression;
  *
  */
 @Component
-public class FeatureOfInterestService implements AbstractSensorThingsEntityService {
+public class FeatureOfInterestService extends AbstractSensorThingsEntityService<FeatureRepository> {
 
-    private FeatureRepository repository;
 
     private FeatureOfInterestMapper mapper;
 
     private final static FeatureOfInterestQuerySpecifications foiQS = new FeatureOfInterestQuerySpecifications();
 
     public FeatureOfInterestService(FeatureRepository repository, FeatureOfInterestMapper mapper) {
-        this.repository = repository;
+        super(repository);
         this.mapper = mapper;
     }
 
     @Override
-    public EntityCollection getEntityCollection() {
+    public EntityCollection getEntityCollection(QueryOptions queryOptions) {
         EntityCollection retEntitySet = new EntityCollection();
-        repository.findAll(foiQS.isValidEntity()).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        getRepository().findAll(foiQS.isValidEntity(), createPageableRequest(queryOptions))
+                .forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
 
     @Override
     public Entity getEntity(Long id) {
-        Optional<FeatureEntity> entity = repository.findOne(byId(id));
+        Optional<FeatureEntity> entity = getRepository().findOne(byId(id));
         return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
 
     @Override
-    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType) {
+    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType, QueryOptions queryOptions) {
         return null;
     }
 
     @Override
     public boolean existsEntity(Long id) {
-        return repository.exists(byId(id));
+        return getRepository().exists(byId(id));
     }
 
     @Override
@@ -97,7 +98,7 @@ public class FeatureOfInterestService implements AbstractSensorThingsEntityServi
             if (targetId != null) {
                 filter = filter.and(foiQS.withId(targetId));
             }
-            return repository.exists(filter);
+            return getRepository().exists(filter);
         }
         default: return false;
         }
@@ -155,7 +156,7 @@ public class FeatureOfInterestService implements AbstractSensorThingsEntityServi
         if (targetId != null) {
             filter = filter.and(foiQS.withId(targetId));
         }
-        return repository.findOne(filter);
+        return getRepository().findOne(filter);
     }
 
     /**

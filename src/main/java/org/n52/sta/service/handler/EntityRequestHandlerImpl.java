@@ -18,7 +18,6 @@ import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
-import org.n52.sta.service.response.EntityCollectionResponse;
 import org.n52.sta.service.response.EntityResponse;
 import org.n52.sta.utils.EntityQueryParams;
 import org.n52.sta.utils.UriResourceNavigationResolver;
@@ -66,7 +65,7 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
 
         // fetch the data from backend for this requested Entity and deliver as Entity
         List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
-        AbstractSensorThingsEntityService responseService = serviceRepository.getEntityService(uriResourceEntitySet.getEntityType().getName());
+        AbstractSensorThingsEntityService<?> responseService = serviceRepository.getEntityService(uriResourceEntitySet.getEntityType().getName());
         Entity responseEntity = responseService.getEntity(navigationResolver.getEntityIdFromKeyParams(keyPredicates));
 
         if (responseEntity == null) {

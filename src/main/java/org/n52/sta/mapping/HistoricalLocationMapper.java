@@ -47,7 +47,7 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-public class HistoricalLocationMapper {
+public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationEntity>{
 
     @Autowired
     EntityCreationHelper entityCreationHelper;

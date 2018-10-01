@@ -20,9 +20,10 @@ public interface AbstractEntityCollectionRequestHandler {
      * Handles a request for a EntityCollection and creates a response
      *
      * @param uriInfo information for the EntityCollection request URI
+     * @param string 
      * @return response that contains data for the EntityCollection reponse
      * @throws ODataApplicationException
      */
-    public abstract EntityCollectionResponse handleEntityCollectionRequest(UriInfo uriInfo) throws ODataApplicationException;
+    public abstract EntityCollectionResponse handleEntityCollectionRequest(UriInfo uriInfo, String string) throws ODataApplicationException;
 
 }

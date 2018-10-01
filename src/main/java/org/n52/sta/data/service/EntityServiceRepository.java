@@ -59,8 +59,8 @@ public class EntityServiceRepository {
      * @param entityTypeName the type name of the requested entity service
      * @return the requested entity data service
      */
-    public AbstractSensorThingsEntityService getEntityService(String entityTypeName) {
-        AbstractSensorThingsEntityService entityService = null;
+    public AbstractSensorThingsEntityService<?> getEntityService(String entityTypeName) {
+        AbstractSensorThingsEntityService<?> entityService = null;
 
         switch (entityTypeName) {
         case "Thing": {

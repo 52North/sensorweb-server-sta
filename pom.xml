@@ -73,11 +73,13 @@
 			<version>7.0</version>
 			<scope>provided</scope>
 		</dependency>
+        <!-- 
 		<dependency>
 			<groupId>com.vividsolutions</groupId>
 			<artifactId>jts-io</artifactId>
 			<version>1.14.0</version>
 		</dependency>
+         -->
 		
 		<!-- Data Access -->
 		<dependency>
@@ -100,7 +102,8 @@
             <artifactId>types</artifactId>
             <version>${series-hbm.version}</version>
         </dependency>
-
+        
+    
 <!--         <dependency> -->
 <!--             <groupId>org.springframework</groupId> -->
 <!--             <artifactId>spring-orm</artifactId> -->

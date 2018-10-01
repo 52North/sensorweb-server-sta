@@ -38,6 +38,7 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.data.query.LocationQuerySpecifications;
 import org.n52.sta.data.repositories.LocationRepository;
 import org.n52.sta.mapping.LocationMapper;
+import org.n52.sta.service.query.QueryOptions;
 import org.springframework.stereotype.Component;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -47,58 +48,67 @@ import com.querydsl.core.types.dsl.BooleanExpression;
  *
  */
 @Component
-public class LocationService implements AbstractSensorThingsEntityService {
+public class LocationService extends AbstractSensorThingsEntityService<LocationRepository> {
 
-    private LocationRepository repository;
 
     private LocationMapper mapper;
 
     private final static LocationQuerySpecifications lQS= new LocationQuerySpecifications();
 
     public LocationService(LocationRepository repository, LocationMapper mapper) {
-        this.repository = repository;
+        super(repository);
         this.mapper = mapper;
     }
 
     @Override
-    public EntityCollection getEntityCollection() {
+    public EntityCollection getEntityCollection(QueryOptions queryOptions) {
         EntityCollection retEntitySet = new EntityCollection();
-        repository.findAll().forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        getRepository().findAll(createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
 
     @Override
     public Entity getEntity(Long id) {
-        Optional<LocationEntity> entity = repository.findOne(byId(id));
+        Optional<LocationEntity> entity = getRepository().findOne(byId(id));
         return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
 
     @Override
-    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType) {
-        BooleanExpression filter;
-        Iterable<LocationEntity> locations;
-        switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-        case "iot.HistoricalLocation": {
-            filter = lQS.withRelatedHistoricalLocation(sourceId);
-            locations = repository.findAll(filter);
-            break;
-        }
-        case "iot.Thing": {
-            filter = lQS.withRelatedThing(sourceId);
-            locations = repository.findAll(filter);               
-            break;
-        }
-        default: return null;
-        }
+    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType, QueryOptions queryOptions) {
+        BooleanExpression filter = getFilter(sourceId, sourceEntityType);
 
         EntityCollection retEntitySet = new EntityCollection();
+        Iterable<LocationEntity> locations = getRepository().findAll(filter, createPageableRequest(queryOptions));
         locations.forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
 
     @Override
+    public long getRelatedEntityCollectionCount(Long sourceId, EdmEntityType sourceEntityType) {
+        BooleanExpression filter = getFilter(sourceId, sourceEntityType);
+        return getRepository().count(filter);
+    }
+
+    private BooleanExpression getFilter(Long sourceId, EdmEntityType sourceEntityType) {
+        BooleanExpression filter;
+        switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
+        case "iot.HistoricalLocation": {
+            filter = lQS.withRelatedHistoricalLocation(sourceId);
+            break;
+        }
+        case "iot.Thing": {
+            filter = lQS.withRelatedThing(sourceId);
+            break;
+        }
+        default:
+            return null;
+        }
+        return filter;
+    }
+
+    @Override
     public boolean existsEntity(Long id) {
-        return repository.exists(byId(id));
+        return getRepository().exists(byId(id));
     }
 
     @Override
@@ -123,7 +133,7 @@ public class LocationService implements AbstractSensorThingsEntityService {
         if (targetId != null) {
             filter = filter.and(lQS.withId(targetId));
         }
-        return repository.exists(filter);
+        return getRepository().exists(filter);
     }
 
     @Override
@@ -182,7 +192,7 @@ public class LocationService implements AbstractSensorThingsEntityService {
         if (targetId != null) {
             filter = filter.and(lQS.withId(targetId));
         }
-        return repository.findOne(filter);
+        return getRepository().findOne(filter);
     }
 
     /**

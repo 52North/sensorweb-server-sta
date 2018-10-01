@@ -60,7 +60,7 @@ public class SensorThingsEntityCollectionProcessor implements EntityCollectionPr
     @Override
     public void readEntityCollection(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType contentType) throws ODataApplicationException, ODataLibraryException {
 
-        EntityCollectionResponse entityCollectionResponse = requestHandler.handleEntityCollectionRequest(uriInfo);
+        EntityCollectionResponse entityCollectionResponse = requestHandler.handleEntityCollectionRequest(uriInfo, request.getRawBaseUri());
 
         InputStream serializedContent = createResponseContent(entityCollectionResponse, uriInfo, request.getRawBaseUri());
 
@@ -95,7 +95,6 @@ public class SensorThingsEntityCollectionProcessor implements EntityCollectionPr
 
         //evaluate count options
         CountOptions countOptions = propertySelectionHandler.evaluateCountOptions(uriInfo, response.getEntityCollection());
-        response.getEntityCollection().setCount(countOptions.getCount());
 
         // serialize the content: transform from the EntitySet object to InputStream
         ContextURL contextUrl = ContextURL.with()

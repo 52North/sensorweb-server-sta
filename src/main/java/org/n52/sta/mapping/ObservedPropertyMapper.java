@@ -46,7 +46,7 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-public class ObservedPropertyMapper extends AbstractMapper {
+public class ObservedPropertyMapper extends AbstractMapper<PhenomenonEntity> {
 
     @Autowired
     EntityCreationHelper entityCreationHelper;

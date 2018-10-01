@@ -38,6 +38,7 @@ import org.n52.series.db.ProcedureRepository;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.sta.data.query.SensorQuerySpecifications;
 import org.n52.sta.mapping.SensorMapper;
+import org.n52.sta.service.query.QueryOptions;
 import org.springframework.stereotype.Component;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -48,40 +49,38 @@ import com.querydsl.core.types.dsl.BooleanExpression;
  *
  */
 @Component
-public class SensorService implements AbstractSensorThingsEntityService {
-
-    private ProcedureRepository repository;
+public class SensorService extends AbstractSensorThingsEntityService<ProcedureRepository> {
 
     private SensorMapper mapper;
 
     private final static SensorQuerySpecifications sQS = new SensorQuerySpecifications();
 
     public SensorService(ProcedureRepository repository, SensorMapper mapper) {
-        this.repository = repository;
+        super(repository);
         this.mapper = mapper;
     }
 
     @Override
-    public EntityCollection getEntityCollection() {
+    public EntityCollection getEntityCollection(QueryOptions queryOptions) {
         EntityCollection retEntitySet = new EntityCollection();
-        repository.findAll(sQS.isValidEntity()).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        getRepository().findAll(sQS.isValidEntity(), createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
 
     @Override
     public Entity getEntity(Long id) {
-        Optional<ProcedureEntity> entity = repository.findOne(byId(id));
+        Optional<ProcedureEntity> entity = getRepository().findOne(byId(id));
         return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
 
     @Override
-    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType) {
+    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType, QueryOptions queryOptions) {
         return null;
     }
 
     @Override
     public boolean existsEntity(Long id) {
-        return repository.exists(byId(id));
+        return getRepository().exists(byId(id));
     }
 
     @Override
@@ -97,7 +96,7 @@ public class SensorService implements AbstractSensorThingsEntityService {
             if (targetId != null) {
                 filter = filter.and(sQS.withId(targetId));
             }
-            return repository.exists(filter);
+            return getRepository().exists(filter);
         }
         default: return false;
         }
@@ -155,7 +154,7 @@ public class SensorService implements AbstractSensorThingsEntityService {
         if (targetId != null) {
             filter = filter.and(sQS.withId(targetId));
         }
-        return repository.findOne(filter);
+        return getRepository().findOne(filter);
     }
 
     /**

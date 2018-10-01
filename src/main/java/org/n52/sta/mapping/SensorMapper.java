@@ -50,7 +50,7 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-public class SensorMapper extends AbstractMapper {
+public class SensorMapper extends AbstractMapper<ProcedureEntity> {
 
     @Autowired
     EntityCreationHelper entityCreationHelper;

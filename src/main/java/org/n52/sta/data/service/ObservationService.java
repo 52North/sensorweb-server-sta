@@ -36,8 +36,11 @@ import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.n52.series.db.DataRepository;
 import org.n52.series.db.beans.DataEntity;
+import org.n52.sta.data.OffsetLimitBasedPageRequest;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
 import org.n52.sta.mapping.ObservationMapper;
+import org.n52.sta.service.query.QueryOptions;
+import org.springframework.data.querydsl.QPageRequest;
 import org.springframework.stereotype.Component;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -47,37 +50,50 @@ import com.querydsl.core.types.dsl.BooleanExpression;
  *
  */
 @Component
-public class ObservationService implements AbstractSensorThingsEntityService {
-
-    private DataRepository<?> repository;
+public class ObservationService extends AbstractSensorThingsEntityService<DataRepository<?>> {
 
     private ObservationMapper mapper;
 
     private ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
 
     public ObservationService(DataRepository<?> repository, ObservationMapper mapper) {
-        this.repository = repository;
+        super(repository);
         this.mapper = mapper;
     }
 
     @Override
-    public EntityCollection getEntityCollection() {
+    public EntityCollection getEntityCollection(QueryOptions queryOptions) {
         EntityCollection retEntitySet = new EntityCollection();
-        repository.findAll(oQS.isValidEntity()).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        getRepository().findAll(createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
 
     @Override
     public Entity getEntity(Long id) {
         //TODO: check if this cast is possible
-        Optional<DataEntity<?>> entity = (Optional<DataEntity< ? >>) repository.findOne(byId(id));
+        Optional<DataEntity<?>> entity = (Optional<DataEntity< ? >>) getRepository().findOne(byId(id));
         return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
 
     @Override
-    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType) {
+    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType, QueryOptions queryOptions) {
+        BooleanExpression filter = getFilter(sourceId, sourceEntityType);
+        //TODO: check cast
+        Iterable<DataEntity<?>> observations = (Iterable<DataEntity< ? >>) getRepository().findAll(filter, createPageableRequest(queryOptions));
+        EntityCollection retEntitySet = new EntityCollection();
+        observations.forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        return retEntitySet;
+    }
+
+    @Override
+    public long getRelatedEntityCollectionCount(Long sourceId, EdmEntityType sourceEntityType) {
+        BooleanExpression filter = getFilter(sourceId, sourceEntityType);
+        return getRepository().count(filter);
+    }
+    
+    private BooleanExpression getFilter(Long sourceId, EdmEntityType sourceEntityType) {
         BooleanExpression filter;
-        switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
+        switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
         case "iot.Datastream": {
             filter = oQS.withDatastream(sourceId);
             break;
@@ -86,19 +102,15 @@ public class ObservationService implements AbstractSensorThingsEntityService {
             filter = oQS.withFeatureOfInterest(sourceId);
             break;
         }
-        default: return null;
+        default:
+            return null;
         }
-
-        //TODO: check cast
-        Iterable<DataEntity<?>> observations = (Iterable<DataEntity< ? >>) repository.findAll(filter);
-        EntityCollection retEntitySet = new EntityCollection();
-        observations.forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
-        return retEntitySet;
+        return filter;
     }
 
     @Override
     public boolean existsEntity(Long id) {
-        return repository.exists(byId(id));
+        return getRepository().exists(byId(id));
     }
 
     @Override
@@ -109,7 +121,7 @@ public class ObservationService implements AbstractSensorThingsEntityService {
     @Override
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         BooleanExpression filter;
-        switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
+        switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
         case "iot.Datastream": {
             filter = oQS.withDatastream(sourceId);
             break;
@@ -118,12 +130,13 @@ public class ObservationService implements AbstractSensorThingsEntityService {
             filter = oQS.withFeatureOfInterest(sourceId);
             break;
         }
-        default: return false;
+        default:
+            return false;
         }
         if (targetId != null) {
             filter = filter.and(oQS.withId(targetId));
         }
-        return repository.exists(filter);
+        return getRepository().exists(filter);
     }
 
     @Override
@@ -182,7 +195,7 @@ public class ObservationService implements AbstractSensorThingsEntityService {
         if (targetId != null) {
             filter = filter.and(oQS.withId(targetId));
         }
-        return (Optional<DataEntity< ? >>) repository.findOne(filter);
+        return (Optional<DataEntity< ? >>) getRepository().findOne(filter);
     }
 
     /**

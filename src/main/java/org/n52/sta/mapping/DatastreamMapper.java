@@ -53,6 +53,7 @@ import org.n52.series.db.beans.UnitEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.shetland.util.DateTimeHelper;
 import org.n52.sta.edm.provider.complextypes.UnitOfMeasurementComplexType;
+import org.n52.sta.service.query.QueryOptions;
 import org.springframework.stereotype.Component;
 
 /**
@@ -60,7 +61,7 @@ import org.springframework.stereotype.Component;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
-public class DatastreamMapper extends AbstractMapper {
+public class DatastreamMapper extends AbstractMapper<DatastreamEntity> {
 
     public Entity createEntity(DatastreamEntity datastream) {
         Entity entity = new Entity();

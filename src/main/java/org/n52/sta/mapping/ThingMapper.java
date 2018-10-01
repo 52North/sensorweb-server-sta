@@ -53,7 +53,7 @@ import com.fasterxml.jackson.databind.JsonNode;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
-public class ThingMapper extends AbstractMapper {
+public class ThingMapper extends AbstractMapper<ThingEntity> {
 
     private static final Logger LOG = LoggerFactory.getLogger(ThingMapper.class);
 

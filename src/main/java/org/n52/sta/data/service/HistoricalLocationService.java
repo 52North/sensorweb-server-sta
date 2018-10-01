@@ -38,6 +38,7 @@ import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.sta.data.query.HistoricalLocationQuerySpecifications;
 import org.n52.sta.data.repositories.HistoricalLocationRepository;
 import org.n52.sta.mapping.HistoricalLocationMapper;
+import org.n52.sta.service.query.QueryOptions;
 import org.springframework.stereotype.Component;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -47,36 +48,49 @@ import com.querydsl.core.types.dsl.BooleanExpression;
  *
  */
 @Component
-public class HistoricalLocationService implements AbstractSensorThingsEntityService {
-
-    private HistoricalLocationRepository repository;
+public class HistoricalLocationService extends AbstractSensorThingsEntityService<HistoricalLocationRepository> {
 
     private HistoricalLocationMapper mapper;
 
     private HistoricalLocationQuerySpecifications hlQS = new HistoricalLocationQuerySpecifications();
 
     public HistoricalLocationService(HistoricalLocationRepository repository, HistoricalLocationMapper mapper) {
-        this.repository = repository;
+        super(repository);
         this.mapper = mapper;
     }
 
     @Override
-    public EntityCollection getEntityCollection() {
+    public EntityCollection getEntityCollection(QueryOptions queryOptions) {
         EntityCollection retEntitySet = new EntityCollection();
-        repository.findAll().forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        getRepository().findAll(createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
 
     @Override
     public Entity getEntity(Long id) {
-        Optional<HistoricalLocationEntity> entity = repository.findOne(byId(id));
+        Optional<HistoricalLocationEntity> entity = getRepository().findOne(byId(id));
         return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
 
     @Override
-    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType) {
+    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType, QueryOptions queryOptions) {
+        BooleanExpression filter = getFilter(sourceId, sourceEntityType);
+
+        Iterable<HistoricalLocationEntity> locations = getRepository().findAll(filter, createPageableRequest(queryOptions));
+        EntityCollection retEntitySet = new EntityCollection();
+        locations.forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        return retEntitySet;
+    }
+    
+    @Override
+    public long getRelatedEntityCollectionCount(Long sourceId, EdmEntityType sourceEntityType) {
+        BooleanExpression filter = getFilter(sourceId, sourceEntityType);
+        return getRepository().count(filter);
+    }
+
+    public BooleanExpression getFilter(Long sourceId, EdmEntityType sourceEntityType) {
         BooleanExpression filter;
-        switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
+        switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
         case "iot.Location": {
             filter = hlQS.withRelatedLocation(sourceId);
             break;
@@ -85,18 +99,15 @@ public class HistoricalLocationService implements AbstractSensorThingsEntityServ
             filter = hlQS.withRelatedThing(sourceId);
             break;
         }
-        default: return null;
+        default:
+            return null;
         }
-
-        Iterable<HistoricalLocationEntity> locations = repository.findAll(filter);
-        EntityCollection retEntitySet = new EntityCollection();
-        locations.forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
-        return retEntitySet;
+        return filter;
     }
 
     @Override
     public boolean existsEntity(Long id) {
-        return repository.exists(byId(id));
+        return getRepository().exists(byId(id));
     }
 
     @Override
@@ -122,7 +133,7 @@ public class HistoricalLocationService implements AbstractSensorThingsEntityServ
         if (targetId != null) {
             filter = filter.and(hlQS.withId(targetId));
         }
-        return repository.exists(filter);
+        return getRepository().exists(filter);
     }
 
     @Override

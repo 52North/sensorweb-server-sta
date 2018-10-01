@@ -38,7 +38,7 @@ import org.apache.olingo.commons.api.data.ValueType;
 import org.n52.series.db.beans.HibernateRelations.HasGeometry;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class AbstractLocationGeometryMapper extends AbstractMapper {
+public abstract class AbstractLocationGeometryMapper<T> extends AbstractMapper<T> {
 
     private static final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
 

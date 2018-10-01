@@ -48,13 +48,15 @@ import org.n52.shetland.ogc.gml.time.TimePeriod;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public abstract class AbstractMapper {
+public abstract class AbstractMapper<T> {
     
     @Autowired
     EntityCreationHelper entityCreationHelper;
     
     @Autowired
     GeometryMapper geometryMapper;
+    
+    public abstract Entity createEntity(T t);
     
     protected void addNameDescriptionProperties(Entity entity, DescribableEntity describableEntity) {
         // add name
