@@ -1076,17 +1076,21 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
             CircleStreamBuffer buffer = new CircleStreamBuffer();
             outputStream = buffer.getOutputStream();
             JsonGenerator json = new JsonFactory().createGenerator(outputStream);
-            // applay customized serializing for OpenType properties
+
+            json.writeStartObject();
+            writeContextURL(contextURL, json);
+            writeMetadataETag(metadata, json);
+
+            // apply customized serializing for OpenType properties
             if (((EdmComplexType) type).isOpenType()
                     && (((EdmComplexType) type).getPropertyNames() == null
                     || ((EdmComplexType) type).getPropertyNames().isEmpty())) {
                 writeContextURL(contextURL, json);
                 writeMetadataETag(metadata, json);
+                json.writeFieldName(property.getName());
                 writeOpenTypeComplex(metadata, (EdmComplexType) type, property, json);
             } else {
-                json.writeStartObject();
-                writeContextURL(contextURL, json);
-                writeMetadataETag(metadata, json);
+
                 EdmComplexType resolvedType = null;
                 if (!type.getFullQualifiedName().getFullQualifiedNameAsString().
                         equals(property.getType())) {
@@ -1114,9 +1118,8 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
                     writeNavigationProperties(metadata, type, property.asComplex(),
                             options == null ? null : options.getExpand(), null, null, name, json);
                 }
-
-                json.writeEndObject();
             }
+            json.writeEndObject();
 
             json.close();
             outputStream.close();
@@ -1257,7 +1260,8 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
             for (final Entity entity : entityCollection) {
                 json.writeStartObject();
 //                json.writeStringField(Constants.JSON_ID, uriHelper.buildCanonicalURL(edmEntitySet, entity));
-                json.writeStringField(String.join(".", CONTROL_ANNOTATION_PREFIX, "selfLinks"), String.valueOf(entity.getProperty(SELF_LINK_ANNOTATION).getValue()));
+                uriHelper.buildCanonicalURL(edmEntitySet, entity);
+                json.writeStringField(SELF_LINK_ANNOTATION, String.valueOf(entity.getProperty(SELF_LINK_ANNOTATION).getValue()));
                 json.writeEndObject();
             }
             json.writeEndArray();
