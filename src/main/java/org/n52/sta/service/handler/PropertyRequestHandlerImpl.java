@@ -45,7 +45,7 @@ public class PropertyRequestHandlerImpl implements AbstractPropertyRequestHandle
     private UriResourceNavigationResolver navigationResolver;
 
     @Override
-    public PropertyResponse handlePrimitiveRequest(UriInfo uriInfo) throws ODataApplicationException {
+    public PropertyResponse handlePropertyRequest(UriInfo uriInfo) throws ODataApplicationException {
         PropertyResponse response = null;
 
         List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
@@ -132,7 +132,7 @@ public class PropertyRequestHandlerImpl implements AbstractPropertyRequestHandle
             throw new ODataApplicationException("Property not found",
                     HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ENGLISH);
         }
-        while (resourcePaths.get(i) instanceof UriResourceComplexProperty) {
+        while (resourcePaths.get(i) instanceof UriResourceComplexProperty && i != resourcePaths.size() - 1) {
             ComplexValue complexValue = (ComplexValue) property.getValue();
             edmProperty = ((UriResourceProperty) resourcePaths.get(++i)).getProperty();
             final String edmPropertyName = edmProperty.getName();
