@@ -42,7 +42,7 @@ import org.springframework.stereotype.Component;
 @Component
 public abstract class AbstractSensorThingsEntityProvider implements InitializingBean {
 
-    protected static final String CONTROL_ANNOTATION_PREFIX = "@" + NAMESPACE;
+    public static final String CONTROL_ANNOTATION_PREFIX = "@" + NAMESPACE;
 
     public static final String ID_ANNOTATION = CONTROL_ANNOTATION_PREFIX + ".id";
 
