@@ -1280,9 +1280,9 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
             throws IOException {
         if (count != null) {
             if (isIEEE754Compatible) {
-                json.writeStringField(propertyName + Constants.JSON_COUNT, String.valueOf(count));
+                json.writeStringField(propertyName + replaceOdataIot(Constants.JSON_COUNT), String.valueOf(count));
             } else {
-                json.writeNumberField(propertyName + Constants.JSON_COUNT, count);
+                json.writeNumberField(propertyName + replaceOdataIot(Constants.JSON_COUNT), count);
             }
         }
     }
@@ -1291,7 +1291,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
             throws IOException {
         if (entitySet.getNext() != null) {
             pagination = true;
-            json.writeStringField(Constants.JSON_NEXT_LINK, entitySet.getNext().toASCIIString());
+            json.writeStringField(replaceOdataIot(Constants.JSON_NEXT_LINK), entitySet.getNext().toASCIIString());
         } else {
             pagination = false;
         }
@@ -1302,5 +1302,9 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
         if (entitySet.getDeltaLink() != null && !pagination) {
             json.writeStringField(Constants.JSON_DELTA_LINK, entitySet.getDeltaLink().toASCIIString());
         }
+    }
+    
+    private String replaceOdataIot(String s) {
+        return s.replace("odata", "iot");
     }
 }
