@@ -13,14 +13,14 @@ import org.springframework.data.domain.Sort.Direction;
  * @since 1.0.0
  *
  */
-public class OffsetLimitPageRequest extends AbstractPageRequest {
+public class OffsetLimitBasedPageRequest extends AbstractPageRequest {
 
     private static final long serialVersionUID = -5115884285975519825L;
 
     private final Sort sort;
 
     /**
-     * Creates a new {@link OffsetLimitPageRequest}. Pages are zero indexed,
+     * Creates a new {@link OffsetLimitBasedPageRequest}. Pages are zero indexed,
      * thus providing 0 for {@code page} will return the first page.
      * 
      * @param offset
@@ -28,12 +28,12 @@ public class OffsetLimitPageRequest extends AbstractPageRequest {
      * @param limit
      *            the size of the page to be returned.
      */
-    public OffsetLimitPageRequest(int offset, int limit) {
+    public OffsetLimitBasedPageRequest(int offset, int limit) {
         this(offset, limit, Sort.unsorted());
     }
 
     /**
-     * Creates a new {@link OffsetLimitPageRequest} with sort parameters
+     * Creates a new {@link OffsetLimitBasedPageRequest} with sort parameters
      * applied.
      * 
      * @param offset
@@ -47,12 +47,12 @@ public class OffsetLimitPageRequest extends AbstractPageRequest {
      *            the properties to sort by, must not be {@literal null} or
      *            empty.
      */
-    public OffsetLimitPageRequest(int offset, int limit, Direction direction, String... properties) {
+    public OffsetLimitBasedPageRequest(int offset, int limit, Direction direction, String... properties) {
         this(offset, limit, Sort.by(direction, properties));
     }
 
     /**
-     * Creates a new {@link OffsetLimitPageRequest} with sort parameters
+     * Creates a new {@link OffsetLimitBasedPageRequest} with sort parameters
      * applied.
      * 
      * @param offset
@@ -62,7 +62,7 @@ public class OffsetLimitPageRequest extends AbstractPageRequest {
      * @param sort
      *            can be {@literal null}.
      */
-    public OffsetLimitPageRequest(int offset, int limit, Sort sort) {
+    public OffsetLimitBasedPageRequest(int offset, int limit, Sort sort) {
         super(offset, limit);
         this.sort = sort;
     }
@@ -84,18 +84,18 @@ public class OffsetLimitPageRequest extends AbstractPageRequest {
 
     @Override
     public Pageable next() {
-        return new OffsetLimitPageRequest((int) getOffset() + getPageSize(), getPageSize(), getSort());
+        return new OffsetLimitBasedPageRequest((int) getOffset() + getPageSize(), getPageSize(), getSort());
     }
 
     @Override
     public Pageable previous() {
-        return hasPrevious() ? new OffsetLimitPageRequest((int) getOffset() - getPageSize(), getPageSize(), getSort())
+        return hasPrevious() ? new OffsetLimitBasedPageRequest((int) getOffset() - getPageSize(), getPageSize(), getSort())
                 : this;
     }
 
     @Override
     public Pageable first() {
-        return new OffsetLimitPageRequest(0, getPageSize(), getSort());
+        return new OffsetLimitBasedPageRequest(0, getPageSize(), getSort());
     }
 
     @Override
@@ -109,7 +109,7 @@ public class OffsetLimitPageRequest extends AbstractPageRequest {
     @Override
     public boolean equals(Object obj) {
         if (super.equals(obj)) {
-            OffsetLimitPageRequest other = (OffsetLimitPageRequest) obj;
+            OffsetLimitBasedPageRequest other = (OffsetLimitBasedPageRequest) obj;
             return this.sort == other.sort;
         }
         return false;
