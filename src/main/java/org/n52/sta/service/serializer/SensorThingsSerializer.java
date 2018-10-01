@@ -1080,17 +1080,17 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
             json.writeStartObject();
             writeContextURL(contextURL, json);
             writeMetadataETag(metadata, json);
+            json.writeFieldName(property.getName());
+            
 
             // apply customized serializing for OpenType properties
             if (((EdmComplexType) type).isOpenType()
                     && (((EdmComplexType) type).getPropertyNames() == null
                     || ((EdmComplexType) type).getPropertyNames().isEmpty())) {
-                writeContextURL(contextURL, json);
-                writeMetadataETag(metadata, json);
-                json.writeFieldName(property.getName());
+//                json.writeFieldName(property.getName());
                 writeOpenTypeComplex(metadata, (EdmComplexType) type, property, json);
             } else {
-
+                json.writeStartObject();
                 EdmComplexType resolvedType = null;
                 if (!type.getFullQualifiedName().getFullQualifiedNameAsString().
                         equals(property.getType())) {
@@ -1118,6 +1118,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
                     writeNavigationProperties(metadata, type, property.asComplex(),
                             options == null ? null : options.getExpand(), null, null, name, json);
                 }
+                json.writeEndObject();
             }
             json.writeEndObject();
 
