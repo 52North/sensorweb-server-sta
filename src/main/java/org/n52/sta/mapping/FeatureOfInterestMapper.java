@@ -29,10 +29,6 @@
 package org.n52.sta.mapping;
 
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DESCRIPTION;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ENCODINGTYPE;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_FEATURE;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_NAME;
 import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ES_FEATURES_OF_INTEREST_NAME;
 import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ET_FEATURE_OF_INTEREST_FQN;
 
@@ -50,12 +46,7 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-public class FeatureOfInterestMapper {
-
-    private static final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
-
-    @Autowired
-    GeometryMapper geometryMapper;
+public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper {
 
     @Autowired
     EntityCreationHelper entityCreationHelper;
@@ -63,20 +54,8 @@ public class FeatureOfInterestMapper {
     public Entity createEntity(FeatureEntity feature) {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, feature.getId()));
-        String description =  "Description of " + feature.getIdentifier();
-        if (feature.isSetDescription()) {
-            description = feature.getDescription();
-        }
-        entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, description));
-        String name =  "Description of " + feature.getIdentifier();
-        if (feature.isSetName()) {
-            name = feature.getName();
-        }
-        entity.addProperty(new Property(null, PROP_NAME, ValueType.PRIMITIVE, name));
-        entity.addProperty(new Property(null, PROP_ENCODINGTYPE, ValueType.PRIMITIVE, ENCODINGTYPE_GEOJSON));
-
-        entity.addProperty(new Property(null, PROP_FEATURE, ValueType.COMPLEX, geometryMapper.resolveGeometry(feature.getGeometryEntity())));
-
+        addNameDescriptionProperties(entity, feature);
+        addGeometry(entity, feature);
         entity.setType(ET_FEATURE_OF_INTEREST_FQN.getFullQualifiedNameAsString());
         entity.setId(entityCreationHelper.createId(entity, ES_FEATURES_OF_INTEREST_NAME, ID_ANNOTATION));
 

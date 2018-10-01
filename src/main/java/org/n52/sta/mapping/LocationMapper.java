@@ -29,10 +29,6 @@
 package org.n52.sta.mapping;
 
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DESCRIPTION;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ENCODINGTYPE;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_LOCATION;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_NAME;
 import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ES_LOCATIONS_NAME;
 import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATION_FQN;
 
@@ -49,12 +45,7 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-public class LocationMapper {
-
-    private static final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
-
-    @Autowired
-    GeometryMapper geometryMapper;
+public class LocationMapper extends AbstractLocationGeometryMapper {
 
     @Autowired
     EntityCreationHelper entityCreationHelper;
@@ -62,11 +53,9 @@ public class LocationMapper {
     public Entity createEntity(LocationEntity location) {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, location.getId()));
-        entity.addProperty(new Property(null, PROP_NAME, ValueType.PRIMITIVE, location.getName()));
-        entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, location.getDescription()));
-        entity.addProperty(new Property(null, PROP_ENCODINGTYPE, ValueType.PRIMITIVE, ENCODINGTYPE_GEOJSON));
-
-        entity.addProperty(new Property(null, PROP_LOCATION, ValueType.COMPLEX, geometryMapper.resolveGeometry(location.getGeometryEntity())));
+        addDescription(entity, location);
+        addNane(entity, location);
+        addLocation(entity, location);
 
         entity.setType(ET_LOCATION_FQN.getFullQualifiedNameAsString());
         entity.setId(entityCreationHelper.createId(entity, ES_LOCATIONS_NAME, ID_ANNOTATION));

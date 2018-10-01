@@ -68,7 +68,7 @@ import com.fasterxml.jackson.databind.JsonNode;
  *
  */
 @Component
-public class ObservationMapper extends AbstractMapper{
+public class ObservationMapper extends AbstractMapper {
 
     public Entity createEntity(DataEntity<?> observation) {
         Entity entity = new Entity();

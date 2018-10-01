@@ -28,18 +28,17 @@
  */
 package org.n52.sta.mapping;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PROPERTIES;
+import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ES_THINGS_NAME;
+import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_FQN;
+
 import java.io.IOException;
+
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.n52.series.db.beans.sta.ThingEntity;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DESCRIPTION;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_NAME;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PROPERTIES;
-import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ES_THINGS_NAME;
-import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_FQN;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.n52.sta.utils.JsonHelper;
 import org.slf4j.Logger;
@@ -47,12 +46,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 /**
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
-public class ThingMapper {
+public class ThingMapper extends AbstractMapper {
 
     private static final Logger LOG = LoggerFactory.getLogger(ThingMapper.class);
 
@@ -65,8 +66,8 @@ public class ThingMapper {
     public Entity createEntity(ThingEntity thing) {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, thing.getId()));
-        entity.addProperty(new Property(null, PROP_NAME, ValueType.PRIMITIVE, thing.getName()));
-        entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, thing.getDescription()));
+        addDescription(entity, thing);
+        addNane(entity, thing);
 
         entity.addProperty(new Property(null, PROP_PROPERTIES, ValueType.COMPLEX, createJsonProperty(thing)));
 

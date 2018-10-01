@@ -28,39 +28,37 @@
  */
 package org.n52.sta.mapping;
 
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DEFINITION;
-import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ES_OBSERVED_PROPERTIES_NAME;
-import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_FQN;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ENCODINGTYPE;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_FEATURE;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_LOCATION;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
-import org.n52.series.db.beans.PhenomenonEntity;
-import org.n52.sta.utils.EntityCreationHelper;
+import org.n52.series.db.beans.HibernateRelations.HasGeometry;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-/**
- * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- *
- */
-@Component
-public class ObservedPropertyMapper extends AbstractMapper {
+public class AbstractLocationGeometryMapper extends AbstractMapper {
+
+    private static final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
 
     @Autowired
-    EntityCreationHelper entityCreationHelper;
+    GeometryMapper geometryMapper;
 
-    public Entity createEntity(PhenomenonEntity observedProperty) {
-        Entity entity = new Entity();
-        entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, observedProperty.getId()));
-        addNameDescriptionProperties(entity, observedProperty);
-        entity.addProperty(new Property(null, PROP_DEFINITION, ValueType.PRIMITIVE, observedProperty.getIdentifier()));
+    protected void addGeometry(Entity entity, HasGeometry<?> geometryEntity) {
+        addLocationGeometry(entity, geometryEntity, PROP_FEATURE);
 
-        entity.setType(ET_OBSERVED_PROPERTY_FQN.getFullQualifiedNameAsString());
-        entity.setId(entityCreationHelper.createId(entity, ES_OBSERVED_PROPERTIES_NAME, ID_ANNOTATION));
+    }
 
-        return entity;
+    protected void addLocation(Entity entity, HasGeometry<?> locationEntity) {
+        addLocationGeometry(entity, locationEntity, PROP_LOCATION);
+    }
+
+    protected void addLocationGeometry(Entity entity, HasGeometry<?> geometryLocationEntity, String property) {
+        entity.addProperty(new Property(null, PROP_ENCODINGTYPE, ValueType.PRIMITIVE, ENCODINGTYPE_GEOJSON));
+        entity.addProperty(new Property(null, property, ValueType.COMPLEX,
+                geometryMapper.resolveGeometry(geometryLocationEntity.getGeometryEntity())));
+
     }
 
 }
