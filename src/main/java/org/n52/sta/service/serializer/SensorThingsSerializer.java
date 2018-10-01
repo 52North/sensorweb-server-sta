@@ -695,7 +695,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
                 } else if (((EdmComplexType) type).isOpenType()
                         && (((EdmComplexType) type).getPropertyNames() == null
                         || ((EdmComplexType) type).getPropertyNames().isEmpty())) {
-                    writeOpenTypeComplex(metadata, (EdmComplexType) type, property, selectedPaths, json);
+                    writeOpenTypeComplexValue(property, json);
                 } else {
                     writeComplex(metadata, (EdmComplexType) type, property, selectedPaths, json);
                 }
@@ -738,7 +738,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
         json.writeEndObject();
     }
 
-    private void writeOpenTypeComplex(ServiceMetadata metadata, EdmComplexType type, Property property, Set<List<String>> selectedPaths, JsonGenerator json) throws SerializerException, IOException {
+    private void writeOpenTypeComplex(ServiceMetadata metadata, EdmComplexType type, Property property, JsonGenerator json) throws SerializerException, IOException {
         String derivedName = property.getType();
         EdmComplexType resolvedType = null;
         if (!type.getFullQualifiedName().getFullQualifiedNameAsString().
@@ -758,6 +758,10 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
             json.writeStringField(Constants.JSON_TYPE, "#"
                     + resolvedType.getFullQualifiedName().getFullQualifiedNameAsString());
         }
+        writeOpenTypeComplexValue(property, json);
+    }
+
+    private void writeOpenTypeComplexValue(Property property, JsonGenerator json) throws SerializerException, IOException {
         if (property.getValue() instanceof ObjectNode) {
             ObjectNode value = (ObjectNode) property.getValue();
             json.writeRawValue(value.toString());
@@ -809,7 +813,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
                             && (((EdmComplexType) derivedType).getPropertyNames() == null
                             || ((EdmComplexType) derivedType).getPropertyNames().isEmpty())) {
                         for (Property p : ((ComplexValue) value).getValue()) {
-                            writeOpenTypeComplex(metadata, (EdmComplexType) derivedType, p, selectedPaths, json);
+                            writeOpenTypeComplex(metadata, (EdmComplexType) derivedType, p, json);
                         }
 
                     } else {
@@ -1069,36 +1073,47 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
             CircleStreamBuffer buffer = new CircleStreamBuffer();
             outputStream = buffer.getOutputStream();
             JsonGenerator json = new JsonFactory().createGenerator(outputStream);
-            json.writeStartObject();
-            writeContextURL(contextURL, json);
-            writeMetadataETag(metadata, json);
-            EdmComplexType resolvedType = null;
-            if (!type.getFullQualifiedName().getFullQualifiedNameAsString().
-                    equals(property.getType())) {
-                if (type.getBaseType() != null
-                        && type.getBaseType().getFullQualifiedName().getFullQualifiedNameAsString().
-                                equals(property.getType())) {
-                    resolvedType = resolveComplexType(metadata, type.getBaseType(),
-                            type.getFullQualifiedName().getFullQualifiedNameAsString());
+            // applay customized serializing for OpenType properties
+            if (((EdmComplexType) type).isOpenType()
+                    && (((EdmComplexType) type).getPropertyNames() == null
+                    || ((EdmComplexType) type).getPropertyNames().isEmpty())) {
+                writeContextURL(contextURL, json);
+                writeMetadataETag(metadata, json);
+                writeOpenTypeComplex(metadata, (EdmComplexType) type, property, json);
+            } else {
+                json.writeStartObject();
+                writeContextURL(contextURL, json);
+                writeMetadataETag(metadata, json);
+                EdmComplexType resolvedType = null;
+                if (!type.getFullQualifiedName().getFullQualifiedNameAsString().
+                        equals(property.getType())) {
+                    if (type.getBaseType() != null
+                            && type.getBaseType().getFullQualifiedName().getFullQualifiedNameAsString().
+                                    equals(property.getType())) {
+                        resolvedType = resolveComplexType(metadata, type.getBaseType(),
+                                type.getFullQualifiedName().getFullQualifiedNameAsString());
+                    } else {
+                        resolvedType = resolveComplexType(metadata, type, property.getType());
+                    }
                 } else {
                     resolvedType = resolveComplexType(metadata, type, property.getType());
                 }
-            } else {
-                resolvedType = resolveComplexType(metadata, type, property.getType());
+                if (!isODataMetadataNone && !resolvedType.equals(type) || isODataMetadataFull) {
+                    json.writeStringField(Constants.JSON_TYPE, "#"
+                            + resolvedType.getFullQualifiedName().getFullQualifiedNameAsString());
+                }
+                writeOperations(property.getOperations(), json);
+
+                final List<Property> values
+                        = property.isNull() ? Collections.<Property>emptyList() : property.asComplex().getValue();
+                writeProperties(metadata, type, values, options == null ? null : options.getSelect(), json);
+                if (!property.isNull() && property.isComplex()) {
+                    writeNavigationProperties(metadata, type, property.asComplex(),
+                            options == null ? null : options.getExpand(), null, null, name, json);
+                }
+
+                json.writeEndObject();
             }
-            if (!isODataMetadataNone && !resolvedType.equals(type) || isODataMetadataFull) {
-                json.writeStringField(Constants.JSON_TYPE, "#"
-                        + resolvedType.getFullQualifiedName().getFullQualifiedNameAsString());
-            }
-            writeOperations(property.getOperations(), json);
-            final List<Property> values
-                    = property.isNull() ? Collections.<Property>emptyList() : property.asComplex().getValue();
-            writeProperties(metadata, type, values, options == null ? null : options.getSelect(), json);
-            if (!property.isNull() && property.isComplex()) {
-                writeNavigationProperties(metadata, type, property.asComplex(),
-                        options == null ? null : options.getExpand(), null, null, name, json);
-            }
-            json.writeEndObject();
 
             json.close();
             outputStream.close();
