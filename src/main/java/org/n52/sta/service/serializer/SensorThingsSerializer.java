@@ -95,6 +95,9 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.olingo.server.core.serializer.json.ODataErrorSerializer;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.CONTROL_ANNOTATION_PREFIX;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.SELF_LINK_ANNOTATION;
 
 public class SensorThingsSerializer extends AbstractODataSerializer {
 
@@ -1253,7 +1256,8 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
             json.writeArrayFieldStart(Constants.VALUE);
             for (final Entity entity : entityCollection) {
                 json.writeStartObject();
-                json.writeStringField(Constants.JSON_ID, uriHelper.buildCanonicalURL(edmEntitySet, entity));
+//                json.writeStringField(Constants.JSON_ID, uriHelper.buildCanonicalURL(edmEntitySet, entity));
+                json.writeStringField(String.join(".", CONTROL_ANNOTATION_PREFIX, "selfLinks"), String.valueOf(entity.getProperty(SELF_LINK_ANNOTATION).getValue()));
                 json.writeEndObject();
             }
             json.writeEndArray();
@@ -1318,7 +1322,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
             json.writeStringField(Constants.JSON_DELTA_LINK, entitySet.getDeltaLink().toASCIIString());
         }
     }
-    
+
     private String replaceOdataIot(String s) {
         return s.replace("odata", "iot");
     }

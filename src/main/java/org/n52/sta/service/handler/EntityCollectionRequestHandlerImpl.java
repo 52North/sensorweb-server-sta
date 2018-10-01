@@ -11,7 +11,6 @@ import java.util.List;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.server.api.ODataApplicationException;
-import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.queryoption.SystemQueryOptionKind;
@@ -39,19 +38,17 @@ public class EntityCollectionRequestHandlerImpl implements AbstractEntityCollect
     private UriResourceNavigationResolver navigationResolver;
 
     @Override
-    public EntityCollectionResponse handleEntityCollectionRequest(UriInfo uriInfo, String baseURI) throws ODataApplicationException {
+    public EntityCollectionResponse handleEntityCollectionRequest(List<UriResource> resourcePaths, QueryOptions queryOptions) throws ODataApplicationException {
         EntityCollectionResponse response = null;
-
-        List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
 
         // handle request depending on the number of UriResource paths
         // e.g the case: sta/Things
         if (resourcePaths.size() == 1) {
-            response = createResponseForEntitySet(resourcePaths, new QueryOptions(uriInfo, baseURI));
+            response = createResponseForEntitySet(resourcePaths, queryOptions);
 
             // e.g. the case: sta/Things(id)/Locations
         } else {
-            response = createResponseForNavigation(resourcePaths, new QueryOptions(uriInfo, baseURI));
+            response = createResponseForNavigation(resourcePaths, queryOptions);
 
         }
         return response;
