@@ -1220,7 +1220,8 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
 
             json.writeStartObject();
             writeContextURL(contextURL, json);
-            json.writeStringField(Constants.JSON_ID, uriHelper.buildCanonicalURL(edmEntitySet, entity));
+//            json.writeStringField(Constants.JSON_ID, uriHelper.buildCanonicalURL(edmEntitySet, entity));
+            json.writeStringField(SELF_LINK_ANNOTATION, String.valueOf(entity.getProperty(SELF_LINK_ANNOTATION).getValue()));
             json.writeEndObject();
 
             json.close();
