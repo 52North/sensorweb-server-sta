@@ -23,6 +23,6 @@ public interface AbstractPropertyRequestHandler {
      * @return response that contains data for the property reponse
      * @throws ODataApplicationException
      */
-    public PropertyResponse handlePrimitiveRequest(UriInfo uriInfo) throws ODataApplicationException;
+    public PropertyResponse handlePropertyRequest(UriInfo uriInfo) throws ODataApplicationException;
 
 }

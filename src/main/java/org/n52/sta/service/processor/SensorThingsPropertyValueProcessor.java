@@ -5,16 +5,11 @@
  */
 package org.n52.sta.service.processor;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveType;
-import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
-import org.apache.olingo.commons.api.edm.EdmProperty;
-import org.apache.olingo.commons.api.edm.EdmReturnType;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
@@ -55,7 +50,7 @@ public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcess
 
     @Override
     public void readPrimitiveValue(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-        PropertyResponse primitiveResponse = requestHandler.handlePrimitiveRequest(uriInfo);
+        PropertyResponse primitiveResponse = requestHandler.handlePropertyRequest(uriInfo);
 
         // serialize
         Object propertyValue = primitiveResponse.getProperty().getValue();
@@ -87,7 +82,7 @@ public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcess
 
     @Override
     public void readPrimitive(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-        PropertyResponse primitiveResponse = requestHandler.handlePrimitiveRequest(uriInfo);
+        PropertyResponse primitiveResponse = requestHandler.handlePropertyRequest(uriInfo);
 
         // serialize
         Object value = primitiveResponse.getProperty().getValue();
