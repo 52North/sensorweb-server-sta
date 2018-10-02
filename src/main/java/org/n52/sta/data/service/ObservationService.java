@@ -168,6 +168,20 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
             return null;
         }
     }
+    
+    @Override
+    protected String checkPropertyForSorting(String property) {
+        switch (property) {
+        case "phenomenonTime":
+            return DataEntity.PROPERTY_SAMPLING_TIME_START;
+        case "validTime":
+            return DataEntity.PROPERTY_VALID_TIME_START;
+//        case "result":
+//            return DataEntity.PROPERTY_VALUE;
+        default:
+            return super.checkPropertyForSorting(property);
+        }
+    }
 
     /**
      * Retrieves Observation Entity with Relation to sourceEntity from Database.

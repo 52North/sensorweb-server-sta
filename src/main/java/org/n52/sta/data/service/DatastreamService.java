@@ -137,6 +137,18 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
             return null;
         }
     }
+    
+    @Override
+    protected String checkPropertyForSorting(String property) {
+        switch (property) {
+        case "phenomenonTime":
+            return DatastreamEntity.PROPERTY_SAMPLING_TIME_START;
+        case "resultTime":
+            return DatastreamEntity.PROPERTY_RESULT_TIME_START;
+        default:
+            return super.checkPropertyForSorting(property);
+        }
+    }
 
     /**
      * Retrieves Datastream Entity with Relation to sourceEntity from Database.

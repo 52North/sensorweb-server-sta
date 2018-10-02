@@ -35,6 +35,7 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.n52.series.db.PhenomenonRepository;
+import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.sta.data.query.ObservedPropertyQuerySpecifications;
 import org.n52.sta.mapping.ObservedPropertyMapper;
@@ -128,6 +129,16 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
             return mapper.createEntity(sensor.get());
         } else {
             return null;
+        }
+    }
+    
+    @Override
+    protected String checkPropertyForSorting(String property) {
+        switch (property) {
+        case "definition":
+            return DataEntity.PROPERTY_IDENTIFIER;
+        default:
+            return super.checkPropertyForSorting(property);
         }
     }
 
