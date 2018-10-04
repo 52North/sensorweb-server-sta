@@ -143,7 +143,7 @@ public class HistoricalLocationService extends AbstractSensorThingsEntityService
 
     @Override
     public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-        Optional<HistoricalLocationEntity> historicalLocation = this.getRelatedEntityRaw(targetId, sourceEntityType, targetId);
+        Optional<HistoricalLocationEntity> historicalLocation = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
         if (historicalLocation.isPresent()) {
             return OptionalLong.of(historicalLocation.get().getId());
         } else {
