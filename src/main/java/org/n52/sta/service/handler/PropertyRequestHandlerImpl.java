@@ -22,6 +22,7 @@ import org.apache.olingo.server.api.uri.UriResourceComplexProperty;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
 import org.apache.olingo.server.api.uri.UriResourceProperty;
+import org.apache.olingo.server.api.uri.UriResourceValue;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.service.response.PropertyResponse;
@@ -132,9 +133,11 @@ public class PropertyRequestHandlerImpl implements AbstractPropertyRequestHandle
             throw new ODataApplicationException("Property not found",
                     HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ENGLISH);
         }
-        while (resourcePaths.get(i) instanceof UriResourceComplexProperty && i != resourcePaths.size() - 1) {
+        while (resourcePaths.get(i) instanceof UriResourceComplexProperty
+                && i != resourcePaths.size() - 1
+                && !(resourcePaths.get(++i) instanceof UriResourceValue)) {
             ComplexValue complexValue = (ComplexValue) property.getValue();
-            edmProperty = ((UriResourceProperty) resourcePaths.get(++i)).getProperty();
+            edmProperty = ((UriResourceProperty) resourcePaths.get(i)).getProperty();
             final String edmPropertyName = edmProperty.getName();
             Optional<Property> optProperty = complexValue.getValue().stream()
                     .filter(p -> p.getName().equals(edmPropertyName))
