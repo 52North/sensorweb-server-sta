@@ -1064,6 +1064,70 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
         }
     }
 
+    public SerializerResult complexValue(final ServiceMetadata metadata, final EdmComplexType type,
+            final Property property, final ComplexSerializerOptions options) throws SerializerException {
+        OutputStream outputStream = null;
+        SerializerException cachedException = null;
+        try {
+            final ContextURL contextURL = checkContextURL(options == null ? null : options.getContextURL());
+            final String name = contextURL == null ? null
+                    : contextURL.getEntitySetOrSingletonOrType();
+            CircleStreamBuffer buffer = new CircleStreamBuffer();
+            outputStream = buffer.getOutputStream();
+            JsonGenerator json = new JsonFactory().createGenerator(outputStream);
+
+            if (((EdmComplexType) type).isOpenType()
+                    && (((EdmComplexType) type).getPropertyNames() == null
+                    || ((EdmComplexType) type).getPropertyNames().isEmpty())) {
+                writeContextURL(contextURL, json);
+                writeMetadataETag(metadata, json);
+                writeOpenTypeComplex(metadata, (EdmComplexType) type, property, json);
+            } else {
+                json.writeStartObject();
+                writeContextURL(contextURL, json);
+                writeMetadataETag(metadata, json);
+
+                EdmComplexType resolvedType = null;
+                if (!type.getFullQualifiedName().getFullQualifiedNameAsString().
+                        equals(property.getType())) {
+                    if (type.getBaseType() != null
+                            && type.getBaseType().getFullQualifiedName().getFullQualifiedNameAsString().
+                                    equals(property.getType())) {
+                        resolvedType = resolveComplexType(metadata, type.getBaseType(),
+                                type.getFullQualifiedName().getFullQualifiedNameAsString());
+                    } else {
+                        resolvedType = resolveComplexType(metadata, type, property.getType());
+                    }
+                } else {
+                    resolvedType = resolveComplexType(metadata, type, property.getType());
+                }
+                if (!isODataMetadataNone && !resolvedType.equals(type) || isODataMetadataFull) {
+                    json.writeStringField(Constants.JSON_TYPE, "#"
+                            + resolvedType.getFullQualifiedName().getFullQualifiedNameAsString());
+                }
+                writeOperations(property.getOperations(), json);
+                final List<Property> values
+                        = property.isNull() ? Collections.<Property>emptyList() : property.asComplex().getValue();
+                writeProperties(metadata, type, values, options == null ? null : options.getSelect(), json);
+                if (!property.isNull() && property.isComplex()) {
+                    writeNavigationProperties(metadata, type, property.asComplex(),
+                            options == null ? null : options.getExpand(), null, null, name, json);
+                }
+                json.writeEndObject();
+            }
+
+            json.close();
+            outputStream.close();
+            return SerializerResultImpl.with().content(buffer.getInputStream()).build();
+        } catch (final IOException e) {
+            cachedException
+                    = new SerializerException(IO_EXCEPTION_TEXT, e, SerializerException.MessageKeys.IO_EXCEPTION);
+            throw cachedException;
+        } finally {
+            closeCircleStreamBufferOutput(outputStream, cachedException);
+        }
+    }
+
     @Override
     public SerializerResult complex(final ServiceMetadata metadata, final EdmComplexType type,
             final Property property, final ComplexSerializerOptions options) throws SerializerException {
@@ -1081,7 +1145,6 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
             writeContextURL(contextURL, json);
             writeMetadataETag(metadata, json);
             json.writeFieldName(property.getName());
-            
 
             // apply customized serializing for OpenType properties
             if (((EdmComplexType) type).isOpenType()
