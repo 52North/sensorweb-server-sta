@@ -8,6 +8,7 @@ package org.n52.sta.service.processor;
 import java.io.InputStream;
 import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.data.Property;
+import org.apache.olingo.commons.api.edm.EdmComplexType;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveType;
 import org.apache.olingo.commons.api.format.ContentType;
@@ -20,6 +21,7 @@ import org.apache.olingo.server.api.ODataRequest;
 import org.apache.olingo.server.api.ODataResponse;
 import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.api.processor.PrimitiveValueProcessor;
+import org.apache.olingo.server.api.serializer.ComplexSerializerOptions;
 import org.apache.olingo.server.api.serializer.FixedFormatSerializer;
 import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.PrimitiveSerializerOptions;
@@ -32,6 +34,7 @@ import org.n52.sta.service.response.PropertyResponse;
 import org.n52.sta.service.serializer.SensorThingsSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.SerializationUtils;
 
 /**
  *
@@ -50,24 +53,47 @@ public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcess
 
     @Override
     public void readPrimitiveValue(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-        PropertyResponse primitiveResponse = requestHandler.handlePropertyRequest(uriInfo);
+        PropertyResponse propertyValueReponse = requestHandler.handlePropertyRequest(uriInfo);
 
         // serialize
-        Object propertyValue = primitiveResponse.getProperty().getValue();
+        Object propertyValue = propertyValueReponse.getProperty().getValue();
         if (propertyValue != null) {
             //TODO: check for other than primitive types for the property
+            if (propertyValueReponse.getEdmPropertyType() instanceof EdmComplexType) {
+                createComplexValueResponse(response, propertyValueReponse);
+            } else {
+                createPrimitiveValueResponse(response, propertyValueReponse);
+            }
 
-            final FixedFormatSerializer serializer = odata.createFixedFormatSerializer();
-            PrimitiveValueSerializerOptions options = PrimitiveValueSerializerOptions.with().build();
-            InputStream serializedContent = serializer.primitiveValue((EdmPrimitiveType) primitiveResponse.getEdmPropertyType(), primitiveResponse.getProperty().getValue(), options); //            EdmPrimitiveType type == odata.createPrimitiveTypeInstance(EdmPrimitiveTypeKind.Binary);
-
-            response.setContent(serializedContent);
-            response.setStatusCode(HttpStatusCode.OK.getStatusCode());
-            response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.TEXT_PLAIN.toContentTypeString());
         } else {
             // in case there's no value for the property, we can skip the serialization
             response.setStatusCode(HttpStatusCode.NO_CONTENT.getStatusCode());
         }
+    }
+
+    private void createComplexValueResponse(ODataResponse response, PropertyResponse complexResponse) throws SerializerException {
+        SensorThingsSerializer serializer = new SensorThingsSerializer(ET_PROPERTY_PROCESSOR_CONTENT_TYPE);
+
+        ContextURL contextUrl = ContextURL.with().entitySet(complexResponse.getResponseEdmEntitySet()).navOrPropertyPath(complexResponse.getProperty().getName()).build();
+        ComplexSerializerOptions options = ComplexSerializerOptions.with().contextURL(contextUrl).build();
+
+        // serialize
+        SerializerResult serializerResult = serializer.complexValue(serviceMetadata, (EdmComplexType) complexResponse.getEdmPropertyType(), complexResponse.getProperty(), options);
+        InputStream serializedContent = serializerResult.getContent();
+
+        response.setContent(serializedContent);
+        response.setStatusCode(HttpStatusCode.OK.getStatusCode());
+        response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.JSON_NO_METADATA.toContentTypeString());
+    }
+
+    private void createPrimitiveValueResponse(ODataResponse response, PropertyResponse primitiveResponse) throws SerializerException {
+        final FixedFormatSerializer serializer = odata.createFixedFormatSerializer();
+        PrimitiveValueSerializerOptions options = PrimitiveValueSerializerOptions.with().build();
+        InputStream serializedContent = serializer.primitiveValue((EdmPrimitiveType) primitiveResponse.getEdmPropertyType(), primitiveResponse.getProperty().getValue(), options);
+        response.setContent(serializedContent);
+        response.setStatusCode(HttpStatusCode.OK.getStatusCode());
+        response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.TEXT_PLAIN.toContentTypeString());
+
     }
 
     @Override
