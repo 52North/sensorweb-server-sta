@@ -146,9 +146,9 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
 
     @Override
     public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-        Optional<DataEntity<?>> historicalLocation = this.getRelatedEntityRaw(targetId, sourceEntityType, targetId);
-        if (historicalLocation.isPresent()) {
-            return OptionalLong.of(historicalLocation.get().getId());
+        Optional<DataEntity<?>> observation = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
+        if (observation.isPresent()) {
+            return OptionalLong.of(observation.get().getId());
         } else {
             return OptionalLong.empty();
         }
