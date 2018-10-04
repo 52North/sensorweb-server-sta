@@ -153,14 +153,19 @@ public class HistoricalLocationService extends AbstractSensorThingsEntityService
 
     @Override
     public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
-        return null;
+        return this.getRelatedEntity(sourceId, sourceEntityType, null);
     }
 
     @Override
     public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-        return null;
+        Optional<HistoricalLocationEntity> location = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
+        if (location.isPresent()) {
+            return mapper.createEntity(location.get());
+        } else {
+            return null;
+        }
     }
-
+    
     /**
      * Retrieves HistoricalLocation Entity with Relation to sourceEntity from Database.
      * Returns empty if HistoricalLocation is not found or Entities are not related.
@@ -171,8 +176,23 @@ public class HistoricalLocationService extends AbstractSensorThingsEntityService
      * @return Optional<HistoricalLocationEntity> Requested Entity
      */
     private Optional<HistoricalLocationEntity> getRelatedEntityRaw(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-        // In Theory there are only related Collections
-        return Optional.empty();
+        BooleanExpression filter;
+        switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
+        case "iot.Location": {
+            filter = hlQS.withRelatedLocation(sourceId);
+            break;
+        }
+        case "iot.Thing": {
+            filter = hlQS.withRelatedThing(sourceId);
+            break;
+        }
+        default: return Optional.empty();
+        }
+
+        if (targetId != null) {
+            filter = filter.and(hlQS.withId(targetId));
+        }
+        return getRepository().findOne(filter);
     }
 
     /**
