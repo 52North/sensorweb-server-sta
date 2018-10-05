@@ -23,7 +23,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
-		<odata.version>4.4.0</odata.version>
+		<odata.version>4.4.0-STA-SNAPSHOT</odata.version>
 		<series-hbm.version>2-SNAPSHOT</series-hbm.version>
         <arctic-sea.version>5.1.0-SNAPSHOT</arctic-sea.version>
 		<!-- Version is not compatible with Spring Boot 2.0.3 ? -->
