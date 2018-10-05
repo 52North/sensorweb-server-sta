@@ -89,22 +89,14 @@ public abstract class AbstractMapper<T> {
         entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, description));
     }
     
-    public Time createTime(DataEntity<?> observation) {
-        // create time element
-        final DateTime start = createDateTime(observation.getSamplingTimeStart());
-        DateTime end;
-        if (observation.getSamplingTimeEnd() != null) {
-            end = createDateTime(observation.getSamplingTimeEnd());
-        } else {
-            end = start;
-        }
-        return createTime(start, end);
-    }
-
-    public DateTime createDateTime(Date date) {
+    protected DateTime createDateTime(Date date) {
         return new DateTime(date, DateTimeZone.UTC);
     }
 
+    protected Time createTime(DateTime time) {
+        return new TimeInstant(time);
+    }
+    
     /**
      * Create {@link Time} from {@link DateTime}s
      *
@@ -114,9 +106,9 @@ public abstract class AbstractMapper<T> {
      *            End {@link DateTime}
      * @return Resulting {@link Time}
      */
-    public Time createTime(DateTime start, DateTime end) {
+    protected Time createTime(DateTime start, DateTime end) {
         if (start.equals(end)) {
-            return new TimeInstant(start);
+            return createTime(start);
         } else {
             return new TimePeriod(start, end);
         }

@@ -44,6 +44,7 @@ import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
+import org.joda.time.DateTime;
 import org.n52.janmayen.Json;
 import org.n52.series.db.beans.BlobDataEntity;
 import org.n52.series.db.beans.BooleanDataEntity;
@@ -58,6 +59,7 @@ import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.ReferencedDataEntity;
 import org.n52.series.db.beans.TextDataEntity;
 import org.n52.series.db.beans.parameter.Parameter;
+import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.util.DateTimeHelper;
 import org.springframework.stereotype.Component;
 
@@ -74,15 +76,16 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, observation.getId()));
         entity.addProperty(new Property(null, PROP_RESULT, ValueType.PRIMITIVE, this.getResult(observation)));
-        entity.addProperty(new Property(null, PROP_RESULT_TIME, ValueType.PRIMITIVE, observation.getResultTime()));
+        
+        entity.addProperty(new Property(null, PROP_RESULT_TIME, ValueType.PRIMITIVE,
+                DateTimeHelper.format(createResultTime(observation))));
 
-        String phenomenonTime = DateTimeHelper.format(createTime(observation));
+        String phenomenonTime = DateTimeHelper.format(createPhenomenonTime(observation));
         entity.addProperty(new Property(null, PROP_PHENOMENON_TIME, ValueType.PRIMITIVE, phenomenonTime));
 
         if (observation.isSetValidTime()) {
             entity.addProperty(new Property(null, PROP_VALID_TIME, ValueType.PRIMITIVE,
-                    DateTimeHelper.format(createTime(createDateTime(observation.getValidTimeStart()),
-                            createDateTime(observation.getValidTimeEnd())))));
+                    DateTimeHelper.format(createValidTime(observation))));
         }
 
         // TODO: check for quality property
@@ -153,6 +156,32 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
         ComplexValue cv = new ComplexValue();
         cv.getValue().add(new Property(null, null, ValueType.PRIMITIVE, createParameterProperty(p)));
         return cv;
+    }
+    
+    private Time createPhenomenonTime(DataEntity<?> observation) {
+        final DateTime start = createDateTime(observation.getSamplingTimeStart());
+        DateTime end;
+        if (observation.getSamplingTimeEnd() != null) {
+            end = createDateTime(observation.getSamplingTimeEnd());
+        } else {
+            end = start;
+        }
+        return createTime(start, end);
+    }
+    
+    private Time createResultTime(DataEntity<?> observation) {
+        return createTime(createDateTime(observation.getResultTime()));
+    }
+    
+    private Time createValidTime(DataEntity<?> observation) {
+        final DateTime start = createDateTime(observation.getValidTimeStart());
+        DateTime end;
+        if (observation.getValidTimeEnd() != null) {
+            end = createDateTime(observation.getValidTimeEnd());
+        } else {
+            end = start;
+        }
+        return createTime(start, end);
     }
 
 }
