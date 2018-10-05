@@ -6,6 +6,6 @@ Implementation of the (OGC SensorThings API Part I: Sensing)[https://github.com/
 
 | Conformance Class                     | Reference | Implemented |Test Status |
 |:--------------------------------------|:---------:|:-----------:|-----------:|
-| Sensing Core                          | A.1       | No         |   4 /  6   |
+| Sensing Core                          | A.1       | No         |   5 /  6   |
 | Filtering Extension                   | A.2       | No         |  0 / 42   |
 | Create-Update-Delete                  | A.3       | No         |  0 / 14   |
