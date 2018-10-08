@@ -8,8 +8,6 @@ package org.n52.sta.service.processor;
 import java.io.InputStream;
 import java.util.Locale;
 import org.apache.olingo.commons.api.data.ContextURL;
-import org.apache.olingo.commons.api.data.Entity;
-import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
@@ -27,9 +25,8 @@ import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
 import org.n52.sta.service.handler.AbstractEntityRequestHandler;
-import org.n52.sta.service.handler.EntityRequestHandlerImpl;
-import org.n52.sta.service.query.handler.AbstractQueryOptionHandler;
-import org.n52.sta.service.query.handler.PropertySelectionOptions;
+import org.n52.sta.service.query.QueryOptions;
+import org.n52.sta.service.query.QueryOptionsHandler;
 import org.n52.sta.service.response.EntityResponse;
 import org.n52.sta.service.serializer.SensorThingsSerializer;
 import org.n52.sta.utils.EntityAnnotator;
@@ -43,30 +40,30 @@ import org.springframework.stereotype.Component;
 @Component
 public class SensorThingsEntityProcessor implements EntityProcessor {
 
-    private static final ContentType ET_PROCESSOR_CONTENT_TYPE = ContentType.JSON_NO_METADATA;
-
     @Autowired
     AbstractEntityRequestHandler requestHandler;
 
     @Autowired
-    AbstractQueryOptionHandler propertySelectionHandler;
+    QueryOptionsHandler queryOptionsHandler;
 
     @Autowired
     EntityAnnotator entityAnnotator;
 
     private OData odata;
     private ServiceMetadata serviceMetadata;
+    private ODataSerializer serializer;
 
     @Override
     public void readEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
+        QueryOptions queryOptions = new QueryOptions(uriInfo, request.getRawBaseUri());
         EntityResponse entityResponse = requestHandler.handleEntityCollectionRequest(uriInfo.getUriResourceParts());
 
-        InputStream serializedContent = createResponseContent(entityResponse, request.getRawBaseUri(), uriInfo);
+        InputStream serializedContent = createResponseContent(serviceMetadata, entityResponse, queryOptions);
 
         // configure the response object: set the body, headers and status code
         response.setContent(serializedContent);
         response.setStatusCode(HttpStatusCode.OK.getStatusCode());
-        response.setHeader(HttpHeader.CONTENT_TYPE, ET_PROCESSOR_CONTENT_TYPE.toContentTypeString());
+        response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.JSON_NO_METADATA.toContentTypeString());
     }
 
     @Override
@@ -88,33 +85,30 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
     public void init(OData odata, ServiceMetadata sm) {
         this.odata = odata;
         this.serviceMetadata = serviceMetadata;
-        this.propertySelectionHandler.setUriHelper(odata.createUriHelper());
+        this.serializer = new SensorThingsSerializer(ContentType.JSON_NO_METADATA);
+        this.queryOptionsHandler.setUriHelper(odata.createUriHelper());
     }
 
-    private InputStream createResponseContent(EntityResponse response, String rawBaseUri, UriInfo uriInfo) throws SerializerException {
+    private InputStream createResponseContent(ServiceMetadata serviceMetadata, EntityResponse response, QueryOptions queryOptions) throws SerializerException {
+        EdmEntityType edmEntityType = response.getEntitySet().getEntityType();
 
         // annotate the entity
         entityAnnotator.annotateEntity(response.getEntity(),
-                response.getEntitySet().getEntityType(), rawBaseUri);
+                response.getEntitySet().getEntityType(), queryOptions.getBaseURI());
 
-        // 3rd: create a serializer based on the requested format (json)
-//        ODataSerializer serializer = odata.createSerializer(ET_PROCESSOR_CONTENT_TYPE);
-        ODataSerializer serializer = new SensorThingsSerializer(ET_PROCESSOR_CONTENT_TYPE);
-
-        //determine property selections
-        PropertySelectionOptions selectOptions = propertySelectionHandler
-                .evaluatePropertySelectionOptions(uriInfo, response.getEntitySet().getEntityType());
-
-        // and serialize the content: transform from the EntitySet object to InputStream
-        ContextURL contextUrl = ContextURL.with()
+        ContextURL.Builder contextUrlBuilder = ContextURL.with()
                 .entitySet(response.getEntitySet())
-                .suffix(ContextURL.Suffix.ENTITY)
-                .selectList(selectOptions.getSelectionList())
-                .build();
+                .suffix(ContextURL.Suffix.ENTITY);
+
+        if (queryOptions.hasSelectOption()) {
+            contextUrlBuilder.selectList(queryOptionsHandler.getSelectListFromSelectOption(queryOptions.getSelectOption(), edmEntityType));
+        }
+
+        ContextURL contextUrl = contextUrlBuilder.build();
 
         EntitySerializerOptions opts = EntitySerializerOptions.with()
                 .contextURL(contextUrl)
-                .select(selectOptions.getSelectOption())
+                .select(queryOptions.getSelectOption())
                 .build();
 
         SerializerResult serializerResult = serializer.entity(serviceMetadata, response.getEntitySet().getEntityType(), response.getEntity(), opts);

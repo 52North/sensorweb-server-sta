@@ -6,7 +6,6 @@
 package org.n52.sta.service.processor;
 
 import java.io.InputStream;
-import java.util.List;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
@@ -20,7 +19,6 @@ import org.apache.olingo.server.api.processor.MetadataProcessor;
 import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
-import org.apache.olingo.server.api.uri.UriResource;
 import org.springframework.stereotype.Component;
 
 /**

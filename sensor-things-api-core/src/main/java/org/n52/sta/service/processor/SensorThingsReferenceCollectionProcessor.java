@@ -41,8 +41,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class SensorThingsReferenceCollectionProcessor implements ReferenceCollectionProcessor {
 
-    private static final ContentType ET_REFERENCE_COLLECTION_PROCESSOR_CONTENT_TYPE = ContentType.JSON_NO_METADATA;
-
     @Autowired
     AbstractEntityCollectionRequestHandler requestHandler;
 
@@ -51,30 +49,30 @@ public class SensorThingsReferenceCollectionProcessor implements ReferenceCollec
 
     private OData odata;
     private ServiceMetadata serviceMetadata;
+    private ODataSerializer serializer;
 
     @Override
     public void readReferenceCollection(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
+        QueryOptions queryOptions = new QueryOptions(uriInfo, request.getRawBaseUri());
         List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
-        EntityCollectionResponse entityCollectionResponse =
-                requestHandler.handleEntityCollectionRequest(resourcePaths.subList(0, resourcePaths.size() - 1),
-                        new QueryOptions(uriInfo, request.getRawBaseUri()));
+        EntityCollectionResponse entityCollectionResponse
+                = requestHandler.handleEntityCollectionRequest(resourcePaths.subList(0, resourcePaths.size() - 1),
+                        queryOptions);
 
-        InputStream serializedContent = createResponseContent(entityCollectionResponse, uriInfo, request.getRawBaseUri());
+        InputStream serializedContent = createResponseContent(serviceMetadata, entityCollectionResponse, queryOptions);
 
         // configure the response object: set the body, headers and status code
         response.setContent(serializedContent);
         response.setStatusCode(HttpStatusCode.OK.getStatusCode());
-        response.setHeader(HttpHeader.CONTENT_TYPE, ET_REFERENCE_COLLECTION_PROCESSOR_CONTENT_TYPE.toContentTypeString());
+        response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.JSON_NO_METADATA.toContentTypeString());
     }
 
-    private InputStream createResponseContent(EntityCollectionResponse response, UriInfo uriInfo, String rawBaseUri) throws SerializerException {
-        // annotate the entities
-        for (Entity e : response.getEntityCollection().getEntities()) {
-            entityAnnotator.annotateEntity(e, response.getEntitySet().getEntityType(), rawBaseUri);
-        }
+    public InputStream createResponseContent(ServiceMetadata serviceMetadata, EntityCollectionResponse response, QueryOptions queryOptions) throws SerializerException {
+        EdmEntityType edmEntityType = response.getEntitySet().getEntityType();
 
-        // create a serializer based on JSON format
-        ODataSerializer serializer = new SensorThingsSerializer(ET_REFERENCE_COLLECTION_PROCESSOR_CONTENT_TYPE);
+        for (Entity e : response.getEntityCollection().getEntities()) {
+            entityAnnotator.annotateEntity(e, edmEntityType, queryOptions.getBaseURI());
+        }
 
         // serialize the content: transform from the EntitySet object to InputStream
         ContextURL contextUrl = ContextURL.with()
@@ -85,10 +83,10 @@ public class SensorThingsReferenceCollectionProcessor implements ReferenceCollec
                 = ReferenceCollectionSerializerOptions
                         .with()
                         .contextURL(contextUrl)
+                        .count(queryOptions.getCountOption())
                         .build();
         SerializerResult serializerResult = serializer.referenceCollection(serviceMetadata, response.getEntitySet(), response.getEntityCollection(), opts);
         InputStream serializedContent = serializerResult.getContent();
-
         return serializedContent;
     }
 
@@ -96,6 +94,7 @@ public class SensorThingsReferenceCollectionProcessor implements ReferenceCollec
     public void init(OData odata, ServiceMetadata serviceMetadata) {
         this.odata = odata;
         this.serviceMetadata = serviceMetadata;
+        this.serializer = new SensorThingsSerializer(ContentType.JSON_NO_METADATA);
     }
 
 }

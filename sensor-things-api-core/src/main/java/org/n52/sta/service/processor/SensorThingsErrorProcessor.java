@@ -17,6 +17,7 @@ import org.apache.olingo.server.api.processor.ErrorProcessor;
 import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerResult;
+import org.n52.sta.service.serializer.SensorThingsSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -32,18 +33,17 @@ public class SensorThingsErrorProcessor implements ErrorProcessor {
 
     private OData odata;
     private ServiceMetadata serviceMetadata;
+    private ODataSerializer serializer;
 
     @Override
     public void processError(ODataRequest request, ODataResponse response, ODataServerError error, ContentType contentType) {
         try {
             LOG.debug("Error occurred.", error.getException());
-            // create a serializer based on json format
-            ODataSerializer serializer = odata.createSerializer(ContentType.JSON_FULL_METADATA);
 
             SerializerResult serializerResult = serializer.error(error);
             InputStream serializedContent = serializerResult.getContent();
 
-            // Finally: configure the response object: set the body, headers and status code
+            // configure the response object: set the body, headers and status code
             response.setContent(serializedContent);
             response.setStatusCode(error.getStatusCode());
             response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.JSON_NO_METADATA.toContentTypeString());
@@ -57,6 +57,7 @@ public class SensorThingsErrorProcessor implements ErrorProcessor {
     public void init(OData odata, ServiceMetadata metadata) {
         this.odata = odata;
         this.serviceMetadata = metadata;
+        this.serializer = new SensorThingsSerializer(ContentType.JSON_NO_METADATA);
     }
 
 }

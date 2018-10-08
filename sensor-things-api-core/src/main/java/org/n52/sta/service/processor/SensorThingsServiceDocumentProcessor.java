@@ -29,30 +29,27 @@ import org.springframework.stereotype.Component;
 @Component
 public class SensorThingsServiceDocumentProcessor implements ServiceDocumentProcessor {
 
-    private static final ContentType ET_SERVICE_DOCUMENT_PROCESSOR_CONTENT_TYPE = ContentType.JSON_FULL_METADATA;
-
     private OData odata;
     private ServiceMetadata serviceMetadata;
+    private ODataSerializer serializer;
 
     @Override
     public void readServiceDocument(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType contentType) throws ODataApplicationException, ODataLibraryException {
-        // create a serializer based on json format
-//        ODataSerializer serializer = odata.createSerializer(ET_SERVICE_DOCUMENT_PROCESSOR_CONTENT_TYPE);
-        ODataSerializer serializer = new SensorThingsSerializer(contentType);
 
         SerializerResult serializerResult = serializer.serviceDocument(serviceMetadata, request.getRawBaseUri());
         InputStream serializedContent = serializerResult.getContent();
 
-        // Finally: configure the response object: set the body, headers and status code
+        // configure the response object: set the body, headers and status code
         response.setContent(serializedContent);
         response.setStatusCode(HttpStatusCode.OK.getStatusCode());
-        response.setHeader(HttpHeader.CONTENT_TYPE, ET_SERVICE_DOCUMENT_PROCESSOR_CONTENT_TYPE.toContentTypeString());
+        response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.JSON_NO_METADATA.toContentTypeString());
     }
 
     @Override
     public void init(OData odata, ServiceMetadata sm) {
         this.odata = odata;
         this.serviceMetadata = sm;
+        this.serializer = new SensorThingsSerializer(ContentType.JSON_NO_METADATA);
     }
 
 }

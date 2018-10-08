@@ -25,7 +25,6 @@ import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.n52.sta.service.handler.AbstractEntityRequestHandler;
-import org.n52.sta.service.query.handler.AbstractQueryOptionHandler;
 import org.n52.sta.service.response.EntityResponse;
 import org.n52.sta.service.serializer.SensorThingsSerializer;
 import org.n52.sta.utils.EntityAnnotator;
@@ -39,16 +38,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class SensorThingsReferenceProcessor implements ReferenceProcessor {
 
-    private static final ContentType ET_REFERENCE_PROCESSOR_CONTENT_TYPE = ContentType.JSON_NO_METADATA;
-
     private OData odata;
     private ServiceMetadata serviceMetadata;
+    private ODataSerializer serializer;
 
     @Autowired
     AbstractEntityRequestHandler requestHandler;
 
-    @Autowired
-    AbstractQueryOptionHandler propertySelectionHandler;
+//    @Autowired
+//    AbstractQueryOptionHandler propertySelectionHandler;
 
     @Autowired
     EntityAnnotator entityAnnotator;
@@ -63,7 +61,7 @@ public class SensorThingsReferenceProcessor implements ReferenceProcessor {
         // configure the response object: set the body, headers and status code
         response.setContent(serializedContent);
         response.setStatusCode(HttpStatusCode.OK.getStatusCode());
-        response.setHeader(HttpHeader.CONTENT_TYPE, ET_REFERENCE_PROCESSOR_CONTENT_TYPE.toContentTypeString());
+        response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.JSON_NO_METADATA.toContentTypeString());
     }
 
     @Override
@@ -85,6 +83,7 @@ public class SensorThingsReferenceProcessor implements ReferenceProcessor {
     public void init(OData odata, ServiceMetadata serviceMetadata) {
         this.odata = odata;
         this.serviceMetadata = serviceMetadata;
+        this.serializer = new SensorThingsSerializer(ContentType.JSON_NO_METADATA);
     }
 
     private InputStream createResponseContent(EntityResponse response, String rawBaseUri) throws SerializerException {
@@ -93,12 +92,10 @@ public class SensorThingsReferenceProcessor implements ReferenceProcessor {
         entityAnnotator.annotateEntity(response.getEntity(),
                 response.getEntitySet().getEntityType(), rawBaseUri);
 
-        ODataSerializer serializer = new SensorThingsSerializer(ET_REFERENCE_PROCESSOR_CONTENT_TYPE);
-
         // and serialize the content: transform from the EntitySet object to InputStream
         ContextURL contextUrl = ContextURL.with()
                 .entitySet(response.getEntitySet())
-                .suffix(ContextURL.Suffix.ENTITY)
+                .suffix(ContextURL.Suffix.REFERENCE)
                 .build();
 
         ReferenceSerializerOptions opts = ReferenceSerializerOptions.with()

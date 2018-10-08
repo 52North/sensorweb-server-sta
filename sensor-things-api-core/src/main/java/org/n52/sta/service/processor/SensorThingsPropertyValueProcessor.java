@@ -34,7 +34,6 @@ import org.n52.sta.service.response.PropertyResponse;
 import org.n52.sta.service.serializer.SensorThingsSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.SerializationUtils;
 
 /**
  *
@@ -43,13 +42,13 @@ import org.springframework.util.SerializationUtils;
 @Component
 public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcessor {
 
-    private static final ContentType ET_PROPERTY_PROCESSOR_CONTENT_TYPE = ContentType.JSON_NO_METADATA;
-
     @Autowired
     AbstractPropertyRequestHandler requestHandler;
 
     private OData odata;
     private ServiceMetadata serviceMetadata;
+    private SensorThingsSerializer serializer;
+    private FixedFormatSerializer fixedFormatSerializer;
 
     @Override
     public void readPrimitiveValue(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
@@ -72,8 +71,6 @@ public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcess
     }
 
     private void createComplexValueResponse(ODataResponse response, PropertyResponse complexResponse) throws SerializerException {
-        SensorThingsSerializer serializer = new SensorThingsSerializer(ET_PROPERTY_PROCESSOR_CONTENT_TYPE);
-
         ContextURL contextUrl = ContextURL.with().entitySet(complexResponse.getResponseEdmEntitySet()).navOrPropertyPath(complexResponse.getProperty().getName()).build();
         ComplexSerializerOptions options = ComplexSerializerOptions.with().contextURL(contextUrl).build();
 
@@ -87,9 +84,8 @@ public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcess
     }
 
     private void createPrimitiveValueResponse(ODataResponse response, PropertyResponse primitiveResponse) throws SerializerException {
-        final FixedFormatSerializer serializer = odata.createFixedFormatSerializer();
         PrimitiveValueSerializerOptions options = PrimitiveValueSerializerOptions.with().build();
-        InputStream serializedContent = serializer.primitiveValue((EdmPrimitiveType) primitiveResponse.getEdmPropertyType(), primitiveResponse.getProperty().getValue(), options);
+        InputStream serializedContent = fixedFormatSerializer.primitiveValue((EdmPrimitiveType) primitiveResponse.getEdmPropertyType(), primitiveResponse.getProperty().getValue(), options);
         response.setContent(serializedContent);
         response.setStatusCode(HttpStatusCode.OK.getStatusCode());
         response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.TEXT_PLAIN.toContentTypeString());
@@ -141,12 +137,13 @@ public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcess
     public void init(OData odata, ServiceMetadata serviceMetadata) {
         this.odata = odata;
         this.serviceMetadata = serviceMetadata;
+        this.serializer = new SensorThingsSerializer(ContentType.JSON_NO_METADATA);
+        fixedFormatSerializer = odata.createFixedFormatSerializer();
     }
 
     private InputStream createReponseContent(Property property, EdmPrimitiveType edmPropertyType, EdmEntitySet responseEdmEntitySet) throws SerializerException {
 
-        ODataSerializer serializer = new SensorThingsSerializer(ET_PROPERTY_PROCESSOR_CONTENT_TYPE);
-
+//        ODataSerializer serializer = new SensorThingsSerializer(ContentType.JSON_NO_METADATA);
         ContextURL contextUrl = ContextURL.with().entitySet(responseEdmEntitySet).navOrPropertyPath(property.getName()).build();
         PrimitiveSerializerOptions options = PrimitiveSerializerOptions.with().contextURL(contextUrl).build();
 

@@ -10,7 +10,6 @@ import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.edm.EdmComplexType;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
-import org.apache.olingo.commons.api.edm.EdmPrimitiveType;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
@@ -23,7 +22,6 @@ import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.api.processor.ComplexProcessor;
 import org.apache.olingo.server.api.serializer.ComplexSerializerOptions;
 import org.apache.olingo.server.api.serializer.ODataSerializer;
-import org.apache.olingo.server.api.serializer.PrimitiveSerializerOptions;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
@@ -40,13 +38,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class SensorThingsComplexProcessor implements ComplexProcessor {
 
-    private static final ContentType ET_COMPLEX_PROCESSOR_CONTENT_TYPE = ContentType.JSON_NO_METADATA;
-
     @Autowired
     AbstractPropertyRequestHandler requestHandler;
 
     private OData odata;
     private ServiceMetadata serviceMetadata;
+    private ODataSerializer serializer;
 
     @Override
     public void readComplex(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
@@ -71,10 +68,10 @@ public class SensorThingsComplexProcessor implements ComplexProcessor {
 
     private InputStream createReponseContent(Property property, EdmComplexType edmPropertyType, EdmEntitySet responseEdmEntitySet) throws SerializerException {
 
-        ODataSerializer serializer = new SensorThingsSerializer(ET_COMPLEX_PROCESSOR_CONTENT_TYPE);
-
         ContextURL contextUrl = ContextURL.with().entitySet(responseEdmEntitySet).navOrPropertyPath(property.getName()).build();
-        ComplexSerializerOptions options = ComplexSerializerOptions.with().contextURL(contextUrl).build();
+        ComplexSerializerOptions options = ComplexSerializerOptions.with()
+                .contextURL(contextUrl)
+                .build();
 
         // serialize
         SerializerResult serializerResult = serializer.complex(serviceMetadata, edmPropertyType, property, options);
@@ -97,6 +94,7 @@ public class SensorThingsComplexProcessor implements ComplexProcessor {
     public void init(OData odata, ServiceMetadata serviceMetadata) {
         this.odata = odata;
         this.serviceMetadata = serviceMetadata;
+        this.serializer = new SensorThingsSerializer(ContentType.JSON_NO_METADATA);
     }
 
 }
