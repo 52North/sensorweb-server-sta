@@ -3,6 +3,7 @@ package org.n52.sta.service.query;
 import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.queryoption.CountOption;
 import org.apache.olingo.server.api.uri.queryoption.OrderByOption;
+import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 import org.apache.olingo.server.api.uri.queryoption.SkipOption;
 import org.apache.olingo.server.api.uri.queryoption.SystemQueryOption;
 import org.apache.olingo.server.api.uri.queryoption.TopOption;
@@ -12,7 +13,7 @@ import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 /**
  * Class that holds the {@link UriInfo} to get the {@link SystemQueryOption}s to
  * use them in the {@link AbstractSensorThingsEntityService}s.
- * 
+ *
  * @author Carsten Hollmann <c.hollmann@52north.org>
  * @since 1.0.0
  *
@@ -27,11 +28,9 @@ public class QueryOptions {
 
     /**
      * Constuctor
-     * 
-     * @param uriInfo
-     *            the {@link UriInfo} of the query
-     * @param baseURI
-     *            the baseURI
+     *
+     * @param uriInfo the {@link UriInfo} of the query
+     * @param baseURI the baseURI
      */
     public QueryOptions(UriInfo uriInfo, String baseURI) {
         this.uriInfo = uriInfo;
@@ -40,7 +39,7 @@ public class QueryOptions {
 
     /**
      * Get the {@link UriInfo}
-     * 
+     *
      * @return the uriInfo
      */
     public UriInfo getUriInfo() {
@@ -49,7 +48,7 @@ public class QueryOptions {
 
     /**
      * Get the baseURI
-     * 
+     *
      * @return the baseURI
      */
     public String getBaseURI() {
@@ -58,9 +57,9 @@ public class QueryOptions {
 
     /**
      * Check if the {@link UriInfo} holds {@link CountOption}
-     * 
+     *
      * @return <code>true</code>, if the {@link UriInfo} holds
-     *         {@link CountOption}
+     * {@link CountOption}
      */
     public boolean hasCountOption() {
         return getUriInfo().getCountOption() != null && getUriInfo().getCountOption().getValue();
@@ -68,7 +67,7 @@ public class QueryOptions {
 
     /**
      * Get the {@link CountOption} from {@link UriInfo}
-     * 
+     *
      * @return the {@link CountOption}
      */
     public CountOption getCountOption() {
@@ -81,7 +80,7 @@ public class QueryOptions {
 
     /**
      * Get the {@link TopOption} from {@link UriInfo} or the default with 100
-     * 
+     *
      * @return the {@link TopOption}
      */
     public TopOption getTopOption() {
@@ -93,9 +92,9 @@ public class QueryOptions {
 
     /**
      * Check if the {@link UriInfo} holds {@link SkipOption}
-     * 
+     *
      * @return <code>true</code>, if the {@link UriInfo} holds
-     *         {@link SkipOption}
+     * {@link SkipOption}
      */
     public boolean hasSkipOption() {
         return getUriInfo().getSkipOption() != null;
@@ -103,7 +102,7 @@ public class QueryOptions {
 
     /**
      * Get the {@link SkipOption} from {@link UriInfo}
-     * 
+     *
      * @return the {@link SkipOption}
      */
     public SkipOption getSkipOption() {
@@ -112,9 +111,9 @@ public class QueryOptions {
 
     /**
      * Check if the {@link UriInfo} holds {@link OrderByOption}
-     * 
+     *
      * @return <code>true</code>, if the {@link UriInfo} holds
-     *         {@link OrderByOption}
+     * {@link OrderByOption}
      */
     public boolean hasOrderByOption() {
         return getUriInfo().getOrderByOption() != null;
@@ -122,11 +121,29 @@ public class QueryOptions {
 
     /**
      * Get the {@link OrderByOption} from {@link UriInfo}
-     * 
+     *
      * @return the {@link OrderByOption}
      */
     public OrderByOption getOrderByOption() {
         return getUriInfo().getOrderByOption();
     }
 
+    /**
+     * * Check if the {@link UriInfo} holds {@link SelectOption}
+     *
+     * @return <code>true</code>, if the {@link UriInfo} holds
+     * {@link SelectOption}
+     */
+    public boolean hasSelectOption() {
+        return getUriInfo().getSelectOption() != null;
+    }
+
+    /**
+     * Get the {@link SelectOption} from {@link UriInfo}
+     *
+     * @return the {@link SelectOption}
+     */
+    public SelectOption getSelectOption() {
+        return getUriInfo().getSelectOption();
+    }
 }
