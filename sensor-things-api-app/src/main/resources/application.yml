@@ -14,9 +14,9 @@ database:
 spring:
   datasource:
     platform: postgres
-    username: pgadmin
-    password: pgadmin
-    url: jdbc:postgresql://localhost:5432/ets_sta10_2
+    username: postgres
+    password: postgres
+    url: jdbc:postgresql://localhost:5432/sta_db
     #data: classpath:/META-INF/data-${spring.datasource.platform}.sql
     initialization-mode: always
   jpa:

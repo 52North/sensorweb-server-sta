@@ -34,8 +34,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import aj.org.objectweb.asm.Type;
-
 /**
  * Interface for requesting Sensor Things entities
  *
