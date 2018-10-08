@@ -15,3 +15,5 @@ buildNumber.properties
 .classpath
 .project
 .settings/*
+sensor-things-api-app/.settings/
+sensor-things-api-core/.settings/
