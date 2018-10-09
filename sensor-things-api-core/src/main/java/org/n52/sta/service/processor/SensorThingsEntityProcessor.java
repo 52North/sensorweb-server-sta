@@ -8,6 +8,7 @@ package org.n52.sta.service.processor;
 import java.io.InputStream;
 import java.util.Locale;
 import org.apache.olingo.commons.api.data.ContextURL;
+import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
@@ -18,6 +19,9 @@ import org.apache.olingo.server.api.ODataLibraryException;
 import org.apache.olingo.server.api.ODataRequest;
 import org.apache.olingo.server.api.ODataResponse;
 import org.apache.olingo.server.api.ServiceMetadata;
+import org.apache.olingo.server.api.deserializer.DeserializerException;
+import org.apache.olingo.server.api.deserializer.DeserializerResult;
+import org.apache.olingo.server.api.deserializer.ODataDeserializer;
 import org.apache.olingo.server.api.processor.EntityProcessor;
 import org.apache.olingo.server.api.serializer.EntitySerializerOptions;
 import org.apache.olingo.server.api.serializer.ODataSerializer;
@@ -30,6 +34,7 @@ import org.n52.sta.service.query.QueryOptionsHandler;
 import org.n52.sta.service.response.EntityResponse;
 import org.n52.sta.service.serializer.SensorThingsSerializer;
 import org.n52.sta.utils.EntityAnnotator;
+import org.n52.sta.utils.UriResourceNavigationResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -48,10 +53,15 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
 
     @Autowired
     EntityAnnotator entityAnnotator;
+    
+    @Autowired
+    private UriResourceNavigationResolver navigationResolver;
+
 
     private OData odata;
     private ServiceMetadata serviceMetadata;
     private ODataSerializer serializer;
+    private ODataDeserializer deserializer;
 
     @Override
     public void readEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
@@ -68,16 +78,36 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
 
     @Override
     public void createEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType requestFormat, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-        throw new ODataApplicationException("Not supported.", HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
+        EntityResponse entityResponse = requestHandler.handleCreateEntityRequest(deserializeRequestBody(request, uriInfo));
+        
+
+        // configure the response object: set the body, headers and status code
+        response.setStatusCode(HttpStatusCode.CREATED.getStatusCode());
+        response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.JSON_NO_METADATA.toContentTypeString());
+        
+//        throw new ODataApplicationException("Not supported.", HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
     }
 
     @Override
     public void updateEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType requestFormat, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
+        EntityResponse entityResponse = requestHandler.handleUpdateEntityRequest(deserializeRequestBody(request, uriInfo));
+        
+
+        // configure the response object: set the body, headers and status code
+        response.setStatusCode(HttpStatusCode.OK.getStatusCode());
+        response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.JSON_NO_METADATA.toContentTypeString());
+        
         throw new ODataApplicationException("Not supported.", HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
     }
 
     @Override
     public void deleteEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo) throws ODataApplicationException, ODataLibraryException {
+        EntityResponse entityResponse = requestHandler.handleDeleteEntityRequest(deserializeRequestBody(request, uriInfo));
+        
+        // configure the response object: set the body, headers and status code
+        response.setStatusCode(HttpStatusCode.OK.getStatusCode());
+        response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.JSON_NO_METADATA.toContentTypeString());
+        
         throw new ODataApplicationException("Not supported.", HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
     }
 
@@ -86,6 +116,11 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
         this.odata = odata;
         this.serviceMetadata = serviceMetadata;
         this.serializer = new SensorThingsSerializer(ContentType.JSON_NO_METADATA);
+        try {
+            this.deserializer = odata.createDeserializer(ContentType.JSON_NO_METADATA);
+        } catch (DeserializerException e) {
+           
+        }
         this.queryOptionsHandler.setUriHelper(odata.createUriHelper());
     }
 
@@ -115,6 +150,12 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
         InputStream serializedContent = serializerResult.getContent();
 
         return serializedContent;
+    }
+
+    private DeserializerResult deserializeRequestBody(ODataRequest request, UriInfo uriInfo)
+            throws DeserializerException, ODataApplicationException {
+        return deserializer.entity(request.getBody(), navigationResolver
+                .resolveRootUriResource(uriInfo.getUriResourceParts().get(0)).getEntityType());
     }
 
 }

@@ -211,4 +211,10 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     private BooleanExpression byId(Long id) {
         return dQS.matchesId(id);
     }
+
+    @Override
+    public Entity create(Entity entity) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

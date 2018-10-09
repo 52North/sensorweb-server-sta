@@ -204,4 +204,10 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     private BooleanExpression byId(Long id) {
         return lQS.withId(id);
     }
+
+    @Override
+    public Entity create(Entity entity) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

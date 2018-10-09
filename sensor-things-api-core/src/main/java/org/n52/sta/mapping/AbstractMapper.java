@@ -38,10 +38,10 @@ import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.HibernateRelations.HasDescription;
 import org.n52.series.db.beans.HibernateRelations.HasName;
+import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
@@ -73,7 +73,7 @@ public abstract class AbstractMapper<T> {
         addDescription(entity, description);
     }
     
-    protected void addNane(Entity entity, HasName describableEntity) {
+    protected void addName(Entity entity, HasName describableEntity) {
         entity.addProperty(new Property(null, PROP_NAME, ValueType.PRIMITIVE, describableEntity.getName()));
     }
     
@@ -89,6 +89,19 @@ public abstract class AbstractMapper<T> {
         entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, description));
     }
     
+    protected void setNameDescription(ThingEntity thing, Entity entity) {
+        setName(thing, entity);
+        setDescription(thing, entity);
+    }
+    
+    protected void setName(HasName describableEntity, Entity entity) {
+       describableEntity.setName(entity.getProperty(PROP_NAME).getValue().toString());
+    }
+
+    protected void setDescription(HasDescription describableEntity, Entity entity) {
+        describableEntity.setDescription(entity.getProperty(PROP_DESCRIPTION).getValue().toString());
+    }
+
     protected DateTime createDateTime(Date date) {
         return new DateTime(date, DateTimeZone.UTC);
     }

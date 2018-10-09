@@ -34,6 +34,7 @@ import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ES_THINGS_NA
 import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_FQN;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
@@ -67,7 +68,7 @@ public class ThingMapper extends AbstractMapper<ThingEntity> {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, thing.getId()));
         addDescription(entity, thing);
-        addNane(entity, thing);
+        addName(entity, thing);
 
         entity.addProperty(new Property(null, PROP_PROPERTIES, ValueType.COMPLEX, createJsonProperty(thing)));
 
@@ -75,6 +76,15 @@ public class ThingMapper extends AbstractMapper<ThingEntity> {
         entity.setId(entityCreationHelper.createId(entity, ES_THINGS_NAME, ID_ANNOTATION));
 
         return entity;
+    }
+
+    public ThingEntity createThing(Entity entity) {
+        ThingEntity thing = new ThingEntity();
+        setNameDescription(thing, entity);
+        if (entity.getProperty(PROP_PROPERTIES) != null) {
+            thing.setProperties(entity.getProperty(PROP_PROPERTIES).toString());
+        }
+        return thing;
     }
 
     private JsonNode createJsonProperty(ThingEntity thing) {

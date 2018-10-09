@@ -7,16 +7,16 @@ package org.n52.sta.service.handler;
 
 import java.util.List;
 import java.util.Locale;
+
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
-import org.apache.olingo.server.api.uri.UriInfo;
+import org.apache.olingo.server.api.deserializer.DeserializerResult;
 import org.apache.olingo.server.api.uri.UriParameter;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
-import org.apache.olingo.server.api.uri.queryoption.ExpandItem;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.service.query.QueryOptions;
@@ -64,15 +64,59 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
         return response;
     }
 
+
+    @Override
+    public EntityResponse handleCreateEntityRequest(DeserializerResult deserializerResult)
+            throws ODataApplicationException {
+        EntityResponse response = null;
+        Entity entity = deserializerResult.getEntity();
+        if (entity != null) {
+            AbstractSensorThingsEntityService<?> entityService =
+                    getUriResourceEntitySet(entity.getType().replace("iot.", ""));
+            entityService.create(entity);
+        }
+        // TODO Auto-generated method stub
+        return response;
+    }
+
+
+    @Override
+    public EntityResponse handleUpdateEntityRequest(DeserializerResult deserializerResult)
+            throws ODataApplicationException {
+        EntityResponse response = null;
+        Entity entity = deserializerResult.getEntity();
+        if (entity != null) {
+            AbstractSensorThingsEntityService<?> entityService =
+                    getUriResourceEntitySet(entity.getType().replace("iot.", ""));
+        }
+        // TODO Auto-generated method stub
+        return response;
+    }
+
+
+    @Override
+    public EntityResponse handleDeleteEntityRequest(DeserializerResult deserializerResult)
+            throws ODataApplicationException {
+        EntityResponse response = null;
+        Entity entity = deserializerResult.getEntity();
+        if (entity != null) {
+            AbstractSensorThingsEntityService<?> entityService =
+                    getUriResourceEntitySet(entity.getType().replace("iot.", ""));
+        }
+        // TODO Auto-generated method stub
+        return response;
+    }
+
+
     private EntityResponse createResponseForEntity(List<UriResource> resourcePaths) throws ODataApplicationException {
 
         // determine the response EntitySet
-        UriResourceEntitySet uriResourceEntitySet = navigationResolver.resolveRootUriResource(resourcePaths.get(0));
+        UriResourceEntitySet uriResourceEntitySet = getUriResourceEntitySet(resourcePaths);
         EdmEntitySet responseEntitySet = uriResourceEntitySet.getEntitySet();
 
         // fetch the data from backend for this requested Entity and deliver as Entity
         List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
-        AbstractSensorThingsEntityService<?> responseService = serviceRepository.getEntityService(uriResourceEntitySet.getEntityType().getName());
+        AbstractSensorThingsEntityService<?> responseService = getEntityService(uriResourceEntitySet);
         Entity responseEntity = responseService.getEntity(navigationResolver.getEntityIdFromKeyParams(keyPredicates));
 
         if (responseEntity == null) {
@@ -87,6 +131,11 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
 
         return response;
     }
+
+    private UriResourceEntitySet getUriResourceEntitySet(List<UriResource> resourcePaths) throws ODataApplicationException {
+        return navigationResolver.resolveRootUriResource(resourcePaths.get(0));
+    }
+
 
     private EntityResponse createResponseForNavigation(List<UriResource> resourcePaths) throws ODataApplicationException {
         // determine the target query parameters and fetch Entity for it
@@ -119,5 +168,14 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
         response.setEntitySet(requestParams.getTargetEntitySet());
         response.setEntity(responseEntity);
         return response;
+    }
+    
+    private AbstractSensorThingsEntityService<?> getEntityService(UriResourceEntitySet uriResourceEntitySet) {
+        return getUriResourceEntitySet(uriResourceEntitySet.getEntityType().getName());
+    }
+    
+
+    private AbstractSensorThingsEntityService<?> getUriResourceEntitySet(String type) {
+        return serviceRepository.getEntityService(type);
     }
 }

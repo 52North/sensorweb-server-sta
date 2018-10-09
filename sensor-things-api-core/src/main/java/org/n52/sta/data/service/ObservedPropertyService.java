@@ -176,4 +176,10 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
     private BooleanExpression byId(Long id) {
         return oQS.isValidEntity().and(oQS.withId(id));
     }
+
+    @Override
+    public Entity create(Entity entity) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

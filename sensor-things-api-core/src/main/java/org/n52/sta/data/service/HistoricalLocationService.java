@@ -204,4 +204,10 @@ public class HistoricalLocationService extends AbstractSensorThingsEntityService
     private BooleanExpression byId(Long id) {
         return hlQS.withId(id);
     }
+
+    @Override
+    public Entity create(Entity entity) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

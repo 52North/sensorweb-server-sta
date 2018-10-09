@@ -166,4 +166,10 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     private BooleanExpression byId(Long id) {
         return sQS.isValidEntity().and(sQS.withId(id));
     }
+
+    @Override
+    public Entity create(Entity entity) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

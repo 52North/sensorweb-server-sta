@@ -211,6 +211,8 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
         return getRepository().count();
     }
 
+    public abstract Entity create(Entity entity);
+
     /**
      * Create {@link PageRequest}
      * 

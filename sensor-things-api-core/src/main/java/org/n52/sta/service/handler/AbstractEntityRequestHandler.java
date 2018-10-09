@@ -7,6 +7,8 @@ package org.n52.sta.service.handler;
 
 import java.util.List;
 import org.apache.olingo.server.api.ODataApplicationException;
+import org.apache.olingo.server.api.ODataRequest;
+import org.apache.olingo.server.api.deserializer.DeserializerResult;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.n52.sta.service.query.QueryOptions;
 import org.n52.sta.service.response.EntityResponse;
@@ -28,4 +30,10 @@ public interface AbstractEntityRequestHandler {
      */
     public abstract EntityResponse handleEntityRequest(List<UriResource> resourcePaths, QueryOptions queryOptions) throws ODataApplicationException;
 
+    
+    public abstract EntityResponse handleCreateEntityRequest(DeserializerResult deserializerResult) throws ODataApplicationException;
+    
+    public abstract EntityResponse handleUpdateEntityRequest(DeserializerResult deserializerResult) throws ODataApplicationException;
+    
+    public abstract EntityResponse handleDeleteEntityRequest(DeserializerResult deserializerResult) throws ODataApplicationException;
 }

@@ -67,7 +67,7 @@ public class DatastreamMapper extends AbstractMapper<DatastreamEntity> {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, datastream.getId()));
         addDescription(entity, datastream);
-        addNane(entity, datastream);
+        addName(entity, datastream);
         entity.addProperty(new Property(null, PROP_OBSERVATION_TYPE, ValueType.PRIMITIVE, datastream.getObservationType().getFormat()));
 
         entity.addProperty(new Property(null, PROP_PHENOMENON_TIME, ValueType.PRIMITIVE,

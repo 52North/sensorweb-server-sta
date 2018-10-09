@@ -168,4 +168,10 @@ public class FeatureOfInterestService extends AbstractSensorThingsEntityService<
     private BooleanExpression byId(Long id) {
         return foiQS.isValidEntity().and(foiQS.withId(id));
     }
+
+    @Override
+    public Entity create(Entity entity) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

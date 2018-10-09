@@ -173,4 +173,14 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
         }
         return getRepository().findOne(filter);
     }
+
+    @Override
+    public Entity create(Entity entity) {
+        ThingEntity thing = mapper.createThing(entity);
+        if (!getRepository().exists(tQS.withName(thing.getName()))) {
+            return mapper.createEntity(getRepository().save(thing));
+        }
+        Optional<ThingEntity> optionalThing = getRepository().findOne(tQS.withName(thing.getName()));
+        return optionalThing.isPresent() ? mapper.createEntity(optionalThing.get()) : null;
+    }
 }
