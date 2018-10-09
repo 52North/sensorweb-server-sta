@@ -16,8 +16,11 @@ import org.apache.olingo.server.api.uri.UriParameter;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
+import org.apache.olingo.server.api.uri.queryoption.ExpandItem;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
+import org.n52.sta.service.query.QueryOptions;
+import org.n52.sta.service.query.QueryOptionsHandler;
 import org.n52.sta.service.response.EntityResponse;
 import org.n52.sta.utils.EntityQueryParams;
 import org.n52.sta.utils.UriResourceNavigationResolver;
@@ -38,8 +41,11 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
     @Autowired
     private UriResourceNavigationResolver navigationResolver;
 
+    @Autowired
+    private QueryOptionsHandler queryOptionsHandler;
+
     @Override
-    public EntityResponse handleEntityCollectionRequest(List<UriResource> resourcePaths) throws ODataApplicationException {
+    public EntityResponse handleEntityRequest(List<UriResource> resourcePaths, QueryOptions queryOptions) throws ODataApplicationException {
         EntityResponse response = null;
 
         // handle request depending on the number of UriResource paths
@@ -50,7 +56,10 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
             // e.g. the case: sta/Things(id)/Locations(id)
         } else {
             response = createResponseForNavigation(resourcePaths);
-
+        }
+        if (queryOptions.hasExpandOption()) {
+            response.getEntity().getNavigationLinks().addAll(
+                    queryOptionsHandler.handleExpandOption(queryOptions.getExpandOption(), response.getEntitySet()));
         }
         return response;
     }
