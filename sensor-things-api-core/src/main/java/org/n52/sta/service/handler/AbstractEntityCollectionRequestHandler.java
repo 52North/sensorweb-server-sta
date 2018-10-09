@@ -21,10 +21,9 @@ public interface AbstractEntityCollectionRequestHandler {
     /**
      * Handles a request for a EntityCollection and creates a response
      *
-     * @param uriInfo
-     *            information for the EntityCollection request URI
-     * @param string
-     * @return response that contains data for the EntityCollection reponse
+     * @param resourcePaths list of {@Link UriResource}
+     * @param queryOptions {@Link QueryOptions} for the request
+     * @return response that contains data for the EntityCollection
      * @throws ODataApplicationException
      */
     public abstract EntityCollectionResponse handleEntityCollectionRequest(List<UriResource> resourcePaths,
