@@ -29,11 +29,5 @@ public interface AbstractEntityRequestHandler {
      * @throws ODataApplicationException
      */
     public abstract EntityResponse handleEntityRequest(List<UriResource> resourcePaths, QueryOptions queryOptions) throws ODataApplicationException;
-
-    
-    public abstract EntityResponse handleCreateEntityRequest(DeserializerResult deserializerResult) throws ODataApplicationException;
-    
-    public abstract EntityResponse handleUpdateEntityRequest(DeserializerResult deserializerResult) throws ODataApplicationException;
-    
-    public abstract EntityResponse handleDeleteEntityRequest(DeserializerResult deserializerResult) throws ODataApplicationException;
+   
 }

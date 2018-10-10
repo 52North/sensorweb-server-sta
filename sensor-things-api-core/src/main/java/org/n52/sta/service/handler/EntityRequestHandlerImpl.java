@@ -64,50 +64,6 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
         return response;
     }
 
-
-    @Override
-    public EntityResponse handleCreateEntityRequest(DeserializerResult deserializerResult)
-            throws ODataApplicationException {
-        EntityResponse response = null;
-        Entity entity = deserializerResult.getEntity();
-        if (entity != null) {
-            AbstractSensorThingsEntityService<?> entityService =
-                    getUriResourceEntitySet(entity.getType().replace("iot.", ""));
-            entityService.create(entity);
-        }
-        // TODO Auto-generated method stub
-        return response;
-    }
-
-
-    @Override
-    public EntityResponse handleUpdateEntityRequest(DeserializerResult deserializerResult)
-            throws ODataApplicationException {
-        EntityResponse response = null;
-        Entity entity = deserializerResult.getEntity();
-        if (entity != null) {
-            AbstractSensorThingsEntityService<?> entityService =
-                    getUriResourceEntitySet(entity.getType().replace("iot.", ""));
-        }
-        // TODO Auto-generated method stub
-        return response;
-    }
-
-
-    @Override
-    public EntityResponse handleDeleteEntityRequest(DeserializerResult deserializerResult)
-            throws ODataApplicationException {
-        EntityResponse response = null;
-        Entity entity = deserializerResult.getEntity();
-        if (entity != null) {
-            AbstractSensorThingsEntityService<?> entityService =
-                    getUriResourceEntitySet(entity.getType().replace("iot.", ""));
-        }
-        // TODO Auto-generated method stub
-        return response;
-    }
-
-
     private EntityResponse createResponseForEntity(List<UriResource> resourcePaths) throws ODataApplicationException {
 
         // determine the response EntitySet
@@ -131,11 +87,6 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
 
         return response;
     }
-
-    private UriResourceEntitySet getUriResourceEntitySet(List<UriResource> resourcePaths) throws ODataApplicationException {
-        return navigationResolver.resolveRootUriResource(resourcePaths.get(0));
-    }
-
 
     private EntityResponse createResponseForNavigation(List<UriResource> resourcePaths) throws ODataApplicationException {
         // determine the target query parameters and fetch Entity for it
@@ -170,6 +121,10 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
         return response;
     }
     
+    private UriResourceEntitySet getUriResourceEntitySet(List<UriResource> resourcePaths) throws ODataApplicationException {
+        return navigationResolver.resolveRootUriResource(resourcePaths.get(0));
+    }
+
     private AbstractSensorThingsEntityService<?> getEntityService(UriResourceEntitySet uriResourceEntitySet) {
         return getUriResourceEntitySet(uriResourceEntitySet.getEntityType().getName());
     }

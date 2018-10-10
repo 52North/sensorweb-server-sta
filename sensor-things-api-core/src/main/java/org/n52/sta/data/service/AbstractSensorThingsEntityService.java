@@ -213,6 +213,10 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
 
     public abstract Entity create(Entity entity);
 
+    public abstract Entity update(Entity entity);
+
+    public abstract Entity delete(Entity entity);
+
     /**
      * Create {@link PageRequest}
      * 

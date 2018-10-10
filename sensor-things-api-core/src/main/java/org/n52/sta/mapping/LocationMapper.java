@@ -29,6 +29,7 @@
 package org.n52.sta.mapping;
 
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PROPERTIES;
 import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ES_LOCATIONS_NAME;
 import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATION_FQN;
 
@@ -36,6 +37,7 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -61,6 +63,13 @@ public class LocationMapper extends AbstractLocationGeometryMapper<LocationEntit
         entity.setId(entityCreationHelper.createId(entity, ES_LOCATIONS_NAME, ID_ANNOTATION));
 
         return entity;
+    }
+
+    public LocationEntity createLocation(Entity entity) {
+        LocationEntity location = new LocationEntity();
+        setNameDescription(location, entity);
+        if (entity.getProperty(LocationEntity.))
+        return location;
     }
 
 }

@@ -35,6 +35,7 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.sta.data.query.LocationQuerySpecifications;
 import org.n52.sta.data.repositories.LocationRepository;
 import org.n52.sta.mapping.LocationMapper;
@@ -207,6 +208,22 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
 
     @Override
     public Entity create(Entity entity) {
+        LocationEntity location = mapper.createLocation(entity);
+        if (!getRepository().exists(lQS.withName(location.getName()))) {
+            return mapper.createEntity(getRepository().save(location));
+        }
+        Optional<LocationEntity> optionalLocation = getRepository().findOne(lQS.withName(location.getName()));
+        return optionalLocation.isPresent() ? mapper.createEntity(optionalLocation.get()) : null;
+    }
+
+    @Override
+    public Entity update(Entity entity) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Entity delete(Entity entity) {
         // TODO Auto-generated method stub
         return null;
     }

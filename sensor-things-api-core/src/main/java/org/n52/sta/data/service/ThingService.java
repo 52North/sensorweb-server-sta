@@ -183,4 +183,18 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
         Optional<ThingEntity> optionalThing = getRepository().findOne(tQS.withName(thing.getName()));
         return optionalThing.isPresent() ? mapper.createEntity(optionalThing.get()) : null;
     }
+
+    @Override
+    public Entity update(Entity entity) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Entity delete(Entity entity) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    
 }

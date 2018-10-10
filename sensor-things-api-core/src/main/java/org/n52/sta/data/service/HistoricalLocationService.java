@@ -210,4 +210,16 @@ public class HistoricalLocationService extends AbstractSensorThingsEntityService
         // TODO Auto-generated method stub
         return null;
     }
+
+    @Override
+    public Entity update(Entity entity) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Entity delete(Entity entity) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

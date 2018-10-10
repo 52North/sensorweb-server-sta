@@ -6,6 +6,7 @@
 package org.n52.sta.service.processor;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.Locale;
 
 import org.apache.olingo.commons.api.data.ContextURL;
@@ -28,8 +29,13 @@ import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
+import org.apache.olingo.server.api.uri.UriResource;
+import org.apache.olingo.server.api.uri.UriResourceEntitySet;
+import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.service.deserializer.SensorThingsDeserializer;
 import org.n52.sta.service.handler.AbstractEntityRequestHandler;
+import org.n52.sta.service.handler.crud.AbstractEntityCrudRequestHandler;
+import org.n52.sta.service.handler.crud.EntityCrudRequestHandlerRepository;
 import org.n52.sta.service.query.QueryOptions;
 import org.n52.sta.service.query.QueryOptionsHandler;
 import org.n52.sta.service.response.EntityResponse;
@@ -48,6 +54,9 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
 
     @Autowired
     AbstractEntityRequestHandler requestHandler;
+    
+    @Autowired
+    EntityCrudRequestHandlerRepository crudRequestHandlerReportitory;
 
     @Autowired
     QueryOptionsHandler queryOptionsHandler;
@@ -79,7 +88,7 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
 
     @Override
     public void createEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType requestFormat, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-        EntityResponse entityResponse = requestHandler.handleCreateEntityRequest(deserializeRequestBody(request, uriInfo));
+        EntityResponse entityResponse = getCrudEntityHanlder(uriInfo).handleCreateEntityRequest(deserializeRequestBody(request, uriInfo));
         
 
         // configure the response object: set the body, headers and status code
@@ -91,7 +100,7 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
 
     @Override
     public void updateEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType requestFormat, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-        EntityResponse entityResponse = requestHandler.handleUpdateEntityRequest(deserializeRequestBody(request, uriInfo));
+        EntityResponse entityResponse = getCrudEntityHanlder(uriInfo).handleUpdateEntityRequest(deserializeRequestBody(request, uriInfo));
         
 
         // configure the response object: set the body, headers and status code
@@ -103,7 +112,7 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
 
     @Override
     public void deleteEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo) throws ODataApplicationException, ODataLibraryException {
-        EntityResponse entityResponse = requestHandler.handleDeleteEntityRequest(deserializeRequestBody(request, uriInfo));
+        EntityResponse entityResponse = getCrudEntityHanlder(uriInfo).handleDeleteEntityRequest(deserializeRequestBody(request, uriInfo));
         
         // configure the response object: set the body, headers and status code
         response.setStatusCode(HttpStatusCode.OK.getStatusCode());
@@ -155,4 +164,15 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
                 .resolveRootUriResource(uriInfo.getUriResourceParts().get(0)).getEntityType());
     }
 
+    private AbstractEntityCrudRequestHandler getCrudEntityHanlder(UriInfo uriInfo) throws ODataApplicationException {
+        return getCrudEntityHanlder(navigationResolver.resolveRootUriResource(uriInfo.getUriResourceParts().get(0)));
+    }
+    
+    private AbstractEntityCrudRequestHandler getCrudEntityHanlder(UriResourceEntitySet uriResourceEntitySet) {
+        return getUriResourceEntitySet(uriResourceEntitySet.getEntityType().getName());
+    }
+
+    private AbstractEntityCrudRequestHandler getUriResourceEntitySet(String type) {
+        return crudRequestHandlerReportitory.getEntityCrudRequestHandler(type);
+    }
 }
