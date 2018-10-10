@@ -7,8 +7,8 @@ package org.n52.sta.service.processor;
 
 import java.io.InputStream;
 import java.util.Locale;
+
 import org.apache.olingo.commons.api.data.ContextURL;
-import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
@@ -28,6 +28,7 @@ import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
+import org.n52.sta.service.deserializer.SensorThingsDeserializer;
 import org.n52.sta.service.handler.AbstractEntityRequestHandler;
 import org.n52.sta.service.query.QueryOptions;
 import org.n52.sta.service.query.QueryOptionsHandler;
@@ -116,11 +117,7 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
         this.odata = odata;
         this.serviceMetadata = serviceMetadata;
         this.serializer = new SensorThingsSerializer(ContentType.JSON_NO_METADATA);
-        try {
-            this.deserializer = odata.createDeserializer(ContentType.JSON_NO_METADATA);
-        } catch (DeserializerException e) {
-           
-        }
+        this.deserializer = new SensorThingsDeserializer(ContentType.JSON_NO_METADATA);
         this.queryOptionsHandler.setUriHelper(odata.createUriHelper());
     }
 
