@@ -8,7 +8,12 @@ package org.n52.sta.service.handler;
 import java.util.List;
 import java.util.Locale;
 import org.apache.olingo.commons.api.data.Entity;
+import org.apache.olingo.commons.api.data.Link;
+import org.apache.olingo.commons.api.edm.EdmElement;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
+import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
+import org.apache.olingo.commons.api.edm.EdmNavigationPropertyBinding;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriInfo;
@@ -57,9 +62,13 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
         } else {
             response = createResponseForNavigation(resourcePaths);
         }
+
         if (queryOptions.hasExpandOption()) {
-            response.getEntity().getNavigationLinks().addAll(
-                    queryOptionsHandler.handleExpandOption(queryOptions.getExpandOption(), response.getEntitySet()));
+            List<Link> links = queryOptionsHandler.handleExpandOption(queryOptions.getExpandOption(),
+                                                                      Long.parseLong(response.getEntity().getProperty("@iot.id").getValue().toString()),
+                                                                      response.getEntitySet(),
+                                                                      queryOptions.getBaseURI());
+            response.getEntity().getNavigationLinks().addAll(links);
         }
         return response;
     }
@@ -77,7 +86,7 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
 
         if (responseEntity == null) {
             throw new ODataApplicationException("Entity not found.",
-                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
+                                                HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
         }
 
         // set Entity response information
@@ -110,7 +119,7 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
             }
             if (responseEntity == null) {
                 throw new ODataApplicationException("Entity not found.",
-                        HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
+                                                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
             }
         }
 

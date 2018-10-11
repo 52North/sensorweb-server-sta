@@ -28,7 +28,7 @@ public class QueryOptions {
     private final String baseURI;
 
     /**
-     * Constuctor
+     * Constructor
      *
      * @param uriInfo the {@link UriInfo} of the query
      * @param baseURI the baseURI

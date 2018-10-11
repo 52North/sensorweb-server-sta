@@ -103,12 +103,13 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
         if (queryOptions.hasSelectOption()) {
             contextUrlBuilder.selectList(queryOptionsHandler.getSelectListFromSelectOption(queryOptions.getSelectOption(), edmEntityType));
         }
-
+        
         ContextURL contextUrl = contextUrlBuilder.build();
 
         EntitySerializerOptions opts = EntitySerializerOptions.with()
                 .contextURL(contextUrl)
                 .select(queryOptions.getSelectOption())
+                .expand(queryOptions.getExpandOption())
                 .build();
 
         SerializerResult serializerResult = serializer.entity(serviceMetadata, response.getEntitySet().getEntityType(), response.getEntity(), opts);
