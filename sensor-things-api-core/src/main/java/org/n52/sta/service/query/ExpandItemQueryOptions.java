@@ -96,7 +96,7 @@ public class ExpandItemQueryOptions implements QueryOptions {
      */
     @Override
     public TopOption getTopOption() {
-        if (item.getTopOption() != null && getUriInfo().getTopOption().getValue() <= DEFAULT_TOP) {
+        if (item.getTopOption() != null && item.getTopOption().getValue() <= DEFAULT_TOP) {
             return item.getTopOption();
         }
         return new TopOptionImpl().setValue(DEFAULT_TOP);
