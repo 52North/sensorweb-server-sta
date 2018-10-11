@@ -86,7 +86,7 @@ public class QueryOptionsHandler {
             EdmEntityType targetEdmEntityType = null;
             String targetTitle = null;
                 
-            // TODO: Expand to nested paths
+            // TODO: Expand to support nested paths
             UriResource uriResource = expandItem.getResourcePath().getUriResourceParts().get(0);
     
             if(uriResource instanceof UriResourceNavigation) {
@@ -110,7 +110,6 @@ public class QueryOptionsHandler {
                                                                     targetEdmEntityType,
                                                                     new ExpandItemQueryOptions(expandItem, baseURI)));
                 
-                //TODO: check for Null Pointer on entity
                 // Annotate inline Entites with appropiate links
                 final EdmEntityType type = targetEdmEntityType;
                 entity.getInlineEntitySet().forEach( inlineEntity -> {entityAnnotator.annotateEntity(inlineEntity, type, baseURI);});
@@ -119,12 +118,13 @@ public class QueryOptionsHandler {
                                                        sourceEdmEntitySet,
                                                        targetEdmEntityType));
                 
-                //TODO: check for Null Pointer on entity
                 // Annotate inline Entites with appropiate links
                 entityAnnotator.annotateEntity(entity.getInlineEntity(), targetEdmEntityType, baseURI);    
             }
-            
-            links.add(entity);
+            // Only add valid Elements
+            if (entity != null) {
+                links.add(entity);
+            }
         });
         
         return links;

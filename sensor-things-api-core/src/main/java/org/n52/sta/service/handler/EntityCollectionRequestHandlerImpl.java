@@ -9,6 +9,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import org.apache.olingo.commons.api.data.EntityCollection;
+import org.apache.olingo.commons.api.data.Link;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriResource;
@@ -17,6 +18,7 @@ import org.apache.olingo.server.api.uri.queryoption.SystemQueryOptionKind;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.service.query.QueryOptions;
+import org.n52.sta.service.query.QueryOptionsHandler;
 import org.n52.sta.service.response.EntityCollectionResponse;
 import org.n52.sta.utils.EntityQueryParams;
 import org.n52.sta.utils.UriResourceNavigationResolver;
@@ -36,6 +38,9 @@ public class EntityCollectionRequestHandlerImpl implements AbstractEntityCollect
 
     @Autowired
     private UriResourceNavigationResolver navigationResolver;
+    
+    @Autowired
+    private QueryOptionsHandler queryOptionsHandler;
 
     @Override
     public EntityCollectionResponse handleEntityCollectionRequest(List<UriResource> resourcePaths, QueryOptions queryOptions) throws ODataApplicationException {
@@ -49,7 +54,17 @@ public class EntityCollectionRequestHandlerImpl implements AbstractEntityCollect
             // e.g. the case: sta/Things(id)/Locations
         } else {
             response = createResponseForNavigation(resourcePaths, queryOptions);
+        }
 
+        if (queryOptions.hasExpandOption()) {
+            EdmEntitySet sourceEdmEntitySet = response.getEntitySet();
+            response.getEntityCollection().forEach(entity -> {
+                List<Link> links = queryOptionsHandler.handleExpandOption(queryOptions.getExpandOption(),
+                                                                          Long.parseLong(entity.getProperty("@iot.id").getValue().toString()),
+                                                                          sourceEdmEntitySet,
+                                                                          queryOptions.getBaseURI());
+                entity.getNavigationLinks().addAll(links);
+            });
         }
         return response;
     }

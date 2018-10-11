@@ -31,6 +31,11 @@ public class EntityAnnotator {
      * @return the annotated Entity
      */
     public Entity annotateEntity(Entity entity, EdmEntityType entityType, String baseUri) {
+        // Do not annotate if there is nothing to annotate
+        if (entity == null) {
+            return null;
+        }
+        
         String selfLink = String.join("/", baseUri, entity.getId().getPath());
         entity.addProperty(new Property(null, SELF_LINK_ANNOTATION, ValueType.PRIMITIVE, selfLink));
 
