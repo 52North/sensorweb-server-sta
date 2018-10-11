@@ -7,6 +7,7 @@ package org.n52.sta.service.processor;
 
 import java.io.InputStream;
 import java.util.List;
+
 import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
@@ -28,6 +29,7 @@ import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.n52.sta.service.handler.AbstractEntityCollectionRequestHandler;
 import org.n52.sta.service.query.QueryOptions;
+import org.n52.sta.service.query.URIQueryOptions;
 import org.n52.sta.service.response.EntityCollectionResponse;
 import org.n52.sta.service.serializer.SensorThingsSerializer;
 import org.n52.sta.utils.EntityAnnotator;
@@ -53,7 +55,7 @@ public class SensorThingsReferenceCollectionProcessor implements ReferenceCollec
 
     @Override
     public void readReferenceCollection(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-        QueryOptions queryOptions = new QueryOptions(uriInfo, request.getRawBaseUri());
+        QueryOptions queryOptions = new URIQueryOptions(uriInfo, request.getRawBaseUri());
         List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
         EntityCollectionResponse entityCollectionResponse
                 = requestHandler.handleEntityCollectionRequest(resourcePaths.subList(0, resourcePaths.size() - 1),

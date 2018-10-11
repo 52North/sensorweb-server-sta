@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.olingo.commons.api.data.Entity;
+import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.data.Link;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
@@ -68,7 +69,15 @@ public class QueryOptionsHandler {
         return selectList;
     }
 
-    
+    /**
+     * Handles the $expand Query Parameter
+     * 
+     * @param expandOption Options for expand Parameter
+     * @param sourceId Id of the source Entity
+     * @param sourceEdmEntitySet EntitySet of the source Entity
+     * @param baseURI baseURI of the Request
+     * @return List<Link> List of inlined Entities
+     */
     public List<Link> handleExpandOption(ExpandOption expandOption, Long sourceId, EdmEntitySet sourceEdmEntitySet, String baseURI) {
         List<Link> links = new ArrayList<>();
         
@@ -80,20 +89,40 @@ public class QueryOptionsHandler {
             // TODO: Expand to nested paths
             UriResource uriResource = expandItem.getResourcePath().getUriResourceParts().get(0);
     
-            // we don't need to handle error cases, as it is done in the Olingo library
             if(uriResource instanceof UriResourceNavigation) {
                 edmNavigationProperty = ((UriResourceNavigation) uriResource).getProperty();
             }
     
+            // Get Target Type and Name
             if(edmNavigationProperty != null) {
                 targetEdmEntityType = edmNavigationProperty.getType();
                 targetTitle = edmNavigationProperty.getName();
             }
-            Link entity = resolveExpandItem(sourceId,
-                                            sourceEdmEntitySet,
-                                            targetEdmEntityType,
-                                            targetTitle);
-            entityAnnotator.annotateEntity(entity.getInlineEntity(), targetEdmEntityType, baseURI);
+            
+
+            Link entity = new Link();
+            entity.setTitle(targetTitle);
+            
+            // Either add inline Collection or add single inline Entity          
+            if (sourceEdmEntitySet.getEntityType().getNavigationProperty(targetTitle).isCollection()) {
+                entity.setInlineEntitySet(getInlineEntityCollection(sourceId,
+                                                                    sourceEdmEntitySet,
+                                                                    targetEdmEntityType,
+                                                                    new ExpandItemQueryOptions(expandItem, baseURI)));
+                
+                //TODO: check for Null Pointer on entity
+                // Annotate inline Entites with appropiate links
+                final EdmEntityType type = targetEdmEntityType;
+                entity.getInlineEntitySet().forEach( inlineEntity -> {entityAnnotator.annotateEntity(inlineEntity, type, baseURI);});
+            } else {
+                entity.setInlineEntity(getInlineEntity(sourceId,
+                                                       sourceEdmEntitySet,
+                                                       targetEdmEntityType));
+                
+                //TODO: check for Null Pointer on entity
+                // Annotate inline Entites with appropiate links
+                entityAnnotator.annotateEntity(entity.getInlineEntity(), targetEdmEntityType, baseURI);    
+            }
             
             links.add(entity);
         });
@@ -101,25 +130,18 @@ public class QueryOptionsHandler {
         return links;
     }
 
-    private Link resolveExpandItem(Long sourceId, EdmEntitySet sourceEntitySet, EdmEntityType targetType, String targetTitle) {
+    private Entity getInlineEntity(Long sourceId, EdmEntitySet sourceEntitySet, EdmEntityType targetType) {
         AbstractSensorThingsEntityService<?> responseService = serviceRepository.getEntityService(targetType.getName());
         Entity entity = responseService.getRelatedEntity(sourceId, sourceEntitySet.getEntityType());
 
-        Link link = new Link();
-        link.setTitle(targetTitle);
-        link.setInlineEntity(entity);
-        return link;
+        return entity;
     }
     
-    private Link resolveExpandItemCollection(Long sourceId, EdmEntitySet sourceEntitySet, EdmEntityType targetType, String targetTitle) {
+    private EntityCollection getInlineEntityCollection(Long sourceId, EdmEntitySet sourceEntitySet, EdmEntityType targetType, QueryOptions queryOptions) {
         AbstractSensorThingsEntityService<?> responseService = serviceRepository.getEntityService(targetType.getName());
-        Entity entity = responseService.getRelatedEntity(sourceId, sourceEntitySet.getEntityType());
+        EntityCollection entityCollection = responseService.getRelatedEntityCollection(sourceId, sourceEntitySet.getEntityType(), queryOptions);
 
-        Link link = new Link();
-        link.setTitle(targetTitle);
-        link.setInlineEntity(entity);
-        return link;
-        
+        return entityCollection;
     }
 
 }

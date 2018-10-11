@@ -7,6 +7,7 @@ package org.n52.sta.service.processor;
 
 import java.io.InputStream;
 import java.util.Locale;
+
 import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.format.ContentType;
@@ -27,6 +28,7 @@ import org.apache.olingo.server.api.uri.UriInfo;
 import org.n52.sta.service.handler.AbstractEntityRequestHandler;
 import org.n52.sta.service.query.QueryOptions;
 import org.n52.sta.service.query.QueryOptionsHandler;
+import org.n52.sta.service.query.URIQueryOptions;
 import org.n52.sta.service.response.EntityResponse;
 import org.n52.sta.service.serializer.SensorThingsSerializer;
 import org.n52.sta.utils.EntityAnnotator;
@@ -55,7 +57,7 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
 
     @Override
     public void readEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-        QueryOptions queryOptions = new QueryOptions(uriInfo, request.getRawBaseUri());
+        QueryOptions queryOptions = new URIQueryOptions(uriInfo, request.getRawBaseUri());
         EntityResponse entityResponse = requestHandler.handleEntityRequest(uriInfo.getUriResourceParts(), queryOptions);
 
         InputStream serializedContent = createResponseContent(serviceMetadata, entityResponse, queryOptions);
