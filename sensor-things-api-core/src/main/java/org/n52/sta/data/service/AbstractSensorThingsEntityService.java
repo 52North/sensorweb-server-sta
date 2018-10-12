@@ -219,7 +219,11 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
      * @return {@link PageRequest} of type {@link OffsetLimitBasedPageRequest}
      */
     protected OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions) {
-        int offset = queryOptions.hasSkipOption() ? queryOptions.getSkipOption().getValue() : 0;
+        int offset = 0;
+        if (queryOptions.hasSkipOption()){
+            offset = queryOptions.getSkipOption().getValue();
+        }
+
         Sort sort = Sort.by(Direction.ASC, "id");
         if (queryOptions.hasOrderByOption()) {
             OrderByItem orderByItem = queryOptions.getOrderByOption().getOrders().get(0);
