@@ -38,6 +38,7 @@ import org.n52.sta.service.handler.crud.AbstractEntityCrudRequestHandler;
 import org.n52.sta.service.handler.crud.EntityCrudRequestHandlerRepository;
 import org.n52.sta.service.query.QueryOptions;
 import org.n52.sta.service.query.QueryOptionsHandler;
+import org.n52.sta.service.query.URIQueryOptions;
 import org.n52.sta.service.response.EntityResponse;
 import org.n52.sta.service.serializer.SensorThingsSerializer;
 import org.n52.sta.utils.EntityAnnotator;
@@ -75,7 +76,7 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
 
     @Override
     public void readEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-        QueryOptions queryOptions = new QueryOptions(uriInfo, request.getRawBaseUri());
+        QueryOptions queryOptions = new URIQueryOptions(uriInfo, request.getRawBaseUri());
         EntityResponse entityResponse = requestHandler.handleEntityRequest(uriInfo.getUriResourceParts(), queryOptions);
 
         InputStream serializedContent = createResponseContent(serviceMetadata, entityResponse, queryOptions);
@@ -144,12 +145,13 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
         if (queryOptions.hasSelectOption()) {
             contextUrlBuilder.selectList(queryOptionsHandler.getSelectListFromSelectOption(queryOptions.getSelectOption(), edmEntityType));
         }
-
+        
         ContextURL contextUrl = contextUrlBuilder.build();
 
         EntitySerializerOptions opts = EntitySerializerOptions.with()
                 .contextURL(contextUrl)
                 .select(queryOptions.getSelectOption())
+                .expand(queryOptions.getExpandOption())
                 .build();
 
         SerializerResult serializerResult = serializer.entity(serviceMetadata, response.getEntitySet().getEntityType(), response.getEntity(), opts);

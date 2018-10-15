@@ -7,6 +7,7 @@ package org.n52.sta.service.processor;
 
 import java.io.InputStream;
 import java.util.List;
+
 import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
@@ -26,6 +27,7 @@ import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.n52.sta.service.handler.AbstractEntityRequestHandler;
 import org.n52.sta.service.query.QueryOptions;
+import org.n52.sta.service.query.URIQueryOptions;
 import org.n52.sta.service.response.EntityResponse;
 import org.n52.sta.service.serializer.SensorThingsSerializer;
 import org.n52.sta.utils.EntityAnnotator;
@@ -53,7 +55,7 @@ public class SensorThingsReferenceProcessor implements ReferenceProcessor {
 
     @Override
     public void readReference(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-        QueryOptions options = new QueryOptions(uriInfo, request.getRawBaseUri());
+        QueryOptions options = new URIQueryOptions(uriInfo, request.getRawBaseUri());
         List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
         EntityResponse entityResponse = requestHandler.handleEntityRequest(resourcePaths.subList(0, resourcePaths.size() - 1), options);
 

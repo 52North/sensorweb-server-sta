@@ -1,3 +1,32 @@
+/*
+ * Copyright (C) 2012-2018 52°North Initiative for Geospatial Open Source
+ * Software GmbH
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation.
+ *
+ * If the program is linked with libraries which are licensed under one of
+ * the following licenses, the combination of the program with the linked
+ * library is not considered a "derivative work" of the program:
+ *
+ *     - Apache License, version 2.0
+ *     - Apache Software License, version 1.0
+ *     - GNU Lesser General Public License, version 3
+ *     - Mozilla Public License, versions 1.0, 1.1 and 2.0
+ *     - Common Development and Distribution License (CDDL), version 1.0
+ *
+ * Therefore the distribution of the program linked with libraries licensed
+ * under the aforementioned licenses, is permitted by the copyright holders
+ * if the distribution is compliant with both the GNU General Public
+ * License version 2 and the aforementioned licenses.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details.
+ */
+
 package org.n52.sta.service.query;
 
 import org.apache.olingo.server.api.uri.UriInfo;
@@ -6,164 +35,109 @@ import org.apache.olingo.server.api.uri.queryoption.ExpandOption;
 import org.apache.olingo.server.api.uri.queryoption.OrderByOption;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 import org.apache.olingo.server.api.uri.queryoption.SkipOption;
-import org.apache.olingo.server.api.uri.queryoption.SystemQueryOption;
 import org.apache.olingo.server.api.uri.queryoption.TopOption;
-import org.apache.olingo.server.core.uri.queryoption.TopOptionImpl;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 
 /**
- * Class that holds the {@link UriInfo} to get the {@link SystemQueryOption}s to
- * use them in the {@link AbstractSensorThingsEntityService}s.
- *
+ * Abstract Interface to hold Query Parameters for {@link AbstractSensorThingsEntityService}
+ * 
  * @author Carsten Hollmann <c.hollmann@52north.org>
- * @since 1.0.0
+ * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
-public class QueryOptions {
+public interface QueryOptions {
 
-    private static final int DEFAULT_TOP = 100;
-
-    private final UriInfo uriInfo;
-
-    private final String baseURI;
-
-    /**
-     * Constuctor
-     *
-     * @param uriInfo the {@link UriInfo} of the query
-     * @param baseURI the baseURI
-     */
-    public QueryOptions(UriInfo uriInfo, String baseURI) {
-        this.uriInfo = uriInfo;
-        this.baseURI = baseURI;
-    }
-
+    static final int DEFAULT_TOP = 100;
+    
     /**
      * Get the {@link UriInfo}
      *
      * @return the uriInfo
      */
-    public UriInfo getUriInfo() {
-        return uriInfo;
-    }
+    public UriInfo getUriInfo();
 
     /**
      * Get the baseURI
      *
      * @return the baseURI
      */
-    public String getBaseURI() {
-        return baseURI;
-    }
-
+    public String getBaseURI();
+    
     /**
-     * Check if the {@link UriInfo} holds {@link CountOption}
+     * Check if {@link CountOption} is present
      *
-     * @return <code>true</code>, if the {@link UriInfo} holds
-     * {@link CountOption}
+     * @return <code>true</code>, if {@link CountOption} is present
      */
-    public boolean hasCountOption() {
-        return getUriInfo().getCountOption() != null && getUriInfo().getCountOption().getValue();
-    }
+    boolean hasCountOption();
 
     /**
-     * Get the {@link CountOption} from {@link UriInfo}
+     * Get the {@link CountOption}
      *
      * @return the {@link CountOption}
      */
-    public CountOption getCountOption() {
-        return getUriInfo().getCountOption();
-    }
-
-    private boolean hasTopOption() {
-        return getUriInfo().getTopOption() != null;
-    }
-
+    CountOption getCountOption();
+    
     /**
-     * Get the {@link TopOption} from {@link UriInfo} or the default with 100
+     * Get the {@link TopOption}. If {@link TopOption} is missing return {@link QueryOptions.DEFAULT_TOP}
      *
      * @return the {@link TopOption}
      */
-    public TopOption getTopOption() {
-        if (hasTopOption() && getUriInfo().getTopOption().getValue() <= DEFAULT_TOP) {
-            return getUriInfo().getTopOption();
-        }
-        return new TopOptionImpl().setValue(DEFAULT_TOP);
-    }
+    TopOption getTopOption();
 
     /**
-     * Check if the {@link UriInfo} holds {@link SkipOption}
+     * Check if {@link SkipOption} is present
      *
-     * @return <code>true</code>, if the {@link UriInfo} holds
-     * {@link SkipOption}
+     * @return <code>true</code>, if {@link SkipOption} is present
      */
-    public boolean hasSkipOption() {
-        return getUriInfo().getSkipOption() != null;
-    }
+    boolean hasSkipOption();
 
     /**
-     * Get the {@link SkipOption} from {@link UriInfo}
+     * Get the {@link SkipOption}
      *
      * @return the {@link SkipOption}
      */
-    public SkipOption getSkipOption() {
-        return getUriInfo().getSkipOption();
-    }
+    SkipOption getSkipOption();
 
     /**
-     * Check if the {@link UriInfo} holds {@link OrderByOption}
+     * Check if {@link OrderByOption} is present
      *
-     * @return <code>true</code>, if the {@link UriInfo} holds
-     * {@link OrderByOption}
+     * @return <code>true</code>, if {@link OrderByOption} is present
      */
-    public boolean hasOrderByOption() {
-        return getUriInfo().getOrderByOption() != null;
-    }
+    boolean hasOrderByOption();
 
     /**
-     * Get the {@link OrderByOption} from {@link UriInfo}
+     * Get the {@link OrderByOption}
      *
      * @return the {@link OrderByOption}
      */
-    public OrderByOption getOrderByOption() {
-        return getUriInfo().getOrderByOption();
-    }
+    OrderByOption getOrderByOption();
 
     /**
-     * * Check if the {@link UriInfo} holds {@link SelectOption}
+     * * Check if {@link SelectOption} is present
      *
-     * @return <code>true</code>, if the {@link UriInfo} holds
-     * {@link SelectOption}
+     * @return <code>true</code>, if the {@link SelectOption} is present
      */
-    public boolean hasSelectOption() {
-        return getUriInfo().getSelectOption() != null;
-    }
+    boolean hasSelectOption();
 
     /**
-     * Get the {@link SelectOption} from {@link UriInfo}
+     * Get the {@link SelectOption}
      *
      * @return the {@link SelectOption}
      */
-    public SelectOption getSelectOption() {
-        return getUriInfo().getSelectOption();
-    }
+    SelectOption getSelectOption();
 
     /**
-     * * Check if the {@link UriInfo} holds {@link ExpandOption}
+     * * Check if {@link ExpandOption} is present
      *
-     * @return <code>true</code>, if the {@link UriInfo} holds
-     * {@link ExpandOption}
+     * @return <code>true</code>, if {@link ExpandOption} is present
      */
-    public boolean hasExpandOption() {
-        return getUriInfo().getExpandOption() != null;
-    }
+    boolean hasExpandOption();
 
     /**
-     * Get the {@link ExpandOption} from {@link UriInfo}
+     * Get the {@link ExpandOption}
      *
      * @return the {@link ExpandOption}
      */
-    public ExpandOption getExpandOption() {
-        return getUriInfo().getExpandOption();
-    }
+    ExpandOption getExpandOption();
+
 }
