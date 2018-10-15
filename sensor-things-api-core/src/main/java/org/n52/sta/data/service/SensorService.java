@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.service;
 
 import java.util.Optional;
@@ -63,7 +64,8 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     @Override
     public EntityCollection getEntityCollection(QueryOptions queryOptions) {
         EntityCollection retEntitySet = new EntityCollection();
-        getRepository().findAll(sQS.isValidEntity(), createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        getRepository().findAll(sQS.isValidEntity(), createPageableRequest(queryOptions))
+                       .forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
 
@@ -74,7 +76,9 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     }
 
     @Override
-    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType, QueryOptions queryOptions) {
+    public EntityCollection getRelatedEntityCollection(Long sourceId,
+                                                       EdmEntityType sourceEntityType,
+                                                       QueryOptions queryOptions) {
         return null;
     }
 
@@ -90,7 +94,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
 
     @Override
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-        switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
+        switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
         case "iot.Datastream": {
             BooleanExpression filter = sQS.withDatastream(sourceId);
             if (targetId != null) {
@@ -98,7 +102,8 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
             }
             return getRepository().exists(filter);
         }
-        default: return false;
+        default:
+            return false;
         }
     }
 
@@ -132,23 +137,42 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
         }
     }
 
+    @Override
+    protected String checkPropertyForSorting(String property) {
+        switch (property) {
+        case "encodingType":
+            return ProcedureEntity.PROPERTY_PROCEDURE_DESCRIPTION_FORMAT;
+        case "metadata":
+            // TODO: Add sorting by HistoricalLocation that replaces Description if it is not present
+            return ProcedureEntity.DESCRIPTION;
+        default:
+            return super.checkPropertyForSorting(property);
+        }
+    }
+
     /**
-     * Retrieves Sensor Entity (aka Procedure Entity) with Relation to sourceEntity from Database.
-     * Returns empty if Sensor is not found or Entities are not related.
+     * Retrieves Sensor Entity (aka Procedure Entity) with Relation to sourceEntity from Database. Returns
+     * empty if Sensor is not found or Entities are not related.
      * 
-     * @param sourceId Id of the Source Entity
-     * @param sourceEntityType Type of the Source Entity
-     * @param targetId Id of the Entity to be retrieved
+     * @param sourceId
+     *        Id of the Source Entity
+     * @param sourceEntityType
+     *        Type of the Source Entity
+     * @param targetId
+     *        Id of the Entity to be retrieved
      * @return Optional<ProcedureEntity> Requested Entity
      */
-    private Optional<ProcedureEntity> getRelatedEntityRaw(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+    private Optional<ProcedureEntity> getRelatedEntityRaw(Long sourceId,
+                                                          EdmEntityType sourceEntityType,
+                                                          Long targetId) {
         BooleanExpression filter;
-        switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
+        switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
         case "iot.Datastream": {
             filter = sQS.withDatastream(sourceId);
             break;
         }
-        default: return Optional.empty();
+        default:
+            return Optional.empty();
         }
 
         if (targetId != null) {
@@ -160,7 +184,8 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     /**
      * Constructs SQL Expression to request Entity by ID.
      * 
-     * @param id id of the requested entity
+     * @param id
+     *        id of the requested entity
      * @return BooleanExpression evaluating to true if Entity is found and valid
      */
     private BooleanExpression byId(Long id) {

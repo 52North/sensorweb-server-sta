@@ -32,6 +32,7 @@ package org.n52.sta.service.query;
 import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.queryoption.CountOption;
 import org.apache.olingo.server.api.uri.queryoption.ExpandOption;
+import org.apache.olingo.server.api.uri.queryoption.FilterOption;
 import org.apache.olingo.server.api.uri.queryoption.OrderByOption;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 import org.apache.olingo.server.api.uri.queryoption.SkipOption;
@@ -139,5 +140,19 @@ public interface QueryOptions {
      * @return the {@link ExpandOption}
      */
     ExpandOption getExpandOption();
+    
+    /**
+     * * Check if {@link ExpandOption} is present
+     *
+     * @return <code>true</code>, if {@link ExpandOption} is present
+     */
+    boolean hasFilterOption();
+
+    /**
+     * Get the {@link ExpandOption}
+     *
+     * @return the {@link ExpandOption}
+     */
+    FilterOption getFilterOption();
 
 }

@@ -17,6 +17,7 @@ import org.apache.olingo.commons.api.edm.EdmType;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriInfoResource;
 import org.apache.olingo.server.api.uri.UriResource;
+import org.apache.olingo.server.api.uri.queryoption.FilterOption;
 import org.apache.olingo.server.api.uri.queryoption.OrderByItem;
 import org.apache.olingo.server.api.uri.queryoption.OrderByOption;
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
@@ -219,11 +220,8 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
      * @return {@link PageRequest} of type {@link OffsetLimitBasedPageRequest}
      */
     protected OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions) {
-        int offset = 0;
-        if (queryOptions.hasSkipOption()){
-            offset = queryOptions.getSkipOption().getValue();
-        }
-
+        int offset = queryOptions.hasSkipOption() ? queryOptions.getSkipOption().getValue() : 0;
+        
         Sort sort = Sort.by(Direction.ASC, "id");
         if (queryOptions.hasOrderByOption()) {
             OrderByItem orderByItem = queryOptions.getOrderByOption().getOrders().get(0);

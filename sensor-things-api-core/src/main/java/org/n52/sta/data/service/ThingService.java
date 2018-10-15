@@ -34,10 +34,14 @@ import java.util.OptionalLong;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.server.api.ODataApplicationException;
+import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
+import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.sta.data.query.ThingQuerySpecifications;
 import org.n52.sta.data.repositories.ThingRepository;
 import org.n52.sta.mapping.ThingMapper;
+import org.n52.sta.service.query.FilterExpressionVisitor;
 import org.n52.sta.service.query.QueryOptions;
 import org.springframework.stereotype.Component;
 
@@ -62,7 +66,24 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     @Override
     public EntityCollection getEntityCollection(QueryOptions queryOptions) {
         EntityCollection retEntitySet = new EntityCollection();
-        getRepository().findAll(createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        BooleanExpression filter = null;
+        if (queryOptions.hasFilterOption()) {
+            Expression filterExpression = queryOptions.getFilterOption().getExpression();
+            
+            FilterExpressionVisitor<ThingEntity> visitor = new FilterExpressionVisitor<>(ThingEntity.class);
+            Object expression = null;
+            try {
+                expression = filterExpression.accept(visitor);
+            } catch (ExpressionVisitException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (ODataApplicationException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            filter = (BooleanExpression) expression;
+        }
+        getRepository().findAll(filter, createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
 
@@ -75,6 +96,8 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     @Override
     public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType, QueryOptions queryOptions) {
         BooleanExpression filter = tQS.withRelatedLocation(sourceId);
+
+        
         Iterable<ThingEntity> things = getRepository().findAll(filter, createPageableRequest(queryOptions));
 
         EntityCollection retEntitySet = new EntityCollection();
