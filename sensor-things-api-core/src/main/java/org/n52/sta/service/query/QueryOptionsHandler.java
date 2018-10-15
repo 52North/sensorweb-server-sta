@@ -141,6 +141,13 @@ public class QueryOptionsHandler {
         AbstractSensorThingsEntityService<?> responseService = serviceRepository.getEntityService(targetType.getName());
         EntityCollection entityCollection = responseService.getRelatedEntityCollection(sourceId, sourceEntitySet.getEntityType(), queryOptions);
 
+        //TODO: filter for affected (inline) entities
+        long count = responseService.getCount();
+
+        if (queryOptions.hasCountOption()) {
+            entityCollection.setCount(Long.valueOf(count).intValue());
+        }
+
         return entityCollection;
     }
 
