@@ -89,9 +89,8 @@ public class SensorThingsEntityCollectionProcessor implements EntityCollectionPr
         }
 
         ContextURL.Builder contextUrlBuilder = ContextURL.with().entitySet(response.getEntitySet());
-        if (queryOptions.hasSelectOption()) {
-            contextUrlBuilder.selectList(queryOptionsHandler.getSelectListFromSelectOption(queryOptions.getSelectOption(), edmEntityType));
-        }
+        contextUrlBuilder.selectList(queryOptionsHandler.getSelectListFromSelectOption(
+                edmEntityType, queryOptions.getExpandOption(), queryOptions.getSelectOption()));
         ContextURL contextUrl = contextUrlBuilder.build();
 
         final String id = queryOptions.getBaseURI() + "/" + response.getEntitySet().getName();
