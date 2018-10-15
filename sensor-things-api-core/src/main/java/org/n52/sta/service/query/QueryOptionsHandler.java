@@ -37,15 +37,15 @@ public class QueryOptionsHandler {
 
     @Autowired
     private EntityServiceRepository serviceRepository;
-    
+
     @Autowired
     EntityCreationHelper entityCreationHelper;
-    
+
     @Autowired
     EntityAnnotator entityAnnotator;
 
     protected UriHelper uriHelper;
-    
+
     public UriHelper getUriHelper() {
         return uriHelper;
     }
@@ -71,81 +71,91 @@ public class QueryOptionsHandler {
 
     /**
      * Handles the $expand Query Parameter
-     * 
+     *
      * @param expandOption Options for expand Parameter
      * @param sourceId Id of the source Entity
      * @param sourceEdmEntitySet EntitySet of the source Entity
      * @param baseURI baseURI of the Request
      * @return List<Link> List of inlined Entities
      */
-    public List<Link> handleExpandOption(ExpandOption expandOption, Long sourceId, EdmEntitySet sourceEdmEntitySet, String baseURI) {
+    public List<Link> handleExpandOption(ExpandOption expandOption, Long sourceId, EdmEntityType sourceEdmEntityType, String baseURI) {
         List<Link> links = new ArrayList<>();
-        
+
         expandOption.getExpandItems().forEach(expandItem -> {
             EdmNavigationProperty edmNavigationProperty = null;
             EdmEntityType targetEdmEntityType = null;
             String targetTitle = null;
-                
+
             // TODO: Expand to support nested paths
             UriResource uriResource = expandItem.getResourcePath().getUriResourceParts().get(0);
-    
-            if(uriResource instanceof UriResourceNavigation) {
+
+            if (uriResource instanceof UriResourceNavigation) {
                 edmNavigationProperty = ((UriResourceNavigation) uriResource).getProperty();
             }
-    
+
             // Get Target Type and Name
-            if(edmNavigationProperty != null) {
+            if (edmNavigationProperty != null) {
                 targetEdmEntityType = edmNavigationProperty.getType();
                 targetTitle = edmNavigationProperty.getName();
             }
-            
 
             Link entity = new Link();
             entity.setTitle(targetTitle);
-            
+
             // Either add inline Collection or add single inline Entity          
-            if (sourceEdmEntitySet.getEntityType().getNavigationProperty(targetTitle).isCollection()) {
+            if (sourceEdmEntityType.getNavigationProperty(targetTitle).isCollection()) {
                 entity.setInlineEntitySet(getInlineEntityCollection(sourceId,
-                                                                    sourceEdmEntitySet,
-                                                                    targetEdmEntityType,
-                                                                    new ExpandItemQueryOptions(expandItem, baseURI)));
-                
+                        sourceEdmEntityType,
+                        targetEdmEntityType,
+                        new ExpandItemQueryOptions(expandItem, baseURI)));
+
                 // Annotate inline Entites with appropiate links
                 final EdmEntityType type = targetEdmEntityType;
-                entity.getInlineEntitySet().forEach( inlineEntity -> {entityAnnotator.annotateEntity(inlineEntity, type, baseURI);});
+                entity.getInlineEntitySet().forEach(inlineEntity -> {
+                    entityAnnotator.annotateEntity(inlineEntity, type, baseURI);
+                });
             } else {
                 entity.setInlineEntity(getInlineEntity(sourceId,
-                                                       sourceEdmEntitySet,
-                                                       targetEdmEntityType));
-                
+                        sourceEdmEntityType,
+                        targetEdmEntityType));
+
                 // Annotate inline Entites with appropiate links
-                entityAnnotator.annotateEntity(entity.getInlineEntity(), targetEdmEntityType, baseURI);    
+                entityAnnotator.annotateEntity(entity.getInlineEntity(), targetEdmEntityType, baseURI);
             }
             // Only add valid Elements
             if (entity != null) {
                 links.add(entity);
             }
         });
-        
+
         return links;
     }
 
-    private Entity getInlineEntity(Long sourceId, EdmEntitySet sourceEntitySet, EdmEntityType targetType) {
+    private Entity getInlineEntity(Long sourceId, EdmEntityType sourceType, EdmEntityType targetType) {
         AbstractSensorThingsEntityService<?> responseService = serviceRepository.getEntityService(targetType.getName());
-        Entity entity = responseService.getRelatedEntity(sourceId, sourceEntitySet.getEntityType());
+        Entity entity = responseService.getRelatedEntity(sourceId, sourceType);
 
         return entity;
     }
-    
-    private EntityCollection getInlineEntityCollection(Long sourceId, EdmEntitySet sourceEntitySet, EdmEntityType targetType, QueryOptions queryOptions) {
-        AbstractSensorThingsEntityService<?> responseService = serviceRepository.getEntityService(targetType.getName());
-        EntityCollection entityCollection = responseService.getRelatedEntityCollection(sourceId, sourceEntitySet.getEntityType(), queryOptions);
 
-        //TODO: filter for affected (inline) entities
-        long count = responseService.getCount();
+    private EntityCollection getInlineEntityCollection(Long sourceId, EdmEntityType sourceType, EdmEntityType targetType, QueryOptions queryOptions) {
+        AbstractSensorThingsEntityService<?> responseService = serviceRepository.getEntityService(targetType.getName());
+        EntityCollection entityCollection = responseService.getRelatedEntityCollection(sourceId, sourceType, queryOptions);
+
+        long count = responseService.getRelatedEntityCollectionCount(sourceId, sourceType);
 
         if (queryOptions.hasCountOption()) {
             entityCollection.setCount(Long.valueOf(count).intValue());
+        }
+
+        if (queryOptions.hasExpandOption()) {
+            entityCollection.forEach(entity -> {
+                List<Link> links = handleExpandOption(queryOptions.getExpandOption(),
+                        Long.parseLong(entity.getProperty("@iot.id").getValue().toString()),
+                        targetType,
+                        queryOptions.getBaseURI());
+                entity.getNavigationLinks().addAll(links);
+            });
         }
 
         return entityCollection;

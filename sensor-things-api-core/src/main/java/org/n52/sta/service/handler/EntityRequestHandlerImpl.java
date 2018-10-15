@@ -66,7 +66,7 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
         if (queryOptions.hasExpandOption()) {
             List<Link> links = queryOptionsHandler.handleExpandOption(queryOptions.getExpandOption(),
                                                                       Long.parseLong(response.getEntity().getProperty("@iot.id").getValue().toString()),
-                                                                      response.getEntitySet(),
+                                                                      response.getEntitySet().getEntityType(),
                                                                       queryOptions.getBaseURI());
             response.getEntity().getNavigationLinks().addAll(links);
         }
