@@ -62,9 +62,9 @@ public class QueryOptionsHandler {
      * @return the select list
      * @throws SerializerException
      */
-    public String getSelectListFromSelectOption(SelectOption option, EdmEntityType edmEntityType) throws SerializerException {
+    public String getSelectListFromSelectOption(EdmEntityType edmEntityType, ExpandOption expandOption, SelectOption selectOption) throws SerializerException {
         String selectList = uriHelper.buildContextURLSelectList(edmEntityType,
-                null, option);
+                expandOption, selectOption);
 
         return selectList;
     }

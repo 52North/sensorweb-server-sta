@@ -101,11 +101,8 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
         ContextURL.Builder contextUrlBuilder = ContextURL.with()
                 .entitySet(response.getEntitySet())
                 .suffix(ContextURL.Suffix.ENTITY);
-
-        if (queryOptions.hasSelectOption()) {
-            contextUrlBuilder.selectList(queryOptionsHandler.getSelectListFromSelectOption(queryOptions.getSelectOption(), edmEntityType));
-        }
-        
+        contextUrlBuilder.selectList(queryOptionsHandler.getSelectListFromSelectOption(
+                edmEntityType, queryOptions.getExpandOption(), queryOptions.getSelectOption()));
         ContextURL contextUrl = contextUrlBuilder.build();
 
         EntitySerializerOptions opts = EntitySerializerOptions.with()
