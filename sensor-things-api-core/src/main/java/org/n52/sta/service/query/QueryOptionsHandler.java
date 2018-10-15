@@ -117,7 +117,8 @@ public class QueryOptionsHandler {
             } else {
                 entity.setInlineEntity(getInlineEntity(sourceId,
                         sourceEdmEntityType,
-                        targetEdmEntityType));
+                        targetEdmEntityType,
+                        new ExpandItemQueryOptions(expandItem, baseURI)));
 
                 // Annotate inline Entites with appropiate links
                 entityAnnotator.annotateEntity(entity.getInlineEntity(), targetEdmEntityType, baseURI);
@@ -131,9 +132,17 @@ public class QueryOptionsHandler {
         return links;
     }
 
-    private Entity getInlineEntity(Long sourceId, EdmEntityType sourceType, EdmEntityType targetType) {
+    private Entity getInlineEntity(Long sourceId, EdmEntityType sourceType, EdmEntityType targetType, QueryOptions queryOptions) {
         AbstractSensorThingsEntityService<?> responseService = serviceRepository.getEntityService(targetType.getName());
         Entity entity = responseService.getRelatedEntity(sourceId, sourceType);
+
+        if (queryOptions.hasExpandOption()) {
+            List<Link> links = handleExpandOption(queryOptions.getExpandOption(),
+                    Long.parseLong(entity.getProperty("@iot.id").getValue().toString()),
+                    targetType,
+                    queryOptions.getBaseURI());
+            entity.getNavigationLinks().addAll(links);
+        }
 
         return entity;
     }
