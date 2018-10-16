@@ -5,12 +5,14 @@
  */
 package org.n52.sta.mapping;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
+import org.apache.olingo.commons.api.edm.geo.ComposedGeospatial;
 import org.apache.olingo.commons.api.edm.geo.Geospatial;
 import org.apache.olingo.commons.api.edm.geo.GeospatialCollection;
 import org.apache.olingo.commons.api.edm.geo.LineString;
@@ -26,6 +28,9 @@ import org.springframework.stereotype.Component;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LinearRing;
+import com.vividsolutions.jts.geom.PrecisionModel;
 
 /**
  *
@@ -35,6 +40,8 @@ import com.vividsolutions.jts.geom.Geometry;
 public class GeometryMapper {
 
     private static final String LOCATION_TYPE = "Feature";
+    
+    private final GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
 
     public ComplexValue resolveGeometry(GeometryEntity geometry) {
         //TODO: geometry creation dependend on the GeometryType
@@ -154,6 +161,126 @@ public class GeometryMapper {
 //            return SRID.valueOf(Integer.toString(geometry.getSRID()));
 //        }
         return null;
+    }
+
+    public GeometryEntity createGeometryEntity(ComplexValue value) {
+        if (value.getTypeName().equals("iot.Feature")) {
+            GeometryEntity geometryEntity = new GeometryEntity();
+            geometryEntity.setGeometry(createGeometry(value.getValue()));
+            return geometryEntity;
+        }
+        return null;
+    }
+
+    private Geometry createGeometry(List<Property> list) {
+        for (Property property : list) {
+            if (property.getType().equals("Edm.Geometry") && property.getValue() != null) {
+                return createGeometry((Geospatial) property.getValue());
+            }
+        }
+        return null;
+    }
+    
+    private Geometry createGeometry(Geospatial geospatial) {
+        if (geospatial instanceof Point) {
+            return createPoint((Point) geospatial);
+        } else if (geospatial instanceof LineString) {
+            return createLineString((LineString) geospatial);
+        } else if (geospatial instanceof Polygon) {
+            return createPolygon((Polygon) geospatial);
+        } else if (geospatial instanceof MultiPoint) {
+            return createMultiPoint((MultiPoint) geospatial);
+        } else if (geospatial instanceof MultiLineString) {
+            return createMultiLineString((MultiLineString) geospatial);
+        } else if (geospatial instanceof MultiPolygon) {
+            return createMultiPolygon((MultiPolygon) geospatial);
+        } else if (geospatial instanceof GeospatialCollection) {
+            return createGemetryCollection((GeospatialCollection) geospatial);
+        }
+        return null;
+    }
+
+    private com.vividsolutions.jts.geom.Point createPoint(Point point) {
+        return factory.createPoint(createCoordinate(point));
+    }
+
+    private com.vividsolutions.jts.geom.LineString createLineString(LineString lineString) {
+        return factory.createLineString(createCoordinates(lineString.iterator()));
+    }
+
+    private com.vividsolutions.jts.geom.Polygon createPolygon(Polygon polygon) {
+        return factory.createPolygon(createLinearRing(polygon.getExterior()), createLinearRings(polygon.getInterior()));
+    }
+
+    private com.vividsolutions.jts.geom.MultiPoint createMultiPoint(MultiPoint multiPoint) {
+        return factory.createMultiPoint(createPoints(multiPoint.iterator()));
+    }
+
+    private com.vividsolutions.jts.geom.MultiLineString createMultiLineString(MultiLineString multiLineString) {
+        return factory.createMultiLineString(createLineStrings(multiLineString.iterator()));
+    }
+
+    private com.vividsolutions.jts.geom.MultiPolygon createMultiPolygon(MultiPolygon multiPolygon) {
+        return factory.createMultiPolygon(createMultyPolygons(multiPolygon.iterator()));
+    }
+
+    private Geometry createGemetryCollection(GeospatialCollection geospatialCollection) {
+        // TODO Auto-generated method stub
+        return factory.createGeometryCollection(createGeometries(geospatialCollection.iterator()));
+    }
+
+    private Coordinate createCoordinate(Point point) {
+        return new Coordinate(point.getX(), point.getY(), point.getZ());
+    }
+
+    private Coordinate[] createCoordinates(Iterator<Point> iterator) {
+        List<Coordinate> coordinates = new LinkedList<>();
+        while (iterator.hasNext()) {
+            coordinates.add(createCoordinate((Point) iterator.next()));
+        }
+        return coordinates.toArray(new Coordinate[0]);
+    }
+    
+    private com.vividsolutions.jts.geom.Point[] createPoints(Iterator<Point> iterator) {
+        List<com.vividsolutions.jts.geom.Point> points = new LinkedList<>();
+        while (iterator.hasNext()) {
+            points.add(createPoint(iterator.next()));
+        }
+        return points.toArray(new com.vividsolutions.jts.geom.Point[0]);
+    }
+
+    private com.vividsolutions.jts.geom.LineString[] createLineStrings(Iterator<LineString> iterator) {
+        List<com.vividsolutions.jts.geom.LineString> lineStrings = new LinkedList<>();
+        while (iterator.hasNext()) {
+           lineStrings.add(createLineString(iterator.next()));
+        }
+        return lineStrings.toArray(new com.vividsolutions.jts.geom.LineString[0]);
+    }
+
+    private LinearRing createLinearRing(ComposedGeospatial<Point> ring) {
+        return factory.createLinearRing(createCoordinates(ring.iterator()));
+    }
+
+    private LinearRing[] createLinearRings(ComposedGeospatial<Point> ring) {
+        List<LinearRing> rings = new LinkedList<>();
+        rings.add(createLinearRing(ring));
+        return rings.toArray(new LinearRing[0]);
+    }
+
+    private com.vividsolutions.jts.geom.Polygon[] createMultyPolygons(Iterator<Polygon> iterator) {
+        List<com.vividsolutions.jts.geom.Polygon> polygons = new LinkedList<>();
+        while (iterator.hasNext()) {
+            polygons.add(createPolygon(iterator.next()));
+        }
+        return polygons.toArray(new com.vividsolutions.jts.geom.Polygon[0]);
+    }
+
+    private Geometry[] createGeometries(Iterator<Geospatial> iterator) {
+        List<Geometry> polygons = new LinkedList<>();
+        while (iterator.hasNext()) {
+            polygons.add(createGeometry(iterator.next()));
+        }
+        return polygons.toArray(new Geometry[0]);
     }
 
 }

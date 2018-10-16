@@ -207,23 +207,21 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     }
 
     @Override
-    public Entity create(Entity entity) {
-        LocationEntity location = mapper.createLocation(entity);
+    public Optional<LocationEntity> create(LocationEntity location) {
         if (!getRepository().exists(lQS.withName(location.getName()))) {
-            return mapper.createEntity(getRepository().save(location));
+            return Optional.of(getRepository().save(location));
         }
-        Optional<LocationEntity> optionalLocation = getRepository().findOne(lQS.withName(location.getName()));
-        return optionalLocation.isPresent() ? mapper.createEntity(optionalLocation.get()) : null;
+        return getRepository().findOne(lQS.withName(location.getName()));
     }
 
     @Override
-    public Entity update(Entity entity) {
+    public Optional<LocationEntity> update(LocationEntity entity) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Entity delete(Entity entity) {
+    public Optional<LocationEntity> delete(LocationEntity entity) {
         // TODO Auto-generated method stub
         return null;
     }

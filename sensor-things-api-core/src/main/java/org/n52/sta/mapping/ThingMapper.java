@@ -28,8 +28,7 @@
  */
 package org.n52.sta.mapping;
 
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PROPERTIES;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.*;
 import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ES_THINGS_NAME;
 import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_FQN;
 
@@ -80,7 +79,8 @@ public class ThingMapper extends AbstractMapper<ThingEntity> {
 
     public ThingEntity createThing(Entity entity) {
         ThingEntity thing = new ThingEntity();
-        setNameDescription(thing, entity);
+        setName(thing, entity);
+        setDescription(thing, entity);
         if (entity.getProperty(PROP_PROPERTIES) != null) {
             thing.setProperties(entity.getProperty(PROP_PROPERTIES).toString());
         }

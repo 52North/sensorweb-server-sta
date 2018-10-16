@@ -28,16 +28,17 @@
  */
 package org.n52.sta.mapping;
 
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PROPERTIES;
 import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ES_LOCATIONS_NAME;
 import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATION_FQN;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.*;
 
+import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
+import org.n52.series.db.beans.GeometryEntity;
+import org.n52.series.db.beans.sta.LocationEncodingEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
-import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -48,9 +49,12 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class LocationMapper extends AbstractLocationGeometryMapper<LocationEntity> {
-
+    
     @Autowired
     EntityCreationHelper entityCreationHelper;
+    
+    @Autowired
+    GeometryMapper geometryMapper;
 
     public Entity createEntity(LocationEntity location) {
         Entity entity = new Entity();
@@ -67,9 +71,26 @@ public class LocationMapper extends AbstractLocationGeometryMapper<LocationEntit
 
     public LocationEntity createLocation(Entity entity) {
         LocationEntity location = new LocationEntity();
-        setNameDescription(location, entity);
-        if (entity.getProperty(LocationEntity.))
+        setName(location, entity);
+        setDescription(location, entity);
+        Property locationProperty = entity.getProperty(PROP_LOCATION);
+        if (locationProperty != null) {
+            if (locationProperty.getValueType().equals(ValueType.COMPLEX)) {
+                location.setGeometryEntity(geometryMapper.createGeometryEntity((ComplexValue) locationProperty.getValue()));
+            } else {
+                location.setLocation(locationProperty.getValue().toString());
+            }
+        }
+        if (entity.getProperty(PROP_ENCODINGTYPE) != null) {
+            location.setLocationEncoding(createLocationEncodingEntity(entity.getProperty(PROP_ENCODINGTYPE)));
+        }
         return location;
+    }
+    
+    private LocationEncodingEntity createLocationEncodingEntity(Property property) {
+        LocationEncodingEntity locationEncodingEntity = new LocationEncodingEntity();
+        locationEncodingEntity.setEncodingType(property.getValue().toString());
+        return locationEncodingEntity;
     }
 
 }
