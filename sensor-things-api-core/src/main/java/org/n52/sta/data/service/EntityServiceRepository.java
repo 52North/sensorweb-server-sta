@@ -24,6 +24,7 @@ public class EntityServiceRepository {
     private ObservationService observationService;
     private ObservedPropertyService observedPropertyService;
     private FeatureOfInterestService featureOfInterestService;
+    private LocationEncodingService locationEncodingService;
 
     public EntityServiceRepository(ThingService thingService,
                                    LocationService locationService,
@@ -32,7 +33,8 @@ public class EntityServiceRepository {
                                    DatastreamService datastreamService,
                                    ObservationService observationService,
                                    ObservedPropertyService observedPropertyService,
-                                   FeatureOfInterestService featureOfInterestService) {
+                                   FeatureOfInterestService featureOfInterestService,
+                                   LocationEncodingService locationEncodingService) {
         this.thingService = thingService;
         this.locationService = locationService;
         this.historicalLocationService = historicalLocationService;
@@ -41,6 +43,7 @@ public class EntityServiceRepository {
         this.observationService = observationService;
         this.observedPropertyService = observedPropertyService;
         this.featureOfInterestService = featureOfInterestService;
+        this.locationEncodingService = locationEncodingService;
 
         final String message = "Unable to get Service Implementation: "; 
         Assert.notNull(thingService, message + thingService.getClass().getName());
@@ -51,6 +54,7 @@ public class EntityServiceRepository {
         Assert.notNull(observationService, message + observationService.getClass().getName());
         Assert.notNull(observedPropertyService, message + observedPropertyService.getClass().getName());
         Assert.notNull(featureOfInterestService, message + featureOfInterestService.getClass().getName());
+        Assert.notNull(locationEncodingService, message + locationEncodingService.getClass().getName());
     }
 
     /**
@@ -59,40 +63,54 @@ public class EntityServiceRepository {
      * @param entityTypeName the type name of the requested entity service
      * @return the requested entity data service
      */
-    public AbstractSensorThingsEntityService<?> getEntityService(String entityTypeName) {
-        AbstractSensorThingsEntityService<?> entityService = null;
+    public AbstractSensorThingsEntityService<?, ?> getEntityService(String entityTypeName) {
+        return getEntityService(EntityTypes.valueOf(entityTypeName));
+    }
+    
+    /**
+     * Provides an entity data service for a entity type
+     *
+     * @param entityTypeName the type name of the requested entity service
+     * @return the requested entity data service
+     */
+    public AbstractSensorThingsEntityService<?, ?> getEntityService(EntityTypes entityTypeName) {
+        AbstractSensorThingsEntityService<?, ?> entityService = null;
 
         switch (entityTypeName) {
-        case "Thing": {
+        case Thing: {
             entityService = thingService;
             break;
         }
-        case "Location": {
+        case Location: {
             entityService = locationService;
             break;
         }
-        case "HistoricalLocation": {
+        case HistoricalLocation: {
             entityService = historicalLocationService;
             break;
         }
-        case "Sensor": {
+        case Sensor: {
             entityService = sensorService;
             break;
         }
-        case "Datastream": {
+        case Datastream: {
             entityService = datastreamService;
             break;
         }
-        case "Observation": {
+        case Observation: {
             entityService = observationService;
             break;
         }
-        case "ObservedProperty": {
+        case ObservedProperty: {
             entityService = observedPropertyService;
             break;
         }
-        case "FeatureOfInterest": {
+        case FeatureOfInterest: {
             entityService = featureOfInterestService;
+            break;
+        }
+        case LocationEncoding: {
+            entityService = locationEncodingService;
             break;
         }
         default: {
@@ -100,6 +118,10 @@ public class EntityServiceRepository {
         }
         }
         return entityService;
+    }
+    
+    public enum EntityTypes {
+        Thing, Location, HistoricalLocation, Sensor, Datastream, Observation, ObservedProperty, FeatureOfInterest, LocationEncoding;
     }
 
 }
