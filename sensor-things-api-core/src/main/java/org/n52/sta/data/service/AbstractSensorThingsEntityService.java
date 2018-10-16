@@ -242,7 +242,7 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
      *            the sorting property to check
      * @return the databse property name
      */
-    protected String checkPropertyForSorting(String property) {
+    public String checkPropertyForSorting(String property) {
         return property;
     }
 

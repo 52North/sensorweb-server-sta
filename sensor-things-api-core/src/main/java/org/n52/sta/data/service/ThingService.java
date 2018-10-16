@@ -45,6 +45,7 @@ import org.n52.sta.service.query.FilterExpressionVisitor;
 import org.n52.sta.service.query.QueryOptions;
 import org.springframework.stereotype.Component;
 
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
 /**
@@ -66,11 +67,11 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     @Override
     public EntityCollection getEntityCollection(QueryOptions queryOptions) {
         EntityCollection retEntitySet = new EntityCollection();
-        BooleanExpression filter = null;
+        Predicate filter = null;
         if (queryOptions.hasFilterOption()) {
             Expression filterExpression = queryOptions.getFilterOption().getExpression();
             
-            FilterExpressionVisitor<ThingEntity> visitor = new FilterExpressionVisitor<>(ThingEntity.class);
+            FilterExpressionVisitor<ThingEntity> visitor = new FilterExpressionVisitor<>(ThingEntity.class, this);
             Object expression = null;
             try {
                 expression = filterExpression.accept(visitor);
@@ -81,7 +82,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-            filter = (BooleanExpression) expression;
+            filter = (Predicate) expression;
         }
         getRepository().findAll(filter, createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;

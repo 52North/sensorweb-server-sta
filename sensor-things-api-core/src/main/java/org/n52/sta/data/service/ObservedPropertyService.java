@@ -133,7 +133,7 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
     }
     
     @Override
-    protected String checkPropertyForSorting(String property) {
+    public String checkPropertyForSorting(String property) {
         switch (property) {
         case "definition":
             return DataEntity.PROPERTY_IDENTIFIER;

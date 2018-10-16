@@ -138,7 +138,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     }
 
     @Override
-    protected String checkPropertyForSorting(String property) {
+    public String checkPropertyForSorting(String property) {
         switch (property) {
         case "encodingType":
             return ProcedureEntity.PROPERTY_PROCEDURE_DESCRIPTION_FORMAT;

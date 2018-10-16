@@ -139,7 +139,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     }
     
     @Override
-    protected String checkPropertyForSorting(String property) {
+    public String checkPropertyForSorting(String property) {
         switch (property) {
         case "phenomenonTime":
             return DatastreamEntity.PROPERTY_SAMPLING_TIME_START;
