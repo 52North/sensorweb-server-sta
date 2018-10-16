@@ -78,7 +78,7 @@ public class EntityCollectionRequestHandlerImpl implements AbstractEntityCollect
 
         // fetch the data from backend for this requested EntitySetName and
         // deliver as EntityCollection
-        AbstractSensorThingsEntityService<?> responseService =
+        AbstractSensorThingsEntityService<?,?> responseService =
                 serviceRepository.getEntityService(uriResourceEntitySet.getEntityType().getName());
         EntityCollection responseEntityCollection = responseService.getEntityCollection(queryOptions);
         
@@ -103,7 +103,7 @@ public class EntityCollectionRequestHandlerImpl implements AbstractEntityCollect
         // determine the target query parameters and fetch EntityCollection for it
         EntityQueryParams queryParams = navigationResolver.resolveUriResourceNavigationPaths(resourcePaths);
 
-        AbstractSensorThingsEntityService<?> entityService = serviceRepository.getEntityService(queryParams.getTargetEntitySet().getEntityType().getName());
+        AbstractSensorThingsEntityService<?,?> entityService = serviceRepository.getEntityService(queryParams.getTargetEntitySet().getEntityType().getName());
         EntityCollection responseEntityCollection = entityService
                 .getRelatedEntityCollection(queryParams.getSourceId(), queryParams.getSourceEntityType(), queryOptions);
         

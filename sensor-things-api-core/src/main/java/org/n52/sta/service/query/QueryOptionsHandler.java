@@ -131,14 +131,14 @@ public class QueryOptionsHandler {
     }
 
     private Entity getInlineEntity(Long sourceId, EdmEntitySet sourceEntitySet, EdmEntityType targetType) {
-        AbstractSensorThingsEntityService<?> responseService = serviceRepository.getEntityService(targetType.getName());
+        AbstractSensorThingsEntityService<?,?> responseService = serviceRepository.getEntityService(targetType.getName());
         Entity entity = responseService.getRelatedEntity(sourceId, sourceEntitySet.getEntityType());
 
         return entity;
     }
     
     private EntityCollection getInlineEntityCollection(Long sourceId, EdmEntitySet sourceEntitySet, EdmEntityType targetType, QueryOptions queryOptions) {
-        AbstractSensorThingsEntityService<?> responseService = serviceRepository.getEntityService(targetType.getName());
+        AbstractSensorThingsEntityService<?,?> responseService = serviceRepository.getEntityService(targetType.getName());
         EntityCollection entityCollection = responseService.getRelatedEntityCollection(sourceId, sourceEntitySet.getEntityType(), queryOptions);
 
         return entityCollection;

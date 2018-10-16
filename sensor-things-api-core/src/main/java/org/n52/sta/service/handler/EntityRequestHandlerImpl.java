@@ -81,7 +81,7 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
 
         // fetch the data from backend for this requested Entity and deliver as Entity
         List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
-        AbstractSensorThingsEntityService<?> responseService = getEntityService(uriResourceEntitySet);
+        AbstractSensorThingsEntityService<?,?> responseService = getEntityService(uriResourceEntitySet);
         Entity responseEntity = responseService.getEntity(navigationResolver.getEntityIdFromKeyParams(keyPredicates));
 
         if (responseEntity == null) {
@@ -134,12 +134,12 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
         return navigationResolver.resolveRootUriResource(resourcePaths.get(0));
     }
 
-    private AbstractSensorThingsEntityService<?> getEntityService(UriResourceEntitySet uriResourceEntitySet) {
+    private AbstractSensorThingsEntityService<?,?> getEntityService(UriResourceEntitySet uriResourceEntitySet) {
         return getUriResourceEntitySet(uriResourceEntitySet.getEntityType().getName());
     }
     
 
-    private AbstractSensorThingsEntityService<?> getUriResourceEntitySet(String type) {
+    private AbstractSensorThingsEntityService<?,?> getUriResourceEntitySet(String type) {
         return serviceRepository.getEntityService(type);
     }
 }

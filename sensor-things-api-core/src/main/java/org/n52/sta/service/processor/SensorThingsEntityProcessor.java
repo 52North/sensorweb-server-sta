@@ -101,7 +101,7 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
 
     @Override
     public void updateEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType requestFormat, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-        EntityResponse entityResponse = getCrudEntityHanlder(uriInfo).handleUpdateEntityRequest(deserializeRequestBody(request, uriInfo));
+        EntityResponse entityResponse = getCrudEntityHanlder(uriInfo).handleUpdateEntityRequest(deserializeRequestBody(request, uriInfo), request.getMethod());
         
 
         // configure the response object: set the body, headers and status code
