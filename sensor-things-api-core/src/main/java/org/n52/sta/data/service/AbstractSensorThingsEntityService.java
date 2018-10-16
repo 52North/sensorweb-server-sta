@@ -6,6 +6,7 @@
 package org.n52.sta.data.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.stream.Collectors;
 
@@ -27,6 +28,7 @@ import org.apache.olingo.server.api.uri.queryoption.expression.Literal;
 import org.apache.olingo.server.api.uri.queryoption.expression.Member;
 import org.apache.olingo.server.api.uri.queryoption.expression.MethodKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.UnaryOperatorKind;
+import org.n52.series.db.beans.IdEntity;
 import org.n52.sta.data.OffsetLimitBasedPageRequest;
 import org.n52.sta.service.query.QueryOptions;
 import org.springframework.data.domain.PageRequest;
@@ -39,7 +41,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
-public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<?, ?>> {
+public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<?, ?>, S extends IdEntity> {
 
     private T repository;
 
@@ -211,11 +213,11 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
         return getRepository().count();
     }
 
-    public abstract Entity create(Entity entity);
+    public abstract Optional<S> create(S entity);
 
-    public abstract Entity update(Entity entity);
+    public abstract Optional<S> update(S entity);
 
-    public abstract Entity delete(Entity entity);
+    public abstract Optional<S> delete(S entity);
 
     /**
      * Create {@link PageRequest}
@@ -259,9 +261,9 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
      */
     private static final class ExpressionGenerator implements ExpressionVisitor<String> {
 
-        private AbstractSensorThingsEntityService<?> service;
+        private AbstractSensorThingsEntityService<?,?> service;
 
-        public ExpressionGenerator(AbstractSensorThingsEntityService<?> service) {
+        public ExpressionGenerator(AbstractSensorThingsEntityService<?,?> service) {
             this.service = service;
         }
 
@@ -323,4 +325,5 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
             throw new ExpressionVisitException("MethodKind expressions are not supported");
         }
     }
+
 }

@@ -34,6 +34,7 @@ import java.util.OptionalLong;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.commons.api.http.HttpMethod;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.sta.data.query.HistoricalLocationQuerySpecifications;
 import org.n52.sta.data.repositories.HistoricalLocationRepository;
@@ -48,7 +49,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
  *
  */
 @Component
-public class HistoricalLocationService extends AbstractSensorThingsEntityService<HistoricalLocationRepository> {
+public class HistoricalLocationService extends AbstractSensorThingsEntityService<HistoricalLocationRepository, HistoricalLocationEntity> {
 
     private HistoricalLocationMapper mapper;
 
@@ -206,19 +207,19 @@ public class HistoricalLocationService extends AbstractSensorThingsEntityService
     }
 
     @Override
-    public Entity create(Entity entity) {
+    public Optional<HistoricalLocationEntity> create(HistoricalLocationEntity entity) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Entity update(Entity entity) {
+    public Optional<HistoricalLocationEntity> update(HistoricalLocationEntity entity) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Entity delete(Entity entity) {
+    public Optional<HistoricalLocationEntity> delete(HistoricalLocationEntity entity) {
         // TODO Auto-generated method stub
         return null;
     }

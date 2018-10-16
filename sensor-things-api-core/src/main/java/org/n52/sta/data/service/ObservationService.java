@@ -34,6 +34,7 @@ import java.util.OptionalLong;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.commons.api.http.HttpMethod;
 import org.n52.series.db.DataRepository;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.sta.data.OffsetLimitBasedPageRequest;
@@ -50,7 +51,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
  *
  */
 @Component
-public class ObservationService extends AbstractSensorThingsEntityService<DataRepository<?>> {
+public class ObservationService extends AbstractSensorThingsEntityService<DataRepository<?>, DataEntity<?>> {
 
     private ObservationMapper mapper;
 
@@ -223,19 +224,19 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
     }
 
     @Override
-    public Entity create(Entity entity) {
+    public Optional<DataEntity<?>> create(DataEntity<?> entity) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Entity update(Entity entity) {
+    public Optional<DataEntity<?>> update(DataEntity<?> entity) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Entity delete(Entity entity) {
+    public Optional<DataEntity<?>> delete(DataEntity<?> entity) {
         // TODO Auto-generated method stub
         return null;
     }

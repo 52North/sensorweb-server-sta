@@ -34,6 +34,7 @@ import java.util.OptionalLong;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.commons.api.http.HttpMethod;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.repositories.DatastreamRepository;
@@ -48,7 +49,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
  *
  */
 @Component
-public class DatastreamService extends AbstractSensorThingsEntityService<DatastreamRepository> {
+public class DatastreamService extends AbstractSensorThingsEntityService<DatastreamRepository, DatastreamEntity> {
 
     private DatastreamMapper mapper;
 
@@ -213,19 +214,19 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     }
 
     @Override
-    public Entity create(Entity entity) {
+    public Optional<DatastreamEntity> create(DatastreamEntity entity) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Entity update(Entity entity) {
+    public Optional<DatastreamEntity> update(DatastreamEntity entity) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Entity delete(Entity entity) {
+    public Optional<DatastreamEntity> delete(DatastreamEntity entity) {
         // TODO Auto-generated method stub
         return null;
     }

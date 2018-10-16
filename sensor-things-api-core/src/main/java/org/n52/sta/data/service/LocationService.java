@@ -34,6 +34,7 @@ import java.util.OptionalLong;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.commons.api.http.HttpMethod;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.sta.data.query.LocationQuerySpecifications;
@@ -49,8 +50,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
  *
  */
 @Component
-public class LocationService extends AbstractSensorThingsEntityService<LocationRepository> {
-
+public class LocationService extends AbstractSensorThingsEntityService<LocationRepository, LocationEntity> {
 
     private LocationMapper mapper;
 

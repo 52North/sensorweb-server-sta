@@ -34,6 +34,7 @@ import java.util.OptionalLong;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.commons.api.http.HttpMethod;
 import org.n52.series.db.FeatureRepository;
 import org.n52.series.db.beans.FeatureEntity;
 import org.n52.sta.data.query.FeatureOfInterestQuerySpecifications;
@@ -49,7 +50,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
  *
  */
 @Component
-public class FeatureOfInterestService extends AbstractSensorThingsEntityService<FeatureRepository> {
+public class FeatureOfInterestService extends AbstractSensorThingsEntityService<FeatureRepository, FeatureEntity> {
 
 
     private FeatureOfInterestMapper mapper;
@@ -170,19 +171,19 @@ public class FeatureOfInterestService extends AbstractSensorThingsEntityService<
     }
 
     @Override
-    public Entity create(Entity entity) {
+    public Optional<FeatureEntity> create(FeatureEntity entity) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Entity update(Entity entity) {
+    public Optional<FeatureEntity> update(FeatureEntity entity) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Entity delete(Entity entity) {
+    public Optional<FeatureEntity> delete(FeatureEntity entity) {
         // TODO Auto-generated method stub
         return null;
     }

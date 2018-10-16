@@ -34,6 +34,7 @@ import java.util.OptionalLong;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.commons.api.http.HttpMethod;
 import org.n52.series.db.PhenomenonRepository;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
@@ -49,7 +50,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
  *
  */
 @Component
-public class ObservedPropertyService extends AbstractSensorThingsEntityService<PhenomenonRepository> {
+public class ObservedPropertyService extends AbstractSensorThingsEntityService<PhenomenonRepository, PhenomenonEntity> {
 
     private ObservedPropertyMapper mapper;
 
@@ -178,19 +179,19 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
     }
 
     @Override
-    public Entity create(Entity entity) {
+    public Optional<PhenomenonEntity> create(PhenomenonEntity entity) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Entity update(Entity entity) {
+    public Optional<PhenomenonEntity> update(PhenomenonEntity entity) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Entity delete(Entity entity) {
+    public Optional<PhenomenonEntity> delete(PhenomenonEntity entity) {
         // TODO Auto-generated method stub
         return null;
     }

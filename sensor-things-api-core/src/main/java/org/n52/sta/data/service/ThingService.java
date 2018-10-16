@@ -34,6 +34,7 @@ import java.util.OptionalLong;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.commons.api.http.HttpMethod;
 import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.sta.data.query.ThingQuerySpecifications;
 import org.n52.sta.data.repositories.ThingRepository;
@@ -48,7 +49,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
-public class ThingService extends AbstractSensorThingsEntityService<ThingRepository> {
+public class ThingService extends AbstractSensorThingsEntityService<ThingRepository, ThingEntity> {
 
     private ThingMapper mapper;
 
@@ -175,23 +176,21 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     }
 
     @Override
-    public Entity create(Entity entity) {
-        ThingEntity thing = mapper.createThing(entity);
+    public Optional<ThingEntity> create(ThingEntity thing) {
         if (!getRepository().exists(tQS.withName(thing.getName()))) {
-            return mapper.createEntity(getRepository().save(thing));
+            return Optional.of(getRepository().save(thing));
         }
-        Optional<ThingEntity> optionalThing = getRepository().findOne(tQS.withName(thing.getName()));
-        return optionalThing.isPresent() ? mapper.createEntity(optionalThing.get()) : null;
+        return getRepository().findOne(tQS.withName(thing.getName()));
     }
 
     @Override
-    public Entity update(Entity entity) {
+    public Optional<ThingEntity> update(ThingEntity thing) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Entity delete(Entity entity) {
+    public Optional<ThingEntity> delete(ThingEntity thing) {
         // TODO Auto-generated method stub
         return null;
     }

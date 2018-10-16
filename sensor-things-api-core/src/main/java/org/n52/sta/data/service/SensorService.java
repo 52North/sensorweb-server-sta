@@ -34,6 +34,7 @@ import java.util.OptionalLong;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.commons.api.http.HttpMethod;
 import org.n52.series.db.ProcedureRepository;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.sta.data.query.SensorQuerySpecifications;
@@ -49,7 +50,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
  *
  */
 @Component
-public class SensorService extends AbstractSensorThingsEntityService<ProcedureRepository> {
+public class SensorService extends AbstractSensorThingsEntityService<ProcedureRepository, ProcedureEntity> {
 
     private SensorMapper mapper;
 
@@ -168,19 +169,19 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     }
 
     @Override
-    public Entity create(Entity entity) {
+    public Optional<ProcedureEntity> create(ProcedureEntity entity) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Entity update(Entity entity) {
+    public Optional<ProcedureEntity> update(ProcedureEntity entity) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Entity delete(Entity entity) {
+    public Optional<ProcedureEntity> delete(ProcedureEntity entity) {
         // TODO Auto-generated method stub
         return null;
     }
