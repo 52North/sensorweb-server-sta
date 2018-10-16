@@ -61,7 +61,7 @@ public class EntityCollectionRequestHandlerImpl implements AbstractEntityCollect
             response.getEntityCollection().forEach(entity -> {
                 List<Link> links = queryOptionsHandler.handleExpandOption(queryOptions.getExpandOption(),
                                                                           Long.parseLong(entity.getProperty("@iot.id").getValue().toString()),
-                                                                          sourceEdmEntitySet,
+                                                                          sourceEdmEntitySet.getEntityType(),
                                                                           queryOptions.getBaseURI());
                 entity.getNavigationLinks().addAll(links);
             });

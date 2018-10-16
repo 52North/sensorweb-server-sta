@@ -80,7 +80,7 @@ public class ExpandItemQueryOptions implements QueryOptions {
      */
     @Override
     public boolean hasCountOption() {
-        return item.hasCountPath();
+        return item.getCountOption() != null && item.getCountOption().getValue();
     }
 
     /* (non-Javadoc)
