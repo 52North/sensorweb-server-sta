@@ -10,8 +10,6 @@ public class EntityCrudRequestHandlerRepository {
 
     private LocationEntityCrudRequestHandler locationEntityCrudRequestHandler;
 
-    private HistoricalLocationEntityCrudRequestHandler historicalLocationEntityCrudRequestHandler;
-
     private SensorEntityCrudRequestHandler sensorEntityCrudRequestHandler;
 
     private DatastreamEntityCrudRequestHandler datastreamEntityCrudRequestHandler;
@@ -24,7 +22,6 @@ public class EntityCrudRequestHandlerRepository {
 
     public EntityCrudRequestHandlerRepository(ThingEntityCrudRequestHandler thingEntityCrudRequestHandler,
             LocationEntityCrudRequestHandler locationEntityCrudRequestHandler,
-            HistoricalLocationEntityCrudRequestHandler historicalLocationEntityCrudRequestHandler,
             SensorEntityCrudRequestHandler sensorEntityCrudRequestHandler,
             DatastreamEntityCrudRequestHandler datastreamEntityCrudRequestHandler,
             ObservationEntityCrudRequestHandler observationEntityCrudRequestHandler,
@@ -32,7 +29,6 @@ public class EntityCrudRequestHandlerRepository {
             FeatureOfInterestEntityCrudRequestHandler featureOfInterestEntityCrudRequestHandler) {
         this.thingEntityCrudRequestHandler = thingEntityCrudRequestHandler;
         this.locationEntityCrudRequestHandler = locationEntityCrudRequestHandler;
-        this.historicalLocationEntityCrudRequestHandler = historicalLocationEntityCrudRequestHandler;
         this.sensorEntityCrudRequestHandler = sensorEntityCrudRequestHandler;
         this.datastreamEntityCrudRequestHandler = datastreamEntityCrudRequestHandler;
         this.observationEntityCrudRequestHandler = observationEntityCrudRequestHandler;
@@ -43,8 +39,6 @@ public class EntityCrudRequestHandlerRepository {
         Assert.notNull(thingEntityCrudRequestHandler, message + thingEntityCrudRequestHandler.getClass().getName());
         Assert.notNull(locationEntityCrudRequestHandler,
                 message + locationEntityCrudRequestHandler.getClass().getName());
-        Assert.notNull(historicalLocationEntityCrudRequestHandler,
-                message + historicalLocationEntityCrudRequestHandler.getClass().getName());
         Assert.notNull(sensorEntityCrudRequestHandler, message + sensorEntityCrudRequestHandler.getClass().getName());
         Assert.notNull(datastreamEntityCrudRequestHandler,
                 message + datastreamEntityCrudRequestHandler.getClass().getName());
@@ -64,9 +58,6 @@ public class EntityCrudRequestHandlerRepository {
         }
         case "Location": {
             return locationEntityCrudRequestHandler;
-        }
-        case "HistoricalLocation": {
-            return historicalLocationEntityCrudRequestHandler;
         }
         case "Sensor": {
             return sensorEntityCrudRequestHandler;
