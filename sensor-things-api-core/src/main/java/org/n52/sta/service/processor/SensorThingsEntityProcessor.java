@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Locale;
 
 import org.apache.olingo.commons.api.data.ContextURL;
+import org.apache.olingo.commons.api.data.Entity;
+import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
@@ -89,7 +91,13 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
 
     @Override
     public void createEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType requestFormat, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-        EntityResponse entityResponse = getCrudEntityHanlder(uriInfo).handleCreateEntityRequest(deserializeRequestBody(request, uriInfo));
+        EntityResponse entityResponse = new EntityResponse();
+        DeserializerResult deserializeRequestBody = deserializeRequestBody(request, uriInfo);
+        if (deserializeRequestBody.getEntity() != null) {
+            Entity entity = getCrudEntityHanlder(uriInfo).handleCreateEntityRequest(deserializeRequestBody.getEntity());
+        } else if (deserializeRequestBody.getEntityCollection() != null) {
+            EntityCollection entityCollection = getCrudEntityHanlder(uriInfo).handleCreateEntityRequest(deserializeRequestBody.getEntityCollection());
+        }
         
 
         // configure the response object: set the body, headers and status code

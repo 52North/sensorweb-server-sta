@@ -185,8 +185,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
 
     @Override
     public Optional<ThingEntity> update(ThingEntity thing) {
-        // TODO Auto-generated method stub
-        return null;
+        return Optional.of(getRepository().save(thing));
     }
 
     @Override

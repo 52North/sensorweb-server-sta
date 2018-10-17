@@ -207,9 +207,8 @@ public class HistoricalLocationService extends AbstractSensorThingsEntityService
     }
 
     @Override
-    public Optional<HistoricalLocationEntity> create(HistoricalLocationEntity entity) {
-        // TODO Auto-generated method stub
-        return null;
+    public Optional<HistoricalLocationEntity> create(HistoricalLocationEntity historicalLocation) {
+        return Optional.of(getRepository().save(historicalLocation));
     }
 
     @Override

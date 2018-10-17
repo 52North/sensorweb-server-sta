@@ -34,9 +34,7 @@ import java.util.OptionalLong;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
-import org.apache.olingo.commons.api.http.HttpMethod;
 import org.n52.series.db.beans.sta.LocationEntity;
-import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.sta.data.query.LocationQuerySpecifications;
 import org.n52.sta.data.repositories.LocationRepository;
 import org.n52.sta.mapping.LocationMapper;
@@ -215,13 +213,12 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     }
 
     @Override
-    public Optional<LocationEntity> update(LocationEntity entity) {
-        // TODO Auto-generated method stub
-        return null;
+    public Optional<LocationEntity> update(LocationEntity location) {
+        return Optional.of(getRepository().save(location));
     }
 
     @Override
-    public Optional<LocationEntity> delete(LocationEntity entity) {
+    public Optional<LocationEntity> delete(LocationEntity location) {
         // TODO Auto-generated method stub
         return null;
     }
