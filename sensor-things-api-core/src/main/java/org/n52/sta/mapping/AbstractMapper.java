@@ -52,9 +52,6 @@ public abstract class AbstractMapper<T> {
     @Autowired
     EntityCreationHelper entityCreationHelper;
     
-    @Autowired
-    GeometryMapper geometryMapper;
-    
     public abstract Entity createEntity(T t);
     
     protected void addNameDescriptionProperties(Entity entity, DescribableEntity describableEntity) {

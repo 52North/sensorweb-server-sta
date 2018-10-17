@@ -43,11 +43,18 @@ public class GeometryMapper {
     
     private final GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
 
-    public ComplexValue resolveGeometry(GeometryEntity geometry) {
+    public Geospatial resolveGeometry(GeometryEntity geometry) {
+        if (geometry.isSetGeometry()) {
+            return createGeospatial(geometry.getGeometry(), null);
+        }
+        return null;
+    }
+    
+    public ComplexValue resolveComplexValueGeometry(GeometryEntity geometry) {
         //TODO: geometry creation dependend on the GeometryType
         ComplexValue value = null;
-        if (geometry.isSetGeometry()) {
-            Geospatial geospatial = createGeospatial(geometry.getGeometry(), null);
+        Geospatial geospatial = resolveGeometry(geometry);
+        if (geospatial != null) {
             value = new ComplexValue();
             value.getValue().add(new Property(null, FeatureComplexType.PROP_TYPE, ValueType.PRIMITIVE, LOCATION_TYPE));
             value.getValue().add(new Property(null, FeatureComplexType.PROP_GEOMETRY, ValueType.GEOSPATIAL, geospatial));
@@ -167,6 +174,15 @@ public class GeometryMapper {
         if (value.getTypeName().equals("iot.Feature")) {
             GeometryEntity geometryEntity = new GeometryEntity();
             geometryEntity.setGeometry(createGeometry(value.getValue()));
+            return geometryEntity;
+        }
+        return null;
+    }
+
+    public GeometryEntity createGeometryEntity(Geospatial geospatial) {
+        if (geospatial != null) {
+            GeometryEntity geometryEntity = new GeometryEntity();
+            geometryEntity.setGeometry(createGeometry(geospatial));
             return geometryEntity;
         }
         return null;

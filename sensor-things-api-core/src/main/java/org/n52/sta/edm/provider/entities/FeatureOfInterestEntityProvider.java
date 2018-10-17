@@ -82,8 +82,11 @@ public class FeatureOfInterestEntityProvider extends AbstractSensorThingsEntityP
                 .setNullable(false);
 
         //create EntityType complex properties
+//        CsdlProperty feature = new CsdlProperty().setName(PROP_FEATURE)
+//                .setType(FeatureComplexType.CT_FEATURE_FQN)
+//                .setNullable(false);
         CsdlProperty feature = new CsdlProperty().setName(PROP_FEATURE)
-                .setType(FeatureComplexType.CT_FEATURE_FQN)
+                .setType(EdmPrimitiveTypeKind.Geometry.getFullQualifiedName())
                 .setNullable(false);
 
         //create EntityType navigation links

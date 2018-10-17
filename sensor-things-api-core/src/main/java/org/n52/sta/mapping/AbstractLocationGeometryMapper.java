@@ -32,9 +32,11 @@ import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvid
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_FEATURE;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_LOCATION;
 
+import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
+import org.n52.series.db.beans.GeometryEntity;
 import org.n52.series.db.beans.HibernateRelations.HasGeometry;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -56,9 +58,20 @@ public abstract class AbstractLocationGeometryMapper<T> extends AbstractMapper<T
 
     protected void addLocationGeometry(Entity entity, HasGeometry<?> geometryLocationEntity, String property) {
         entity.addProperty(new Property(null, PROP_ENCODINGTYPE, ValueType.PRIMITIVE, ENCODINGTYPE_GEOJSON));
-        entity.addProperty(new Property(null, property, ValueType.COMPLEX,
+//        entity.addProperty(new Property(null, property, ValueType.COMPLEX,
+//                geometryMapper.resolveGeometry(geometryLocationEntity.getGeometryEntity())));
+        entity.addProperty(new Property(null, property, ValueType.GEOSPATIAL,
                 geometryMapper.resolveGeometry(geometryLocationEntity.getGeometryEntity())));
 
+    }
+    
+    protected GeometryEntity parseGeometry(ComplexValue value) {
+        return geometryMapper.createGeometryEntity(value);
+    }
+    
+    protected GeometryEntity parseGeometry(Object value) {
+        return null;
+//        return geometryMapper.createGeometryEntity(value);
     }
 
 }

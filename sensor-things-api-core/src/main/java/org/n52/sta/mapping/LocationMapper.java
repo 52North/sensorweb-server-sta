@@ -36,6 +36,7 @@ import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
+import org.apache.olingo.commons.api.edm.geo.Geospatial;
 import org.n52.series.db.beans.GeometryEntity;
 import org.n52.series.db.beans.sta.LocationEncodingEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
@@ -50,12 +51,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class LocationMapper extends AbstractLocationGeometryMapper<LocationEntity> {
     
-    @Autowired
-    EntityCreationHelper entityCreationHelper;
-    
-    @Autowired
-    GeometryMapper geometryMapper;
-
     public Entity createEntity(LocationEntity location) {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, location.getId()));
@@ -75,8 +70,8 @@ public class LocationMapper extends AbstractLocationGeometryMapper<LocationEntit
         setDescription(location, entity);
         Property locationProperty = entity.getProperty(PROP_LOCATION);
         if (locationProperty != null) {
-            if (locationProperty.getValueType().equals(ValueType.COMPLEX)) {
-                location.setGeometryEntity(geometryMapper.createGeometryEntity((ComplexValue) locationProperty.getValue()));
+            if (locationProperty.getValueType().equals(ValueType.PRIMITIVE) && locationProperty.getValue() instanceof Geospatial) {
+                location.setGeometryEntity(geometryMapper.createGeometryEntity((Geospatial) locationProperty.getValue()));
             } else {
                 location.setLocation(locationProperty.getValue().toString());
             }

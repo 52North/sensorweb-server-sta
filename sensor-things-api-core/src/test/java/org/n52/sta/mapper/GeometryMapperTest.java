@@ -86,7 +86,7 @@ public class GeometryMapperTest {
         g.setSRID(4326);
         GeometryEntity ge = new GeometryEntity();
         ge.setGeometry(g);
-        return mapper.resolveGeometry(ge);
+        return mapper.resolveComplexValueGeometry(ge);
     }
 
     private Geospatial check(ComplexValue geom) {
