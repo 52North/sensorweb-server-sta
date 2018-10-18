@@ -96,7 +96,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.olingo.server.core.serializer.json.ODataErrorSerializer;
 import org.n52.sta.edm.provider.SensorThingsEdmConstants;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.SELF_LINK_ANNOTATION;
+import static org.n52.sta.edm.provider.SensorThingsEdmConstants.SELF_LINK_ANNOTATION;
 
 public class SensorThingsSerializer extends AbstractODataSerializer {
 

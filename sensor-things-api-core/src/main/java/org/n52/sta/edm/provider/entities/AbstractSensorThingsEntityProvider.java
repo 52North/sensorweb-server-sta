@@ -42,16 +42,6 @@ import org.springframework.stereotype.Component;
 @Component
 public abstract class AbstractSensorThingsEntityProvider implements InitializingBean {
 
-    public static final String CONTROL_ANNOTATION_PREFIX = "@" + NAMESPACE;
-
-    public static final String ID_ANNOTATION = CONTROL_ANNOTATION_PREFIX + ".id";
-
-    public static final String SELF_LINK_ANNOTATION = CONTROL_ANNOTATION_PREFIX + ".selfLink";
-
-    public static final String NAVIGATION_LINK_ANNOTATION = CONTROL_ANNOTATION_PREFIX + ".navigationLink";
-    
-    public static final String NEXT_LINK_ANNOTATION = CONTROL_ANNOTATION_PREFIX + ".nextLink";
-
     // Entity Property Names
     public static final String PROP_DEFINITION = "definition";
     public static final String PROP_DESCRIPTION = "description";
