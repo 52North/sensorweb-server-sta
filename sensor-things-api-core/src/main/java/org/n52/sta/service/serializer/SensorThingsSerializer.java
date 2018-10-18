@@ -95,8 +95,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.olingo.server.core.serializer.json.ODataErrorSerializer;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.CONTROL_ANNOTATION_PREFIX;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
+import org.n52.sta.edm.provider.SensorThingsEdmConstants;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.SELF_LINK_ANNOTATION;
 
 public class SensorThingsSerializer extends AbstractODataSerializer {
@@ -511,16 +510,14 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
             final EdmStructuredType type, final Linked linked, final ExpandOption expand, final Integer toDepth,
             final Set<String> ancestors, final String name, final JsonGenerator json)
             throws SerializerException, IOException {
-        if (isODataMetadataFull) {
-            for (final String propertyName : type.getNavigationPropertyNames()) {
-                final Link navigationLink = linked.getNavigationLink(propertyName);
-                if (navigationLink != null) {
-                    json.writeStringField(propertyName + Constants.JSON_NAVIGATION_LINK, navigationLink.getHref());
-                }
-                final Link associationLink = linked.getAssociationLink(propertyName);
-                if (associationLink != null) {
-                    json.writeStringField(propertyName + Constants.JSON_ASSOCIATION_LINK, associationLink.getHref());
-                }
+        for (final String propertyName : type.getNavigationPropertyNames()) {
+            final Link navigationLink = linked.getNavigationLink(propertyName);
+            if (navigationLink != null) {
+                json.writeStringField(propertyName + SensorThingsEdmConstants.NAVIGATION_LINK_ANNOTATION, navigationLink.getHref());
+            }
+            final Link associationLink = linked.getAssociationLink(propertyName);
+            if (associationLink != null) {
+                json.writeStringField(propertyName + Constants.JSON_ASSOCIATION_LINK, associationLink.getHref());
             }
         }
         if ((toDepth != null && toDepth > 1) || (toDepth == null && ExpandSelectHelper.hasExpand(expand))) {
