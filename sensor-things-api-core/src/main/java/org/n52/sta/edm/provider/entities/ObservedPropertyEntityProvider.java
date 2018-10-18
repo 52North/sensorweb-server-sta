@@ -61,11 +61,50 @@ public class ObservedPropertyEntityProvider extends AbstractSensorThingsEntityPr
     // Entity Set Name
     public static final String ES_OBSERVED_PROPERTIES_NAME = "ObservedProperties";
 
-    // Entity Navigation Property Names
-    private static final String NAV_LINK_NAME_DATASTREAMS = ES_DATASTREAMS_NAME + NAVIGATION_LINK_ANNOTATION;
-    
     @Override
     protected CsdlEntityType createEntityType() {
+
+        List<CsdlProperty> properties = createCsdlProperties();
+
+        List<CsdlNavigationProperty> navigationProperties = createCsdlNavigationProperties();
+
+        // create CsdlPropertyRef for Key element
+        CsdlPropertyRef propertyRef = new CsdlPropertyRef();
+        propertyRef.setName(ID_ANNOTATION);
+
+        // configure EntityType
+        CsdlEntityType entityType = new CsdlEntityType();
+        entityType.setName(ET_OBSERVED_PROPERTY_NAME);
+        entityType.setProperties(properties);
+        entityType.setKey(Collections.singletonList(propertyRef));
+        entityType.setNavigationProperties(navigationProperties);
+
+        return entityType;
+    }
+
+    @Override
+    protected CsdlEntitySet createEntitySet() {
+        CsdlEntitySet entitySet = new CsdlEntitySet();
+        entitySet.setName(ES_OBSERVED_PROPERTIES_NAME);
+        entitySet.setType(ET_OBSERVED_PROPERTY_FQN);
+
+        CsdlNavigationPropertyBinding navPropDatastreamBinding = new CsdlNavigationPropertyBinding();
+        navPropDatastreamBinding.setPath(ES_DATASTREAMS_NAME);
+        navPropDatastreamBinding.setTarget(ES_DATASTREAMS_NAME);
+
+        List<CsdlNavigationPropertyBinding> navPropBindingList = new ArrayList<CsdlNavigationPropertyBinding>();
+        navPropBindingList.add(navPropDatastreamBinding);
+        entitySet.setNavigationPropertyBindings(navPropBindingList);
+
+        return entitySet;
+    }
+
+    @Override
+    public FullQualifiedName getFullQualifiedTypeName() {
+        return ET_OBSERVED_PROPERTY_FQN;
+    }
+
+    private List<CsdlProperty> createCsdlProperties() {
         //create EntityType properties
         CsdlProperty id = new CsdlProperty().setName(ID_ANNOTATION)
                 .setType(EdmPrimitiveTypeKind.Int64.getFullQualifiedName())
@@ -79,64 +118,28 @@ public class ObservedPropertyEntityProvider extends AbstractSensorThingsEntityPr
         CsdlProperty definition = new CsdlProperty().setName(PROP_DEFINITION)
                 .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
                 .setNullable(true);
-        
+
         CsdlProperty selfLink = new CsdlProperty().setName(SELF_LINK_ANNOTATION)
                 .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
                 .setNullable(false);
-        CsdlProperty navLinkDatastreams = new CsdlProperty().setName(NAV_LINK_NAME_DATASTREAMS)
-                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
-                .setNullable(false);
 
-        // navigation property: one mandatory to many optional
+        return Arrays.asList(
+                id,
+                name,
+                description,
+                definition,
+                selfLink);
+    }
+
+    private List<CsdlNavigationProperty> createCsdlNavigationProperties() {
+         // navigation property: one mandatory to many optional
         CsdlNavigationProperty navPropDatastreams = new CsdlNavigationProperty()
                 .setName(ES_DATASTREAMS_NAME)
                 .setType(ET_DATASTREAM_FQN)
                 .setCollection(true)
                 .setPartner(ET_OBSERVED_PROPERTY_NAME);
-        
-        List<CsdlNavigationProperty> navPropList = new ArrayList<CsdlNavigationProperty>();
-        navPropList.add(navPropDatastreams);
 
-        // create CsdlPropertyRef for Key element
-        CsdlPropertyRef propertyRef = new CsdlPropertyRef();
-        propertyRef.setName(ID_ANNOTATION);
+        return Arrays.asList(navPropDatastreams);
+    }
 
-        // configure EntityType
-        CsdlEntityType entityType = new CsdlEntityType();
-        entityType.setName(ET_OBSERVED_PROPERTY_NAME);
-        entityType.setProperties(Arrays.asList(
-                id,
-                name,
-                description,
-                definition,
-                selfLink,
-                navLinkDatastreams));
-        entityType.setKey(Collections.singletonList(propertyRef));
-        entityType.setNavigationProperties(navPropList);
-        
-        return entityType;
-    }
-    
-    @Override
-    protected CsdlEntitySet createEntitySet() {
-        CsdlEntitySet entitySet = new CsdlEntitySet();
-        entitySet.setName(ES_OBSERVED_PROPERTIES_NAME);
-        entitySet.setType(ET_OBSERVED_PROPERTY_FQN);
-        
-        CsdlNavigationPropertyBinding navPropDatastreamBinding = new CsdlNavigationPropertyBinding();
-        navPropDatastreamBinding.setPath(ES_DATASTREAMS_NAME);
-        navPropDatastreamBinding.setTarget(ES_DATASTREAMS_NAME);
-        
-        List<CsdlNavigationPropertyBinding> navPropBindingList = new ArrayList<CsdlNavigationPropertyBinding>();
-        navPropBindingList.add(navPropDatastreamBinding);
-        entitySet.setNavigationPropertyBindings(navPropBindingList);
-        
-        return entitySet;
-    }
-    
-    @Override
-    public FullQualifiedName getFullQualifiedTypeName() {
-        return ET_OBSERVED_PROPERTY_FQN;
-    }
-    
 }
