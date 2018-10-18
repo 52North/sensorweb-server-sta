@@ -12,5 +12,7 @@ package org.n52.sta.edm.provider;
 public class SensorThingsEdmConstants {
 
     public static final String NAMESPACE = "iot";
+    public static final String CONTROL_ANNOTATION_PREFIX = "@" + NAMESPACE;
+    public static final String NAVIGATION_LINK_ANNOTATION = CONTROL_ANNOTATION_PREFIX + ".navigationLink";
 
 }
