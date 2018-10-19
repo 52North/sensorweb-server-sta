@@ -43,6 +43,7 @@ import org.springframework.stereotype.Component;
 public abstract class AbstractSensorThingsEntityProvider implements InitializingBean {
 
     // Entity Property Names
+    public static final String PROP_ID = "id";
     public static final String PROP_DEFINITION = "definition";
     public static final String PROP_DESCRIPTION = "description";
     public static final String PROP_ENCODINGTYPE = "encodingType";

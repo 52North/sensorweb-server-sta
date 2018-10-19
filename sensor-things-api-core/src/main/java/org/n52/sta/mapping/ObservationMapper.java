@@ -28,7 +28,6 @@
  */
 package org.n52.sta.mapping;
 
-import static org.n52.sta.edm.provider.SensorThingsEdmConstants.ID_ANNOTATION;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PARAMETERS;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PHENOMENON_TIME;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_RESULT;
@@ -64,6 +63,7 @@ import org.n52.shetland.util.DateTimeHelper;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -74,7 +74,7 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
 
     public Entity createEntity(DataEntity<?> observation) {
         Entity entity = new Entity();
-        entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, observation.getId()));
+        entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, observation.getId()));
         entity.addProperty(new Property(null, PROP_RESULT, ValueType.PRIMITIVE, this.getResult(observation)));
         
         entity.addProperty(new Property(null, PROP_RESULT_TIME, ValueType.PRIMITIVE,
@@ -100,7 +100,7 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
         entity.addProperty(new Property(null, PROP_PARAMETERS, ValueType.COLLECTION_COMPLEX, parameters));
 
         entity.setType(ET_OBSERVATION_FQN.getFullQualifiedNameAsString());
-        entity.setId(entityCreationHelper.createId(entity, ES_OBSERVATIONS_NAME, ID_ANNOTATION));
+        entity.setId(entityCreationHelper.createId(entity, ES_OBSERVATIONS_NAME, PROP_ID));
 
         return entity;
     }
