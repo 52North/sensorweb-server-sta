@@ -156,8 +156,9 @@ public class FilterExpressionVisitor<T> implements ExpressionVisitor<Object> {
             case NE:
                 return ((ComparableExpressionBase)leftExpr).ne(rightExpr);
             default:
-                // This should never happen. There are no other operations on Numbers
-                return null;
+                throw new ODataApplicationException("Invalid Operator for NumberExpression.",
+                                                    HttpStatusCode.BAD_REQUEST.getStatusCode(),
+                                                    Locale.ENGLISH);
             }
         } catch (ODataApplicationException e) {
             try {
@@ -170,8 +171,9 @@ public class FilterExpressionVisitor<T> implements ExpressionVisitor<Object> {
                 case NE:
                     return leftExpr.ne(rightExpr);
                 default:
-                    // This should never happen. There are no other operations on Strings
-                    return null;
+                    throw new ODataApplicationException("Invalid Operator for StringExpression.",
+                                                        HttpStatusCode.BAD_REQUEST.getStatusCode(),
+                                                        Locale.ENGLISH);
                 }
             } catch (ODataApplicationException f) {
                 throw new ODataApplicationException("Could not convert Expression to ComparableExpression.",
@@ -255,12 +257,15 @@ public class FilterExpressionVisitor<T> implements ExpressionVisitor<Object> {
     public Object visitUnaryOperator(UnaryOperatorKind operator, Object operand) throws ExpressionVisitException,
             ODataApplicationException {
 
-        if (operator == UnaryOperatorKind.NOT && operand instanceof Boolean) {
+        if (operator == UnaryOperatorKind.NOT && operand instanceof BooleanExpression) {
             // 1.) boolean negation
-            return !(Boolean) operand;
-        } else if (operator == UnaryOperatorKind.MINUS && operand instanceof Integer) {
+            return ((BooleanExpression)operand).not();
+        } else if (operator == UnaryOperatorKind.MINUS && operand instanceof Number) {
             // 2.) arithmetic minus
-            return -(Integer) operand;
+            return -(Double) operand;
+        } else if (operator == UnaryOperatorKind.MINUS && operand instanceof NumberExpression) {
+            // 2.) arithmetic minus
+            return ((NumberExpression)operand).negate();
         }
 
         // Operation not processed, throw an exception
@@ -316,13 +321,13 @@ public class FilterExpressionVisitor<T> implements ExpressionVisitor<Object> {
 
             return Expressions.asString(stringLiteral);
         } else if (literal.getType() instanceof EdmBoolean) {
-            // TODO: Check if boolean literals are actually supported
+            // TODO: Check if boolean literals are actually supported by STA Spec
             // return (Boolean.valueOf(literal.getText()))? Expressions.TRUE: Expressions.FALSE;
             throw new ODataApplicationException("Boolean Literals are currently not implemented",
                                                 HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(),
                                                 Locale.ENGLISH);
         } else {
-            // Try to convert the literal into an Java
+            // Try to convert the literal into Double
             try {
                 return Expressions.asNumber(Double.parseDouble(literalAsString));
             } catch (NumberFormatException e) {
@@ -343,11 +348,6 @@ public class FilterExpressionVisitor<T> implements ExpressionVisitor<Object> {
     @Override
     public Object visitMember(Member member) throws ExpressionVisitException, ODataApplicationException {
         final List<UriResource> uriResourceParts = member.getResourcePath().getUriResourceParts();
-
-        // Make sure that the resource path of the property contains only a single segment and a
-        // primitive property has been addressed. We can be sure, that the property exists because
-        // the UriParser checks if the property has been defined in service metadata document.
-
         if (uriResourceParts.size() == 1 && uriResourceParts.get(0) instanceof UriResourcePrimitiveProperty) {
             UriResourcePrimitiveProperty uriResourceProperty = (UriResourcePrimitiveProperty) uriResourceParts.get(0);
             
