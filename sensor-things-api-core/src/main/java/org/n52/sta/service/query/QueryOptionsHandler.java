@@ -14,6 +14,7 @@ import org.apache.olingo.commons.api.data.Link;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
+import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.uri.UriHelper;
 import org.apache.olingo.server.api.uri.UriResource;
@@ -106,10 +107,12 @@ public class QueryOptionsHandler {
 
             // Either add inline Collection or add single inline Entity          
             if (sourceEdmEntityType.getNavigationProperty(targetTitle).isCollection()) {
-                entity.setInlineEntitySet(getInlineEntityCollection(sourceId,
-                        sourceEdmEntityType,
-                        targetEdmEntityType,
-                        new ExpandItemQueryOptions(expandItem, baseURI)));
+                try {
+                    entity.setInlineEntitySet(getInlineEntityCollection(sourceId,
+                            sourceEdmEntityType,
+                            targetEdmEntityType,
+                            new ExpandItemQueryOptions(expandItem, baseURI)));
+                } catch (ODataApplicationException e) {}
 
                 // Annotate inline Entites with appropiate links
                 final EdmEntityType type = targetEdmEntityType;
@@ -149,7 +152,7 @@ public class QueryOptionsHandler {
         return entity;
     }
 
-    private EntityCollection getInlineEntityCollection(Long sourceId, EdmEntityType sourceType, EdmEntityType targetType, QueryOptions queryOptions) {
+    private EntityCollection getInlineEntityCollection(Long sourceId, EdmEntityType sourceType, EdmEntityType targetType, QueryOptions queryOptions) throws ODataApplicationException {
         AbstractSensorThingsEntityService<?> responseService = serviceRepository.getEntityService(targetType.getName());
         EntityCollection entityCollection = responseService.getRelatedEntityCollection(sourceId, sourceType, queryOptions);
 

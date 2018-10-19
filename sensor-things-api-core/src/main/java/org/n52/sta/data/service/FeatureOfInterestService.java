@@ -34,13 +34,16 @@ import java.util.OptionalLong;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.FeatureRepository;
 import org.n52.series.db.beans.FeatureEntity;
+import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.sta.data.query.FeatureOfInterestQuerySpecifications;
 import org.n52.sta.mapping.FeatureOfInterestMapper;
 import org.n52.sta.service.query.QueryOptions;
 import org.springframework.stereotype.Component;
 
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
 /**
@@ -62,9 +65,10 @@ public class FeatureOfInterestService extends AbstractSensorThingsEntityService<
     }
 
     @Override
-    public EntityCollection getEntityCollection(QueryOptions queryOptions) {
+    public EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException {
         EntityCollection retEntitySet = new EntityCollection();
-        getRepository().findAll(foiQS.isValidEntity(), createPageableRequest(queryOptions))
+        Predicate filter = getFilterPredicate(HistoricalLocationEntity.class, queryOptions);
+        getRepository().findAll(foiQS.isValidEntity().and(filter), createPageableRequest(queryOptions))
                 .forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }

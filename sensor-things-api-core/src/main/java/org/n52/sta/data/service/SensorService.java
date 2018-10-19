@@ -35,13 +35,16 @@ import java.util.OptionalLong;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.ProcedureRepository;
 import org.n52.series.db.beans.ProcedureEntity;
+import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.sta.data.query.SensorQuerySpecifications;
 import org.n52.sta.mapping.SensorMapper;
 import org.n52.sta.service.query.QueryOptions;
 import org.springframework.stereotype.Component;
 
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
 /**
@@ -62,9 +65,10 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     }
 
     @Override
-    public EntityCollection getEntityCollection(QueryOptions queryOptions) {
+    public EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException {
         EntityCollection retEntitySet = new EntityCollection();
-        getRepository().findAll(sQS.isValidEntity(), createPageableRequest(queryOptions))
+        Predicate filter = getFilterPredicate(ProcedureEntity.class, queryOptions);
+        getRepository().findAll(sQS.isValidEntity().and(filter), createPageableRequest(queryOptions))
                        .forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
@@ -138,7 +142,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     }
 
     @Override
-    public String checkPropertyForSorting(String property) {
+    public String checkPropertyName(String property) {
         switch (property) {
         case "encodingType":
             return ProcedureEntity.PROPERTY_PROCEDURE_DESCRIPTION_FORMAT;
@@ -146,7 +150,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
             // TODO: Add sorting by HistoricalLocation that replaces Description if it is not present
             return ProcedureEntity.DESCRIPTION;
         default:
-            return super.checkPropertyForSorting(property);
+            return super.checkPropertyName(property);
         }
     }
 

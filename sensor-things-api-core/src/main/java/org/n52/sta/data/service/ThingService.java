@@ -37,6 +37,7 @@ import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
+import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.sta.data.query.ThingQuerySpecifications;
 import org.n52.sta.data.repositories.ThingRepository;
@@ -65,25 +66,9 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     }
 
     @Override
-    public EntityCollection getEntityCollection(QueryOptions queryOptions) {
+    public EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException {
         EntityCollection retEntitySet = new EntityCollection();
-        Predicate filter = null;
-        if (queryOptions.hasFilterOption()) {
-            Expression filterExpression = queryOptions.getFilterOption().getExpression();
-            
-            FilterExpressionVisitor<ThingEntity> visitor = new FilterExpressionVisitor<>(ThingEntity.class, this);
-            Object expression = null;
-            try {
-                expression = filterExpression.accept(visitor);
-            } catch (ExpressionVisitException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (ODataApplicationException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            filter = (Predicate) expression;
-        }
+        Predicate filter = getFilterPredicate(ThingEntity.class, queryOptions);
         getRepository().findAll(filter, createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
@@ -95,10 +80,10 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     }
 
     @Override
-    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType, QueryOptions queryOptions) {
+    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType, QueryOptions queryOptions) throws ODataApplicationException {
         BooleanExpression filter = tQS.withRelatedLocation(sourceId);
 
-        
+        filter = filter.and(getFilterPredicate(ThingEntity.class, queryOptions));       
         Iterable<ThingEntity> things = getRepository().findAll(filter, createPageableRequest(queryOptions));
 
         EntityCollection retEntitySet = new EntityCollection();

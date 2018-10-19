@@ -34,14 +34,17 @@ import java.util.OptionalLong;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.PhenomenonRepository;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
+import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.sta.data.query.ObservedPropertyQuerySpecifications;
 import org.n52.sta.mapping.ObservedPropertyMapper;
 import org.n52.sta.service.query.QueryOptions;
 import org.springframework.stereotype.Component;
 
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
 /**
@@ -61,9 +64,10 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
     }
 
     @Override
-    public EntityCollection getEntityCollection(QueryOptions queryOptions) {
+    public EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException {
         EntityCollection retEntitySet = new EntityCollection();
-        getRepository().findAll(oQS.isValidEntity(), createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        Predicate filter = getFilterPredicate(PhenomenonEntity.class, queryOptions);
+        getRepository().findAll(oQS.isValidEntity().and(filter), createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
 
@@ -133,12 +137,12 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
     }
     
     @Override
-    public String checkPropertyForSorting(String property) {
+    public String checkPropertyName(String property) {
         switch (property) {
         case "definition":
             return DataEntity.PROPERTY_IDENTIFIER;
         default:
-            return super.checkPropertyForSorting(property);
+            return super.checkPropertyName(property);
         }
     }
 

@@ -57,21 +57,25 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.core.types.dsl.StringExpression;
-import com.querydsl.core.types.dsl.StringPath;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
-public class FilterExpressionVisitor<T> implements ExpressionVisitor<Object> {
+public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
 
-    private Class<T> sourceType;
+    private Class sourceType;
+
+    private String sourcePath;
     
     private AbstractSensorThingsEntityService service;
 
-    public FilterExpressionVisitor(Class<T> sourceType, AbstractSensorThingsEntityService service) {
+    public FilterExpressionVisitor(Class sourceType, AbstractSensorThingsEntityService service) {
         this.sourceType = sourceType;
         this.service = service;
+
+        //TODO: Replace fragile simpleName (with lowercase first letter) with better alternative (e.g. <QType>.getRoot())
+        this.sourcePath = Character.toLowerCase(sourceType.getSimpleName().charAt(0)) + sourceType.getSimpleName().substring(1);
     }
 
     /*
@@ -176,7 +180,7 @@ public class FilterExpressionVisitor<T> implements ExpressionVisitor<Object> {
                                                         Locale.ENGLISH);
                 }
             } catch (ODataApplicationException f) {
-                throw new ODataApplicationException("Could not convert Expression to ComparableExpression.",
+                throw new ODataApplicationException("Could not convert Expression to ComparableExpression. Error was: " + e.getMessage(),
                                                     HttpStatusCode.BAD_REQUEST.getStatusCode(),
                                                     Locale.ENGLISH);
             }
@@ -214,9 +218,11 @@ public class FilterExpressionVisitor<T> implements ExpressionVisitor<Object> {
 
     private StringExpression convertToStringExpression(Object expr) throws ODataApplicationException {
         StringExpression result;
-        if (expr instanceof StringPath) {
-            result = (StringPath) expr;
+        if (expr instanceof String) {
+            // Property (assumed to be numerical)
+            return new PathBuilder(sourceType, sourcePath).getString((String)expr);
         } else if (expr instanceof StringExpression) {
+            // SubExpression
             result = (StringExpression) expr;
         } else {
             throw new ODataApplicationException("Could not convert " + expr.toString() + " to BooleanExpressions",
@@ -228,22 +234,20 @@ public class FilterExpressionVisitor<T> implements ExpressionVisitor<Object> {
 
     private com.querydsl.core.types.dsl.NumberExpression< ? extends Comparable<?>> convertToArithmeticExpression(Object expr)
             throws ODataApplicationException {
-        NumberExpression< ? > result;
         if (expr instanceof Number) {
             // Raw Number
-            result = Expressions.asNumber((double) expr);
-        } else if (expr instanceof String) {
-            // Reference to Property
-            result = new PathBuilder<T>(sourceType, "entity").getNumber(service.checkPropertyForSorting((String) expr), Double.class);
+            return Expressions.asNumber((double) expr);
         } else if (expr instanceof NumberExpression< ? >) {
             // SubExpression
-            result = (com.querydsl.core.types.dsl.NumberExpression< ? >) expr;
+            return (com.querydsl.core.types.dsl.NumberExpression< ? >) expr;
+        }else if (expr instanceof String) {
+            // Property (assumed to be numerical)
+            return new PathBuilder(sourceType, sourcePath).getNumber((String)expr, Double.class);
         } else {
-            throw new ODataApplicationException("Could not convert " + expr.toString() + " to BooleanExpression",
+            throw new ODataApplicationException("Could not convert " + expr.toString() + " to NumberExpression",
                                                 HttpStatusCode.BAD_REQUEST.getStatusCode(),
                                                 Locale.ENGLISH);
         }
-        return result;
     }
 
     /*
@@ -351,10 +355,7 @@ public class FilterExpressionVisitor<T> implements ExpressionVisitor<Object> {
         if (uriResourceParts.size() == 1 && uriResourceParts.get(0) instanceof UriResourcePrimitiveProperty) {
             UriResourcePrimitiveProperty uriResourceProperty = (UriResourcePrimitiveProperty) uriResourceParts.get(0);
             
-            //TODO: Add Paths for Numbers etc.
-            //TODO: Replace fragile simpleName (with lowercase first letter) with better alternative (e.g. <QType>.getRoot())
-            String sourcePath = sourceType.getSimpleName();
-            return new PathBuilder<T>(sourceType, Character.toLowerCase(sourcePath.charAt(0)) + sourcePath.substring(1)).getString(service.checkPropertyForSorting(uriResourceProperty.getProperty().getName()));
+            return service.checkPropertyName(uriResourceProperty.getProperty().getName());
         } else {
             // The OData specification allows in addition complex properties and navigation
             // properties with a target cardinality 0..1 or 1.
