@@ -72,7 +72,7 @@ public class ThingEntityProvider extends AbstractSensorThingsEntityProvider {
 
         // create CsdlPropertyRef for Key element
         CsdlPropertyRef propertyRef = new CsdlPropertyRef();
-        propertyRef.setName(ID_ANNOTATION);
+        propertyRef.setName(PROP_ID);
 
         // configure EntityType
         CsdlEntityType entityType = new CsdlEntityType();
@@ -112,7 +112,7 @@ public class ThingEntityProvider extends AbstractSensorThingsEntityProvider {
 
     private List<CsdlProperty> createCsdlProperties() {
         //create EntityType primitive properties
-        CsdlProperty id = new CsdlProperty().setName(ID_ANNOTATION)
+        CsdlProperty id = new CsdlProperty().setName(PROP_ID)
                 .setType(EdmPrimitiveTypeKind.Int64.getFullQualifiedName())
                 .setNullable(false);
         CsdlProperty name = new CsdlProperty().setName(PROP_NAME)
@@ -127,14 +127,8 @@ public class ThingEntityProvider extends AbstractSensorThingsEntityProvider {
                 .setType(OpenComplexType.CT_OPEN_TYPE_FQN)
                 .setNullable(true);
 
-        //create EntityType navigation links
-        CsdlProperty selfLink = new CsdlProperty().setName(SELF_LINK_ANNOTATION)
-                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
-                .setNullable(false);
-
         return Arrays.asList(
                 id,
-                selfLink,
                 name,
                 description,
                 properties);

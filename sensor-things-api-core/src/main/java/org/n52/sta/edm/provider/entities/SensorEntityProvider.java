@@ -45,8 +45,6 @@ import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
-import static org.n52.sta.edm.provider.SensorThingsEdmConstants.ID_ANNOTATION;
-import static org.n52.sta.edm.provider.SensorThingsEdmConstants.SELF_LINK_ANNOTATION;
 import org.springframework.stereotype.Component;
 
 /**
@@ -71,7 +69,7 @@ public class SensorEntityProvider extends AbstractSensorThingsEntityProvider {
 
         // create CsdlPropertyRef for Key element
         CsdlPropertyRef propertyRef = new CsdlPropertyRef();
-        propertyRef.setName(ID_ANNOTATION);
+        propertyRef.setName(PROP_ID);
 
         // configure EntityType
         CsdlEntityType entityType = new CsdlEntityType();
@@ -107,7 +105,7 @@ public class SensorEntityProvider extends AbstractSensorThingsEntityProvider {
 
     private List<CsdlProperty> createCsdlProperties() {
         //create EntityType properties
-        CsdlProperty id = new CsdlProperty().setName(ID_ANNOTATION)
+        CsdlProperty id = new CsdlProperty().setName(PROP_ID)
                 .setType(EdmPrimitiveTypeKind.Int64.getFullQualifiedName())
                 .setNullable(false);
         CsdlProperty name = new CsdlProperty().setName(PROP_NAME)
@@ -123,17 +121,12 @@ public class SensorEntityProvider extends AbstractSensorThingsEntityProvider {
                 .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
                 .setNullable(false);
 
-        CsdlProperty selfLink = new CsdlProperty().setName(SELF_LINK_ANNOTATION)
-                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
-                .setNullable(false);
-
         return Arrays.asList(
                 id,
                 name,
                 description,
                 encodingType,
-                metadata,
-                selfLink);
+                metadata);
     }
 
     private List<CsdlNavigationProperty> createCsdlNavigationProperties() {

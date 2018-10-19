@@ -47,8 +47,6 @@ import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
-import static org.n52.sta.edm.provider.SensorThingsEdmConstants.ID_ANNOTATION;
-import static org.n52.sta.edm.provider.SensorThingsEdmConstants.SELF_LINK_ANNOTATION;
 import org.n52.sta.edm.provider.complextypes.FeatureComplexType;
 import org.springframework.stereotype.Component;
 
@@ -74,7 +72,7 @@ public class LocationEntityProvider extends AbstractSensorThingsEntityProvider {
 
         // create CsdlPropertyRef for Key element
         CsdlPropertyRef propertyRef = new CsdlPropertyRef();
-        propertyRef.setName(ID_ANNOTATION);
+        propertyRef.setName(PROP_ID);
 
         // configure EntityType
         CsdlEntityType entityType = new CsdlEntityType();
@@ -114,7 +112,7 @@ public class LocationEntityProvider extends AbstractSensorThingsEntityProvider {
 
     private List<CsdlProperty> createCsdlProperties() {
         //create EntityType primitive properties
-        CsdlProperty id = new CsdlProperty().setName(ID_ANNOTATION)
+        CsdlProperty id = new CsdlProperty().setName(PROP_ID)
                 .setType(EdmPrimitiveTypeKind.Int64.getFullQualifiedName())
                 .setNullable(false);
         CsdlProperty name = new CsdlProperty().setName(PROP_NAME)
@@ -132,13 +130,8 @@ public class LocationEntityProvider extends AbstractSensorThingsEntityProvider {
                 .setType(FeatureComplexType.CT_FEATURE_FQN)
                 .setNullable(false);
 
-        //create EntityType navigation links
-        CsdlProperty selfLink = new CsdlProperty().setName(SELF_LINK_ANNOTATION)
-                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
-                .setNullable(false);
-
-        return Arrays.asList(id,
-                selfLink,
+        return Arrays.asList(
+                id,
                 name,
                 description,
                 encodingType,

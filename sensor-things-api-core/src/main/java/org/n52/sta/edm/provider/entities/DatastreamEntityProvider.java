@@ -53,8 +53,6 @@ import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
-import static org.n52.sta.edm.provider.SensorThingsEdmConstants.ID_ANNOTATION;
-import static org.n52.sta.edm.provider.SensorThingsEdmConstants.SELF_LINK_ANNOTATION;
 import org.n52.sta.edm.provider.complextypes.UnitOfMeasurementComplexType;
 import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
 import org.springframework.stereotype.Component;
@@ -82,7 +80,7 @@ public class DatastreamEntityProvider extends AbstractSensorThingsEntityProvider
 
         // create CsdlPropertyRef for Key element
         CsdlPropertyRef propertyRef = new CsdlPropertyRef();
-        propertyRef.setName(ID_ANNOTATION);
+        propertyRef.setName(PROP_ID);
 
         // configure EntityType
         CsdlEntityType entityType = new CsdlEntityType();
@@ -135,7 +133,7 @@ public class DatastreamEntityProvider extends AbstractSensorThingsEntityProvider
 
     private List<CsdlProperty> createCsdlProperties() {
         //create EntityType properties
-        CsdlProperty id = new CsdlProperty().setName(ID_ANNOTATION)
+        CsdlProperty id = new CsdlProperty().setName(PROP_ID)
                 .setType(EdmPrimitiveTypeKind.Int64.getFullQualifiedName())
                 .setNullable(false);
         CsdlProperty name = new CsdlProperty().setName(PROP_NAME)
@@ -163,9 +161,9 @@ public class DatastreamEntityProvider extends AbstractSensorThingsEntityProvider
                 .setNullable(true);
 
         //create EntityType navigation links
-        CsdlProperty selfLink = new CsdlProperty().setName(SELF_LINK_ANNOTATION)
-                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
-                .setNullable(false);
+//        CsdlProperty selfLink = new CsdlProperty().setName(SELF_LINK_ANNOTATION)
+//                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+//                .setNullable(false);
 
         return Arrays.asList(
                 id,
@@ -175,8 +173,7 @@ public class DatastreamEntityProvider extends AbstractSensorThingsEntityProvider
                 observationType,
                 observedArea,
                 phenomenonTime,
-                resultTime,
-                selfLink);
+                resultTime);
     }
 
     private List<CsdlNavigationProperty> createCsdlNavigationProperties() {

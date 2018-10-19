@@ -49,8 +49,6 @@ import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
-import static org.n52.sta.edm.provider.SensorThingsEdmConstants.ID_ANNOTATION;
-import static org.n52.sta.edm.provider.SensorThingsEdmConstants.SELF_LINK_ANNOTATION;
 import org.n52.sta.edm.provider.complextypes.OpenComplexType;
 import org.springframework.stereotype.Component;
 
@@ -77,7 +75,7 @@ public class ObservationEntityProvider extends AbstractSensorThingsEntityProvide
 
         // create CsdlPropertyRef for Key element
         CsdlPropertyRef propertyRef = new CsdlPropertyRef();
-        propertyRef.setName(ID_ANNOTATION);
+        propertyRef.setName(PROP_ID);
 
         // configure EntityType
         CsdlEntityType entityType = new CsdlEntityType();
@@ -119,7 +117,7 @@ public class ObservationEntityProvider extends AbstractSensorThingsEntityProvide
 
     private List<CsdlProperty> createCsdlProperties() {
         //create EntityType primitive properties
-        CsdlProperty id = new CsdlProperty().setName(ID_ANNOTATION)
+        CsdlProperty id = new CsdlProperty().setName(PROP_ID)
                 .setType(EdmPrimitiveTypeKind.Int64.getFullQualifiedName())
                 .setNullable(false);
         CsdlProperty phenomenonTime = new CsdlProperty().setName(PROP_PHENOMENON_TIME)
@@ -142,11 +140,6 @@ public class ObservationEntityProvider extends AbstractSensorThingsEntityProvide
                 .setCollection(true)
                 .setNullable(true);
 
-        //create EntityType navigation links
-        CsdlProperty selfLink = new CsdlProperty().setName(SELF_LINK_ANNOTATION)
-                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
-                .setNullable(false);
-
         return Arrays.asList(
                 id,
                 phenomenonTime,
@@ -154,8 +147,7 @@ public class ObservationEntityProvider extends AbstractSensorThingsEntityProvide
                 resultTime,
                 resultQuality,
                 validTime,
-                parameters,
-                selfLink);
+                parameters);
     }
 
     private List<CsdlNavigationProperty> createCsdlNavigationProperties() {
