@@ -48,6 +48,10 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
         return qobservedproperty.id.in(dQS.toSubquery(qdatastream.id.eq(datastreamId)).select(qdatastream.observableProperty.id));
     }
     
+    public BooleanExpression withIdentifier(String identifier) {
+        return qobservedproperty.identifier.eq(identifier);
+    }
+    
     /**
      * Assures that Entity is valid.
      * Entity is valid if:

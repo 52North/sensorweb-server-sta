@@ -48,8 +48,12 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications {
                 .where(filter);
     }
 
-    public BooleanExpression matchesId(Long id) {
+    public BooleanExpression withId(Long id) {
         return  qdatastream.id.eq(id);
+    }
+    
+    public BooleanExpression withName(String name) {
+        return  qdatastream.name.eq(name);
     }
     
     public BooleanExpression withObservedProperty(Long observedPropertyId) {
