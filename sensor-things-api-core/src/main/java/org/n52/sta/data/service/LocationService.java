@@ -34,11 +34,18 @@ import java.util.OptionalLong;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.n52.series.db.beans.sta.LocationEncodingEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.sta.data.query.LocationQuerySpecifications;
+import org.n52.sta.data.repositories.LocationEncodingRepository;
 import org.n52.sta.data.repositories.LocationRepository;
+import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.LocationMapper;
 import org.n52.sta.service.query.QueryOptions;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers;
 import org.springframework.stereotype.Component;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -51,12 +58,19 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 public class LocationService extends AbstractSensorThingsEntityService<LocationRepository, LocationEntity> {
 
     private LocationMapper mapper;
+    
+    private LocationEncodingRepository locationEncodingRepository;
 
     private final static LocationQuerySpecifications lQS= new LocationQuerySpecifications();
 
     public LocationService(LocationRepository repository, LocationMapper mapper) {
         super(repository);
         this.mapper = mapper;
+    }
+    
+    @Override
+    public EntityTypes getType() {
+        return EntityTypes.Location;
     }
 
     @Override
@@ -205,21 +219,51 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     }
 
     @Override
-    public Optional<LocationEntity> create(LocationEntity location) {
-        if (!getRepository().exists(lQS.withName(location.getName()))) {
-            return Optional.of(getRepository().save(location));
+    public LocationEntity create(LocationEntity location) {
+        if (location.getId() != null && !location.isSetName()) {
+            return getRepository().findOne(lQS.withId(location.getId())).get();
         }
-        return getRepository().findOne(lQS.withName(location.getName()));
+        if (getRepository().exists(lQS.withName(location.getName()))) {
+            Optional<LocationEntity> optional = getRepository().findOne(lQS.withName(location.getName()));
+            return optional.isPresent() ? optional.get() : null;
+        }
+        checkLocationEncoding(location);
+        return getRepository().save(location);
     }
 
     @Override
-    public Optional<LocationEntity> update(LocationEntity location) {
-        return Optional.of(getRepository().save(location));
+    public LocationEntity update(LocationEntity location) {
+        return getRepository().save(location);
     }
 
     @Override
-    public Optional<LocationEntity> delete(LocationEntity location) {
+    public LocationEntity delete(LocationEntity location) {
         // TODO Auto-generated method stub
         return null;
+    }
+    
+    
+    private void checkLocationEncoding(LocationEntity location) {
+        if (location.getLocationEncoding() != null) {
+            LocationEncodingEntity optionalLocationEncoding = createLocationEncoding(location.getLocationEncoding());
+            location.setLocationEncoding(optionalLocationEncoding);
+        }
+    }
+    
+    
+    private LocationEncodingEntity createLocationEncoding(LocationEncodingEntity locationEncoding) {
+        ExampleMatcher createEncodingTypeMatcher = createEncodingTypeMatcher();
+        if (!locationEncodingRepository.exists(createEncodingTypeExample(locationEncoding, createEncodingTypeMatcher))) {
+            return locationEncodingRepository.save(locationEncoding);
+        }
+        return locationEncodingRepository.findOne(createEncodingTypeExample(locationEncoding, createEncodingTypeMatcher)).get();
+    }
+
+    private Example<LocationEncodingEntity> createEncodingTypeExample(LocationEncodingEntity locationEncoding, ExampleMatcher matcher) {
+        return Example.<LocationEncodingEntity>of(locationEncoding, matcher);
+    }
+
+    private ExampleMatcher createEncodingTypeMatcher() {
+        return ExampleMatcher.matching().withMatcher("encodingType", GenericPropertyMatchers.ignoreCase());
     }
 }

@@ -39,6 +39,7 @@ import org.n52.series.db.DataRepository;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.sta.data.OffsetLimitBasedPageRequest;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
+import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.ObservationMapper;
 import org.n52.sta.service.query.QueryOptions;
 import org.springframework.data.querydsl.QPageRequest;
@@ -60,6 +61,11 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
     public ObservationService(DataRepository<?> repository, ObservationMapper mapper) {
         super(repository);
         this.mapper = mapper;
+    }
+    
+    @Override
+    public EntityTypes getType() {
+        return EntityTypes.Observation;
     }
 
     @Override
@@ -224,19 +230,19 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
     }
 
     @Override
-    public Optional<DataEntity<?>> create(DataEntity<?> entity) {
+    public DataEntity<?> create(DataEntity<?> entity) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Optional<DataEntity<?>> update(DataEntity<?> entity) {
+    public DataEntity<?> update(DataEntity<?> entity) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Optional<DataEntity<?>> delete(DataEntity<?> entity) {
+    public DataEntity<?> delete(DataEntity<?> entity) {
         // TODO Auto-generated method stub
         return null;
     }

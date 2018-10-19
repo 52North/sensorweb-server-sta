@@ -36,6 +36,7 @@ import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
+import org.apache.olingo.commons.api.edm.geo.Geospatial;
 import org.n52.series.db.beans.GeometryEntity;
 import org.n52.series.db.beans.HibernateRelations.HasGeometry;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,9 +70,8 @@ public abstract class AbstractLocationGeometryMapper<T> extends AbstractMapper<T
         return geometryMapper.createGeometryEntity(value);
     }
     
-    protected GeometryEntity parseGeometry(Object value) {
-        return null;
-//        return geometryMapper.createGeometryEntity(value);
+    protected GeometryEntity parseGeometry(Geospatial geospatial) {
+        return geometryMapper.createGeometryEntity(geospatial);
     }
 
 }

@@ -28,16 +28,24 @@
  */
 package org.n52.sta.mapping;
 
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.*;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PROPERTIES;
+import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ES_DATASTREAMS_NAME;
+import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ES_LOCATIONS_NAME;
 import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ES_THINGS_NAME;
 import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_FQN;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.apache.olingo.commons.api.data.Entity;
+import org.apache.olingo.commons.api.data.Link;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
+import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.n52.sta.utils.JsonHelper;
@@ -58,10 +66,16 @@ public class ThingMapper extends AbstractMapper<ThingEntity> {
     private static final Logger LOG = LoggerFactory.getLogger(ThingMapper.class);
 
     @Autowired
-    EntityCreationHelper entityCreationHelper;
+    private EntityCreationHelper entityCreationHelper;
 
     @Autowired
-    JsonHelper jsonHelper;
+    private JsonHelper jsonHelper;
+    
+    @Autowired
+    private LocationMapper locationMapper;
+    
+    @Autowired
+    private DatastreamMapper datastreamMapper;
 
     public Entity createEntity(ThingEntity thing) {
         Entity entity = new Entity();
@@ -79,12 +93,48 @@ public class ThingMapper extends AbstractMapper<ThingEntity> {
 
     public ThingEntity createThing(Entity entity) {
         ThingEntity thing = new ThingEntity();
+        setId(thing, entity);
         setName(thing, entity);
         setDescription(thing, entity);
         if (entity.getProperty(PROP_PROPERTIES) != null) {
             thing.setProperties(entity.getProperty(PROP_PROPERTIES).toString());
         }
+        addLocations(thing, entity);
+        addDatastreams(thing, entity);
         return thing;
+    }
+
+    private void addLocations(ThingEntity thing, Entity entity) {
+        if (checkNavigationLink(entity, ES_LOCATIONS_NAME)) {
+            Set<LocationEntity> locations = new LinkedHashSet<>();
+            Link link = entity.getNavigationLink(ES_LOCATIONS_NAME);
+            if (link.getInlineEntity() != null) {
+                locations.add(locationMapper.createLocation(entity.getNavigationLink(ES_LOCATIONS_NAME).getInlineEntity()));
+            } else if (link.getInlineEntitySet() != null) {
+                Iterator<Entity> iterator = link.getInlineEntitySet().iterator();
+                while (iterator.hasNext()) {
+                    locations.add(locationMapper.createLocation((Entity) iterator.next()));
+                }
+            }
+            thing.setLocationEntities(locations);
+        }
+    }
+
+    private void addDatastreams(ThingEntity thing, Entity entity) {
+        if (checkNavigationLink(entity, ES_DATASTREAMS_NAME)) {
+            Set<DatastreamEntity> datastreams = new LinkedHashSet<>();
+            Link link = entity.getNavigationLink(ES_DATASTREAMS_NAME);
+            if (link.getInlineEntity() != null) {
+                datastreams.add(datastreamMapper
+                        .createDatastream(entity.getNavigationLink(ES_DATASTREAMS_NAME).getInlineEntity()));
+            } else if (link.getInlineEntitySet() != null) {
+                Iterator<Entity> iterator = link.getInlineEntitySet().iterator();
+                while (iterator.hasNext()) {
+                    datastreams.add(datastreamMapper.createDatastream((Entity) iterator.next()));
+                }
+            }
+            thing.setDatastreamEntities(datastreams);
+        }
     }
 
     private JsonNode createJsonProperty(ThingEntity thing) {

@@ -29,16 +29,22 @@
 package org.n52.sta.mapping;
 
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_FEATURE;
 import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ES_FEATURES_OF_INTEREST_NAME;
 import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ET_FEATURE_OF_INTEREST_FQN;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
+import org.apache.olingo.commons.api.edm.geo.Geospatial;
 import org.n52.series.db.beans.FeatureEntity;
+import org.n52.series.db.beans.FormatEntity;
+import org.n52.shetland.ogc.om.features.SfConstants;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -62,4 +68,43 @@ public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper<Feat
         return entity;
     }
 
+    public FeatureEntity createFeatureOfInterest(Entity entity) {
+        FeatureEntity featureOfInterest = new FeatureEntity();
+        setId(featureOfInterest, entity);
+        setIdentifier(featureOfInterest, entity);
+        setName(featureOfInterest, entity);
+        setDescription(featureOfInterest, entity);
+        Property featureProperty = entity.getProperty(PROP_FEATURE);
+        if (featureProperty != null) {
+            if (featureProperty.getValueType().equals(ValueType.PRIMITIVE) && featureProperty.getValue() instanceof Geospatial) {
+                featureOfInterest.setGeometryEntity(parseGeometry((Geospatial) featureProperty.getValue()));
+            }
+        }
+        featureOfInterest.setFeatureType(createFeatureType(featureOfInterest.getGeometry()));
+        return featureOfInterest;
+    }
+
+    private FormatEntity createFeatureType(Geometry geometry) {
+        if (geometry != null) {
+            FormatEntity formatEntity = new FormatEntity();
+            switch (geometry.getGeometryType()) {
+            case "Point":
+                formatEntity.setFormat(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_POINT);
+                break;
+            case "LineString":
+                formatEntity.setFormat(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_CURVE);
+                break;
+            case "Polygon":
+                formatEntity.setFormat(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_SURFACE);
+                break;
+            default:
+                formatEntity.setFormat(SfConstants.SAMPLING_FEAT_TYPE_SF_SPATIAL_SAMPLING_FEATURE);
+                break;
+            }
+            return formatEntity;
+        }
+        return null;
+    }
+    
+    
 }

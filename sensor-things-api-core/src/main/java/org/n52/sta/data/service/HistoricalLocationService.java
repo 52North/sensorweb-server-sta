@@ -38,6 +38,7 @@ import org.apache.olingo.commons.api.http.HttpMethod;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.sta.data.query.HistoricalLocationQuerySpecifications;
 import org.n52.sta.data.repositories.HistoricalLocationRepository;
+import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.HistoricalLocationMapper;
 import org.n52.sta.service.query.QueryOptions;
 import org.springframework.stereotype.Component;
@@ -58,6 +59,11 @@ public class HistoricalLocationService extends AbstractSensorThingsEntityService
     public HistoricalLocationService(HistoricalLocationRepository repository, HistoricalLocationMapper mapper) {
         super(repository);
         this.mapper = mapper;
+    }
+    
+    @Override
+    public EntityTypes getType() {
+        return EntityTypes.HistoricalLocation;
     }
 
     @Override
@@ -207,19 +213,17 @@ public class HistoricalLocationService extends AbstractSensorThingsEntityService
     }
 
     @Override
-    public Optional<HistoricalLocationEntity> create(HistoricalLocationEntity historicalLocation) {
-        return Optional.of(getRepository().save(historicalLocation));
+    public HistoricalLocationEntity create(HistoricalLocationEntity historicalLocation) {
+        return getRepository().save(historicalLocation);
     }
 
     @Override
-    public Optional<HistoricalLocationEntity> update(HistoricalLocationEntity entity) {
-        // TODO Auto-generated method stub
+    public HistoricalLocationEntity update(HistoricalLocationEntity historicalLocation) {
         return null;
     }
 
     @Override
-    public Optional<HistoricalLocationEntity> delete(HistoricalLocationEntity entity) {
-        // TODO Auto-generated method stub
+    public HistoricalLocationEntity delete(HistoricalLocationEntity historicalLocation) {
         return null;
     }
 }

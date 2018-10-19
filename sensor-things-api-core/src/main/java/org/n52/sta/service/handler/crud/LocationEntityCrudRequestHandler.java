@@ -2,15 +2,12 @@ package org.n52.sta.service.handler.crud;
 
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.server.api.ODataApplicationException;
-import org.n52.series.db.beans.sta.LocationEncodingEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
@@ -36,9 +33,7 @@ public class LocationEntityCrudRequestHandler extends AbstractEntityCrudRequestH
             throws ODataApplicationException {
         if (entity != null) {
             LocationEntity location = mapper.createLocation(entity);
-            checkLocationEncoding(location);
-            Optional<LocationEntity> optionalLocation = getEntityService().create(location);
-            return optionalLocation.isPresent() ? optionalLocation.get() : null;
+            return getEntityService().create(location);
         }
         return null;
     }
@@ -57,19 +52,8 @@ public class LocationEntityCrudRequestHandler extends AbstractEntityCrudRequestH
         return locations;
     }
     
-    private void checkLocationEncoding(LocationEntity location) {
-        if (location.getLocationEncoding() != null) {
-            Optional<LocationEncodingEntity> optionalLocationEncoding = getLocationEncodingEntityService().create(location.getLocationEncoding());
-            location.setLocationEncoding(optionalLocationEncoding.isPresent() ? optionalLocationEncoding.get() : null);
-        }
-    }
-
     private AbstractSensorThingsEntityService<?, LocationEntity> getEntityService() {
         return (AbstractSensorThingsEntityService<?, LocationEntity>) getEntityService(EntityTypes.Location);
-    }
-    
-    private AbstractSensorThingsEntityService<?, LocationEncodingEntity> getLocationEncodingEntityService() {
-        return (AbstractSensorThingsEntityService<?, LocationEncodingEntity>) getEntityService(EntityTypes.LocationEncoding);
     }
     
 }

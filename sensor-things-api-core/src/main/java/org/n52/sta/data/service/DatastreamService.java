@@ -34,12 +34,20 @@ import java.util.OptionalLong;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
-import org.apache.olingo.commons.api.http.HttpMethod;
+import org.n52.series.db.FormatRepository;
+import org.n52.series.db.beans.FormatEntity;
+import org.n52.series.db.beans.PhenomenonEntity;
+import org.n52.series.db.beans.ProcedureEntity;
+import org.n52.series.db.beans.UnitEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.repositories.DatastreamRepository;
+import org.n52.sta.data.repositories.UnitRepository;
+import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.DatastreamMapper;
 import org.n52.sta.service.query.QueryOptions;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -52,12 +60,23 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 public class DatastreamService extends AbstractSensorThingsEntityService<DatastreamRepository, DatastreamEntity> {
 
     private DatastreamMapper mapper;
-
+    
+    @Autowired
+    private UnitRepository unitRepository;
+    
+    @Autowired
+    private FormatRepository formatRepository;
+    
     private final static DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
 
     public DatastreamService(DatastreamRepository repository, DatastreamMapper mapper) {
         super(repository);
         this.mapper = mapper;
+    }
+
+    @Override
+    public EntityTypes getType() {
+        return EntityTypes.Datastream;
     }
 
     @Override
@@ -104,7 +123,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
             return false;
         }
         if (targetId != null) {
-            filter = filter.and(dQS.matchesId(targetId));
+            filter = filter.and(dQS.withId(targetId));
         }
         return getRepository().exists(filter);
     }
@@ -167,7 +186,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
         }
 
         if (targetId != null) {
-            filter = filter.and(dQS.matchesId(targetId));
+            filter = filter.and(dQS.withId(targetId));
         }
         return getRepository().findOne(filter);
     }
@@ -210,24 +229,67 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
      * @return BooleanExpression evaluating to true if Entity is found and valid
      */
     private BooleanExpression byId(Long id) {
-        return dQS.matchesId(id);
+        return dQS.withId(id);
     }
 
     @Override
-    public Optional<DatastreamEntity> create(DatastreamEntity entity) {
+    public DatastreamEntity create(DatastreamEntity datastream) {
+        if (datastream.getId() != null && !datastream.isSetName()) {
+            return getRepository().findOne(dQS.withId(datastream.getId())).get();
+        }
+        if (getRepository().exists(dQS.withName(datastream.getName()))) {
+            Optional<DatastreamEntity> optional = getRepository().findOne(dQS.withName(datastream.getName()));
+            return optional.isPresent() ? optional.get() : null;
+        }
+        checkObservationType(datastream);
+        checkUnit(datastream);
+        datastream.setObservableProperty(getObservedPropertyService().create(datastream.getObservableProperty()));
+        datastream.setProcedure(getSensorService().create(datastream.getProcedure()));
+        datastream.setThing(getThingService().create(datastream.getThing()));
+        return getRepository().save(datastream );
+    }
+
+    @Override
+    public DatastreamEntity update(DatastreamEntity entity) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Optional<DatastreamEntity> update(DatastreamEntity entity) {
+    public DatastreamEntity delete(DatastreamEntity entity) {
         // TODO Auto-generated method stub
         return null;
     }
+    
+    private void checkUnit(DatastreamEntity datastream) {
+        UnitEntity unit;
+        if (!unitRepository.existsBySymbol(datastream.getUnit().getSymbol())) {
+            unit = unitRepository.save(datastream.getUnit());
+        } else {
+            unit = unitRepository.findBySymbol(datastream.getUnit().getSymbol());
+        }
+        datastream.setUnit(unit);
+    }
 
-    @Override
-    public Optional<DatastreamEntity> delete(DatastreamEntity entity) {
-        // TODO Auto-generated method stub
-        return null;
+    private void checkObservationType(DatastreamEntity datastream) {
+        FormatEntity format;
+        if (!formatRepository.existsByFormat(datastream.getObservationType().getFormat())) {
+            format = formatRepository.save(datastream.getObservationType());
+        } else {
+            format = formatRepository.findByFormat(datastream.getObservationType().getFormat());
+        }
+        datastream.setObservationType(format);
+    }
+    
+    private AbstractSensorThingsEntityService<?, ThingEntity> getThingService() {
+        return (AbstractSensorThingsEntityService<?, ThingEntity>) getEntityService(EntityTypes.Thing);
+    }
+    
+    private AbstractSensorThingsEntityService<?, ProcedureEntity> getSensorService() {
+        return (AbstractSensorThingsEntityService<?, ProcedureEntity>) getEntityService(EntityTypes.Sensor);
+    }
+    
+    private AbstractSensorThingsEntityService<?, PhenomenonEntity> getObservedPropertyService() {
+        return (AbstractSensorThingsEntityService<?, PhenomenonEntity>) getEntityService(EntityTypes.ObservedProperty);
     }
 }

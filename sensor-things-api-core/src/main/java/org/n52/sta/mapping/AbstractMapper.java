@@ -30,6 +30,8 @@ package org.n52.sta.mapping;
 
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DESCRIPTION;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_NAME;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DEFINITION;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
 
 import java.util.Date;
 
@@ -39,11 +41,15 @@ import org.apache.olingo.commons.api.data.ValueType;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.n52.series.db.beans.DescribableEntity;
+import org.n52.series.db.beans.IdEntity;
+import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.HibernateRelations.HasDescription;
 import org.n52.series.db.beans.HibernateRelations.HasName;
+import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
+import org.n52.shetland.util.DateTimeHelper;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -69,8 +75,16 @@ public abstract class AbstractMapper<T> {
         addDescription(entity, description);
     }
     
+    protected boolean checkProperty(Entity entity, String name) {
+        return entity.getProperty(name) != null;
+    }
+    
+    protected boolean checkNavigationLink(Entity entity, String name) {
+        return entity.getNavigationLink(name) != null;
+    }
+    
     protected void addName(Entity entity, HasName describableEntity) {
-        entity.addProperty(new Property(null, PROP_NAME, ValueType.PRIMITIVE, describableEntity.getName()));
+        addNane(entity, describableEntity.getName());
     }
     
     protected void addNane(Entity entity, String name) {
@@ -78,11 +92,17 @@ public abstract class AbstractMapper<T> {
     }
     
     protected void addDescription(Entity entity, HasDescription describableEntity) {
-        entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, describableEntity.getDescription()));
+        addDescription(entity, describableEntity.getDescription());
     }
     
     protected void addDescription(Entity entity, String description) {
         entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, description));
+    }
+    
+    protected void setId(IdEntity idEntity, Entity entity) {
+        if (checkProperty(entity, ID_ANNOTATION)) {
+            idEntity.setId(Long.parseLong(getPropertyValue(entity, ID_ANNOTATION).toString()));
+        }
     }
     
     protected void setNameDescription(DescribableEntity thing, Entity entity) {
@@ -90,16 +110,32 @@ public abstract class AbstractMapper<T> {
         setDescription(thing, entity);
     }
     
+    protected void setIdentifier(DescribableEntity describableEntity, Entity entity) {
+        if (checkProperty(entity, PROP_DEFINITION)) {
+            describableEntity.setIdentifier(getPropertyValue(entity, PROP_DEFINITION).toString());
+        } else if (checkProperty(entity, PROP_NAME)) {
+            describableEntity.setIdentifier(getPropertyValue(entity, PROP_NAME).toString());
+        }
+        
+    }
+    
     protected void setName(HasName describableEntity, Entity entity) {
-       if (entity.getProperty(PROP_NAME) != null) {
-           describableEntity.setName(entity.getProperty(PROP_NAME).getValue().toString());
+       if (checkProperty(entity, PROP_NAME)) {
+           describableEntity.setName(getPropertyValue(entity, PROP_NAME).toString());
        }
     }
 
     protected void setDescription(HasDescription describableEntity, Entity entity) {
-        if (entity.getProperty(PROP_DESCRIPTION) != null) {
-            describableEntity.setDescription(entity.getProperty(PROP_DESCRIPTION).getValue().toString());
+        if (checkProperty(entity, PROP_DESCRIPTION)) {
+            describableEntity.setDescription(getPropertyValue(entity, PROP_DESCRIPTION).toString());
         }
+    }
+    
+    protected Object getPropertyValue(Entity entity, String name) {
+        if (entity.getProperty(name) != null) {
+            return entity.getProperty(name).getValue();
+        }
+        return "";
     }
 
     protected DateTime createDateTime(Date date) {
@@ -125,5 +161,14 @@ public abstract class AbstractMapper<T> {
         } else {
             return new TimePeriod(start, end);
         }
+    }
+    
+    protected Time parseTime(String timeString) {
+        if (timeString.contains("/")) {
+            String[] split = timeString.split("/");
+            return createTime(DateTimeHelper.parseIsoString2DateTime(split[0]),
+                    DateTimeHelper.parseIsoString2DateTime(split[1]));
+        }
+        return createTime(DateTimeHelper.parseIsoString2DateTime(timeString));
     }
 }

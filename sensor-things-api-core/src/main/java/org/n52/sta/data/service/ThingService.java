@@ -28,16 +28,22 @@
  */
 package org.n52.sta.data.service;
 
+import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.Set;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
-import org.apache.olingo.commons.api.http.HttpMethod;
+import org.joda.time.DateTime;
+import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.HistoricalLocationEntity;
+import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.sta.data.query.ThingQuerySpecifications;
 import org.n52.sta.data.repositories.ThingRepository;
+import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.ThingMapper;
 import org.n52.sta.service.query.QueryOptions;
 import org.springframework.stereotype.Component;
@@ -58,6 +64,11 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     public ThingService(ThingRepository repository, ThingMapper mapper) {
         super(repository);
         this.mapper = mapper;
+    }
+    
+    @Override
+    public EntityTypes getType() {
+        return EntityTypes.Thing;
     }
 
     @Override
@@ -176,23 +187,88 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     }
 
     @Override
-    public Optional<ThingEntity> create(ThingEntity thing) {
-        if (!getRepository().exists(tQS.withName(thing.getName()))) {
-            return Optional.of(getRepository().save(thing));
+    public ThingEntity create(ThingEntity thing) {
+        if (thing.getId() != null && !thing.isSetName()) {
+            return getRepository().findOne(tQS.withId(thing.getId())).get();
         }
-        return getRepository().findOne(tQS.withName(thing.getName()));
+        if (getRepository().exists(tQS.withName(thing.getName()))) {
+            Optional<ThingEntity> optional = getRepository().findOne(tQS.withName(thing.getName()));
+            return optional.isPresent() ? optional.get() : null;
+        }
+        processLocations(thing);
+        thing = getRepository().save(thing);
+        processDatastreams(thing);
+        processHistoricalLocations(thing);
+        return thing;
+        
     }
 
     @Override
-    public Optional<ThingEntity> update(ThingEntity thing) {
-        return Optional.of(getRepository().save(thing));
+    public ThingEntity update(ThingEntity thing) {
+        return getRepository().save(thing);
     }
 
     @Override
-    public Optional<ThingEntity> delete(ThingEntity thing) {
+    public ThingEntity delete(ThingEntity thing) {
         // TODO Auto-generated method stub
         return null;
     }
-    
-    
+
+    private void processDatastreams(ThingEntity thing) {
+       if (thing.hasDatastreamEntities()) {
+           Set<DatastreamEntity> datastreams = new LinkedHashSet<>();
+           for (DatastreamEntity datastream : thing.getDatastreamEntities()) {
+               datastream.setThing(thing);
+               DatastreamEntity optionalLocation = getDatastreamService().create(datastream);
+               datastreams.add(optionalLocation != null ? optionalLocation : datastream);
+           }
+           thing.setDatastreamEntities(datastreams);
+       }
+    }
+
+    private void processLocations(ThingEntity thing) {
+        if (thing.hasLocationEntities()) {
+            Set<LocationEntity> locations = new LinkedHashSet<>();
+            for (LocationEntity location : thing.getLocationEntities()) {
+                LocationEntity optionalLocation = getLocationService().create(location);
+                locations.add(optionalLocation != null ? optionalLocation : location);
+            }
+            thing.setLocationEntities(locations);
+        }
+    }
+
+    private void processHistoricalLocations(ThingEntity thing) {
+        if (thing != null && thing.hasLocationEntities()) {
+            Set<HistoricalLocationEntity> historicalLocations = new LinkedHashSet<>();
+            HistoricalLocationEntity historicalLocation = new HistoricalLocationEntity();
+            historicalLocation.setThingEntity(thing);
+            historicalLocation.setLocationEntities(thing.getLocationEntities());
+            historicalLocation.setTime(DateTime.now().toDate());
+            HistoricalLocationEntity createdHistoricalLocation =
+                    getHistoricalLocationService().create(historicalLocation);
+            if (createdHistoricalLocation != null) {
+                historicalLocations.add(createdHistoricalLocation);
+            }
+            for (LocationEntity location : thing.getLocationEntities()) {
+                location.setHistoricalLocationEntities(historicalLocations);
+                getLocationService().update(location);
+            }
+            thing.setHistoricalLocationEntities(historicalLocations);
+        }
+    }
+
+    private AbstractSensorThingsEntityService<?, LocationEntity> getLocationService() {
+        return (AbstractSensorThingsEntityService<?, LocationEntity>) getEntityService(EntityTypes.Location);
+    }
+
+    private AbstractSensorThingsEntityService<?, HistoricalLocationEntity> getHistoricalLocationService() {
+        return (AbstractSensorThingsEntityService<?, HistoricalLocationEntity>) getEntityService(
+                EntityTypes.HistoricalLocation);
+    }
+
+    private AbstractSensorThingsEntityService<?, DatastreamEntity> getDatastreamService() {
+        return (AbstractSensorThingsEntityService<?, DatastreamEntity>) getEntityService(
+                EntityTypes.Datastream);
+    }
+
 }

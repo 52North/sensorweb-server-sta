@@ -274,13 +274,16 @@ public class GeometryMapper {
     }
 
     private LinearRing createLinearRing(ComposedGeospatial<Point> ring) {
-        return factory.createLinearRing(createCoordinates(ring.iterator()));
+         return !ring.isEmpty() ? factory.createLinearRing(createCoordinates(ring.iterator())) : null;
     }
 
     private LinearRing[] createLinearRings(ComposedGeospatial<Point> ring) {
-        List<LinearRing> rings = new LinkedList<>();
-        rings.add(createLinearRing(ring));
-        return rings.toArray(new LinearRing[0]);
+        if (!ring.isEmpty()) {
+            List<LinearRing> rings = new LinkedList<>();
+            rings.add(createLinearRing(ring));
+            return rings.toArray(new LinearRing[0]);
+        }
+        return null;
     }
 
     private com.vividsolutions.jts.geom.Polygon[] createMultyPolygons(Iterator<Polygon> iterator) {

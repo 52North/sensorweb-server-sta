@@ -62,5 +62,14 @@ public class ObservedPropertyMapper extends AbstractMapper<PhenomenonEntity> {
 
         return entity;
     }
+    
+    public PhenomenonEntity createObservableProperty(Entity entity) {
+        PhenomenonEntity phenomenon = new PhenomenonEntity();
+        setId(phenomenon, entity);
+        setIdentifier(phenomenon, entity);
+        setName(phenomenon, entity);
+        setDescription(phenomenon, entity);
+        return phenomenon;
+    }
 
 }

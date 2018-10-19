@@ -28,20 +28,18 @@
  */
 package org.n52.sta.mapping;
 
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ENCODINGTYPE;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_LOCATION;
 import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ES_LOCATIONS_NAME;
 import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATION_FQN;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.*;
 
-import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.edm.geo.Geospatial;
-import org.n52.series.db.beans.GeometryEntity;
 import org.n52.series.db.beans.sta.LocationEncodingEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
-import org.n52.sta.utils.EntityCreationHelper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -66,12 +64,13 @@ public class LocationMapper extends AbstractLocationGeometryMapper<LocationEntit
 
     public LocationEntity createLocation(Entity entity) {
         LocationEntity location = new LocationEntity();
+        setId(location, entity);
         setName(location, entity);
         setDescription(location, entity);
         Property locationProperty = entity.getProperty(PROP_LOCATION);
         if (locationProperty != null) {
             if (locationProperty.getValueType().equals(ValueType.PRIMITIVE) && locationProperty.getValue() instanceof Geospatial) {
-                location.setGeometryEntity(geometryMapper.createGeometryEntity((Geospatial) locationProperty.getValue()));
+                location.setGeometryEntity(parseGeometry((Geospatial) locationProperty.getValue()));
             } else {
                 location.setLocation(locationProperty.getValue().toString());
             }

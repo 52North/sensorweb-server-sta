@@ -34,12 +34,19 @@ import java.util.OptionalLong;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
-import org.apache.olingo.commons.api.http.HttpMethod;
+import org.n52.series.db.FormatRepository;
 import org.n52.series.db.ProcedureRepository;
+import org.n52.series.db.beans.FormatEntity;
+import org.n52.series.db.beans.OfferingEntity;
 import org.n52.series.db.beans.ProcedureEntity;
+import org.n52.series.db.beans.ProcedureHistoryEntity;
+import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.sta.data.query.SensorQuerySpecifications;
+import org.n52.sta.data.repositories.ProcedureHistoryRepository;
+import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.SensorMapper;
 import org.n52.sta.service.query.QueryOptions;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -53,12 +60,23 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 public class SensorService extends AbstractSensorThingsEntityService<ProcedureRepository, ProcedureEntity> {
 
     private SensorMapper mapper;
+    
+    @Autowired
+    private FormatRepository formatRepository;
+    
+    @Autowired(required=false)
+    private ProcedureHistoryRepository procedureHistoryRepository;
 
     private final static SensorQuerySpecifications sQS = new SensorQuerySpecifications();
 
     public SensorService(ProcedureRepository repository, SensorMapper mapper) {
         super(repository);
         this.mapper = mapper;
+    }
+    
+    @Override
+    public EntityTypes getType() {
+        return EntityTypes.Sensor;
     }
 
     @Override
@@ -169,20 +187,55 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     }
 
     @Override
-    public Optional<ProcedureEntity> create(ProcedureEntity entity) {
+    public ProcedureEntity create(ProcedureEntity sensor) {
+        if (sensor.getId() != null && !sensor.isSetName()) {
+            return getRepository().findOne(sQS.withId(sensor.getId())).get();
+        }
+        if (getRepository().exists(sQS.withIdentifier(sensor.getIdentifier()))
+                || getRepository().exists(sQS.wihtName(sensor.getName()))) {
+            Optional<ProcedureEntity> optional = getRepository()
+                    .findOne(sQS.withIdentifier(sensor.getIdentifier()).or(sQS.wihtName(sensor.getName())));
+            return optional.isPresent() ? optional.get() : null;
+        }
+        checkFormat(sensor);
+        checkProcedureHistory(getRepository().save(sensor));
+        return sensor;
+    }
+
+    @Override
+    public ProcedureEntity update(ProcedureEntity entity) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Optional<ProcedureEntity> update(ProcedureEntity entity) {
+    public ProcedureEntity delete(ProcedureEntity entity) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    @Override
-    public Optional<ProcedureEntity> delete(ProcedureEntity entity) {
-        // TODO Auto-generated method stub
-        return null;
+    private void checkFormat(ProcedureEntity sensor) {
+        FormatEntity format;
+        if (!formatRepository.existsByFormat(sensor.getFormat().getFormat())) {
+            format = formatRepository.save(sensor.getFormat());
+        } else {
+            format = formatRepository.findByFormat(sensor.getFormat().getFormat());
+        }
+        sensor.setFormat(format);
+        if (sensor.hasProcedureHistory()) {
+            sensor.getProcedureHistory().forEach(pf -> pf.setFormat(format));
+        }
+    }
+
+    private void checkProcedureHistory(ProcedureEntity sensor) {
+        if (sensor.hasProcedureHistory()) {
+            if (procedureHistoryRepository != null) {
+                for (ProcedureHistoryEntity procedureHistory : sensor.getProcedureHistory()) {
+                    sensor.getProcedureHistory().add(procedureHistoryRepository.save(procedureHistory));
+                }
+            } else {
+                sensor.setDescriptionFile(sensor.getProcedureHistory().iterator().next().getXml());
+            }
+        }
     }
 }

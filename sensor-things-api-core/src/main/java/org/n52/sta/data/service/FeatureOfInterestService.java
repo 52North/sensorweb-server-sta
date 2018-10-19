@@ -34,12 +34,16 @@ import java.util.OptionalLong;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
-import org.apache.olingo.commons.api.http.HttpMethod;
 import org.n52.series.db.FeatureRepository;
+import org.n52.series.db.FormatRepository;
 import org.n52.series.db.beans.FeatureEntity;
+import org.n52.series.db.beans.FormatEntity;
+import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.sta.data.query.FeatureOfInterestQuerySpecifications;
+import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.FeatureOfInterestMapper;
 import org.n52.sta.service.query.QueryOptions;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -54,12 +58,20 @@ public class FeatureOfInterestService extends AbstractSensorThingsEntityService<
 
 
     private FeatureOfInterestMapper mapper;
+    
+    @Autowired
+    private FormatRepository formatRepository;
 
     private final static FeatureOfInterestQuerySpecifications foiQS = new FeatureOfInterestQuerySpecifications();
 
     public FeatureOfInterestService(FeatureRepository repository, FeatureOfInterestMapper mapper) {
         super(repository);
         this.mapper = mapper;
+    }
+    
+    @Override
+    public EntityTypes getType() {
+        return EntityTypes.FeatureOfInterest;
     }
 
     @Override
@@ -171,20 +183,38 @@ public class FeatureOfInterestService extends AbstractSensorThingsEntityService<
     }
 
     @Override
-    public Optional<FeatureEntity> create(FeatureEntity entity) {
+    public FeatureEntity create(FeatureEntity feature) {
+        if (feature.getId() != null && !feature.isSetName()) {
+            return getRepository().findOne(foiQS.withId(feature.getId())).get();
+        }
+        if (getRepository().exists(foiQS.withIdentifier(feature.getIdentifier()))) {
+            Optional<FeatureEntity> optional =
+                    getRepository().findOne(foiQS.withIdentifier(feature.getIdentifier()));
+            return optional.isPresent() ? optional.get() : null;
+        }
+        
+        return getRepository().save(feature);
+    }
+
+    @Override
+    public FeatureEntity update(FeatureEntity entity) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Optional<FeatureEntity> update(FeatureEntity entity) {
+    public FeatureEntity delete(FeatureEntity entity) {
         // TODO Auto-generated method stub
         return null;
     }
-
-    @Override
-    public Optional<FeatureEntity> delete(FeatureEntity entity) {
-        // TODO Auto-generated method stub
-        return null;
+    
+    private void checkFeatureType(FeatureEntity feature) {
+        FormatEntity format;
+        if (!formatRepository.existsByFormat(feature.getFeatureType().getFormat())) {
+            format = formatRepository.save(feature.getFeatureType());
+        } else {
+            format = formatRepository.findByFormat(feature.getFeatureType().getFormat());
+        }
+        feature.setFeatureType(format);
     }
 }

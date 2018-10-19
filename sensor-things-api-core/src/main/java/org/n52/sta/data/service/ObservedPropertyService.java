@@ -39,6 +39,7 @@ import org.n52.series.db.PhenomenonRepository;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.sta.data.query.ObservedPropertyQuerySpecifications;
+import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.ObservedPropertyMapper;
 import org.n52.sta.service.query.QueryOptions;
 import org.springframework.stereotype.Component;
@@ -59,6 +60,11 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
     public ObservedPropertyService(PhenomenonRepository repository, ObservedPropertyMapper mapper) {
         super(repository);
         this.mapper = mapper;
+    }
+    
+    @Override
+    public EntityTypes getType() {
+        return EntityTypes.ObservedProperty;
     }
 
     @Override
@@ -179,19 +185,26 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
     }
 
     @Override
-    public Optional<PhenomenonEntity> create(PhenomenonEntity entity) {
+    public PhenomenonEntity create(PhenomenonEntity observableProperty) {
+        if (observableProperty.getId() != null && !observableProperty.isSetName()) {
+            return getRepository().findOne(oQS.withId(observableProperty.getId())).get();
+        }
+        if (getRepository().exists(oQS.withIdentifier(observableProperty.getIdentifier()))) {
+            Optional<PhenomenonEntity> optional =
+                    getRepository().findOne(oQS.withIdentifier(observableProperty.getIdentifier()));
+            return optional.isPresent() ? optional.get() : null;
+        }
+        return getRepository().save(observableProperty);
+    }
+
+    @Override
+    public PhenomenonEntity update(PhenomenonEntity entity) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Optional<PhenomenonEntity> update(PhenomenonEntity entity) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Optional<PhenomenonEntity> delete(PhenomenonEntity entity) {
+    public PhenomenonEntity delete(PhenomenonEntity entity) {
         // TODO Auto-generated method stub
         return null;
     }

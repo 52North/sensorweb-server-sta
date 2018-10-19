@@ -10,6 +10,8 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
@@ -30,7 +32,9 @@ import org.apache.olingo.server.api.uri.queryoption.expression.MethodKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.UnaryOperatorKind;
 import org.n52.series.db.beans.IdEntity;
 import org.n52.sta.data.OffsetLimitBasedPageRequest;
+import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.service.query.QueryOptions;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -42,12 +46,22 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<?, ?>, S extends IdEntity> {
+   
+    @Autowired
+    private EntityServiceRepository serviceRepository;
 
     private T repository;
 
     public AbstractSensorThingsEntityService(T repository) {
         this.repository = repository;
     }
+    
+    @PostConstruct
+    public void init() {
+        serviceRepository.addEntityService(this);
+    }
+    
+    public abstract EntityTypes getType();
 
     /**
      * Requests the full EntityCollection
@@ -213,11 +227,15 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
         return getRepository().count();
     }
 
-    public abstract Optional<S> create(S entity);
+    public abstract S create(S entity);
 
-    public abstract Optional<S> update(S entity);
+    public abstract S update(S entity);
 
-    public abstract Optional<S> delete(S entity);
+    public abstract S delete(S entity);
+    
+    protected AbstractSensorThingsEntityService<?, ?> getEntityService(EntityTypes type) {
+        return serviceRepository.getEntityService(type);
+    }
 
     /**
      * Create {@link PageRequest}
