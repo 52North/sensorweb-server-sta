@@ -36,8 +36,12 @@ public class EntityAnnotator {
             return null;
         }
 
-        String selfLink = String.join("/", baseUri, entity.getId().getPath());
-        entity.addProperty(new Property(null, SELF_LINK_ANNOTATION, ValueType.PRIMITIVE, selfLink));
+        String selfLinkValue = String.join("/", baseUri, entity.getId().getPath());
+
+        Link selfLink = new Link();
+        selfLink.setTitle(SELF_LINK_ANNOTATION);
+        selfLink.setHref(selfLinkValue);
+        entity.setSelfLink(selfLink);
 
         entityType.getNavigationPropertyNames().forEach(np -> {
             EdmNavigationProperty navProp = entityType.getNavigationProperty(np);
