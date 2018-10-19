@@ -9,7 +9,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import org.apache.olingo.commons.api.data.EntityCollection;
-import org.apache.olingo.commons.api.data.Link;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriResource;
