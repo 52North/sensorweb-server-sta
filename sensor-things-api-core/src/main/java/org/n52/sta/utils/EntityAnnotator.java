@@ -6,12 +6,12 @@
 package org.n52.sta.utils;
 
 import org.apache.olingo.commons.api.data.Entity;
+import org.apache.olingo.commons.api.data.Link;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.NAVIGATION_LINK_ANNOTATION;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.SELF_LINK_ANNOTATION;
+import static org.n52.sta.edm.provider.SensorThingsEdmConstants.SELF_LINK_ANNOTATION;
 import org.springframework.stereotype.Component;
 
 /**
@@ -35,16 +35,23 @@ public class EntityAnnotator {
         if (entity == null) {
             return null;
         }
-        
-        String selfLink = String.join("/", baseUri, entity.getId().getPath());
-        entity.addProperty(new Property(null, SELF_LINK_ANNOTATION, ValueType.PRIMITIVE, selfLink));
+
+        String selfLinkValue = String.join("/", baseUri, entity.getId().getPath());
+
+        Link selfLink = new Link();
+        selfLink.setTitle(SELF_LINK_ANNOTATION);
+        selfLink.setHref(selfLinkValue);
+        entity.setSelfLink(selfLink);
 
         entityType.getNavigationPropertyNames().forEach(np -> {
-            String navigationAnnotationName = np + NAVIGATION_LINK_ANNOTATION;
             EdmNavigationProperty navProp = entityType.getNavigationProperty(np);
 
             String navigationAnnotationValue = String.join("/", baseUri, entity.getId().getPath(), navProp.getName());
-            entity.addProperty(new Property(null, navigationAnnotationName, ValueType.PRIMITIVE, navigationAnnotationValue));
+
+            Link link = new Link();
+            link.setTitle(np);
+            link.setHref(navigationAnnotationValue);
+            entity.getNavigationLinks().add(link);
         });
 
         return entity;

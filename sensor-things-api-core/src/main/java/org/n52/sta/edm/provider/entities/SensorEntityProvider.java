@@ -61,62 +61,22 @@ public class SensorEntityProvider extends AbstractSensorThingsEntityProvider {
     // Entity Set Name
     public static final String ES_SENSORS_NAME = "Sensors";
 
-    // Entity Navigation Property Names
-    private static final String NAV_LINK_NAME_DATASTREAMS = ES_DATASTREAMS_NAME + NAVIGATION_LINK_ANNOTATION;
-
     @Override
     protected CsdlEntityType createEntityType() {
-        //create EntityType properties
-        CsdlProperty id = new CsdlProperty().setName(ID_ANNOTATION)
-                .setType(EdmPrimitiveTypeKind.Int64.getFullQualifiedName())
-                .setNullable(false);
-        CsdlProperty name = new CsdlProperty().setName(PROP_NAME)
-                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
-                .setNullable(true);
-        CsdlProperty description = new CsdlProperty().setName(PROP_DESCRIPTION)
-                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
-                .setNullable(false);
-        CsdlProperty encodingType = new CsdlProperty().setName(PROP_ENCODINGTYPE)
-                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
-                .setNullable(false);
-        CsdlProperty metadata = new CsdlProperty().setName(PROP_METADATA)
-                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
-                .setNullable(false);
+        List<CsdlProperty> properties = createCsdlProperties();
 
-        CsdlProperty selfLink = new CsdlProperty().setName(SELF_LINK_ANNOTATION)
-                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
-                .setNullable(false);
-        CsdlProperty navLinkDatastreams = new CsdlProperty().setName(NAV_LINK_NAME_DATASTREAMS)
-                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
-                .setNullable(false);
-
-        // navigation property: one mandatory to many optional
-        CsdlNavigationProperty navPropDatastreams = new CsdlNavigationProperty()
-                .setName(ES_DATASTREAMS_NAME)
-                .setType(ET_DATASTREAM_FQN)
-                .setCollection(true)
-                .setPartner(ET_SENSOR_NAME);
-
-        List<CsdlNavigationProperty> navPropList = new ArrayList<CsdlNavigationProperty>();
-        navPropList.add(navPropDatastreams);
+        List<CsdlNavigationProperty> navigationProperties = createCsdlNavigationProperties();
 
         // create CsdlPropertyRef for Key element
         CsdlPropertyRef propertyRef = new CsdlPropertyRef();
-        propertyRef.setName(ID_ANNOTATION);
+        propertyRef.setName(PROP_ID);
 
         // configure EntityType
         CsdlEntityType entityType = new CsdlEntityType();
         entityType.setName(ET_SENSOR_NAME);
-        entityType.setProperties(Arrays.asList(
-                id,
-                name,
-                description,
-                encodingType,
-                metadata,
-                selfLink,
-                navLinkDatastreams));
+        entityType.setProperties(properties);
         entityType.setKey(Collections.singletonList(propertyRef));
-        entityType.setNavigationProperties(navPropList);
+        entityType.setNavigationProperties(navigationProperties);
 
         return entityType;
     }
@@ -141,6 +101,43 @@ public class SensorEntityProvider extends AbstractSensorThingsEntityProvider {
     @Override
     public FullQualifiedName getFullQualifiedTypeName() {
         return ET_SENSOR_FQN;
+    }
+
+    private List<CsdlProperty> createCsdlProperties() {
+        //create EntityType properties
+        CsdlProperty id = new CsdlProperty().setName(PROP_ID)
+                .setType(EdmPrimitiveTypeKind.Int64.getFullQualifiedName())
+                .setNullable(false);
+        CsdlProperty name = new CsdlProperty().setName(PROP_NAME)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(true);
+        CsdlProperty description = new CsdlProperty().setName(PROP_DESCRIPTION)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(false);
+        CsdlProperty encodingType = new CsdlProperty().setName(PROP_ENCODINGTYPE)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(false);
+        CsdlProperty metadata = new CsdlProperty().setName(PROP_METADATA)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(false);
+
+        return Arrays.asList(
+                id,
+                name,
+                description,
+                encodingType,
+                metadata);
+    }
+
+    private List<CsdlNavigationProperty> createCsdlNavigationProperties() {
+        // navigation property: one mandatory to many optional
+        CsdlNavigationProperty navPropDatastreams = new CsdlNavigationProperty()
+                .setName(ES_DATASTREAMS_NAME)
+                .setType(ET_DATASTREAM_FQN)
+                .setCollection(true)
+                .setPartner(ET_SENSOR_NAME);
+        
+        return Arrays.asList(navPropDatastreams);
     }
 
 }

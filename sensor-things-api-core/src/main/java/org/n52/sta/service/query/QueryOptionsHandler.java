@@ -11,7 +11,6 @@ import java.util.List;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.data.Link;
-import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
 import org.apache.olingo.server.api.serializer.SerializerException;
@@ -22,6 +21,7 @@ import org.apache.olingo.server.api.uri.queryoption.ExpandOption;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 import org.n52.sta.utils.EntityAnnotator;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,9 +55,9 @@ public class QueryOptionsHandler {
     }
 
     /**
-     *
-     * @param option the {@Link SelectOption} to get the select list from
      * @param edmEntityType the {@Link EdmEntityType} the select list option is
+     * @param expandOption the {@Link ExpandOption} to get the expand items from
+     * @param selectOption the {@Link SelectOption} to get the select list from
      * referred to
      * @return the select list
      * @throws SerializerException
@@ -72,13 +72,14 @@ public class QueryOptionsHandler {
     /**
      * Handles the $expand Query Parameter
      *
+     * @param entity The entity to handle expand parameter for
      * @param expandOption Options for expand Parameter
      * @param sourceId Id of the source Entity
-     * @param sourceEdmEntitySet EntitySet of the source Entity
+     * @param sourceEdmEntityType EntityType of the source Entity
      * @param baseURI baseURI of the Request
      * @return List<Link> List of inlined Entities
      */
-    public List<Link> handleExpandOption(ExpandOption expandOption, Long sourceId, EdmEntityType sourceEdmEntityType, String baseURI) {
+    public List<Link> handleExpandOption(Entity entity, ExpandOption expandOption, Long sourceId, EdmEntityType sourceEdmEntityType, String baseURI) {
         List<Link> links = new ArrayList<>();
 
         expandOption.getExpandItems().forEach(expandItem -> {
@@ -99,33 +100,29 @@ public class QueryOptionsHandler {
                 targetTitle = edmNavigationProperty.getName();
             }
 
-            Link entity = new Link();
-            entity.setTitle(targetTitle);
+            Link link = entity.getNavigationLink(targetTitle);
 
             // Either add inline Collection or add single inline Entity          
             if (sourceEdmEntityType.getNavigationProperty(targetTitle).isCollection()) {
-                entity.setInlineEntitySet(getInlineEntityCollection(sourceId,
+                link.setInlineEntitySet(getInlineEntityCollection(sourceId,
                         sourceEdmEntityType,
                         targetEdmEntityType,
                         new ExpandItemQueryOptions(expandItem, baseURI)));
 
                 // Annotate inline Entites with appropiate links
                 final EdmEntityType type = targetEdmEntityType;
-                entity.getInlineEntitySet().forEach(inlineEntity -> {
-                    entityAnnotator.annotateEntity(inlineEntity, type, baseURI);
-                });
             } else {
-                entity.setInlineEntity(getInlineEntity(sourceId,
+                link.setInlineEntity(getInlineEntity(sourceId,
                         sourceEdmEntityType,
                         targetEdmEntityType,
                         new ExpandItemQueryOptions(expandItem, baseURI)));
 
                 // Annotate inline Entites with appropiate links
-                entityAnnotator.annotateEntity(entity.getInlineEntity(), targetEdmEntityType, baseURI);
+                entityAnnotator.annotateEntity(link.getInlineEntity(), targetEdmEntityType, baseURI);
             }
             // Only add valid Elements
-            if (entity != null) {
-                links.add(entity);
+            if (link != null) {
+                links.add(link);
             }
         });
 
@@ -137,11 +134,13 @@ public class QueryOptionsHandler {
         Entity entity = responseService.getRelatedEntity(sourceId, sourceType);
 
         if (queryOptions.hasExpandOption()) {
-            List<Link> links = handleExpandOption(queryOptions.getExpandOption(),
-                    Long.parseLong(entity.getProperty("@iot.id").getValue().toString()),
+            entityAnnotator.annotateEntity(entity, targetType, queryOptions.getBaseURI());
+            List<Link> links = handleExpandOption(entity, queryOptions.getExpandOption(),
+                    Long.parseLong(entity.getProperty(PROP_ID).getValue().toString()),
                     targetType,
                     queryOptions.getBaseURI());
-            entity.getNavigationLinks().addAll(links);
+        } else {
+            entityAnnotator.annotateEntity(entity, targetType, queryOptions.getBaseURI());
         }
 
         return entity;
@@ -159,12 +158,17 @@ public class QueryOptionsHandler {
 
         if (queryOptions.hasExpandOption()) {
             entityCollection.forEach(entity -> {
-                List<Link> links = handleExpandOption(queryOptions.getExpandOption(),
-                        Long.parseLong(entity.getProperty("@iot.id").getValue().toString()),
+                entityAnnotator.annotateEntity(entity, targetType, queryOptions.getBaseURI());
+                List<Link> links = handleExpandOption(entity, queryOptions.getExpandOption(),
+                        Long.parseLong(entity.getProperty(PROP_ID).getValue().toString()),
                         targetType,
                         queryOptions.getBaseURI());
-                entity.getNavigationLinks().addAll(links);
             });
+        } else {
+            entityCollection.forEach(entity -> {
+                entityAnnotator.annotateEntity(entity, targetType, queryOptions.getBaseURI());
+            });
+
         }
 
         return entityCollection;

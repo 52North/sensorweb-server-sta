@@ -9,12 +9,7 @@ import java.util.List;
 import java.util.Locale;
 
 import org.apache.olingo.commons.api.data.Entity;
-import org.apache.olingo.commons.api.data.Link;
-import org.apache.olingo.commons.api.edm.EdmElement;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
-import org.apache.olingo.commons.api.edm.EdmEntityType;
-import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
-import org.apache.olingo.commons.api.edm.EdmNavigationPropertyBinding;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.deserializer.DeserializerResult;
@@ -24,9 +19,11 @@ import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 import org.n52.sta.service.query.QueryOptions;
 import org.n52.sta.service.query.QueryOptionsHandler;
 import org.n52.sta.service.response.EntityResponse;
+import org.n52.sta.utils.EntityAnnotator;
 import org.n52.sta.utils.EntityQueryParams;
 import org.n52.sta.utils.UriResourceNavigationResolver;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +46,9 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
     @Autowired
     private QueryOptionsHandler queryOptionsHandler;
 
+    @Autowired
+    EntityAnnotator entityAnnotator;
+
     @Override
     public EntityResponse handleEntityRequest(List<UriResource> resourcePaths, QueryOptions queryOptions) throws ODataApplicationException {
         EntityResponse response = null;
@@ -64,11 +64,21 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
         }
 
         if (queryOptions.hasExpandOption()) {
-            List<Link> links = queryOptionsHandler.handleExpandOption(queryOptions.getExpandOption(),
-                                                                      Long.parseLong(response.getEntity().getProperty("@iot.id").getValue().toString()),
-                                                                      response.getEntitySet().getEntityType(),
-                                                                      queryOptions.getBaseURI());
-            response.getEntity().getNavigationLinks().addAll(links);
+            entityAnnotator.annotateEntity(
+                    response.getEntity(),
+                    response.getEntitySet().getEntityType(),
+                    queryOptions.getBaseURI());
+            queryOptionsHandler.handleExpandOption(
+                    response.getEntity(),
+                    queryOptions.getExpandOption(),
+                    Long.parseLong(response.getEntity().getProperty(PROP_ID).getValue().toString()),
+                    response.getEntitySet().getEntityType(),
+                    queryOptions.getBaseURI());
+        } else {
+            entityAnnotator.annotateEntity(
+                    response.getEntity(),
+                    response.getEntitySet().getEntityType(),
+                    queryOptions.getBaseURI());
         }
         return response;
     }
@@ -86,7 +96,7 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
 
         if (responseEntity == null) {
             throw new ODataApplicationException("Entity not found.",
-                                                HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
+                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
         }
 
         // set Entity response information
@@ -119,7 +129,7 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
             }
             if (responseEntity == null) {
                 throw new ODataApplicationException("Entity not found.",
-                                                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
+                        HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
             }
         }
 

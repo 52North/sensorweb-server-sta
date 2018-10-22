@@ -95,9 +95,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.olingo.server.core.serializer.json.ODataErrorSerializer;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.CONTROL_ANNOTATION_PREFIX;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.SELF_LINK_ANNOTATION;
+import org.n52.sta.edm.provider.SensorThingsEdmConstants;
 
 public class SensorThingsSerializer extends AbstractODataSerializer {
 
@@ -315,7 +313,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
         for (final Entity entity : entitySet) {
             if (onlyReference) {
                 json.writeStartObject();
-                json.writeStringField(Constants.JSON_ID, getEntityId(entity, entityType, name));
+                json.writeStringField(SensorThingsEdmConstants.SELF_LINK_ANNOTATION, entity.getSelfLink().getHref());
                 json.writeEndObject();
             } else {
                 writeEntity(metadata, entityType, entity, null, expand, toDepth, select, false, ancestors, name, json);
@@ -398,22 +396,31 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
                 }
             }
             if (cycle || onlyReference) {
-                json.writeStringField(Constants.JSON_ID, getEntityId(entity, entityType, name));
+                json.writeStringField(SensorThingsEdmConstants.SELF_LINK_ANNOTATION, entity.getSelfLink().getHref());
             } else {
                 final EdmEntityType resolvedType = resolveEntityType(metadata, entityType, entity.getType());
                 if ((!isODataMetadataNone && !resolvedType.equals(entityType)) || isODataMetadataFull) {
                     json.writeStringField(Constants.JSON_TYPE, "#" + entity.getType());
                 }
-                if ((!isODataMetadataNone && !areKeyPredicateNamesSelected(select, resolvedType)) || isODataMetadataFull) {
-                    json.writeStringField(Constants.JSON_ID, getEntityId(entity, resolvedType, name));
-                }
 
-                if (isODataMetadataFull) {
-                    if (entity.getSelfLink() != null) {
-                        json.writeStringField(Constants.JSON_READ_LINK, entity.getSelfLink().getHref());
-                    }
-                    if (entity.getEditLink() != null) {
-                        json.writeStringField(Constants.JSON_EDIT_LINK, entity.getEditLink().getHref());
+                json.writeStringField(SensorThingsEdmConstants.SELF_LINK_ANNOTATION, entity.getSelfLink().getHref());
+
+                final boolean all = ExpandSelectHelper.isAll(select);
+                final Set<String> selected = all ? new HashSet<String>()
+                        : ExpandSelectHelper.getSelectedPropertyNames(select.getSelectItems());
+
+                for (final String propertyName : entityType.getKeyPredicateNames()) {
+                    if (all || selected.contains(propertyName)) {
+                        if (entityType.getKeyPredicateNames().contains(propertyName)) {
+                            final EdmProperty edmProperty = entityType.getStructuralProperty(propertyName);
+                            final Property property = findProperty(propertyName, entity.getProperties());
+                            final Set<List<String>> selectedPaths = all || edmProperty.isPrimitive() ? null
+                                    : ExpandSelectHelper.getSelectedPaths(select.getSelectItems(), propertyName);
+
+                            json.writeFieldName(SensorThingsEdmConstants.ID_ANNOTATION);
+                            writePropertyValue(metadata, edmProperty, property, selectedPaths, json);
+                        }
+
                     }
                 }
 
@@ -498,11 +505,14 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
                 : ExpandSelectHelper.getSelectedPropertyNames(select.getSelectItems());
         for (final String propertyName : type.getPropertyNames()) {
             if (all || selected.contains(propertyName)) {
-                final EdmProperty edmProperty = type.getStructuralProperty(propertyName);
-                final Property property = findProperty(propertyName, properties);
-                final Set<List<String>> selectedPaths = all || edmProperty.isPrimitive() ? null
-                        : ExpandSelectHelper.getSelectedPaths(select.getSelectItems(), propertyName);
-                writeProperty(metadata, edmProperty, property, selectedPaths, json);
+                if (!((EdmEntityType) type).getKeyPredicateNames().contains(propertyName)) {
+                    final EdmProperty edmProperty = type.getStructuralProperty(propertyName);
+                    final Property property = findProperty(propertyName, properties);
+                    final Set<List<String>> selectedPaths = all || edmProperty.isPrimitive() ? null
+                            : ExpandSelectHelper.getSelectedPaths(select.getSelectItems(), propertyName);
+                    writeProperty(metadata, edmProperty, property, selectedPaths, json);
+                }
+
             }
         }
     }
@@ -511,16 +521,14 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
             final EdmStructuredType type, final Linked linked, final ExpandOption expand, final Integer toDepth,
             final Set<String> ancestors, final String name, final JsonGenerator json)
             throws SerializerException, IOException {
-        if (isODataMetadataFull) {
-            for (final String propertyName : type.getNavigationPropertyNames()) {
-                final Link navigationLink = linked.getNavigationLink(propertyName);
-                if (navigationLink != null) {
-                    json.writeStringField(propertyName + Constants.JSON_NAVIGATION_LINK, navigationLink.getHref());
-                }
-                final Link associationLink = linked.getAssociationLink(propertyName);
-                if (associationLink != null) {
-                    json.writeStringField(propertyName + Constants.JSON_ASSOCIATION_LINK, associationLink.getHref());
-                }
+        for (final String propertyName : type.getNavigationPropertyNames()) {
+            final Link navigationLink = linked.getNavigationLink(propertyName);
+            if (navigationLink != null) {
+                json.writeStringField(propertyName + SensorThingsEdmConstants.NAVIGATION_LINK_ANNOTATION, navigationLink.getHref());
+            }
+            final Link associationLink = linked.getAssociationLink(propertyName);
+            if (associationLink != null) {
+                json.writeStringField(propertyName + Constants.JSON_ASSOCIATION_LINK, associationLink.getHref());
             }
         }
         if ((toDepth != null && toDepth > 1) || (toDepth == null && ExpandSelectHelper.hasExpand(expand))) {
@@ -1285,7 +1293,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
             json.writeStartObject();
             writeContextURL(contextURL, json);
 //            json.writeStringField(Constants.JSON_ID, uriHelper.buildCanonicalURL(edmEntitySet, entity));
-            json.writeStringField(SELF_LINK_ANNOTATION, String.valueOf(entity.getProperty(SELF_LINK_ANNOTATION).getValue()));
+            json.writeStringField(SensorThingsEdmConstants.SELF_LINK_ANNOTATION, entity.getSelfLink().getHref());
             json.writeEndObject();
 
             json.close();
@@ -1326,7 +1334,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
                 json.writeStartObject();
 //                json.writeStringField(Constants.JSON_ID, uriHelper.buildCanonicalURL(edmEntitySet, entity));
                 uriHelper.buildCanonicalURL(edmEntitySet, entity);
-                json.writeStringField(SELF_LINK_ANNOTATION, String.valueOf(entity.getProperty(SELF_LINK_ANNOTATION).getValue()));
+                json.writeStringField(SensorThingsEdmConstants.SELF_LINK_ANNOTATION, entity.getSelfLink().getHref());
                 json.writeEndObject();
             }
             json.writeEndArray();

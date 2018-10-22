@@ -142,10 +142,6 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
     private InputStream createResponseContent(ServiceMetadata serviceMetadata, EntityResponse response, QueryOptions queryOptions) throws SerializerException {
         EdmEntityType edmEntityType = response.getEntitySet().getEntityType();
 
-        // annotate the entity
-        entityAnnotator.annotateEntity(response.getEntity(),
-                response.getEntitySet().getEntityType(), queryOptions.getBaseURI());
-
         ContextURL.Builder contextUrlBuilder = ContextURL.with()
                 .entitySet(response.getEntitySet())
                 .suffix(ContextURL.Suffix.ENTITY);

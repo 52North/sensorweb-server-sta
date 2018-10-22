@@ -28,7 +28,6 @@
  */
 package org.n52.sta.mapping;
 
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_TIME;
 import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ES_HISTORICAL_LOCATIONS_NAME;
 import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_FQN;
@@ -39,6 +38,7 @@ import org.apache.olingo.commons.api.data.ValueType;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.util.DateTimeHelper;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 //import org.n52.sta.utils.EntityAnnotator;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,11 +57,11 @@ public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationE
     public Entity createEntity(HistoricalLocationEntity location) {
         Entity entity = new Entity();
 
-        entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, location.getId()));
+        entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, location.getId()));
         entity.addProperty(new Property(null, PROP_TIME, ValueType.PRIMITIVE,  DateTimeHelper.format(createTime(location))));
 
         entity.setType(ET_HISTORICAL_LOCATION_FQN.getFullQualifiedNameAsString());
-        entity.setId(entityCreationHelper.createId(entity, ES_HISTORICAL_LOCATIONS_NAME, ID_ANNOTATION));
+        entity.setId(entityCreationHelper.createId(entity, ES_HISTORICAL_LOCATIONS_NAME, PROP_ID));
 
         return entity;
 
