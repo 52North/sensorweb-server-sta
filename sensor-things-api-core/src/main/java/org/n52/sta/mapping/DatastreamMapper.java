@@ -34,11 +34,15 @@ import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvid
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PHENOMENON_TIME;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_RESULT_TIME;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_UOM;
-import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
-import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ET_SENSOR_NAME;
-import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_NAME;
 import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ES_DATASTREAMS_NAME;
 import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_FQN;
+import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ES_OBSERVATIONS_NAME;
+import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_NAME;
+import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ET_SENSOR_NAME;
+import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
@@ -48,7 +52,9 @@ import org.apache.olingo.commons.api.edm.geo.Geospatial;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.GeometryEntity;
 import org.n52.series.db.beans.UnitEntity;
+import org.n52.series.db.beans.data.Data;
 import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.StaDataEntityHolder;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
@@ -75,6 +81,9 @@ public class DatastreamMapper extends AbstractMapper<DatastreamEntity> {
 
     @Autowired
     private GeometryMapper geometryMapper;
+    
+    @Autowired
+    private ObservationMapper observationMapper;
 
     public Entity createEntity(DatastreamEntity datastream) {
         Entity entity = new Entity();
@@ -115,6 +124,7 @@ public class DatastreamMapper extends AbstractMapper<DatastreamEntity> {
         addSensor(datastream, entity);
         addObservedProperty(datastream, entity);
         addThing(datastream, entity);
+        addObservations(datastream, entity);
         return datastream;
     }
 
@@ -175,19 +185,6 @@ public class DatastreamMapper extends AbstractMapper<DatastreamEntity> {
         datastream.setUnit(unit);
     }
 
-    private void addPhenomenonTime(DatastreamEntity datastream, Entity entity) {
-        if (checkProperty(entity, PROP_PHENOMENON_TIME)) {
-            Time time = parseTime(getPropertyValue(entity, PROP_PHENOMENON_TIME).toString());
-            if (time instanceof TimeInstant) {
-                datastream.setSamplingTimeStart(((TimeInstant) time).getValue().toDate());
-                datastream.setSamplingTimeEnd(((TimeInstant) time).getValue().toDate());
-            } else if (time instanceof TimePeriod) {
-                datastream.setSamplingTimeStart(((TimePeriod) time).getStart().toDate());
-                datastream.setSamplingTimeEnd(((TimePeriod) time).getEnd().toDate());
-            }
-        }
-    }
-
     private void addResultTime(DatastreamEntity datastream, Entity entity) {
         if (checkProperty(entity, PROP_RESULT_TIME)) {
             Time time = parseTime(getPropertyValue(entity, PROP_RESULT_TIME).toString());
@@ -200,7 +197,7 @@ public class DatastreamMapper extends AbstractMapper<DatastreamEntity> {
             }
         }
     }
-
+    
     private void addSensor(DatastreamEntity datastream, Entity entity) {
         if (checkNavigationLink(entity, ET_SENSOR_NAME)) {
             datastream.setProcedure(
@@ -218,6 +215,17 @@ public class DatastreamMapper extends AbstractMapper<DatastreamEntity> {
     private void addThing(DatastreamEntity datastream, Entity entity) {
         if (checkNavigationLink(entity, ET_THING_NAME)) {
             datastream.setThing(thingMapper.createThing(entity.getNavigationLink(ET_THING_NAME).getInlineEntity()));
+        }
+    }
+
+    private void addObservations(DatastreamEntity datastream, Entity entity) {
+        if (checkNavigationLink(entity, ES_OBSERVATIONS_NAME)) {
+            Set<Data<?>> observations = new LinkedHashSet<>();
+            for (Entity observation : entity.getNavigationLink(ES_OBSERVATIONS_NAME).getInlineEntitySet()) {
+               StaDataEntityHolder createObservation = observationMapper.createObservation(observation);
+               createObservation.setDatastream(datastream);
+               observations.add(createObservation);
+            }
         }
     }
 }

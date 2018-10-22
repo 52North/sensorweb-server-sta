@@ -36,6 +36,8 @@ import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvid
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_VALID_TIME;
 import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ES_OBSERVATIONS_NAME;
 import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ET_OBSERVATION_FQN;
+import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ET_FEATURE_OF_INTEREST_NAME;
+import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_NAME;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -58,9 +60,15 @@ import org.n52.series.db.beans.ProfileDataEntity;
 import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.ReferencedDataEntity;
 import org.n52.series.db.beans.TextDataEntity;
+import org.n52.series.db.beans.data.Data;
 import org.n52.series.db.beans.parameter.Parameter;
+import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.StaDataEntityHolder;
 import org.n52.shetland.ogc.gml.time.Time;
+import org.n52.shetland.ogc.gml.time.TimeInstant;
+import org.n52.shetland.ogc.gml.time.TimePeriod;
 import org.n52.shetland.util.DateTimeHelper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -71,6 +79,12 @@ import com.fasterxml.jackson.databind.JsonNode;
  */
 @Component
 public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
+    
+    @Autowired
+    private DatastreamMapper datastreamMapper;
+    
+    @Autowired
+    private FeatureOfInterestMapper featureMapper;
 
     public Entity createEntity(DataEntity<?> observation) {
         Entity entity = new Entity();
@@ -182,6 +196,60 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
             end = start;
         }
         return createTime(start, end);
+    }
+
+    public StaDataEntityHolder createObservation(Entity entity) {
+        StaDataEntityHolder observation = new StaDataEntityHolder();
+        addPhenomenonTime(observation, entity);
+        addResultTime(observation, entity);
+        addValidTime(observation, entity);
+        addParameter(observation, entity);
+        addFeatureOfInterest(observation, entity);
+        addDatastream(observation, entity);
+        return observation;
+    }
+    
+    private void addResultTime(StaDataEntityHolder observation, Entity entity) {
+        if (checkProperty(entity, PROP_RESULT_TIME)) {
+            Time time = parseTime(getPropertyValue(entity, PROP_RESULT_TIME).toString());
+            if (time instanceof TimeInstant) {
+                observation.setResultTime(((TimeInstant) time).getValue().toDate());
+            } else if (time instanceof TimePeriod) {
+                observation.setResultTime(((TimePeriod) time).getEnd().toDate());
+            }
+        }
+    }
+    
+    private void addValidTime(StaDataEntityHolder observation, Entity entity) {
+        if (checkProperty(entity, PROP_RESULT_TIME)) {
+            Time time = parseTime(getPropertyValue(entity, PROP_RESULT_TIME).toString());
+            if (time instanceof TimeInstant) {
+                observation.setValidTimeStart(((TimeInstant) time).getValue().toDate());
+                observation.setValidTimeEnd(((TimeInstant) time).getValue().toDate());
+            } else if (time instanceof TimePeriod) {
+                observation.setValidTimeStart(((TimePeriod) time).getStart().toDate());
+                observation.setValidTimeEnd(((TimePeriod) time).getEnd().toDate());
+            }
+        }
+    }
+
+    private void addParameter(StaDataEntityHolder observation, Entity entity) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    private void addFeatureOfInterest(StaDataEntityHolder observation, Entity entity) {
+        if (checkNavigationLink(entity, ET_FEATURE_OF_INTEREST_NAME)) {
+            observation.setFeatureOfInterest(featureMapper
+                    .createFeatureOfInterest(entity.getNavigationLink(ET_FEATURE_OF_INTEREST_NAME).getInlineEntity()));
+        }
+    }
+
+    private void addDatastream(StaDataEntityHolder observation, Entity entity) {
+        if (checkNavigationLink(entity, ET_DATASTREAM_NAME)) {
+            observation.setDatastream(datastreamMapper
+                    .createDatastream(entity.getNavigationLink(ET_DATASTREAM_NAME).getInlineEntity()));
+        }
     }
 
 }

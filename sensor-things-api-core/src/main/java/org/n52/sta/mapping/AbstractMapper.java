@@ -30,6 +30,8 @@ package org.n52.sta.mapping;
 
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DESCRIPTION;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_NAME;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PHENOMENON_TIME;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_RESULT_TIME;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DEFINITION;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
 
@@ -45,6 +47,9 @@ import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.HibernateRelations.HasDescription;
 import org.n52.series.db.beans.HibernateRelations.HasName;
+import org.n52.series.db.beans.HibernateRelations.HasPhenomenonTime;
+import org.n52.series.db.beans.HibernateRelations.HasResultTime;
+import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
@@ -52,6 +57,7 @@ import org.n52.shetland.ogc.gml.time.TimePeriod;
 import org.n52.shetland.util.DateTimeHelper;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.web.HateoasPageableHandlerMethodArgumentResolver;
 
 public abstract class AbstractMapper<T> {
     
@@ -136,6 +142,19 @@ public abstract class AbstractMapper<T> {
             return entity.getProperty(name).getValue();
         }
         return "";
+    }
+    
+    protected void addPhenomenonTime(HasPhenomenonTime phenomenonTime , Entity entity) {
+        if (checkProperty(entity, PROP_PHENOMENON_TIME)) {
+            Time time = parseTime(getPropertyValue(entity, PROP_PHENOMENON_TIME).toString());
+            if (time instanceof TimeInstant) {
+                phenomenonTime.setSamplingTimeStart(((TimeInstant) time).getValue().toDate());
+                phenomenonTime.setSamplingTimeEnd(((TimeInstant) time).getValue().toDate());
+            } else if (time instanceof TimePeriod) {
+                phenomenonTime.setSamplingTimeStart(((TimePeriod) time).getStart().toDate());
+                phenomenonTime.setSamplingTimeEnd(((TimePeriod) time).getEnd().toDate());
+            }
+        }
     }
 
     protected DateTime createDateTime(Date date) {

@@ -37,6 +37,7 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.edm.geo.Geospatial;
+import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.shetland.ogc.om.features.SfConstants;
@@ -52,12 +53,12 @@ import com.vividsolutions.jts.geom.Geometry;
  *
  */
 @Component
-public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper<FeatureEntity> {
+public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper<AbstractFeatureEntity<?>> {
 
     @Autowired
     EntityCreationHelper entityCreationHelper;
 
-    public Entity createEntity(FeatureEntity feature) {
+    public Entity createEntity(AbstractFeatureEntity<?> feature) {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, feature.getId()));
         addNameDescriptionProperties(entity, feature);

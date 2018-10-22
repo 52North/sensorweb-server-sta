@@ -36,12 +36,10 @@ import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ES_THINGS_NA
 import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_FQN;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.apache.olingo.commons.api.data.Entity;
-import org.apache.olingo.commons.api.data.Link;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.n52.series.db.beans.sta.DatastreamEntity;
@@ -107,14 +105,8 @@ public class ThingMapper extends AbstractMapper<ThingEntity> {
     private void addLocations(ThingEntity thing, Entity entity) {
         if (checkNavigationLink(entity, ES_LOCATIONS_NAME)) {
             Set<LocationEntity> locations = new LinkedHashSet<>();
-            Link link = entity.getNavigationLink(ES_LOCATIONS_NAME);
-            if (link.getInlineEntity() != null) {
-                locations.add(locationMapper.createLocation(entity.getNavigationLink(ES_LOCATIONS_NAME).getInlineEntity()));
-            } else if (link.getInlineEntitySet() != null) {
-                Iterator<Entity> iterator = link.getInlineEntitySet().iterator();
-                while (iterator.hasNext()) {
-                    locations.add(locationMapper.createLocation((Entity) iterator.next()));
-                }
+            for (Entity location : entity.getNavigationLink(ES_LOCATIONS_NAME).getInlineEntitySet()) {
+                locations.add(locationMapper.createLocation(location));
             }
             thing.setLocationEntities(locations);
         }
@@ -123,15 +115,8 @@ public class ThingMapper extends AbstractMapper<ThingEntity> {
     private void addDatastreams(ThingEntity thing, Entity entity) {
         if (checkNavigationLink(entity, ES_DATASTREAMS_NAME)) {
             Set<DatastreamEntity> datastreams = new LinkedHashSet<>();
-            Link link = entity.getNavigationLink(ES_DATASTREAMS_NAME);
-            if (link.getInlineEntity() != null) {
-                datastreams.add(datastreamMapper
-                        .createDatastream(entity.getNavigationLink(ES_DATASTREAMS_NAME).getInlineEntity()));
-            } else if (link.getInlineEntitySet() != null) {
-                Iterator<Entity> iterator = link.getInlineEntitySet().iterator();
-                while (iterator.hasNext()) {
-                    datastreams.add(datastreamMapper.createDatastream((Entity) iterator.next()));
-                }
+            for (Entity datastream : entity.getNavigationLink(ES_DATASTREAMS_NAME).getInlineEntitySet()) {
+                datastreams.add(datastreamMapper.createDatastream(datastream));
             }
             thing.setDatastreamEntities(datastreams);
         }
