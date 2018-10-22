@@ -28,7 +28,6 @@
  */
 package org.n52.sta.mapping;
 
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
 import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ES_FEATURES_OF_INTEREST_NAME;
 import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ET_FEATURE_OF_INTEREST_FQN;
 
@@ -36,6 +35,7 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.n52.series.db.beans.FeatureEntity;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -53,11 +53,11 @@ public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper<Feat
 
     public Entity createEntity(FeatureEntity feature) {
         Entity entity = new Entity();
-        entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, feature.getId()));
+        entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, feature.getId()));
         addNameDescriptionProperties(entity, feature);
         addGeometry(entity, feature);
         entity.setType(ET_FEATURE_OF_INTEREST_FQN.getFullQualifiedNameAsString());
-        entity.setId(entityCreationHelper.createId(entity, ES_FEATURES_OF_INTEREST_NAME, ID_ANNOTATION));
+        entity.setId(entityCreationHelper.createId(entity, ES_FEATURES_OF_INTEREST_NAME, PROP_ID));
 
         return entity;
     }

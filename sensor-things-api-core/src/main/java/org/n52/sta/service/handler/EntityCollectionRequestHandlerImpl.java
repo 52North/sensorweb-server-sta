@@ -9,7 +9,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import org.apache.olingo.commons.api.data.EntityCollection;
-import org.apache.olingo.commons.api.data.Link;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriResource;
@@ -17,9 +16,11 @@ import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.queryoption.SystemQueryOptionKind;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 import org.n52.sta.service.query.QueryOptions;
 import org.n52.sta.service.query.QueryOptionsHandler;
 import org.n52.sta.service.response.EntityCollectionResponse;
+import org.n52.sta.utils.EntityAnnotator;
 import org.n52.sta.utils.EntityQueryParams;
 import org.n52.sta.utils.UriResourceNavigationResolver;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,9 +39,12 @@ public class EntityCollectionRequestHandlerImpl implements AbstractEntityCollect
 
     @Autowired
     private UriResourceNavigationResolver navigationResolver;
-    
+
     @Autowired
     private QueryOptionsHandler queryOptionsHandler;
+
+    @Autowired
+    EntityAnnotator entityAnnotator;
 
     @Override
     public EntityCollectionResponse handleEntityCollectionRequest(List<UriResource> resourcePaths, QueryOptions queryOptions) throws ODataApplicationException {
@@ -55,15 +59,26 @@ public class EntityCollectionRequestHandlerImpl implements AbstractEntityCollect
         } else {
             response = createResponseForNavigation(resourcePaths, queryOptions);
         }
-
+        EdmEntitySet sourceEdmEntitySet = response.getEntitySet();
         if (queryOptions.hasExpandOption()) {
-            EdmEntitySet sourceEdmEntitySet = response.getEntitySet();
             response.getEntityCollection().forEach(entity -> {
-                List<Link> links = queryOptionsHandler.handleExpandOption(queryOptions.getExpandOption(),
-                                                                          Long.parseLong(entity.getProperty("@iot.id").getValue().toString()),
-                                                                          sourceEdmEntitySet.getEntityType(),
-                                                                          queryOptions.getBaseURI());
-                entity.getNavigationLinks().addAll(links);
+                entityAnnotator.annotateEntity(
+                        entity,
+                        sourceEdmEntitySet.getEntityType(),
+                        queryOptions.getBaseURI());
+                queryOptionsHandler.handleExpandOption(
+                        entity,
+                        queryOptions.getExpandOption(),
+                        Long.parseLong(entity.getProperty(PROP_ID).getValue().toString()),
+                        sourceEdmEntitySet.getEntityType(),
+                        queryOptions.getBaseURI());
+            });
+        } else {
+            response.getEntityCollection().forEach(entity -> {
+                entityAnnotator.annotateEntity(
+                        entity,
+                        sourceEdmEntitySet.getEntityType(),
+                        queryOptions.getBaseURI());
             });
         }
         return response;
@@ -78,18 +93,18 @@ public class EntityCollectionRequestHandlerImpl implements AbstractEntityCollect
 
         // fetch the data from backend for this requested EntitySetName and
         // deliver as EntityCollection
-        AbstractSensorThingsEntityService<?> responseService =
-                serviceRepository.getEntityService(uriResourceEntitySet.getEntityType().getName());
+        AbstractSensorThingsEntityService<?> responseService
+                = serviceRepository.getEntityService(uriResourceEntitySet.getEntityType().getName());
         EntityCollection responseEntityCollection = responseService.getEntityCollection(queryOptions);
-        
+
         long count = responseService.getCount();
-        
+
         if (queryOptions.hasCountOption()) {
             responseEntityCollection.setCount(Long.valueOf(count).intValue());
         }
-        
+
         responseEntityCollection.setNext(createNext(count, queryOptions, null));
-        
+
         // set EntityCollection response information
         EntityCollectionResponse response = new EntityCollectionResponse();
         response.setEntitySet(responseEntitySet);
@@ -106,9 +121,9 @@ public class EntityCollectionRequestHandlerImpl implements AbstractEntityCollect
         AbstractSensorThingsEntityService<?> entityService = serviceRepository.getEntityService(queryParams.getTargetEntitySet().getEntityType().getName());
         EntityCollection responseEntityCollection = entityService
                 .getRelatedEntityCollection(queryParams.getSourceId(), queryParams.getSourceEntityType(), queryOptions);
-        
+
         long count = entityService.getRelatedEntityCollectionCount(queryParams.getSourceId(), queryParams.getSourceEntityType());
-        
+
         responseEntityCollection.setNext(createNext(count, queryOptions, queryParams));
         // set EntityCollection response information
         EntityCollectionResponse response = new EntityCollectionResponse();

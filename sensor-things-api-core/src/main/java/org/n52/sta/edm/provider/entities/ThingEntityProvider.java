@@ -64,86 +64,23 @@ public class ThingEntityProvider extends AbstractSensorThingsEntityProvider {
     // Entity Set Name
     public static final String ES_THINGS_NAME = "Things";
 
-    // Entity Navigation Property Names
-    private static final String NAV_LINK_NAME_DATASTREAMS = ES_DATASTREAMS_NAME + NAVIGATION_LINK_ANNOTATION;
-    private static final String NAV_LINK_NAME_LOCATIONS = ES_LOCATIONS_NAME + NAVIGATION_LINK_ANNOTATION;
-    private static final String NAV_LINK_NAME_HISTORICAL_LOCATIONS = ES_HISTORICAL_LOCATIONS_NAME + NAVIGATION_LINK_ANNOTATION;
-
     @Override
     protected CsdlEntityType createEntityType() {
-        //create EntityType primitive properties
-        CsdlProperty id = new CsdlProperty().setName(ID_ANNOTATION)
-                .setType(EdmPrimitiveTypeKind.Int64.getFullQualifiedName())
-                .setNullable(false);
-        CsdlProperty name = new CsdlProperty().setName(PROP_NAME)
-                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
-                .setNullable(false);
-        CsdlProperty description = new CsdlProperty().setName(PROP_DESCRIPTION)
-                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
-                .setNullable(false);
+        List<CsdlProperty> properties = createCsdlProperties();
 
-        //create EntityType complex properties
-        CsdlProperty properties = new CsdlProperty().setName(PROP_PROPERTIES)
-                .setType(OpenComplexType.CT_OPEN_TYPE_FQN)
-                .setNullable(true);
-
-        //create EntityType navigation links
-        CsdlProperty selfLink = new CsdlProperty().setName(SELF_LINK_ANNOTATION)
-                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
-                .setNullable(false);
-        CsdlProperty navLinkDatastreams = new CsdlProperty().setName(NAV_LINK_NAME_DATASTREAMS)
-                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
-                .setNullable(false);
-        CsdlProperty navLinkLocations = new CsdlProperty().setName(NAV_LINK_NAME_LOCATIONS)
-                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
-                .setNullable(false);
-        CsdlProperty navLinkHistoricalLocations = new CsdlProperty().setName(NAV_LINK_NAME_HISTORICAL_LOCATIONS)
-                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
-                .setNullable(false);
-
-        // navigation property: many optional to many optional
-        CsdlNavigationProperty navPropLocations = new CsdlNavigationProperty()
-                .setName(ES_LOCATIONS_NAME)
-                .setType(ET_LOCATION_FQN)
-                .setCollection(true)
-                .setPartner(ES_THINGS_NAME);
-
-        // navigation property: one mandatory to many optional
-        CsdlNavigationProperty navPropDatastreams = new CsdlNavigationProperty()
-                .setName(ES_DATASTREAMS_NAME)
-                .setType(ET_DATASTREAM_FQN)
-                .setCollection(true)
-                .setPartner(ET_THING_NAME);
-
-        // navigation property: one mandatory to many optional
-        CsdlNavigationProperty navPropHistoricalLocations = new CsdlNavigationProperty()
-                .setName(ES_HISTORICAL_LOCATIONS_NAME)
-                .setType(ET_HISTORICAL_LOCATION_FQN)
-                .setCollection(true)
-                .setPartner(ET_THING_NAME);
-
-        List<CsdlNavigationProperty> navPropList = new ArrayList<CsdlNavigationProperty>();
-        navPropList.addAll(Arrays.asList(navPropLocations, navPropDatastreams, navPropHistoricalLocations));
+        List<CsdlNavigationProperty> navigationProperties = createCsdlNavigationProperties();
 
         // create CsdlPropertyRef for Key element
         CsdlPropertyRef propertyRef = new CsdlPropertyRef();
-        propertyRef.setName(ID_ANNOTATION);
+        propertyRef.setName(PROP_ID);
 
         // configure EntityType
         CsdlEntityType entityType = new CsdlEntityType();
         entityType.setName(ET_THING_NAME);
-        entityType.setProperties(Arrays.asList(
-                id,
-                selfLink,
-                name,
-                description,
-                properties,
-                navLinkDatastreams,
-                navLinkLocations,
-                navLinkHistoricalLocations));
+        entityType.setProperties(properties);
         entityType.setOpenType(true);
         entityType.setKey(Collections.singletonList(propertyRef));
-        entityType.setNavigationProperties(navPropList);
+        entityType.setNavigationProperties(navigationProperties);
 
         return entityType;
     }
@@ -172,6 +109,63 @@ public class ThingEntityProvider extends AbstractSensorThingsEntityProvider {
 
         return entitySet;
     }
+
+    private List<CsdlProperty> createCsdlProperties() {
+        //create EntityType primitive properties
+        CsdlProperty id = new CsdlProperty().setName(PROP_ID)
+                .setType(EdmPrimitiveTypeKind.Int64.getFullQualifiedName())
+                .setNullable(false);
+        CsdlProperty name = new CsdlProperty().setName(PROP_NAME)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(false);
+        CsdlProperty description = new CsdlProperty().setName(PROP_DESCRIPTION)
+                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setNullable(false);
+
+        //create EntityType complex properties
+        CsdlProperty properties = new CsdlProperty().setName(PROP_PROPERTIES)
+                .setType(OpenComplexType.CT_OPEN_TYPE_FQN)
+                .setNullable(true);
+
+        return Arrays.asList(
+                id,
+                name,
+                description,
+                properties);
+    }
+
+    private List<CsdlNavigationProperty> createCsdlNavigationProperties() {
+        // navigation property: many optional to many optional
+        CsdlNavigationProperty navPropLocations = new CsdlNavigationProperty()
+                .setName(ES_LOCATIONS_NAME)
+                .setType(ET_LOCATION_FQN)
+                .setCollection(true)
+                .setPartner(ES_THINGS_NAME);
+
+        // navigation property: one mandatory to many optional
+        CsdlNavigationProperty navPropDatastreams = new CsdlNavigationProperty()
+                .setName(ES_DATASTREAMS_NAME)
+                .setType(ET_DATASTREAM_FQN)
+                .setCollection(true)
+                .setPartner(ET_THING_NAME);
+
+        // navigation property: one mandatory to many optional
+        CsdlNavigationProperty navPropHistoricalLocations = new CsdlNavigationProperty()
+                .setName(ES_HISTORICAL_LOCATIONS_NAME)
+                .setType(ET_HISTORICAL_LOCATION_FQN)
+                .setCollection(true)
+                .setPartner(ET_THING_NAME);
+
+        return Arrays.asList(navPropLocations, navPropDatastreams, navPropHistoricalLocations);
+    }
+
+//    public List<CsdlAnnotation> createCsdlAnnotations() {
+//        CsdlAnnotation annotation = new CsdlAnnotation()
+//                .setTerm("iot.test")
+//                .setQualifier("@iot")
+//                .setExpression(new CsdlConstantExpression(CsdlConstantExpression.ConstantExpressionType.String, "testContent"));
+//        return Arrays.asList(annotation);
+//    }
 
     @Override
     public FullQualifiedName getFullQualifiedTypeName() {

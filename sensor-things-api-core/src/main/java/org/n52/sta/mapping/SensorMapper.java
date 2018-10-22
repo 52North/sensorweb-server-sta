@@ -28,7 +28,6 @@
  */
 package org.n52.sta.mapping;
 
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ENCODINGTYPE;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_METADATA;
 import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ES_SENSORS_NAME;
@@ -41,6 +40,7 @@ import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -57,7 +57,7 @@ public class SensorMapper extends AbstractMapper<ProcedureEntity> {
 
     public Entity createEntity(ProcedureEntity sensor) {
         Entity entity = new Entity();
-        entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, sensor.getId()));
+        entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, sensor.getId()));
         addNameDescriptionProperties(entity, sensor);
         entity.addProperty(new Property(null, PROP_ENCODINGTYPE, ValueType.PRIMITIVE, sensor.getFormat().getFormat()));
         String metadata = "metadata";
@@ -72,7 +72,7 @@ public class SensorMapper extends AbstractMapper<ProcedureEntity> {
         }
         entity.addProperty(new Property(null, PROP_METADATA, ValueType.PRIMITIVE, metadata));
         entity.setType(ET_SENSOR_FQN.getFullQualifiedNameAsString());
-        entity.setId(entityCreationHelper.createId(entity, ES_SENSORS_NAME, ID_ANNOTATION));
+        entity.setId(entityCreationHelper.createId(entity, ES_SENSORS_NAME, PROP_ID));
 
         return entity;
     }

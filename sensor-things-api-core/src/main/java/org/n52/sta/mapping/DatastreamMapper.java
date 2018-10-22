@@ -28,7 +28,6 @@
  */
 package org.n52.sta.mapping;
 
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.ID_ANNOTATION;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_OBSERVATION_TYPE;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_OBSERVED_AREA;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PHENOMENON_TIME;
@@ -53,7 +52,7 @@ import org.n52.series.db.beans.UnitEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.shetland.util.DateTimeHelper;
 import org.n52.sta.edm.provider.complextypes.UnitOfMeasurementComplexType;
-import org.n52.sta.service.query.QueryOptions;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 import org.springframework.stereotype.Component;
 
 /**
@@ -65,7 +64,7 @@ public class DatastreamMapper extends AbstractMapper<DatastreamEntity> {
 
     public Entity createEntity(DatastreamEntity datastream) {
         Entity entity = new Entity();
-        entity.addProperty(new Property(null, ID_ANNOTATION, ValueType.PRIMITIVE, datastream.getId()));
+        entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, datastream.getId()));
         addDescription(entity, datastream);
         addNane(entity, datastream);
         entity.addProperty(new Property(null, PROP_OBSERVATION_TYPE, ValueType.PRIMITIVE, datastream.getObservationType().getFormat()));
@@ -81,7 +80,7 @@ public class DatastreamMapper extends AbstractMapper<DatastreamEntity> {
         entity.addProperty(new Property(null, PROP_OBSERVED_AREA, ValueType.GEOSPATIAL, resolveObservedArea(datastream.getGeometryEntity())));
 
         entity.setType(ET_DATASTREAM_FQN.getFullQualifiedNameAsString());
-        entity.setId(entityCreationHelper.createId(entity, ES_DATASTREAMS_NAME, ID_ANNOTATION));
+        entity.setId(entityCreationHelper.createId(entity, ES_DATASTREAMS_NAME, PROP_ID));
 
         return entity;
     }
