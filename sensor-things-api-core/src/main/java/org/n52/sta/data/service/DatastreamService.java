@@ -246,7 +246,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
         datastream.setObservableProperty(getObservedPropertyService().create(datastream.getObservableProperty()));
         datastream.setProcedure(getSensorService().create(datastream.getProcedure()));
         datastream.setThing(getThingService().create(datastream.getThing()));
-        return getRepository().save(datastream );
+        return getRepository().save(datastream);
     }
 
     @Override

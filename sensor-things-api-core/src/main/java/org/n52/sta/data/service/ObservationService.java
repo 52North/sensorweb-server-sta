@@ -36,7 +36,11 @@ import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.http.HttpMethod;
 import org.n52.series.db.DataRepository;
+import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.FeatureEntity;
+import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.series.db.beans.sta.StaDataEntityHolder;
 import org.n52.sta.data.OffsetLimitBasedPageRequest;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
@@ -52,7 +56,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
  *
  */
 @Component
-public class ObservationService extends AbstractSensorThingsEntityService<DataRepository<?>, DataEntity<?>> {
+public class ObservationService extends AbstractSensorThingsEntityService<DataRepository<?>, StaDataEntityHolder> {
 
     private ObservationMapper mapper;
 
@@ -72,7 +76,7 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
     public EntityCollection getEntityCollection(QueryOptions queryOptions) {
         EntityCollection retEntitySet = new EntityCollection();
         getRepository().findAll(createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
-        return retEntitySet;
+        return retEntitySet;    
     }
 
     @Override
@@ -230,20 +234,31 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
     }
 
     @Override
-    public DataEntity<?> create(DataEntity<?> entity) {
+    public StaDataEntityHolder create(StaDataEntityHolder entity) {
+        // insert
+        // feature
+        AbstractFeatureEntity<?> feature = getFeatureOfInterestService().create(entity.getFeatureOfInterest());
+        // category (obdProp)
+        // offering (sensor)
+        // dataset
+        // observation
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public DataEntity<?> update(DataEntity<?> entity) {
+    public StaDataEntityHolder update(StaDataEntityHolder entity) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public DataEntity<?> delete(DataEntity<?> entity) {
+    public StaDataEntityHolder delete(StaDataEntityHolder entity) {
         // TODO Auto-generated method stub
         return null;
+    }
+    
+    private AbstractSensorThingsEntityService<?, AbstractFeatureEntity<?>> getFeatureOfInterestService() {
+        return (AbstractSensorThingsEntityService<?, AbstractFeatureEntity<?>>) getEntityService(EntityTypes.FeatureOfInterest);
     }
 }

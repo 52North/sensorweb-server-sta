@@ -34,12 +34,12 @@ import java.util.OptionalLong;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
-import org.n52.series.db.FeatureRepository;
 import org.n52.series.db.FormatRepository;
-import org.n52.series.db.beans.FeatureEntity;
+import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.sta.data.query.FeatureOfInterestQuerySpecifications;
+import org.n52.sta.data.repositories.FeatureOfInterestRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.FeatureOfInterestMapper;
 import org.n52.sta.service.query.QueryOptions;
@@ -54,7 +54,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
  *
  */
 @Component
-public class FeatureOfInterestService extends AbstractSensorThingsEntityService<FeatureRepository, FeatureEntity> {
+public class FeatureOfInterestService extends AbstractSensorThingsEntityService<FeatureOfInterestRepository, AbstractFeatureEntity<?>> {
 
 
     private FeatureOfInterestMapper mapper;
@@ -64,7 +64,7 @@ public class FeatureOfInterestService extends AbstractSensorThingsEntityService<
 
     private final static FeatureOfInterestQuerySpecifications foiQS = new FeatureOfInterestQuerySpecifications();
 
-    public FeatureOfInterestService(FeatureRepository repository, FeatureOfInterestMapper mapper) {
+    public FeatureOfInterestService(FeatureOfInterestRepository repository, FeatureOfInterestMapper mapper) {
         super(repository);
         this.mapper = mapper;
     }
@@ -84,7 +84,7 @@ public class FeatureOfInterestService extends AbstractSensorThingsEntityService<
 
     @Override
     public Entity getEntity(Long id) {
-        Optional<FeatureEntity> entity = getRepository().findOne(byId(id));
+        Optional<AbstractFeatureEntity<?>> entity = getRepository().findOne(byId(id));
         return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
 
@@ -124,7 +124,7 @@ public class FeatureOfInterestService extends AbstractSensorThingsEntityService<
 
     @Override
     public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-        Optional<FeatureEntity> foi = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
+        Optional<AbstractFeatureEntity<?>> foi = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
         if (foi.isPresent()) {
             return OptionalLong.of(foi.get().getId());
         } else {
@@ -139,7 +139,7 @@ public class FeatureOfInterestService extends AbstractSensorThingsEntityService<
 
     @Override
     public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-        Optional<FeatureEntity> feature = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
+        Optional<AbstractFeatureEntity<?>> feature = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
         if (feature.isPresent()) {
             return mapper.createEntity(feature.get());
         } else {
@@ -156,7 +156,7 @@ public class FeatureOfInterestService extends AbstractSensorThingsEntityService<
      * @param targetId Id of the Entity to be retrieved
      * @return Optional<FeatureEntity> Requested Entity
      */
-    private Optional<FeatureEntity> getRelatedEntityRaw(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+    private Optional<AbstractFeatureEntity<?>> getRelatedEntityRaw(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         BooleanExpression filter;
         switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
         case "iot.Observation": {
@@ -183,12 +183,12 @@ public class FeatureOfInterestService extends AbstractSensorThingsEntityService<
     }
 
     @Override
-    public FeatureEntity create(FeatureEntity feature) {
+    public AbstractFeatureEntity<?> create(AbstractFeatureEntity<?> feature) {
         if (feature.getId() != null && !feature.isSetName()) {
             return getRepository().findOne(foiQS.withId(feature.getId())).get();
         }
         if (getRepository().exists(foiQS.withIdentifier(feature.getIdentifier()))) {
-            Optional<FeatureEntity> optional =
+            Optional<AbstractFeatureEntity<?>> optional =
                     getRepository().findOne(foiQS.withIdentifier(feature.getIdentifier()));
             return optional.isPresent() ? optional.get() : null;
         }
@@ -197,18 +197,18 @@ public class FeatureOfInterestService extends AbstractSensorThingsEntityService<
     }
 
     @Override
-    public FeatureEntity update(FeatureEntity entity) {
+    public AbstractFeatureEntity<?> update(AbstractFeatureEntity<?> entity) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public FeatureEntity delete(FeatureEntity entity) {
+    public AbstractFeatureEntity<?> delete(AbstractFeatureEntity<?> entity) {
         // TODO Auto-generated method stub
         return null;
     }
     
-    private void checkFeatureType(FeatureEntity feature) {
+    private void checkFeatureType(AbstractFeatureEntity<?> feature) {
         FormatEntity format;
         if (!formatRepository.existsByFormat(feature.getFeatureType().getFormat())) {
             format = formatRepository.save(feature.getFeatureType());
