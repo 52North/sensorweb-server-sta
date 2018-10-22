@@ -6,6 +6,7 @@
 package org.n52.sta.service.processor;
 
 import java.io.InputStream;
+
 import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.edm.EdmComplexType;
@@ -23,7 +24,6 @@ import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.api.processor.PrimitiveValueProcessor;
 import org.apache.olingo.server.api.serializer.ComplexSerializerOptions;
 import org.apache.olingo.server.api.serializer.FixedFormatSerializer;
-import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.PrimitiveSerializerOptions;
 import org.apache.olingo.server.api.serializer.PrimitiveValueSerializerOptions;
 import org.apache.olingo.server.api.serializer.SerializerException;

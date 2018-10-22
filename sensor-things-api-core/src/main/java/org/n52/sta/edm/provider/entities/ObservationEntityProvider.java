@@ -32,9 +32,9 @@ import static org.n52.sta.edm.provider.SensorThingsEdmConstants.NAMESPACE;
 import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ES_DATASTREAMS_NAME;
 import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_FQN;
 import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_NAME;
+import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ES_FEATURES_OF_INTEREST_NAME;
 import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ET_FEATURE_OF_INTEREST_FQN;
 import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ET_FEATURE_OF_INTEREST_NAME;
-import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ES_FEATURES_OF_INTEREST_NAME;
 
 import java.util.ArrayList;
 import java.util.Arrays;

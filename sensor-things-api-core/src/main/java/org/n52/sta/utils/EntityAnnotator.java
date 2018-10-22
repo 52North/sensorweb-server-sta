@@ -5,13 +5,12 @@
  */
 package org.n52.sta.utils;
 
+import static org.n52.sta.edm.provider.SensorThingsEdmConstants.SELF_LINK_ANNOTATION;
+
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Link;
-import org.apache.olingo.commons.api.data.Property;
-import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
-import static org.n52.sta.edm.provider.SensorThingsEdmConstants.SELF_LINK_ANNOTATION;
 import org.springframework.stereotype.Component;
 
 /**

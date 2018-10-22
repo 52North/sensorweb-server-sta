@@ -6,7 +6,6 @@
 package org.n52.sta.data.service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.stream.Collectors;
 

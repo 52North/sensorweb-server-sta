@@ -36,7 +36,6 @@ import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.n52.series.db.beans.sta.LocationEncodingEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
-import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.sta.data.query.LocationQuerySpecifications;
 import org.n52.sta.data.repositories.LocationEncodingRepository;
 import org.n52.sta.data.repositories.LocationRepository;

@@ -28,15 +28,16 @@
  */
 package org.n52.sta.mapping;
 
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PARAMETERS;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PHENOMENON_TIME;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_RESULT;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_RESULT_TIME;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_VALID_TIME;
+import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_NAME;
+import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ET_FEATURE_OF_INTEREST_NAME;
 import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ES_OBSERVATIONS_NAME;
 import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ET_OBSERVATION_FQN;
-import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ET_FEATURE_OF_INTEREST_NAME;
-import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_NAME;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -59,9 +60,7 @@ import org.n52.series.db.beans.ProfileDataEntity;
 import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.ReferencedDataEntity;
 import org.n52.series.db.beans.TextDataEntity;
-import org.n52.series.db.beans.data.Data;
 import org.n52.series.db.beans.parameter.Parameter;
-import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.StaDataEntityHolder;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
@@ -71,7 +70,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>

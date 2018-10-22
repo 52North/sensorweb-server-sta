@@ -28,6 +28,7 @@
  */
 package org.n52.sta.mapping;
 
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PROPERTIES;
 import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ES_DATASTREAMS_NAME;
 import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ES_LOCATIONS_NAME;
@@ -52,7 +53,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 
 /**
  *

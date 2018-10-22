@@ -5,8 +5,11 @@
  */
 package org.n52.sta.edm.provider;
 
+import static org.n52.sta.edm.provider.SensorThingsEdmConstants.NAMESPACE;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
 import org.apache.olingo.commons.api.edm.provider.CsdlComplexType;
@@ -16,8 +19,6 @@ import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityType;
 import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
 import org.apache.olingo.commons.api.ex.ODataException;
-import static org.n52.sta.edm.provider.SensorThingsEdmConstants.NAMESPACE;
-import org.n52.sta.edm.provider.complextypes.ComplexTypeRepository;
 import org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider;
 import org.n52.sta.edm.provider.entities.SensorThingsEntityProviderRepository;
 import org.springframework.beans.factory.annotation.Autowired;

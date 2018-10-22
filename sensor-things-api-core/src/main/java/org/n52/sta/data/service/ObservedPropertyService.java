@@ -34,7 +34,6 @@ import java.util.OptionalLong;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
-import org.apache.olingo.commons.api.http.HttpMethod;
 import org.n52.series.db.PhenomenonRepository;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.PhenomenonEntity;

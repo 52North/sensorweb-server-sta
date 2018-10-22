@@ -8,7 +8,7 @@ package org.n52.sta.utils;
 import java.util.List;
 import java.util.Locale;
 import java.util.OptionalLong;
-import org.apache.olingo.commons.api.data.Entity;
+
 import org.apache.olingo.commons.api.edm.EdmBindingTarget;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.edm.EdmEntityType;

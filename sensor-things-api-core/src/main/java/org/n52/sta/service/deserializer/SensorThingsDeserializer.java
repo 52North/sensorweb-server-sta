@@ -74,7 +74,6 @@ import org.apache.olingo.server.core.deserializer.DeserializerResultImpl;
 import org.apache.olingo.server.core.deserializer.helper.ExpandTreeBuilder;
 import org.apache.olingo.server.core.deserializer.helper.ExpandTreeBuilderImpl;
 import org.apache.olingo.server.core.serializer.utils.ContentTypeHelper;
-import org.geotools.feature.FeatureIterator;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;

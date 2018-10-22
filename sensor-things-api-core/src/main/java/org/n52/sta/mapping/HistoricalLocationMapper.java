@@ -28,6 +28,7 @@
  */
 package org.n52.sta.mapping;
 
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_TIME;
 import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ES_HISTORICAL_LOCATIONS_NAME;
 import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_FQN;
@@ -38,7 +39,6 @@ import org.apache.olingo.commons.api.data.ValueType;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.util.DateTimeHelper;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 //import org.n52.sta.utils.EntityAnnotator;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;

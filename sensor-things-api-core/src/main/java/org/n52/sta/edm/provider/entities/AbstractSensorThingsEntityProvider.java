@@ -31,7 +31,6 @@ package org.n52.sta.edm.provider.entities;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityType;
-import static org.n52.sta.edm.provider.SensorThingsEdmConstants.NAMESPACE;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 

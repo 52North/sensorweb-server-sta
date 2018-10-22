@@ -37,7 +37,6 @@ import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.n52.series.db.FormatRepository;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.FormatEntity;
-import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.sta.data.query.FeatureOfInterestQuerySpecifications;
 import org.n52.sta.data.repositories.FeatureOfInterestRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;

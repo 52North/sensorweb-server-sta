@@ -5,6 +5,8 @@
  */
 package org.n52.sta.service.handler;
 
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
+
 import java.util.List;
 import java.util.Locale;
 
@@ -12,14 +14,12 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
-import org.apache.olingo.server.api.deserializer.DeserializerResult;
 import org.apache.olingo.server.api.uri.UriParameter;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 import org.n52.sta.service.query.QueryOptions;
 import org.n52.sta.service.query.QueryOptionsHandler;
 import org.n52.sta.service.response.EntityResponse;

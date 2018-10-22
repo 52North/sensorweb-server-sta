@@ -2,7 +2,6 @@ package org.n52.sta.service.handler.crud;
 
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.Optional;
 import java.util.Set;
 
 import org.apache.olingo.commons.api.data.Entity;

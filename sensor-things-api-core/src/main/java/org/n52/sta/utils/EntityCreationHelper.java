@@ -7,6 +7,7 @@ package org.n52.sta.utils;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.ex.ODataRuntimeException;

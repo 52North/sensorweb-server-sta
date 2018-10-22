@@ -6,7 +6,6 @@
 package org.n52.sta.service.processor;
 
 import java.io.InputStream;
-import java.util.List;
 import java.util.Locale;
 
 import org.apache.olingo.commons.api.data.ContextURL;
@@ -31,9 +30,7 @@ import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
-import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
-import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.service.deserializer.SensorThingsDeserializer;
 import org.n52.sta.service.handler.AbstractEntityRequestHandler;
 import org.n52.sta.service.handler.crud.AbstractEntityCrudRequestHandler;

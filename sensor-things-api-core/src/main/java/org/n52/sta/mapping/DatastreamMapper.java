@@ -28,6 +28,7 @@
  */
 package org.n52.sta.mapping;
 
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_OBSERVATION_TYPE;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_OBSERVED_AREA;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PHENOMENON_TIME;
@@ -60,7 +61,6 @@ import org.n52.shetland.ogc.gml.time.TimePeriod;
 import org.n52.shetland.util.DateTimeHelper;
 import org.n52.sta.edm.provider.complextypes.UnitOfMeasurementComplexType;
 import org.springframework.beans.factory.annotation.Autowired;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 import org.springframework.stereotype.Component;
 
 /**

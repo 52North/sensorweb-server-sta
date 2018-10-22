@@ -29,6 +29,7 @@
 package org.n52.sta.mapping;
 
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ENCODINGTYPE;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_LOCATION;
 import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ES_LOCATIONS_NAME;
 import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATION_FQN;
@@ -39,9 +40,6 @@ import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.edm.geo.Geospatial;
 import org.n52.series.db.beans.sta.LocationEncodingEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
-import org.n52.sta.utils.EntityCreationHelper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**

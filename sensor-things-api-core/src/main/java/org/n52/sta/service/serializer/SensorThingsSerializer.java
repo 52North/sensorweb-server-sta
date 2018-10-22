@@ -84,18 +84,18 @@ import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 import org.apache.olingo.server.core.ODataWritableContent;
 import org.apache.olingo.server.core.serializer.AbstractODataSerializer;
 import org.apache.olingo.server.core.serializer.SerializerResultImpl;
+import org.apache.olingo.server.core.serializer.json.ODataErrorSerializer;
 import org.apache.olingo.server.core.serializer.utils.CircleStreamBuffer;
 import org.apache.olingo.server.core.serializer.utils.ContentTypeHelper;
 import org.apache.olingo.server.core.serializer.utils.ContextURLBuilder;
 import org.apache.olingo.server.core.serializer.utils.ExpandSelectHelper;
 import org.apache.olingo.server.core.uri.UriHelperImpl;
 import org.apache.olingo.server.core.uri.queryoption.ExpandOptionImpl;
+import org.n52.sta.edm.provider.SensorThingsEdmConstants;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.apache.olingo.server.core.serializer.json.ODataErrorSerializer;
-import org.n52.sta.edm.provider.SensorThingsEdmConstants;
 
 public class SensorThingsSerializer extends AbstractODataSerializer {
 

@@ -8,7 +8,6 @@ package org.n52.sta.service.processor;
 import java.io.InputStream;
 
 import org.apache.olingo.commons.api.data.ContextURL;
-import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;

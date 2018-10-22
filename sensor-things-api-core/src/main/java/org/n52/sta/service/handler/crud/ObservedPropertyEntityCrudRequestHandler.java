@@ -1,7 +1,5 @@
 package org.n52.sta.service.handler.crud;
 
-import java.util.Optional;
-
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.beans.PhenomenonEntity;
