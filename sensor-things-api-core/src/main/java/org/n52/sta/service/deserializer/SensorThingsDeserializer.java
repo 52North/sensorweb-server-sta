@@ -895,7 +895,7 @@ public class SensorThingsDeserializer implements ODataDeserializer {
                 throw new DeserializerException("Unknown Primitive Type: " + name, e,
                         DeserializerException.MessageKeys.UNKNOWN_PRIMITIVE_TYPE, name, propertyName);
             }
-            valid = matchTextualCase(jsonNode, primKind) || matchNumberCase(jsonNode, primKind)
+            valid = propertyName.equals("result") || matchTextualCase(jsonNode, primKind) || matchNumberCase(jsonNode, primKind)
                     || matchBooleanCase(jsonNode, primKind) || matchIEEENumberCase(jsonNode, primKind)
                     || jsonNode.isObject() && name.startsWith("Geo");
         }
