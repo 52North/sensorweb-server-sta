@@ -28,18 +28,24 @@
  */
 package org.n52.sta.data.service;
 
+import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.Set;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.n52.series.db.FormatRepository;
+import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.UnitEntity;
+import org.n52.series.db.beans.dataset.Dataset;
 import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.repositories.DatastreamRepository;
@@ -246,7 +252,9 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
         datastream.setObservableProperty(getObservedPropertyService().create(datastream.getObservableProperty()));
         datastream.setProcedure(getSensorService().create(datastream.getProcedure()));
         datastream.setThing(getThingService().create(datastream.getThing()));
-        return getRepository().save(datastream);
+        datastream = getRepository().save(datastream);
+        processObservation(datastream);
+        return datastream = getRepository().save(datastream);
     }
 
     @Override
@@ -281,6 +289,17 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
         datastream.setObservationType(format);
     }
     
+    private void processObservation(DatastreamEntity datastream) {
+        Set<DatasetEntity> datasets = new LinkedHashSet<>();
+        for (StaDataEntity observation : datastream.getObservations()) {
+            DataEntity<?> data = getObservationService().create(observation);
+            if (data != null) {
+                datasets.add(data.getDataset());
+            }
+        }
+        datastream.setDatasets(datasets);
+    }
+
     private AbstractSensorThingsEntityService<?, ThingEntity> getThingService() {
         return (AbstractSensorThingsEntityService<?, ThingEntity>) getEntityService(EntityTypes.Thing);
     }
@@ -291,5 +310,9 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     
     private AbstractSensorThingsEntityService<?, PhenomenonEntity> getObservedPropertyService() {
         return (AbstractSensorThingsEntityService<?, PhenomenonEntity>) getEntityService(EntityTypes.ObservedProperty);
+    }
+    
+    private AbstractSensorThingsEntityService<?, DataEntity<?>> getObservationService() {
+        return (AbstractSensorThingsEntityService<?, DataEntity<?>>) getEntityService(EntityTypes.Observation);
     }
 }

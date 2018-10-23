@@ -191,7 +191,7 @@ public class FeatureOfInterestService extends AbstractSensorThingsEntityService<
                     getRepository().findOne(foiQS.withIdentifier(feature.getIdentifier()));
             return optional.isPresent() ? optional.get() : null;
         }
-        
+        checkFeatureType(feature);
         return getRepository().save(feature);
     }
 

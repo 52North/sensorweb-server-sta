@@ -52,9 +52,8 @@ import org.apache.olingo.commons.api.edm.geo.Geospatial;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.GeometryEntity;
 import org.n52.series.db.beans.UnitEntity;
-import org.n52.series.db.beans.data.Data;
 import org.n52.series.db.beans.sta.DatastreamEntity;
-import org.n52.series.db.beans.sta.StaDataEntityHolder;
+import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
@@ -220,12 +219,13 @@ public class DatastreamMapper extends AbstractMapper<DatastreamEntity> {
 
     private void addObservations(DatastreamEntity datastream, Entity entity) {
         if (checkNavigationLink(entity, ES_OBSERVATIONS_NAME)) {
-            Set<Data<?>> observations = new LinkedHashSet<>();
+            Set<StaDataEntity> observations = new LinkedHashSet<>();
             for (Entity observation : entity.getNavigationLink(ES_OBSERVATIONS_NAME).getInlineEntitySet()) {
-               StaDataEntityHolder createObservation = observationMapper.createObservation(observation);
+               StaDataEntity createObservation = observationMapper.createObservation(observation);
                createObservation.setDatastream(datastream);
                observations.add(createObservation);
             }
+            datastream.setObservations(observations);
         }
     }
 }

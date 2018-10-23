@@ -61,7 +61,7 @@ import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.ReferencedDataEntity;
 import org.n52.series.db.beans.TextDataEntity;
 import org.n52.series.db.beans.parameter.Parameter;
-import org.n52.series.db.beans.sta.StaDataEntityHolder;
+import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
@@ -196,18 +196,25 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
         return createTime(start, end);
     }
 
-    public StaDataEntityHolder createObservation(Entity entity) {
-        StaDataEntityHolder observation = new StaDataEntityHolder();
+    public StaDataEntity createObservation(Entity entity) {
+        StaDataEntity observation = new StaDataEntity();
         addPhenomenonTime(observation, entity);
         addResultTime(observation, entity);
         addValidTime(observation, entity);
         addParameter(observation, entity);
         addFeatureOfInterest(observation, entity);
         addDatastream(observation, entity);
+        addResult(observation, entity);
         return observation;
     }
     
-    private void addResultTime(StaDataEntityHolder observation, Entity entity) {
+    private void addResult(StaDataEntity observation, Entity entity) {
+        if (checkProperty(entity, PROP_RESULT)) {
+            observation.setValue(getPropertyValue(entity, PROP_RESULT).toString());
+        }
+    }
+
+    private void addResultTime(StaDataEntity observation, Entity entity) {
         if (checkProperty(entity, PROP_RESULT_TIME)) {
             Time time = parseTime(getPropertyValue(entity, PROP_RESULT_TIME).toString());
             if (time instanceof TimeInstant) {
@@ -218,7 +225,7 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
         }
     }
     
-    private void addValidTime(StaDataEntityHolder observation, Entity entity) {
+    private void addValidTime(StaDataEntity observation, Entity entity) {
         if (checkProperty(entity, PROP_RESULT_TIME)) {
             Time time = parseTime(getPropertyValue(entity, PROP_RESULT_TIME).toString());
             if (time instanceof TimeInstant) {
@@ -231,19 +238,19 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
         }
     }
 
-    private void addParameter(StaDataEntityHolder observation, Entity entity) {
+    private void addParameter(StaDataEntity observation, Entity entity) {
         // TODO Auto-generated method stub
         
     }
 
-    private void addFeatureOfInterest(StaDataEntityHolder observation, Entity entity) {
+    private void addFeatureOfInterest(StaDataEntity observation, Entity entity) {
         if (checkNavigationLink(entity, ET_FEATURE_OF_INTEREST_NAME)) {
             observation.setFeatureOfInterest(featureMapper
                     .createFeatureOfInterest(entity.getNavigationLink(ET_FEATURE_OF_INTEREST_NAME).getInlineEntity()));
         }
     }
 
-    private void addDatastream(StaDataEntityHolder observation, Entity entity) {
+    private void addDatastream(StaDataEntity observation, Entity entity) {
         if (checkNavigationLink(entity, ET_DATASTREAM_NAME)) {
             observation.setDatastream(datastreamMapper
                     .createDatastream(entity.getNavigationLink(ET_DATASTREAM_NAME).getInlineEntity()));

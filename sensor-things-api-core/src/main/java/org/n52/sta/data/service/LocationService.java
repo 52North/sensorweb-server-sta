@@ -42,6 +42,7 @@ import org.n52.sta.data.repositories.LocationRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.LocationMapper;
 import org.n52.sta.service.query.QueryOptions;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers;
@@ -58,6 +59,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
 
     private LocationMapper mapper;
     
+    @Autowired
     private LocationEncodingRepository locationEncodingRepository;
 
     private final static LocationQuerySpecifications lQS= new LocationQuerySpecifications();

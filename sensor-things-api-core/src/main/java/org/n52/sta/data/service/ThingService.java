@@ -197,8 +197,9 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
         }
         processLocations(thing);
         thing = getRepository().save(thing);
-        processDatastreams(thing);
         processHistoricalLocations(thing);
+        processDatastreams(thing);
+        thing = getRepository().save(thing);
         return thing;
         
     }
@@ -242,7 +243,6 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
             Set<HistoricalLocationEntity> historicalLocations = new LinkedHashSet<>();
             HistoricalLocationEntity historicalLocation = new HistoricalLocationEntity();
             historicalLocation.setThingEntity(thing);
-            historicalLocation.setLocationEntities(thing.getLocationEntities());
             historicalLocation.setTime(DateTime.now().toDate());
             HistoricalLocationEntity createdHistoricalLocation =
                     getHistoricalLocationService().create(historicalLocation);
