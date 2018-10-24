@@ -36,6 +36,8 @@ import java.util.Set;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.commons.api.http.HttpMethod;
+import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.FormatRepository;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
@@ -239,7 +241,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     }
 
     @Override
-    public DatastreamEntity create(DatastreamEntity datastream) {
+    public DatastreamEntity create(DatastreamEntity datastream) throws ODataApplicationException {
         if (datastream.getId() != null && !datastream.isSetName()) {
             return getRepository().findOne(dQS.withId(datastream.getId())).get();
         }
@@ -258,7 +260,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     }
 
     @Override
-    public DatastreamEntity update(DatastreamEntity entity) {
+    public DatastreamEntity update(DatastreamEntity entity, HttpMethod method) throws ODataApplicationException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -289,7 +291,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
         datastream.setObservationType(format);
     }
     
-    private void processObservation(DatastreamEntity datastream) {
+    private void processObservation(DatastreamEntity datastream) throws ODataApplicationException {
         Set<DatasetEntity> datasets = new LinkedHashSet<>();
         for (StaDataEntity observation : datastream.getObservations()) {
             DataEntity<?> data = getObservationService().create(observation);

@@ -29,6 +29,7 @@
 package org.n52.sta.data.service;
 
 import java.util.LinkedHashSet;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
@@ -36,6 +37,9 @@ import java.util.Set;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.commons.api.http.HttpMethod;
+import org.apache.olingo.commons.api.http.HttpStatusCode;
+import org.apache.olingo.server.api.ODataApplicationException;
 import org.joda.time.DateTime;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
@@ -187,7 +191,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     }
 
     @Override
-    public ThingEntity create(ThingEntity thing) {
+    public ThingEntity create(ThingEntity thing) throws ODataApplicationException {
         if (thing.getId() != null && !thing.isSetName()) {
             return getRepository().findOne(tQS.withId(thing.getId())).get();
         }
@@ -205,8 +209,27 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     }
 
     @Override
-    public ThingEntity update(ThingEntity thing) {
-        return getRepository().save(thing);
+    public ThingEntity update(ThingEntity thing, HttpMethod method) throws ODataApplicationException {
+        if (HttpMethod.PATCH.equals(method)) {
+            Optional<ThingEntity> existing = getRepository().findOne(tQS.withId(thing.getId()));
+            if (existing.isPresent()) {
+                ThingEntity merged = mapper.merge(existing.get(), thing);
+                if (thing.hasLocationEntities()) {
+                    merged.setLocationEntities(thing.getLocationEntities());
+                    processLocations(merged);
+                    merged = getRepository().save(merged);
+                    processHistoricalLocations(merged);
+                }
+                return getRepository().save(merged);
+            }
+            throw new ODataApplicationException(String.format("The entity with id (%s) does not exist!", thing.getId()),
+                    HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+        } else if (HttpMethod.PUT.equals(method)) {
+            throw new ODataApplicationException("Http PUT is not yet supported!",
+                    HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.getDefault());
+        }
+        throw new ODataApplicationException("Invalid http method for updating entity!",
+                HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
     }
 
     @Override
@@ -215,7 +238,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
         return null;
     }
 
-    private void processDatastreams(ThingEntity thing) {
+    private void processDatastreams(ThingEntity thing) throws ODataApplicationException {
        if (thing.hasDatastreamEntities()) {
            Set<DatastreamEntity> datastreams = new LinkedHashSet<>();
            for (DatastreamEntity datastream : thing.getDatastreamEntities()) {
@@ -227,7 +250,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
        }
     }
 
-    private void processLocations(ThingEntity thing) {
+    private void processLocations(ThingEntity thing) throws ODataApplicationException {
         if (thing.hasLocationEntities()) {
             Set<LocationEntity> locations = new LinkedHashSet<>();
             for (LocationEntity location : thing.getLocationEntities()) {
@@ -238,7 +261,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
         }
     }
 
-    private void processHistoricalLocations(ThingEntity thing) {
+    private void processHistoricalLocations(ThingEntity thing) throws ODataApplicationException {
         if (thing != null && thing.hasLocationEntities()) {
             Set<HistoricalLocationEntity> historicalLocations = new LinkedHashSet<>();
             HistoricalLocationEntity historicalLocation = new HistoricalLocationEntity();
@@ -251,7 +274,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
             }
             for (LocationEntity location : thing.getLocationEntities()) {
                 location.setHistoricalLocationEntities(historicalLocations);
-                getLocationService().update(location);
+                getLocationService().update(location, HttpMethod.PATCH);
             }
             thing.setHistoricalLocationEntities(historicalLocations);
         }

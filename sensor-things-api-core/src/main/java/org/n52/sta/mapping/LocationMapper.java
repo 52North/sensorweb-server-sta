@@ -33,6 +33,10 @@ import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvid
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_LOCATION;
 import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ES_LOCATIONS_NAME;
 import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATION_FQN;
+import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ES_THINGS_NAME;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
@@ -40,6 +44,8 @@ import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.edm.geo.Geospatial;
 import org.n52.series.db.beans.sta.LocationEncodingEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.series.db.beans.sta.ThingEntity;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -48,6 +54,9 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class LocationMapper extends AbstractLocationGeometryMapper<LocationEntity> {
+    
+    @Autowired
+    private ThingMapper thingMapper;
     
     public Entity createEntity(LocationEntity location) {
         Entity entity = new Entity();
@@ -62,7 +71,7 @@ public class LocationMapper extends AbstractLocationGeometryMapper<LocationEntit
         return entity;
     }
 
-    public LocationEntity createLocation(Entity entity) {
+    public LocationEntity createEntity(Entity entity) {
         LocationEntity location = new LocationEntity();
         setId(location, entity);
         setName(location, entity);
@@ -78,6 +87,7 @@ public class LocationMapper extends AbstractLocationGeometryMapper<LocationEntit
         if (entity.getProperty(PROP_ENCODINGTYPE) != null) {
             location.setLocationEncoding(createLocationEncodingEntity(entity.getProperty(PROP_ENCODINGTYPE)));
         }
+        addThings(location, entity);
         return location;
     }
     
@@ -85,6 +95,27 @@ public class LocationMapper extends AbstractLocationGeometryMapper<LocationEntit
         LocationEncodingEntity locationEncodingEntity = new LocationEncodingEntity();
         locationEncodingEntity.setEncodingType(property.getValue().toString());
         return locationEncodingEntity;
+    }
+
+    @Override
+    public LocationEntity merge(LocationEntity existing, LocationEntity toMerge) {
+        mergeName(existing, toMerge);
+        mergeDescription(existing, toMerge);
+        if (toMerge.hasLocation()) {
+            existing.setLocation(toMerge.getLocation());
+        }
+        mergeGeometry(existing, toMerge);
+        return existing;
+    }
+    
+    private void addThings(LocationEntity location, Entity entity) {
+        if (checkNavigationLink(entity, ES_THINGS_NAME)) {
+            Set<ThingEntity> things = new LinkedHashSet<>();
+            for (Entity thing : entity.getNavigationLink(ES_THINGS_NAME).getInlineEntitySet()) {
+                things.add(thingMapper.createEntity(thing));
+            }
+            location.setThingEntities(things);
+        }
     }
 
 }

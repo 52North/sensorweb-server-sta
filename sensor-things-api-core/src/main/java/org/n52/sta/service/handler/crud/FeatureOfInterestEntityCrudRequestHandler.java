@@ -11,27 +11,19 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class FeatureOfInterestEntityCrudRequestHandler extends AbstractEntityCrudRequestHandler<FeatureEntity> {
-    
+
     @Autowired
     private FeatureOfInterestMapper mapper;
-    
+
     @Override
-    public Entity handleCreateEntityRequest(Entity entity)
-            throws ODataApplicationException {
-        FeatureEntity feature = processEntity(entity);
-        return feature != null ? mapper.createEntity(feature) : null;
-    }
-    
-    @Override
-    protected FeatureEntity processEntity(Entity entity)
-            throws ODataApplicationException {
+    protected Entity handleCreateEntityRequest(Entity entity) throws ODataApplicationException {
         if (entity != null) {
-            FeatureEntity feature = mapper.createFeatureOfInterest(entity);
-            return getEntityService().create(feature);
+            FeatureEntity feature = getEntityService().create(mapper.createEntity(entity));
+            return feature != null ? mapper.createEntity(feature) : null;
         }
         return null;
     }
-    
+
     private AbstractSensorThingsEntityService<?, FeatureEntity> getEntityService() {
         return (AbstractSensorThingsEntityService<?, FeatureEntity>) getEntityService(EntityTypes.FeatureOfInterest);
     }

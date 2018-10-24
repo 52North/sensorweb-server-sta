@@ -19,44 +19,33 @@ public class ThingEntityCrudRequestHandler extends AbstractEntityCrudRequestHand
     private ThingMapper mapper;
     
     @Override
-    public Entity handleCreateEntityRequest(Entity entity) throws ODataApplicationException {
-        ThingEntity thing = processEntity(entity);
-        return thing != null ? mapper.createEntity(thing) : null;
-    }
-    
-    @Override
-    protected ThingEntity processEntity(Entity entity) throws ODataApplicationException {
+    protected Entity handleCreateEntityRequest(Entity entity) throws ODataApplicationException {
         if (entity != null) {
-            ThingEntity thing = mapper.createThing(entity);
-            return getEntityService().create(thing);
+            ThingEntity thing = getEntityService().create(mapper.createEntity(entity));
+            return thing != null ? mapper.createEntity(thing) : null;
         }
         return null;
     }
     
-
     @Override
-    public EntityResponse handleUpdateEntityRequest(DeserializerResult deserializerResult, HttpMethod method)
+    protected Entity handleUpdateEntityRequest(Entity entity, HttpMethod method)
             throws ODataApplicationException {
-        EntityResponse response = null;
-        Entity entity = deserializerResult.getEntity();
         if (entity != null) {
-            getEntityService().update(mapper.createThing(entity));
+            ThingEntity thing = getEntityService().update(mapper.createEntity(entity), method);
+            return thing != null ? mapper.createEntity(thing) : null;
         }
-        // TODO Auto-generated method stub
-        return response;
+        return null;
     }
 
 
     @Override
-    public EntityResponse handleDeleteEntityRequest(DeserializerResult deserializerResult)
+    protected Entity handleDeleteEntityRequest(Entity entity)
             throws ODataApplicationException {
-        EntityResponse response = null;
-        Entity entity = deserializerResult.getEntity();
         if (entity != null) {
-            getEntityService().delete(mapper.createThing(entity));
+            ThingEntity thing = getEntityService().delete(mapper.createEntity(entity));
+            return thing != null ? mapper.createEntity(thing) : null;
         }
-        // TODO Auto-generated method stub
-        return response;
+        return null;
     }
     
     private AbstractSensorThingsEntityService<?, ThingEntity> getEntityService() {

@@ -34,6 +34,8 @@ import java.util.OptionalLong;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.commons.api.http.HttpMethod;
+import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.sta.data.query.HistoricalLocationQuerySpecifications;
 import org.n52.sta.data.repositories.HistoricalLocationRepository;
@@ -217,7 +219,7 @@ public class HistoricalLocationService extends AbstractSensorThingsEntityService
     }
 
     @Override
-    public HistoricalLocationEntity update(HistoricalLocationEntity historicalLocation) {
+    public HistoricalLocationEntity update(HistoricalLocationEntity historicalLocation, HttpMethod method) throws ODataApplicationException {
         return null;
     }
 

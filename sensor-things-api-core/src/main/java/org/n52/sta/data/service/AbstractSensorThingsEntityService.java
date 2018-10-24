@@ -16,6 +16,7 @@ import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmEnumType;
 import org.apache.olingo.commons.api.edm.EdmType;
+import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriInfoResource;
 import org.apache.olingo.server.api.uri.UriResource;
@@ -38,13 +39,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Interface for requesting Sensor Things entities
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
-public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<?, ?>, S extends IdEntity> {
+public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<?, Long>, S extends IdEntity> {
    
     @Autowired
     private EntityServiceRepository serviceRepository;
@@ -226,12 +228,22 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
         return getRepository().count();
     }
 
-    public abstract S create(S entity);
+    @Transactional(rollbackFor = Exception.class)
+    public abstract S create(S entity) throws ODataApplicationException;
 
-    public abstract S update(S entity);
+    @Transactional(rollbackFor = Exception.class)
+    public abstract S update(S entity, HttpMethod method) throws ODataApplicationException;
 
-    public abstract S delete(S entity);
+    @Transactional(rollbackFor = Exception.class)
+    public abstract S delete(S entity) throws ODataApplicationException;
     
+    protected S createOrUpdate(S entity) throws ODataApplicationException {
+        if (entity.getId() != null && getRepository().existsById(entity.getId())) {
+            return update(entity, HttpMethod.PATCH);
+        }
+        return create(entity);
+    }
+
     protected AbstractSensorThingsEntityService<?, ?> getEntityService(EntityTypes type) {
         return serviceRepository.getEntityService(type);
     }

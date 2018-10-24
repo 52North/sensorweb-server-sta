@@ -74,6 +74,7 @@ import org.apache.olingo.server.core.deserializer.DeserializerResultImpl;
 import org.apache.olingo.server.core.deserializer.helper.ExpandTreeBuilder;
 import org.apache.olingo.server.core.deserializer.helper.ExpandTreeBuilderImpl;
 import org.apache.olingo.server.core.serializer.utils.ContentTypeHelper;
+import org.n52.sta.edm.provider.SensorThingsEdmConstants;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -360,7 +361,7 @@ public class SensorThingsDeserializer implements ODataDeserializer {
             throws DeserializerException {
         List<String> propertyNames = edmEntityType.getPropertyNames();
         for (String propertyName : propertyNames) {
-            JsonNode jsonNode = node.get(propertyName);
+            JsonNode jsonNode = node.get(propertyName.equalsIgnoreCase("id") ? SensorThingsEdmConstants.ID_ANNOTATION : propertyName);
             if (jsonNode != null) {
                 EdmProperty edmProperty = (EdmProperty) edmEntityType.getProperty(propertyName);
                 if (jsonNode.isNull() && !edmProperty.isNullable()) {
@@ -847,7 +848,8 @@ public class SensorThingsDeserializer implements ODataDeserializer {
         while (fieldsIterator.hasNext()) {
             Map.Entry<String, JsonNode> field = fieldsIterator.next();
 
-            if (field.getKey().contains(ODATA_CONTROL_INFORMATION_PREFIX)) {
+            if (field.getKey().contains(ODATA_CONTROL_INFORMATION_PREFIX) 
+                    || field.getKey().contains(SensorThingsEdmConstants.CONTROL_ANNOTATION_PREFIX)) {
                 // Control Information is ignored for requests as per
                 // specification chapter "4.5 Control Information"
                 toRemove.add(field.getKey());

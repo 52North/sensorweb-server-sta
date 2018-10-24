@@ -75,6 +75,7 @@ public class ThingMapper extends AbstractMapper<ThingEntity> {
     @Autowired
     private DatastreamMapper datastreamMapper;
 
+    @Override
     public Entity createEntity(ThingEntity thing) {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, thing.getId()));
@@ -89,7 +90,8 @@ public class ThingMapper extends AbstractMapper<ThingEntity> {
         return entity;
     }
 
-    public ThingEntity createThing(Entity entity) {
+    @Override
+    public ThingEntity createEntity(Entity entity) {
         ThingEntity thing = new ThingEntity();
         setId(thing, entity);
         setName(thing, entity);
@@ -102,11 +104,21 @@ public class ThingMapper extends AbstractMapper<ThingEntity> {
         return thing;
     }
 
+    @Override
+    public ThingEntity merge(ThingEntity existing, ThingEntity toMerge) {
+        mergeName(existing, toMerge);
+        mergeDescription(existing, toMerge);
+        if (toMerge.hasProperties()) {
+            existing.setProperties(toMerge.getProperties());
+        }
+        return existing;
+    }
+
     private void addLocations(ThingEntity thing, Entity entity) {
         if (checkNavigationLink(entity, ES_LOCATIONS_NAME)) {
             Set<LocationEntity> locations = new LinkedHashSet<>();
             for (Entity location : entity.getNavigationLink(ES_LOCATIONS_NAME).getInlineEntitySet()) {
-                locations.add(locationMapper.createLocation(location));
+                locations.add(locationMapper.createEntity(location));
             }
             thing.setLocationEntities(locations);
         }
@@ -116,7 +128,7 @@ public class ThingMapper extends AbstractMapper<ThingEntity> {
         if (checkNavigationLink(entity, ES_DATASTREAMS_NAME)) {
             Set<DatastreamEntity> datastreams = new LinkedHashSet<>();
             for (Entity datastream : entity.getNavigationLink(ES_DATASTREAMS_NAME).getInlineEntitySet()) {
-                datastreams.add(datastreamMapper.createDatastream(datastream));
+                datastreams.add(datastreamMapper.createEntity(datastream));
             }
             thing.setDatastreamEntities(datastreams);
         }

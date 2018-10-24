@@ -28,14 +28,19 @@
  */
 package org.n52.sta.data.service;
 
+import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.Set;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.commons.api.http.HttpMethod;
+import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.beans.sta.LocationEncodingEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.sta.data.query.LocationQuerySpecifications;
 import org.n52.sta.data.repositories.LocationEncodingRepository;
 import org.n52.sta.data.repositories.LocationRepository;
@@ -48,6 +53,7 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Sets;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
 /**
@@ -220,7 +226,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     }
 
     @Override
-    public LocationEntity create(LocationEntity location) {
+    public LocationEntity create(LocationEntity location) throws ODataApplicationException {
         if (location.getId() != null && !location.isSetName()) {
             return getRepository().findOne(lQS.withId(location.getId())).get();
         }
@@ -229,11 +235,13 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
             return optional.isPresent() ? optional.get() : null;
         }
         checkLocationEncoding(location);
-        return getRepository().save(location);
+        location = getRepository().save(location);
+        processThings(location);
+        return location;
     }
 
     @Override
-    public LocationEntity update(LocationEntity location) {
+    public LocationEntity update(LocationEntity location, HttpMethod method) throws ODataApplicationException {
         return getRepository().save(location);
     }
 
@@ -267,4 +275,21 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     private ExampleMatcher createEncodingTypeMatcher() {
         return ExampleMatcher.matching().withMatcher("encodingType", GenericPropertyMatchers.ignoreCase());
     }
+    
+    private void processThings(LocationEntity location) throws ODataApplicationException {
+        if (location.hasThings()) {
+            Set<ThingEntity> things = new LinkedHashSet<>();
+            for (ThingEntity thing : location.getThingEntities()) {
+                thing.setLocationEntities(Sets.newHashSet(location));
+                ThingEntity optionalThing = getThingService().createOrUpdate(thing);
+                things.add(optionalThing != null ? optionalThing : thing);
+            }
+            location.setThingEntities(things);
+        }
+    }
+
+    private AbstractSensorThingsEntityService<?, ThingEntity> getThingService() {
+        return (AbstractSensorThingsEntityService<?, ThingEntity>) getEntityService(EntityTypes.Thing);
+    }
+    
 }

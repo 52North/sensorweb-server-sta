@@ -9,11 +9,10 @@ import java.io.InputStream;
 import java.util.Locale;
 
 import org.apache.olingo.commons.api.data.ContextURL;
-import org.apache.olingo.commons.api.data.Entity;
-import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
+import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataApplicationException;
@@ -53,16 +52,16 @@ import org.springframework.stereotype.Component;
 public class SensorThingsEntityProcessor implements EntityProcessor {
 
     @Autowired
-    AbstractEntityRequestHandler requestHandler;
+    private AbstractEntityRequestHandler requestHandler;
     
     @Autowired
-    EntityCrudRequestHandlerRepository crudRequestHandlerReportitory;
+    private EntityCrudRequestHandlerRepository crudRequestHandlerReportitory;
 
     @Autowired
-    QueryOptionsHandler queryOptionsHandler;
+    private QueryOptionsHandler queryOptionsHandler;
 
     @Autowired
-    EntityAnnotator entityAnnotator;
+    private EntityAnnotator entityAnnotator;
     
     @Autowired
     private UriResourceNavigationResolver navigationResolver;
@@ -87,44 +86,83 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
     }
 
     @Override
-    public void createEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType requestFormat, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
+    public void createEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType requestFormat,
+            ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
+        QueryOptions queryOptions = new URIQueryOptions(uriInfo, request.getRawBaseUri());
         EntityResponse entityResponse = new EntityResponse();
         DeserializerResult deserializeRequestBody = deserializeRequestBody(request, uriInfo);
         if (deserializeRequestBody.getEntity() != null) {
-            Entity entity = getCrudEntityHanlder(uriInfo).handleCreateEntityRequest(deserializeRequestBody.getEntity());
-        } else if (deserializeRequestBody.getEntityCollection() != null) {
-            EntityCollection entityCollection = getCrudEntityHanlder(uriInfo).handleCreateEntityRequest(deserializeRequestBody.getEntityCollection());
-        }
-        
+            entityResponse = getCrudEntityHanlder(uriInfo)
+                    .handleCreateEntityRequest(deserializeRequestBody.getEntity(), uriInfo.getUriResourceParts());
 
-        // configure the response object: set the body, headers and status code
-        response.setStatusCode(HttpStatusCode.CREATED.getStatusCode());
-        response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.JSON_NO_METADATA.toContentTypeString());
-        
+            entityAnnotator.annotateEntity(entityResponse.getEntity(), entityResponse.getEntitySet().getEntityType(),
+                    queryOptions.getBaseURI());
+            InputStream serializedContent = createResponseContent(serviceMetadata, entityResponse, queryOptions);
+            // configure the response object: set the body, headers and status code
+            response.setContent(serializedContent);
+            response.setStatusCode(HttpStatusCode.CREATED.getStatusCode());
+            response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.APPLICATION_JSON.toContentTypeString());
+            response.setHeader(HttpHeader.LOCATION, entityResponse.getEntity().getSelfLink().getHref());
+        } else {
+            response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.JSON_NO_METADATA.toContentTypeString());
+        }
 //        throw new ODataApplicationException("Not supported.", HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
     }
 
     @Override
-    public void updateEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType requestFormat, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-        EntityResponse entityResponse = getCrudEntityHanlder(uriInfo).handleUpdateEntityRequest(deserializeRequestBody(request, uriInfo), request.getMethod());
-        
+    public void updateEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType requestFormat,
+            ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
+        if (HttpMethod.PUT.equals(request.getMethod())) {
+            throw new ODataApplicationException("Http PUT is not yet supported!",
+                    HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.getDefault());
+        }
+        QueryOptions queryOptions = new URIQueryOptions(uriInfo, request.getRawBaseUri());
+        EntityResponse entityResponse = new EntityResponse();
+        DeserializerResult deserializeRequestBody = deserializeRequestBody(request, uriInfo);
+        if (deserializeRequestBody.getEntity() != null) {
+            entityResponse = getCrudEntityHanlder(uriInfo).handleUpdateEntityRequest(
+                    deserializeRequestBody.getEntity(), request.getMethod(), uriInfo.getUriResourceParts());
 
-        // configure the response object: set the body, headers and status code
-        response.setStatusCode(HttpStatusCode.OK.getStatusCode());
-        response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.JSON_NO_METADATA.toContentTypeString());
-        
-        throw new ODataApplicationException("Not supported.", HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
+            entityAnnotator.annotateEntity(
+                    entityResponse.getEntity(),
+                    entityResponse.getEntitySet().getEntityType(),
+                    queryOptions.getBaseURI());
+            InputStream serializedContent = createResponseContent(serviceMetadata, entityResponse, queryOptions);
+            // configure the response object: set the body, headers and status code
+            response.setContent(serializedContent);
+            response.setStatusCode(HttpStatusCode.OK.getStatusCode());
+            response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.APPLICATION_JSON.toContentTypeString());
+            response.setHeader(HttpHeader.LOCATION, entityResponse.getEntity().getSelfLink().getHref());
+        } else {
+            response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.JSON_NO_METADATA.toContentTypeString());
+        }
+//        throw new ODataApplicationException("Not supported.", HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
     }
 
     @Override
-    public void deleteEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo) throws ODataApplicationException, ODataLibraryException {
-        EntityResponse entityResponse = getCrudEntityHanlder(uriInfo).handleDeleteEntityRequest(deserializeRequestBody(request, uriInfo));
+    public void deleteEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo)
+            throws ODataApplicationException, ODataLibraryException {
+        QueryOptions queryOptions = new URIQueryOptions(uriInfo, request.getRawBaseUri());
+        EntityResponse entityResponse = new EntityResponse();
+        DeserializerResult deserializeRequestBody = deserializeRequestBody(request, uriInfo);
+        if (deserializeRequestBody.getEntity() != null) {
+            entityResponse = getCrudEntityHanlder(uriInfo)
+                    .handleDeleteEntityRequest(deserializeRequestBody.getEntity(), uriInfo.getUriResourceParts());
+
+            entityAnnotator.annotateEntity(entityResponse.getEntity(),
+                    entityResponse.getEntitySet().getEntityType(),
+                    queryOptions.getBaseURI());
+            InputStream serializedContent = createResponseContent(serviceMetadata, entityResponse, queryOptions);
+            // configure the response object: set the body, headers and status code
+            response.setContent(serializedContent);
+            response.setStatusCode(HttpStatusCode.OK.getStatusCode());
+            response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.APPLICATION_JSON.toContentTypeString());
+            response.setHeader(HttpHeader.LOCATION, entityResponse.getEntity().getSelfLink().getHref());
+        } else {
+            response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.JSON_NO_METADATA.toContentTypeString());
+        }
         
-        // configure the response object: set the body, headers and status code
-        response.setStatusCode(HttpStatusCode.OK.getStatusCode());
-        response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.JSON_NO_METADATA.toContentTypeString());
-        
-        throw new ODataApplicationException("Not supported.", HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
+//        throw new ODataApplicationException("Not supported.", HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
     }
 
     @Override

@@ -16,16 +16,10 @@ public class DatastreamEntityCrudRequestHandler extends AbstractEntityCrudReques
     DatastreamMapper mapper;
 
     @Override
-    public Entity handleCreateEntityRequest(Entity entity) throws ODataApplicationException {
-        DatastreamEntity datastream = processEntity(entity);
-        return datastream != null ? mapper.createEntity(datastream) : null;
-    }
-    
-    @Override
-    protected DatastreamEntity processEntity(Entity entity) throws ODataApplicationException {
+    protected Entity handleCreateEntityRequest(Entity entity) throws ODataApplicationException {
         if (entity != null) {
-            DatastreamEntity datastream = mapper.createDatastream(entity);
-            return  getEntityService().create(datastream);
+            DatastreamEntity datastream = getEntityService().create(mapper.createEntity(entity));
+            return datastream != null ? mapper.createEntity(datastream) : null;
         }
         return null;
     }

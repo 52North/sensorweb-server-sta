@@ -39,13 +39,17 @@ import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.
 import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ES_OBSERVATIONS_NAME;
 import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ET_OBSERVATION_FQN;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
+import org.apache.olingo.commons.api.http.HttpStatusCode;
+import org.apache.olingo.server.api.ODataApplicationException;
 import org.joda.time.DateTime;
 import org.n52.janmayen.Json;
 import org.n52.series.db.beans.BlobDataEntity;
@@ -196,7 +200,7 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
         return createTime(start, end);
     }
 
-    public StaDataEntity createObservation(Entity entity) {
+    public StaDataEntity createEntity(Entity entity) {
         StaDataEntity observation = new StaDataEntity();
         addPhenomenonTime(observation, entity);
         addResultTime(observation, entity);
@@ -246,14 +250,54 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
     private void addFeatureOfInterest(StaDataEntity observation, Entity entity) {
         if (checkNavigationLink(entity, ET_FEATURE_OF_INTEREST_NAME)) {
             observation.setFeatureOfInterest(featureMapper
-                    .createFeatureOfInterest(entity.getNavigationLink(ET_FEATURE_OF_INTEREST_NAME).getInlineEntity()));
+                    .createEntity(entity.getNavigationLink(ET_FEATURE_OF_INTEREST_NAME).getInlineEntity()));
         }
     }
 
     private void addDatastream(StaDataEntity observation, Entity entity) {
         if (checkNavigationLink(entity, ET_DATASTREAM_NAME)) {
             observation.setDatastream(datastreamMapper
-                    .createDatastream(entity.getNavigationLink(ET_DATASTREAM_NAME).getInlineEntity()));
+                    .createEntity(entity.getNavigationLink(ET_DATASTREAM_NAME).getInlineEntity()));
+        }
+    }
+
+    @Override
+    public DataEntity<?> merge(DataEntity<?> existing, DataEntity<?> toMerge) throws ODataApplicationException {
+        // phenomenonTime
+        mergeSamplingTime(existing, toMerge);
+        // resultTime
+        if (toMerge.getResultTime() != null) {
+            existing.setResultTime(toMerge.getResultTime());
+        }
+        // validTime
+        if (toMerge.isSetValidTime()) {
+            existing.setValidTimeStart(toMerge.getValidTimeStart());
+            existing.setValidTimeEnd(toMerge.getValidTimeEnd());
+        }
+        // parameter
+        // value
+        if (toMerge.getValue() != null) {
+            checkValue(existing, toMerge);
+        }
+        return existing;
+    }
+
+    private void checkValue(DataEntity<?> existing, DataEntity<?> toMerge) throws ODataApplicationException {
+        if (existing instanceof QuantityDataEntity) {
+            ((QuantityDataEntity) existing)
+                    .setValue(BigDecimal.valueOf(Double.parseDouble(toMerge.getValue().toString())));
+        } else if (existing instanceof CountDataEntity) {
+            ((CountDataEntity) existing).setValue(Integer.parseInt(toMerge.getValue().toString()));
+        } else if (existing instanceof BooleanDataEntity) {
+            ((BooleanDataEntity) existing).setValue(Boolean.parseBoolean(toMerge.getValue().toString()));
+        } else if (existing instanceof TextDataEntity) {
+            ((TextDataEntity) existing).setValue(toMerge.getValue().toString());
+        } else if (existing instanceof CategoryDataEntity) {
+            ((CategoryDataEntity) existing).setValue(toMerge.getValue().toString());
+        } else {
+            throw new ODataApplicationException(
+                    String.format("The observation value for @iot.id %i can not be updated!", existing.getId()),
+                    HttpStatusCode.CONFLICT.getStatusCode(), Locale.getDefault());
         }
     }
 

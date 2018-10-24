@@ -34,6 +34,8 @@ import java.util.OptionalLong;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.commons.api.http.HttpMethod;
+import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.FormatRepository;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.FormatEntity;
@@ -196,7 +198,7 @@ public class FeatureOfInterestService extends AbstractSensorThingsEntityService<
     }
 
     @Override
-    public AbstractFeatureEntity<?> update(AbstractFeatureEntity<?> entity) {
+    public AbstractFeatureEntity<?> update(AbstractFeatureEntity<?> entity, HttpMethod method) throws ODataApplicationException {
         // TODO Auto-generated method stub
         return null;
     }

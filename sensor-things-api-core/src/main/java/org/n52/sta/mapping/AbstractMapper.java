@@ -28,6 +28,7 @@
  */
 package org.n52.sta.mapping;
 
+import static org.n52.sta.edm.provider.SensorThingsEdmConstants.ID;
 import static org.n52.sta.edm.provider.SensorThingsEdmConstants.ID_ANNOTATION;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DEFINITION;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DESCRIPTION;
@@ -39,6 +40,7 @@ import java.util.Date;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
+import org.apache.olingo.server.api.ODataApplicationException;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.n52.series.db.beans.DescribableEntity;
@@ -59,6 +61,10 @@ public abstract class AbstractMapper<T> {
     EntityCreationHelper entityCreationHelper;
     
     public abstract Entity createEntity(T t);
+    
+    public abstract T createEntity(Entity entity);
+    
+    public abstract T merge(T existing, T toMerge) throws ODataApplicationException;
     
     protected void addNameDescriptionProperties(Entity entity, DescribableEntity describableEntity) {
         // add name
@@ -100,9 +106,11 @@ public abstract class AbstractMapper<T> {
     }
     
     protected void setId(IdEntity idEntity, Entity entity) {
-        if (checkProperty(entity, ID_ANNOTATION)) {
+        if (checkProperty(entity, ID)) {
+            idEntity.setId(Long.parseLong(getPropertyValue(entity, ID).toString()));
+        } else if (checkProperty(entity, ID_ANNOTATION)) {
             idEntity.setId(Long.parseLong(getPropertyValue(entity, ID_ANNOTATION).toString()));
-        }
+        } 
     }
     
     protected void setNameDescription(DescribableEntity thing, Entity entity) {
@@ -148,6 +156,37 @@ public abstract class AbstractMapper<T> {
                 phenomenonTime.setSamplingTimeStart(((TimePeriod) time).getStart().toDate());
                 phenomenonTime.setSamplingTimeEnd(((TimePeriod) time).getEnd().toDate());
             }
+        }
+    }
+    
+    protected void mergeIdentifierNameDescription(DescribableEntity existing, DescribableEntity toMerge) {
+        if (toMerge.isSetIdentifier()) {
+            existing.setIdentifier(toMerge.getIdentifier());
+        }
+        mergeNameDescription(existing, toMerge);
+    }
+    
+    protected void mergeNameDescription(DescribableEntity existing, DescribableEntity toMerge) {
+        mergeName(existing, toMerge);
+        mergeDescription(existing, toMerge);
+    }
+    
+    protected void mergeName(HasName existing, HasName toMerge) {
+        if (toMerge.isSetName()) {
+            existing.setName(toMerge.getName());
+        }
+    }
+
+    protected void mergeDescription(HasDescription existing, HasDescription toMerge) {
+        if (toMerge.isSetDescription()) {
+            existing.setDescription(toMerge.getDescription());
+        }
+    }
+    
+    protected void mergeSamplingTime(HasPhenomenonTime existing, HasPhenomenonTime toMerge) {
+        if (toMerge.hasSamplingTimeStart() && toMerge.hasSamplingTimeEnd()) {
+            existing.setSamplingTimeStart(toMerge.getSamplingTimeStart());
+            existing.setSamplingTimeEnd(toMerge.getSamplingTimeEnd());
         }
     }
 

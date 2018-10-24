@@ -34,6 +34,8 @@ import java.util.OptionalLong;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.commons.api.http.HttpMethod;
+import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.PhenomenonRepository;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
@@ -197,7 +199,7 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
     }
 
     @Override
-    public PhenomenonEntity update(PhenomenonEntity entity) {
+    public PhenomenonEntity update(PhenomenonEntity entity, HttpMethod method) throws ODataApplicationException {
         // TODO Auto-generated method stub
         return null;
     }

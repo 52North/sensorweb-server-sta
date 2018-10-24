@@ -85,7 +85,7 @@ public class SensorMapper extends AbstractMapper<ProcedureEntity> {
         return entity;
     }
 
-    public ProcedureEntity createSensor(Entity entity) {
+    public ProcedureEntity createEntity(Entity entity) {
         ProcedureEntity sensor = new ProcedureEntity();
         setId(sensor, entity);
         setIdentifier(sensor, entity);
@@ -98,6 +98,15 @@ public class SensorMapper extends AbstractMapper<ProcedureEntity> {
             sensor.setDescriptionFile(getPropertyValue(entity, PROP_METADATA).toString());
         }
         return sensor;
+    }
+
+    @Override
+    public ProcedureEntity merge(ProcedureEntity existing, ProcedureEntity toMerge) {
+        mergeIdentifierNameDescription(existing, toMerge);
+        if (toMerge.isSetDescriptionFile()) {
+            existing.setDescriptionFile(toMerge.getDescriptionFile());
+        }
+        return existing;
     }
 
     private FormatEntity createFormat(Entity entity) {

@@ -63,13 +63,19 @@ public class ObservedPropertyMapper extends AbstractMapper<PhenomenonEntity> {
         return entity;
     }
     
-    public PhenomenonEntity createObservableProperty(Entity entity) {
+    public PhenomenonEntity createEntity(Entity entity) {
         PhenomenonEntity phenomenon = new PhenomenonEntity();
         setId(phenomenon, entity);
         setIdentifier(phenomenon, entity);
         setName(phenomenon, entity);
         setDescription(phenomenon, entity);
         return phenomenon;
+    }
+
+    @Override
+    public PhenomenonEntity merge(PhenomenonEntity existing, PhenomenonEntity toMerge) {
+        mergeIdentifierNameDescription(existing, toMerge);
+        return existing;
     }
 
 }

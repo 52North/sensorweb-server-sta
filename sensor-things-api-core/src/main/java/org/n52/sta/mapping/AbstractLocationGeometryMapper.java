@@ -31,6 +31,7 @@ package org.n52.sta.mapping;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ENCODINGTYPE;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_FEATURE;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_LOCATION;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_OBSERVED_AREA;
 
 import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
@@ -46,18 +47,21 @@ public abstract class AbstractLocationGeometryMapper<T> extends AbstractMapper<T
     private static final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
 
     @Autowired
-    GeometryMapper geometryMapper;
+    private GeometryMapper geometryMapper;
 
     protected void addGeometry(Entity entity, HasGeometry<?> geometryEntity) {
-        addLocationGeometry(entity, geometryEntity, PROP_FEATURE);
-
+        add(entity, geometryEntity, PROP_FEATURE);
     }
-
+    
     protected void addLocation(Entity entity, HasGeometry<?> locationEntity) {
-        addLocationGeometry(entity, locationEntity, PROP_LOCATION);
+        add(entity, locationEntity, PROP_LOCATION);
     }
 
-    protected void addLocationGeometry(Entity entity, HasGeometry<?> geometryLocationEntity, String property) {
+    protected void addObservedArea(Entity entity, HasGeometry<?> geometryEntity) {
+        add(entity, geometryEntity, PROP_OBSERVED_AREA);
+    }
+
+    protected void add(Entity entity, HasGeometry<?> geometryLocationEntity, String property) {
         entity.addProperty(new Property(null, PROP_ENCODINGTYPE, ValueType.PRIMITIVE, ENCODINGTYPE_GEOJSON));
 //        entity.addProperty(new Property(null, property, ValueType.COMPLEX,
 //                geometryMapper.resolveGeometry(geometryLocationEntity.getGeometryEntity())));
@@ -72,6 +76,12 @@ public abstract class AbstractLocationGeometryMapper<T> extends AbstractMapper<T
     
     protected GeometryEntity parseGeometry(Geospatial geospatial) {
         return geometryMapper.createGeometryEntity(geospatial);
+    }
+    
+    protected void mergeGeometry(HasGeometry<?> existing, HasGeometry<?> toMerge) {
+        if (toMerge.isSetGeometry()) {
+            existing.setGeometryEntity(toMerge.getGeometryEntity());
+        }
     }
 
 }

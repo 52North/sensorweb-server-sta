@@ -40,6 +40,7 @@ import org.apache.olingo.commons.api.edm.geo.Geospatial;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.FormatEntity;
+import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.ogc.om.features.SfConstants;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +70,7 @@ public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper<Abst
         return entity;
     }
 
-    public FeatureEntity createFeatureOfInterest(Entity entity) {
+    public FeatureEntity createEntity(Entity entity) {
         FeatureEntity featureOfInterest = new FeatureEntity();
         setId(featureOfInterest, entity);
         setIdentifier(featureOfInterest, entity);
@@ -84,10 +85,35 @@ public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper<Abst
         featureOfInterest.setFeatureType(createFeatureType(featureOfInterest.getGeometry()));
         return featureOfInterest;
     }
+    
+    public FeatureEntity createFeatureOfInterest(LocationEntity location) {
+        FeatureEntity featureOfInterest = new FeatureEntity();
+        featureOfInterest.setIdentifier(location.getName());
+        featureOfInterest.setName(location.getName());
+        featureOfInterest.setDescription(location.getDescription());
+        featureOfInterest.setGeometryEntity(location.getGeometryEntity());
+        featureOfInterest.setFeatureType(createFeatureType(location.getGeometry()));
+        return featureOfInterest;
+    }
+
+    @Override
+    public AbstractFeatureEntity<?> merge(AbstractFeatureEntity<?> existing, AbstractFeatureEntity<?> toMerge) {
+        mergeIdentifierNameDescription(existing, toMerge);
+        mergeGeometry(existing, toMerge);
+        mergeFeatureType(existing);
+        return existing;
+    }
+
+    private void mergeFeatureType(AbstractFeatureEntity<?> existing) {
+        FormatEntity featureType = createFeatureType(existing.getGeometry());
+        if (!featureType.getFormat().equals(existing.getFeatureType().getFormat())) {
+            existing.setFeatureType(featureType);
+        }
+    }
 
     private FormatEntity createFeatureType(Geometry geometry) {
+        FormatEntity formatEntity = new FormatEntity();
         if (geometry != null) {
-            FormatEntity formatEntity = new FormatEntity();
             switch (geometry.getGeometryType()) {
             case "Point":
                 formatEntity.setFormat(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_POINT);
@@ -104,7 +130,7 @@ public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper<Abst
             }
             return formatEntity;
         }
-        return null;
+        return formatEntity.setFormat(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_FEATURE);
     }
     
     

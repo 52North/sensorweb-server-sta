@@ -34,6 +34,8 @@ import java.util.OptionalLong;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.commons.api.http.HttpMethod;
+import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.FormatRepository;
 import org.n52.series.db.ProcedureRepository;
 import org.n52.series.db.beans.FormatEntity;
@@ -185,7 +187,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     }
 
     @Override
-    public ProcedureEntity create(ProcedureEntity sensor) {
+    public ProcedureEntity create(ProcedureEntity sensor) throws ODataApplicationException {
         if (sensor.getId() != null && !sensor.isSetName()) {
             return getRepository().findOne(sQS.withId(sensor.getId())).get();
         }
@@ -201,13 +203,13 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     }
 
     @Override
-    public ProcedureEntity update(ProcedureEntity entity) {
+    public ProcedureEntity update(ProcedureEntity entity, HttpMethod method) throws ODataApplicationException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public ProcedureEntity delete(ProcedureEntity entity) {
+    public ProcedureEntity delete(ProcedureEntity entity) throws ODataApplicationException {
         // TODO Auto-generated method stub
         return null;
     }

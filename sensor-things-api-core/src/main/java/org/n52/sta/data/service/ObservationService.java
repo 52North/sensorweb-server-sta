@@ -35,6 +35,8 @@ import java.util.OptionalLong;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.commons.api.http.HttpMethod;
+import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.CategoryRepository;
 import org.n52.series.db.DataRepository;
 import org.n52.series.db.DatasetRepository;
@@ -59,11 +61,13 @@ import org.n52.series.db.beans.TextDataEntity;
 import org.n52.series.db.beans.TextDatasetEntity;
 import org.n52.series.db.beans.dataset.Dataset;
 import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.series.db.query.DatasetQuerySpecifications;
 import org.n52.shetland.ogc.om.OmConstants;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
+import org.n52.sta.mapping.FeatureOfInterestMapper;
 import org.n52.sta.mapping.ObservationMapper;
 import org.n52.sta.service.query.QueryOptions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,6 +84,9 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 public class ObservationService extends AbstractSensorThingsEntityService<DataRepository<DataEntity<?>>, DataEntity<?>> {
 
     private ObservationMapper mapper;
+    
+    @Autowired
+    private FeatureOfInterestMapper featureMapper;
 
     @Autowired
     private CategoryRepository categoryRepository;
@@ -274,12 +281,12 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
     }
 
     @Override
-    public DataEntity<?> create(DataEntity<?> entity) {
+    public DataEntity<?> create(DataEntity<?> entity) throws ODataApplicationException {
         if (entity instanceof StaDataEntity) {
             StaDataEntity observation = (StaDataEntity) entity;
-            DatastreamEntity datastream = getDatastreamService().create(observation.getDatastream());
+            DatastreamEntity datastream = checkDatastream(observation);
             // feature
-            AbstractFeatureEntity<?> feature = getFeatureOfInterestService().create(observation.getFeatureOfInterest());
+            AbstractFeatureEntity<?> feature = checkFeature(observation, datastream);
             // category (obdProp)
             CategoryEntity category = checkCategory(datastream);
             // offering (sensor)
@@ -297,7 +304,7 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
     }
 
     @Override
-    public DataEntity<?> update(DataEntity<?> entity) {
+    public DataEntity<?> update(DataEntity<?> entity, HttpMethod method) throws ODataApplicationException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -306,6 +313,31 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
     public DataEntity<?> delete(DataEntity<?> entity) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    private DatastreamEntity checkDatastream(StaDataEntity observation) throws ODataApplicationException {
+        DatastreamEntity datastream = getDatastreamService().create(observation.getDatastream());
+        observation.setDatastream(datastream);
+        return datastream;
+    }
+
+    private AbstractFeatureEntity<?> checkFeature(StaDataEntity observation, DatastreamEntity datastream) throws ODataApplicationException {
+        if (!observation.hasFeatureOfInterest()) {
+            AbstractFeatureEntity<?> feature = null;
+            for (LocationEntity location : datastream.getThing().getLocationEntities()) {
+                if (feature == null) {
+                    feature = featureMapper.createFeatureOfInterest(location);
+                }
+                if (location.isSetGeometry()) {
+                    feature = featureMapper.createFeatureOfInterest(location);
+                    break;
+                }
+            }
+            observation.setFeatureOfInterest(feature);
+        }
+        AbstractFeatureEntity<?> feature = getFeatureOfInterestService().create(observation.getFeatureOfInterest());
+        observation.setFeatureOfInterest(feature);
+        return feature;
     }
 
     private OfferingEntity checkOffering(DatastreamEntity datastream) {
@@ -362,13 +394,7 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
        dataset.setOffering(offering);
        dataset.setUnit(datastream.getUnit());
        dataset.setObservationType(datastream.getObservationType());
-       if (datastream.hasSamplingTimeStart()) {
-           dataset.setFirstValueAt(datastream.getSamplingTimeStart());
-       }
-       if (datastream.hasSamplingTimeEnd()) {
-           dataset.setLastValueAt(datastream.getSamplingTimeEnd());
-       }
-        BooleanExpression query = dQS.matchProcedures(Long.toString(datastream.getProcedure().getId()))
+       BooleanExpression query = dQS.matchProcedures(Long.toString(datastream.getProcedure().getId()))
                 .and(dQS.matchPhenomena(Long.toString(datastream.getObservableProperty().getId()))
                         .and(dQS.matchFeatures(Long.toString(feature.getId())))
                         .and(dQS.matchOfferings(Long.toString(offering.getId()))));

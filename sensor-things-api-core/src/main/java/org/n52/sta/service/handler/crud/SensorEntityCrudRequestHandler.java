@@ -11,21 +11,15 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class SensorEntityCrudRequestHandler extends AbstractEntityCrudRequestHandler<ProcedureEntity> {
-    
+
     @Autowired
     SensorMapper mapper;
 
     @Override
-    public Entity handleCreateEntityRequest(Entity entity) throws ODataApplicationException {
-        ProcedureEntity sensor = processEntity(entity);
-        return sensor != null ? mapper.createEntity(sensor) : null;
-    }
-    
-    @Override
-    protected ProcedureEntity processEntity(Entity entity) throws ODataApplicationException {
+    protected Entity handleCreateEntityRequest(Entity entity) throws ODataApplicationException {
         if (entity != null) {
-            ProcedureEntity sensor = mapper.createSensor(entity);
-            return getEntityService().create(sensor);
+            ProcedureEntity sensor = getEntityService().create(mapper.createEntity(entity));
+            return sensor != null ? mapper.createEntity(sensor) : null;
         }
         return null;
     }

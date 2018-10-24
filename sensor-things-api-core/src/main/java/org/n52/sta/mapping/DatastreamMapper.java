@@ -42,6 +42,7 @@ import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ET_SENSOR_N
 import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
 
 import java.util.LinkedHashSet;
+import java.util.Locale;
 import java.util.Set;
 
 import org.apache.olingo.commons.api.data.ComplexValue;
@@ -49,8 +50,9 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.edm.geo.Geospatial;
+import org.apache.olingo.commons.api.http.HttpStatusCode;
+import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.beans.FormatEntity;
-import org.n52.series.db.beans.GeometryEntity;
 import org.n52.series.db.beans.UnitEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
@@ -67,7 +69,7 @@ import org.springframework.stereotype.Component;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
-public class DatastreamMapper extends AbstractMapper<DatastreamEntity> {
+public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamEntity> {
 
     @Autowired
     private ThingMapper thingMapper;
@@ -78,9 +80,6 @@ public class DatastreamMapper extends AbstractMapper<DatastreamEntity> {
     @Autowired
     private SensorMapper sensorMapper;
 
-    @Autowired
-    private GeometryMapper geometryMapper;
-    
     @Autowired
     private ObservationMapper observationMapper;
 
@@ -101,8 +100,7 @@ public class DatastreamMapper extends AbstractMapper<DatastreamEntity> {
 
         entity.addProperty(new Property(null, PROP_UOM, ValueType.COMPLEX,
                 resolveUnitOfMeasurement(datastream.getUnitOfMeasurement())));
-        entity.addProperty(new Property(null, PROP_OBSERVED_AREA, ValueType.GEOSPATIAL,
-                resolveObservedArea(datastream.getGeometryEntity())));
+        addObservedArea(entity, datastream);
 
         entity.setType(ET_DATASTREAM_FQN.getFullQualifiedNameAsString());
         entity.setId(entityCreationHelper.createId(entity, ES_DATASTREAMS_NAME, PROP_ID));
@@ -110,7 +108,7 @@ public class DatastreamMapper extends AbstractMapper<DatastreamEntity> {
         return entity;
     }
 
-    public DatastreamEntity createDatastream(Entity entity) {
+    public DatastreamEntity createEntity(Entity entity) {
         DatastreamEntity datastream = new DatastreamEntity();
         setId(datastream, entity);
         setName(datastream, entity);
@@ -127,6 +125,45 @@ public class DatastreamMapper extends AbstractMapper<DatastreamEntity> {
         return datastream;
     }
 
+    @Override
+    public DatastreamEntity merge(DatastreamEntity existing, DatastreamEntity toMerge) throws ODataApplicationException {
+        mergeName(existing, toMerge);
+        mergeDescription(existing, toMerge);
+        checkObservationType(existing, toMerge);
+        // observedArea
+        mergeGeometry(existing, toMerge);
+        // unit
+        if (toMerge.isSetUnit() && existing.getUnit().getSymbol().equals(toMerge.getUnit().getSymbol())) {
+            existing.setUnit(toMerge.getUnit());
+        }
+        // phenTime
+        mergeSamplingTime(existing, toMerge);
+       
+        // resultTime
+        if (toMerge.hasResultTimeStart() && toMerge.hasResultTimeEnd()) {
+            existing.setResultTimeStart(toMerge.getResultTimeStart());
+            existing.setResultTimeEnd(toMerge.getResultTimeEnd());
+        }
+        // observationType
+        if (existing.getDatasets() == null || existing.getDatasets().isEmpty() && toMerge.isSetObservationType()) {
+            if (!existing.getObservationType().getFormat().equals(toMerge.getObservationType().getFormat())) {
+                existing.setObservationType(toMerge.getObservationType());
+            }
+        }
+        return existing;
+    }
+
+    private void checkObservationType(DatastreamEntity existing, DatastreamEntity toMerge) throws ODataApplicationException {
+        if (toMerge.isSetObservationType()
+                && !existing.getObservationType().getFormat().equals(toMerge.getObservationType().getFormat())) {
+            throw new ODataApplicationException(
+                    String.format(
+                            "The updated observationType (%s) does not comply with the existing observationType (%s)",
+                            toMerge.getObservationType().getFormat(), existing.getObservationType().getFormat()),
+                    HttpStatusCode.CONFLICT.getStatusCode(), Locale.getDefault());
+        }
+    }
+
     private ComplexValue resolveUnitOfMeasurement(UnitEntity uom) {
         ComplexValue value = new ComplexValue();
         if (uom != null) {
@@ -141,26 +178,6 @@ public class DatastreamMapper extends AbstractMapper<DatastreamEntity> {
         return value;
     }
 
-    private Geospatial resolveObservedArea(GeometryEntity geometryEntity) {
-        return geometryMapper.resolveGeometry(geometryEntity);
-        // Polygon polygon = null;
-        // if (geometryEntity != null &&
-        // geometryEntity.getGeometry().getGeometryType().equals("Polygon")) {
-        // List<Point> points =
-        // Arrays.stream(geometryEntity.getGeometry().getCoordinates()).map(c ->
-        // {
-        // Point p = new Point(Geospatial.Dimension.GEOMETRY, null);
-        // p.setX(c.x);
-        // p.setY(c.y);
-        // return p;
-        // }).collect(Collectors.toList());
-        // polygon = new Polygon(Geospatial.Dimension.GEOMETRY, null, null,
-        // points);
-        //
-        // }
-        // return polygon;
-    }
-
     private DatastreamEntity addFormat(DatastreamEntity datastream, Entity entity) {
         if (checkProperty(entity, PROP_OBSERVATION_TYPE)) {
             return datastream.setObservationType(
@@ -170,9 +187,11 @@ public class DatastreamMapper extends AbstractMapper<DatastreamEntity> {
     }
 
     private void addObservedArea(DatastreamEntity datastream, Entity entity) {
-        if (checkProperty(entity, PROP_OBSERVED_AREA)) {
-            datastream.setGeometryEntity(
-                    geometryMapper.createGeometryEntity((Geospatial) getPropertyValue(entity, PROP_OBSERVED_AREA)));
+        Property observedArea = entity.getProperty(PROP_OBSERVED_AREA);
+        if (observedArea != null) {
+            if (observedArea.getValueType().equals(ValueType.PRIMITIVE) && observedArea.getValue() instanceof Geospatial) {
+                datastream.setGeometryEntity(parseGeometry((Geospatial) observedArea.getValue()));
+            }
         }
     }
 
@@ -200,20 +219,20 @@ public class DatastreamMapper extends AbstractMapper<DatastreamEntity> {
     private void addSensor(DatastreamEntity datastream, Entity entity) {
         if (checkNavigationLink(entity, ET_SENSOR_NAME)) {
             datastream.setProcedure(
-                    sensorMapper.createSensor(entity.getNavigationLink(ET_SENSOR_NAME).getInlineEntity()));
+                    sensorMapper.createEntity(entity.getNavigationLink(ET_SENSOR_NAME).getInlineEntity()));
         }
     }
 
     private void addObservedProperty(DatastreamEntity datastream, Entity entity) {
         if (checkNavigationLink(entity, ET_OBSERVED_PROPERTY_NAME)) {
             datastream.setObservableProperty(observedPropertyMapper
-                    .createObservableProperty(entity.getNavigationLink(ET_OBSERVED_PROPERTY_NAME).getInlineEntity()));
+                    .createEntity(entity.getNavigationLink(ET_OBSERVED_PROPERTY_NAME).getInlineEntity()));
         }
     }
 
     private void addThing(DatastreamEntity datastream, Entity entity) {
         if (checkNavigationLink(entity, ET_THING_NAME)) {
-            datastream.setThing(thingMapper.createThing(entity.getNavigationLink(ET_THING_NAME).getInlineEntity()));
+            datastream.setThing(thingMapper.createEntity(entity.getNavigationLink(ET_THING_NAME).getInlineEntity()));
         }
     }
 
@@ -221,7 +240,7 @@ public class DatastreamMapper extends AbstractMapper<DatastreamEntity> {
         if (checkNavigationLink(entity, ES_OBSERVATIONS_NAME)) {
             Set<StaDataEntity> observations = new LinkedHashSet<>();
             for (Entity observation : entity.getNavigationLink(ES_OBSERVATIONS_NAME).getInlineEntitySet()) {
-               StaDataEntity createObservation = observationMapper.createObservation(observation);
+               StaDataEntity createObservation = observationMapper.createEntity(observation);
                createObservation.setDatastream(datastream);
                observations.add(createObservation);
             }

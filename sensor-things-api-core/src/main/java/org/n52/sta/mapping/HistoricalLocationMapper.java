@@ -71,4 +71,18 @@ public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationE
         return createTime(createDateTime(location.getTime()));
     }
 
+    @Override
+    public HistoricalLocationEntity createEntity(Entity entity) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public HistoricalLocationEntity merge(HistoricalLocationEntity existing, HistoricalLocationEntity toMerge) {
+        if (toMerge.getTime() != null) {
+            existing.setTime(toMerge.getTime());
+        }
+        return toMerge;
+    }
+
 }
