@@ -505,7 +505,9 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
                 : ExpandSelectHelper.getSelectedPropertyNames(select.getSelectItems());
         for (final String propertyName : type.getPropertyNames()) {
             if (all || selected.contains(propertyName)) {
-                if (!((EdmEntityType) type).getKeyPredicateNames().contains(propertyName)) {
+                if (!(type instanceof EdmEntityType)
+                        || ((type instanceof EdmEntityType)
+                        && !((EdmEntityType) type).getKeyPredicateNames().contains(propertyName))) {
                     final EdmProperty edmProperty = type.getStructuralProperty(propertyName);
                     final Property property = findProperty(propertyName, properties);
                     final Set<List<String>> selectedPaths = all || edmProperty.isPrimitive() ? null
