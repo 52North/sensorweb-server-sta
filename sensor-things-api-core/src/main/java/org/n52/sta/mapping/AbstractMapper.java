@@ -36,7 +36,9 @@ import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvid
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PHENOMENON_TIME;
 
 import java.util.Date;
+import java.util.Optional;
 
+import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
@@ -144,6 +146,11 @@ public abstract class AbstractMapper<T> {
             return entity.getProperty(name).getValue();
         }
         return "";
+    }
+    
+    protected Object getPropertyValue(ComplexValue complexValue, String name) {
+       Optional<Property> property = complexValue.getValue().stream().filter(p -> p.getName().equals(name)).findAny();
+       return property.isPresent() ? property.get().getValue() : "";
     }
     
     protected void addPhenomenonTime(HasPhenomenonTime phenomenonTime , Entity entity) {

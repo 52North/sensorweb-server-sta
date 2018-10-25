@@ -197,9 +197,13 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
 
     private void addUnitOfMeasurement(DatastreamEntity datastream, Entity entity) {
         UnitEntity unit = new UnitEntity();
-        unit.setSymbol(getPropertyValue(entity, UnitOfMeasurementComplexType.PROP_SYMBOL).toString());
-        unit.setName(getPropertyValue(entity, UnitOfMeasurementComplexType.PROP_NAME).toString());
-        unit.setLink(getPropertyValue(entity, UnitOfMeasurementComplexType.PROP_DEFINITION).toString());
+        Object uom = getPropertyValue(entity, PROP_UOM);
+        if (uom instanceof ComplexValue) {
+            ComplexValue uomComplexValue = (ComplexValue) uom;
+            unit.setSymbol(getPropertyValue(uomComplexValue, UnitOfMeasurementComplexType.PROP_SYMBOL).toString());
+            unit.setName(getPropertyValue(uomComplexValue, UnitOfMeasurementComplexType.PROP_NAME).toString());
+            unit.setLink(getPropertyValue(uomComplexValue, UnitOfMeasurementComplexType.PROP_DEFINITION).toString());
+        }
         datastream.setUnit(unit);
     }
 
