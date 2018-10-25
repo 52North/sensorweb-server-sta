@@ -75,6 +75,7 @@ import org.apache.olingo.server.core.deserializer.helper.ExpandTreeBuilder;
 import org.apache.olingo.server.core.deserializer.helper.ExpandTreeBuilderImpl;
 import org.apache.olingo.server.core.serializer.utils.ContentTypeHelper;
 import org.n52.sta.edm.provider.SensorThingsEdmConstants;
+import org.n52.sta.edm.provider.complextypes.OpenComplexType;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -529,8 +530,12 @@ public class SensorThingsDeserializer implements ODataDeserializer {
         case COMPLEX:
             EdmType derivedType = getDerivedType((EdmComplexType) type, jsonNode);
             property.setType(derivedType.getFullQualifiedName().getFullQualifiedNameAsString());
-
-            value = readComplexNode(name, derivedType, isNullable, jsonNode);
+            if (derivedType.getName().equals(OpenComplexType.CT_OPEN_TYPE_NAME)) {
+                value = jsonNode.toString();
+                jsonNode.fieldNames().forEachRemaining(n -> ((ObjectNode) jsonNode).remove(n));
+            } else {
+                value = readComplexNode(name, derivedType, isNullable, jsonNode);
+            }
             property.setValue(ValueType.COMPLEX, value);
             break;
         default:

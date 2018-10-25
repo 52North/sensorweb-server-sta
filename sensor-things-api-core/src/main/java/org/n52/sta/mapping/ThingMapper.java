@@ -37,8 +37,10 @@ import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_FQN
 
 import java.io.IOException;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
 
+import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
@@ -97,7 +99,11 @@ public class ThingMapper extends AbstractMapper<ThingEntity> {
         setName(thing, entity);
         setDescription(thing, entity);
         if (entity.getProperty(PROP_PROPERTIES) != null) {
-            thing.setProperties(entity.getProperty(PROP_PROPERTIES).toString());
+            if (entity.getProperty(PROP_PROPERTIES).getValue() instanceof ComplexValue) {
+                thing.setProperties(getPropertyValue((ComplexValue) entity.getProperty(PROP_PROPERTIES).getValue(), PROP_PROPERTIES).toString());
+            } else {
+                thing.setProperties(entity.getProperty(PROP_PROPERTIES).getValue().toString());
+            }
         }
         addLocations(thing, entity);
         addDatastreams(thing, entity);
