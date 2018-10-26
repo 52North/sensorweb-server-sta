@@ -7,6 +7,7 @@ import org.apache.olingo.server.api.deserializer.DeserializerResult;
 import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
+import org.n52.sta.mapping.AbstractMapper;
 import org.n52.sta.mapping.ThingMapper;
 import org.n52.sta.service.response.EntityResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ public class ThingEntityCrudRequestHandler extends AbstractEntityCrudRequestHand
     protected Entity handleCreateEntityRequest(Entity entity) throws ODataApplicationException {
         if (entity != null) {
             ThingEntity thing = getEntityService().create(mapper.createEntity(entity));
-            return thing != null ? mapper.createEntity(thing) : null;
+            return mapToEntity(thing);
         }
         return null;
     }
@@ -32,22 +33,22 @@ public class ThingEntityCrudRequestHandler extends AbstractEntityCrudRequestHand
             throws ODataApplicationException {
         if (entity != null) {
             ThingEntity thing = getEntityService().update(mapper.createEntity(entity), method);
-            return thing != null ? mapper.createEntity(thing) : null;
+            return mapToEntity(thing);
         }
         return null;
     }
 
 
     @Override
-    protected Entity handleDeleteEntityRequest(Entity entity)
-            throws ODataApplicationException {
-        if (entity != null) {
-            ThingEntity thing = getEntityService().delete(mapper.createEntity(entity));
-            return thing != null ? mapper.createEntity(thing) : null;
-        }
-        return null;
+    protected void handleDeleteEntityRequest(Long id) throws ODataApplicationException {
+        getEntityService().delete(id);
     }
     
+    @Override
+    protected AbstractMapper<ThingEntity> getMapper() {
+        return mapper;
+    }
+
     private AbstractSensorThingsEntityService<?, ThingEntity> getEntityService() {
         return (AbstractSensorThingsEntityService<?, ThingEntity>) getEntityService(EntityTypes.Thing);
     }

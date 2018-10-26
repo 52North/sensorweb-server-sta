@@ -29,6 +29,7 @@
 package org.n52.sta.data.service;
 
 import java.util.LinkedHashSet;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
@@ -37,13 +38,18 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.http.HttpMethod;
+import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.beans.sta.LocationEncodingEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ThingEntity;
+import org.n52.sta.data.query.HistoricalLocationQuerySpecifications;
 import org.n52.sta.data.query.LocationQuerySpecifications;
+import org.n52.sta.data.query.ThingQuerySpecifications;
+import org.n52.sta.data.repositories.HistoricalLocationRepository;
 import org.n52.sta.data.repositories.LocationEncodingRepository;
 import org.n52.sta.data.repositories.LocationRepository;
+import org.n52.sta.data.repositories.ThingRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.LocationMapper;
 import org.n52.sta.service.query.QueryOptions;
@@ -67,8 +73,18 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     
     @Autowired
     private LocationEncodingRepository locationEncodingRepository;
+    
+    @Autowired
+    private HistoricalLocationRepository historicalLocationRepository;
+    
+    @Autowired
+    private ThingRepository thingRepoitory;
 
     private final static LocationQuerySpecifications lQS= new LocationQuerySpecifications();
+    
+    private HistoricalLocationQuerySpecifications hlQS = new HistoricalLocationQuerySpecifications();
+    
+    private final static ThingQuerySpecifications tQS = new ThingQuerySpecifications();
 
     public LocationService(LocationRepository repository, LocationMapper mapper) {
         super(repository);
@@ -241,14 +257,37 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     }
 
     @Override
-    public LocationEntity update(LocationEntity location, HttpMethod method) throws ODataApplicationException {
-        return getRepository().save(location);
+    public LocationEntity update(LocationEntity entity, HttpMethod method) throws ODataApplicationException {
+        if (HttpMethod.PATCH.equals(method)) {
+            Optional<LocationEntity> existing = getRepository().findOne(lQS.withId(entity.getId()));
+            if (existing.isPresent()) {
+                LocationEntity merged = mapper.merge(existing.get(), entity);
+                return getRepository().save(merged);
+            }
+            throw new ODataApplicationException("Entity not found.",
+                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
+        } else if (HttpMethod.PUT.equals(method)) {
+            throw new ODataApplicationException("Http PUT is not yet supported!",
+                    HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.getDefault());
+        }
+        throw new ODataApplicationException("Invalid http method for updating entity!",
+                HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
     }
 
     @Override
-    public LocationEntity delete(LocationEntity location) {
-        // TODO Auto-generated method stub
-        return null;
+    public void delete(Long id) throws ODataApplicationException {
+        if (getRepository().existsById(id)) {
+            LocationEntity location = getRepository().getOne(id);
+            // delete all historical locations
+            historicalLocationRepository.deleteAll(historicalLocationRepository.findAll(hlQS.withRelatedLocation(id)));
+            location.getThingEntities().forEach(t -> {
+                t.setLocationEntities(null);
+                thingRepoitory.saveAndFlush(t);
+            });
+            getRepository().deleteById(id);
+        }
+        throw new ODataApplicationException("Entity not found.",
+                HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
     }
     
     

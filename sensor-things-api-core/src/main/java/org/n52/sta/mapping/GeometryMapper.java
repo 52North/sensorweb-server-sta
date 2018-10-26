@@ -44,7 +44,7 @@ public class GeometryMapper {
     private final GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
 
     public Geospatial resolveGeometry(GeometryEntity geometry) {
-        if (geometry.isSetGeometry()) {
+        if (geometry != null && geometry.isSetGeometry()) {
             return createGeospatial(geometry.getGeometry(), null);
         }
         return null;

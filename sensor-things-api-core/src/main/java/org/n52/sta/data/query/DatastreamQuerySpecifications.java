@@ -60,12 +60,24 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications {
         return qdatastream.observableProperty.id.eq(observedPropertyId);
     }
     
+    public BooleanExpression withObservedProperty(String name) {
+        return qdatastream.observableProperty.name.eq(name);
+    }
+    
     public BooleanExpression withThing(Long thingId) {
         return qdatastream.thing.id.eq(thingId);
     }
     
+    public BooleanExpression withThing(String name) {
+        return qdatastream.thing.name.eq(name);
+    }
+    
     public BooleanExpression withSensor(Long sensorId) {
         return qdatastream.procedure.id.eq(sensorId);
+    }
+    
+    public BooleanExpression withSensor(String name) {
+        return qdatastream.procedure.name.eq(name);
     }
 
     public BooleanExpression withObservation(Long observationId) {

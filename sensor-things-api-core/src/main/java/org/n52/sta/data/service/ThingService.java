@@ -209,21 +209,21 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     }
 
     @Override
-    public ThingEntity update(ThingEntity thing, HttpMethod method) throws ODataApplicationException {
+    public ThingEntity update(ThingEntity entity, HttpMethod method) throws ODataApplicationException {
         if (HttpMethod.PATCH.equals(method)) {
-            Optional<ThingEntity> existing = getRepository().findOne(tQS.withId(thing.getId()));
+            Optional<ThingEntity> existing = getRepository().findOne(tQS.withId(entity.getId()));
             if (existing.isPresent()) {
-                ThingEntity merged = mapper.merge(existing.get(), thing);
-                if (thing.hasLocationEntities()) {
-                    merged.setLocationEntities(thing.getLocationEntities());
+                ThingEntity merged = mapper.merge(existing.get(), entity);
+                if (entity.hasLocationEntities()) {
+                    merged.setLocationEntities(entity.getLocationEntities());
                     processLocations(merged);
                     merged = getRepository().save(merged);
                     processHistoricalLocations(merged);
                 }
                 return getRepository().save(merged);
             }
-            throw new ODataApplicationException(String.format("The entity with id (%s) does not exist!", thing.getId()),
-                    HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+            throw new ODataApplicationException("Entity not found.",
+                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
         } else if (HttpMethod.PUT.equals(method)) {
             throw new ODataApplicationException("Http PUT is not yet supported!",
                     HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.getDefault());
@@ -233,9 +233,31 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     }
 
     @Override
-    public ThingEntity delete(ThingEntity thing) {
-        // TODO Auto-generated method stub
-        return null;
+    public void delete(Long id) throws ODataApplicationException {
+        if (getRepository().existsById(id)) {
+            ThingEntity thing = getRepository().getOne(id);
+            // delete datastreams
+            thing.getDatastreamEntities().forEach(d -> {
+                try {
+                    getDatastreamService().delete(d.getId());
+                } catch (ODataApplicationException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            });
+            // delete historicalLocation
+            thing.getHistoricalLocationEntities().forEach(hl -> {
+                try {
+                    getHistoricalLocationService().delete(hl.getId());
+                } catch (ODataApplicationException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            });
+            getRepository().deleteById(id);
+        }
+        throw new ODataApplicationException("Entity not found.",
+                HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
     }
 
     private void processDatastreams(ThingEntity thing) throws ODataApplicationException {

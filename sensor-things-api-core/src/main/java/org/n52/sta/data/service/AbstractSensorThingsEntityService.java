@@ -235,7 +235,7 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
     public abstract S update(S entity, HttpMethod method) throws ODataApplicationException;
 
     @Transactional(rollbackFor = Exception.class)
-    public abstract S delete(S entity) throws ODataApplicationException;
+    public abstract void delete(Long id) throws ODataApplicationException;
     
     protected S createOrUpdate(S entity) throws ODataApplicationException {
         if (entity.getId() != null && getRepository().existsById(entity.getId())) {

@@ -28,6 +28,7 @@
  */
 package org.n52.sta.data.service;
 
+import java.util.Locale;
 import java.util.Optional;
 import java.util.OptionalLong;
 
@@ -35,11 +36,18 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.http.HttpMethod;
+import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
+import org.n52.series.db.DataRepository;
+import org.n52.series.db.DatasetRepository;
 import org.n52.series.db.FormatRepository;
 import org.n52.series.db.beans.AbstractFeatureEntity;
+import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
+import org.n52.series.db.query.DatasetQuerySpecifications;
 import org.n52.sta.data.query.FeatureOfInterestQuerySpecifications;
+import org.n52.sta.data.query.ObservationQuerySpecifications;
 import org.n52.sta.data.repositories.FeatureOfInterestRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.FeatureOfInterestMapper;
@@ -62,8 +70,18 @@ public class FeatureOfInterestService extends AbstractSensorThingsEntityService<
     
     @Autowired
     private FormatRepository formatRepository;
+    
+    @Autowired
+    private DataRepository<DataEntity<?>> dataRepository;
 
+    @Autowired
+    private DatasetRepository<DatasetEntity> datasetRepository;
+    
     private final static FeatureOfInterestQuerySpecifications foiQS = new FeatureOfInterestQuerySpecifications();
+    
+    private ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
+    
+    private DatasetQuerySpecifications dQS = DatasetQuerySpecifications.of(null);
 
     public FeatureOfInterestService(FeatureOfInterestRepository repository, FeatureOfInterestMapper mapper) {
         super(repository);
@@ -199,16 +217,48 @@ public class FeatureOfInterestService extends AbstractSensorThingsEntityService<
 
     @Override
     public AbstractFeatureEntity<?> update(AbstractFeatureEntity<?> entity, HttpMethod method) throws ODataApplicationException {
-        // TODO Auto-generated method stub
-        return null;
+        if (HttpMethod.PATCH.equals(method)) {
+            Optional<AbstractFeatureEntity<?>> existing = getRepository().findOne(foiQS.withId(entity.getId()));
+            if (existing.isPresent()) {
+                AbstractFeatureEntity<?> merged = mapper.merge(existing.get(), entity);
+                return getRepository().save(merged);
+            }
+            throw new ODataApplicationException("Entity not found.",
+                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
+        } else if (HttpMethod.PUT.equals(method)) {
+            throw new ODataApplicationException("Http PUT is not yet supported!",
+                    HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.getDefault());
+        }
+        throw new ODataApplicationException("Invalid http method for updating entity!",
+                HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
     }
 
     @Override
-    public AbstractFeatureEntity<?> delete(AbstractFeatureEntity<?> entity) {
-        // TODO Auto-generated method stub
-        return null;
+    public void delete(Long id) throws ODataApplicationException {
+        if (getRepository().existsById(id)) {
+            // check observations
+            deleteRelatedObservationsAndUpdateDatasets(id);
+            getRepository().deleteById(id);
+        }
+        throw new ODataApplicationException("Entity not found.",
+                HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
     }
     
+    private void deleteRelatedObservationsAndUpdateDatasets(Long featureId) {
+        // set dataset first/last to null
+        datasetRepository.findAll(dQS.matchFeatures(Long.toString(featureId))).forEach(d -> {
+            d.setFirstObservation(null);
+            d.setFirstQuantityValue(null);
+            d.setFirstValueAt(null);
+            d.setLastQuantityValue(null);
+            d.setLastQuantityValue(null);
+            d.setLastValueAt(null);
+            datasetRepository.saveAndFlush(d);
+        });
+        // delete observations
+        dataRepository.deleteAll(dataRepository.findAll(oQS.withFeatureOfInterest(featureId)));
+    }
+
     private void checkFeatureType(AbstractFeatureEntity<?> feature) {
         FormatEntity format;
         if (!formatRepository.existsByFormat(feature.getFeatureType().getFormat())) {

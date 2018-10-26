@@ -57,7 +57,7 @@ import com.vividsolutions.jts.geom.Geometry;
 public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper<AbstractFeatureEntity<?>> {
 
     @Autowired
-    EntityCreationHelper entityCreationHelper;
+    private EntityCreationHelper entityCreationHelper;
 
     public Entity createEntity(AbstractFeatureEntity<?> feature) {
         Entity entity = new Entity();
@@ -66,11 +66,10 @@ public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper<Abst
         addGeometry(entity, feature);
         entity.setType(ET_FEATURE_OF_INTEREST_FQN.getFullQualifiedNameAsString());
         entity.setId(entityCreationHelper.createId(entity, ES_FEATURES_OF_INTEREST_NAME, PROP_ID));
-
         return entity;
     }
 
-    public FeatureEntity createEntity(Entity entity) {
+    public AbstractFeatureEntity<?> createEntity(Entity entity) {
         FeatureEntity featureOfInterest = new FeatureEntity();
         setId(featureOfInterest, entity);
         setIdentifier(featureOfInterest, entity);
@@ -86,7 +85,7 @@ public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper<Abst
         return featureOfInterest;
     }
     
-    public FeatureEntity createFeatureOfInterest(LocationEntity location) {
+    public AbstractFeatureEntity<?> createFeatureOfInterest(LocationEntity location) {
         FeatureEntity featureOfInterest = new FeatureEntity();
         featureOfInterest.setIdentifier(location.getName());
         featureOfInterest.setName(location.getName());

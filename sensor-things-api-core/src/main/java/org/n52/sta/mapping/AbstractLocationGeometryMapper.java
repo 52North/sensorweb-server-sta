@@ -50,23 +50,29 @@ public abstract class AbstractLocationGeometryMapper<T> extends AbstractMapper<T
     private GeometryMapper geometryMapper;
 
     protected void addGeometry(Entity entity, HasGeometry<?> geometryEntity) {
-        add(entity, geometryEntity, PROP_FEATURE);
+        addWithEncoding(entity, geometryEntity, PROP_FEATURE);
     }
     
     protected void addLocation(Entity entity, HasGeometry<?> locationEntity) {
-        add(entity, locationEntity, PROP_LOCATION);
+        addWithEncoding(entity, locationEntity, PROP_LOCATION);
     }
 
     protected void addObservedArea(Entity entity, HasGeometry<?> geometryEntity) {
         add(entity, geometryEntity, PROP_OBSERVED_AREA);
     }
+    
+    protected void addWithEncoding(Entity entity, HasGeometry<?> geometryLocationEntity, String property) {
+        if (geometryLocationEntity.isSetGeometry()) {
+            entity.addProperty(new Property(null, PROP_ENCODINGTYPE, ValueType.PRIMITIVE, ENCODINGTYPE_GEOJSON));
+            add(entity, geometryLocationEntity, property);
+        }
+    }
 
     protected void add(Entity entity, HasGeometry<?> geometryLocationEntity, String property) {
-        entity.addProperty(new Property(null, PROP_ENCODINGTYPE, ValueType.PRIMITIVE, ENCODINGTYPE_GEOJSON));
-//        entity.addProperty(new Property(null, property, ValueType.COMPLEX,
-//                geometryMapper.resolveGeometry(geometryLocationEntity.getGeometryEntity())));
-        entity.addProperty(new Property(null, property, ValueType.GEOSPATIAL,
-                geometryMapper.resolveGeometry(geometryLocationEntity.getGeometryEntity())));
+        if (geometryLocationEntity.isSetGeometry()) {
+            entity.addProperty(new Property(null, property, ValueType.GEOSPATIAL,
+                    geometryMapper.resolveGeometry(geometryLocationEntity.getGeometryEntity())));
+        }
 
     }
     

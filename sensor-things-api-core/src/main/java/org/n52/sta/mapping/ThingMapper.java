@@ -36,6 +36,7 @@ import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ES_THINGS_NA
 import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_FQN;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -123,8 +124,9 @@ public class ThingMapper extends AbstractMapper<ThingEntity> {
     private void addLocations(ThingEntity thing, Entity entity) {
         if (checkNavigationLink(entity, ES_LOCATIONS_NAME)) {
             Set<LocationEntity> locations = new LinkedHashSet<>();
-            for (Entity location : entity.getNavigationLink(ES_LOCATIONS_NAME).getInlineEntitySet()) {
-                locations.add(locationMapper.createEntity(location));
+            Iterator<Entity> iterator = entity.getNavigationLink(ES_LOCATIONS_NAME).getInlineEntitySet().iterator();
+            while (iterator.hasNext()) {
+                locations.add(locationMapper.createEntity((Entity) iterator.next()));
             }
             thing.setLocationEntities(locations);
         }
@@ -133,8 +135,9 @@ public class ThingMapper extends AbstractMapper<ThingEntity> {
     private void addDatastreams(ThingEntity thing, Entity entity) {
         if (checkNavigationLink(entity, ES_DATASTREAMS_NAME)) {
             Set<DatastreamEntity> datastreams = new LinkedHashSet<>();
-            for (Entity datastream : entity.getNavigationLink(ES_DATASTREAMS_NAME).getInlineEntitySet()) {
-                datastreams.add(datastreamMapper.createEntity(datastream));
+            Iterator<Entity> iterator = entity.getNavigationLink(ES_DATASTREAMS_NAME).getInlineEntitySet().iterator();
+            while (iterator.hasNext()) {
+                datastreams.add(datastreamMapper.createEntity((Entity) iterator.next()));
             }
             thing.setDatastreamEntities(datastreams);
         }

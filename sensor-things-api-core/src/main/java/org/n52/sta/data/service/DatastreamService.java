@@ -29,6 +29,7 @@
 package org.n52.sta.data.service;
 
 import java.util.LinkedHashSet;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
@@ -37,7 +38,10 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.http.HttpMethod;
+import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
+import org.n52.series.db.DataRepository;
+import org.n52.series.db.DatasetRepository;
 import org.n52.series.db.FormatRepository;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
@@ -45,11 +49,12 @@ import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.UnitEntity;
-import org.n52.series.db.beans.dataset.Dataset;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.series.db.beans.sta.ThingEntity;
+import org.n52.series.db.query.DatasetQuerySpecifications;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
+import org.n52.sta.data.query.ObservationQuerySpecifications;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.UnitRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
@@ -58,6 +63,7 @@ import org.n52.sta.service.query.QueryOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
 /**
@@ -75,7 +81,17 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     @Autowired
     private FormatRepository formatRepository;
     
+    @Autowired
+    private DataRepository<DataEntity<?>> dataRepository;
+    
+    @Autowired
+    private DatasetRepository<DatasetEntity> datasetRepository;
+    
     private final static DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
+    
+    private ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
+    
+    private DatasetQuerySpecifications dsQS = DatasetQuerySpecifications.of(null);
 
     public DatastreamService(DatastreamRepository repository, DatastreamMapper mapper) {
         super(repository);
@@ -245,9 +261,10 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
         if (datastream.getId() != null && !datastream.isSetName()) {
             return getRepository().findOne(dQS.withId(datastream.getId())).get();
         }
-        if (getRepository().exists(dQS.withName(datastream.getName()))) {
-            Optional<DatastreamEntity> optional = getRepository().findOne(dQS.withName(datastream.getName()));
-            return optional.isPresent() ? optional.get() : null;
+        Predicate predicate = createQuery(datastream);
+        if (getRepository().exists(predicate)) {
+            Optional<DatastreamEntity> optional = getRepository().findOne(predicate);
+            return optional.isPresent() ? processObservation(optional.get()) : null;
         }
         checkObservationType(datastream);
         checkUnit(datastream);
@@ -259,18 +276,82 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
         return datastream = getRepository().save(datastream);
     }
 
-    @Override
-    public DatastreamEntity update(DatastreamEntity entity, HttpMethod method) throws ODataApplicationException {
-        // TODO Auto-generated method stub
-        return null;
+    private Predicate createQuery(DatastreamEntity datastream) {
+        BooleanExpression expression;
+        if (datastream.getThing().getId() != null && !datastream.getThing().isSetName()) {
+            expression = dQS.withThing(datastream.getThing().getId());
+        } else {
+            expression = dQS.withThing(datastream.getThing().getName());
+        }
+        if (datastream.getThing().getId() != null && !datastream.getThing().isSetName()) {
+            expression.and(dQS.withSensor(datastream.getProcedure().getId()));
+        } else {
+            expression.and(dQS.withSensor(datastream.getProcedure().getName()));
+        }
+        if (datastream.getThing().getId() != null && !datastream.getThing().isSetName()) {
+            expression.and(dQS.withObservedProperty(datastream.getObservableProperty().getId()));
+        } else {
+            expression.and(dQS.withObservedProperty(datastream.getObservableProperty().getName()));
+        }
+        return expression;
     }
 
     @Override
-    public DatastreamEntity delete(DatastreamEntity entity) {
-        // TODO Auto-generated method stub
-        return null;
+    public DatastreamEntity update(DatastreamEntity entity, HttpMethod method) throws ODataApplicationException {
+        if (HttpMethod.PATCH.equals(method)) {
+            Optional<DatastreamEntity> existing = getRepository().findOne(dQS.withId(entity.getId()));
+            if (existing.isPresent()) {
+                DatastreamEntity merged = mapper.merge(existing.get(), entity);
+                return getRepository().save(merged);
+            }
+            throw new ODataApplicationException("Entity not found.",
+                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
+        } else if (HttpMethod.PUT.equals(method)) {
+            throw new ODataApplicationException("Http PUT is not yet supported!",
+                    HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.getDefault());
+        }
+        throw new ODataApplicationException("Invalid http method for updating entity!",
+                HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+    }
+
+    @Override
+    public void delete(Long id) throws ODataApplicationException {
+        if (getRepository().existsById(id)) {
+            DatastreamEntity datastream = getRepository().getOne(id);
+            // check datasets
+            deleteRelatedDatasetsAndObservations(datastream);
+            // check observations
+            getRepository().deleteById(id);
+        }
+        throw new ODataApplicationException("Entity not found.",
+                HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
     }
     
+    private void deleteRelatedDatasetsAndObservations(DatastreamEntity datastream) {
+        // update datasets
+        datastream.getDatasets().forEach(d -> {
+            d.setFirstObservation(null);
+            d.setFirstQuantityValue(null);
+            d.setFirstValueAt(null);
+            d.setLastQuantityValue(null);
+            d.setLastQuantityValue(null);
+            d.setLastValueAt(null);
+            datasetRepository.saveAndFlush(d);
+        });
+        // delete observations
+        dataRepository.deleteAll(dataRepository.findAll(oQS.withDatastream(datastream.getId())));
+        // delete datasets
+        datastream.getDatasets().forEach(d -> {
+            d.setFirstObservation(null);
+            d.setFirstQuantityValue(null);
+            d.setFirstValueAt(null);
+            d.setLastQuantityValue(null);
+            d.setLastQuantityValue(null);
+            d.setLastValueAt(null);
+            datasetRepository.delete(d);
+        });
+    }
+
     private void checkUnit(DatastreamEntity datastream) {
         UnitEntity unit;
         if (!unitRepository.existsBySymbol(datastream.getUnit().getSymbol())) {
@@ -291,15 +372,21 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
         datastream.setObservationType(format);
     }
     
-    private void processObservation(DatastreamEntity datastream) throws ODataApplicationException {
-        Set<DatasetEntity> datasets = new LinkedHashSet<>();
-        for (StaDataEntity observation : datastream.getObservations()) {
-            DataEntity<?> data = getObservationService().create(observation);
-            if (data != null) {
-                datasets.add(data.getDataset());
+    private DatastreamEntity processObservation(DatastreamEntity datastream) throws ODataApplicationException {
+        if (datastream.hasObservations()) {
+            Set<DatasetEntity> datasets = new LinkedHashSet<>();
+            if (datastream.getDatasets() != null) {
+                datasets.addAll(datastream.getDatasets());
             }
+            for (StaDataEntity observation : datastream.getObservations()) {
+                DataEntity<?> data = getObservationService().create(observation);
+                if (data != null) {
+                    datasets.add(data.getDataset());
+                }
+            }
+            datastream.setDatasets(datasets);
         }
-        datastream.setDatasets(datasets);
+        return datastream;
     }
 
     private AbstractSensorThingsEntityService<?, ThingEntity> getThingService() {

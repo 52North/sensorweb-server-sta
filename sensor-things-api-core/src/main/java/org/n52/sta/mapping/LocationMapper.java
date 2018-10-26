@@ -35,6 +35,7 @@ import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ES_LOCATI
 import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATION_FQN;
 import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ES_THINGS_NAME;
 
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -111,8 +112,9 @@ public class LocationMapper extends AbstractLocationGeometryMapper<LocationEntit
     private void addThings(LocationEntity location, Entity entity) {
         if (checkNavigationLink(entity, ES_THINGS_NAME)) {
             Set<ThingEntity> things = new LinkedHashSet<>();
-            for (Entity thing : entity.getNavigationLink(ES_THINGS_NAME).getInlineEntitySet()) {
-                things.add(thingMapper.createEntity(thing));
+            Iterator<Entity> iterator = entity.getNavigationLink(ES_THINGS_NAME).getInlineEntitySet().iterator();
+            while (iterator.hasNext()) {
+                things.add(thingMapper.createEntity((Entity) iterator.next()));
             }
             location.setThingEntities(things);
         }

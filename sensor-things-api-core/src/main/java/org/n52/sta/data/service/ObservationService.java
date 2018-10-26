@@ -29,6 +29,7 @@
 package org.n52.sta.data.service;
 
 import java.math.BigDecimal;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.OptionalLong;
 
@@ -36,6 +37,7 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.http.HttpMethod;
+import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.CategoryRepository;
 import org.n52.series.db.DataRepository;
@@ -305,14 +307,47 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
 
     @Override
     public DataEntity<?> update(DataEntity<?> entity, HttpMethod method) throws ODataApplicationException {
-        // TODO Auto-generated method stub
-        return null;
+        if (HttpMethod.PATCH.equals(method)) {
+            Optional<DataEntity<?>> existing = getRepository().findOne(oQS.withId(entity.getId()));
+            if (existing.isPresent()) {
+                DataEntity<?> merged = mapper.merge(existing.get(), entity);
+                return getRepository().save(merged);
+            }
+            throw new ODataApplicationException("Entity not found.",
+                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
+        } else if (HttpMethod.PUT.equals(method)) {
+            throw new ODataApplicationException("Http PUT is not yet supported!",
+                    HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.getDefault());
+        }
+        throw new ODataApplicationException("Invalid http method for updating entity!",
+                HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
     }
 
     @Override
-    public DataEntity<?> delete(DataEntity<?> entity) {
-        // TODO Auto-generated method stub
-        return null;
+    public void delete(Long id) throws ODataApplicationException {
+        if (getRepository().existsById(id)) {
+            DataEntity<?> observation = getRepository().getOne(id);
+            checkDataset(observation);
+            getRepository().deleteById(id);
+        }
+        throw new ODataApplicationException("Entity not found.",
+                HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
+    }
+
+    private void checkDataset(DataEntity<?> observation) {
+        // TODO get the next first/last observation and set it
+        DatasetEntity dataset = observation.getDataset();
+        if (dataset.getFirstObservation().getId().equals(observation.getId())) {
+            dataset.setFirstObservation(null);
+            dataset.setFirstQuantityValue(null);
+            dataset.setFirstValueAt(null);
+        }
+        if (dataset.getLastObservation().getId().equals(observation.getId())) {
+            dataset.setLastObservation(null);
+            dataset.setLastQuantityValue(null);
+            dataset.setLastValueAt(null);
+        }
+        observation.setDataset(datasetRepository.saveAndFlush(dataset));
     }
 
     private DatastreamEntity checkDatastream(StaDataEntity observation) throws ODataApplicationException {

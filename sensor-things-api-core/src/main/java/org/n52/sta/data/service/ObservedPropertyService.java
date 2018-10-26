@@ -28,6 +28,7 @@
  */
 package org.n52.sta.data.service;
 
+import java.util.Locale;
 import java.util.Optional;
 import java.util.OptionalLong;
 
@@ -35,14 +36,20 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.http.HttpMethod;
+import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.PhenomenonRepository;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
+import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.ObservedPropertyQuerySpecifications;
+import org.n52.sta.data.query.SensorQuerySpecifications;
+import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.ObservedPropertyMapper;
 import org.n52.sta.service.query.QueryOptions;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -55,9 +62,14 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 public class ObservedPropertyService extends AbstractSensorThingsEntityService<PhenomenonRepository, PhenomenonEntity> {
 
     private ObservedPropertyMapper mapper;
+    
+    @Autowired
+    private DatastreamRepository datastreamRepository;
 
     private final static ObservedPropertyQuerySpecifications oQS = new ObservedPropertyQuerySpecifications();
 
+    private final static DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
+    
     public ObservedPropertyService(PhenomenonRepository repository, ObservedPropertyMapper mapper) {
         super(repository);
         this.mapper = mapper;
@@ -200,13 +212,42 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
 
     @Override
     public PhenomenonEntity update(PhenomenonEntity entity, HttpMethod method) throws ODataApplicationException {
-        // TODO Auto-generated method stub
-        return null;
+        if (HttpMethod.PATCH.equals(method)) {
+            Optional<PhenomenonEntity> existing = getRepository().findOne(oQS.withId(entity.getId()));
+            if (existing.isPresent()) {
+                PhenomenonEntity merged = mapper.merge(existing.get(), entity);
+                return getRepository().save(merged);
+            }
+            throw new ODataApplicationException("Entity not found.",
+                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
+        } else if (HttpMethod.PUT.equals(method)) {
+            throw new ODataApplicationException("Http PUT is not yet supported!",
+                    HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.getDefault());
+        }
+        throw new ODataApplicationException("Invalid http method for updating entity!",
+                HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
     }
 
     @Override
-    public PhenomenonEntity delete(PhenomenonEntity entity) {
-        // TODO Auto-generated method stub
-        return null;
+    public void delete(Long id) throws ODataApplicationException {
+        if (getRepository().existsById(id)) {
+         // delete datastreams
+            datastreamRepository.findAll(dQS.withSensor(id)).forEach(d -> {
+                try {
+                    getDatastreamService().delete(d.getId());
+                } catch (ODataApplicationException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            });
+            getRepository().deleteById(id);
+        }
+        throw new ODataApplicationException("Entity not found.",
+                HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
+    }
+    
+    private AbstractSensorThingsEntityService<?, DatastreamEntity> getDatastreamService() {
+        return (AbstractSensorThingsEntityService<?, DatastreamEntity>) getEntityService(
+                EntityTypes.Datastream);
     }
 }

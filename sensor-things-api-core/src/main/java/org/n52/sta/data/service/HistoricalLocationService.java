@@ -28,6 +28,7 @@
  */
 package org.n52.sta.data.service;
 
+import java.util.Locale;
 import java.util.Optional;
 import java.util.OptionalLong;
 
@@ -35,6 +36,7 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.http.HttpMethod;
+import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.sta.data.query.HistoricalLocationQuerySpecifications;
@@ -219,12 +221,29 @@ public class HistoricalLocationService extends AbstractSensorThingsEntityService
     }
 
     @Override
-    public HistoricalLocationEntity update(HistoricalLocationEntity historicalLocation, HttpMethod method) throws ODataApplicationException {
-        return null;
+    public HistoricalLocationEntity update(HistoricalLocationEntity entity, HttpMethod method) throws ODataApplicationException {
+        if (HttpMethod.PATCH.equals(method)) {
+            Optional<HistoricalLocationEntity> existing = getRepository().findOne(hlQS.withId(entity.getId()));
+            if (existing.isPresent()) {
+                HistoricalLocationEntity merged = mapper.merge(existing.get(), entity);
+                return getRepository().save(merged);
+            }
+            throw new ODataApplicationException("Entity not found.",
+                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
+        } else if (HttpMethod.PUT.equals(method)) {
+            throw new ODataApplicationException("Http PUT is not yet supported!",
+                    HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.getDefault());
+        }
+        throw new ODataApplicationException("Invalid http method for updating entity!",
+                HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
     }
 
     @Override
-    public HistoricalLocationEntity delete(HistoricalLocationEntity historicalLocation) {
-        return null;
+    public void delete(Long id) throws ODataApplicationException {
+        if (getRepository().existsById(id)) {
+            getRepository().deleteById(id);
+        }
+        throw new ODataApplicationException("Entity not found.",
+                HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
     }
 }

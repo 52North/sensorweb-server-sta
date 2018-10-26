@@ -41,6 +41,7 @@ import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.E
 import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ET_SENSOR_NAME;
 import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
 
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -243,10 +244,11 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
     private void addObservations(DatastreamEntity datastream, Entity entity) {
         if (checkNavigationLink(entity, ES_OBSERVATIONS_NAME)) {
             Set<StaDataEntity> observations = new LinkedHashSet<>();
-            for (Entity observation : entity.getNavigationLink(ES_OBSERVATIONS_NAME).getInlineEntitySet()) {
-               StaDataEntity createObservation = observationMapper.createEntity(observation);
-               createObservation.setDatastream(datastream);
-               observations.add(createObservation);
+            Iterator<Entity> iterator = entity.getNavigationLink(ES_OBSERVATIONS_NAME).getInlineEntitySet().iterator();
+            while (iterator.hasNext()) {
+                StaDataEntity createObservation = observationMapper.createEntity((Entity) iterator.next());
+                createObservation.setDatastream(datastream);
+                observations.add(createObservation);
             }
             datastream.setObservations(observations);
         }

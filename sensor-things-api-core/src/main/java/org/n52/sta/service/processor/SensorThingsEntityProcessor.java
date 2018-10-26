@@ -132,7 +132,6 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
             response.setContent(serializedContent);
             response.setStatusCode(HttpStatusCode.OK.getStatusCode());
             response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.APPLICATION_JSON.toContentTypeString());
-            response.setHeader(HttpHeader.LOCATION, entityResponse.getEntity().getSelfLink().getHref());
         } else {
             response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.JSON_NO_METADATA.toContentTypeString());
         }
@@ -144,23 +143,16 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
             throws ODataApplicationException, ODataLibraryException {
         QueryOptions queryOptions = new URIQueryOptions(uriInfo, request.getRawBaseUri());
         EntityResponse entityResponse = new EntityResponse();
-        DeserializerResult deserializeRequestBody = deserializeRequestBody(request, uriInfo);
-        if (deserializeRequestBody.getEntity() != null) {
-            entityResponse = getCrudEntityHanlder(uriInfo)
-                    .handleDeleteEntityRequest(deserializeRequestBody.getEntity(), uriInfo.getUriResourceParts());
-
-            entityAnnotator.annotateEntity(entityResponse.getEntity(),
-                    entityResponse.getEntitySet().getEntityType(),
-                    queryOptions.getBaseURI());
-            InputStream serializedContent = createResponseContent(serviceMetadata, entityResponse, queryOptions);
-            // configure the response object: set the body, headers and status code
-            response.setContent(serializedContent);
-            response.setStatusCode(HttpStatusCode.OK.getStatusCode());
-            response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.APPLICATION_JSON.toContentTypeString());
-            response.setHeader(HttpHeader.LOCATION, entityResponse.getEntity().getSelfLink().getHref());
-        } else {
-            response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.JSON_NO_METADATA.toContentTypeString());
-        }
+        entityResponse = getCrudEntityHanlder(uriInfo)
+                .handleDeleteEntityRequest(uriInfo.getUriResourceParts());
+        entityAnnotator.annotateEntity(entityResponse.getEntity(),
+                entityResponse.getEntitySet().getEntityType(),
+                queryOptions.getBaseURI());
+//        InputStream serializedContent = createResponseContent(serviceMetadata, entityResponse, queryOptions);
+        // configure the response object: set the body, headers and status code
+//        response.setContent(serializedContent);
+        response.setStatusCode(HttpStatusCode.OK.getStatusCode());
+        response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.JSON_NO_METADATA.toContentTypeString());
         
 //        throw new ODataApplicationException("Not supported.", HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
     }
