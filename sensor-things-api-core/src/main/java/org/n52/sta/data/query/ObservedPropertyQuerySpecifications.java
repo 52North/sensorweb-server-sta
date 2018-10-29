@@ -28,26 +28,30 @@
  */
 package org.n52.sta.data.query;
 
-import org.n52.series.db.beans.QPhenomenonEntity;
+import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
+import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
+import org.n52.series.db.beans.PhenomenonEntity;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.StringExpression;
+import com.querydsl.jpa.JPQLQuery;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
-public class ObservedPropertyQuerySpecifications extends EntityQuerySpecifications {
-    
-    private final static QPhenomenonEntity qobservedproperty = QPhenomenonEntity.phenomenonEntity;
-        
+public class ObservedPropertyQuerySpecifications extends EntityQuerySpecifications<PhenomenonEntity> {
+
     public BooleanExpression withId(Long id) {
         return qobservedproperty.id.eq(id);
     }
-    
+
     public BooleanExpression withDatastream(Long datastreamId) {
-        return qobservedproperty.id.in(dQS.toSubquery(qdatastream.id.eq(datastreamId)).select(qdatastream.observableProperty.id));
+        return qobservedproperty.id.in(dQS.toSubquery(qdatastream,
+                                                      qdatastream.observableProperty.id,
+                                                      qdatastream.id.eq(datastreamId)));
     }
-    
+
     /**
      * Assures that Entity is valid.
      * Entity is valid if:
@@ -56,6 +60,74 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
      * @return BooleanExpression evaluating to true if Entity is valid
      */
     public BooleanExpression isValidEntity() {
-        return qobservedproperty.id.in(dQS.toSubquery(qdatastream.isNotNull()).select(qdatastream.observableProperty.id));
+        return qobservedproperty.id.in(dQS.toSubquery(qdatastream,
+                                                      qdatastream.observableProperty.id,
+                                                      qdatastream.isNotNull()));
     }
+
+    /* (non-Javadoc)
+     * @see org.n52.sta.data.query.EntityQuerySpecifications#getIdSubqueryWithFilter(com.querydsl.core.types.dsl.BooleanExpression)
+     */
+    @Override
+    public JPQLQuery<Long> getIdSubqueryWithFilter(BooleanExpression filter) {
+        return this.toSubquery(qobservedproperty, qobservedproperty.id, filter);
+    }
+
+    /* (non-Javadoc)
+     * @see org.n52.sta.data.query.EntityQuerySpecifications#getFilterForProperty(java.lang.String, java.lang.Object, org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind)
+     */
+    @Override
+    public BooleanExpression getFilterForProperty(String propertyName,
+                                                  Object propertyValue,
+                                                  BinaryOperatorKind operator) throws ExpressionVisitException {
+        if (propertyName.equals("Datastreams")) {
+            return handleRelatedPropertyFilter(propertyName, (JPQLQuery<Long>)propertyValue);
+        } else if (propertyName.equals("id")) {
+            return handleIdPropertyFilter(qobservedproperty.id, propertyValue, operator);
+        } else {
+            return handleDirectPropertyFilter(propertyName, propertyValue, operator);
+        }
+    }
+
+
+
+    private BooleanExpression handleRelatedPropertyFilter(String propertyName, JPQLQuery<Long> propertyValue) throws ExpressionVisitException {
+        throw new ExpressionVisitException("Filtering by Related Properties with cardinality >1 is currently not supported!");
+    }
+
+    private BooleanExpression handleDirectPropertyFilter(String propertyName, Object propertyValue, BinaryOperatorKind operator) throws ExpressionVisitException {
+        StringExpression value = toStringExpression(propertyValue);
+        if (operator.equals(BinaryOperatorKind.EQ)) {
+            switch(propertyName) {
+            case "name": {
+                return qobservedproperty.name.eq(value);
+            }
+            case "description": {
+                return qobservedproperty.description.eq(value);
+            }
+            case "definition": {
+                return qobservedproperty.identifier.eq(value);
+            }
+            default:
+                throw new ExpressionVisitException("Error getting filter for Property: \"" + propertyName + "\". No such property in Entity.");
+            }
+        } else if (operator.equals(BinaryOperatorKind.NE)){
+            switch(propertyName) {
+            case "name": {
+                return qobservedproperty.name.eq(value);
+            }
+            case "description": {
+                return qobservedproperty.description.eq(value);
+            }
+            case "definition": {
+                return qobservedproperty.identifier.eq(value);
+            }
+            default:
+                throw new ExpressionVisitException("Error getting filter for Property: \"" + propertyName + "\". No such property in Entity.");
+            }
+        } else {
+            throw new ExpressionVisitException("BinaryOperator \"" + operator.toString() + "\" is not supported for \"" + propertyName + "\"");
+        }
+    }
+
 }

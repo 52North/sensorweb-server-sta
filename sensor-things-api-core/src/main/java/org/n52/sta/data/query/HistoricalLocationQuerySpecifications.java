@@ -28,18 +28,19 @@
  */
 package org.n52.sta.data.query;
 
-import org.n52.series.db.beans.sta.QHistoricalLocationEntity;
+import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
+import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
+import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPQLQuery;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
-public class HistoricalLocationQuerySpecifications extends EntityQuerySpecifications {
-
-    final QHistoricalLocationEntity qhistoricallocation = QHistoricalLocationEntity.historicalLocationEntity;
-
+public class HistoricalLocationQuerySpecifications extends EntityQuerySpecifications<HistoricalLocationEntity> {
+    
     public BooleanExpression withRelatedLocation(Long historicalId) {
         return qhistoricallocation.locationEntities.any().id.eq(historicalId);
     }
@@ -50,5 +51,39 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
     
     public BooleanExpression withId(Long id) {
         return  qhistoricallocation.id.eq(id);
+    }
+
+    /* (non-Javadoc)
+     * @see org.n52.sta.data.query.EntityQuerySpecifications#getIdSubqueryWithFilter(com.querydsl.core.types.dsl.BooleanExpression)
+     */
+    @Override
+    public JPQLQuery<Long> getIdSubqueryWithFilter(BooleanExpression filter) {
+        return this.toSubquery(qhistoricallocation, qhistoricallocation.id, filter);
+    }
+
+    /* (non-Javadoc)
+     * @see org.n52.sta.data.query.EntityQuerySpecifications#getFilterForProperty(java.lang.String, java.lang.Object, org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind)
+     */
+    @Override
+    public BooleanExpression getFilterForProperty(String propertyName,
+                                                  Object propertyValue,
+                                                  BinaryOperatorKind operator) throws ExpressionVisitException {
+        if (propertyName.equals("Thing") || propertyName.equals("Locations")) {
+            return handleRelatedPropertyFilter(propertyName, (JPQLQuery<Long>)propertyValue);
+        } else if (propertyName.equals("id")) {
+            return handleIdPropertyFilter(qhistoricallocation.id, propertyValue, operator);
+        } else {
+            return handleDirectPropertyFilter(propertyName, propertyValue, operator);
+        }
+    }
+
+    private BooleanExpression handleRelatedPropertyFilter(String propertyName, JPQLQuery<Long> propertyValue) throws ExpressionVisitException {
+        if (propertyName.equals("Thing")) {
+            return qhistoricallocation.thingEntity.id.eqAny(propertyValue);
+        } else throw new ExpressionVisitException("Filtering by Related Properties with cardinality >1 is currently not supported!");
+    }
+
+    private BooleanExpression handleDirectPropertyFilter(String propertyName, Object propertyValue, BinaryOperatorKind operator) throws ExpressionVisitException {
+        throw new ExpressionVisitException("Currently not implemented!");
     }
 }

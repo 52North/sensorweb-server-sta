@@ -28,21 +28,38 @@
  */
 package org.n52.sta.data.query;
 
+import java.util.Locale;
+
+import org.apache.olingo.commons.api.http.HttpStatusCode;
+import org.apache.olingo.server.api.ODataApplicationException;
+import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
+import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.n52.series.db.beans.QDataEntity;
 import org.n52.series.db.beans.QDatasetEntity;
 import org.n52.series.db.beans.QFeatureEntity;
+import org.n52.series.db.beans.QPhenomenonEntity;
 import org.n52.series.db.beans.QProcedureEntity;
 import org.n52.series.db.beans.sta.QDatastreamEntity;
 import org.n52.series.db.beans.sta.QHistoricalLocationEntity;
 import org.n52.series.db.beans.sta.QLocationEntity;
 import org.n52.series.db.beans.sta.QThingEntity;
 
+import com.querydsl.core.types.EntityPath;
+import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.ComparableExpressionBase;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.core.types.dsl.NumberPath;
+import com.querydsl.core.types.dsl.StringExpression;
+import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.JPQLQuery;
+
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
-public abstract class EntityQuerySpecifications {
-    
+public abstract class EntityQuerySpecifications<T> {
     final static DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
     final static ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
     
@@ -54,4 +71,75 @@ public abstract class EntityQuerySpecifications {
     final static QFeatureEntity qfeature = QFeatureEntity.featureEntity;
     final static QDatasetEntity qdataset = QDatasetEntity.datasetEntity;
     final static QThingEntity qthing = QThingEntity.thingEntity;
+    final static QPhenomenonEntity qobservedproperty = QPhenomenonEntity.phenomenonEntity;
+    
+    /**
+     * 
+     * @param filter
+     * @return
+     */
+    public abstract JPQLQuery<Long> getIdSubqueryWithFilter(BooleanExpression filter);
+    
+    /**
+     * Gets Entity-specific Filter for property with given name. Filters may not accept all BinaryOperators,
+     * as they may not be defined for the datatype of the property. 
+     * 
+     * @param propertyName Name of the property to be filtered on
+     * @param propertyValue supposed Value of the property
+     * @param operator Operator to be used for comparing propertyValue and actual Value
+     * @return BooleanExpression evaluating to true if Entity is not to be filtered out
+     */
+    public abstract BooleanExpression getFilterForProperty(String propertyName,
+                                                           Object propertyValue,
+                                                           BinaryOperatorKind operator)
+            throws ExpressionVisitException;
+    
+    //TODO:JavaDoc
+    protected JPQLQuery<Long> toSubquery(EntityPath<T> relation, Expression<Long> selector, BooleanExpression filter) {
+        return JPAExpressions.selectFrom(relation)
+                             .select(selector)
+                             .where(filter);
+    }
+    
+    protected StringExpression toStringExpression(Object expr) {
+        if (expr instanceof String) {
+            return Expressions.asString((String)expr);
+        } else if (expr instanceof StringExpression){
+            return (StringExpression)expr;
+        } else {
+            return null;
+        }
+    }
+    
+    protected NumberExpression toNumberExpression(Object expr) {
+        if (expr instanceof String) {
+            return Expressions.asNumber((Long)expr);
+        } else if (expr instanceof NumberExpression){
+            return (NumberExpression)expr;
+        } else {
+            return null;
+        }
+    }
+    
+    protected BooleanExpression handleIdPropertyFilter(NumberPath<Long> idPath,
+                                                       Object propertyValue,
+                                                       BinaryOperatorKind operator) throws ExpressionVisitException {
+        NumberExpression<Long> value = toNumberExpression(propertyValue);
+        switch (operator) {
+        case GE:
+            return idPath.goe(value);
+        case GT:
+            return idPath.gt(value);
+        case LE:
+            return idPath.loe(value);
+        case LT:
+            return idPath.lt(value);
+        case EQ:
+            return ((ComparableExpressionBase)idPath).eq(value);
+        case NE:
+            return ((ComparableExpressionBase)idPath).ne(value);
+        default:
+            throw new ExpressionVisitException("BinaryOperator \"" + operator.toString() + "\" is not supported for property \"id\"");
+        }
+    }
 }

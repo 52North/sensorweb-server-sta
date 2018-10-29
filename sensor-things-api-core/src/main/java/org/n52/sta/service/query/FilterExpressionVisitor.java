@@ -29,6 +29,7 @@
 
 package org.n52.sta.service.query;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -48,6 +49,14 @@ import org.apache.olingo.server.api.uri.queryoption.expression.Literal;
 import org.apache.olingo.server.api.uri.queryoption.expression.Member;
 import org.apache.olingo.server.api.uri.queryoption.expression.MethodKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.UnaryOperatorKind;
+import org.n52.series.db.beans.sta.QDatastreamEntity;
+import org.n52.series.db.beans.sta.QLocationEntity;
+import org.n52.series.db.beans.sta.QThingEntity;
+import org.n52.series.db.query.QuerySpecifications;
+import org.n52.sta.data.query.EntityQuerySpecifications;
+import org.n52.sta.data.query.LocationQuerySpecifications;
+import org.n52.sta.data.query.QuerySpecificationRepository;
+import org.n52.sta.data.query.ThingQuerySpecifications;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 
 import com.querydsl.core.BooleanBuilder;
@@ -57,6 +66,8 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.core.types.dsl.StringExpression;
+import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.JPQLQuery;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -68,11 +79,14 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
 
     private String sourcePath;
     
+    private EntityQuerySpecifications< ? > rootQS;
+    
     private AbstractSensorThingsEntityService service;
 
     public FilterExpressionVisitor(Class sourceType, AbstractSensorThingsEntityService service) {
         this.sourceType = sourceType;
         this.service = service;
+        this.rootQS = QuerySpecificationRepository.getSpecification(sourceType.getSimpleName());
 
         //TODO: Replace fragile simpleName (with lowercase first letter) with better alternative (e.g. <QType>.getRoot())
         this.sourcePath = Character.toLowerCase(sourceType.getSimpleName().charAt(0)) + sourceType.getSimpleName().substring(1);
@@ -139,7 +153,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
     }
 
     private Object evaluateComparisonOperation(BinaryOperatorKind operator, Object left, Object right)
-            throws ODataApplicationException {
+            throws ODataApplicationException, ExpressionVisitException {
         
         try {
             // Assume Numbers are compared
@@ -166,6 +180,8 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
             }
         } catch (ODataApplicationException e) {
             try {
+                // Handle literal values + inherent properties
+                if (!(left instanceof List< ? > || right instanceof List< ? >)) {
                 // Fallback to String comparison
                 StringExpression leftExpr = convertToStringExpression(left);
                 StringExpression rightExpr = convertToStringExpression(right);
@@ -179,6 +195,20 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
                                                         HttpStatusCode.BAD_REQUEST.getStatusCode(),
                                                         Locale.ENGLISH);
                 }
+                } else {
+                    //Handle foreign properties
+                    if (left instanceof List< ? > && right instanceof List< ? >) {
+                        //TODO: implement
+                        throw new ODataApplicationException("Currently not implemented",
+                                                            HttpStatusCode.BAD_REQUEST.getStatusCode(),
+                                                            Locale.ENGLISH);
+                    } else if (left instanceof List< ? >) {
+                        return convertToForeignExpression((List<UriResource>)left, right, operator);
+                    } else {
+                        return convertToForeignExpression((List<UriResource>)right, left, operator);
+                    }
+                    
+                }
             } catch (ODataApplicationException f) {
                 throw new ODataApplicationException("Could not convert Expression to ComparableExpression. Error was: " + e.getMessage(),
                                                     HttpStatusCode.BAD_REQUEST.getStatusCode(),
@@ -186,7 +216,27 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
             }
         }
     }
+    
+    private BooleanExpression convertToForeignExpression(List<UriResource> uriResources, Object value, BinaryOperatorKind operator) throws ExpressionVisitException{
+        JPQLQuery<Long> result = null;
+        int uriLength = uriResources.size();
+        String name = uriResources.get(uriLength-2).toString();
+        
+        EntityQuerySpecifications stepQS = QuerySpecificationRepository.getSpecification(name);
+        BooleanExpression filter = stepQS.getFilterForProperty(uriResources.get(uriLength-1).toString(), value, operator);
+        
+        result = stepQS.getIdSubqueryWithFilter(filter);
+        
+        // Build Query
+//        for (int i = uriResources.size()-3; i >=0; i--) {
+//            // Get appropiate QuerySpecifications
+//            EntityQuerySpecifications qs = QuerySpecificationRepository.getSpecification(uriResources.get(i).toString());
+//            result = qs.getIdWithFilter("id", result);
+//        }
 
+        return rootQS.getFilterForProperty(name, result, operator);
+    }
+ 
     private Object evaluateBooleanOperation(BinaryOperatorKind operator, Object left, Object right)
             throws ODataApplicationException {
         // Check operands and get Operand Values
@@ -219,7 +269,8 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
     private StringExpression convertToStringExpression(Object expr) throws ODataApplicationException {
         StringExpression result;
         if (expr instanceof String) {
-            // Property (assumed to be numerical)
+            // Property (assumed to be String)
+            
             return new PathBuilder(sourceType, sourcePath).getString((String)expr);
         } else if (expr instanceof StringExpression) {
             // SubExpression
@@ -359,14 +410,13 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
         } else {
             // The OData specification allows in addition complex properties and navigation
             // properties with a target cardinality 0..1 or 1.
-            // This means any combination can occur e.g. Supplier/Address/City
+            // This means any combination can occur e.g. Things/Location/description
             // -> Navigation properties Supplier
             // -> Complex Property Address
             // -> Primitive Property City
             // For such cases the resource path returns a list of UriResourceParts
-            throw new ODataApplicationException("Only primitive properties are implemented in filter expressions",
-                                                HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(),
-                                                Locale.ENGLISH);
+            
+            return uriResourceParts;
         }
     }
 

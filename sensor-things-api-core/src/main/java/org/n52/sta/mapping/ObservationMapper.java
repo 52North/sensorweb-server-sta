@@ -75,7 +75,7 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
     public Entity createEntity(DataEntity<?> observation) {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, observation.getId()));
-        entity.addProperty(new Property(null, PROP_RESULT, ValueType.PRIMITIVE, this.getResult(observation)));
+        entity.addProperty(new Property(null, PROP_RESULT, ValueType.PRIMITIVE, Double.valueOf(this.getResult(observation))));
         
         entity.addProperty(new Property(null, PROP_RESULT_TIME, ValueType.PRIMITIVE,
                 DateTimeHelper.format(createResultTime(observation))));

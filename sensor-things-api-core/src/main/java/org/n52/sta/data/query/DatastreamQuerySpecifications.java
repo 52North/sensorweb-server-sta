@@ -28,8 +28,13 @@
  */
 package org.n52.sta.data.query;
 
+import java.util.Locale;
+
+import org.apache.olingo.commons.api.http.HttpStatusCode;
+import org.apache.olingo.server.api.ODataApplicationException;
+import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
+import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.n52.series.db.beans.sta.DatastreamEntity;
-import org.n52.series.db.beans.sta.QDatastreamEntity;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
@@ -39,35 +44,110 @@ import com.querydsl.jpa.JPQLQuery;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
-public class DatastreamQuerySpecifications extends EntityQuerySpecifications {
-    
-    final QDatastreamEntity qdatastream = QDatastreamEntity.datastreamEntity;
-
-    public JPQLQuery<DatastreamEntity> toSubquery(final BooleanExpression filter) {
-        return JPAExpressions.selectFrom(qdatastream)
-                .where(filter);
-    }
+public class DatastreamQuerySpecifications extends EntityQuerySpecifications<DatastreamEntity> {
 
     public BooleanExpression matchesId(Long id) {
         return  qdatastream.id.eq(id);
     }
-    
+
     public BooleanExpression withObservedProperty(Long observedPropertyId) {
         return qdatastream.observableProperty.id.eq(observedPropertyId);
     }
-    
+
     public BooleanExpression withThing(Long thingId) {
         return qdatastream.thing.id.eq(thingId);
     }
-    
+
     public BooleanExpression withSensor(Long sensorId) {
         return qdatastream.procedure.id.eq(sensorId);
     }
 
     public BooleanExpression withObservation(Long observationId) {
         return qdatastream.datasets.any().id.in(JPAExpressions
-                                          .selectFrom(qobservation)
-                                          .where(qobservation.id.eq(observationId))
-                                          .select(qobservation.dataset.id));
+                                                .selectFrom(qobservation)
+                                                .where(qobservation.id.eq(observationId))
+                                                .select(qobservation.dataset.id));
+    }
+
+    public JPQLQuery<Long> getIdSubqueryWithFilter(BooleanExpression filter) {
+        return this.toSubquery(qdatastream, qdatastream.id, filter);
+    }
+
+    @Override
+    public BooleanExpression getFilterForProperty(String propertyName, Object propertyValue, BinaryOperatorKind operator) throws ExpressionVisitException {
+        if (propertyName.equals("Sensor") || propertyName.equals("ObservedProperty") || propertyName.equals("Thing")) {
+            return handleRelatedPropertyFilter(propertyName, (JPQLQuery<Long>)propertyValue);
+        } else if (propertyName.equals("id")) {
+            return handleIdPropertyFilter(qdatastream.id, propertyValue, operator);
+        } else {
+            return handleDirectPropertyFilter(propertyName, propertyValue, operator);
+        }
+    }
+
+    /**
+     * Handles filtering of properties embedded in this Entity.
+     * 
+     * @param propertyName Name of property
+     * @param propertyValue Supposed value of Property
+     * @param operator Comparison operator between propertyValue and actual Value
+     * @return BooleanExpression evaluating to true if Entity is not filtered out
+     * @throws ExpressionVisitException 
+     */
+    private BooleanExpression handleDirectPropertyFilter(String propertyName, Object propertyValue, BinaryOperatorKind operator) throws ExpressionVisitException {
+        throw new ExpressionVisitException("Error getting filter for Property: \"" + propertyName + "\". Currently not implemented.");
+    }
+    //        if (operator.equals(BinaryOperatorKind.EQ)) {
+    //            switch(propertyName) {
+    //            case "name": {
+    //                return qdatastream.name.eq((toStringExpression(propertyValue)));
+    //            }
+    //            case "description": {
+    //                return qdatastream.description.eq((toStringExpression(propertyValue)));
+    //            }
+    //            case "observationType": {
+    //                return qdatastream.observationType.formatEntity.format.eq((toStringExpression(propertyValue)));
+    //            }
+    //            default:
+    //                return null;
+    //            }
+    //        } else if (operator.equals(BinaryOperatorKind.NE)){
+    //            switch(propertyName) {
+    //            case "name": {
+    //                return qdatastream.name.ne((toStringExpression(propertyValue)));
+    //            }
+    //            case "description": {
+    //                return qdatastream.description.ne((toStringExpression(propertyValue)));
+    //            }
+    //            case "observationType": {
+    //                return qdatastream.observationType.formatEntity.format.ne((toStringExpression(propertyValue)));
+    //            }
+    //            default:
+    //                return null;
+    //            }
+    //        } 
+    //    }
+
+    /**
+     * Handles filtering of properties in related Entities.
+     * 
+     * @param propertyName Name of property
+     * @param propertyValue Supposed value of Property
+     * @param operator Comparison operator between propertyValue and actual Value
+     * @return BooleanExpression evaluating to true if Entity is not filtered out
+     */
+    private BooleanExpression handleRelatedPropertyFilter(String propertyName, JPQLQuery<Long> propertyValue) throws ExpressionVisitException {
+        switch(propertyName) {
+        case "Sensor": {
+            return qdatastream.procedure.id.eqAny(propertyValue);
+        }
+        case "ObservedProperty": {
+            return qdatastream.observableProperty.id.eqAny(propertyValue);
+        }
+        case "Thing": {
+            return qdatastream.thing.id.eqAny(propertyValue);
+        }
+        default: 
+            throw new ExpressionVisitException("Error getting filter for Property: \"" + propertyName + "\". No such related Entity.");
+        }
     }
 }
