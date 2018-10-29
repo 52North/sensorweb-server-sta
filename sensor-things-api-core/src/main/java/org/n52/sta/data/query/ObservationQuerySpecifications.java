@@ -100,7 +100,11 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
 
 
     private BooleanExpression handleRelatedPropertyFilter(String propertyName, JPQLQuery<Long> propertyValue) throws ExpressionVisitException {
-        throw new ExpressionVisitException("Filtering by Related Properties with cardinality >1 is currently not supported!");
+        if (propertyName.equals("Datastream")) {
+            return qobservation.dataset.id.in(propertyValue);
+        } else {
+            throw new ExpressionVisitException("Filtering by Related Properties with cardinality >1 is currently not supported!");
+        }
     }
 
     private BooleanExpression handleDirectPropertyFilter(String propertyName, Object propertyValue, BinaryOperatorKind operator) throws ExpressionVisitException {

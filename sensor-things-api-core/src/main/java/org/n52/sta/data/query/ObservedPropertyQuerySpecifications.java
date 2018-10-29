@@ -114,13 +114,13 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
         } else if (operator.equals(BinaryOperatorKind.NE)){
             switch(propertyName) {
             case "name": {
-                return qobservedproperty.name.eq(value);
+                return qobservedproperty.name.ne(value);
             }
             case "description": {
-                return qobservedproperty.description.eq(value);
+                return qobservedproperty.description.ne(value);
             }
             case "definition": {
-                return qobservedproperty.identifier.eq(value);
+                return qobservedproperty.identifier.ne(value);
             }
             default:
                 throw new ExpressionVisitException("Error getting filter for Property: \"" + propertyName + "\". No such property in Entity.");

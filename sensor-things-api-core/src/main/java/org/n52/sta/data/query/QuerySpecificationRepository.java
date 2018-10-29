@@ -28,13 +28,18 @@
  */
 package org.n52.sta.data.query;
 
+import java.util.Locale;
+
+import org.apache.olingo.commons.api.http.HttpStatusCode;
+import org.apache.olingo.server.api.ODataApplicationException;
+
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
 public class QuerySpecificationRepository {
     
-    public static EntityQuerySpecifications getSpecification(String name) {
+    public static EntityQuerySpecifications getSpecification(String name) throws ODataApplicationException {
         switch(name) {
         case "ThingEntity":
         case "Thing": {
@@ -56,8 +61,22 @@ public class QuerySpecificationRepository {
         case "Sensor": {
             return new SensorQuerySpecifications();
         }
+        case "DataEntity":
+        case "Observation": {
+            return new ObservationQuerySpecifications();
+        }
+        case "FeatureEntity":
+        case "FeatureOfInterest": {
+            return new FeatureOfInterestQuerySpecifications();
+        }
+        case "PhenomenonEntity":
+        case "ObservedProperty": {
+            return new ObservedPropertyQuerySpecifications();
+        }
         default:
-            return null;
+            throw new ODataApplicationException("Could not find QuerySpecifications for Type\"" + name + "\"",
+                                                HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(),
+                                                Locale.ENGLISH);
         }
     }
 

@@ -83,7 +83,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
     
     private AbstractSensorThingsEntityService service;
 
-    public FilterExpressionVisitor(Class sourceType, AbstractSensorThingsEntityService service) {
+    public FilterExpressionVisitor(Class sourceType, AbstractSensorThingsEntityService service) throws ODataApplicationException {
         this.sourceType = sourceType;
         this.service = service;
         this.rootQS = QuerySpecificationRepository.getSpecification(sourceType.getSimpleName());
@@ -217,7 +217,8 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
         }
     }
     
-    private BooleanExpression convertToForeignExpression(List<UriResource> uriResources, Object value, BinaryOperatorKind operator) throws ExpressionVisitException{
+    private BooleanExpression convertToForeignExpression(List<UriResource> uriResources, Object value, BinaryOperatorKind operator)
+            throws ExpressionVisitException, ODataApplicationException { 
         JPQLQuery<Long> result = null;
         int uriLength = uriResources.size();
         String name = uriResources.get(uriLength-2).toString();
