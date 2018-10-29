@@ -37,6 +37,7 @@ import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitEx
 import org.n52.series.db.beans.sta.DatastreamEntity;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 
@@ -94,38 +95,39 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
      * @throws ExpressionVisitException 
      */
     private BooleanExpression handleDirectPropertyFilter(String propertyName, Object propertyValue, BinaryOperatorKind operator) throws ExpressionVisitException {
-        throw new ExpressionVisitException("Error getting filter for Property: \"" + propertyName + "\". Currently not implemented.");
+        StringExpression value = toStringExpression(propertyValue);
+        if (operator.equals(BinaryOperatorKind.EQ)) {
+            switch(propertyName) {
+            case "name": {
+                return qdatastream.name.eq(value);
+            }
+            case "description": {
+                return qdatastream.description.eq(value);
+            }
+            case "observationType": {
+                return qdatastream.observationType.format.eq(value);
+            }
+            default:
+                throw new ExpressionVisitException("Error getting filter for Property: \"" + propertyName + "\". No such property in Entity.");
+            }
+        } else if (operator.equals(BinaryOperatorKind.NE)){
+            switch(propertyName) {
+            case "name": {
+                return qdatastream.name.ne(value);
+            }
+            case "description": {
+                return qdatastream.description.ne(value);
+            }
+            case "observationType": {
+                return qdatastream.observationType.format.ne(value);
+            }
+            default:
+                throw new ExpressionVisitException("Error getting filter for Property: \"" + propertyName + "\". No such property in Entity.");
+            }
+        } else {
+            throw new ExpressionVisitException("BinaryOperator \"" + operator.toString() + "\" is not supported for \"" + propertyName + "\"");
+        }
     }
-    //        if (operator.equals(BinaryOperatorKind.EQ)) {
-    //            switch(propertyName) {
-    //            case "name": {
-    //                return qdatastream.name.eq((toStringExpression(propertyValue)));
-    //            }
-    //            case "description": {
-    //                return qdatastream.description.eq((toStringExpression(propertyValue)));
-    //            }
-    //            case "observationType": {
-    //                return qdatastream.observationType.formatEntity.format.eq((toStringExpression(propertyValue)));
-    //            }
-    //            default:
-    //                return null;
-    //            }
-    //        } else if (operator.equals(BinaryOperatorKind.NE)){
-    //            switch(propertyName) {
-    //            case "name": {
-    //                return qdatastream.name.ne((toStringExpression(propertyValue)));
-    //            }
-    //            case "description": {
-    //                return qdatastream.description.ne((toStringExpression(propertyValue)));
-    //            }
-    //            case "observationType": {
-    //                return qdatastream.observationType.formatEntity.format.ne((toStringExpression(propertyValue)));
-    //            }
-    //            default:
-    //                return null;
-    //            }
-    //        } 
-    //    }
 
     /**
      * Handles filtering of properties in related Entities.

@@ -147,8 +147,9 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
             return leftExpr.subtract(rightExpr);
         default:
             // this should never happen. Trying Arithmetics without Arithmetic operator
-            return null;
-
+            throw new ODataApplicationException("Invalid Operator for NumberExpression.",
+                                                HttpStatusCode.BAD_REQUEST.getStatusCode(),
+                                                Locale.ENGLISH);
         }
     }
 
