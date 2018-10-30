@@ -258,22 +258,27 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
 
     @Override
     public DatastreamEntity create(DatastreamEntity datastream) throws ODataApplicationException {
-        if (datastream.getId() != null && !datastream.isSetName()) {
-            return getRepository().findOne(dQS.withId(datastream.getId())).get();
+        if (!datastream.isProcesssed()) {
+            if (datastream.getId() != null && !datastream.isSetName()) {
+                return getRepository().findOne(dQS.withId(datastream.getId())).get();
+            }
+            check(datastream);
+            Predicate predicate = createQuery(datastream);
+            if (getRepository().exists(predicate)) {
+                DatastreamEntity optional = getRepository().findOne(predicate).get();
+                return processObservation((DatastreamEntity) optional.setProcesssed(true));
+            }
+            datastream.setProcesssed(true);
+            checkObservationType(datastream);
+            checkUnit(datastream);
+            datastream.setObservableProperty(getObservedPropertyService().create(datastream.getObservableProperty()));
+            datastream.setProcedure(getSensorService().create(datastream.getProcedure()));
+            datastream.setThing(getThingService().create(datastream.getThing()));
+            datastream = getRepository().save(datastream);
+            processObservation(datastream);
+            datastream = getRepository().save(datastream);
         }
-        Predicate predicate = createQuery(datastream);
-        if (getRepository().exists(predicate)) {
-            Optional<DatastreamEntity> optional = getRepository().findOne(predicate);
-            return optional.isPresent() ? processObservation(optional.get()) : null;
-        }
-        checkObservationType(datastream);
-        checkUnit(datastream);
-        datastream.setObservableProperty(getObservedPropertyService().create(datastream.getObservableProperty()));
-        datastream.setProcedure(getSensorService().create(datastream.getProcedure()));
-        datastream.setThing(getThingService().create(datastream.getThing()));
-        datastream = getRepository().save(datastream);
-        processObservation(datastream);
-        return datastream = getRepository().save(datastream);
+        return datastream;
     }
 
     private Predicate createQuery(DatastreamEntity datastream) {
@@ -283,21 +288,30 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
         } else {
             expression = dQS.withThing(datastream.getThing().getName());
         }
-        if (datastream.getThing().getId() != null && !datastream.getThing().isSetName()) {
-            expression.and(dQS.withSensor(datastream.getProcedure().getId()));
+        if (datastream.getProcedure().getId() != null && !datastream.getProcedure().isSetName()) {
+            expression = expression.and(dQS.withSensor(datastream.getProcedure().getId()));
         } else {
-            expression.and(dQS.withSensor(datastream.getProcedure().getName()));
+            expression = expression.and(dQS.withSensor(datastream.getProcedure().getName()));
         }
-        if (datastream.getThing().getId() != null && !datastream.getThing().isSetName()) {
-            expression.and(dQS.withObservedProperty(datastream.getObservableProperty().getId()));
+        if (datastream.getObservableProperty().getId() != null && !datastream.getObservableProperty().isSetName()) {
+            expression =  expression.and(dQS.withObservedProperty(datastream.getObservableProperty().getId()));
         } else {
-            expression.and(dQS.withObservedProperty(datastream.getObservableProperty().getName()));
+            expression = expression.and(dQS.withObservedProperty(datastream.getObservableProperty().getName()));
         }
         return expression;
     }
 
+    private void check(DatastreamEntity datastream) throws ODataApplicationException {
+        if (datastream.getThing() == null || datastream.getObservableProperty() == null
+                || datastream.getProcedure() == null) {
+            throw new ODataApplicationException("The datastream to create is invalid",
+                    HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+        }
+    }
+
     @Override
     public DatastreamEntity update(DatastreamEntity entity, HttpMethod method) throws ODataApplicationException {
+        checkUpdate(entity);
         if (HttpMethod.PATCH.equals(method)) {
             Optional<DatastreamEntity> existing = getRepository().findOne(dQS.withId(entity.getId()));
             if (existing.isPresent()) {
@@ -313,6 +327,35 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
         throw new ODataApplicationException("Invalid http method for updating entity!",
                 HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
     }
+    
+    private void checkUpdate(DatastreamEntity entity) throws ODataApplicationException {
+        if (entity.getObservableProperty() == null || entity.getObservableProperty().getId() == null
+                || entity.getObservableProperty().isSetName() || entity.getObservableProperty().isSetDescription()) {
+            throw new ODataApplicationException("Inlined entities are not allowed for updates!",
+                    HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+        }
+
+        if (entity.getProcedure() == null || entity.getProcedure().getId() == null || entity.getProcedure().isSetName()
+                || entity.getProcedure().isSetDescription()) {
+            throw new ODataApplicationException("Inlined entities are not allowed for updates!",
+                    HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+        }
+
+        if (entity.getThing() == null || entity.getThing().getId() == null || entity.getThing().isSetName()
+                || entity.getThing().isSetDescription()) {
+            throw new ODataApplicationException("Inlined entities are not allowed for updates!",
+                    HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+        }
+        if (entity.getObservations() != null) {
+            throw new ODataApplicationException("Inlined entities are not allowed for updates!",
+                    HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+        }
+    }
+    
+    @Override
+    protected DatastreamEntity update(DatastreamEntity entity) throws ODataApplicationException {
+        return getRepository().save(entity);
+    }
 
     @Override
     public void delete(Long id) throws ODataApplicationException {
@@ -322,11 +365,17 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
             deleteRelatedDatasetsAndObservations(datastream);
             // check observations
             getRepository().deleteById(id);
+        } else {
+            throw new ODataApplicationException("Entity not found.", HttpStatusCode.NOT_FOUND.getStatusCode(),
+                    Locale.ROOT);
         }
-        throw new ODataApplicationException("Entity not found.",
-                HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
     }
     
+    @Override
+    protected void delete(DatastreamEntity entity) throws ODataApplicationException {
+        getRepository().deleteById(entity.getId());
+    }
+
     private void deleteRelatedDatasetsAndObservations(DatastreamEntity datastream) {
         // update datasets
         datastream.getDatasets().forEach(d -> {

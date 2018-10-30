@@ -65,6 +65,7 @@ import org.n52.series.db.beans.dataset.Dataset;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
+import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.series.db.query.DatasetQuerySpecifications;
 import org.n52.shetland.ogc.om.OmConstants;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
@@ -286,23 +287,35 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
     public DataEntity<?> create(DataEntity<?> entity) throws ODataApplicationException {
         if (entity instanceof StaDataEntity) {
             StaDataEntity observation = (StaDataEntity) entity;
-            DatastreamEntity datastream = checkDatastream(observation);
-            // feature
-            AbstractFeatureEntity<?> feature = checkFeature(observation, datastream);
-            // category (obdProp)
-            CategoryEntity category = checkCategory(datastream);
-            // offering (sensor)
-            OfferingEntity offering = checkOffering(datastream);
-            // dataset
-            Dataset dataset = checkDataset(datastream, feature, category, offering);
-            // observation
-            DataEntity<?> data = checkData(observation, dataset);
-            if (data != null) {
-                updateDataset(dataset, data);
+            if (!observation.isProcesssed()) {
+                observation.setProcesssed(true);
+                check(observation);
+                DatastreamEntity datastream = checkDatastream(observation);
+                // feature
+                AbstractFeatureEntity<?> feature = checkFeature(observation, datastream);
+                // category (obdProp)
+                CategoryEntity category = checkCategory(datastream);
+                // offering (sensor)
+                OfferingEntity offering = checkOffering(datastream);
+                // dataset
+                Dataset dataset = checkDataset(datastream, feature, category, offering);
+                // observation
+                DataEntity<?> data = checkData(observation, dataset);
+                if (data != null) {
+                    updateDataset(dataset, data);
+                }
+                return data;
             }
-            return data;
+            return observation;
         }
-        return null;
+        return entity;
+    }
+
+    private void check(StaDataEntity observation) throws ODataApplicationException {
+        if (observation.getFeatureOfInterest() == null || observation.getDatastream() == null) {
+            throw new ODataApplicationException("The datastream to create is invalid",
+                    HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+        }
     }
 
     @Override
@@ -324,14 +337,25 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
     }
 
     @Override
+    public DataEntity<?> update(DataEntity<?> entity) throws ODataApplicationException {
+        return getRepository().save(entity);
+    }
+    
+    @Override
     public void delete(Long id) throws ODataApplicationException {
         if (getRepository().existsById(id)) {
             DataEntity<?> observation = getRepository().getOne(id);
             checkDataset(observation);
             getRepository().deleteById(id);
+        } else {
+            throw new ODataApplicationException("Entity not found.",
+                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
         }
-        throw new ODataApplicationException("Entity not found.",
-                HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
+    }
+
+    @Override
+    public void delete(DataEntity<?> entity) throws ODataApplicationException {
+        getRepository().deleteById(entity.getId());
     }
 
     private void checkDataset(DataEntity<?> observation) {

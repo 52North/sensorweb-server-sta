@@ -3,50 +3,50 @@ package org.n52.sta.service.handler.crud;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.server.api.ODataApplicationException;
-import org.n52.series.db.beans.PhenomenonEntity;
-import org.n52.series.db.beans.sta.ObservablePropertyEntity;
+import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.AbstractMapper;
-import org.n52.sta.mapping.ObservedPropertyMapper;
+import org.n52.sta.mapping.HistoricalLocationMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ObservedPropertyEntityCrudRequestHandler extends AbstractEntityCrudRequestHandler<PhenomenonEntity> {
+public class HistoricalLocationEntityCrudRequestHandler extends AbstractEntityCrudRequestHandler<HistoricalLocationEntity> {
 
     @Autowired
-    protected ObservedPropertyMapper mapper;
-
+    private HistoricalLocationMapper mapper;
+    
     @Override
     protected Entity handleCreateEntityRequest(Entity entity) throws ODataApplicationException {
         if (entity != null) {
-            ObservablePropertyEntity observableProperty = getEntityService().create(mapper.createEntity(entity));
-            return mapToEntity(observableProperty);
+            HistoricalLocationEntity historicalLocation = getEntityService().create(mapper.createEntity(entity));
+            return mapToEntity(historicalLocation);
         }
         return null;
     }
-
+    
     @Override
     protected Entity handleUpdateEntityRequest(Entity entity, HttpMethod method) throws ODataApplicationException {
         if (entity != null) {
-            ObservablePropertyEntity datastream = getEntityService().update(mapper.createEntity(entity), method);
-            return mapToEntity(datastream);
+            HistoricalLocationEntity historicalLocation = getEntityService().update(mapper.createEntity(entity), method);
+            return mapToEntity(historicalLocation);
         }
         return null;
     }
 
     @Override
     protected void handleDeleteEntityRequest(Long id) throws ODataApplicationException {
-            getEntityService().delete(id);
+        getEntityService().delete(id);
     }
     
     @Override
-    protected AbstractMapper<PhenomenonEntity> getMapper() {
+    protected AbstractMapper<HistoricalLocationEntity> getMapper() {
         return mapper;
     }
 
-    private AbstractSensorThingsEntityService<?, ObservablePropertyEntity> getEntityService() {
-        return (AbstractSensorThingsEntityService<?, ObservablePropertyEntity>) getEntityService(EntityTypes.ObservedProperty);
+    private AbstractSensorThingsEntityService<?, HistoricalLocationEntity> getEntityService() {
+        return (AbstractSensorThingsEntityService<?, HistoricalLocationEntity>) getEntityService(EntityTypes.HistoricalLocation);
     }
+
 }

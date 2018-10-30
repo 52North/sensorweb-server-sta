@@ -45,6 +45,7 @@ import org.joda.time.DateTime;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
+import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -84,9 +85,13 @@ public class SensorMapper extends AbstractMapper<ProcedureEntity> {
 
         return entity;
     }
+    
+    public Entity createEntity(SensorEntity sensor) {
+        return createEntity(sensor);
+    }
 
-    public ProcedureEntity createEntity(Entity entity) {
-        ProcedureEntity sensor = new ProcedureEntity();
+    public SensorEntity createEntity(Entity entity) {
+        SensorEntity sensor = new SensorEntity();
         setId(sensor, entity);
         setIdentifier(sensor, entity);
         setName(sensor, entity);
@@ -97,6 +102,7 @@ public class SensorMapper extends AbstractMapper<ProcedureEntity> {
         } else {
             sensor.setDescriptionFile(getPropertyValue(entity, PROP_METADATA).toString());
         }
+        setDatastreams(sensor, entity);
         return sensor;
     }
 
@@ -107,6 +113,15 @@ public class SensorMapper extends AbstractMapper<ProcedureEntity> {
             existing.setDescriptionFile(toMerge.getDescriptionFile());
         }
         return existing;
+    }
+    
+    public SensorEntity mergeSensorEntity(SensorEntity existing, SensorEntity toMerge) {
+       if (toMerge.hasDatastreams()) {
+           toMerge.getDatastreams().forEach(d -> {
+               existing.addDatastream(d);
+           });
+       }
+       return (SensorEntity) merge(existing, toMerge);
     }
 
     private FormatEntity createFormat(Entity entity) {

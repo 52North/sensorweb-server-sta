@@ -37,6 +37,7 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.n52.series.db.beans.PhenomenonEntity;
+import org.n52.series.db.beans.sta.ObservablePropertyEntity;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -56,19 +57,24 @@ public class ObservedPropertyMapper extends AbstractMapper<PhenomenonEntity> {
         entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, observedProperty.getId()));
         addNameDescriptionProperties(entity, observedProperty);
         entity.addProperty(new Property(null, PROP_DEFINITION, ValueType.PRIMITIVE, observedProperty.getIdentifier()));
-
+    
         entity.setType(ET_OBSERVED_PROPERTY_FQN.getFullQualifiedNameAsString());
         entity.setId(entityCreationHelper.createId(entity, ES_OBSERVED_PROPERTIES_NAME, PROP_ID));
-
+    
         return entity;
     }
+
+    public Entity createEntity(ObservablePropertyEntity observedProperty) {
+        return createEntity(observedProperty);
+    }
     
-    public PhenomenonEntity createEntity(Entity entity) {
-        PhenomenonEntity phenomenon = new PhenomenonEntity();
+    public ObservablePropertyEntity createEntity(Entity entity) {
+        ObservablePropertyEntity phenomenon = new ObservablePropertyEntity();
         setId(phenomenon, entity);
         setIdentifier(phenomenon, entity);
         setName(phenomenon, entity);
         setDescription(phenomenon, entity);
+        setDatastreams(phenomenon, entity);
         return phenomenon;
     }
 
@@ -76,6 +82,15 @@ public class ObservedPropertyMapper extends AbstractMapper<PhenomenonEntity> {
     public PhenomenonEntity merge(PhenomenonEntity existing, PhenomenonEntity toMerge) {
         mergeIdentifierNameDescription(existing, toMerge);
         return existing;
+    }
+    
+    public ObservablePropertyEntity mergeObservablePropertyEntity(ObservablePropertyEntity existing, ObservablePropertyEntity toMerge) {
+        if (toMerge.hasDatastreams()) {
+            toMerge.getDatastreams().forEach(d -> {
+                existing.addDatastream(d);
+            });
+        }
+        return (ObservablePropertyEntity) merge(existing, toMerge);
     }
 
 }

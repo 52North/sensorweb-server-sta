@@ -42,9 +42,9 @@ import org.n52.series.db.PhenomenonRepository;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.ObservablePropertyEntity;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.ObservedPropertyQuerySpecifications;
-import org.n52.sta.data.query.SensorQuerySpecifications;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.ObservedPropertyMapper;
@@ -207,16 +207,17 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
                     getRepository().findOne(oQS.withIdentifier(observableProperty.getIdentifier()));
             return optional.isPresent() ? optional.get() : null;
         }
-        return getRepository().save(observableProperty);
+        return getRepository().save(getAsPhenomenonEntity(observableProperty));
     }
 
     @Override
     public PhenomenonEntity update(PhenomenonEntity entity, HttpMethod method) throws ODataApplicationException {
+        checkUpdate(entity);
         if (HttpMethod.PATCH.equals(method)) {
             Optional<PhenomenonEntity> existing = getRepository().findOne(oQS.withId(entity.getId()));
             if (existing.isPresent()) {
                 PhenomenonEntity merged = mapper.merge(existing.get(), entity);
-                return getRepository().save(merged);
+                return getRepository().save(getAsPhenomenonEntity(merged));
             }
             throw new ODataApplicationException("Entity not found.",
                     HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
@@ -227,7 +228,23 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
         throw new ODataApplicationException("Invalid http method for updating entity!",
                 HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
     }
+    
+    private void checkUpdate(PhenomenonEntity entity) throws ODataApplicationException {
+        if (entity instanceof ObservablePropertyEntity) {
+            ObservablePropertyEntity observableProperty = (ObservablePropertyEntity) entity;
+            if (observableProperty.hasDatastreams()) {
+                for (DatastreamEntity datastream : observableProperty.getDatastreams()) {
+                    checkInlineDatastream(datastream);
+                }
+            }
+        }
+    }
 
+    @Override
+    protected PhenomenonEntity update(PhenomenonEntity entity) throws ODataApplicationException {
+        return getRepository().save(getAsPhenomenonEntity(entity));
+    }
+    
     @Override
     public void delete(Long id) throws ODataApplicationException {
         if (getRepository().existsById(id)) {
@@ -241,11 +258,23 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
                 }
             });
             getRepository().deleteById(id);
+        } else {
+            throw new ODataApplicationException("Entity not found.", HttpStatusCode.NOT_FOUND.getStatusCode(),
+                    Locale.ROOT);
         }
-        throw new ODataApplicationException("Entity not found.",
-                HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
     }
     
+    @Override
+    protected void delete(PhenomenonEntity entity) throws ODataApplicationException {
+        getRepository().deleteById(entity.getId());
+    }
+
+    private PhenomenonEntity getAsPhenomenonEntity(PhenomenonEntity observableProperty) {
+        return  observableProperty instanceof ObservablePropertyEntity
+                ? ((ObservablePropertyEntity) observableProperty).asPhenomenonEntity()
+                : observableProperty;
+    }
+
     private AbstractSensorThingsEntityService<?, DatastreamEntity> getDatastreamService() {
         return (AbstractSensorThingsEntityService<?, DatastreamEntity>) getEntityService(
                 EntityTypes.Datastream);

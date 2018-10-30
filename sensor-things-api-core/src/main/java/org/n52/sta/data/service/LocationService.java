@@ -40,6 +40,7 @@ import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
+import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEncodingEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ThingEntity;
@@ -78,7 +79,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     private HistoricalLocationRepository historicalLocationRepository;
     
     @Autowired
-    private ThingRepository thingRepoitory;
+    private ThingRepository thingRepository;
 
     private final static LocationQuerySpecifications lQS= new LocationQuerySpecifications();
     
@@ -243,16 +244,19 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
 
     @Override
     public LocationEntity create(LocationEntity location) throws ODataApplicationException {
-        if (location.getId() != null && !location.isSetName()) {
-            return getRepository().findOne(lQS.withId(location.getId())).get();
+        if (!location.isProcesssed()) {
+            if (location.getId() != null && !location.isSetName()) {
+                return getRepository().findOne(lQS.withId(location.getId())).get();
+            }
+            if (getRepository().exists(lQS.withName(location.getName()))) {
+                Optional<LocationEntity> optional = getRepository().findOne(lQS.withName(location.getName()));
+                return optional.isPresent() ? optional.get() : null;
+            }
+            location.setProcesssed(true);
+            checkLocationEncoding(location);
+            location = getRepository().save(location);
+            processThings(location);
         }
-        if (getRepository().exists(lQS.withName(location.getName()))) {
-            Optional<LocationEntity> optional = getRepository().findOne(lQS.withName(location.getName()));
-            return optional.isPresent() ? optional.get() : null;
-        }
-        checkLocationEncoding(location);
-        location = getRepository().save(location);
-        processThings(location);
         return location;
     }
 
@@ -273,24 +277,42 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
         throw new ODataApplicationException("Invalid http method for updating entity!",
                 HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
     }
+    
+    @Override
+    public LocationEntity update(LocationEntity entity) throws ODataApplicationException {
+        return getRepository().save(entity);
+    }
 
     @Override
     public void delete(Long id) throws ODataApplicationException {
         if (getRepository().existsById(id)) {
             LocationEntity location = getRepository().getOne(id);
             // delete all historical locations
-            historicalLocationRepository.deleteAll(historicalLocationRepository.findAll(hlQS.withRelatedLocation(id)));
-            location.getThingEntities().forEach(t -> {
-                t.setLocationEntities(null);
-                thingRepoitory.saveAndFlush(t);
-            });
+            for (HistoricalLocationEntity historicalLocation : location.getHistoricalLocationEntities()) {
+                getHistoricalLocationService().delete(historicalLocation);
+            }
+            location.setHistoricalLocationEntities(null);
+            getRepository().save(location);
+            for (ThingEntity thing : location.getThingEntities()) {
+                thing.setLocationEntities(null);
+                if (location.getHistoricalLocationEntities() != null) {
+                    thing.getHistoricalLocationEntities().removeAll(location.getHistoricalLocationEntities());
+                }
+                getThingService().update(thing);
+            }
             getRepository().deleteById(id);
+        } else {
+            throw new ODataApplicationException("Entity not found.", HttpStatusCode.NOT_FOUND.getStatusCode(),
+                    Locale.ROOT);
         }
-        throw new ODataApplicationException("Entity not found.",
-                HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
     }
     
     
+    @Override
+    public void delete(LocationEntity entity) throws ODataApplicationException {
+        getRepository().deleteById(entity.getId());
+    }
+
     private void checkLocationEncoding(LocationEntity location) {
         if (location.getLocationEncoding() != null) {
             LocationEncodingEntity optionalLocationEncoding = createLocationEncoding(location.getLocationEncoding());
@@ -329,6 +351,10 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
 
     private AbstractSensorThingsEntityService<?, ThingEntity> getThingService() {
         return (AbstractSensorThingsEntityService<?, ThingEntity>) getEntityService(EntityTypes.Thing);
+    }
+    
+    private AbstractSensorThingsEntityService<?, HistoricalLocationEntity> getHistoricalLocationService() {
+        return (AbstractSensorThingsEntityService<?, HistoricalLocationEntity>) getEntityService(EntityTypes.HistoricalLocation);
     }
     
 }

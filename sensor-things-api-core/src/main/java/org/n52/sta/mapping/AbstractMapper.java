@@ -34,9 +34,13 @@ import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvid
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DESCRIPTION;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_NAME;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PHENOMENON_TIME;
+import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ES_DATASTREAMS_NAME;
 
 import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
@@ -50,6 +54,8 @@ import org.n52.series.db.beans.HibernateRelations.HasDescription;
 import org.n52.series.db.beans.HibernateRelations.HasName;
 import org.n52.series.db.beans.HibernateRelations.HasPhenomenonTime;
 import org.n52.series.db.beans.IdEntity;
+import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.StaRelations;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
@@ -60,7 +66,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 public abstract class AbstractMapper<T> {
     
     @Autowired
-    EntityCreationHelper entityCreationHelper;
+    protected EntityCreationHelper entityCreationHelper;
+    
+    @Autowired
+    private DatastreamMapper datastreamMapper;
     
     public abstract Entity createEntity(T t);
     
@@ -139,6 +148,18 @@ public abstract class AbstractMapper<T> {
         if (checkProperty(entity, PROP_DESCRIPTION)) {
             describableEntity.setDescription(getPropertyValue(entity, PROP_DESCRIPTION).toString());
         }
+    }
+    
+    protected void setDatastreams(StaRelations.Datastreams<?> datastreams, Entity entity) {
+        if (checkNavigationLink(entity, ES_DATASTREAMS_NAME)) {
+            Set<DatastreamEntity> ds = new LinkedHashSet<>();
+            Iterator<Entity> iterator = entity.getNavigationLink(ES_DATASTREAMS_NAME).getInlineEntitySet().iterator();
+            while (iterator.hasNext()) {
+                ds.add(datastreamMapper.createEntity((Entity) iterator.next()));
+            }
+            datastreams.setDatastreams(ds);
+        }
+        
     }
     
     protected Object getPropertyValue(Entity entity, String name) {

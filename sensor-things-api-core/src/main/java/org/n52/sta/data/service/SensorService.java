@@ -41,9 +41,12 @@ import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.FormatRepository;
 import org.n52.series.db.ProcedureRepository;
 import org.n52.series.db.beans.FormatEntity;
+import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.ObservablePropertyEntity;
+import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.SensorQuerySpecifications;
 import org.n52.sta.data.repositories.DatastreamRepository;
@@ -205,20 +208,25 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
                 || getRepository().exists(sQS.wihtName(sensor.getName()))) {
             Optional<ProcedureEntity> optional = getRepository()
                     .findOne(sQS.withIdentifier(sensor.getIdentifier()).or(sQS.wihtName(sensor.getName())));
-            return optional.isPresent() ? optional.get() : null;
+            return optional.isPresent() ?  optional.get() : null;
         }
         checkFormat(sensor);
-        checkProcedureHistory(getRepository().save(sensor));
-        return sensor;
+        ProcedureEntity procedure = getAsProcedureEntity(sensor);
+        checkProcedureHistory(getRepository().save(getRepository().save(procedure)));
+        return procedure;
     }
 
     @Override
     public ProcedureEntity update(ProcedureEntity entity, HttpMethod method) throws ODataApplicationException {
+        checkUpdate(entity);
         if (HttpMethod.PATCH.equals(method)) {
             Optional<ProcedureEntity> existing = getRepository().findOne(sQS.withId(entity.getId()));
             if (existing.isPresent()) {
                 ProcedureEntity merged = mapper.merge(existing.get(), entity);
-                return getRepository().save(merged);
+                if (entity instanceof SensorEntity) {
+                    // TODO insert datastream
+                }
+                return getRepository().save(getAsProcedureEntity(merged));
             }
             throw new ODataApplicationException("Entity not found.",
                     HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
@@ -228,6 +236,22 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
         }
         throw new ODataApplicationException("Invalid http method for updating entity!",
                 HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+    }
+
+    private void checkUpdate(ProcedureEntity entity) throws ODataApplicationException {
+        if (entity instanceof SensorEntity) {
+            SensorEntity sensor = (SensorEntity) entity;
+            if (sensor.hasDatastreams()) {
+                for (DatastreamEntity datastream : sensor.getDatastreams()) {
+                    checkInlineDatastream(datastream);
+                }
+            }
+        }
+    }
+    
+    @Override
+    protected ProcedureEntity update(ProcedureEntity entity) throws ODataApplicationException {
+        return getRepository().save(getAsProcedureEntity(entity));
     }
 
     @Override
@@ -243,9 +267,15 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
                 }
             });
             getRepository().deleteById(id);
+        } else {
+            throw new ODataApplicationException("Entity not found.", HttpStatusCode.NOT_FOUND.getStatusCode(),
+                    Locale.ROOT);
         }
-        throw new ODataApplicationException("Entity not found.",
-                HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
+    }
+
+    @Override
+    protected void delete(ProcedureEntity entity) throws ODataApplicationException {
+        getRepository().deleteById(entity.getId());
     }
 
     private void checkFormat(ProcedureEntity sensor) {
@@ -271,6 +301,12 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
                 sensor.setDescriptionFile(sensor.getProcedureHistory().iterator().next().getXml());
             }
         }
+    }
+    
+    private ProcedureEntity getAsProcedureEntity(ProcedureEntity sensor) {
+        return  sensor instanceof ProcedureEntity
+                ? ((SensorEntity) sensor).asProcedureEntity()
+                : sensor;
     }
     
     private AbstractSensorThingsEntityService<?, DatastreamEntity> getDatastreamService() {

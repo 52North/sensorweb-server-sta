@@ -6,6 +6,7 @@
 package org.n52.sta.data.service;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.OptionalLong;
 import java.util.stream.Collectors;
 
@@ -17,6 +18,7 @@ import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmEnumType;
 import org.apache.olingo.commons.api.edm.EdmType;
 import org.apache.olingo.commons.api.http.HttpMethod;
+import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriInfoResource;
 import org.apache.olingo.server.api.uri.UriResource;
@@ -31,6 +33,9 @@ import org.apache.olingo.server.api.uri.queryoption.expression.Member;
 import org.apache.olingo.server.api.uri.queryoption.expression.MethodKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.UnaryOperatorKind;
 import org.n52.series.db.beans.IdEntity;
+import org.n52.series.db.beans.ProcedureEntity;
+import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.data.OffsetLimitBasedPageRequest;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.service.query.QueryOptions;
@@ -234,14 +239,32 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
     @Transactional(rollbackFor = Exception.class)
     public abstract S update(S entity, HttpMethod method) throws ODataApplicationException;
 
+    protected abstract S update(S entity) throws ODataApplicationException;
+
     @Transactional(rollbackFor = Exception.class)
     public abstract void delete(Long id) throws ODataApplicationException;
     
+    protected abstract void delete(S entity) throws ODataApplicationException;
+
     protected S createOrUpdate(S entity) throws ODataApplicationException {
         if (entity.getId() != null && getRepository().existsById(entity.getId())) {
             return update(entity, HttpMethod.PATCH);
         }
         return create(entity);
+    }
+    
+    protected void checkInlineDatastream(DatastreamEntity datastream) throws ODataApplicationException {
+        if (datastream.getId() == null || datastream.isSetName() || datastream.isSetDescription() || datastream.isSetUnit()) {
+            throw new ODataApplicationException("Inlined entities are not allowed for updates!",
+                    HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+        }
+    }
+    
+    protected void checkInlineLocation(LocationEntity location) throws ODataApplicationException {
+        if (location.getId() == null || location.isSetName() || location.isSetDescription()) {
+            throw new ODataApplicationException("Inlined entities are not allowed for updates!",
+                    HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+        }
     }
 
     protected AbstractSensorThingsEntityService<?, ?> getEntityService(EntityTypes type) {

@@ -44,7 +44,9 @@ import org.n52.series.db.FormatRepository;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
+import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.FormatEntity;
+import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.series.db.query.DatasetQuerySpecifications;
 import org.n52.sta.data.query.FeatureOfInterestQuerySpecifications;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
@@ -232,6 +234,11 @@ public class FeatureOfInterestService extends AbstractSensorThingsEntityService<
         throw new ODataApplicationException("Invalid http method for updating entity!",
                 HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
     }
+    
+    @Override
+    protected AbstractFeatureEntity<?> update(AbstractFeatureEntity<?> entity) throws ODataApplicationException {
+        return getRepository().save(entity);
+    }
 
     @Override
     public void delete(Long id) throws ODataApplicationException {
@@ -239,11 +246,17 @@ public class FeatureOfInterestService extends AbstractSensorThingsEntityService<
             // check observations
             deleteRelatedObservationsAndUpdateDatasets(id);
             getRepository().deleteById(id);
+        } else {
+            throw new ODataApplicationException("Entity not found.", HttpStatusCode.NOT_FOUND.getStatusCode(),
+                    Locale.ROOT);
         }
-        throw new ODataApplicationException("Entity not found.",
-                HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
     }
     
+    @Override
+    protected void delete(AbstractFeatureEntity<?> entity) throws ODataApplicationException {
+        getRepository().deleteById(entity.getId());
+    }
+
     private void deleteRelatedObservationsAndUpdateDatasets(Long featureId) {
         // set dataset first/last to null
         datasetRepository.findAll(dQS.matchFeatures(Long.toString(featureId))).forEach(d -> {
@@ -253,6 +266,7 @@ public class FeatureOfInterestService extends AbstractSensorThingsEntityService<
             d.setLastQuantityValue(null);
             d.setLastQuantityValue(null);
             d.setLastValueAt(null);
+            d.setFeature(null);
             datasetRepository.saveAndFlush(d);
         });
         // delete observations

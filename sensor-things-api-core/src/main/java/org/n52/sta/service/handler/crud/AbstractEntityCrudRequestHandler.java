@@ -4,10 +4,8 @@ import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvid
 
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 import org.apache.olingo.commons.api.data.Entity;
-import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
@@ -24,7 +22,6 @@ import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.edm.provider.SensorThingsEdmConstants;
 import org.n52.sta.mapping.AbstractMapper;
 import org.n52.sta.service.response.EntityResponse;
-import org.n52.sta.utils.EntityAnnotator;
 import org.n52.sta.utils.UriResourceNavigationResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
