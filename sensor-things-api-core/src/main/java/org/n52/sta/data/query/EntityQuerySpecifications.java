@@ -28,6 +28,7 @@
  */
 package org.n52.sta.data.query;
 
+import java.time.OffsetDateTime;
 import java.util.Locale;
 
 import org.apache.olingo.commons.api.http.HttpStatusCode;
@@ -48,6 +49,8 @@ import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.ComparableExpressionBase;
+import com.querydsl.core.types.dsl.DateTimeExpression;
+import com.querydsl.core.types.dsl.DateTimePath;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.core.types.dsl.NumberPath;
@@ -74,9 +77,9 @@ public abstract class EntityQuerySpecifications<T> {
     final static QPhenomenonEntity qobservedproperty = QPhenomenonEntity.phenomenonEntity;
     
     /**
-     * 
-     * @param filter
-     * @return
+     * Gets Subquery returning the IDs of the Entities
+     * @param filter BooleanExpression filtering the Entites whose IDs are returned
+     * @return JPQLQuery<Long> Subquery
      */
     public abstract JPQLQuery<Long> getIdSubqueryWithFilter(BooleanExpression filter);
     
@@ -111,11 +114,21 @@ public abstract class EntityQuerySpecifications<T> {
         }
     }
     
-    protected NumberExpression toNumberExpression(Object expr) {
+    protected NumberExpression<Long> toNumberExpression(Object expr) {
         if (expr instanceof String) {
             return Expressions.asNumber((Long)expr);
         } else if (expr instanceof NumberExpression){
-            return (NumberExpression)expr;
+            return (NumberExpression<Long>)expr;
+        } else {
+            return null;
+        }
+    }
+    
+    protected DateTimeExpression toDateTimeExpression(Object expr) {
+        if (expr instanceof String) {
+            return Expressions.asDateTime((OffsetDateTime)expr);
+        } else if (expr instanceof NumberExpression){
+            return (DateTimeExpression)expr;
         } else {
             return null;
         }
@@ -141,5 +154,27 @@ public abstract class EntityQuerySpecifications<T> {
         default:
             throw new ExpressionVisitException("BinaryOperator \"" + operator.toString() + "\" is not supported for property \"id\"");
         }
+    }
+    
+    protected BooleanExpression handleDateTimePropertyFilter(DateTimePath<OffsetDateTime> dtPath,
+                                                             Object propertyValue,
+                                                             BinaryOperatorKind operator) throws ExpressionVisitException {
+        DateTimeExpression<OffsetDateTime> value = toDateTimeExpression(propertyValue);
+        switch (operator) {
+        case GE:
+            return dtPath.goe(value);
+        case GT:
+            return dtPath.gt(value);
+        case LE:
+            return dtPath.loe(value);
+        case LT:
+            return dtPath.lt(value);
+        case EQ:
+            return ((ComparableExpressionBase)dtPath).eq(value);
+        case NE:
+            return ((ComparableExpressionBase)dtPath).ne(value);
+        default:
+            throw new ExpressionVisitException("BinaryOperator \"" + operator.toString() + "\" is not supported for property \"id\"");
+        }  
     }
 }

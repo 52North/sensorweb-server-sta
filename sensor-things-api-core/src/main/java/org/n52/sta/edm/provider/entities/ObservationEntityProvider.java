@@ -127,7 +127,7 @@ public class ObservationEntityProvider extends AbstractSensorThingsEntityProvide
                 .setType(EdmPrimitiveTypeKind.Double.getFullQualifiedName())
                 .setNullable(false);
         CsdlProperty resultTime = new CsdlProperty().setName(PROP_RESULT_TIME)
-                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setType(EdmPrimitiveTypeKind.DateTimeOffset.getFullQualifiedName())
                 .setNullable(false);
         CsdlProperty resultQuality = new CsdlProperty().setName(PROP_RESULT_QUALITY)
                 .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())

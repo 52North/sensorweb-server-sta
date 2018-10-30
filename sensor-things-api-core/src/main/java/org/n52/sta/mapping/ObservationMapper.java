@@ -77,8 +77,7 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
         entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, observation.getId()));
         entity.addProperty(new Property(null, PROP_RESULT, ValueType.PRIMITIVE, Double.valueOf(this.getResult(observation))));
         
-        entity.addProperty(new Property(null, PROP_RESULT_TIME, ValueType.PRIMITIVE,
-                DateTimeHelper.format(createResultTime(observation))));
+        entity.addProperty(new Property(null, PROP_RESULT_TIME, ValueType.PRIMITIVE, observation.getResultTime().getTime()));
 
         String phenomenonTime = DateTimeHelper.format(createPhenomenonTime(observation));
         entity.addProperty(new Property(null, PROP_PHENOMENON_TIME, ValueType.PRIMITIVE, phenomenonTime));
@@ -167,10 +166,6 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
             end = start;
         }
         return createTime(start, end);
-    }
-    
-    private Time createResultTime(DataEntity<?> observation) {
-        return createTime(createDateTime(observation.getResultTime()));
     }
     
     private Time createValidTime(DataEntity<?> observation) {
