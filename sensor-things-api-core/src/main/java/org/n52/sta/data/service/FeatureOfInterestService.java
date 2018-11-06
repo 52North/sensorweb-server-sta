@@ -98,7 +98,7 @@ public class FeatureOfInterestService extends AbstractSensorThingsEntityService<
     @Override
     public EntityCollection getEntityCollection(QueryOptions queryOptions) {
         EntityCollection retEntitySet = new EntityCollection();
-        getRepository().findAll(foiQS.isValidEntity(), createPageableRequest(queryOptions))
+        getRepository().findAll(createPageableRequest(queryOptions))
                 .forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
@@ -200,7 +200,7 @@ public class FeatureOfInterestService extends AbstractSensorThingsEntityService<
      * @return BooleanExpression evaluating to true if Entity is found and valid
      */
     private BooleanExpression byId(Long id) {
-        return foiQS.isValidEntity().and(foiQS.withId(id));
+        return foiQS.withId(id);
     }
 
     @Override

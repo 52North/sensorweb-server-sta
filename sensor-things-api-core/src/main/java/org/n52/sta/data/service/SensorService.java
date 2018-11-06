@@ -41,11 +41,9 @@ import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.FormatRepository;
 import org.n52.series.db.ProcedureRepository;
 import org.n52.series.db.beans.FormatEntity;
-import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
-import org.n52.series.db.beans.sta.ObservablePropertyEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.SensorQuerySpecifications;
@@ -95,7 +93,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     @Override
     public EntityCollection getEntityCollection(QueryOptions queryOptions) {
         EntityCollection retEntitySet = new EntityCollection();
-        getRepository().findAll(sQS.isValidEntity(), createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        getRepository().findAll(createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
 
@@ -196,7 +194,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
      * @return BooleanExpression evaluating to true if Entity is found and valid
      */
     private BooleanExpression byId(Long id) {
-        return sQS.isValidEntity().and(sQS.withId(id));
+        return sQS.withId(id);
     }
 
     @Override
@@ -260,6 +258,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
             // delete datastreams
             datastreamRepository.findAll(dQS.withSensor(id)).forEach(d -> {
                 try {
+                    // TODO delete observation and datasets ...
                     getDatastreamService().delete(d.getId());
                 } catch (ODataApplicationException e) {
                     // TODO Auto-generated catch block

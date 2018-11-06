@@ -83,7 +83,7 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
     @Override
     public EntityCollection getEntityCollection(QueryOptions queryOptions) {
         EntityCollection retEntitySet = new EntityCollection();
-        getRepository().findAll(oQS.isValidEntity(), createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        getRepository().findAll(createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
 
@@ -194,7 +194,7 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
      * @return BooleanExpression evaluating to true if Entity is found and valid
      */
     private BooleanExpression byId(Long id) {
-        return oQS.isValidEntity().and(oQS.withId(id));
+        return oQS.withId(id);
     }
 
     @Override
