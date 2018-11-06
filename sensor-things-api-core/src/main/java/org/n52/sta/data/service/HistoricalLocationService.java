@@ -251,7 +251,7 @@ public class HistoricalLocationService extends AbstractSensorThingsEntityService
         historicalLocation.setThingEntity(thing);
         HistoricalLocationEntity created = getRepository().save(historicalLocation);
         created.setProcesssed(true);
-        getThingService().createOrUpdate(thing.addHistoricalLocation(created));
+        getThingService().update(thing.addHistoricalLocation(created));
         return created.setLocationEntities(historicalLocation.getLocationEntities());
     }
 
