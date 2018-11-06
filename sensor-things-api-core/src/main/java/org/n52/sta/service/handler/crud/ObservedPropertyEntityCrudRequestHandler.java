@@ -21,7 +21,7 @@ public class ObservedPropertyEntityCrudRequestHandler extends AbstractEntityCrud
     @Override
     protected Entity handleCreateEntityRequest(Entity entity) throws ODataApplicationException {
         if (entity != null) {
-            ObservablePropertyEntity observableProperty = getEntityService().create(mapper.createEntity(entity));
+            PhenomenonEntity observableProperty = getEntityService().create(mapper.createEntity(entity));
             return mapToEntity(observableProperty);
         }
         return null;
@@ -30,7 +30,7 @@ public class ObservedPropertyEntityCrudRequestHandler extends AbstractEntityCrud
     @Override
     protected Entity handleUpdateEntityRequest(Entity entity, HttpMethod method) throws ODataApplicationException {
         if (entity != null) {
-            ObservablePropertyEntity datastream = getEntityService().update(mapper.createEntity(entity), method);
+            PhenomenonEntity datastream = getEntityService().update(mapper.createEntity(entity), method);
             return mapToEntity(datastream);
         }
         return null;
