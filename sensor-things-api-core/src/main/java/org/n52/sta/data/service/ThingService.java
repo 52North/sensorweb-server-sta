@@ -218,12 +218,12 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
             Optional<ThingEntity> existing = getRepository().findOne(tQS.withId(entity.getId()));
             if (existing.isPresent()) {
                 ThingEntity merged = mapper.merge(existing.get(), entity);
-//                if (entity.hasLocationEntities()) {
-//                    merged.setLocationEntities(entity.getLocationEntities());
-//                    processLocations(merged);
-//                    merged = getRepository().save(merged);
-//                    processHistoricalLocations(merged);
-//                }
+                if (entity.hasLocationEntities()) {
+                    merged.setLocationEntities(entity.getLocationEntities());
+                    processLocations(merged);
+                    merged = getRepository().save(merged);
+                    processHistoricalLocations(merged);
+                }
                 return getRepository().save(merged);
             }
             throw new ODataApplicationException("Entity not found.",

@@ -298,11 +298,12 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
                 // offering (sensor)
                 OfferingEntity offering = checkOffering(datastream);
                 // dataset
-                Dataset dataset = checkDataset(datastream, feature, category, offering);
+                DatasetEntity dataset = checkDataset(datastream, feature, category, offering);
                 // observation
                 DataEntity<?> data = checkData(observation, dataset);
                 if (data != null) {
                     updateDataset(dataset, data);
+                    updateDatastream(datastream, dataset);
                 }
                 return data;
             }
@@ -312,8 +313,8 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
     }
 
     private void check(StaDataEntity observation) throws ODataApplicationException {
-        if (observation.getFeatureOfInterest() == null || observation.getDatastream() == null) {
-            throw new ODataApplicationException("The datastream to create is invalid",
+        if (observation.getDatastream() == null) {
+            throw new ODataApplicationException("The observation to create is invalid. Missing datastream!",
                     HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
         }
     }
@@ -392,6 +393,10 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
                     break;
                 }
             }
+            if (feature == null) {
+                throw new ODataApplicationException("The observation to create is invalid. Missing feature or thing.location!",
+                        HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+            }
             observation.setFeatureOfInterest(feature);
         }
         AbstractFeatureEntity<?> feature = getFeatureOfInterestService().create(observation.getFeatureOfInterest());
@@ -443,7 +448,7 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
         }
     }
 
-    private Dataset checkDataset(DatastreamEntity datastream, AbstractFeatureEntity<?> feature, CategoryEntity category,
+    private DatasetEntity checkDataset(DatastreamEntity datastream, AbstractFeatureEntity<?> feature, CategoryEntity category,
             OfferingEntity offering) {
        DatasetEntity dataset = getDatasetEntity(datastream.getObservationType().getFormat());
        dataset.setProcedure(datastream.getProcedure());
@@ -488,6 +493,13 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
             }
         }
         return datasetRepository.save((DatasetEntity) dataset);
+    }
+
+    private void updateDatastream(DatastreamEntity datastream, DatasetEntity dataset) throws ODataApplicationException {
+        if (datastream.getDatasets() != null && !datastream.getDatasets().contains(dataset)) {
+            datastream.addDataset(dataset);
+            getDatastreamService().update(datastream);
+        }
     }
 
     private AbstractSensorThingsEntityService<?, DatastreamEntity> getDatastreamService() {
