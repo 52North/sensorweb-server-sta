@@ -104,7 +104,7 @@ public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationE
         if (toMerge.getTime() != null) {
             existing.setTime(toMerge.getTime());
         }
-        return toMerge;
+        return existing;
     }
     
     private void addTime(HistoricalLocationEntity historicalLocation, Entity entity) {
