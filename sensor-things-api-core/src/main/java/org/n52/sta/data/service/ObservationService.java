@@ -347,7 +347,7 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
         if (getRepository().existsById(id)) {
             DataEntity<?> observation = getRepository().getOne(id);
             checkDataset(observation);
-            getRepository().deleteById(id);
+            delete(observation);
         } else {
             throw new ODataApplicationException("Entity not found.",
                     HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
