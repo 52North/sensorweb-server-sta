@@ -179,9 +179,7 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
     public String checkPropertyName(String property) {
         switch (property) {
         case "phenomenonTime":
-            return DataEntity.PROPERTY_SAMPLING_TIME_START;
-        case "validTime":
-            return DataEntity.PROPERTY_VALID_TIME_START;
+            return "samplingTime";
         case "result":
             return DataEntity.PROPERTY_VALUE;
         default:

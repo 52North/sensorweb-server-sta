@@ -29,6 +29,7 @@
 
 package org.n52.sta.service.query;
 
+import java.nio.ByteBuffer;
 import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.List;
@@ -37,9 +38,11 @@ import java.util.Locale;
 import org.apache.olingo.commons.api.edm.EdmEnumType;
 import org.apache.olingo.commons.api.edm.EdmType;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
+import org.apache.olingo.commons.core.edm.primitivetype.EdmAny;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmBoolean;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDateTimeOffset;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmString;
+import org.apache.olingo.commons.core.edm.primitivetype.EdmTimespan;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourcePrimitiveProperty;
@@ -51,6 +54,8 @@ import org.apache.olingo.server.api.uri.queryoption.expression.Literal;
 import org.apache.olingo.server.api.uri.queryoption.expression.Member;
 import org.apache.olingo.server.api.uri.queryoption.expression.MethodKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.UnaryOperatorKind;
+import org.joda.time.DateTime;
+import org.n52.shetland.ogc.gml.time.TimePeriod;
 import org.n52.sta.data.query.EntityQuerySpecifications;
 import org.n52.sta.data.query.QuerySpecificationRepository;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
@@ -138,7 +143,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
             return ((BooleanExpression)operand).not();
         } else if (operator == UnaryOperatorKind.MINUS && operand instanceof Number) {
             // 2.) arithmetic minus
-            return -(Double) operand;
+            return -(Double)operand;
         } else if (operator == UnaryOperatorKind.MINUS && operand instanceof NumberExpression) {
             // 2.) arithmetic minus
             return ((NumberExpression)operand).negate();
@@ -149,13 +154,12 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
                                             HttpStatusCode.BAD_REQUEST.getStatusCode(),
                                             Locale.ENGLISH);
     }
-    
+
     private Object evaluateArithmeticOperation(BinaryOperatorKind operator, Object left, Object right)
             throws ODataApplicationException {
 
-        // Check values
-        com.querydsl.core.types.dsl.NumberExpression< ? > leftExpr = convertToArithmeticExpression(left);
-        com.querydsl.core.types.dsl.NumberExpression< ? > rightExpr = convertToArithmeticExpression(right);
+        NumberExpression< ? > leftExpr = convertToArithmeticExpression(left);
+        NumberExpression< ? > rightExpr = convertToArithmeticExpression(right);
 
         // Check operands and get Operand Values
         switch (operator) {
@@ -171,7 +175,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
             return leftExpr.subtract(rightExpr);
         default:
             // this should never happen. Trying Arithmetics without Arithmetic operator
-            throw new ODataApplicationException("Invalid Operator for NumberExpression.",
+            throw new ODataApplicationException("Invalid Operator for Arithmetic Operation.",
                                                 HttpStatusCode.BAD_REQUEST.getStatusCode(),
                                                 Locale.ENGLISH);
         }
@@ -180,7 +184,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
     /**
      *  Evaluates Comparison operation for various Types. Comparison is attempted in the following order:
      *  
-     *  Number Comparison > String Comparison > Date Comparison.
+     *  Number Comparison > String Comparison > Date Comparison > Timespan Comparison.
      *  
      *  If parameters can not be converted into comparable Datatypes or all Comparisons fail an error is thrown. 
      *  
@@ -196,8 +200,8 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
 
         // Assume Numbers are compared
         try {
-            com.querydsl.core.types.dsl.NumberExpression< ? extends Comparable<?>> leftExpr = convertToArithmeticExpression(left);                 
-            com.querydsl.core.types.dsl.NumberExpression< ? extends Comparable<?> > rightExpr = convertToArithmeticExpression(right);
+            NumberExpression< ? extends Comparable<?>> leftExpr = convertToArithmeticExpression(left);                 
+            NumberExpression< ? extends Comparable<?> > rightExpr = convertToArithmeticExpression(right);
 
             switch (operator) {
             case GE:
@@ -213,7 +217,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
             case NE:
                 return ((ComparableExpressionBase)leftExpr).ne(rightExpr);
             default:
-                throw new ODataApplicationException("Invalid Operator for NumberExpression.",
+                throw new ODataApplicationException("Invalid Operator for Number Comparison.",
                                                     HttpStatusCode.BAD_REQUEST.getStatusCode(),
                                                     Locale.ENGLISH);
             }
@@ -233,7 +237,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
                 case NE:
                     return leftExpr.ne(rightExpr);
                 default:
-                    throw new ODataApplicationException("Invalid Operator for StringExpression.",
+                    throw new ODataApplicationException("Invalid Operator for String Comparison. Only EQ and NE are allowed.",
                                                         HttpStatusCode.BAD_REQUEST.getStatusCode(),
                                                         Locale.ENGLISH);
                 }
@@ -252,11 +256,11 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
 
             }
         } catch (ODataApplicationException f) {}
-        
+
         // Fallback to Date comparison
         try {
-            com.querydsl.core.types.dsl.DateTimeExpression<Date> leftExpr = convertToDateTimeExpression(left);                 
-            com.querydsl.core.types.dsl.DateTimeExpression<Date> rightExpr = convertToDateTimeExpression(right);
+            DateTimeExpression<Date> leftExpr = convertToDateTimeExpression(left);
+            DateTimeExpression<Date> rightExpr = convertToDateTimeExpression(right);
 
             switch (operator) {
             case GE:
@@ -278,20 +282,38 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
             }
         } catch (ODataApplicationException e) {}
 
+        // Fallback to Timespan comparison
+        try {
+            DateTimeExpression<Date>[] leftExpr = convertToTimespanExpression(left);
+            DateTimeExpression<Date>[] rightExpr = convertToTimespanExpression(right);
+
+            switch (operator) {
+            case EQ: {
+                return leftExpr[0].eq(rightExpr[0]).and(leftExpr[1].eq(rightExpr[1]));
+            }
+            case NE: {
+                return leftExpr[0].ne(rightExpr[0]).or(leftExpr[1].ne(rightExpr[1]));
+            }
+            default: {
+                throw new ODataApplicationException("Comparison of Timespans is currently implemented for EQ and NE operators.",
+                                                    HttpStatusCode.BAD_REQUEST.getStatusCode(),
+                                                    Locale.ENGLISH);
+            }
+            }
+        } catch (ODataApplicationException e) {}
+
         // Fallback to Error
-        throw new ODataApplicationException("Could not convert Expression to ComparableExpression.",
+        throw new ODataApplicationException("Could not parse Parameters to Filter Expression.",
                                             HttpStatusCode.BAD_REQUEST.getStatusCode(),
                                             Locale.ENGLISH);
     }
-    
+
     private Object evaluateBooleanOperation(BinaryOperatorKind operator, Object left, Object right)
             throws ODataApplicationException {
-        // Check operands and get Operand Values
         BooleanExpression leftExpr = convertToBooleanExpression(left);
         BooleanExpression rightExpr = convertToBooleanExpression(right);
 
         BooleanBuilder builder = new BooleanBuilder();
-
         if (operator == BinaryOperatorKind.AND) {
             return builder.and(rightExpr).and(leftExpr).getValue();
         } else if (operator == BinaryOperatorKind.OR) {
@@ -305,18 +327,39 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
 
     private DateTimeExpression<Date> convertToDateTimeExpression(Object expr) throws ODataApplicationException {
         if (expr instanceof DateTimeExpression< ? >) {
+            // Literal
             return  ((DateTimeExpression<Date>)expr);
         } else if (expr instanceof String){
+            // Property
             return new PathBuilder(sourceType, sourcePath).getDateTime((String)expr, Date.class);
         } else throw new ODataApplicationException("Could not convert " + expr.toString() + "to BooleanExpression",
-                                                HttpStatusCode.BAD_REQUEST.getStatusCode(),
-                                                Locale.ENGLISH);
+                                                   HttpStatusCode.BAD_REQUEST.getStatusCode(),
+                                                   Locale.ENGLISH);
+    }
+
+    private DateTimeExpression<Date>[] convertToTimespanExpression(Object expr) throws ODataApplicationException {
+        DateTimeExpression<Date>[] result = new DateTimeExpression[2];
+
+        if (expr instanceof TimePeriod) {
+            // Literal
+            result[0] = Expressions.asDateTime(((TimePeriod)expr).getStart().toDate());
+            result[1] = Expressions.asDateTime(((TimePeriod)expr).getEnd().toDate());
+            return result;
+        } else if (expr instanceof String){
+            // Property
+            result[0] = new PathBuilder(sourceType, sourcePath).getDateTime((String)expr + "Start", Date.class);
+            result[1] = new PathBuilder(sourceType, sourcePath).getDateTime((String)expr + "End", Date.class);
+            return result;
+        } else throw new ODataApplicationException("Could not convert " + expr.toString() + "to DateTimeExpression",
+                                                   HttpStatusCode.BAD_REQUEST.getStatusCode(),
+                                                   Locale.ENGLISH);
     }
 
     /**
      * 
      * Constructs a Subquery based on given Path to property of related Entity to evaluate Filters on those properties.
      * Returned Expression evaluates to true if Entity should be included.
+     * TODO: Expand to support deeper nested properties
      * 
      * @param uriResources Path to foreign property
      * @param value supposed value of foreign property
@@ -335,11 +378,11 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
         EntityQuerySpecifications stepQS = QuerySpecificationRepository.getSpecification(name);
         BooleanExpression filter = stepQS.getFilterForProperty(uriResources.get(uriLength-1).toString(), value, operator);
         result = stepQS.getIdSubqueryWithFilter(filter);
-        
+
         // Filter by Id on main Query
         return rootQS.getFilterForProperty(name, result, operator);
     }
-    
+
     /**
      * Casts an Object to BooleanExpression. Throws an Exception if Cast fails.
      * 
@@ -349,6 +392,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
      */
     private BooleanExpression convertToBooleanExpression(Object expr) throws ODataApplicationException {
         if (expr instanceof BooleanExpression) {
+            // Subexpression
             return (BooleanExpression) expr;
         } else {
             throw new ODataApplicationException("Could not convert " + expr.toString() + "to BooleanExpression",
@@ -367,10 +411,14 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
     private StringExpression convertToStringExpression(Object expr) throws ODataApplicationException {
         StringExpression result;
         if (expr instanceof String) {
+            // Property
             return new PathBuilder(sourceType, sourcePath).getString((String)expr);
         } else if (expr instanceof StringExpression) {
             // SubExpression
             result = (StringExpression) expr;
+        } else if (expr instanceof byte[]) {
+            // EdmAny
+            return Expressions.asString(new String((byte[])expr));
         } else {
             throw new ODataApplicationException("Could not convert " + expr.toString() + " to StringExpression",
                                                 HttpStatusCode.BAD_REQUEST.getStatusCode(),
@@ -386,17 +434,20 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
      * @return NumberExpression equivalent to expr
      * @throws ODataApplicationException if Object cannot be converted to NumberExpression
      */
-    private com.querydsl.core.types.dsl.NumberExpression< ? extends Comparable<?>> convertToArithmeticExpression(Object expr)
+    private NumberExpression< ? extends Comparable<?>> convertToArithmeticExpression(Object expr)
             throws ODataApplicationException {
         if (expr instanceof Number) {
             // Raw Number
             return Expressions.asNumber((double) expr);
         } else if (expr instanceof NumberExpression< ? >) {
             // SubExpression
-            return (com.querydsl.core.types.dsl.NumberExpression< ? >) expr;
-        }else if (expr instanceof String) {
+            return (NumberExpression< ? >) expr;
+        } else if (expr instanceof String) {
             // Property
             return new PathBuilder(sourceType, sourcePath).getNumber((String)expr, Double.class);
+        } else if (expr instanceof byte[]) {
+            // EdmAny
+            return Expressions.asNumber(ByteBuffer.wrap((byte[])expr).getDouble());
         } else {
             throw new ODataApplicationException("Could not convert " + expr.toString() + " to NumberExpression",
                                                 HttpStatusCode.BAD_REQUEST.getStatusCode(),
@@ -458,14 +509,22 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
                                                 HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(),
                                                 Locale.ENGLISH);
         } else if (literal.getType() instanceof EdmDateTimeOffset) {
-            Date date = Date.from(OffsetDateTime.parse(literal.getText()).toInstant());
-            return Expressions.asDateTime(date);
+            return Expressions.asDateTime(Date.from(OffsetDateTime.parse(literal.getText()).toInstant()));
+        } else if (literal.getType() instanceof EdmAny) {
+            return literalAsString.getBytes();
+        } else if (literal.getType() instanceof EdmTimespan) {
+            TimePeriod timespan = new TimePeriod();
+
+            String[] split = literalAsString.split("/");
+            timespan.setStart(DateTime.parse(split[0]));
+            timespan.setEnd(DateTime.parse(split[1]));
+            return timespan;
         } else {
             // Coerce literal numbers into Double
             try {
                 return Expressions.asNumber(Double.parseDouble(literalAsString));
             } catch (NumberFormatException e) {
-                throw new ODataApplicationException("Could not parse Numeric Value to Double",
+                throw new ODataApplicationException("Could not parse literal Numeric Value to Double. Error was: " + e.getMessage(),
                                                     HttpStatusCode.BAD_REQUEST.getStatusCode(),
                                                     Locale.ENGLISH);
             }

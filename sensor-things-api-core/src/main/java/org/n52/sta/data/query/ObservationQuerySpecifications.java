@@ -97,8 +97,6 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
         }
     }
 
-
-
     private BooleanExpression handleRelatedPropertyFilter(String propertyName, JPQLQuery<Long> propertyValue) throws ExpressionVisitException {
         if (propertyName.equals("Datastream")) {
             return qobservation.dataset.id.in(propertyValue);
