@@ -1044,17 +1044,13 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
             writeContextURL(contextURL, json);
             writeMetadataETag(metadata, json);
             writeOperations(property.getOperations(), json);
-            if (property.isNull()) {
-                throw new SerializerException("Property value can not be null.", SerializerException.MessageKeys.NULL_INPUT);
-            } else {
-                json.writeFieldName(property.getName());
-                writePrimitive(type, property,
-                        options == null ? null : options.isNullable(),
-                        options == null ? null : options.getMaxLength(),
-                        options == null ? null : options.getPrecision(),
-                        options == null ? null : options.getScale(),
-                        options == null ? null : options.isUnicode(), json);
-            }
+            json.writeFieldName(property.getName());
+            writePrimitive(type, property,
+                    options == null ? null : options.isNullable(),
+                    options == null ? null : options.getMaxLength(),
+                    options == null ? null : options.getPrecision(),
+                    options == null ? null : options.getScale(),
+                    options == null ? null : options.isUnicode(), json);
             json.writeEndObject();
 
             json.close();
