@@ -85,11 +85,15 @@ public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcess
 
     private void createPrimitiveValueResponse(ODataResponse response, PropertyResponse primitiveResponse) throws SerializerException {
         PrimitiveValueSerializerOptions options = PrimitiveValueSerializerOptions.with().build();
-        InputStream serializedContent = fixedFormatSerializer.primitiveValue((EdmPrimitiveType) primitiveResponse.getEdmPropertyType(), primitiveResponse.getProperty().getValue(), options);
+        InputStream serializedContent = null;
+        if (primitiveResponse.getProperty().getValue() != null) {
+            serializedContent = fixedFormatSerializer.primitiveValue((EdmPrimitiveType) primitiveResponse.getEdmPropertyType(), primitiveResponse.getProperty().getValue(), options);
+        } else {
+            serializedContent = fixedFormatSerializer.primitiveValue((EdmPrimitiveType) primitiveResponse.getEdmPropertyType(), "null", options);
+        }
         response.setContent(serializedContent);
         response.setStatusCode(HttpStatusCode.OK.getStatusCode());
         response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.TEXT_PLAIN.toContentTypeString());
-
     }
 
     @Override
