@@ -362,12 +362,13 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
     private void checkDataset(DataEntity<?> observation) {
         // TODO get the next first/last observation and set it
         DatasetEntity dataset = observation.getDataset();
-        if (dataset.getFirstObservation().getId().equals(observation.getId())) {
+        if (dataset.getFirstObservation() != null
+                && dataset.getFirstObservation().getId().equals(observation.getId())) {
             dataset.setFirstObservation(null);
             dataset.setFirstQuantityValue(null);
             dataset.setFirstValueAt(null);
         }
-        if (dataset.getLastObservation().getId().equals(observation.getId())) {
+        if (dataset.getLastObservation() != null && dataset.getLastObservation().getId().equals(observation.getId())) {
             dataset.setLastObservation(null);
             dataset.setLastQuantityValue(null);
             dataset.setLastValueAt(null);
