@@ -5,9 +5,12 @@
  */
 package org.n52.sta.service.handler;
 
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.server.api.ODataApplicationException;
@@ -16,7 +19,6 @@ import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.queryoption.SystemQueryOptionKind;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 import org.n52.sta.service.query.QueryOptions;
 import org.n52.sta.service.query.QueryOptionsHandler;
 import org.n52.sta.service.response.EntityCollectionResponse;
@@ -93,8 +95,8 @@ public class EntityCollectionRequestHandlerImpl implements AbstractEntityCollect
 
         // fetch the data from backend for this requested EntitySetName and
         // deliver as EntityCollection
-        AbstractSensorThingsEntityService<?> responseService
-                = serviceRepository.getEntityService(uriResourceEntitySet.getEntityType().getName());
+        AbstractSensorThingsEntityService<?,?> responseService =
+                serviceRepository.getEntityService(uriResourceEntitySet.getEntityType().getName());
         EntityCollection responseEntityCollection = responseService.getEntityCollection(queryOptions);
 
         long count = responseService.getCount();
@@ -118,7 +120,7 @@ public class EntityCollectionRequestHandlerImpl implements AbstractEntityCollect
         // determine the target query parameters and fetch EntityCollection for it
         EntityQueryParams queryParams = navigationResolver.resolveUriResourceNavigationPaths(resourcePaths);
 
-        AbstractSensorThingsEntityService<?> entityService = serviceRepository.getEntityService(queryParams.getTargetEntitySet().getEntityType().getName());
+        AbstractSensorThingsEntityService<?,?> entityService = serviceRepository.getEntityService(queryParams.getTargetEntitySet().getEntityType().getName());
         EntityCollection responseEntityCollection = entityService
                 .getRelatedEntityCollection(queryParams.getSourceId(), queryParams.getSourceEntityType(), queryOptions);
 

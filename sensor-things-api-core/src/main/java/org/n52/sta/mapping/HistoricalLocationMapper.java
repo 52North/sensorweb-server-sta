@@ -28,17 +28,29 @@
  */
 package org.n52.sta.mapping;
 
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_RESULT_TIME;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_TIME;
 import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ES_HISTORICAL_LOCATIONS_NAME;
 import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_FQN;
+import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ES_LOCATIONS_NAME;
+import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
+
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
+import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
+import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.shetland.ogc.gml.time.Time;
+import org.n52.shetland.ogc.gml.time.TimeInstant;
+import org.n52.shetland.ogc.gml.time.TimePeriod;
 import org.n52.shetland.util.DateTimeHelper;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 //import org.n52.sta.utils.EntityAnnotator;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +64,13 @@ import org.springframework.stereotype.Component;
 public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationEntity>{
 
     @Autowired
-    EntityCreationHelper entityCreationHelper;
+    private EntityCreationHelper entityCreationHelper;
+    
+    @Autowired
+    private LocationMapper locationMapper;
+    
+    @Autowired
+    private ThingMapper thingMapper;
 
     public Entity createEntity(HistoricalLocationEntity location) {
         Entity entity = new Entity();
@@ -69,6 +87,52 @@ public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationE
 
     private Time createTime(HistoricalLocationEntity location) {
         return createTime(createDateTime(location.getTime()));
+    }
+
+    @Override
+    public HistoricalLocationEntity createEntity(Entity entity) {
+        HistoricalLocationEntity historicalLocation = new HistoricalLocationEntity();
+        setId(historicalLocation, entity);
+        addTime(historicalLocation, entity);
+        addThing(historicalLocation, entity);
+        addLocations(historicalLocation, entity);
+        return historicalLocation;
+    }
+
+    @Override
+    public HistoricalLocationEntity merge(HistoricalLocationEntity existing, HistoricalLocationEntity toMerge) {
+        if (toMerge.getTime() != null) {
+            existing.setTime(toMerge.getTime());
+        }
+        return existing;
+    }
+    
+    private void addTime(HistoricalLocationEntity historicalLocation, Entity entity) {
+        if (checkProperty(entity, PROP_TIME)) {
+            Time time = parseTime(getPropertyValue(entity, PROP_TIME).toString());
+            if (time instanceof TimeInstant) {
+                historicalLocation.setTime(((TimeInstant) time).getValue().toDate());
+            } else if (time instanceof TimePeriod) {
+                historicalLocation.setTime(((TimePeriod) time).getEnd().toDate());
+            }
+        }
+    }
+
+    private void addThing(HistoricalLocationEntity historicalLocation, Entity entity) {
+        if (checkNavigationLink(entity, ET_THING_NAME)) {
+            historicalLocation.setThingEntity(thingMapper.createEntity(entity.getNavigationLink(ET_THING_NAME).getInlineEntity()));
+        }
+    }
+    
+    private void addLocations(HistoricalLocationEntity historicalLocation, Entity entity) {
+        if (checkNavigationLink(entity, ES_LOCATIONS_NAME)) {
+            Set<LocationEntity> locations = new LinkedHashSet<>();
+            Iterator<Entity> iterator = entity.getNavigationLink(ES_LOCATIONS_NAME).getInlineEntitySet().iterator();
+            while (iterator.hasNext()) {
+                locations.add(locationMapper.createEntity((Entity) iterator.next()));
+            }
+            historicalLocation.setLocationEntities(locations);
+        }
     }
 
 }

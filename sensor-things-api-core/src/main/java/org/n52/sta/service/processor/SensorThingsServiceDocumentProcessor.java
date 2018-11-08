@@ -6,6 +6,7 @@
 package org.n52.sta.service.processor;
 
 import java.io.InputStream;
+
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
 import org.apache.olingo.commons.api.http.HttpStatusCode;

@@ -31,10 +31,14 @@ package org.n52.sta.mapping;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ENCODINGTYPE;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_FEATURE;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_LOCATION;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_OBSERVED_AREA;
 
+import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
+import org.apache.olingo.commons.api.edm.geo.Geospatial;
+import org.n52.series.db.beans.GeometryEntity;
 import org.n52.series.db.beans.HibernateRelations.HasGeometry;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -43,22 +47,47 @@ public abstract class AbstractLocationGeometryMapper<T> extends AbstractMapper<T
     private static final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
 
     @Autowired
-    GeometryMapper geometryMapper;
+    private GeometryMapper geometryMapper;
 
     protected void addGeometry(Entity entity, HasGeometry<?> geometryEntity) {
-        addLocationGeometry(entity, geometryEntity, PROP_FEATURE);
-
+        addWithEncoding(entity, geometryEntity, PROP_FEATURE);
     }
-
+    
     protected void addLocation(Entity entity, HasGeometry<?> locationEntity) {
-        addLocationGeometry(entity, locationEntity, PROP_LOCATION);
+        addWithEncoding(entity, locationEntity, PROP_LOCATION);
     }
 
-    protected void addLocationGeometry(Entity entity, HasGeometry<?> geometryLocationEntity, String property) {
-        entity.addProperty(new Property(null, PROP_ENCODINGTYPE, ValueType.PRIMITIVE, ENCODINGTYPE_GEOJSON));
-        entity.addProperty(new Property(null, property, ValueType.COMPLEX,
-                geometryMapper.resolveGeometry(geometryLocationEntity.getGeometryEntity())));
+    protected void addObservedArea(Entity entity, HasGeometry<?> geometryEntity) {
+        add(entity, geometryEntity, PROP_OBSERVED_AREA);
+    }
+    
+    protected void addWithEncoding(Entity entity, HasGeometry<?> geometryLocationEntity, String property) {
+        if (geometryLocationEntity.isSetGeometry()) {
+            entity.addProperty(new Property(null, PROP_ENCODINGTYPE, ValueType.PRIMITIVE, ENCODINGTYPE_GEOJSON));
+            add(entity, geometryLocationEntity, property);
+        }
+    }
 
+    protected void add(Entity entity, HasGeometry<?> geometryLocationEntity, String property) {
+        if (geometryLocationEntity.isSetGeometry()) {
+            entity.addProperty(new Property(null, property, ValueType.GEOSPATIAL,
+                    geometryMapper.resolveGeometry(geometryLocationEntity.getGeometryEntity())));
+        }
+
+    }
+    
+    protected GeometryEntity parseGeometry(ComplexValue value) {
+        return geometryMapper.createGeometryEntity(value);
+    }
+    
+    protected GeometryEntity parseGeometry(Geospatial geospatial) {
+        return geometryMapper.createGeometryEntity(geospatial);
+    }
+    
+    protected void mergeGeometry(HasGeometry<?> existing, HasGeometry<?> toMerge) {
+        if (toMerge.isSetGeometry()) {
+            existing.setGeometryEntity(toMerge.getGeometryEntity());
+        }
     }
 
 }

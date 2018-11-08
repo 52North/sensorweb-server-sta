@@ -48,4 +48,8 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications {
         return qlocation.id.eq(id);
     }
     
+    public BooleanExpression withName(String name) {
+        return qlocation.name.eq(name);
+    }
+    
 }

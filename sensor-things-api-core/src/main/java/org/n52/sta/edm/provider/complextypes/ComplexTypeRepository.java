@@ -6,8 +6,8 @@
 package org.n52.sta.edm.provider.complextypes;
 
 import java.util.List;
+
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
-import org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

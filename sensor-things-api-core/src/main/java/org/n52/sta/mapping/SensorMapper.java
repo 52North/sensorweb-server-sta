@@ -29,18 +29,23 @@
 package org.n52.sta.mapping;
 
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ENCODINGTYPE;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_METADATA;
 import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ES_SENSORS_NAME;
 import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ET_SENSOR_FQN;
 
+import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
+import org.joda.time.DateTime;
+import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
+import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -51,6 +56,10 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class SensorMapper extends AbstractMapper<ProcedureEntity> {
+    
+    private static final String STA_SENSORML_2 = "http://www.opengis.net/doc/IS/SensorML/2.0";
+    
+    private static final String SENSORML_2 = "http://www.opengis.net/sensorml/2.0";
 
     @Autowired
     EntityCreationHelper entityCreationHelper;
@@ -59,7 +68,7 @@ public class SensorMapper extends AbstractMapper<ProcedureEntity> {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, sensor.getId()));
         addNameDescriptionProperties(entity, sensor);
-        entity.addProperty(new Property(null, PROP_ENCODINGTYPE, ValueType.PRIMITIVE, sensor.getFormat().getFormat()));
+        entity.addProperty(new Property(null, PROP_ENCODINGTYPE, ValueType.PRIMITIVE, checkQueryEncodingType(sensor.getFormat().getFormat())));
         String metadata = "metadata";
         if (sensor.getDescriptionFile() != null && !sensor.getDescriptionFile().isEmpty()) {
             metadata = sensor.getDescriptionFile();
@@ -76,5 +85,74 @@ public class SensorMapper extends AbstractMapper<ProcedureEntity> {
 
         return entity;
     }
+    
+    public Entity createEntity(SensorEntity sensor) {
+        return createEntity(sensor);
+    }
 
+    public SensorEntity createEntity(Entity entity) {
+        SensorEntity sensor = new SensorEntity();
+        setId(sensor, entity);
+        setIdentifier(sensor, entity);
+        setName(sensor, entity);
+        setDescription(sensor, entity);
+        sensor.setFormat(createFormat(entity));
+        if (sensor.getFormat().getFormat().equalsIgnoreCase(SENSORML_2)) {
+            sensor.setProcedureHistory(createProcedureHistory(sensor, entity));
+        } else {
+            sensor.setDescriptionFile(getPropertyValue(entity, PROP_METADATA).toString());
+        }
+        setDatastreams(sensor, entity);
+        return sensor;
+    }
+
+    @Override
+    public ProcedureEntity merge(ProcedureEntity existing, ProcedureEntity toMerge) {
+        mergeIdentifierNameDescription(existing, toMerge);
+        if (toMerge.isSetDescriptionFile()) {
+            existing.setDescriptionFile(toMerge.getDescriptionFile());
+        }
+        return existing;
+    }
+    
+    public SensorEntity mergeSensorEntity(SensorEntity existing, SensorEntity toMerge) {
+       if (toMerge.hasDatastreams()) {
+           toMerge.getDatastreams().forEach(d -> {
+               existing.addDatastream(d);
+           });
+       }
+       return (SensorEntity) merge(existing, toMerge);
+    }
+
+    private FormatEntity createFormat(Entity entity) {
+        if (checkProperty(entity, PROP_ENCODINGTYPE)) {
+            return new FormatEntity().setFormat(checkInsertEncodingType(getPropertyValue(entity, PROP_ENCODINGTYPE).toString()));
+        }
+        return new FormatEntity().setFormat("unknown");
+    }
+
+    private Set<ProcedureHistoryEntity> createProcedureHistory(ProcedureEntity sensor, Entity entity) {
+        ProcedureHistoryEntity procedureHistoryEntity = new ProcedureHistoryEntity();
+        procedureHistoryEntity.setProcedure(sensor);
+        procedureHistoryEntity.setFormat(sensor.getFormat());
+        procedureHistoryEntity.setStartTime(DateTime.now().toDate());
+        procedureHistoryEntity.setXml(getPropertyValue(entity, PROP_METADATA).toString());
+        Set<ProcedureHistoryEntity> set = new LinkedHashSet<>();
+        set.add(procedureHistoryEntity);
+        return set;
+    }
+
+    private String checkQueryEncodingType(String format) {
+        if (format.equalsIgnoreCase(SENSORML_2)) {
+            return STA_SENSORML_2;
+        }
+        return format;
+    }
+    
+    private String checkInsertEncodingType(String format) {
+        if (format.equalsIgnoreCase(STA_SENSORML_2)) {
+            return SENSORML_2;
+        }
+        return format;
+    }
 }

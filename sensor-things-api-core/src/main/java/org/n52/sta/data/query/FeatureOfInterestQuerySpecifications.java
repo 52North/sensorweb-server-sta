@@ -52,6 +52,10 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
                               .select(qdataset.feature.id));
     }
     
+    public BooleanExpression withIdentifier(String identifier) {
+        return qfeature.identifier.eq(identifier);
+    }
+    
     /**
      * Assures that Entity is valid.
      * Entity is valid if:

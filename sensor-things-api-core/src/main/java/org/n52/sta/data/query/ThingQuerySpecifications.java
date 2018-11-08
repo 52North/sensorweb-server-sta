@@ -51,4 +51,8 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications {
     public BooleanExpression withId(Long id) {
         return qthing.id.eq(id);
     }
+    
+    public BooleanExpression withName(String name) {
+        return qthing.name.eq(name);
+    }
 }

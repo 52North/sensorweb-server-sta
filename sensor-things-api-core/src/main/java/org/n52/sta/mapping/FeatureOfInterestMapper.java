@@ -28,17 +28,25 @@
  */
 package org.n52.sta.mapping;
 
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_FEATURE;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ES_FEATURES_OF_INTEREST_NAME;
 import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ET_FEATURE_OF_INTEREST_FQN;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
+import org.apache.olingo.commons.api.edm.geo.Geospatial;
+import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.FeatureEntity;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
+import org.n52.series.db.beans.FormatEntity;
+import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.shetland.ogc.om.features.SfConstants;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -46,20 +54,83 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper<FeatureEntity> {
+public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper<AbstractFeatureEntity<?>> {
 
     @Autowired
-    EntityCreationHelper entityCreationHelper;
+    private EntityCreationHelper entityCreationHelper;
 
-    public Entity createEntity(FeatureEntity feature) {
+    public Entity createEntity(AbstractFeatureEntity<?> feature) {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, feature.getId()));
         addNameDescriptionProperties(entity, feature);
         addGeometry(entity, feature);
         entity.setType(ET_FEATURE_OF_INTEREST_FQN.getFullQualifiedNameAsString());
         entity.setId(entityCreationHelper.createId(entity, ES_FEATURES_OF_INTEREST_NAME, PROP_ID));
-
         return entity;
     }
 
+    public AbstractFeatureEntity<?> createEntity(Entity entity) {
+        FeatureEntity featureOfInterest = new FeatureEntity();
+        setId(featureOfInterest, entity);
+        setIdentifier(featureOfInterest, entity);
+        setName(featureOfInterest, entity);
+        setDescription(featureOfInterest, entity);
+        Property featureProperty = entity.getProperty(PROP_FEATURE);
+        if (featureProperty != null) {
+            if (featureProperty.getValueType().equals(ValueType.PRIMITIVE) && featureProperty.getValue() instanceof Geospatial) {
+                featureOfInterest.setGeometryEntity(parseGeometry((Geospatial) featureProperty.getValue()));
+            }
+        }
+        featureOfInterest.setFeatureType(createFeatureType(featureOfInterest.getGeometry()));
+        return featureOfInterest;
+    }
+    
+    public AbstractFeatureEntity<?> createFeatureOfInterest(LocationEntity location) {
+        FeatureEntity featureOfInterest = new FeatureEntity();
+        featureOfInterest.setIdentifier(location.getName());
+        featureOfInterest.setName(location.getName());
+        featureOfInterest.setDescription(location.getDescription());
+        featureOfInterest.setGeometryEntity(location.getGeometryEntity());
+        featureOfInterest.setFeatureType(createFeatureType(location.getGeometry()));
+        return featureOfInterest;
+    }
+
+    @Override
+    public AbstractFeatureEntity<?> merge(AbstractFeatureEntity<?> existing, AbstractFeatureEntity<?> toMerge) {
+        mergeIdentifierNameDescription(existing, toMerge);
+        mergeGeometry(existing, toMerge);
+        mergeFeatureType(existing);
+        return existing;
+    }
+
+    private void mergeFeatureType(AbstractFeatureEntity<?> existing) {
+        FormatEntity featureType = createFeatureType(existing.getGeometry());
+        if (!featureType.getFormat().equals(existing.getFeatureType().getFormat())) {
+            existing.setFeatureType(featureType);
+        }
+    }
+
+    private FormatEntity createFeatureType(Geometry geometry) {
+        FormatEntity formatEntity = new FormatEntity();
+        if (geometry != null) {
+            switch (geometry.getGeometryType()) {
+            case "Point":
+                formatEntity.setFormat(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_POINT);
+                break;
+            case "LineString":
+                formatEntity.setFormat(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_CURVE);
+                break;
+            case "Polygon":
+                formatEntity.setFormat(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_SURFACE);
+                break;
+            default:
+                formatEntity.setFormat(SfConstants.SAMPLING_FEAT_TYPE_SF_SPATIAL_SAMPLING_FEATURE);
+                break;
+            }
+            return formatEntity;
+        }
+        return formatEntity.setFormat(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_FEATURE);
+    }
+    
+    
 }

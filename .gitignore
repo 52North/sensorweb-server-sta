@@ -17,3 +17,5 @@ buildNumber.properties
 .settings/*
 sensor-things-api-app/.settings/
 sensor-things-api-core/.settings/
+sensor-things-api-webapp/.settings/
+sensor-things-api-app/console.log

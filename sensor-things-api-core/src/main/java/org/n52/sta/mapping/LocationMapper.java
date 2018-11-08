@@ -28,15 +28,24 @@
  */
 package org.n52.sta.mapping;
 
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ENCODINGTYPE;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_LOCATION;
 import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ES_LOCATIONS_NAME;
 import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATION_FQN;
+import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ES_THINGS_NAME;
+
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
+import org.apache.olingo.commons.api.edm.geo.Geospatial;
+import org.n52.series.db.beans.sta.LocationEncodingEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
-import org.n52.sta.utils.EntityCreationHelper;
+import org.n52.series.db.beans.sta.ThingEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -46,21 +55,69 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class LocationMapper extends AbstractLocationGeometryMapper<LocationEntity> {
-
+    
     @Autowired
-    EntityCreationHelper entityCreationHelper;
-
+    private ThingMapper thingMapper;
+    
     public Entity createEntity(LocationEntity location) {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, location.getId()));
         addDescription(entity, location);
-        addNane(entity, location);
+        addName(entity, location);
         addLocation(entity, location);
 
         entity.setType(ET_LOCATION_FQN.getFullQualifiedNameAsString());
         entity.setId(entityCreationHelper.createId(entity, ES_LOCATIONS_NAME, PROP_ID));
 
         return entity;
+    }
+
+    public LocationEntity createEntity(Entity entity) {
+        LocationEntity location = new LocationEntity();
+        setId(location, entity);
+        setName(location, entity);
+        setDescription(location, entity);
+        Property locationProperty = entity.getProperty(PROP_LOCATION);
+        if (locationProperty != null) {
+            if (locationProperty.getValueType().equals(ValueType.PRIMITIVE) && locationProperty.getValue() instanceof Geospatial) {
+                location.setGeometryEntity(parseGeometry((Geospatial) locationProperty.getValue()));
+            } else {
+                location.setLocation(locationProperty.getValue().toString());
+            }
+        }
+        if (entity.getProperty(PROP_ENCODINGTYPE) != null) {
+            location.setLocationEncoding(createLocationEncodingEntity(entity.getProperty(PROP_ENCODINGTYPE)));
+        }
+        addThings(location, entity);
+        return location;
+    }
+    
+    private LocationEncodingEntity createLocationEncodingEntity(Property property) {
+        LocationEncodingEntity locationEncodingEntity = new LocationEncodingEntity();
+        locationEncodingEntity.setEncodingType(property.getValue().toString());
+        return locationEncodingEntity;
+    }
+
+    @Override
+    public LocationEntity merge(LocationEntity existing, LocationEntity toMerge) {
+        mergeName(existing, toMerge);
+        mergeDescription(existing, toMerge);
+        if (toMerge.hasLocation()) {
+            existing.setLocation(toMerge.getLocation());
+        }
+        mergeGeometry(existing, toMerge);
+        return existing;
+    }
+    
+    private void addThings(LocationEntity location, Entity entity) {
+        if (checkNavigationLink(entity, ES_THINGS_NAME)) {
+            Set<ThingEntity> things = new LinkedHashSet<>();
+            Iterator<Entity> iterator = entity.getNavigationLink(ES_THINGS_NAME).getInlineEntitySet().iterator();
+            while (iterator.hasNext()) {
+                things.add(thingMapper.createEntity((Entity) iterator.next()));
+            }
+            location.setThingEntities(things);
+        }
     }
 
 }

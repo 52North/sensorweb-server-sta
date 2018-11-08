@@ -28,15 +28,26 @@
  */
 package org.n52.sta.data.service;
 
+import java.util.LinkedHashSet;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.Set;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.commons.api.http.HttpMethod;
+import org.apache.olingo.commons.api.http.HttpStatusCode;
+import org.apache.olingo.server.api.ODataApplicationException;
+import org.joda.time.DateTime;
+import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.HistoricalLocationEntity;
+import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.sta.data.query.ThingQuerySpecifications;
 import org.n52.sta.data.repositories.ThingRepository;
+import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.ThingMapper;
 import org.n52.sta.service.query.QueryOptions;
 import org.springframework.stereotype.Component;
@@ -48,7 +59,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
-public class ThingService extends AbstractSensorThingsEntityService<ThingRepository> {
+public class ThingService extends AbstractSensorThingsEntityService<ThingRepository, ThingEntity> {
 
     private ThingMapper mapper;
 
@@ -57,6 +68,11 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     public ThingService(ThingRepository repository, ThingMapper mapper) {
         super(repository);
         this.mapper = mapper;
+    }
+    
+    @Override
+    public EntityTypes getType() {
+        return EntityTypes.Thing;
     }
 
     @Override
@@ -173,4 +189,160 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
         }
         return getRepository().findOne(filter);
     }
+
+    @Override
+    public ThingEntity create(ThingEntity thing) throws ODataApplicationException {
+        if (!thing.isProcesssed()) {
+            if (thing.getId() != null && !thing.isSetName()) {
+                return getRepository().findOne(tQS.withId(thing.getId())).get();
+            }
+            if (getRepository().exists(tQS.withName(thing.getName()))) {
+                Optional<ThingEntity> optional = getRepository().findOne(tQS.withName(thing.getName()));
+                return optional.isPresent() ? optional.get() : null;
+            }
+            thing.setProcesssed(true);
+            processLocations(thing);
+            thing = getRepository().save(thing);
+            processHistoricalLocations(thing);
+            processDatastreams(thing);
+            thing = getRepository().save(thing);
+        }
+        return thing;
+        
+    }
+
+    @Override
+    public ThingEntity update(ThingEntity entity, HttpMethod method) throws ODataApplicationException {
+        checkUpdate(entity);
+        if (HttpMethod.PATCH.equals(method)) {
+            Optional<ThingEntity> existing = getRepository().findOne(tQS.withId(entity.getId()));
+            if (existing.isPresent()) {
+                ThingEntity merged = mapper.merge(existing.get(), entity);
+                if (entity.hasLocationEntities()) {
+                    merged.setLocationEntities(entity.getLocationEntities());
+                    processLocations(merged);
+                    merged = getRepository().save(merged);
+                    processHistoricalLocations(merged);
+                }
+                return getRepository().save(merged);
+            }
+            throw new ODataApplicationException("Entity not found.",
+                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
+        } else if (HttpMethod.PUT.equals(method)) {
+            throw new ODataApplicationException("Http PUT is not yet supported!",
+                    HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.getDefault());
+        }
+        throw new ODataApplicationException("Invalid http method for updating entity!",
+                HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+    }
+    
+    private void checkUpdate(ThingEntity thing) throws ODataApplicationException {
+        if (thing.hasLocationEntities()) {
+            for (LocationEntity location : thing.getLocationEntities()) {
+                checkInlineLocation(location);
+            }
+        }
+        if (thing.hasDatastreamEntities()) {
+            for (DatastreamEntity datastream : thing.getDatastreamEntities()) {
+                checkInlineDatastream(datastream);
+            }
+        }
+    }
+
+    @Override
+    public ThingEntity update(ThingEntity entity) throws ODataApplicationException {
+        return getRepository().save(entity);
+    }
+
+    @Override
+    public void delete(Long id) throws ODataApplicationException {
+        if (getRepository().existsById(id)) {
+            ThingEntity thing = getRepository().getOne(id);
+            // delete datastreams
+            thing.getDatastreamEntities().forEach(d -> {
+                try {
+                    getDatastreamService().delete(d.getId());
+                } catch (ODataApplicationException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            });
+            // delete historicalLocation
+            thing.getHistoricalLocationEntities().forEach(hl -> {
+                try {
+                    getHistoricalLocationService().delete(hl);
+                } catch (ODataApplicationException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            });
+            getRepository().deleteById(id);
+        } else {
+        throw new ODataApplicationException("Entity not found.",
+                HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
+        }
+    }
+
+    @Override
+    public void delete(ThingEntity entity) throws ODataApplicationException {
+        getRepository().deleteById(entity.getId());
+    }
+
+    private void processDatastreams(ThingEntity thing) throws ODataApplicationException {
+       if (thing.hasDatastreamEntities()) {
+           Set<DatastreamEntity> datastreams = new LinkedHashSet<>();
+           for (DatastreamEntity datastream : thing.getDatastreamEntities()) {
+               datastream.setThing(thing);
+               DatastreamEntity optionalDatastream = getDatastreamService().create(datastream);
+               datastreams.add(optionalDatastream != null ? optionalDatastream : datastream);
+           }
+           thing.setDatastreamEntities(datastreams);
+       }
+    }
+
+    private void processLocations(ThingEntity thing) throws ODataApplicationException {
+        if (thing.hasLocationEntities()) {
+            Set<LocationEntity> locations = new LinkedHashSet<>();
+            for (LocationEntity location : thing.getLocationEntities()) {
+                LocationEntity optionalLocation = getLocationService().create(location);
+                locations.add(optionalLocation != null ? optionalLocation : location);
+            }
+            thing.setLocationEntities(locations);
+        }
+    }
+
+    private void processHistoricalLocations(ThingEntity thing) throws ODataApplicationException {
+        if (thing != null && thing.hasLocationEntities()) {
+            Set<HistoricalLocationEntity> historicalLocations = new LinkedHashSet<>();
+            HistoricalLocationEntity historicalLocation = new HistoricalLocationEntity();
+            historicalLocation.setThingEntity(thing);
+            historicalLocation.setTime(DateTime.now().toDate());
+            historicalLocation.setProcesssed(true);
+            HistoricalLocationEntity createdHistoricalLocation =
+                    getHistoricalLocationService().createOrUpdate(historicalLocation);
+            if (createdHistoricalLocation != null) {
+                historicalLocations.add(createdHistoricalLocation);
+            }
+            for (LocationEntity location : thing.getLocationEntities()) {
+                location.setHistoricalLocationEntities(historicalLocations);
+                getLocationService().createOrUpdate(location);
+            }
+            thing.setHistoricalLocationEntities(historicalLocations);
+        }
+    }
+
+    private AbstractSensorThingsEntityService<?, LocationEntity> getLocationService() {
+        return (AbstractSensorThingsEntityService<?, LocationEntity>) getEntityService(EntityTypes.Location);
+    }
+
+    private AbstractSensorThingsEntityService<?, HistoricalLocationEntity> getHistoricalLocationService() {
+        return (AbstractSensorThingsEntityService<?, HistoricalLocationEntity>) getEntityService(
+                EntityTypes.HistoricalLocation);
+    }
+
+    private AbstractSensorThingsEntityService<?, DatastreamEntity> getDatastreamService() {
+        return (AbstractSensorThingsEntityService<?, DatastreamEntity>) getEntityService(
+                EntityTypes.Datastream);
+    }
+
 }

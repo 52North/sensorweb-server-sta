@@ -28,36 +28,54 @@
  */
 package org.n52.sta.mapping;
 
+import static org.n52.sta.edm.provider.SensorThingsEdmConstants.ID;
+import static org.n52.sta.edm.provider.SensorThingsEdmConstants.ID_ANNOTATION;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DEFINITION;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DESCRIPTION;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_NAME;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PHENOMENON_TIME;
+import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ES_DATASTREAMS_NAME;
 
 import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Optional;
+import java.util.Set;
 
+import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
-import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.server.api.ODataApplicationException;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.HibernateRelations.HasDescription;
 import org.n52.series.db.beans.HibernateRelations.HasName;
+import org.n52.series.db.beans.HibernateRelations.HasPhenomenonTime;
+import org.n52.series.db.beans.IdEntity;
+import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.StaRelations;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
+import org.n52.shetland.util.DateTimeHelper;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class AbstractMapper<T> {
     
     @Autowired
-    EntityCreationHelper entityCreationHelper;
+    protected EntityCreationHelper entityCreationHelper;
     
     @Autowired
-    GeometryMapper geometryMapper;
+    private DatastreamMapper datastreamMapper;
     
     public abstract Entity createEntity(T t);
+    
+    public abstract T createEntity(Entity entity);
+    
+    public abstract T merge(T existing, T toMerge) throws ODataApplicationException;
     
     protected void addNameDescriptionProperties(Entity entity, DescribableEntity describableEntity) {
         // add name
@@ -74,8 +92,16 @@ public abstract class AbstractMapper<T> {
         addDescription(entity, description);
     }
     
-    protected void addNane(Entity entity, HasName describableEntity) {
-        entity.addProperty(new Property(null, PROP_NAME, ValueType.PRIMITIVE, describableEntity.getName()));
+    protected boolean checkProperty(Entity entity, String name) {
+        return entity.getProperty(name) != null;
+    }
+    
+    protected boolean checkNavigationLink(Entity entity, String name) {
+        return entity.getNavigationLink(name) != null;
+    }
+    
+    protected void addName(Entity entity, HasName describableEntity) {
+        addNane(entity, describableEntity.getName());
     }
     
     protected void addNane(Entity entity, String name) {
@@ -83,13 +109,115 @@ public abstract class AbstractMapper<T> {
     }
     
     protected void addDescription(Entity entity, HasDescription describableEntity) {
-        entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, describableEntity.getDescription()));
+        addDescription(entity, describableEntity.getDescription());
     }
     
     protected void addDescription(Entity entity, String description) {
         entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, description));
     }
     
+    protected void setId(IdEntity idEntity, Entity entity) {
+        if (checkProperty(entity, ID)) {
+            idEntity.setId(Long.parseLong(getPropertyValue(entity, ID).toString()));
+        } else if (checkProperty(entity, ID_ANNOTATION)) {
+            idEntity.setId(Long.parseLong(getPropertyValue(entity, ID_ANNOTATION).toString()));
+        } 
+    }
+    
+    protected void setNameDescription(DescribableEntity thing, Entity entity) {
+        setName(thing, entity);
+        setDescription(thing, entity);
+    }
+    
+    protected void setIdentifier(DescribableEntity describableEntity, Entity entity) {
+        if (checkProperty(entity, PROP_DEFINITION)) {
+            describableEntity.setIdentifier(getPropertyValue(entity, PROP_DEFINITION).toString());
+        } else if (checkProperty(entity, PROP_NAME)) {
+            describableEntity.setIdentifier(getPropertyValue(entity, PROP_NAME).toString());
+        }
+        
+    }
+    
+    protected void setName(HasName describableEntity, Entity entity) {
+       if (checkProperty(entity, PROP_NAME)) {
+           describableEntity.setName(getPropertyValue(entity, PROP_NAME).toString());
+       }
+    }
+
+    protected void setDescription(HasDescription describableEntity, Entity entity) {
+        if (checkProperty(entity, PROP_DESCRIPTION)) {
+            describableEntity.setDescription(getPropertyValue(entity, PROP_DESCRIPTION).toString());
+        }
+    }
+    
+    protected void setDatastreams(StaRelations.Datastreams<?> datastreams, Entity entity) {
+        if (checkNavigationLink(entity, ES_DATASTREAMS_NAME)) {
+            Set<DatastreamEntity> ds = new LinkedHashSet<>();
+            Iterator<Entity> iterator = entity.getNavigationLink(ES_DATASTREAMS_NAME).getInlineEntitySet().iterator();
+            while (iterator.hasNext()) {
+                ds.add(datastreamMapper.createEntity((Entity) iterator.next()));
+            }
+            datastreams.setDatastreams(ds);
+        }
+        
+    }
+    
+    protected Object getPropertyValue(Entity entity, String name) {
+        if (entity.getProperty(name) != null) {
+            return entity.getProperty(name).getValue();
+        }
+        return "";
+    }
+    
+    protected Object getPropertyValue(ComplexValue complexValue, String name) {
+       Optional<Property> property = complexValue.getValue().stream().filter(p -> p.getName().equals(name)).findAny();
+       return property.isPresent() ? property.get().getValue() : "";
+    }
+    
+    protected void addPhenomenonTime(HasPhenomenonTime phenomenonTime , Entity entity) {
+        if (checkProperty(entity, PROP_PHENOMENON_TIME)) {
+            Time time = parseTime(getPropertyValue(entity, PROP_PHENOMENON_TIME).toString());
+            if (time instanceof TimeInstant) {
+                phenomenonTime.setSamplingTimeStart(((TimeInstant) time).getValue().toDate());
+                phenomenonTime.setSamplingTimeEnd(((TimeInstant) time).getValue().toDate());
+            } else if (time instanceof TimePeriod) {
+                phenomenonTime.setSamplingTimeStart(((TimePeriod) time).getStart().toDate());
+                phenomenonTime.setSamplingTimeEnd(((TimePeriod) time).getEnd().toDate());
+            }
+        }
+    }
+    
+    protected void mergeIdentifierNameDescription(DescribableEntity existing, DescribableEntity toMerge) {
+        if (toMerge.isSetIdentifier()) {
+            existing.setIdentifier(toMerge.getIdentifier());
+        }
+        mergeNameDescription(existing, toMerge);
+    }
+    
+    protected void mergeNameDescription(DescribableEntity existing, DescribableEntity toMerge) {
+        mergeName(existing, toMerge);
+        mergeDescription(existing, toMerge);
+    }
+    
+    protected void mergeName(HasName existing, HasName toMerge) {
+        if (toMerge.isSetName()) {
+            existing.setName(toMerge.getName());
+        }
+    }
+
+    protected void mergeDescription(HasDescription existing, HasDescription toMerge) {
+        if (toMerge.isSetDescription()) {
+            existing.setDescription(toMerge.getDescription());
+        }
+    }
+    
+    protected void mergeSamplingTime(HasPhenomenonTime existing, HasPhenomenonTime toMerge) {
+        if (toMerge.hasSamplingTimeStart() && toMerge.hasSamplingTimeEnd()) {
+            existing.setSamplingTimeStart(toMerge.getSamplingTimeStart());
+            existing.setSamplingTimeEnd(toMerge.getSamplingTimeEnd());
+        }
+    }
+
     protected DateTime createDateTime(Date date) {
         return new DateTime(date, DateTimeZone.UTC);
     }
@@ -113,5 +241,14 @@ public abstract class AbstractMapper<T> {
         } else {
             return new TimePeriod(start, end);
         }
+    }
+    
+    protected Time parseTime(String timeString) {
+        if (timeString.contains("/")) {
+            String[] split = timeString.split("/");
+            return createTime(DateTimeHelper.parseIsoString2DateTime(split[0]),
+                    DateTimeHelper.parseIsoString2DateTime(split[1]));
+        }
+        return createTime(DateTimeHelper.parseIsoString2DateTime(timeString));
     }
 }

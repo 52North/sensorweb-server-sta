@@ -28,17 +28,33 @@
  */
 package org.n52.sta.data.service;
 
+import java.util.Locale;
 import java.util.Optional;
 import java.util.OptionalLong;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
-import org.n52.series.db.FeatureRepository;
+import org.apache.olingo.commons.api.http.HttpMethod;
+import org.apache.olingo.commons.api.http.HttpStatusCode;
+import org.apache.olingo.server.api.ODataApplicationException;
+import org.n52.series.db.DataRepository;
+import org.n52.series.db.DatasetRepository;
+import org.n52.series.db.FormatRepository;
+import org.n52.series.db.beans.AbstractFeatureEntity;
+import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FeatureEntity;
+import org.n52.series.db.beans.FormatEntity;
+import org.n52.series.db.beans.sta.ThingEntity;
+import org.n52.series.db.query.DatasetQuerySpecifications;
 import org.n52.sta.data.query.FeatureOfInterestQuerySpecifications;
+import org.n52.sta.data.query.ObservationQuerySpecifications;
+import org.n52.sta.data.repositories.FeatureOfInterestRepository;
+import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.FeatureOfInterestMapper;
 import org.n52.sta.service.query.QueryOptions;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -49,29 +65,47 @@ import com.querydsl.core.types.dsl.BooleanExpression;
  *
  */
 @Component
-public class FeatureOfInterestService extends AbstractSensorThingsEntityService<FeatureRepository> {
+public class FeatureOfInterestService extends AbstractSensorThingsEntityService<FeatureOfInterestRepository, AbstractFeatureEntity<?>> {
 
 
     private FeatureOfInterestMapper mapper;
+    
+    @Autowired
+    private FormatRepository formatRepository;
+    
+    @Autowired
+    private DataRepository<DataEntity<?>> dataRepository;
 
+    @Autowired
+    private DatasetRepository<DatasetEntity> datasetRepository;
+    
     private final static FeatureOfInterestQuerySpecifications foiQS = new FeatureOfInterestQuerySpecifications();
+    
+    private ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
+    
+    private DatasetQuerySpecifications dQS = DatasetQuerySpecifications.of(null);
 
-    public FeatureOfInterestService(FeatureRepository repository, FeatureOfInterestMapper mapper) {
+    public FeatureOfInterestService(FeatureOfInterestRepository repository, FeatureOfInterestMapper mapper) {
         super(repository);
         this.mapper = mapper;
+    }
+    
+    @Override
+    public EntityTypes getType() {
+        return EntityTypes.FeatureOfInterest;
     }
 
     @Override
     public EntityCollection getEntityCollection(QueryOptions queryOptions) {
         EntityCollection retEntitySet = new EntityCollection();
-        getRepository().findAll(foiQS.isValidEntity(), createPageableRequest(queryOptions))
+        getRepository().findAll(createPageableRequest(queryOptions))
                 .forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
 
     @Override
     public Entity getEntity(Long id) {
-        Optional<FeatureEntity> entity = getRepository().findOne(byId(id));
+        Optional<AbstractFeatureEntity<?>> entity = getRepository().findOne(byId(id));
         return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
 
@@ -111,7 +145,7 @@ public class FeatureOfInterestService extends AbstractSensorThingsEntityService<
 
     @Override
     public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-        Optional<FeatureEntity> foi = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
+        Optional<AbstractFeatureEntity<?>> foi = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
         if (foi.isPresent()) {
             return OptionalLong.of(foi.get().getId());
         } else {
@@ -126,7 +160,7 @@ public class FeatureOfInterestService extends AbstractSensorThingsEntityService<
 
     @Override
     public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-        Optional<FeatureEntity> feature = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
+        Optional<AbstractFeatureEntity<?>> feature = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
         if (feature.isPresent()) {
             return mapper.createEntity(feature.get());
         } else {
@@ -143,7 +177,7 @@ public class FeatureOfInterestService extends AbstractSensorThingsEntityService<
      * @param targetId Id of the Entity to be retrieved
      * @return Optional<FeatureEntity> Requested Entity
      */
-    private Optional<FeatureEntity> getRelatedEntityRaw(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+    private Optional<AbstractFeatureEntity<?>> getRelatedEntityRaw(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         BooleanExpression filter;
         switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
         case "iot.Observation": {
@@ -166,6 +200,86 @@ public class FeatureOfInterestService extends AbstractSensorThingsEntityService<
      * @return BooleanExpression evaluating to true if Entity is found and valid
      */
     private BooleanExpression byId(Long id) {
-        return foiQS.isValidEntity().and(foiQS.withId(id));
+        return foiQS.withId(id);
+    }
+
+    @Override
+    public AbstractFeatureEntity<?> create(AbstractFeatureEntity<?> feature) {
+        if (feature.getId() != null && !feature.isSetName()) {
+            return getRepository().findOne(foiQS.withId(feature.getId())).get();
+        }
+        if (getRepository().exists(foiQS.withIdentifier(feature.getIdentifier()))) {
+            Optional<AbstractFeatureEntity<?>> optional =
+                    getRepository().findOne(foiQS.withIdentifier(feature.getIdentifier()));
+            return optional.isPresent() ? optional.get() : null;
+        }
+        checkFeatureType(feature);
+        return getRepository().save(feature);
+    }
+
+    @Override
+    public AbstractFeatureEntity<?> update(AbstractFeatureEntity<?> entity, HttpMethod method) throws ODataApplicationException {
+        if (HttpMethod.PATCH.equals(method)) {
+            Optional<AbstractFeatureEntity<?>> existing = getRepository().findOne(foiQS.withId(entity.getId()));
+            if (existing.isPresent()) {
+                AbstractFeatureEntity<?> merged = mapper.merge(existing.get(), entity);
+                return getRepository().save(merged);
+            }
+            throw new ODataApplicationException("Entity not found.",
+                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
+        } else if (HttpMethod.PUT.equals(method)) {
+            throw new ODataApplicationException("Http PUT is not yet supported!",
+                    HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.getDefault());
+        }
+        throw new ODataApplicationException("Invalid http method for updating entity!",
+                HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+    }
+    
+    @Override
+    protected AbstractFeatureEntity<?> update(AbstractFeatureEntity<?> entity) throws ODataApplicationException {
+        return getRepository().save(entity);
+    }
+
+    @Override
+    public void delete(Long id) throws ODataApplicationException {
+        if (getRepository().existsById(id)) {
+            // check observations
+            deleteRelatedObservationsAndUpdateDatasets(id);
+            getRepository().deleteById(id);
+        } else {
+            throw new ODataApplicationException("Entity not found.", HttpStatusCode.NOT_FOUND.getStatusCode(),
+                    Locale.ROOT);
+        }
+    }
+    
+    @Override
+    protected void delete(AbstractFeatureEntity<?> entity) throws ODataApplicationException {
+        getRepository().deleteById(entity.getId());
+    }
+
+    private void deleteRelatedObservationsAndUpdateDatasets(Long featureId) {
+        // set dataset first/last to null
+        datasetRepository.findAll(dQS.matchFeatures(Long.toString(featureId))).forEach(d -> {
+            d.setFirstObservation(null);
+            d.setFirstQuantityValue(null);
+            d.setFirstValueAt(null);
+            d.setLastQuantityValue(null);
+            d.setLastQuantityValue(null);
+            d.setLastValueAt(null);
+            d.setFeature(null);
+            datasetRepository.saveAndFlush(d);
+        });
+        // delete observations
+        dataRepository.deleteAll(dataRepository.findAll(oQS.withFeatureOfInterest(featureId)));
+    }
+
+    private void checkFeatureType(AbstractFeatureEntity<?> feature) {
+        FormatEntity format;
+        if (!formatRepository.existsByFormat(feature.getFeatureType().getFormat())) {
+            format = formatRepository.save(feature.getFeatureType());
+        } else {
+            format = formatRepository.findByFormat(feature.getFeatureType().getFormat());
+        }
+        feature.setFeatureType(format);
     }
 }
