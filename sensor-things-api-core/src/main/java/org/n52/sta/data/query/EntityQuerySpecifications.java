@@ -39,6 +39,9 @@ import org.n52.series.db.beans.QDataEntity;
 import org.n52.series.db.beans.QDatasetEntity;
 import org.n52.series.db.beans.QFeatureEntity;
 import org.n52.series.db.beans.QPhenomenonEntity;
+import org.n52.series.db.beans.QAbstractFeatureEntity;
+import org.n52.series.db.beans.QDataEntity;
+import org.n52.series.db.beans.QDatasetEntity;
 import org.n52.series.db.beans.QProcedureEntity;
 import org.n52.series.db.beans.sta.QDatastreamEntity;
 import org.n52.series.db.beans.sta.QHistoricalLocationEntity;
@@ -71,7 +74,7 @@ public abstract class EntityQuerySpecifications<T> {
     final static QHistoricalLocationEntity qhistoricallocation = QHistoricalLocationEntity.historicalLocationEntity;
     final static QProcedureEntity qsensor = QProcedureEntity.procedureEntity;
     final static QDataEntity qobservation = QDataEntity.dataEntity;
-    final static QFeatureEntity qfeature = QFeatureEntity.featureEntity;
+    final static QAbstractFeatureEntity qfeature = QAbstractFeatureEntity.abstractFeatureEntity;
     final static QDatasetEntity qdataset = QDatasetEntity.datasetEntity;
     final static QThingEntity qthing = QThingEntity.thingEntity;
     final static QPhenomenonEntity qobservedproperty = QPhenomenonEntity.phenomenonEntity;

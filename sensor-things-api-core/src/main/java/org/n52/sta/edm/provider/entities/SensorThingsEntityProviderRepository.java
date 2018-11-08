@@ -29,6 +29,7 @@
 package org.n52.sta.edm.provider.entities;
 
 import java.util.List;
+
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

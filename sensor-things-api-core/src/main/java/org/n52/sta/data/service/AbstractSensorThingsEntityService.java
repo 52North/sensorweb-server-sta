@@ -10,11 +10,14 @@ import java.util.Locale;
 import java.util.OptionalLong;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmEnumType;
 import org.apache.olingo.commons.api.edm.EdmType;
+import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriInfoResource;
@@ -30,13 +33,20 @@ import org.apache.olingo.server.api.uri.queryoption.expression.Literal;
 import org.apache.olingo.server.api.uri.queryoption.expression.Member;
 import org.apache.olingo.server.api.uri.queryoption.expression.MethodKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.UnaryOperatorKind;
+import org.n52.series.db.beans.IdEntity;
+import org.n52.series.db.beans.ProcedureEntity;
+import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.data.OffsetLimitBasedPageRequest;
 import org.n52.sta.service.query.FilterExpressionVisitor;
+import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.service.query.QueryOptions;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.querydsl.core.types.Predicate;
 
@@ -45,13 +55,23 @@ import com.querydsl.core.types.Predicate;
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
-public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<?, ?>> {
+public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<?, Long>, S extends IdEntity> {
+   
+    @Autowired
+    private EntityServiceRepository serviceRepository;
 
     private T repository;
 
     public AbstractSensorThingsEntityService(T repository) {
         this.repository = repository;
     }
+    
+    @PostConstruct
+    public void init() {
+        serviceRepository.addEntityService(this);
+    }
+    
+    public abstract EntityTypes getType();
 
     /**
      * Requests the full EntityCollection
@@ -242,6 +262,44 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
         }
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    public abstract S create(S entity) throws ODataApplicationException;
+
+    @Transactional(rollbackFor = Exception.class)
+    public abstract S update(S entity, HttpMethod method) throws ODataApplicationException;
+
+    protected abstract S update(S entity) throws ODataApplicationException;
+
+    @Transactional(rollbackFor = Exception.class)
+    public abstract void delete(Long id) throws ODataApplicationException;
+    
+    protected abstract void delete(S entity) throws ODataApplicationException;
+
+    protected S createOrUpdate(S entity) throws ODataApplicationException {
+        if (entity.getId() != null && getRepository().existsById(entity.getId())) {
+            return update(entity, HttpMethod.PATCH);
+        }
+        return create(entity);
+    }
+    
+    protected void checkInlineDatastream(DatastreamEntity datastream) throws ODataApplicationException {
+        if (datastream.getId() == null || datastream.isSetName() || datastream.isSetDescription() || datastream.isSetUnit()) {
+            throw new ODataApplicationException("Inlined entities are not allowed for updates!",
+                    HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+        }
+    }
+    
+    protected void checkInlineLocation(LocationEntity location) throws ODataApplicationException {
+        if (location.getId() == null || location.isSetName() || location.isSetDescription()) {
+            throw new ODataApplicationException("Inlined entities are not allowed for updates!",
+                    HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+        }
+    }
+
+    protected AbstractSensorThingsEntityService<?, ?> getEntityService(EntityTypes type) {
+        return serviceRepository.getEntityService(type);
+    }
+
     /**
      * Create {@link PageRequest}
      * 
@@ -281,9 +339,9 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
      */
     private static final class ExpressionGenerator implements ExpressionVisitor<String> {
 
-        private AbstractSensorThingsEntityService<?> service;
+        private AbstractSensorThingsEntityService<?,?> service;
 
-        public ExpressionGenerator(AbstractSensorThingsEntityService<?> service) {
+        public ExpressionGenerator(AbstractSensorThingsEntityService<?,?> service) {
             this.service = service;
         }
 
@@ -345,4 +403,5 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
             throw new ExpressionVisitException("MethodKind expressions are not supported");
         }
     }
+
 }

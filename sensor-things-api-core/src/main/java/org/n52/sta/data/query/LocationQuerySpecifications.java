@@ -53,6 +53,10 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
     public BooleanExpression withId(Long id) {
         return qlocation.id.eq(id);
     }
+    
+    public BooleanExpression withName(String name) {
+        return qlocation.name.eq(name);
+    }
 
     /* (non-Javadoc)
      * @see org.n52.sta.data.query.EntityQuerySpecifications#getIdSubqueryWithFilter(com.querydsl.core.types.dsl.BooleanExpression)

@@ -28,10 +28,6 @@
  */
 package org.n52.sta.data.query;
 
-import java.util.Locale;
-
-import org.apache.olingo.commons.api.http.HttpStatusCode;
-import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.n52.series.db.beans.sta.DatastreamEntity;
@@ -47,20 +43,36 @@ import com.querydsl.jpa.JPQLQuery;
  */
 public class DatastreamQuerySpecifications extends EntityQuerySpecifications<DatastreamEntity> {
 
-    public BooleanExpression matchesId(Long id) {
+    public BooleanExpression withId(Long id) {
         return  qdatastream.id.eq(id);
     }
-
+    
+    public BooleanExpression withName(String name) {
+        return  qdatastream.name.eq(name);
+    }
+    
     public BooleanExpression withObservedProperty(Long observedPropertyId) {
         return qdatastream.observableProperty.id.eq(observedPropertyId);
     }
-
+    
+    public BooleanExpression withObservedProperty(String name) {
+        return qdatastream.observableProperty.name.eq(name);
+    }
+    
     public BooleanExpression withThing(Long thingId) {
         return qdatastream.thing.id.eq(thingId);
     }
-
+    
+    public BooleanExpression withThing(String name) {
+        return qdatastream.thing.name.eq(name);
+    }
+    
     public BooleanExpression withSensor(Long sensorId) {
         return qdatastream.procedure.id.eq(sensorId);
+    }
+    
+    public BooleanExpression withSensor(String name) {
+        return qdatastream.procedure.name.eq(name);
     }
 
     public BooleanExpression withObservation(Long observationId) {

@@ -57,6 +57,10 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<ThingEnt
     public BooleanExpression withId(Long id) {
         return qthing.id.eq(id);
     }
+    
+    public BooleanExpression withName(String name) {
+        return qthing.name.eq(name);
+    }
 
     /* (non-Javadoc)
      * @see org.n52.sta.data.query.EntityQuerySpecifications#getIdSubqueryWithFilter(com.querydsl.core.types.dsl.BooleanExpression)

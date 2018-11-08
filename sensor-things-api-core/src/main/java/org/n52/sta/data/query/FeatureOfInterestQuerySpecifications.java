@@ -30,6 +30,7 @@ package org.n52.sta.data.query;
 
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
+import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.FeatureEntity;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -41,7 +42,7 @@ import com.querydsl.jpa.JPQLQuery;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
-public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecifications<FeatureEntity> {
+public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecifications<AbstractFeatureEntity< ? >> {
 
     public BooleanExpression withId(Long id) {
         return  qfeature.id.eq(id);
@@ -56,6 +57,10 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
                                                     .where(qobservation.id.eq(observationId))
                                                     .select(qobservation.dataset.id)))
                               .select(qdataset.feature.id));
+    }
+    
+    public BooleanExpression withIdentifier(String identifier) {
+        return qfeature.identifier.eq(identifier);
     }
 
     /**

@@ -6,6 +6,7 @@
 package org.n52.sta.service.processor;
 
 import java.io.InputStream;
+
 import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.edm.EdmComplexType;
@@ -23,17 +24,21 @@ import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.api.processor.PrimitiveValueProcessor;
 import org.apache.olingo.server.api.serializer.ComplexSerializerOptions;
 import org.apache.olingo.server.api.serializer.FixedFormatSerializer;
-import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.PrimitiveSerializerOptions;
 import org.apache.olingo.server.api.serializer.PrimitiveValueSerializerOptions;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
+import org.apache.olingo.server.core.serializer.SerializerResultImpl;
+import org.apache.olingo.server.core.serializer.utils.CircleStreamBuffer;
 import org.n52.sta.service.handler.AbstractPropertyRequestHandler;
 import org.n52.sta.service.response.PropertyResponse;
 import org.n52.sta.service.serializer.SensorThingsSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
 
 /**
  *
@@ -56,7 +61,7 @@ public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcess
 
         // serialize
         Object propertyValue = propertyValueReponse.getProperty().getValue();
-        if (propertyValue != null) {
+//        if (propertyValue != null) {
             //TODO: check for other than primitive types for the property
             if (propertyValueReponse.getEdmPropertyType() instanceof EdmComplexType) {
                 createComplexValueResponse(response, propertyValueReponse);
@@ -64,10 +69,10 @@ public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcess
                 createPrimitiveValueResponse(response, propertyValueReponse);
             }
 
-        } else {
-            // in case there's no value for the property, we can skip the serialization
-            response.setStatusCode(HttpStatusCode.NO_CONTENT.getStatusCode());
-        }
+//        } else {
+//            // in case there's no value for the property, we can skip the serialization
+//            response.setStatusCode(HttpStatusCode.NO_CONTENT.getStatusCode());
+//        }
     }
 
     private void createComplexValueResponse(ODataResponse response, PropertyResponse complexResponse) throws SerializerException {
@@ -85,11 +90,15 @@ public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcess
 
     private void createPrimitiveValueResponse(ODataResponse response, PropertyResponse primitiveResponse) throws SerializerException {
         PrimitiveValueSerializerOptions options = PrimitiveValueSerializerOptions.with().build();
-        InputStream serializedContent = fixedFormatSerializer.primitiveValue((EdmPrimitiveType) primitiveResponse.getEdmPropertyType(), primitiveResponse.getProperty().getValue(), options);
+        InputStream serializedContent = null;
+        if (primitiveResponse.getProperty().getValue() != null) {
+            serializedContent = fixedFormatSerializer.primitiveValue((EdmPrimitiveType) primitiveResponse.getEdmPropertyType(), primitiveResponse.getProperty().getValue(), options);
+        } else {
+            serializedContent = fixedFormatSerializer.primitiveValue((EdmPrimitiveType) primitiveResponse.getEdmPropertyType(), "null", options);
+        }
         response.setContent(serializedContent);
         response.setStatusCode(HttpStatusCode.OK.getStatusCode());
         response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.TEXT_PLAIN.toContentTypeString());
-
     }
 
     @Override
@@ -108,20 +117,15 @@ public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcess
 
         // serialize
         Object value = primitiveResponse.getProperty().getValue();
-        if (value != null) {
-            //TODO: check for other than primitive types for the property
-            InputStream serializedContent = createReponseContent(primitiveResponse.getProperty(),
-                    (EdmPrimitiveType) primitiveResponse.getEdmPropertyType(),
-                    primitiveResponse.getResponseEdmEntitySet());
+        //TODO: check for other than primitive types for the property
+        InputStream serializedContent = createReponseContent(primitiveResponse.getProperty(),
+                (EdmPrimitiveType) primitiveResponse.getEdmPropertyType(),
+                primitiveResponse.getResponseEdmEntitySet());
 
-            response.setContent(serializedContent);
-            response.setStatusCode(HttpStatusCode.OK.getStatusCode());
-            response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.JSON_NO_METADATA.toContentTypeString());
-        } else {
-            // in case there's no value for the property, we can skip the serialization
-            response.setStatusCode(HttpStatusCode.NO_CONTENT.getStatusCode());
-        }
-    }
+        response.setContent(serializedContent);
+        response.setStatusCode(HttpStatusCode.OK.getStatusCode());
+        response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.JSON_NO_METADATA.toContentTypeString());
+}
 
     @Override
     public void updatePrimitive(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType requestFormat, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {

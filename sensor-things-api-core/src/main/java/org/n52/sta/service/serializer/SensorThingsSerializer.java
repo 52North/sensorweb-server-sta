@@ -84,18 +84,18 @@ import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 import org.apache.olingo.server.core.ODataWritableContent;
 import org.apache.olingo.server.core.serializer.AbstractODataSerializer;
 import org.apache.olingo.server.core.serializer.SerializerResultImpl;
+import org.apache.olingo.server.core.serializer.json.ODataErrorSerializer;
 import org.apache.olingo.server.core.serializer.utils.CircleStreamBuffer;
 import org.apache.olingo.server.core.serializer.utils.ContentTypeHelper;
 import org.apache.olingo.server.core.serializer.utils.ContextURLBuilder;
 import org.apache.olingo.server.core.serializer.utils.ExpandSelectHelper;
 import org.apache.olingo.server.core.uri.UriHelperImpl;
 import org.apache.olingo.server.core.uri.queryoption.ExpandOptionImpl;
+import org.n52.sta.edm.provider.SensorThingsEdmConstants;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.apache.olingo.server.core.serializer.json.ODataErrorSerializer;
-import org.n52.sta.edm.provider.SensorThingsEdmConstants;
 
 public class SensorThingsSerializer extends AbstractODataSerializer {
 
@@ -1044,17 +1044,13 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
             writeContextURL(contextURL, json);
             writeMetadataETag(metadata, json);
             writeOperations(property.getOperations(), json);
-            if (property.isNull()) {
-                throw new SerializerException("Property value can not be null.", SerializerException.MessageKeys.NULL_INPUT);
-            } else {
-                json.writeFieldName(property.getName());
-                writePrimitive(type, property,
-                        options == null ? null : options.isNullable(),
-                        options == null ? null : options.getMaxLength(),
-                        options == null ? null : options.getPrecision(),
-                        options == null ? null : options.getScale(),
-                        options == null ? null : options.isUnicode(), json);
-            }
+            json.writeFieldName(property.getName());
+            writePrimitive(type, property,
+                    options == null ? null : options.isNullable(),
+                    options == null ? null : options.getMaxLength(),
+                    options == null ? null : options.getPrecision(),
+                    options == null ? null : options.getScale(),
+                    options == null ? null : options.isUnicode(), json);
             json.writeEndObject();
 
             json.close();

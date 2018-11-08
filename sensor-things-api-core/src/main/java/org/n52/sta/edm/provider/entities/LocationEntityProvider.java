@@ -47,7 +47,6 @@ import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
-import org.n52.sta.edm.provider.complextypes.FeatureComplexType;
 import org.springframework.stereotype.Component;
 
 /**
@@ -67,9 +66,8 @@ public class LocationEntityProvider extends AbstractSensorThingsEntityProvider {
     @Override
     protected CsdlEntityType createEntityType() {
         List<CsdlProperty> properties = createCsdlProperties();
-
         List<CsdlNavigationProperty> navigationProperties = createCsdlNavigationProperties();
-
+        
         // create CsdlPropertyRef for Key element
         CsdlPropertyRef propertyRef = new CsdlPropertyRef();
         propertyRef.setName(PROP_ID);
@@ -126,10 +124,13 @@ public class LocationEntityProvider extends AbstractSensorThingsEntityProvider {
                 .setNullable(false);
 
         //create EntityType complex properties
+//        CsdlProperty location = new CsdlProperty().setName(PROP_LOCATION)
+//                .setType(FeatureComplexType.CT_FEATURE_FQN)
+//                .setNullable(false);
         CsdlProperty location = new CsdlProperty().setName(PROP_LOCATION)
-                .setType(FeatureComplexType.CT_FEATURE_FQN)
+                .setType(EdmPrimitiveTypeKind.Geometry.getFullQualifiedName())
                 .setNullable(false);
-
+        
         return Arrays.asList(
                 id,
                 name,

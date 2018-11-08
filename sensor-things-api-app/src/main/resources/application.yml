@@ -31,15 +31,17 @@ spring:
           lob.non_contextual_creation: true
         format_sql: true
         default_schema: public
-        dialect: org.hibernate.spatial.dialect.postgis.PostgisDialect
+        dialect: org.hibernate.spatial.dialect.postgis.PostgisPG95Dialect
 
         # disable driver's feature detection
         # see https://stackoverflow.com/questions/46493500/hibernate-with-c3p0-createclob-is-not-yet-implemented
         temp.use_jdbc_metadata_defaults: false
-
+  jmx:
+    enabled: false
         
 logging:
   level:
+#    root: TRACE
     org.n52.sta: DEBUG
     org.hibernate: INFO
     org.hibernate.type: INFO

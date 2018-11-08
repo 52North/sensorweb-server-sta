@@ -28,15 +28,25 @@
  */
 package org.n52.sta.mapping;
 
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PROPERTIES;
+import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ES_DATASTREAMS_NAME;
+import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ES_LOCATIONS_NAME;
 import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ES_THINGS_NAME;
 import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_FQN;
 
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Optional;
+import java.util.Set;
 
+import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
+import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.n52.sta.utils.JsonHelper;
@@ -46,7 +56,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 
 /**
  *
@@ -58,16 +67,23 @@ public class ThingMapper extends AbstractMapper<ThingEntity> {
     private static final Logger LOG = LoggerFactory.getLogger(ThingMapper.class);
 
     @Autowired
-    EntityCreationHelper entityCreationHelper;
+    private EntityCreationHelper entityCreationHelper;
 
     @Autowired
-    JsonHelper jsonHelper;
+    private JsonHelper jsonHelper;
+    
+    @Autowired
+    private LocationMapper locationMapper;
+    
+    @Autowired
+    private DatastreamMapper datastreamMapper;
 
+    @Override
     public Entity createEntity(ThingEntity thing) {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, thing.getId()));
         addDescription(entity, thing);
-        addNane(entity, thing);
+        addName(entity, thing);
 
         entity.addProperty(new Property(null, PROP_PROPERTIES, ValueType.COMPLEX, createJsonProperty(thing)));
 
@@ -75,6 +91,56 @@ public class ThingMapper extends AbstractMapper<ThingEntity> {
         entity.setId(entityCreationHelper.createId(entity, ES_THINGS_NAME, PROP_ID));
 
         return entity;
+    }
+
+    @Override
+    public ThingEntity createEntity(Entity entity) {
+        ThingEntity thing = new ThingEntity();
+        setId(thing, entity);
+        setName(thing, entity);
+        setDescription(thing, entity);
+        if (entity.getProperty(PROP_PROPERTIES) != null) {
+            if (entity.getProperty(PROP_PROPERTIES).getValue() instanceof ComplexValue) {
+                thing.setProperties(getPropertyValue((ComplexValue) entity.getProperty(PROP_PROPERTIES).getValue(), PROP_PROPERTIES).toString());
+            } else {
+                thing.setProperties(entity.getProperty(PROP_PROPERTIES).getValue().toString());
+            }
+        }
+        addLocations(thing, entity);
+        addDatastreams(thing, entity);
+        return thing;
+    }
+
+    @Override
+    public ThingEntity merge(ThingEntity existing, ThingEntity toMerge) {
+        mergeName(existing, toMerge);
+        mergeDescription(existing, toMerge);
+        if (toMerge.hasProperties()) {
+            existing.setProperties(toMerge.getProperties());
+        }
+        return existing;
+    }
+
+    private void addLocations(ThingEntity thing, Entity entity) {
+        if (checkNavigationLink(entity, ES_LOCATIONS_NAME)) {
+            Set<LocationEntity> locations = new LinkedHashSet<>();
+            Iterator<Entity> iterator = entity.getNavigationLink(ES_LOCATIONS_NAME).getInlineEntitySet().iterator();
+            while (iterator.hasNext()) {
+                locations.add(locationMapper.createEntity((Entity) iterator.next()));
+            }
+            thing.setLocationEntities(locations);
+        }
+    }
+
+    private void addDatastreams(ThingEntity thing, Entity entity) {
+        if (checkNavigationLink(entity, ES_DATASTREAMS_NAME)) {
+            Set<DatastreamEntity> datastreams = new LinkedHashSet<>();
+            Iterator<Entity> iterator = entity.getNavigationLink(ES_DATASTREAMS_NAME).getInlineEntitySet().iterator();
+            while (iterator.hasNext()) {
+                datastreams.add(datastreamMapper.createEntity((Entity) iterator.next()));
+            }
+            thing.setDatastreamEntities(datastreams);
+        }
     }
 
     private JsonNode createJsonProperty(ThingEntity thing) {

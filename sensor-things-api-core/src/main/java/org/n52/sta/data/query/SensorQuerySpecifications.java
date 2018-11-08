@@ -45,7 +45,15 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications<Procedu
     public BooleanExpression withId(Long id) {
         return qsensor.id.eq(id);
     }
-
+    
+    public BooleanExpression wihtName(String name) {
+        return qsensor.name.eq(name);
+    }
+    
+    public BooleanExpression withIdentifier(String identifier) {
+        return qsensor.identifier.eq(identifier);
+    }
+    
     public BooleanExpression withDatastream(Long datastreamId) {
         return qsensor.id.in(dQS.toSubquery(qdatastream,
                                             qdatastream.procedure.id,

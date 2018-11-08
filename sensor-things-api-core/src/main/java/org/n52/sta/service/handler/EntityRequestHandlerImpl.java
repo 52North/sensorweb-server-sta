@@ -5,8 +5,11 @@
  */
 package org.n52.sta.service.handler;
 
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
+
 import java.util.List;
 import java.util.Locale;
+
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
@@ -17,7 +20,6 @@ import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 import org.n52.sta.service.query.QueryOptions;
 import org.n52.sta.service.query.QueryOptionsHandler;
 import org.n52.sta.service.response.EntityResponse;
@@ -84,12 +86,12 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
     private EntityResponse createResponseForEntity(List<UriResource> resourcePaths) throws ODataApplicationException {
 
         // determine the response EntitySet
-        UriResourceEntitySet uriResourceEntitySet = navigationResolver.resolveRootUriResource(resourcePaths.get(0));
+        UriResourceEntitySet uriResourceEntitySet = getUriResourceEntitySet(resourcePaths);
         EdmEntitySet responseEntitySet = uriResourceEntitySet.getEntitySet();
 
         // fetch the data from backend for this requested Entity and deliver as Entity
         List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
-        AbstractSensorThingsEntityService<?> responseService = serviceRepository.getEntityService(uriResourceEntitySet.getEntityType().getName());
+        AbstractSensorThingsEntityService<?,?> responseService = getEntityService(uriResourceEntitySet);
         Entity responseEntity = responseService.getEntity(navigationResolver.getEntityIdFromKeyParams(keyPredicates));
 
         if (responseEntity == null) {
@@ -136,5 +138,18 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
         response.setEntitySet(requestParams.getTargetEntitySet());
         response.setEntity(responseEntity);
         return response;
+    }
+    
+    private UriResourceEntitySet getUriResourceEntitySet(List<UriResource> resourcePaths) throws ODataApplicationException {
+        return navigationResolver.resolveRootUriResource(resourcePaths.get(0));
+    }
+
+    private AbstractSensorThingsEntityService<?,?> getEntityService(UriResourceEntitySet uriResourceEntitySet) {
+        return getUriResourceEntitySet(uriResourceEntitySet.getEntityType().getName());
+    }
+    
+
+    private AbstractSensorThingsEntityService<?,?> getUriResourceEntitySet(String type) {
+        return serviceRepository.getEntityService(type);
     }
 }
