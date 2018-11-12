@@ -30,6 +30,7 @@
 package org.n52.sta.service.query;
 
 import java.nio.ByteBuffer;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.List;
@@ -41,6 +42,7 @@ import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmAny;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmBoolean;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDateTimeOffset;
+import org.apache.olingo.commons.core.edm.primitivetype.EdmGeographyPoint;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmString;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmTimespan;
 import org.apache.olingo.server.api.ODataApplicationException;
@@ -61,6 +63,7 @@ import org.n52.sta.data.query.QuerySpecificationRepository;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Ops;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.ComparableExpressionBase;
 import com.querydsl.core.types.dsl.DateTimeExpression;
@@ -69,6 +72,7 @@ import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.JPQLQuery;
+import com.querydsl.spatial.GeometryExpressions;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -329,6 +333,9 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
         if (expr instanceof DateTimeExpression< ? >) {
             // Literal
             return  ((DateTimeExpression<Date>)expr);
+        } else if (expr instanceof Date) {
+            // Literal
+            return  Expressions.asDateTime((Date)expr);
         } else if (expr instanceof String){
             // Property
             return new PathBuilder(sourceType, sourcePath).getDateTime((String)expr, Date.class);
@@ -454,8 +461,32 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
                                                 Locale.ENGLISH);
         }
     }
-
-
+    
+    /**
+     * Converts an Object into a GeometryExpression. Throws an Exception if Conversion fails.
+     * 
+     * @param expr Object to be coerced into GeometryExpression
+     * @return GeometryExpression equivalent to expr
+     * @throws ODataApplicationException if Object cannot be converted to GeometryExpression
+     */
+    private StringExpression convertToGeometryExpression(Object expr) throws ODataApplicationException {
+        StringExpression result;
+        if (expr instanceof String) {
+            // Property
+            return new PathBuilder(sourceType, sourcePath).getString((String)expr);
+        } else if (expr instanceof StringExpression) {
+            // SubExpression
+            result = (StringExpression) expr;
+        } else if (expr instanceof byte[]) {
+            // EdmAny
+            return Expressions.asString(new String((byte[])expr));
+        } else {
+            throw new ODataApplicationException("Could not convert " + expr.toString() + " to StringExpression",
+                                                HttpStatusCode.BAD_REQUEST.getStatusCode(),
+                                                Locale.ENGLISH);
+        }
+        return result;
+    }
 
     /*
      * (non-Javadoc)
@@ -467,8 +498,101 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
     @Override
     public Object visitMethodCall(MethodKind methodCall, List<Object> parameters) throws ExpressionVisitException,
     ODataApplicationException {
-        // TODO Auto-generated method stub
-        return null;
+        switch (methodCall) {
+        // String Functions
+        case CONTAINS:
+        case SUBSTRINGOF:
+            return convertToStringExpression(parameters.get(0)).contains(convertToStringExpression(parameters.get(1)));
+        case ENDSWITH:
+            return convertToStringExpression(parameters.get(0)).endsWith(convertToStringExpression(parameters.get(1)));
+        case STARTSWITH:
+            return convertToStringExpression(parameters.get(0)).startsWith(convertToStringExpression(parameters.get(1)));
+        case LENGTH:
+            return convertToStringExpression(parameters.get(0)).length();
+        case INDEXOF:
+            return convertToStringExpression(parameters.get(0)).indexOf(convertToStringExpression(parameters.get(1)));
+        case SUBSTRING:
+            StringExpression arg1 = convertToStringExpression(parameters.get(0));
+            NumberExpression<Integer> arg2 = convertToArithmeticExpression(parameters.get(1)).intValue();
+            return Expressions.stringOperation(Ops.SUBSTR_1ARG, arg1, arg2);
+        case TOLOWER:
+            return convertToStringExpression(parameters.get(0)).toLowerCase();
+        case TOUPPER:
+            return convertToStringExpression(parameters.get(0)).toUpperCase();
+        case TRIM:
+            convertToStringExpression(parameters.get(0)).trim();
+        case CONCAT:
+            return convertToStringExpression(parameters.get(0)).concat(convertToStringExpression(parameters.get(1)));
+            
+        // Math Functions
+        case ROUND:
+            return convertToArithmeticExpression(parameters.get(0)).round();
+        case FLOOR:
+            return convertToArithmeticExpression(parameters.get(0)).floor();
+        case CEILING:
+            return convertToArithmeticExpression(parameters.get(0)).ceil();
+            
+        // Date Functions
+        case YEAR:
+            return convertToDateTimeExpression(parameters.get(0)).year();
+        case MONTH:
+            return convertToDateTimeExpression(parameters.get(0)).month();
+        case DAY:
+            return convertToDateTimeExpression(parameters.get(0)).dayOfMonth();
+        case HOUR:
+            return convertToDateTimeExpression(parameters.get(0)).hour();
+        case MINUTE:
+            return convertToDateTimeExpression(parameters.get(0)).minute();
+        case SECOND:
+            return convertToDateTimeExpression(parameters.get(0)).second();
+        case FRACTIONALSECONDS:
+            return convertToDateTimeExpression(parameters.get(0)).milliSecond();
+        case NOW:
+            return Expressions.asDate(new Date());
+        case MINDATETIME:
+            return Expressions.asDate(Date.from(Instant.MIN));
+        case MAXDATETIME:
+            return Expressions.asDate(Date.from(Instant.MAX));
+        case DATE:
+        case TIME:
+        case TOTALOFFSETMINUTES:
+            break;
+            
+        // Geospatial Functions
+        case GEODISTANCE:
+//            GeometryExpression<?> = new GeometryExpression();
+            return GeometryExpressions.fromText((String)parameters.get(0)).distance(GeometryExpressions.fromText((String)parameters.get(1)));
+        case GEOLENGTH:
+            break;
+        case GEOINTERSECTS:
+            break;
+            
+        // Spatial Relationship Functions
+        case ST_CONTAINS:
+            break;
+        case ST_CROSSES:
+            break;
+        case ST_DISJOINT:
+            break;
+        case ST_EQUALS:
+            break;
+        case ST_INTERSECTS:
+            break;
+        case ST_OVERLAPS:
+            break;
+        case ST_RELATE:
+            break;
+        case ST_TOUCHES:
+            break;
+        case ST_WITHIN:
+            break;
+        default:
+            break;
+        }
+        // Fallback to Error in case of ODATA-conform but not STA-conform Method
+        throw new ODataApplicationException("Invalid Method: " + methodCall.name() + " is not included in STA Specification.",
+                                            HttpStatusCode.BAD_REQUEST.getStatusCode(),
+                                            Locale.ENGLISH);
     }
 
     /*
@@ -512,6 +636,8 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
             return Expressions.asDateTime(Date.from(OffsetDateTime.parse(literal.getText()).toInstant()));
         } else if (literal.getType() instanceof EdmAny) {
             return literalAsString.getBytes();
+        } else if (literal.getType() instanceof EdmGeographyPoint) {
+            return GeometryExpressions.fromText(literalAsString.substring(10, literalAsString.length() - 1));
         } else if (literal.getType() instanceof EdmTimespan) {
             TimePeriod timespan = new TimePeriod();
 
