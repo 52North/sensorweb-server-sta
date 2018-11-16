@@ -90,6 +90,7 @@ import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.spatial.GeometryExpression;
 import com.querydsl.spatial.GeometryExpressions;
+import com.querydsl.spatial.SpatialOps;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -597,7 +598,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
         case ST_DISJOINT:
             return convertToGeometryExpression(arg1).disjoint(convertToGeometryExpression(arg2));
         case ST_EQUALS:
-            return ((GeometryExpression)convertToGeometryExpression(arg1)).eq(convertToGeometryExpression(arg2));
+            return Expressions.booleanOperation(SpatialOps.EQUALS, convertToGeometryExpression(arg1), convertToGeometryExpression(arg1));
         case ST_INTERSECTS:
             return convertToGeometryExpression(arg1).intersects(convertToGeometryExpression(arg2));
         case ST_OVERLAPS:
