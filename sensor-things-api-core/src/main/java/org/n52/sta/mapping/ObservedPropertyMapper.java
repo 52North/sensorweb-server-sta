@@ -36,6 +36,7 @@ import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.E
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
+import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.sta.ObservablePropertyEntity;
 import org.n52.sta.utils.EntityCreationHelper;
@@ -91,6 +92,13 @@ public class ObservedPropertyMapper extends AbstractMapper<PhenomenonEntity> {
             });
         }
         return (ObservablePropertyEntity) merge(existing, toMerge);
+    }
+    
+    @Override
+    public Entity  checkEntity(Entity entity) throws ODataApplicationException {
+        checkNameAndDescription(entity);
+        checkPropertyValidity(PROP_DEFINITION, entity);
+        return entity;
     }
 
 }

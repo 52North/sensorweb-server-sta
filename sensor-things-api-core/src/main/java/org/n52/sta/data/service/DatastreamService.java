@@ -28,6 +28,7 @@
  */
 package org.n52.sta.data.service;
 
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Optional;
@@ -316,6 +317,13 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
             Optional<DatastreamEntity> existing = getRepository().findOne(dQS.withId(entity.getId()));
             if (existing.isPresent()) {
                 DatastreamEntity merged = mapper.merge(existing.get(), entity);
+                checkUnit(merged, entity);
+                if (merged.getDatasets() != null) {
+                    merged.getDatasets().forEach(d -> {
+                        d.setUnit(merged.getUnit());
+                        datasetRepository.saveAndFlush(d);
+                    });
+                }
                 return getRepository().save(merged);
             }
             throw new ODataApplicationException("Entity not found.",
@@ -328,21 +336,28 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
                 HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
     }
     
+    private void checkUnit(DatastreamEntity merged, DatastreamEntity toMerge) {
+        if (toMerge.isSetUnit()) {
+            checkUnit(toMerge);
+            merged.setUnit(toMerge.getUnit());
+        }
+    }
+
     private void checkUpdate(DatastreamEntity entity) throws ODataApplicationException {
-        if (entity.getObservableProperty() == null || entity.getObservableProperty().getId() == null
-                || entity.getObservableProperty().isSetName() || entity.getObservableProperty().isSetDescription()) {
+        if (entity.getObservableProperty() != null && (entity.getObservableProperty().getId() == null
+                || entity.getObservableProperty().isSetName() || entity.getObservableProperty().isSetDescription())) {
             throw new ODataApplicationException("Inlined entities are not allowed for updates!",
                     HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
         }
 
-        if (entity.getProcedure() == null || entity.getProcedure().getId() == null || entity.getProcedure().isSetName()
-                || entity.getProcedure().isSetDescription()) {
+        if (entity.getProcedure() != null  && (entity.getProcedure().getId() == null || entity.getProcedure().isSetName()
+                || entity.getProcedure().isSetDescription())) {
             throw new ODataApplicationException("Inlined entities are not allowed for updates!",
                     HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
         }
 
-        if (entity.getThing() == null || entity.getThing().getId() == null || entity.getThing().isSetName()
-                || entity.getThing().isSetDescription()) {
+        if (entity.getThing() != null  && (entity.getThing().getId() == null || entity.getThing().isSetName()
+                || entity.getThing().isSetDescription())) {
             throw new ODataApplicationException("Inlined entities are not allowed for updates!",
                     HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
         }
@@ -382,33 +397,40 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
             d.setFirstObservation(null);
             d.setFirstQuantityValue(null);
             d.setFirstValueAt(null);
-            d.setLastQuantityValue(null);
+            d.setLastObservation(null);
             d.setLastQuantityValue(null);
             d.setLastValueAt(null);
             datasetRepository.saveAndFlush(d);
         });
         // delete observations
         dataRepository.deleteAll(dataRepository.findAll(oQS.withDatastream(datastream.getId())));
+        getRepository().flush();
         // delete datasets
-        datastream.getDatasets().forEach(d -> {
+        Set<DatasetEntity> datasets = new HashSet<>(datastream.getDatasets());
+        datastream.setDatasets(null);
+        getRepository().saveAndFlush(datastream);
+        datasets.forEach(d -> {
             d.setFirstObservation(null);
             d.setFirstQuantityValue(null);
             d.setFirstValueAt(null);
-            d.setLastQuantityValue(null);
+            d.setLastObservation(null);
             d.setLastQuantityValue(null);
             d.setLastValueAt(null);
             datasetRepository.delete(d);
         });
+        getRepository().flush();
     }
 
     private void checkUnit(DatastreamEntity datastream) {
         UnitEntity unit;
-        if (!unitRepository.existsBySymbol(datastream.getUnit().getSymbol())) {
-            unit = unitRepository.save(datastream.getUnit());
-        } else {
-            unit = unitRepository.findBySymbol(datastream.getUnit().getSymbol());
+        if (datastream.isSetUnit()) {
+            if (!unitRepository.existsBySymbol(datastream.getUnit().getSymbol())) {
+                unit = unitRepository.save(datastream.getUnit());
+            } else {
+                unit = unitRepository.findBySymbol(datastream.getUnit().getSymbol());
+            }
+            datastream.setUnit(unit);
         }
-        datastream.setUnit(unit);
     }
 
     private void checkObservationType(DatastreamEntity datastream) {

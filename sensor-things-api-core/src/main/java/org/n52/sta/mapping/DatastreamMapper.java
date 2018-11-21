@@ -154,8 +154,33 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
         return existing;
     }
 
+    @Override
+    public Entity checkEntity(Entity entity) throws ODataApplicationException {
+       checkNameAndDescription(entity);
+       checkPropertyValidity(PROP_OBSERVATION_TYPE, entity);
+       checkPropertyValidity(PROP_UOM, entity);
+       checkUom(entity);
+       if (checkNavigationLink(entity, ET_SENSOR_NAME)) {
+                   sensorMapper.checkNavigationLink(entity.getNavigationLink(ET_SENSOR_NAME).getInlineEntity());
+       }
+       if (checkNavigationLink(entity, ET_OBSERVED_PROPERTY_NAME)) {
+           observedPropertyMapper
+                   .checkNavigationLink(entity.getNavigationLink(ET_OBSERVED_PROPERTY_NAME).getInlineEntity());
+       }
+       if (checkNavigationLink(entity, ET_THING_NAME)) {
+           thingMapper.checkNavigationLink(entity.getNavigationLink(ET_THING_NAME).getInlineEntity());
+       }
+       if (checkNavigationLink(entity, ES_OBSERVATIONS_NAME)) {
+           Iterator<Entity> iterator = entity.getNavigationLink(ES_OBSERVATIONS_NAME).getInlineEntitySet().iterator();
+           while (iterator.hasNext()) {
+               observationMapper.checkNavigationLink((Entity) iterator.next());
+           }
+       }
+       return entity;
+    }
+
     private void checkObservationType(DatastreamEntity existing, DatastreamEntity toMerge) throws ODataApplicationException {
-        if (toMerge.isSetObservationType()
+        if (toMerge.isSetObservationType() && !toMerge.getObservationType().getFormat().equalsIgnoreCase("unknown")
                 && !existing.getObservationType().getFormat().equals(toMerge.getObservationType().getFormat())) {
             throw new ODataApplicationException(
                     String.format(
@@ -251,6 +276,17 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
                 observations.add(createObservation);
             }
             datastream.setObservations(observations);
+        }
+    }
+    
+    private void checkUom(Entity entity) throws ODataApplicationException {
+        checkPropertyValidity(PROP_UOM, entity);
+        Object value = getPropertyValue(entity, PROP_UOM);
+        if (value != null && value instanceof ComplexValue) {
+            ComplexValue uomComplexValue = (ComplexValue) value;
+            checkProperty(uomComplexValue, UnitOfMeasurementComplexType.PROP_SYMBOL);
+            checkProperty(uomComplexValue, UnitOfMeasurementComplexType.PROP_NAME);
+            checkProperty(uomComplexValue, UnitOfMeasurementComplexType.PROP_DEFINITION);
         }
     }
 }

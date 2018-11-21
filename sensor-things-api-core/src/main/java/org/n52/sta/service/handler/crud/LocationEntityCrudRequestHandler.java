@@ -20,7 +20,7 @@ public class LocationEntityCrudRequestHandler extends AbstractEntityCrudRequestH
     @Override
     protected Entity handleCreateEntityRequest(Entity entity) throws ODataApplicationException {
         if (entity != null) {
-            LocationEntity location = getEntityService().create(mapper.createEntity(entity));
+            LocationEntity location = getEntityService().create(mapper.createEntity(getMapper().checkEntity(entity)));
             return mapToEntity(location);
         }
         return null;

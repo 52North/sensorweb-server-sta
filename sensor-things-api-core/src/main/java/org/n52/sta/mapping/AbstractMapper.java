@@ -39,6 +39,7 @@ import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ES_DATA
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
@@ -46,6 +47,7 @@ import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
+import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -73,17 +75,58 @@ public abstract class AbstractMapper<T> {
     
     public abstract Entity createEntity(T t);
     
-    public abstract T createEntity(Entity entity);
+    protected abstract T createEntity(Entity entity);
     
     public abstract T merge(T existing, T toMerge) throws ODataApplicationException;
     
+    public abstract Entity checkEntity(Entity entity) throws ODataApplicationException;
+    
+    protected void checkNavigationLink(Entity entity) throws ODataApplicationException {
+        if (entity.getProperties().size() == 1) {
+            checkPropertyValidity(ID, entity);
+        } else {
+            checkEntity(entity);
+        }
+    }
+    
+    protected void checkNameAndDescription(Entity entity) throws ODataApplicationException {
+        checkPropertyValidity(PROP_NAME, entity);
+        checkPropertyValidity(PROP_DESCRIPTION, entity);
+    }
+    
+    protected void checkPropertyValidity(String propName, Entity entity) throws ODataApplicationException {
+        if (!checkProperty(entity, propName)) {
+            throw new ODataApplicationException(getMissingPropertyExceptionString(propName, entity),
+                    HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+        }
+    }
+    
+    protected String getMissingPropertyExceptionString(String propName, Entity entity) {
+        return getMissingPropertyExceptionString(propName, entity.getType().replace("iot.", ""));
+    }
+    
+    protected String getMissingPropertyExceptionString(String propName, ComplexValue complexValue) {
+        return getMissingPropertyExceptionString(propName, complexValue.getTypeName());
+    }
+
+    private String getMissingPropertyExceptionString(String propName, String entity) {
+        return String.format("The parameter '%s' is missing for in entity '%s'!", propName, entity);
+    }
+
+    private void checkPropertyValidity(ComplexValue complexValue, String propName) throws ODataApplicationException {
+        if (!checkProperty(complexValue, propName)) {
+            throw new ODataApplicationException(getMissingPropertyExceptionString(propName, complexValue),
+                    HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+        }
+    }
+
     protected void addNameDescriptionProperties(Entity entity, DescribableEntity describableEntity) {
         // add name
         String name =   describableEntity.getIdentifier();
         if (describableEntity.isSetName()) {
             name = describableEntity.getName();
         }
-        addNane(entity, name);
+        addName(entity, name);
         // add description
         String description =  "Description of " + describableEntity.getIdentifier();
         if (describableEntity.isSetDescription()) {
@@ -101,10 +144,10 @@ public abstract class AbstractMapper<T> {
     }
     
     protected void addName(Entity entity, HasName describableEntity) {
-        addNane(entity, describableEntity.getName());
+        addName(entity, describableEntity.getName());
     }
     
-    protected void addNane(Entity entity, String name) {
+    protected void addName(Entity entity, String name) {
         entity.addProperty(new Property(null, PROP_NAME, ValueType.PRIMITIVE, name));
     }
     
@@ -169,9 +212,18 @@ public abstract class AbstractMapper<T> {
         return "";
     }
     
+    protected boolean checkProperty(ComplexValue complexValue, String name) {
+        return getProperty(complexValue, name) != null;
+    }
+    
+    protected Property getProperty(ComplexValue complexValue, String name) {
+        Optional<Property> property = complexValue.getValue().stream().filter(p -> p.getName().equals(name)).findAny();
+        return property.isPresent() ? property.get() : null;
+     }
+    
     protected Object getPropertyValue(ComplexValue complexValue, String name) {
-       Optional<Property> property = complexValue.getValue().stream().filter(p -> p.getName().equals(name)).findAny();
-       return property.isPresent() ? property.get().getValue() : "";
+       Property property = getProperty(complexValue, name);
+       return property != null ? property.getValue() : "";
     }
     
     protected void addPhenomenonTime(HasPhenomenonTime phenomenonTime , Entity entity) {

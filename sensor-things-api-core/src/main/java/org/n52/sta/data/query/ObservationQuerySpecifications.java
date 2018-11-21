@@ -51,7 +51,7 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications {
     public BooleanExpression withDatastream(Long datastreamId) {
         return qobservation.dataset.id.in(JPAExpressions
                                           .selectFrom(qdatastream)
-                                          .where(qdatastream.datasets.any().id.eq(datastreamId))
+                                          .where(qdatastream.id.eq(datastreamId))
                                           .select(qdatastream.datasets.any().id));
     }
     

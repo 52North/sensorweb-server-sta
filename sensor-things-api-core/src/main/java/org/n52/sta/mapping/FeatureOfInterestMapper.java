@@ -30,6 +30,7 @@ package org.n52.sta.mapping;
 
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_FEATURE;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ENCODINGTYPE;
 import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ES_FEATURES_OF_INTEREST_NAME;
 import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ET_FEATURE_OF_INTEREST_FQN;
 
@@ -37,6 +38,7 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.edm.geo.Geospatial;
+import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.FormatEntity;
@@ -75,8 +77,8 @@ public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper<Abst
         setIdentifier(featureOfInterest, entity);
         setName(featureOfInterest, entity);
         setDescription(featureOfInterest, entity);
-        Property featureProperty = entity.getProperty(PROP_FEATURE);
-        if (featureProperty != null) {
+        if (checkProperty(entity, PROP_FEATURE)) {
+            Property featureProperty = entity.getProperty(PROP_FEATURE);
             if (featureProperty.getValueType().equals(ValueType.PRIMITIVE) && featureProperty.getValue() instanceof Geospatial) {
                 featureOfInterest.setGeometryEntity(parseGeometry((Geospatial) featureProperty.getValue()));
             }
@@ -131,6 +133,13 @@ public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper<Abst
         }
         return formatEntity.setFormat(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_FEATURE);
     }
-    
-    
+
+    @Override
+    public Entity  checkEntity(Entity entity) throws ODataApplicationException {
+       checkNameAndDescription(entity);
+       checkPropertyValidity(PROP_FEATURE, entity);
+       checkEncodingType(entity);
+       return entity;
+    }
+
 }

@@ -28,6 +28,8 @@
  */
 package org.n52.sta.data.query;
 
+import java.util.Collection;
+
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.QDatastreamEntity;
 
@@ -78,6 +80,14 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications {
     
     public BooleanExpression withSensor(String name) {
         return qdatastream.procedure.name.eq(name);
+    }
+    
+    public BooleanExpression withDataset(Long datasetId) {
+        return qdatastream.datasets.any().id.eq(datasetId);
+    }
+    
+    public BooleanExpression withDataset(Collection<Long> datasetIds) {
+        return qdatastream.datasets.any().id.in(datasetIds);
     }
 
     public BooleanExpression withObservation(Long observationId) {

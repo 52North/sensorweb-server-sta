@@ -21,7 +21,7 @@ public class SensorEntityCrudRequestHandler extends AbstractEntityCrudRequestHan
     @Override
     protected Entity handleCreateEntityRequest(Entity entity) throws ODataApplicationException {
         if (entity != null) {
-            ProcedureEntity sensor = getEntityService().create(mapper.createEntity(entity));
+            ProcedureEntity sensor = getEntityService().create(mapper.createEntity(getMapper().checkEntity(entity)));
             return mapToEntity(sensor);
         }
         return null;
