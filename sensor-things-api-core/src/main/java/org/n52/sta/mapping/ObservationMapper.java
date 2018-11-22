@@ -125,6 +125,9 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
 
     private String getResult(DataEntity o) {
         if (o instanceof QuantityDataEntity) {
+            if ((((QuantityDataEntity) o).getValue().doubleValue() - ((QuantityDataEntity) o).getValue().intValue()) == 0.0) {
+                return Integer.toString(((QuantityDataEntity) o).getValue().intValue());
+            }
             return ((QuantityDataEntity) o).getValue().toString();
         } else if (o instanceof BlobDataEntity) {
             // TODO: check if Object.tostring is what we want here
