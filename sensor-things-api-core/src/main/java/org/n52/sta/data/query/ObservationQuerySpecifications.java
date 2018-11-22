@@ -55,6 +55,10 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications {
                                           .select(qdatastream.datasets.any().id));
     }
     
+    public BooleanExpression withDataset(Long datasetId) {
+        return qobservation.dataset.id.eq(datasetId);
+    }
+
     /**
      * Assures that Entity is valid.
      * Entity is valid if:

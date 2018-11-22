@@ -44,6 +44,7 @@ import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.ogc.om.features.SfConstants;
+import org.n52.shetland.util.JavaHelper;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -75,6 +76,7 @@ public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper<Abst
         FeatureEntity featureOfInterest = new FeatureEntity();
         setId(featureOfInterest, entity);
         setIdentifier(featureOfInterest, entity);
+        featureOfInterest.setIdentifier(JavaHelper.generateID(featureOfInterest.getIdentifier()));
         setName(featureOfInterest, entity);
         setDescription(featureOfInterest, entity);
         if (checkProperty(entity, PROP_FEATURE)) {

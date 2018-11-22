@@ -267,7 +267,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
             Predicate predicate = createQuery(datastream);
             if (getRepository().exists(predicate)) {
                 DatastreamEntity optional = getRepository().findOne(predicate).get();
-                return processObservation((DatastreamEntity) optional.setProcesssed(true));
+                return processObservation((DatastreamEntity) optional.setProcesssed(true), datastream.getObservations());
             }
             datastream.setProcesssed(true);
             checkObservationType(datastream);
@@ -276,7 +276,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
             datastream.setProcedure(getSensorService().create(datastream.getProcedure()));
             datastream.setThing(getThingService().create(datastream.getThing()));
             datastream = getRepository().save(datastream);
-            processObservation(datastream);
+            processObservation(datastream, datastream.getObservations());
             datastream = getRepository().save(datastream);
         }
         return datastream;
@@ -443,13 +443,13 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
         datastream.setObservationType(format);
     }
     
-    private DatastreamEntity processObservation(DatastreamEntity datastream) throws ODataApplicationException {
-        if (datastream.hasObservations()) {
+    private DatastreamEntity processObservation(DatastreamEntity datastream, Set<StaDataEntity> observations) throws ODataApplicationException {
+        if (observations != null && !observations.isEmpty()) {
             Set<DatasetEntity> datasets = new LinkedHashSet<>();
             if (datastream.getDatasets() != null) {
                 datasets.addAll(datastream.getDatasets());
             }
-            for (StaDataEntity observation : datastream.getObservations()) {
+            for (StaDataEntity observation : observations) {
                 DataEntity<?> data = getObservationService().create(observation);
                 if (data != null) {
                     datasets.add(data.getDataset());

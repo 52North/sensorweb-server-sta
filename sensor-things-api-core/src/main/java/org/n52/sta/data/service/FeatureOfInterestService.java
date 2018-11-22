@@ -51,6 +51,7 @@ import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.series.db.query.DatasetQuerySpecifications;
+import org.n52.shetland.util.JavaHelper;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.FeatureOfInterestQuerySpecifications;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
@@ -227,13 +228,26 @@ public class FeatureOfInterestService
         if (feature.getId() != null && !feature.isSetName()) {
             return getRepository().findOne(foiQS.withId(feature.getId())).get();
         }
-        if (getRepository().exists(foiQS.withIdentifier(feature.getIdentifier()))) {
-            Optional<AbstractFeatureEntity<?>> optional = getRepository()
-                    .findOne(foiQS.withIdentifier(feature.getIdentifier()));
-            return optional.isPresent() ? optional.get() : null;
+        if (getRepository().exists(foiQS.withName(feature.getName()))) {
+            Iterable<AbstractFeatureEntity<?>> features = getRepository().findAll(foiQS.withName(feature.getName()));
+            AbstractFeatureEntity<?> f = alreadyExistsFeature(features, feature);
+            if (f != null) {
+                return f;
+            }
         }
         checkFeatureType(feature);
         return getRepository().save(feature);
+    }
+
+    private AbstractFeatureEntity<?> alreadyExistsFeature(Iterable<AbstractFeatureEntity<?>> features,
+            AbstractFeatureEntity<?> feature) {
+        for (AbstractFeatureEntity<?> f : features) {
+            if (f.isSetGeometry() && feature.isSetGeometry() && f.getGeometry().equals(feature.getGeometry())
+                    && f.getDescription().equals(feature.getDescription())) {
+                return f;
+            }
+        }
+        return null;
     }
 
     @Override
@@ -291,7 +305,7 @@ public class FeatureOfInterestService
             d.setLastValueAt(null);
             datasetRepository.saveAndFlush(d);
             // delete observations
-            dataRepository.deleteAll(dataRepository.findAll(oQS.withFeatureOfInterest(d.getId())));
+            dataRepository.deleteAll(dataRepository.findAll(oQS.withDataset(d.getId())));
             getRepository().flush();
             datastreamRepository.findAll(dsQS.withDataset(d.getId())).forEach(ds -> {
                 ds.getDatasets().remove(d);
@@ -322,6 +336,10 @@ public class FeatureOfInterestService
         feature.setFeatureType(format);
     }
     
+    private void generateIdentifier(AbstractFeatureEntity<?> feature) {
+        feature.setIdentifier(JavaHelper.generateID(feature.getIdentifier()));
+    }
+
     private AbstractSensorThingsEntityService<?, DatastreamEntity> getDatastreamService() {
         return (AbstractSensorThingsEntityService<?, DatastreamEntity>) getEntityService(
                 EntityTypes.Datastream);

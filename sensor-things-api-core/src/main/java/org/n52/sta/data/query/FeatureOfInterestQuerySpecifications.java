@@ -28,6 +28,9 @@
  */
 package org.n52.sta.data.query;
 
+import org.n52.series.db.beans.AbstractFeatureEntity;
+
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
 
@@ -67,6 +70,10 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
         return qfeature.id.in(JPAExpressions
                               .selectFrom(qdatastream)
                               .select(qdatastream.datasets.any().feature.id));
+    }
+
+    public BooleanExpression withName(String name) {
+        return qfeature.name.eq(name);
     }
 
 }
