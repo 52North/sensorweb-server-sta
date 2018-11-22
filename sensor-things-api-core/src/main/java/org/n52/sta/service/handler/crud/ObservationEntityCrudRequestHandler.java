@@ -20,7 +20,7 @@ public class ObservationEntityCrudRequestHandler extends AbstractEntityCrudReque
     @Override
     protected Entity handleCreateEntityRequest(Entity entity) throws ODataApplicationException {
         if (entity != null) {
-            DataEntity<?> observation = getEntityService().create(mapper.createEntity(entity));
+            DataEntity<?> observation = getEntityService().create(mapper.createEntity(getMapper().checkEntity(entity)));
             return mapToEntity(observation);
         }
         return null;

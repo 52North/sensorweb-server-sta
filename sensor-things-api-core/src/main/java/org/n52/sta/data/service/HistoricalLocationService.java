@@ -303,6 +303,17 @@ public class HistoricalLocationService extends AbstractSensorThingsEntityService
 
     @Override
     public void delete(HistoricalLocationEntity entity) throws ODataApplicationException {
+        // delete historicalLocation
+        entity.getLocationEntities().forEach(l -> {
+            try {
+                l.getHistoricalLocationEntities().remove(entity);
+                getLocationService().update(l);
+            } catch (ODataApplicationException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        });
+        getRepository().saveAndFlush(entity);
         getRepository().deleteById(entity.getId());
     }
 

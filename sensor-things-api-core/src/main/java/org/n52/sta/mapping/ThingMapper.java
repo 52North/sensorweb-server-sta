@@ -45,6 +45,7 @@ import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
+import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ThingEntity;
@@ -157,5 +158,23 @@ public class ThingMapper extends AbstractMapper<ThingEntity> {
                 return node;
             }
         }
+    }
+
+    @Override
+    public Entity checkEntity(Entity entity) throws ODataApplicationException {
+        checkNameAndDescription(entity);
+        if (checkNavigationLink(entity, ES_LOCATIONS_NAME)) {
+            Iterator<Entity> iterator = entity.getNavigationLink(ES_LOCATIONS_NAME).getInlineEntitySet().iterator();
+            while (iterator.hasNext()) {
+                locationMapper.checkNavigationLink((Entity) iterator.next());
+            }
+        }
+        if (checkNavigationLink(entity, ES_DATASTREAMS_NAME)) {
+            Iterator<Entity> iterator = entity.getNavigationLink(ES_DATASTREAMS_NAME).getInlineEntitySet().iterator();
+            while (iterator.hasNext()) {
+                datastreamMapper.checkNavigationLink((Entity) iterator.next());
+            }
+        }
+        return entity;
     }
 }

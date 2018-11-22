@@ -51,10 +51,14 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications {
     public BooleanExpression withDatastream(Long datastreamId) {
         return qobservation.dataset.id.in(JPAExpressions
                                           .selectFrom(qdatastream)
-                                          .where(qdatastream.datasets.any().id.eq(datastreamId))
+                                          .where(qdatastream.id.eq(datastreamId))
                                           .select(qdatastream.datasets.any().id));
     }
     
+    public BooleanExpression withDataset(Long datasetId) {
+        return qobservation.dataset.id.eq(datasetId);
+    }
+
     /**
      * Assures that Entity is valid.
      * Entity is valid if:

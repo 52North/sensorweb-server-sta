@@ -42,7 +42,11 @@ public abstract class AbstractEntityCrudRequestHandler<T extends IdEntity> {
         EdmEntitySet responseEntitySet = uriResourceEntitySet.getEntitySet();
         Entity responseEntity = handleCreateEntityRequest(entity);
         EntityResponse response = new EntityResponse();
-        response.setEntitySet(responseEntitySet);
+        if (resourcePaths.size() > 1) {
+            response.setEntitySet(navigationResolver.resolveUriResourceNavigationPaths(resourcePaths).getTargetEntitySet());
+        } else {
+            response.setEntitySet(responseEntitySet);
+        }
         response.setEntity(responseEntity);
         return response;
     }
