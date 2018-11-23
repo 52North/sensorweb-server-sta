@@ -20,7 +20,7 @@ public class FeatureOfInterestEntityCrudRequestHandler extends AbstractEntityCru
     @Override
     protected Entity handleCreateEntityRequest(Entity entity) throws ODataApplicationException {
         if (entity != null) {
-            AbstractFeatureEntity<?> feature = getEntityService().create(mapper.createEntity(entity));
+            AbstractFeatureEntity<?> feature = getEntityService().create(mapper.createEntity(getMapper().checkEntity(entity)));
             return mapToEntity(feature);
         }
         return null;

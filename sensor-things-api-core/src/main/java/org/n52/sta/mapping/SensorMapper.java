@@ -41,6 +41,7 @@ import java.util.Set;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
+import org.apache.olingo.server.api.ODataApplicationException;
 import org.joda.time.DateTime;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.ProcedureEntity;
@@ -88,6 +89,11 @@ public class SensorMapper extends AbstractMapper<ProcedureEntity> {
     
     public Entity createEntity(SensorEntity sensor) {
         return createEntity(sensor);
+    }
+    
+    public SensorEntity createAndCheckEntity(Entity entity) throws ODataApplicationException {
+        checkEntity(entity);
+        return createEntity(entity);
     }
 
     public SensorEntity createEntity(Entity entity) {
@@ -154,5 +160,13 @@ public class SensorMapper extends AbstractMapper<ProcedureEntity> {
             return SENSORML_2;
         }
         return format;
+    }
+    
+    @Override
+    public Entity  checkEntity(Entity entity) throws ODataApplicationException {
+        checkNameAndDescription(entity);
+        checkPropertyValidity(PROP_ENCODINGTYPE, entity);
+        checkPropertyValidity(PROP_METADATA, entity);
+        return entity;
     }
 }

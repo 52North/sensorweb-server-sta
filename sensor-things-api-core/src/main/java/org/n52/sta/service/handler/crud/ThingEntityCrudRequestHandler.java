@@ -20,7 +20,7 @@ public class ThingEntityCrudRequestHandler extends AbstractEntityCrudRequestHand
     @Override
     protected Entity handleCreateEntityRequest(Entity entity) throws ODataApplicationException {
         if (entity != null) {
-            ThingEntity thing = getEntityService().create(mapper.createEntity(entity));
+            ThingEntity thing = getEntityService().create(mapper.createEntity(getMapper().checkEntity(entity)));
             return mapToEntity(thing);
         }
         return null;

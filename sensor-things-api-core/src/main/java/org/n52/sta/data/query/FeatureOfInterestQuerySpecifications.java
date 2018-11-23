@@ -33,6 +33,11 @@ import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitEx
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.FeatureEntity;
 
+=======
+import org.n52.series.db.beans.AbstractFeatureEntity;
+
+import com.querydsl.core.types.Predicate;
+>>>>>>> 52N/master
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.JPAExpressions;
@@ -137,6 +142,10 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
         } else {
             throw new ExpressionVisitException("BinaryOperator \"" + operator.toString() + "\" is not supported for \"" + propertyName + "\"");
         }
+    }
+        
+    public BooleanExpression withName(String name) {
+        return qfeature.name.eq(name);
     }
 
 }

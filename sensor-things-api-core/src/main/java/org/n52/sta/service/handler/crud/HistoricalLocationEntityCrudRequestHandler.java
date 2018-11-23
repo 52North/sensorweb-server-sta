@@ -20,7 +20,7 @@ public class HistoricalLocationEntityCrudRequestHandler extends AbstractEntityCr
     @Override
     protected Entity handleCreateEntityRequest(Entity entity) throws ODataApplicationException {
         if (entity != null) {
-            HistoricalLocationEntity historicalLocation = getEntityService().create(mapper.createEntity(entity));
+            HistoricalLocationEntity historicalLocation = getEntityService().create(mapper.createEntity(getMapper().checkEntity(entity)));
             return mapToEntity(historicalLocation);
         }
         return null;

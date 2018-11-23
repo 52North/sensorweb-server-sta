@@ -28,8 +28,11 @@
  */
 package org.n52.sta.data.query;
 
+
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
+import java.util.Collection;
+
 import org.n52.series.db.beans.sta.DatastreamEntity;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -44,11 +47,11 @@ import com.querydsl.jpa.JPQLQuery;
 public class DatastreamQuerySpecifications extends EntityQuerySpecifications<DatastreamEntity> {
 
     public BooleanExpression withId(Long id) {
-        return  qdatastream.id.eq(id);
+        return qdatastream.id.eq(id);
     }
     
     public BooleanExpression withName(String name) {
-        return  qdatastream.name.eq(name);
+        return qdatastream.name.eq(name);
     }
     
     public BooleanExpression withObservedProperty(Long observedPropertyId) {
@@ -73,6 +76,14 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
     
     public BooleanExpression withSensor(String name) {
         return qdatastream.procedure.name.eq(name);
+    }
+    
+    public BooleanExpression withDataset(Long datasetId) {
+        return qdatastream.datasets.any().id.eq(datasetId);
+    }
+    
+    public BooleanExpression withDataset(Collection<Long> datasetIds) {
+        return qdatastream.datasets.any().id.in(datasetIds);
     }
 
     public BooleanExpression withObservation(Long observationId) {

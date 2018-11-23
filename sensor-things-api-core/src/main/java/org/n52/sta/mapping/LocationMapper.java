@@ -43,6 +43,7 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.edm.geo.Geospatial;
+import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.beans.sta.LocationEncodingEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ThingEntity;
@@ -118,6 +119,20 @@ public class LocationMapper extends AbstractLocationGeometryMapper<LocationEntit
             }
             location.setThingEntities(things);
         }
+    }
+    
+    @Override
+    public Entity  checkEntity(Entity entity) throws ODataApplicationException {
+       checkNameAndDescription(entity);
+       checkPropertyValidity(PROP_LOCATION, entity);
+       checkEncodingType(entity);
+       if (checkNavigationLink(entity, ES_THINGS_NAME)) {
+           Iterator<Entity> iterator = entity.getNavigationLink(ES_THINGS_NAME).getInlineEntitySet().iterator();
+           while (iterator.hasNext()) {
+               thingMapper.checkNavigationLink((Entity) iterator.next());
+           }
+       }
+       return entity;
     }
 
 }

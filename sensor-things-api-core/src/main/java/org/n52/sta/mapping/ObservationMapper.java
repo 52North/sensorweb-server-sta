@@ -64,6 +64,7 @@ import org.n52.series.db.beans.ProfileDataEntity;
 import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.ReferencedDataEntity;
 import org.n52.series.db.beans.TextDataEntity;
+import org.n52.series.db.beans.HibernateRelations.HasPhenomenonTime;
 import org.n52.series.db.beans.parameter.Parameter;
 import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.shetland.ogc.gml.time.Time;
@@ -124,6 +125,9 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
 
     private String getResult(DataEntity o) {
         if (o instanceof QuantityDataEntity) {
+            if ((((QuantityDataEntity) o).getValue().doubleValue() - ((QuantityDataEntity) o).getValue().intValue()) == 0.0) {
+                return Integer.toString(((QuantityDataEntity) o).getValue().intValue());
+            }
             return ((QuantityDataEntity) o).getValue().toString();
         } else if (o instanceof BlobDataEntity) {
             // TODO: check if Object.tostring is what we want here
@@ -208,6 +212,9 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
 
     public StaDataEntity createEntity(Entity entity) {
         StaDataEntity observation = new StaDataEntity();
+        setId(observation, entity);
+        setName(observation, entity);
+        setDescription(observation, entity);
         addPhenomenonTime(observation, entity);
         addResultTime(observation, entity);
         addValidTime(observation, entity);
@@ -270,7 +277,7 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
     @Override
     public DataEntity<?> merge(DataEntity<?> existing, DataEntity<?> toMerge) throws ODataApplicationException {
         // phenomenonTime
-        mergeSamplingTime(existing, toMerge);
+        mergeSamplingTimeAndCheckResultTime(existing, toMerge);
         // resultTime
         if (toMerge.getResultTime() != null) {
             existing.setResultTime(toMerge.getResultTime());
@@ -288,6 +295,13 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
         return existing;
     }
 
+    protected void mergeSamplingTimeAndCheckResultTime(DataEntity<?> existing, DataEntity<?> toMerge) {
+        if (toMerge.hasSamplingTimeEnd() && existing.getSamplingTimeEnd().equals(existing.getResultTime())) {
+            existing.setResultTime(toMerge.getSamplingTimeEnd());
+        }
+        super.mergeSamplingTime(existing, toMerge);
+    }
+    
     private void checkValue(DataEntity<?> existing, DataEntity<?> toMerge) throws ODataApplicationException {
         if (existing instanceof QuantityDataEntity) {
             ((QuantityDataEntity) existing)
@@ -305,6 +319,22 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
                     String.format("The observation value for @iot.id %i can not be updated!", existing.getId()),
                     HttpStatusCode.CONFLICT.getStatusCode(), Locale.getDefault());
         }
+    }
+
+    @Override
+    public Entity checkEntity(Entity entity) throws ODataApplicationException {
+        checkPropertyValidity(PROP_PHENOMENON_TIME, entity);
+        checkPropertyValidity(PROP_RESULT, entity);
+//        checkPropertyValidity(PROP_RESULT_TIME, entity);
+        if (checkNavigationLink(entity, ET_FEATURE_OF_INTEREST_NAME)) {
+            featureMapper
+                    .checkNavigationLink(entity.getNavigationLink(ET_FEATURE_OF_INTEREST_NAME).getInlineEntity());
+        }
+        if (checkNavigationLink(entity, ET_DATASTREAM_NAME)) {
+            datastreamMapper
+                    .checkNavigationLink(entity.getNavigationLink(ET_DATASTREAM_NAME).getInlineEntity());
+        }
+        return entity;
     }
 
 }

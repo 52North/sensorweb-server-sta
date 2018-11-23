@@ -332,7 +332,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     }
     
     private ProcedureEntity getAsProcedureEntity(ProcedureEntity sensor) {
-        return  sensor instanceof ProcedureEntity
+        return  sensor instanceof SensorEntity
                 ? ((SensorEntity) sensor).asProcedureEntity()
                 : sensor;
     }

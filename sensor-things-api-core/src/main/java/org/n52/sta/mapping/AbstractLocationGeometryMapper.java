@@ -33,11 +33,15 @@ import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvid
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_LOCATION;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_OBSERVED_AREA;
 
+import java.util.Locale;
+
 import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.edm.geo.Geospatial;
+import org.apache.olingo.commons.api.http.HttpStatusCode;
+import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.beans.GeometryEntity;
 import org.n52.series.db.beans.HibernateRelations.HasGeometry;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +52,15 @@ public abstract class AbstractLocationGeometryMapper<T> extends AbstractMapper<T
 
     @Autowired
     private GeometryMapper geometryMapper;
+    
+    protected void checkEncodingType(Entity entity) throws ODataApplicationException {
+        checkPropertyValidity(PROP_ENCODINGTYPE, entity);
+        if (!getPropertyValue(entity, PROP_ENCODINGTYPE).equals(ENCODINGTYPE_GEOJSON)) {
+            throw new ODataApplicationException(String.format("The parameter '%s' is invalid for in entity '%s'!",
+                    PROP_ENCODINGTYPE, entity.getType().replace("iot.", "")), HttpStatusCode.BAD_REQUEST.getStatusCode(),
+                    Locale.getDefault());
+        }
+    }
 
     protected void addGeometry(Entity entity, HasGeometry<?> geometryEntity) {
         addWithEncoding(entity, geometryEntity, PROP_FEATURE);
