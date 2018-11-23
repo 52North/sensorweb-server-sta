@@ -227,7 +227,7 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
     
     private void addResult(StaDataEntity observation, Entity entity) {
         if (checkProperty(entity, PROP_RESULT)) {
-            observation.setValue(getPropertyValue(entity, PROP_RESULT).toString());
+            observation.setValue(new String((byte[])getPropertyValue(entity, PROP_RESULT)));
         }
     }
 

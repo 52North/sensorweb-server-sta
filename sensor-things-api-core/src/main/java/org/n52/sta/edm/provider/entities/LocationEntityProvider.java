@@ -128,7 +128,7 @@ public class LocationEntityProvider extends AbstractSensorThingsEntityProvider {
 //                .setType(FeatureComplexType.CT_FEATURE_FQN)
 //                .setNullable(false);
         CsdlProperty location = new CsdlProperty().setName(PROP_LOCATION)
-                .setType(EdmPrimitiveTypeKind.GeographyPoint.getFullQualifiedName())
+                .setType(EdmPrimitiveTypeKind.GeometryPoint.getFullQualifiedName())
                 .setNullable(false);
         
         return Arrays.asList(
