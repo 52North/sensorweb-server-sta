@@ -126,6 +126,10 @@ public class EntityCollectionRequestHandlerImpl implements AbstractEntityCollect
 
         long count = entityService.getRelatedEntityCollectionCount(queryParams.getSourceId(), queryParams.getSourceEntityType());
 
+        if (queryOptions.hasCountOption()) {
+            responseEntityCollection.setCount(Long.valueOf(count).intValue());
+        }
+        
         responseEntityCollection.setNext(createNext(count, queryOptions, queryParams));
         // set EntityCollection response information
         EntityCollectionResponse response = new EntityCollectionResponse();
