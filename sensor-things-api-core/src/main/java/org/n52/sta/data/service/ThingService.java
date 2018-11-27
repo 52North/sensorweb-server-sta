@@ -323,7 +323,9 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
 
     private void processHistoricalLocations(ThingEntity thing) throws ODataApplicationException {
         if (thing != null && thing.hasLocationEntities()) {
-            Set<HistoricalLocationEntity> historicalLocations = new LinkedHashSet<>();
+            Set<HistoricalLocationEntity> historicalLocations = thing.hasHistoricalLocationEntities()
+                    ? new LinkedHashSet<>(thing.getHistoricalLocationEntities())
+                    : new LinkedHashSet<>();
             HistoricalLocationEntity historicalLocation = new HistoricalLocationEntity();
             historicalLocation.setThingEntity(thing);
             historicalLocation.setTime(DateTime.now().toDate());
