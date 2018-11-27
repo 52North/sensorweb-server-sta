@@ -37,8 +37,6 @@ import java.util.Set;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
-import org.apache.olingo.server.api.ODataApplicationException;
-import org.n52.series.db.beans.ProcedureEntity;
 import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
@@ -62,8 +60,8 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers;
 import org.springframework.stereotype.Component;
 
-import com.querydsl.core.types.Predicate;
 import com.google.common.collect.Sets;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
 /**
@@ -316,6 +314,17 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     @Override
     public void delete(LocationEntity entity) throws ODataApplicationException {
         getRepository().deleteById(entity.getId());
+    }
+    
+    @Override
+    public String checkPropertyName(String property) {
+        if (property.equals("encodingType")) {
+            return LocationEntity.PROPERTY_NAME;
+        } else if (property.equals("location")) {
+            return "name desc";
+        } else {
+            return property;
+        }
     }
 
     private void checkLocationEncoding(LocationEntity location) {

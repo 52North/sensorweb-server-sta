@@ -80,7 +80,7 @@ public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationE
         Entity entity = new Entity();
 
         entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, location.getId()));
-        entity.addProperty(new Property(null, PROP_TIME, ValueType.PRIMITIVE,  DateTimeHelper.format(createTime(location))));
+        entity.addProperty(new Property(null, PROP_TIME, ValueType.PRIMITIVE,  location.getTime()));
 
         entity.setType(ET_HISTORICAL_LOCATION_FQN.getFullQualifiedNameAsString());
         entity.setId(entityCreationHelper.createId(entity, ES_HISTORICAL_LOCATIONS_NAME, PROP_ID));

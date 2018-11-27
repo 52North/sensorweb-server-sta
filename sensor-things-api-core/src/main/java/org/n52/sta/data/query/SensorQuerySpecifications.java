@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.query;
 
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
@@ -33,7 +34,6 @@ import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitEx
 import org.n52.series.db.beans.ProcedureEntity;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.JPQLQuery;
 
 /**
@@ -45,15 +45,15 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications<Procedu
     public BooleanExpression withId(Long id) {
         return qsensor.id.eq(id);
     }
-    
+
     public BooleanExpression wihtName(String name) {
         return qsensor.name.eq(name);
     }
-    
+
     public BooleanExpression withIdentifier(String identifier) {
         return qsensor.identifier.eq(identifier);
     }
-    
+
     public BooleanExpression withDatastream(Long datastreamId) {
         return qsensor.id.in(dQS.toSubquery(qdatastream,
                                             qdatastream.procedure.id,
@@ -61,9 +61,7 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications<Procedu
     }
 
     /**
-     * Assures that Entity is valid.
-     * Entity is valid if:
-     * - has Datastream associated with it
+     * Assures that Entity is valid. Entity is valid if: - has Datastream associated with it
      * 
      * @return BooleanExpression evaluating to true if Entity is valid
      */
@@ -73,72 +71,63 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications<Procedu
                                             qdatastream.isNotNull()));
     }
 
-    /* (non-Javadoc)
-     * @see org.n52.sta.data.query.EntityQuerySpecifications#getIdSubqueryWithFilter(com.querydsl.core.types.dsl.BooleanExpression)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.n52.sta.data.query.EntityQuerySpecifications#getIdSubqueryWithFilter(com.querydsl.core.types.dsl.
+     * BooleanExpression)
      */
     @Override
     public JPQLQuery<Long> getIdSubqueryWithFilter(BooleanExpression filter) {
         return this.toSubquery(qsensor, qsensor.id, filter);
     }
 
-    /* (non-Javadoc)
-     * @see org.n52.sta.data.query.EntityQuerySpecifications#getFilterForProperty(java.lang.String, java.lang.Object, org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.n52.sta.data.query.EntityQuerySpecifications#getFilterForProperty(java.lang.String,
+     * java.lang.Object, org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind)
      */
     @Override
-    public BooleanExpression getFilterForProperty(String propertyName,
-                                                  Object propertyValue,
-                                                  BinaryOperatorKind operator) throws ExpressionVisitException {
+    public Object getFilterForProperty(String propertyName,
+                                       Object propertyValue,
+                                       BinaryOperatorKind operator,
+                                       boolean switched)
+            throws ExpressionVisitException {
         if (propertyName.equals("Datastreams")) {
-            return handleRelatedPropertyFilter(propertyName, (JPQLQuery<Long>)propertyValue);
+            return handleRelatedPropertyFilter(propertyName, (JPQLQuery<Long>) propertyValue);
         } else if (propertyName.equals("id")) {
-            return handleIdPropertyFilter(qsensor.id, propertyValue, operator);
+            return handleDirectNumberPropertyFilter(qsensor.id, propertyValue, operator, switched);
         } else {
-            return handleDirectPropertyFilter(propertyName, propertyValue, operator);
+            return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
         }
     }
-    
-    private BooleanExpression handleRelatedPropertyFilter(String propertyName, JPQLQuery<Long> propertyValue) throws ExpressionVisitException {
+
+    private BooleanExpression handleRelatedPropertyFilter(String propertyName, JPQLQuery<Long> propertyValue)
+            throws ExpressionVisitException {
         throw new ExpressionVisitException("Filtering by Related Properties with cardinality >1 is currently not supported!");
     }
 
-    private BooleanExpression handleDirectPropertyFilter(String propertyName, Object propertyValue, BinaryOperatorKind operator) throws ExpressionVisitException {
-        StringExpression value = toStringExpression(propertyValue);
-        if (operator.equals(BinaryOperatorKind.EQ)) {
-            switch(propertyName) {
-            case "name": {
-                return qsensor.name.eq(value);
-            }
-            case "description": {
-                return qsensor.description.eq(value);
-            }
-            case "encodingType": {
-                return qsensor.format.format.eq(value);
-            }
-            case "metadata": {
-                return qsensor.descriptionFile.eq(value);
-            }
-            default:
-                throw new ExpressionVisitException("Error getting filter for Property: \"" + propertyName + "\". No such property in Entity.");
-            }
-        } else if (operator.equals(BinaryOperatorKind.NE)){
-            switch(propertyName) {
-            case "name": {
-                return qsensor.name.ne(value);
-            }
-            case "description": {
-                return qsensor.description.ne(value);
-            }
-            case "encodingType": {
-                return qsensor.format.format.ne(value);
-            }
-            case "metadata": {
-                return qsensor.descriptionFile.ne(value);
-            }
-            default:
-                throw new ExpressionVisitException("Error getting filter for Property: \"" + propertyName + "\". No such property in Entity.");
-            }
-        } else {
-            throw new ExpressionVisitException("BinaryOperator \"" + operator.toString() + "\" is not supported for \"" + propertyName + "\"");
+    private Object handleDirectPropertyFilter(String propertyName,
+                                              Object propertyValue,
+                                              BinaryOperatorKind operator,
+                                              boolean switched)
+            throws ExpressionVisitException {
+
+        switch (propertyName) {
+        case "name":
+            return handleDirectStringPropertyFilter(qsensor.name, propertyValue, operator, switched);
+        case "description":
+            return handleDirectStringPropertyFilter(qsensor.description, propertyValue, operator, switched);
+        case "format":
+        case "encodingType":
+            return handleDirectStringPropertyFilter(qsensor.format.format, propertyValue, operator, switched);
+        case "metadata":
+            return handleDirectStringPropertyFilter(qsensor.descriptionFile, propertyValue, operator, switched);
+        default:
+            throw new ExpressionVisitException("Error getting filter for Property: \"" + propertyName
+                    + "\". No such property in Entity.");
         }
     }
 }

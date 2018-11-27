@@ -178,7 +178,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
             return ProcedureEntity.PROPERTY_PROCEDURE_DESCRIPTION_FORMAT;
         case "metadata":
             // TODO: Add sorting by HistoricalLocation that replaces Description if it is not present
-            return ProcedureEntity.DESCRIPTION;
+            return "description_file";
         default:
             return super.checkPropertyName(property);
         }

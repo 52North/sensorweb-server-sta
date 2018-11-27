@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.query;
 
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
@@ -33,7 +34,6 @@ import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitEx
 import org.n52.series.db.beans.PhenomenonEntity;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.JPQLQuery;
 
 /**
@@ -51,15 +51,14 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
                                                       qdatastream.observableProperty.id,
                                                       qdatastream.id.eq(datastreamId)));
     }
-    
+
     public BooleanExpression withIdentifier(String identifier) {
         return qobservedproperty.identifier.eq(identifier);
     }
-    
+
     /**
-     * Assures that Entity is valid.
-     * Entity is valid if:
-     * - has associated Datastream
+     * Assures that Entity is valid. Entity is valid if:
+     *  - has associated Datastream
      * 
      * @return BooleanExpression evaluating to true if Entity is valid
      */
@@ -69,68 +68,60 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
                                                       qdatastream.isNotNull()));
     }
 
-    /* (non-Javadoc)
-     * @see org.n52.sta.data.query.EntityQuerySpecifications#getIdSubqueryWithFilter(com.querydsl.core.types.dsl.BooleanExpression)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.n52.sta.data.query.EntityQuerySpecifications#getIdSubqueryWithFilter(com.querydsl.core.types.dsl.
+     * BooleanExpression)
      */
     @Override
     public JPQLQuery<Long> getIdSubqueryWithFilter(BooleanExpression filter) {
         return this.toSubquery(qobservedproperty, qobservedproperty.id, filter);
     }
 
-    /* (non-Javadoc)
-     * @see org.n52.sta.data.query.EntityQuerySpecifications#getFilterForProperty(java.lang.String, java.lang.Object, org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.n52.sta.data.query.EntityQuerySpecifications#getFilterForProperty(java.lang.String,
+     * java.lang.Object, org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind)
      */
     @Override
-    public BooleanExpression getFilterForProperty(String propertyName,
-                                                  Object propertyValue,
-                                                  BinaryOperatorKind operator) throws ExpressionVisitException {
+    public Object getFilterForProperty(String propertyName,
+                                       Object propertyValue,
+                                       BinaryOperatorKind operator,
+                                       boolean switched)
+            throws ExpressionVisitException {
         if (propertyName.equals("Datastreams")) {
-            return handleRelatedPropertyFilter(propertyName, (JPQLQuery<Long>)propertyValue);
+            return handleRelatedPropertyFilter(propertyName, (JPQLQuery<Long>) propertyValue);
         } else if (propertyName.equals("id")) {
-            return handleIdPropertyFilter(qobservedproperty.id, propertyValue, operator);
+            return handleDirectNumberPropertyFilter(qobservedproperty.id, propertyValue, operator, switched);
         } else {
-            return handleDirectPropertyFilter(propertyName, propertyValue, operator);
+            return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
         }
     }
 
-
-
-    private BooleanExpression handleRelatedPropertyFilter(String propertyName, JPQLQuery<Long> propertyValue) throws ExpressionVisitException {
+    private BooleanExpression handleRelatedPropertyFilter(String propertyName, JPQLQuery<Long> propertyValue)
+            throws ExpressionVisitException {
         throw new ExpressionVisitException("Filtering by Related Properties with cardinality >1 is currently not supported!");
     }
 
-    private BooleanExpression handleDirectPropertyFilter(String propertyName, Object propertyValue, BinaryOperatorKind operator) throws ExpressionVisitException {
-        StringExpression value = toStringExpression(propertyValue);
-        if (operator.equals(BinaryOperatorKind.EQ)) {
-            switch(propertyName) {
-            case "name": {
-                return qobservedproperty.name.eq(value);
-            }
-            case "description": {
-                return qobservedproperty.description.eq(value);
-            }
-            case "definition": {
-                return qobservedproperty.identifier.eq(value);
-            }
-            default:
-                throw new ExpressionVisitException("Error getting filter for Property: \"" + propertyName + "\". No such property in Entity.");
-            }
-        } else if (operator.equals(BinaryOperatorKind.NE)){
-            switch(propertyName) {
-            case "name": {
-                return qobservedproperty.name.ne(value);
-            }
-            case "description": {
-                return qobservedproperty.description.ne(value);
-            }
-            case "definition": {
-                return qobservedproperty.identifier.ne(value);
-            }
-            default:
-                throw new ExpressionVisitException("Error getting filter for Property: \"" + propertyName + "\". No such property in Entity.");
-            }
-        } else {
-            throw new ExpressionVisitException("BinaryOperator \"" + operator.toString() + "\" is not supported for \"" + propertyName + "\"");
+    private Object handleDirectPropertyFilter(String propertyName,
+                                              Object propertyValue,
+                                              BinaryOperatorKind operator,
+                                              boolean switched)
+            throws ExpressionVisitException {
+        switch (propertyName) {
+        case "name":
+            return handleDirectStringPropertyFilter(qobservedproperty.name, propertyValue, operator, switched);
+        case "description":
+            return handleDirectStringPropertyFilter(qobservedproperty.description, propertyValue, operator, switched);
+        case "definition":
+        case "identifier":
+            return handleDirectStringPropertyFilter(qobservedproperty.identifier, propertyValue, operator, switched);
+        default:
+            throw new ExpressionVisitException("Error getting filter for Property: \"" + propertyName
+                    + "\". No such property in Entity.");
         }
     }
 

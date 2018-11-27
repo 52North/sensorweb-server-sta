@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.query;
 
 import java.util.Locale;
@@ -38,9 +39,9 @@ import org.apache.olingo.server.api.ODataApplicationException;
  *
  */
 public class QuerySpecificationRepository {
-    
+
     public static EntityQuerySpecifications getSpecification(String name) throws ODataApplicationException {
-        switch(name) {
+        switch (name) {
         case "ThingEntity":
         case "Thing": {
             return new ThingQuerySpecifications();
@@ -57,7 +58,7 @@ public class QuerySpecificationRepository {
         case "Datastream": {
             return new DatastreamQuerySpecifications();
         }
-        case "SensorEntity":
+        case "ProcedureEntity":
         case "Sensor": {
             return new SensorQuerySpecifications();
         }

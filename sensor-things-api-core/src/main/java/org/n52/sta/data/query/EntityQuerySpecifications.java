@@ -26,22 +26,17 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.query;
 
-import java.time.OffsetDateTime;
-import java.util.Locale;
+import java.util.Date;
 
-import org.apache.olingo.commons.api.http.HttpStatusCode;
-import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
-import org.n52.series.db.beans.QDataEntity;
-import org.n52.series.db.beans.QDatasetEntity;
-import org.n52.series.db.beans.QFeatureEntity;
-import org.n52.series.db.beans.QPhenomenonEntity;
 import org.n52.series.db.beans.QAbstractFeatureEntity;
 import org.n52.series.db.beans.QDataEntity;
 import org.n52.series.db.beans.QDatasetEntity;
+import org.n52.series.db.beans.QPhenomenonEntity;
 import org.n52.series.db.beans.QProcedureEntity;
 import org.n52.series.db.beans.sta.QDatastreamEntity;
 import org.n52.series.db.beans.sta.QHistoricalLocationEntity;
@@ -58,6 +53,7 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.core.types.dsl.StringExpression;
+import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 
@@ -68,7 +64,7 @@ import com.querydsl.jpa.JPQLQuery;
 public abstract class EntityQuerySpecifications<T> {
     final static DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
     final static ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
-    
+
     final static QDatastreamEntity qdatastream = QDatastreamEntity.datastreamEntity;
     final static QLocationEntity qlocation = QLocationEntity.locationEntity;
     final static QHistoricalLocationEntity qhistoricallocation = QHistoricalLocationEntity.historicalLocationEntity;
@@ -78,106 +74,226 @@ public abstract class EntityQuerySpecifications<T> {
     final static QDatasetEntity qdataset = QDatasetEntity.datasetEntity;
     final static QThingEntity qthing = QThingEntity.thingEntity;
     final static QPhenomenonEntity qobservedproperty = QPhenomenonEntity.phenomenonEntity;
-    
+
     /**
      * Gets Subquery returning the IDs of the Entities
-     * @param filter BooleanExpression filtering the Entites whose IDs are returned
+     * 
+     * @param filter
+     *        BooleanExpression filtering the Entites whose IDs are returned
      * @return JPQLQuery<Long> Subquery
      */
     public abstract JPQLQuery<Long> getIdSubqueryWithFilter(BooleanExpression filter);
-    
+
     /**
      * Gets Entity-specific Filter for property with given name. Filters may not accept all BinaryOperators,
-     * as they may not be defined for the datatype of the property. 
+     * as they may not be defined for the datatype of the property.
      * 
-     * @param propertyName Name of the property to be filtered on
-     * @param propertyValue supposed Value of the property
-     * @param operator Operator to be used for comparing propertyValue and actual Value
+     * @param propertyName
+     *        Name of the property to be filtered on
+     * @param propertyValue
+     *        supposed Value of the property
+     * @param operator
+     *        Operator to be used for comparing propertyValue and actual Value
+     * @param switched
+     *        true if Expression adheres to template: <value> <operator> <name>. False otherwise (Template
+     *        <name> <operator> <value>)
      * @return BooleanExpression evaluating to true if Entity is not to be filtered out
      */
-    public abstract BooleanExpression getFilterForProperty(String propertyName,
-                                                           Object propertyValue,
-                                                           BinaryOperatorKind operator)
+    public abstract Object getFilterForProperty(String propertyName,
+                                                Object propertyValue,
+                                                BinaryOperatorKind operator,
+                                                boolean switched)
             throws ExpressionVisitException;
-    
-    //TODO:JavaDoc
+
+    // TODO:JavaDoc
     protected JPQLQuery<Long> toSubquery(EntityPath<T> relation, Expression<Long> selector, BooleanExpression filter) {
         return JPAExpressions.selectFrom(relation)
                              .select(selector)
                              .where(filter);
     }
-    
-    protected StringExpression toStringExpression(Object expr) {
+
+    protected StringExpression toStringExpression(Object expr) throws ExpressionVisitException {
         if (expr instanceof String) {
-            return Expressions.asString((String)expr);
-        } else if (expr instanceof StringExpression){
-            return (StringExpression)expr;
+            return Expressions.asString((String) expr);
+        } else if (expr instanceof StringExpression) {
+            return (StringExpression) expr;
         } else {
-            return null;
+            throw new ExpressionVisitException("Error converting Argument to NumberExpression");
         }
     }
-    
-    protected NumberExpression<Long> toNumberExpression(Object expr) {
+
+    @SuppressWarnings("unchecked")
+    protected NumberExpression<Double> toNumberExpression(Object expr) throws ExpressionVisitException {
         if (expr instanceof String) {
-            return Expressions.asNumber((Long)expr);
-        } else if (expr instanceof NumberExpression){
-            return (NumberExpression<Long>)expr;
+            return Expressions.asNumber((Double) expr);
+        } else if (expr instanceof NumberExpression) {
+            return (NumberExpression<Double>) expr;
+        } else if (expr instanceof StringExpression) {
+            return ((StringExpression) expr).castToNum(Double.class);
         } else {
-            return null;
+            throw new ExpressionVisitException("Error converting Argument to NumberExpression");
         }
     }
-    
-    protected DateTimeExpression toDateTimeExpression(Object expr) {
+
+    @SuppressWarnings("unchecked")
+    protected DateTimeExpression<Date> toDateTimeExpression(Object expr) throws ExpressionVisitException {
         if (expr instanceof String) {
-            return Expressions.asDateTime((OffsetDateTime)expr);
-        } else if (expr instanceof NumberExpression){
-            return (DateTimeExpression)expr;
+            // TODO: check if this fails
+            return Expressions.asDateTime((Date) expr);
+        } else if (expr instanceof DateTimeExpression) {
+            return (DateTimeExpression<Date>) expr;
         } else {
-            return null;
+            throw new ExpressionVisitException("Error converting Argument to NumberExpression");
         }
     }
-    
-    protected BooleanExpression handleIdPropertyFilter(NumberPath<Long> idPath,
-                                                       Object propertyValue,
-                                                       BinaryOperatorKind operator) throws ExpressionVisitException {
-        NumberExpression<Long> value = toNumberExpression(propertyValue);
+
+    // Wrapper
+    protected Object handleDirectStringPropertyFilter(StringPath stringPath,
+                                                      Object propertyValue,
+                                                      BinaryOperatorKind operator,
+                                                      boolean switched)
+            throws ExpressionVisitException {
+        return this.handleStringFilter(stringPath, toStringExpression(propertyValue), operator, switched);
+    }
+
+    protected Object handleDirectNumberPropertyFilter(NumberPath< ? > numberPath,
+                                                      Object propertyValue,
+                                                      BinaryOperatorKind operator,
+                                                      boolean switched)
+            throws ExpressionVisitException {
+        return this.handleNumberFilter(numberPath, toNumberExpression(propertyValue), operator, switched);
+    }
+
+    protected Object handleDirectDateTimePropertyFilter(DateTimePath<Date> time,
+                                                        Object propertyValue,
+                                                        BinaryOperatorKind operator,
+                                                        boolean switched)
+            throws ExpressionVisitException {
+        return this.handleDateFilter(time, toDateTimeExpression(propertyValue), operator, switched);
+    }
+
+    public Object handleStringFilter(StringExpression left,
+                                     StringExpression right,
+                                     BinaryOperatorKind operator,
+                                     boolean switched)
+            throws ExpressionVisitException {
+        operator = (switched) ? reverseOperator(operator) : operator;
+
+        switch (operator) {
+        case EQ:
+            return left.eq(right);
+        case NE:
+            return left.ne(right);
+        case LT:
+            return left.lt(right);
+        case LE:
+            return left.loe(right);
+        case GT:
+            return left.gt(right);
+        case GE:
+            return left.goe(right);
+        default:
+            throw new ExpressionVisitException("Error getting filter. Invalid Operator");
+        }
+    }
+
+    public Object handleNumberFilter(NumberExpression< ? > left,
+                                     NumberExpression< ? > right,
+                                     BinaryOperatorKind operator,
+                                     boolean switched)
+            throws ExpressionVisitException {
+        NumberExpression< ? > leftExpr;
+        NumberExpression< ? > rightExpr;
+        if (switched) {
+            leftExpr = right;
+            rightExpr = left;
+        } else {
+            leftExpr = left;
+            rightExpr = right;
+        }
+
         switch (operator) {
         case GE:
-            return idPath.goe(value);
+            return leftExpr.goe(rightExpr);
         case GT:
-            return idPath.gt(value);
+            return leftExpr.gt(rightExpr);
         case LE:
-            return idPath.loe(value);
+            return leftExpr.loe(rightExpr);
         case LT:
-            return idPath.lt(value);
+            return leftExpr.lt(rightExpr);
         case EQ:
-            return ((ComparableExpressionBase)idPath).eq(value);
+            return ((ComparableExpressionBase) leftExpr).eq(rightExpr);
         case NE:
-            return ((ComparableExpressionBase)idPath).ne(value);
+            return ((ComparableExpressionBase) leftExpr).ne(rightExpr);
+        case ADD:
+            return leftExpr.add(rightExpr);
+        case DIV:
+            return leftExpr.divide(rightExpr);
+        case MOD:
+            return leftExpr.castToNum(Integer.class).mod(rightExpr.castToNum(Integer.class));
+        case MUL:
+            return leftExpr.multiply(rightExpr);
+        case SUB:
+            return leftExpr.subtract(rightExpr);
         default:
-            throw new ExpressionVisitException("BinaryOperator \"" + operator.toString() + "\" is not supported for property \"id\"");
+            throw new ExpressionVisitException("Operator \"" + operator.toString()
+                    + "\" is not supported for given arguments.");
         }
     }
-    
-    protected BooleanExpression handleDateTimePropertyFilter(DateTimePath<OffsetDateTime> dtPath,
-                                                             Object propertyValue,
-                                                             BinaryOperatorKind operator) throws ExpressionVisitException {
-        DateTimeExpression<OffsetDateTime> value = toDateTimeExpression(propertyValue);
+
+    public Object handleDateFilter(DateTimeExpression<Date> left,
+                                   DateTimeExpression<Date> right,
+                                   BinaryOperatorKind operator,
+                                   boolean switched)
+            throws ExpressionVisitException {
+        DateTimeExpression<Date> leftExpr;
+        DateTimeExpression<Date> rightExpr;
+        if (switched) {
+            leftExpr = right;
+            rightExpr = left;
+        } else {
+            leftExpr = left;
+            rightExpr = right;
+        }
+
         switch (operator) {
         case GE:
-            return dtPath.goe(value);
+            return leftExpr.goe(rightExpr);
         case GT:
-            return dtPath.gt(value);
+            return leftExpr.gt(rightExpr);
         case LE:
-            return dtPath.loe(value);
+            return leftExpr.loe(rightExpr);
         case LT:
-            return dtPath.lt(value);
+            return leftExpr.lt(rightExpr);
         case EQ:
-            return ((ComparableExpressionBase)dtPath).eq(value);
+            return leftExpr.eq(rightExpr);
         case NE:
-            return ((ComparableExpressionBase)dtPath).ne(value);
+            return leftExpr.ne(rightExpr);
         default:
-            throw new ExpressionVisitException("BinaryOperator \"" + operator.toString() + "\" is not supported for property \"id\"");
-        }  
+            throw new ExpressionVisitException("Operator \"" + operator.toString()
+                    + "\" is not supported for DateTimeExpression");
+        }
+    }
+
+    /**
+     * Reverses an operator if this operator is easily revertible.
+     * 
+     * @param operator
+     *        to be reversed
+     * @return String representation of reversed Operator
+     */
+    private BinaryOperatorKind reverseOperator(BinaryOperatorKind operator) {
+        switch (operator) {
+        case LT:
+            return BinaryOperatorKind.GE;
+        case LE:
+            return BinaryOperatorKind.GT;
+        case GT:
+            return BinaryOperatorKind.LE;
+        case GE:
+            return BinaryOperatorKind.LT;
+        default:
+            return operator;
+        }
     }
 }
