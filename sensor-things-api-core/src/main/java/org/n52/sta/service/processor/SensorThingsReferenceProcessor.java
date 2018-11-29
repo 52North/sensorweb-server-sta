@@ -59,7 +59,7 @@ public class SensorThingsReferenceProcessor implements ReferenceProcessor {
         List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
         EntityResponse entityResponse = requestHandler.handleEntityRequest(resourcePaths.subList(0, resourcePaths.size() - 1), options);
 
-        InputStream serializedContent = createResponseContent(entityResponse, request.getRawBaseUri());
+        InputStream serializedContent = createResponseContent(entityResponse, request.getRawBaseUri(), options);
 
         // configure the response object: set the body, headers and status code
         response.setContent(serializedContent);
@@ -89,11 +89,11 @@ public class SensorThingsReferenceProcessor implements ReferenceProcessor {
         this.serializer = new SensorThingsSerializer(ContentType.JSON_NO_METADATA);
     }
 
-    private InputStream createResponseContent(EntityResponse response, String rawBaseUri) throws SerializerException {
+    private InputStream createResponseContent(EntityResponse response, String rawBaseUri, QueryOptions options) throws SerializerException {
 
         // annotate the entity
         entityAnnotator.annotateEntity(response.getEntity(),
-                response.getEntitySet().getEntityType(), rawBaseUri);
+                response.getEntitySet().getEntityType(), rawBaseUri, options.getSelectOption());
 
         // and serialize the content: transform from the EntitySet object to InputStream
         ContextURL contextUrl = ContextURL.with()

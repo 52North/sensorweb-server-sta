@@ -67,7 +67,8 @@ public class EntityCollectionRequestHandlerImpl implements AbstractEntityCollect
                 entityAnnotator.annotateEntity(
                         entity,
                         sourceEdmEntitySet.getEntityType(),
-                        queryOptions.getBaseURI());
+                        queryOptions.getBaseURI(),
+                        queryOptions.getSelectOption());
                 queryOptionsHandler.handleExpandOption(
                         entity,
                         queryOptions.getExpandOption(),
@@ -80,7 +81,8 @@ public class EntityCollectionRequestHandlerImpl implements AbstractEntityCollect
                 entityAnnotator.annotateEntity(
                         entity,
                         sourceEdmEntitySet.getEntityType(),
-                        queryOptions.getBaseURI());
+                        queryOptions.getBaseURI(),
+                        queryOptions.getSelectOption());
             });
         }
         return response;

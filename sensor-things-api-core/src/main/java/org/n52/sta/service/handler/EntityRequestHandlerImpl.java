@@ -67,7 +67,8 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
             entityAnnotator.annotateEntity(
                     response.getEntity(),
                     response.getEntitySet().getEntityType(),
-                    queryOptions.getBaseURI());
+                    queryOptions.getBaseURI(),
+                    queryOptions.getSelectOption());
             queryOptionsHandler.handleExpandOption(
                     response.getEntity(),
                     queryOptions.getExpandOption(),
@@ -78,7 +79,8 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
             entityAnnotator.annotateEntity(
                     response.getEntity(),
                     response.getEntitySet().getEntityType(),
-                    queryOptions.getBaseURI());
+                    queryOptions.getBaseURI(),
+                    queryOptions.getSelectOption());
         }
         return response;
     }

@@ -73,7 +73,7 @@ public class SensorThingsReferenceCollectionProcessor implements ReferenceCollec
         EdmEntityType edmEntityType = response.getEntitySet().getEntityType();
 
         for (Entity e : response.getEntityCollection().getEntities()) {
-            entityAnnotator.annotateEntity(e, edmEntityType, queryOptions.getBaseURI());
+            entityAnnotator.annotateEntity(e, edmEntityType, queryOptions.getBaseURI(), queryOptions.getSelectOption());
         }
 
         // serialize the content: transform from the EntitySet object to InputStream

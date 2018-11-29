@@ -11,8 +11,12 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Link;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
+import org.apache.olingo.server.api.uri.queryoption.QueryOption;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Helper class to annotate Entities
@@ -30,28 +34,40 @@ public class EntityAnnotator {
      * @param baseUri the baseUri for the service deployed
      * @return the annotated Entity
      */
-    public Entity annotateEntity(Entity entity, EdmEntityType entityType, String baseUri) {
+    public Entity annotateEntity(Entity entity, EdmEntityType entityType, String baseUri, SelectOption selectOption) {
         // Do not annotate if there is nothing to annotate
         if (entity == null) {
             return null;
         }
 
-        String selfLinkValue = String.join("/", baseUri, entity.getId().getPath());
+        // Only annotate with selected Annotations if present
+        List<String> selector = new ArrayList<>();
+        boolean hasSelectOption = selectOption != null;
+        if (hasSelectOption) {
+            selectOption.getSelectItems().forEach(
+                    elem -> selector.add(elem.getResourcePath().getUriResourceParts().get(0).getSegmentValue())
+            );
+        }
 
-        Link selfLink = new Link();
-        selfLink.setTitle(SELF_LINK_ANNOTATION);
-        selfLink.setHref(selfLinkValue);
-        entity.setSelfLink(selfLink);
+        if (!hasSelectOption) {
+            String selfLinkValue = String.join("/", baseUri, entity.getId().getPath());
+            Link selfLink = new Link();
+            selfLink.setTitle(SELF_LINK_ANNOTATION);
+            selfLink.setHref(selfLinkValue);
+            entity.setSelfLink(selfLink);
+        }
 
         entityType.getNavigationPropertyNames().forEach(np -> {
-            EdmNavigationProperty navProp = entityType.getNavigationProperty(np);
+            if (!hasSelectOption || selector.contains(np)) {
+                EdmNavigationProperty navProp = entityType.getNavigationProperty(np);
 
-            String navigationAnnotationValue = String.join("/", baseUri, entity.getId().getPath(), navProp.getName());
+                String navigationAnnotationValue = String.join("/", baseUri, entity.getId().getPath(), navProp.getName());
 
-            Link link = new Link();
-            link.setTitle(np);
-            link.setHref(navigationAnnotationValue);
-            entity.getNavigationLinks().add(link);
+                Link link = new Link();
+                link.setTitle(np);
+                link.setHref(navigationAnnotationValue);
+                entity.getNavigationLinks().add(link);
+            }
         });
 
         return entity;

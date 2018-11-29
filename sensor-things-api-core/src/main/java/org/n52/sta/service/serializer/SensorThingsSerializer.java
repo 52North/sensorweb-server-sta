@@ -403,14 +403,13 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
                     json.writeStringField(Constants.JSON_TYPE, "#" + entity.getType());
                 }
 
-                json.writeStringField(SensorThingsEdmConstants.SELF_LINK_ANNOTATION, entity.getSelfLink().getHref());
-
                 final boolean all = ExpandSelectHelper.isAll(select);
                 final Set<String> selected = all ? new HashSet<String>()
                         : ExpandSelectHelper.getSelectedPropertyNames(select.getSelectItems());
 
                 for (final String propertyName : entityType.getKeyPredicateNames()) {
                     if (all || selected.contains(propertyName)) {
+                        json.writeStringField(SensorThingsEdmConstants.SELF_LINK_ANNOTATION, entity.getSelfLink().getHref());
                         if (entityType.getKeyPredicateNames().contains(propertyName)) {
                             final EdmProperty edmProperty = entityType.getStructuralProperty(propertyName);
                             final Property property = findProperty(propertyName, entity.getProperties());

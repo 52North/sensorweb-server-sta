@@ -124,7 +124,7 @@ public class QueryOptionsHandler {
                         new ExpandItemQueryOptions(expandItem, baseURI)));
 
                 // Annotate inline Entites with appropiate links
-                entityAnnotator.annotateEntity(link.getInlineEntity(), targetEdmEntityType, baseURI);
+                entityAnnotator.annotateEntity(link.getInlineEntity(), targetEdmEntityType, baseURI, (new ExpandItemQueryOptions(expandItem, baseURI)).getSelectOption());
             }
             // Only add valid Elements
             if (link != null) {
@@ -140,13 +140,13 @@ public class QueryOptionsHandler {
         Entity entity = responseService.getRelatedEntity(sourceId, sourceType);
 
         if (queryOptions.hasExpandOption()) {
-            entityAnnotator.annotateEntity(entity, targetType, queryOptions.getBaseURI());
+            entityAnnotator.annotateEntity(entity, targetType, queryOptions.getBaseURI(), queryOptions.getSelectOption());
             List<Link> links = handleExpandOption(entity, queryOptions.getExpandOption(),
                     Long.parseLong(entity.getProperty(PROP_ID).getValue().toString()),
                     targetType,
                     queryOptions.getBaseURI());
         } else {
-            entityAnnotator.annotateEntity(entity, targetType, queryOptions.getBaseURI());
+            entityAnnotator.annotateEntity(entity, targetType, queryOptions.getBaseURI(), queryOptions.getSelectOption());
         }
 
         return entity;
@@ -164,7 +164,7 @@ public class QueryOptionsHandler {
 
         if (queryOptions.hasExpandOption()) {
             entityCollection.forEach(entity -> {
-                entityAnnotator.annotateEntity(entity, targetType, queryOptions.getBaseURI());
+                entityAnnotator.annotateEntity(entity, targetType, queryOptions.getBaseURI(), queryOptions.getSelectOption());
                 List<Link> links = handleExpandOption(entity, queryOptions.getExpandOption(),
                         Long.parseLong(entity.getProperty(PROP_ID).getValue().toString()),
                         targetType,
@@ -172,9 +172,8 @@ public class QueryOptionsHandler {
             });
         } else {
             entityCollection.forEach(entity -> {
-                entityAnnotator.annotateEntity(entity, targetType, queryOptions.getBaseURI());
+                entityAnnotator.annotateEntity(entity, targetType, queryOptions.getBaseURI(), queryOptions.getSelectOption());
             });
-
         }
 
         return entityCollection;
