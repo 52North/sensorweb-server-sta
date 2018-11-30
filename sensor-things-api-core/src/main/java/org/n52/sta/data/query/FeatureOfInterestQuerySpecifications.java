@@ -132,7 +132,8 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
         case "description":
             return handleDirectStringPropertyFilter(qfeature.description, propertyValue, operator, switched);
         case "encodingType":
-            return handleDirectStringPropertyFilter(qfeature.featureType.format, propertyValue, operator, switched);
+        case "featureType":
+            return handleStringFilter(toStringExpression("application/vnd.geo+json"), toStringExpression(propertyValue), operator, switched);
         default:
             throw new ExpressionVisitException("Error getting filter for Property: \"" + propertyName
                     + "\". No such property in Entity.");

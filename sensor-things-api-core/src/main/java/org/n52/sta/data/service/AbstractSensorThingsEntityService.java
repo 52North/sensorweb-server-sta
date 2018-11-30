@@ -234,10 +234,9 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
      * @param queryOptions
      * 
      * @return the existing elements
+     * @throws ODataApplicationException if the queryOptions could not be parsed.
      */
-    public long getCount() {
-        return getRepository().count();
-    }
+    public abstract long getCount(QueryOptions queryOptions) throws ODataApplicationException;
     
     /**
      * Constructs QueryDSL FilterPredicate based on given queryOptions.

@@ -43,6 +43,7 @@ import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.ObservablePropertyEntity;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.ObservedPropertyQuerySpecifications;
@@ -198,6 +199,11 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
      */
     private BooleanExpression byId(Long id) {
         return oQS.withId(id);
+    }
+    
+    @Override
+    public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
+        return getRepository().count(getFilterPredicate(PhenomenonEntity.class, queryOptions));
     }
 
     @Override

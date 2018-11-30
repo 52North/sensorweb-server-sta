@@ -244,6 +244,11 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     private BooleanExpression byId(Long id) {
         return lQS.withId(id);
     }
+    
+    @Override
+    public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
+        return getRepository().count(getFilterPredicate(LocationEntity.class, queryOptions));
+    }
 
     @Override
     public LocationEntity create(LocationEntity location) throws ODataApplicationException {

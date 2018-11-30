@@ -38,6 +38,7 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.server.api.ODataApplicationException;
+import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
@@ -232,6 +233,11 @@ public class HistoricalLocationService extends AbstractSensorThingsEntityService
      */
     private BooleanExpression byId(Long id) {
         return hlQS.withId(id);
+    }
+    
+    @Override
+    public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
+        return getRepository().count(getFilterPredicate(HistoricalLocationEntity.class, queryOptions));
     }
 
     @Override

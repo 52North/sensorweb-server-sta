@@ -218,6 +218,22 @@ public class FeatureOfInterestService
         return getRepository().findOne(filter);
     }
 
+    @Override
+    public String checkPropertyName(String property) {
+        switch (property) {
+            case "encodingType":
+                return AbstractFeatureEntity.PROPERTY_FEATURE_TYPE;
+            default:
+                return property;
+        }
+    }
+
+    
+    @Override
+    public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
+        return getRepository().count(getFilterPredicate(AbstractFeatureEntity.class, queryOptions));
+    }
+    
     /**
      * Constructs SQL Expression to request Entity by ID.
      * 

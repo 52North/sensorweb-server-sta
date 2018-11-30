@@ -67,6 +67,7 @@ public class QuerySpecificationRepository {
             return new ObservationQuerySpecifications();
         }
         case "FeatureEntity":
+        case "AbstractFeatureEntity":
         case "FeatureOfInterest": {
             return new FeatureOfInterestQuerySpecifications();
         }

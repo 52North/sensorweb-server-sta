@@ -64,7 +64,6 @@ import org.n52.series.db.beans.ProfileDataEntity;
 import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.ReferencedDataEntity;
 import org.n52.series.db.beans.TextDataEntity;
-import org.n52.series.db.beans.HibernateRelations.HasPhenomenonTime;
 import org.n52.series.db.beans.parameter.Parameter;
 import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.shetland.ogc.gml.time.Time;
@@ -95,7 +94,7 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
         
         //TODO: urlencode whitespaces to allow for copy pasting into filter expression
         entity.addProperty(new Property(null, PROP_RESULT, ValueType.PRIMITIVE, this.getResult(observation).getBytes()));
-        
+
         entity.addProperty(new Property(null, PROP_RESULT_TIME, ValueType.PRIMITIVE, observation.getResultTime().getTime()));
 
         String phenomenonTime = DateTimeHelper.format(createPhenomenonTime(observation));

@@ -101,7 +101,7 @@ public class EntityCollectionRequestHandlerImpl implements AbstractEntityCollect
                 serviceRepository.getEntityService(uriResourceEntitySet.getEntityType().getName());
         EntityCollection responseEntityCollection = responseService.getEntityCollection(queryOptions);
 
-        long count = responseService.getCount();
+        long count = responseService.getCount(queryOptions);
 
         if (queryOptions.hasCountOption()) {
             responseEntityCollection.setCount(Long.valueOf(count).intValue());

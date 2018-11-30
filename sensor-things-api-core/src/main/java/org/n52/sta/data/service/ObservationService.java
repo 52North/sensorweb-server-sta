@@ -66,6 +66,7 @@ import org.n52.series.db.beans.TextDataEntity;
 import org.n52.series.db.beans.TextDatasetEntity;
 import org.n52.series.db.beans.dataset.Dataset;
 import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.series.db.beans.sta.ThingEntity;
@@ -286,6 +287,11 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
      */
     private BooleanExpression byId(Long id) {
         return oQS.isValidEntity().and(oQS.withId(id));
+    }
+    
+    @Override
+    public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
+        return getRepository().count(getFilterPredicate(DataEntity.class, queryOptions));
     }
 
     @Override

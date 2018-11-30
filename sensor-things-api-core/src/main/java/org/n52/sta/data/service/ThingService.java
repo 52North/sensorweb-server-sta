@@ -199,6 +199,11 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
         }
         return getRepository().findOne(filter);
     }
+    
+    @Override
+    public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
+        return getRepository().count(getFilterPredicate(ThingEntity.class, queryOptions));
+    }
 
     @Override
     public ThingEntity create(ThingEntity thing) throws ODataApplicationException {

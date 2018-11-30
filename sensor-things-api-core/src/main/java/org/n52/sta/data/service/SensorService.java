@@ -47,6 +47,7 @@ import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.SensorQuerySpecifications;
@@ -178,7 +179,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
             return ProcedureEntity.PROPERTY_PROCEDURE_DESCRIPTION_FORMAT;
         case "metadata":
             // TODO: Add sorting by HistoricalLocation that replaces Description if it is not present
-            return "description_file";
+            return "descriptionFile";
         default:
             return super.checkPropertyName(property);
         }
@@ -224,6 +225,11 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
      */
     private BooleanExpression byId(Long id) {
         return sQS.withId(id);
+    }
+    
+    @Override
+    public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
+        return getRepository().count(getFilterPredicate(ProcedureEntity.class, queryOptions));
     }
 
     @Override
