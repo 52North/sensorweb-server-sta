@@ -69,16 +69,8 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
         return qfeature.identifier.eq(identifier);
     }
 
-    /**
-     * Assures that Entity is valid. Entity is valid if: - is associated with Dataset associated with any
-     * Datastream
-     * 
-     * @return BooleanExpression evaluating to true if Entity is valid
-     */
-    public BooleanExpression isValidEntity() {
-        return qfeature.id.in(JPAExpressions
-                                            .selectFrom(qdatastream)
-                                            .select(qdatastream.datasets.any().feature.id));
+    public BooleanExpression withName(String name) {
+        return qfeature.name.eq(name);
     }
 
     /*
@@ -138,9 +130,5 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
             throw new ExpressionVisitException("Error getting filter for Property: \"" + propertyName
                     + "\". No such property in Entity.");
         }
-    }
-
-    public BooleanExpression withName(String name) {
-        return qfeature.name.eq(name);
     }
 }

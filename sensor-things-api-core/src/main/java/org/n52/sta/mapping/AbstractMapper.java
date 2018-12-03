@@ -34,8 +34,11 @@ import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvid
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DESCRIPTION;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_NAME;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PHENOMENON_TIME;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_RESULT_TIME;
 import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ES_DATASTREAMS_NAME;
 
+import java.sql.Timestamp;
+import java.text.DateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -51,6 +54,7 @@ import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.joda.time.Instant;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.HibernateRelations.HasDescription;
 import org.n52.series.db.beans.HibernateRelations.HasName;
@@ -295,12 +299,19 @@ public abstract class AbstractMapper<T> {
         }
     }
     
-    protected Time parseTime(String timeString) {
-        if (timeString.contains("/")) {
-            String[] split = timeString.split("/");
-            return createTime(DateTimeHelper.parseIsoString2DateTime(split[0]),
-                    DateTimeHelper.parseIsoString2DateTime(split[1]));
+    protected Time parseTime(Object object) {
+        if (object instanceof Timestamp) {
+            Timestamp timestamp = (Timestamp) object;
+            return new TimeInstant(new Instant(timestamp.getTime()));
+        } else {
+            String obj = object.toString();
+            if (obj.contains("/")) {
+                String[] split = obj.split("/");
+                return createTime(DateTime.parse(split[0]),
+                                  DateTime.parse(split[1]));
+            } else {
+                return new TimeInstant(DateTime.parse(obj));
+            }
         }
-        return createTime(DateTimeHelper.parseIsoString2DateTime(timeString));
     }
 }

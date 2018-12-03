@@ -114,7 +114,7 @@ public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationE
     
     private void addTime(HistoricalLocationEntity historicalLocation, Entity entity) {
         if (checkProperty(entity, PROP_TIME)) {
-            Time time = parseTime(getPropertyValue(entity, PROP_TIME).toString());
+            Time time = parseTime(getPropertyValue(entity, PROP_TIME));
             if (time instanceof TimeInstant) {
                 historicalLocation.setTime(((TimeInstant) time).getValue().toDate());
             } else if (time instanceof TimePeriod) {

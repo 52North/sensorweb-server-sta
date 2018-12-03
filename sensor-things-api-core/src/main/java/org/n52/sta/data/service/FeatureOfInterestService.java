@@ -115,7 +115,7 @@ public class FeatureOfInterestService
     public EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException {
         EntityCollection retEntitySet = new EntityCollection();
         Predicate filter = getFilterPredicate(AbstractFeatureEntity.class, queryOptions);
-        getRepository().findAll(foiQS.isValidEntity().and(filter), createPageableRequest(queryOptions))
+        getRepository().findAll(filter, createPageableRequest(queryOptions))
                 .forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }

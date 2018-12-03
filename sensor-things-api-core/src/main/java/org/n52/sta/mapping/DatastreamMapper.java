@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.mapping;
 
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
@@ -89,18 +90,26 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
         entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, datastream.getId()));
         addDescription(entity, datastream);
         addName(entity, datastream);
-        entity.addProperty(new Property(null, PROP_OBSERVATION_TYPE, ValueType.PRIMITIVE,
-                datastream.getObservationType().getFormat()));
+        entity.addProperty(new Property(null,
+                                        PROP_OBSERVATION_TYPE,
+                                        ValueType.PRIMITIVE,
+                                        datastream.getObservationType().getFormat()));
 
-        entity.addProperty(new Property(null, PROP_PHENOMENON_TIME, ValueType.PRIMITIVE,
-                DateTimeHelper.format(createTime(createDateTime(datastream.getSamplingTimeStart()),
-                        createDateTime(datastream.getSamplingTimeEnd())))));
-        entity.addProperty(new Property(null, PROP_RESULT_TIME, ValueType.PRIMITIVE,
-                DateTimeHelper.format(createTime(createDateTime(datastream.getResultTimeStart()),
-                        createDateTime(datastream.getResultTimeEnd())))));
+        entity.addProperty(new Property(null,
+                                        PROP_PHENOMENON_TIME,
+                                        ValueType.PRIMITIVE,
+                                        DateTimeHelper.format(createTime(createDateTime(datastream.getSamplingTimeStart()),
+                                                                         createDateTime(datastream.getSamplingTimeEnd())))));
+        entity.addProperty(new Property(null,
+                                        PROP_RESULT_TIME,
+                                        ValueType.PRIMITIVE,
+                                        DateTimeHelper.format(createTime(createDateTime(datastream.getResultTimeStart()),
+                                                                         createDateTime(datastream.getResultTimeEnd())))));
 
-        entity.addProperty(new Property(null, PROP_UOM, ValueType.COMPLEX,
-                resolveUnitOfMeasurement(datastream.getUnitOfMeasurement())));
+        entity.addProperty(new Property(null,
+                                        PROP_UOM,
+                                        ValueType.COMPLEX,
+                                        resolveUnitOfMeasurement(datastream.getUnitOfMeasurement())));
         addObservedArea(entity, datastream);
 
         entity.setType(ET_DATASTREAM_FQN.getFullQualifiedNameAsString());
@@ -127,7 +136,8 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
     }
 
     @Override
-    public DatastreamEntity merge(DatastreamEntity existing, DatastreamEntity toMerge) throws ODataApplicationException {
+    public DatastreamEntity merge(DatastreamEntity existing, DatastreamEntity toMerge)
+            throws ODataApplicationException {
         mergeName(existing, toMerge);
         mergeDescription(existing, toMerge);
         checkObservationType(existing, toMerge);
@@ -139,7 +149,7 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
         }
         // phenTime
         mergeSamplingTime(existing, toMerge);
-       
+
         // resultTime
         if (toMerge.hasResultTimeStart() && toMerge.hasResultTimeEnd()) {
             existing.setResultTimeStart(toMerge.getResultTimeStart());
@@ -156,37 +166,41 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
 
     @Override
     public Entity checkEntity(Entity entity) throws ODataApplicationException {
-       checkNameAndDescription(entity);
-       checkPropertyValidity(PROP_OBSERVATION_TYPE, entity);
-       checkPropertyValidity(PROP_UOM, entity);
-       checkUom(entity);
-       if (checkNavigationLink(entity, ET_SENSOR_NAME)) {
-                   sensorMapper.checkNavigationLink(entity.getNavigationLink(ET_SENSOR_NAME).getInlineEntity());
-       }
-       if (checkNavigationLink(entity, ET_OBSERVED_PROPERTY_NAME)) {
-           observedPropertyMapper
-                   .checkNavigationLink(entity.getNavigationLink(ET_OBSERVED_PROPERTY_NAME).getInlineEntity());
-       }
-       if (checkNavigationLink(entity, ET_THING_NAME)) {
-           thingMapper.checkNavigationLink(entity.getNavigationLink(ET_THING_NAME).getInlineEntity());
-       }
-       if (checkNavigationLink(entity, ES_OBSERVATIONS_NAME)) {
-           Iterator<Entity> iterator = entity.getNavigationLink(ES_OBSERVATIONS_NAME).getInlineEntitySet().iterator();
-           while (iterator.hasNext()) {
-               observationMapper.checkNavigationLink((Entity) iterator.next());
-           }
-       }
-       return entity;
+        checkNameAndDescription(entity);
+        checkPropertyValidity(PROP_OBSERVATION_TYPE, entity);
+        checkPropertyValidity(PROP_UOM, entity);
+        checkUom(entity);
+        if (checkNavigationLink(entity, ET_SENSOR_NAME)) {
+            sensorMapper.checkNavigationLink(entity.getNavigationLink(ET_SENSOR_NAME).getInlineEntity());
+        }
+        if (checkNavigationLink(entity, ET_OBSERVED_PROPERTY_NAME)) {
+            observedPropertyMapper
+                                  .checkNavigationLink(entity.getNavigationLink(ET_OBSERVED_PROPERTY_NAME)
+                                                             .getInlineEntity());
+        }
+        if (checkNavigationLink(entity, ET_THING_NAME)) {
+            thingMapper.checkNavigationLink(entity.getNavigationLink(ET_THING_NAME).getInlineEntity());
+        }
+        if (checkNavigationLink(entity, ES_OBSERVATIONS_NAME)) {
+            Iterator<Entity> iterator = entity.getNavigationLink(ES_OBSERVATIONS_NAME).getInlineEntitySet().iterator();
+            while (iterator.hasNext()) {
+                observationMapper.checkNavigationLink((Entity) iterator.next());
+            }
+        }
+        return entity;
     }
 
-    private void checkObservationType(DatastreamEntity existing, DatastreamEntity toMerge) throws ODataApplicationException {
+    private void checkObservationType(DatastreamEntity existing, DatastreamEntity toMerge)
+            throws ODataApplicationException {
         if (toMerge.isSetObservationType() && !toMerge.getObservationType().getFormat().equalsIgnoreCase("unknown")
                 && !existing.getObservationType().getFormat().equals(toMerge.getObservationType().getFormat())) {
             throw new ODataApplicationException(
-                    String.format(
-                            "The updated observationType (%s) does not comply with the existing observationType (%s)",
-                            toMerge.getObservationType().getFormat(), existing.getObservationType().getFormat()),
-                    HttpStatusCode.CONFLICT.getStatusCode(), Locale.getDefault());
+                                                String.format(
+                                                              "The updated observationType (%s) does not comply with the existing observationType (%s)",
+                                                              toMerge.getObservationType().getFormat(),
+                                                              existing.getObservationType().getFormat()),
+                                                HttpStatusCode.CONFLICT.getStatusCode(),
+                                                Locale.getDefault());
         }
     }
 
@@ -194,11 +208,18 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
         ComplexValue value = new ComplexValue();
         if (uom != null) {
             value.getValue().add(
-                    new Property(null, UnitOfMeasurementComplexType.PROP_NAME, ValueType.PRIMITIVE, uom.getName()));
-            value.getValue().add(new Property(null, UnitOfMeasurementComplexType.PROP_SYMBOL, ValueType.PRIMITIVE,
-                    uom.getSymbol()));
-            value.getValue().add(new Property(null, UnitOfMeasurementComplexType.PROP_DEFINITION, ValueType.PRIMITIVE,
-                    uom.getLink()));
+                                 new Property(null,
+                                              UnitOfMeasurementComplexType.PROP_NAME,
+                                              ValueType.PRIMITIVE,
+                                              uom.getName()));
+            value.getValue().add(new Property(null,
+                                              UnitOfMeasurementComplexType.PROP_SYMBOL,
+                                              ValueType.PRIMITIVE,
+                                              uom.getSymbol()));
+            value.getValue().add(new Property(null,
+                                              UnitOfMeasurementComplexType.PROP_DEFINITION,
+                                              ValueType.PRIMITIVE,
+                                              uom.getLink()));
 
         }
         return value;
@@ -207,7 +228,8 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
     private DatastreamEntity addFormat(DatastreamEntity datastream, Entity entity) {
         if (checkProperty(entity, PROP_OBSERVATION_TYPE)) {
             return datastream.setObservationType(
-                    new FormatEntity().setFormat(getPropertyValue(entity, PROP_OBSERVATION_TYPE).toString()));
+                                                 new FormatEntity().setFormat(getPropertyValue(entity,
+                                                                                               PROP_OBSERVATION_TYPE).toString()));
         }
         return datastream.setObservationType(new FormatEntity().setFormat("unknown"));
     }
@@ -215,7 +237,8 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
     private void addObservedArea(DatastreamEntity datastream, Entity entity) {
         Property observedArea = entity.getProperty(PROP_OBSERVED_AREA);
         if (observedArea != null) {
-            if (observedArea.getValueType().equals(ValueType.PRIMITIVE) && observedArea.getValue() instanceof Geospatial) {
+            if (observedArea.getValueType().equals(ValueType.PRIMITIVE)
+                    && observedArea.getValue() instanceof Geospatial) {
                 datastream.setGeometryEntity(parseGeometry((Geospatial) observedArea.getValue()));
             }
         }
@@ -229,13 +252,13 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
             unit.setSymbol(getPropertyValue(uomComplexValue, UnitOfMeasurementComplexType.PROP_SYMBOL).toString());
             unit.setName(getPropertyValue(uomComplexValue, UnitOfMeasurementComplexType.PROP_NAME).toString());
             unit.setLink(getPropertyValue(uomComplexValue, UnitOfMeasurementComplexType.PROP_DEFINITION).toString());
+            datastream.setUnit(unit);
         }
-        datastream.setUnit(unit);
     }
 
     private void addResultTime(DatastreamEntity datastream, Entity entity) {
         if (checkProperty(entity, PROP_RESULT_TIME)) {
-            Time time = parseTime(getPropertyValue(entity, PROP_RESULT_TIME).toString());
+            Time time = parseTime(getPropertyValue(entity, PROP_RESULT_TIME));
             if (time instanceof TimeInstant) {
                 datastream.setResultTimeStart(((TimeInstant) time).getValue().toDate());
                 datastream.setResultTimeEnd(((TimeInstant) time).getValue().toDate());
@@ -245,18 +268,20 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
             }
         }
     }
-    
+
     private void addSensor(DatastreamEntity datastream, Entity entity) {
         if (checkNavigationLink(entity, ET_SENSOR_NAME)) {
             datastream.setProcedure(
-                    sensorMapper.createEntity(entity.getNavigationLink(ET_SENSOR_NAME).getInlineEntity()));
+                                    sensorMapper.createEntity(entity.getNavigationLink(ET_SENSOR_NAME)
+                                                                    .getInlineEntity()));
         }
     }
 
     private void addObservedProperty(DatastreamEntity datastream, Entity entity) {
         if (checkNavigationLink(entity, ET_OBSERVED_PROPERTY_NAME)) {
             datastream.setObservableProperty(observedPropertyMapper
-                    .createEntity(entity.getNavigationLink(ET_OBSERVED_PROPERTY_NAME).getInlineEntity()));
+                                                                   .createEntity(entity.getNavigationLink(ET_OBSERVED_PROPERTY_NAME)
+                                                                                       .getInlineEntity()));
         }
     }
 
@@ -278,7 +303,7 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
             datastream.setObservations(observations);
         }
     }
-    
+
     private void checkUom(Entity entity) throws ODataApplicationException {
         checkPropertyValidity(PROP_UOM, entity);
         Object value = getPropertyValue(entity, PROP_UOM);
