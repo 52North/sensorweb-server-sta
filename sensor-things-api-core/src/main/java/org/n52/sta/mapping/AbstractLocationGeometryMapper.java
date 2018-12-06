@@ -85,6 +85,8 @@ public abstract class AbstractLocationGeometryMapper<T> extends AbstractMapper<T
         if (geometryLocationEntity.isSetGeometry()) {
             entity.addProperty(new Property(null, property, ValueType.GEOSPATIAL,
                     geometryMapper.resolveGeometry(geometryLocationEntity.getGeometryEntity())));
+        } else {
+            entity.addProperty(new Property(null, property, ValueType.GEOSPATIAL,null));
         }
 
     }

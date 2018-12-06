@@ -104,11 +104,11 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
 
         String phenomenonTime = DateTimeHelper.format(createPhenomenonTime(observation));
         entity.addProperty(new Property(null, PROP_PHENOMENON_TIME, ValueType.PRIMITIVE, phenomenonTime));
-
-        if (observation.isSetValidTime()) {
-            entity.addProperty(new Property(null, PROP_VALID_TIME, ValueType.PRIMITIVE,
-                    DateTimeHelper.format(createValidTime(observation))));
-        }
+        
+        
+        entity.addProperty(new Property(null, PROP_VALID_TIME, ValueType.PRIMITIVE, (observation.isSetValidTime())
+                                                                                    ? DateTimeHelper.format(createValidTime(observation))
+                                                                                    : null));
 
         // TODO: check for quality property
         // entity.addProperty(new Property(null, PROP_RESULT_QUALITY,

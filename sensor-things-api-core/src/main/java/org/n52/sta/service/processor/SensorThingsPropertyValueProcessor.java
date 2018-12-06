@@ -5,6 +5,7 @@
  */
 package org.n52.sta.service.processor;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 import org.apache.olingo.commons.api.data.ContextURL;
@@ -15,7 +16,9 @@ import org.apache.olingo.commons.api.edm.EdmPrimitiveType;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
+import org.apache.olingo.commons.core.edm.primitivetype.EdmDateTimeOffset;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmGeometry;
+import org.apache.olingo.commons.core.edm.primitivetype.EdmString;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.ODataLibraryException;
@@ -98,7 +101,12 @@ public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcess
         if (primitiveResponse.getProperty().getValue() != null) {
             serializedContent = fixedFormatSerializer.primitiveValue((EdmPrimitiveType) primitiveResponse.getEdmPropertyType(), primitiveResponse.getProperty().getValue(), options);
         } else {
-            serializedContent = fixedFormatSerializer.primitiveValue((EdmPrimitiveType) primitiveResponse.getEdmPropertyType(), "null", options);
+            if (primitiveResponse.getEdmPropertyType() instanceof EdmDateTimeOffset) {
+                // Work around facet constraint not allowing null values
+                serializedContent = fixedFormatSerializer.primitiveValue(EdmString.getInstance(), "null", options);
+            } else {
+                serializedContent = fixedFormatSerializer.primitiveValue((EdmPrimitiveType) primitiveResponse.getEdmPropertyType(), "null", options);
+            }
         }
         response.setContent(serializedContent);
         response.setStatusCode(HttpStatusCode.OK.getStatusCode());
@@ -132,13 +140,15 @@ public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcess
     @Override
     public void readPrimitive(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
         PropertyResponse primitiveResponse = requestHandler.handlePropertyRequest(uriInfo);
-
-        // serialize
-        Object value = primitiveResponse.getProperty().getValue();
-        //TODO: check for other than primitive types for the property
-        InputStream serializedContent = createReponseContent(primitiveResponse.getProperty(),
-                (EdmPrimitiveType) primitiveResponse.getEdmPropertyType(),
-                primitiveResponse.getResponseEdmEntitySet());
+        InputStream serializedContent;
+        if (primitiveResponse.getProperty().getValue() == null) {
+            serializedContent = new ByteArrayInputStream( ("{\"" + primitiveResponse.getProperty().getName() + "\":null}").getBytes() );
+        } else {
+            //TODO: check for other than primitive types for the property
+            serializedContent = createReponseContent(primitiveResponse.getProperty(),
+                                                     (EdmPrimitiveType) primitiveResponse.getEdmPropertyType(),
+                                                     primitiveResponse.getResponseEdmEntitySet());
+        }
 
         response.setContent(serializedContent);
         response.setStatusCode(HttpStatusCode.OK.getStatusCode());
@@ -164,8 +174,6 @@ public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcess
     }
 
     private InputStream createReponseContent(Property property, EdmPrimitiveType edmPropertyType, EdmEntitySet responseEdmEntitySet) throws SerializerException {
-
-//        ODataSerializer serializer = new SensorThingsSerializer(ContentType.JSON_NO_METADATA);
         ContextURL contextUrl = ContextURL.with().entitySet(responseEdmEntitySet).navOrPropertyPath(property.getName()).build();
         PrimitiveSerializerOptions options = PrimitiveSerializerOptions.with().contextURL(contextUrl).build();
 
