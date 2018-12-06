@@ -15,6 +15,7 @@ import org.apache.olingo.commons.api.edm.EdmPrimitiveType;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
+import org.apache.olingo.commons.core.edm.primitivetype.EdmGeometry;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.ODataLibraryException;
@@ -63,8 +64,11 @@ public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcess
         Object propertyValue = propertyValueReponse.getProperty().getValue();
 //        if (propertyValue != null) {
             //TODO: check for other than primitive types for the property
+
             if (propertyValueReponse.getEdmPropertyType() instanceof EdmComplexType) {
                 createComplexValueResponse(response, propertyValueReponse);
+            } else if (propertyValueReponse.getEdmPropertyType() instanceof EdmGeometry) {
+                createGeospatialValueResponse(response, propertyValueReponse);
             } else {
                 createPrimitiveValueResponse(response, propertyValueReponse);
             }
@@ -99,6 +103,20 @@ public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcess
         response.setContent(serializedContent);
         response.setStatusCode(HttpStatusCode.OK.getStatusCode());
         response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.TEXT_PLAIN.toContentTypeString());
+    }
+    
+    private void createGeospatialValueResponse(ODataResponse response, PropertyResponse primitiveResponse) throws SerializerException {
+        Property property = primitiveResponse.getProperty();
+        EdmPrimitiveType edmPropertyType = (EdmPrimitiveType) primitiveResponse.getEdmPropertyType();
+        
+        ContextURL contextUrl = ContextURL.with().entitySet(primitiveResponse.getResponseEdmEntitySet()).navOrPropertyPath(property.getName()).build();
+        PrimitiveSerializerOptions options = PrimitiveSerializerOptions.with().contextURL(contextUrl).build();
+        // serialize
+        SerializerResult serializerResult = serializer.geospatialPrimitive(serviceMetadata, edmPropertyType, property, options);
+        
+        response.setContent(serializerResult.getContent());
+        response.setStatusCode(HttpStatusCode.OK.getStatusCode());
+        response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.JSON_NO_METADATA.toContentTypeString());
     }
 
     @Override

@@ -1028,6 +1028,40 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
         }
         return null;
     }
+    
+
+    public SerializerResult geospatialPrimitive(final ServiceMetadata metadata, final EdmPrimitiveType type,
+            final Property property, final PrimitiveSerializerOptions options) throws SerializerException {
+        OutputStream outputStream = null;
+        SerializerException cachedException = null;
+        try {
+            final ContextURL contextURL = checkContextURL(options == null ? null : options.getContextURL());
+            CircleStreamBuffer buffer = new CircleStreamBuffer();
+            outputStream = buffer.getOutputStream();
+            JsonGenerator json = new JsonFactory().createGenerator(outputStream);
+            writePrimitive(type, property,
+                    options == null ? null : options.isNullable(),
+                    options == null ? null : options.getMaxLength(),
+                    options == null ? null : options.getPrecision(),
+                    options == null ? null : options.getScale(),
+                    options == null ? null : options.isUnicode(), json);
+
+            json.close();
+            outputStream.close();
+            return SerializerResultImpl.with().content(buffer.getInputStream()).build();
+        } catch (final IOException e) {
+            cachedException
+                    = new SerializerException(IO_EXCEPTION_TEXT, e, SerializerException.MessageKeys.IO_EXCEPTION);
+            throw cachedException;
+        } catch (final EdmPrimitiveTypeException e) {
+            cachedException = new SerializerException("Wrong value for property!", e,
+                    SerializerException.MessageKeys.WRONG_PROPERTY_VALUE,
+                    property.getName(), property.getValue().toString());
+            throw cachedException;
+        } finally {
+            closeCircleStreamBufferOutput(outputStream, cachedException);
+        }
+    }
 
     @Override
     public SerializerResult primitive(final ServiceMetadata metadata, final EdmPrimitiveType type,
