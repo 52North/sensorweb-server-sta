@@ -88,13 +88,14 @@ public class SensorThingsEntityCollectionProcessor implements EntityCollectionPr
         ContextURL contextUrl = contextUrlBuilder.build();
 
         final String id = queryOptions.getBaseURI() + "/" + response.getEntitySet().getName();
+        
         EntityCollectionSerializerOptions opts
                 = EntityCollectionSerializerOptions
                         .with()
                         .id(id)
                         .contextURL(contextUrl)
                         .select(queryOptions.getSelectOption())
-                        .expand(queryOptions.getExpandOption())
+                        .expand(QueryOptionsHandler.minimizeExpandOption(queryOptions.getExpandOption()))
                         .count(queryOptions.getCountOption())
                         .build();
         SerializerResult serializerResult = serializer.entityCollection(serviceMetadata, edmEntityType, response.getEntityCollection(), opts);

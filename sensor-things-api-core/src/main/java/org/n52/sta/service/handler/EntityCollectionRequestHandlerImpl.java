@@ -75,6 +75,7 @@ public class EntityCollectionRequestHandlerImpl implements AbstractEntityCollect
                         Long.parseLong(entity.getProperty(PROP_ID).getValue().toString()),
                         sourceEdmEntitySet.getEntityType(),
                         queryOptions.getBaseURI());
+                entity.getBaseURI();
             });
         } else {
             response.getEntityCollection().forEach(entity -> {
