@@ -33,6 +33,7 @@ import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKin
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.n52.series.db.beans.PhenomenonEntity;
 
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPQLQuery;
 
@@ -76,7 +77,7 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
      * BooleanExpression)
      */
     @Override
-    public JPQLQuery<Long> getIdSubqueryWithFilter(BooleanExpression filter) {
+    public JPQLQuery<Long> getIdSubqueryWithFilter(Expression<Boolean> filter) {
         return this.toSubquery(qobservedproperty, qobservedproperty.id, filter);
     }
 
@@ -103,7 +104,9 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
 
     private BooleanExpression handleRelatedPropertyFilter(String propertyName, JPQLQuery<Long> propertyValue)
             throws ExpressionVisitException {
-        throw new ExpressionVisitException("Filtering by Related Properties with cardinality >1 is currently not supported!");
+        return qobservedproperty.id.in(dQS.toSubquery(qdatastream,
+                                                      qdatastream.observableProperty.id,
+                                                      qdatastream.id.eq(propertyValue)));
     }
 
     private Object handleDirectPropertyFilter(String propertyName,

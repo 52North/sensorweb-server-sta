@@ -35,6 +35,7 @@ import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKin
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
@@ -92,7 +93,7 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
                                                               .select(qobservation.dataset.id));
     }
 
-    public JPQLQuery<Long> getIdSubqueryWithFilter(BooleanExpression filter) {
+    public JPQLQuery<Long> getIdSubqueryWithFilter(Expression<Boolean> filter) {
         return this.toSubquery(qdatastream, qdatastream.id, filter);
     }
 
@@ -102,7 +103,7 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
                                        BinaryOperatorKind operator,
                                        boolean switched)
             throws ExpressionVisitException {
-        if (propertyName.equals("Sensor") || propertyName.equals("ObservedProperty") || propertyName.equals("Thing")) {
+        if (propertyName.equals("Sensor") || propertyName.equals("ObservedProperty") || propertyName.equals("Thing") || propertyName.equals("Observations")) {
             return handleRelatedPropertyFilter(propertyName, (JPQLQuery<Long>) propertyValue, switched);
         } else if (propertyName.equals("id")) {
             return handleDirectNumberPropertyFilter(qdatastream.id, propertyValue, operator, switched);
@@ -170,6 +171,12 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
         }
         case "Thing": {
             return qdatastream.thing.id.eqAny(propertyValue);
+        }
+        case "Observations": {
+            return qdatastream.datasets.any().id.in(JPAExpressions
+                                                    .selectFrom(qobservation)
+                                                    .where(qobservation.id.eq(propertyValue))
+                                                    .select(qobservation.dataset.id));
         }
         default:
             throw new ExpressionVisitException("Error getting filter for Property: \"" + propertyName

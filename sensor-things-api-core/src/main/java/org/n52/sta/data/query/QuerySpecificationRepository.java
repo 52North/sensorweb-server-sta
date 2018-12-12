@@ -43,36 +43,44 @@ public class QuerySpecificationRepository {
     public static EntityQuerySpecifications getSpecification(String name) throws ODataApplicationException {
         switch (name) {
         case "ThingEntity":
-        case "Thing": {
+        case "Thing":
+        case "Things": {
             return new ThingQuerySpecifications();
         }
         case "LocationEntity":
-        case "Location": {
+        case "Location":
+        case "Locations": {
             return new LocationQuerySpecifications();
         }
         case "HistoricalLocationEntity":
-        case "HistoricalLocation": {
+        case "HistoricalLocation":
+        case "HistoricalLocations": {
             return new HistoricalLocationQuerySpecifications();
         }
         case "DatastreamEntity":
-        case "Datastream": {
+        case "Datastream":
+        case "Datastreams": {
             return new DatastreamQuerySpecifications();
         }
         case "ProcedureEntity":
-        case "Sensor": {
+        case "Sensor":
+        case "Sensors": {
             return new SensorQuerySpecifications();
         }
         case "DataEntity":
-        case "Observation": {
+        case "Observation":
+        case "Observations": {
             return new ObservationQuerySpecifications();
         }
         case "FeatureEntity":
         case "AbstractFeatureEntity":
-        case "FeatureOfInterest": {
+        case "FeatureOfInterest":
+        case "FeaturesOfInterest": {
             return new FeatureOfInterestQuerySpecifications();
         }
         case "PhenomenonEntity":
-        case "ObservedProperty": {
+        case "ObservedProperty":
+        case "ObservedProperties": {
             return new ObservedPropertyQuerySpecifications();
         }
         default:

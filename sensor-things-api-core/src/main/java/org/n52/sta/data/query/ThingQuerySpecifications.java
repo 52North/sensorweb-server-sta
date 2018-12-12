@@ -33,6 +33,7 @@ import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKin
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.n52.series.db.beans.sta.ThingEntity;
 
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPQLQuery;
 
@@ -70,7 +71,7 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<ThingEnt
      * BooleanExpression)
      */
     @Override
-    public JPQLQuery<Long> getIdSubqueryWithFilter(BooleanExpression filter) {
+    public JPQLQuery<Long> getIdSubqueryWithFilter(Expression<Boolean> filter) {
         return this.toSubquery(qthing, qthing.id, filter);
     }
 
@@ -98,7 +99,19 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<ThingEnt
 
     private BooleanExpression handleRelatedPropertyFilter(String propertyName, JPQLQuery<Long> propertyValue)
             throws ExpressionVisitException {
-        throw new ExpressionVisitException("Filtering by Related Properties with cardinality >1 is currently not supported!");
+        switch(propertyName) {
+        case "Datastreams": {
+            return qthing.datastreamEntities.any().id.eqAny(propertyValue);
+        }
+        case "Locations": {
+            return qthing.locationEntities.any().id.eqAny(propertyValue);
+        }
+        case "HistoricalLocations": {
+            return qthing.historicalLocationEntities.any().id.eqAny(propertyValue);
+        }
+        default:
+            throw new ExpressionVisitException("Filtering by Related Properties with cardinality >1 is currently not supported!");
+        }
     }
 
     private Object handleDirectPropertyFilter(String propertyName,

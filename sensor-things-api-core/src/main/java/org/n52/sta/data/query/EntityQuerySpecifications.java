@@ -45,6 +45,7 @@ import org.n52.series.db.beans.sta.QThingEntity;
 
 import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.ComparableExpressionBase;
 import com.querydsl.core.types.dsl.DateTimeExpression;
@@ -82,7 +83,7 @@ public abstract class EntityQuerySpecifications<T> {
      *        BooleanExpression filtering the Entites whose IDs are returned
      * @return JPQLQuery<Long> Subquery
      */
-    public abstract JPQLQuery<Long> getIdSubqueryWithFilter(BooleanExpression filter);
+    public abstract JPQLQuery<Long> getIdSubqueryWithFilter(Expression<Boolean> filter);
 
     /**
      * Gets Entity-specific Filter for property with given name. Filters may not accept all BinaryOperators,
@@ -106,10 +107,10 @@ public abstract class EntityQuerySpecifications<T> {
             throws ExpressionVisitException;
 
     // TODO:JavaDoc
-    protected JPQLQuery<Long> toSubquery(EntityPath<T> relation, Expression<Long> selector, BooleanExpression filter) {
+    protected JPQLQuery<Long> toSubquery(EntityPath<T> relation, Expression<Long> selector, Expression<Boolean> filter) {
         return JPAExpressions.selectFrom(relation)
                              .select(selector)
-                             .where(filter);
+                             .where((Predicate)filter);
     }
 
     protected StringExpression toStringExpression(Object expr) throws ExpressionVisitException {

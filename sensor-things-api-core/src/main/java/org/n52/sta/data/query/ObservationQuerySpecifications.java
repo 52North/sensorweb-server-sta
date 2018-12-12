@@ -35,6 +35,7 @@ import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKin
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.n52.series.db.beans.DataEntity;
 
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.DateTimeExpression;
 import com.querydsl.core.types.dsl.NumberPath;
@@ -89,7 +90,7 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
      * BooleanExpression)
      */
     @Override
-    public JPQLQuery<Long> getIdSubqueryWithFilter(BooleanExpression filter) {
+    public JPQLQuery<Long> getIdSubqueryWithFilter(Expression<Boolean> filter) {
         return this.toSubquery(qobservation, qobservation.id, filter);
     }
 
@@ -117,9 +118,15 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
     private BooleanExpression handleRelatedPropertyFilter(String propertyName, JPQLQuery<Long> propertyValue)
             throws ExpressionVisitException {
         if (propertyName.equals("Datastream")) {
-            return qobservation.dataset.id.in(propertyValue);
+            return qobservation.dataset.id.in(JPAExpressions
+                                              .selectFrom(qdatastream)
+                                              .where(qdatastream.id.eq(propertyValue))
+                                              .select(qdatastream.datasets.any().id));
         } else {
-            throw new ExpressionVisitException("Filtering by Related Properties with cardinality >1 is currently not supported!");
+            return qobservation.dataset.id.in(JPAExpressions
+                                              .selectFrom(qdataset)
+                                              .where(qdataset.feature.id.eq(propertyValue))
+                                              .select(qdataset.id));
         }
     }
 

@@ -33,6 +33,7 @@ import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKin
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPQLQuery;
 
@@ -62,7 +63,7 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
      * BooleanExpression)
      */
     @Override
-    public JPQLQuery<Long> getIdSubqueryWithFilter(BooleanExpression filter) {
+    public JPQLQuery<Long> getIdSubqueryWithFilter(Expression<Boolean> filter) {
         return this.toSubquery(qhistoricallocation, qhistoricallocation.id, filter);
     }
 
@@ -93,8 +94,9 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
             throws ExpressionVisitException {
         if (propertyName.equals("Thing")) {
             return qhistoricallocation.thingEntity.id.eqAny(propertyValue);
-        } else
-            throw new ExpressionVisitException("Filtering by Related Properties with cardinality >1 is currently not supported!");
+        } else {
+            return qhistoricallocation.locationEntities.any().id.eqAny(propertyValue);
+        }
     }
 
     private Object handleDirectPropertyFilter(String propertyName,

@@ -32,15 +32,9 @@ package org.n52.sta.data.query;
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.n52.series.db.beans.AbstractFeatureEntity;
-import org.n52.series.db.beans.FeatureEntity;
 
-import org.n52.series.db.beans.AbstractFeatureEntity;
-
-import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.NumberExpression;
-import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 
@@ -81,7 +75,7 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
      * BooleanExpression)
      */
     @Override
-    public JPQLQuery<Long> getIdSubqueryWithFilter(BooleanExpression filter) {
+    public JPQLQuery<Long> getIdSubqueryWithFilter(Expression<Boolean> filter) {
         return this.toSubquery(qfeature, qfeature.id, filter);
     }
 
@@ -110,7 +104,14 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
                                                           JPQLQuery<Long> propertyValue,
                                                           boolean switched)
             throws ExpressionVisitException {
-        throw new ExpressionVisitException("Filtering by Related Properties with cardinality >1 is currently not supported!");
+        return qfeature.id.in(JPAExpressions
+                              .selectFrom(qdataset)
+                              .where(qdataset.id.in(
+                                                    JPAExpressions
+                                                                  .selectFrom(qobservation)
+                                                                  .where(qobservation.id.eq(propertyValue))
+                                                                  .select(qobservation.dataset.id)))
+                              .select(qdataset.feature.id));
     }
 
     private Object handleDirectPropertyFilter(String propertyName,
