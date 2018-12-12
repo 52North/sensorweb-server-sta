@@ -11,7 +11,6 @@ import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvid
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -23,16 +22,11 @@ import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.uri.UriHelper;
-import org.apache.olingo.server.api.uri.UriInfoResource;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
 import org.apache.olingo.server.api.uri.queryoption.ExpandItem;
 import org.apache.olingo.server.api.uri.queryoption.ExpandOption;
-import org.apache.olingo.server.api.uri.queryoption.FilterOption;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
-import org.apache.olingo.server.api.uri.queryoption.SystemQueryOption;
-import org.apache.olingo.server.api.uri.queryoption.SystemQueryOptionKind;
-import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
 import org.apache.olingo.server.core.uri.queryoption.ExpandItemImpl;
 import org.apache.olingo.server.core.uri.queryoption.ExpandOptionImpl;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
@@ -105,160 +99,6 @@ public class QueryOptionsHandler {
      *        baseURI of the Request
      * @return List<Link> List of inlined Entities
      */
-    // public void handleExpandOption(Entity entity, ExpandOption expandOption, Long sourceId, EdmEntityType
-    // sourceEdmEntityType, String baseURI) {
-    // handleExpand(entity, expandOption, sourceId, sourceEdmEntityType, baseURI);
-    // expandOptions.clear();
-    // for (ExpandItem elem : ExpandOption) {
-    //
-    // }
-    // }
-
-    // private class Pair {
-    //
-    // public ExpandItem item;
-    //
-    // public List<ExpandItem> subItems;
-    //
-    // public Pair(ExpandItem item, List<ExpandItem> subItems) {
-    // this.item = item;
-    // this.subItems = subItems;
-    // }
-    // }
-    //
-    // private class QueryOptionWrapper implements ExpandOption {
-    //
-    // private ExpandOption baseOption;
-    //
-    // private List<ExpandItem> expandItems;
-    //
-    // public QueryOptionWrapper(ExpandOption option) {
-    // this.baseOption = option;
-    // this.expandItems = option.getExpandItems();
-    // }
-    //
-    // public void setExpandItems(List<ExpandItem> items) {
-    // this.expandItems = items;
-    // }
-    //
-    // @Override
-    // public List<ExpandItem> getExpandItems() {
-    // return expandItems;
-    // }
-    //
-    // @Override
-    // public String getName() {
-    // return baseOption.getName();
-    // }
-    //
-    // @Override
-    // public String getText() {
-    // return baseOption.getText();
-    // }
-    //
-    // @Override
-    // public SystemQueryOptionKind getKind() {
-    // return baseOption.getKind();
-    // }
-    // }
-    //
-    // private QueryOptionWrapper test(QueryOptionWrapper expand) {
-    // if (expand == null) {
-    // return null;
-    // }
-    // if (expand.getExpandItems().size() <= 1) {
-    // return expand;
-    // } else {
-    // // Merge into minimal Set
-    // Map<UriInfoResource, QueryOptionWrapper> expandOptions = new HashMap<UriInfoResource,
-    // QueryOptionWrapper>();
-    // for (ExpandItem item : expand.getExpandItems()) {
-    // UriInfoResource key = item.getResourcePath();
-    //
-    // if (expandOptions.containsKey(key)) {
-    // // Get stored ExpandItems
-    // List<ExpandItem> items = expandOptions.get(key).getExpandItems();
-    // // Get own ExpandItems
-    // items.addAll(item.getExpandOption().getExpandItems());
-    // // Update Map
-    // expandOptions.get(key).setExpandItems(items);
-    // } else {
-    // expandOptions.put(key, new QueryOptionWrapper(item.getExpandOption()));
-    // }
-    // }
-    // // Set minimal Set as new QueryOptions
-    // expand.setExpandItems(items);
-    //
-    //
-    // }
-    // }
-    
-    public static ExpandOption minimizeExpandOption(ExpandOption option) {
-        if (option == null) {
-            return null;
-        } else {
-            ExpandOptionImpl newExpandOption = new ExpandOptionImpl();
-            minimizeExpandList(option.getExpandItems()).forEach(newExpandOption::addExpandItem);
-            return newExpandOption;
-        }
-    }
-
-    /**
-     * Minimizes a given List of ExpandItems by combining Items that relate to the same Entity.
-     * 
-     * @param original
-     *        List of ExpandItems to be reduced.
-     * @return Minimal set of ExpandItems
-     */
-    // TODO: Improve key (e.g. so the following request has different Keys for each Datastream):
-    // [...]/Things?$expand=Datastreams($filter=id eq 2)/Sensor,Datastreams($filter=id ne 2)/Observations
-    private static List<ExpandItem> minimizeExpandList(List<ExpandItem> original) {
-        if (original.size() <= 1) {
-            return original;
-        } else {
-            Map<String, ExpandItem> resultMap = new HashMap<String, ExpandItem>();
-            original.forEach(item -> {
-                String key = item.getResourcePath().getUriResourceParts().get(0).toString();
-                if (resultMap.containsKey(key)) {
-                    // Join Items
-                    resultMap.put(key, joinExpandItems(item, resultMap.get(key)));
-                } else {
-                    resultMap.put(key, item);
-                }
-            });
-            return new ArrayList<ExpandItem>(resultMap.values());
-        }
-    }
-
-    /**
-     * Joins two ExpandItems relating to the same Entity by joining all subsequent Items
-     * 
-     * @param first
-     *        First Item
-     * @param second
-     *        Second Item
-     * @return ExpandItem
-     *         joined Item
-     */
-    private static ExpandItem joinExpandItems(ExpandItem first, ExpandItem second) {
-        ExpandItemImpl result = new ExpandItemImpl();
-        result.setSystemQueryOptions(Arrays.asList(first.getCountOption(), second.getCountOption()));
-        
-        ExpandOptionImpl newExpandOption = new ExpandOptionImpl();
-        first.getExpandOption().getExpandItems().forEach(newExpandOption::addExpandItem);
-        second.getExpandOption().getExpandItems().forEach(newExpandOption::addExpandItem);
-        result.setSystemQueryOption(newExpandOption);
-        
-        result.setSystemQueryOptions(Arrays.asList(first.getFilterOption(), second.getFilterOption()));
-        result.setSystemQueryOptions(Arrays.asList(first.getOrderByOption(), second.getOrderByOption()));
-        result.setSystemQueryOptions(Arrays.asList(first.getSearchOption(), second.getSearchOption()));
-        result.setSystemQueryOptions(Arrays.asList(first.getSelectOption(), second.getSelectOption()));
-        result.setSystemQueryOptions(Arrays.asList(first.getSkipOption(), second.getSkipOption()));
-        result.setSystemQueryOptions(Arrays.asList(first.getTopOption(), second.getTopOption()));
-        result.setResourcePath(first.getResourcePath());
-        return result;
-    }
-
     public void handleExpandOption(Entity entity,
                                     ExpandOption expandOption,
                                     Long sourceId,
@@ -368,6 +208,72 @@ public class QueryOptionsHandler {
         }
 
         return entityCollection;
+    }
+    
+    public static ExpandOption minimizeExpandOption(ExpandOption option) {
+        if (option == null) {
+            return null;
+        } else {
+            ExpandOptionImpl newExpandOption = new ExpandOptionImpl();
+            minimizeExpandList(option.getExpandItems()).forEach(newExpandOption::addExpandItem);
+            return newExpandOption;
+        }
+    }
+
+    /**
+     * Minimizes a given List of ExpandItems by combining Items that relate to the same Entity.
+     * 
+     * @param original
+     *        List of ExpandItems to be reduced.
+     * @return Minimal set of ExpandItems
+     */
+    // TODO: Improve key (e.g. so the following request has different Keys for each Datastream):
+    // [...]/Things?$expand=Datastreams($filter=id eq 2)/Sensor,Datastreams($filter=id ne 2)/Observations
+    private static List<ExpandItem> minimizeExpandList(List<ExpandItem> original) {
+        if (original.size() <= 1) {
+            return original;
+        } else {
+            Map<String, ExpandItem> resultMap = new HashMap<String, ExpandItem>();
+            original.forEach(item -> {
+                String key = item.getResourcePath().getUriResourceParts().get(0).toString();
+                if (resultMap.containsKey(key)) {
+                    // Join Items
+                    resultMap.put(key, joinExpandItems(item, resultMap.get(key)));
+                } else {
+                    resultMap.put(key, item);
+                }
+            });
+            return new ArrayList<ExpandItem>(resultMap.values());
+        }
+    }
+
+    /**
+     * Joins two ExpandItems relating to the same Entity by joining all subsequent Items
+     * 
+     * @param first
+     *        First Item
+     * @param second
+     *        Second Item
+     * @return ExpandItem
+     *         joined Item
+     */
+    private static ExpandItem joinExpandItems(ExpandItem first, ExpandItem second) {
+        ExpandItemImpl result = new ExpandItemImpl();
+        result.setSystemQueryOptions(Arrays.asList(first.getCountOption(), second.getCountOption()));
+        
+        ExpandOptionImpl newExpandOption = new ExpandOptionImpl();
+        first.getExpandOption().getExpandItems().forEach(newExpandOption::addExpandItem);
+        second.getExpandOption().getExpandItems().forEach(newExpandOption::addExpandItem);
+        result.setSystemQueryOption(newExpandOption);
+        
+        result.setSystemQueryOptions(Arrays.asList(first.getFilterOption(), second.getFilterOption()));
+        result.setSystemQueryOptions(Arrays.asList(first.getOrderByOption(), second.getOrderByOption()));
+        result.setSystemQueryOptions(Arrays.asList(first.getSearchOption(), second.getSearchOption()));
+        result.setSystemQueryOptions(Arrays.asList(first.getSelectOption(), second.getSelectOption()));
+        result.setSystemQueryOptions(Arrays.asList(first.getSkipOption(), second.getSkipOption()));
+        result.setSystemQueryOptions(Arrays.asList(first.getTopOption(), second.getTopOption()));
+        result.setResourcePath(first.getResourcePath());
+        return result;
     }
 
 }
