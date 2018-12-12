@@ -366,19 +366,26 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
                                                          BinaryOperatorKind operator)
             throws ExpressionVisitException,
             ODataApplicationException {
-        // JPQLQuery<Long> result = null;
-        // int uriLength = uriResources.size();
-        // String name = uriResources.get(uriLength-2).toString();
-        //
-        // // Get QuerySpecifications for subQuery
-        // EntityQuerySpecifications stepQS = QuerySpecificationRepository.getSpecification(name);
-        // BooleanExpression filter = stepQS.getFilterForProperty(uriResources.get(uriLength-1).toString(),
-        // value, operator);
-        // result = stepQS.getIdSubqueryWithFilter(filter);
+         JPQLQuery<Long> idQuery = null;
+         int uriLength = uriResources.size();
+         String lastResource = uriResources.get(uriLength-2).toString();
+         
+         // Get filter on Entity
+         EntityQuerySpecifications stepQS = QuerySpecificationRepository.getSpecification(lastResource);
+         Object filter = stepQS.getFilterForProperty(uriResources.get(uriLength-1).toString(), value, operator, false);
+         idQuery = stepQS.getIdSubqueryWithFilter((com.querydsl.core.types.Expression<Boolean>)filter);
+         
+         for (int i = uriLength-3; i > 0; i-- ) {
+             // Get QuerySpecifications for subQuery
+             stepQS = QuerySpecificationRepository.getSpecification(uriResources.get(i).toString());
+             // Get new IdQuery based on Filter
+             BooleanExpression expr = (BooleanExpression) stepQS.getFilterForProperty(uriResources.get(i+1).toString(), idQuery, null, false);
+             idQuery = stepQS.getIdSubqueryWithFilter(expr);
+         }
         //
         // // Filter by Id on main Query
-        // return rootQS.getFilterForProperty(name, result, operator);
-        return null;
+        //TODO check if this cast is legit
+        return  (BooleanExpression) rootQS.getFilterForProperty(uriResources.get(0).toString(), idQuery, null, false);
     }
 
     /**
