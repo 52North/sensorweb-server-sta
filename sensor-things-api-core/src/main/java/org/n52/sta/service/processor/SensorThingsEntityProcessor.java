@@ -192,7 +192,7 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
         EntitySerializerOptions opts = EntitySerializerOptions.with()
                 .contextURL(contextUrl)
                 .select(queryOptions.getSelectOption())
-                .expand(QueryOptionsHandler.minimizeExpandOption(queryOptions.getExpandOption()))
+                .expand(queryOptions.getExpandOption())
                 .build();
 
         SerializerResult serializerResult = serializer.entity(serviceMetadata, response.getEntitySet().getEntityType(), response.getEntity(), opts);

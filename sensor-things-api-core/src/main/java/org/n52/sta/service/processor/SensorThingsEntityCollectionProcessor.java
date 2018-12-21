@@ -95,7 +95,7 @@ public class SensorThingsEntityCollectionProcessor implements EntityCollectionPr
                         .id(id)
                         .contextURL(contextUrl)
                         .select(queryOptions.getSelectOption())
-                        .expand(QueryOptionsHandler.minimizeExpandOption(queryOptions.getExpandOption()))
+                        .expand(queryOptions.getExpandOption())
                         .count(queryOptions.getCountOption())
                         .build();
         SerializerResult serializerResult = serializer.entityCollection(serviceMetadata, edmEntityType, response.getEntityCollection(), opts);
