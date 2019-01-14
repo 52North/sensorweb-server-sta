@@ -18,6 +18,9 @@ buildNumber.properties
 sensor-things-api-app/.settings/
 sensor-things-api-core/.settings/
 sensor-things-api-webapp/.settings/
+sensor-things-api-http/.settings/
+sensor-things-api-mqtt/.settings/
+
 sensor-things-api-app/console.log
 
 # IntelliJ IDE Files
