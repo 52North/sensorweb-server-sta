@@ -3,21 +3,18 @@
 debug: false
 trace: false
 
-#TODO: Check if this is needed. 
+# Database Configuration
 database:
   jpa:
     persistence-location: classpath:META-INF/persistence.xml
-#entitymanager:
-#  packagesToScan: 
 
-# Copied from dao-series-api
+# Spring 
 spring:
   datasource:
     platform: postgres
     username: postgres
     password: postgres
-    url: jdbc:postgresql://localhost:5432/sta_db
-    #data: classpath:/META-INF/data-${spring.datasource.platform}.sql
+    url: jdbc:postgresql://localhost:5432/ets_sta10_2
     initialization-mode: always
   jpa:
     properties:
@@ -39,9 +36,14 @@ spring:
   jmx:
     enabled: false
         
+        
+# MQTT Configuration
+
+
+# Logging
 logging:
   level:
-#    root: TRACE
+    # root: TRACE
     org.n52.sta: DEBUG
     org.hibernate: INFO
     org.hibernate.type: INFO

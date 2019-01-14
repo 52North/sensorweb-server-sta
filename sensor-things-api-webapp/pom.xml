@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.n52.sta</groupId>
         <artifactId>sensor-things-api</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>1.0.0</version>
     </parent>
     <artifactId>sensor-things-api-webapp</artifactId>
     <packaging>war</packaging>
@@ -22,7 +22,7 @@
         <dependency>       
             <groupId>org.n52.sta</groupId>
             <artifactId>sensor-things-api-core</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
