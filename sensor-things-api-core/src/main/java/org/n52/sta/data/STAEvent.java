@@ -26,16 +26,18 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.mqtt.config;
-
-import org.springframework.stereotype.Component;
+package org.n52.sta.data;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
-@Component
-public class MQTTConfiguration {
+public abstract class STAEvent {
     
-    public static final String internalClientId = "p";
+    // List of all possible Events
+    public enum EventType {ObservationCreateEvent}
+    
+    public abstract EventType getEventType();
+    
+    public Object getEvent() {return this;};
 }

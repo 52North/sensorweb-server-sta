@@ -32,9 +32,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Properties;
 
-import org.apache.olingo.commons.api.format.ContentType;
-import org.apache.olingo.server.api.ODataRequest;
-import org.n52.sta.service.deserializer.SensorThingsDeserializer;
+import org.n52.sta.mqtt.config.MQTTConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -45,14 +43,12 @@ import io.moquette.broker.config.IConfig;
 import io.moquette.broker.config.MemoryConfig;
 import io.moquette.interception.AbstractInterceptHandler;
 import io.moquette.interception.InterceptHandler;
-import io.moquette.interception.messages.InterceptAcknowledgedMessage;
 import io.moquette.interception.messages.InterceptConnectMessage;
 import io.moquette.interception.messages.InterceptConnectionLostMessage;
 import io.moquette.interception.messages.InterceptDisconnectMessage;
 import io.moquette.interception.messages.InterceptPublishMessage;
 import io.moquette.interception.messages.InterceptSubscribeMessage;
 import io.moquette.interception.messages.InterceptUnsubscribeMessage;
-import io.netty.buffer.ByteBufInputStream;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -80,47 +76,46 @@ public class MQTTBroker {
 
             @Override
             public String getID() {
-                //TODO(specki): Check if this has any effect at all
-                return "52N";
+                return "STAMessageInterceptor";
             }
             
             @Override
             public void onConnect(InterceptConnectMessage msg) {
-                LOGGER.debug(msg.getClientID());
+                LOGGER.debug("Client with ID: " + msg.getClientID() + "has connected");
             }
 
             @Override
             public void onDisconnect(InterceptDisconnectMessage msg) {
+                LOGGER.debug("Client with ID: " + msg.getClientID() + "has disconnected");
             }
 
             @Override
             public void onConnectionLost(InterceptConnectionLostMessage msg) {
+                LOGGER.debug("Client with ID: " + msg.getClientID() + "has lost connection");
             }
 
             @Override
             public void onPublish(InterceptPublishMessage msg) {
-                LOGGER.debug(msg.getTopicName());
-                LOGGER.debug(msg.getPayload().toString());
+                if (!msg.getClientID().equals(MQTTConfiguration.internalClientId)) {
+                    LOGGER.debug(msg.getTopicName());
+                    LOGGER.debug(msg.getPayload().toString());
+                    
+                    // transform mqtt request into olingo request to go through whole olingo pipeline
+//                    ODataRequest pseudo = new ODataRequest();
+//                    pseudo.setBody(new ByteBufInputStream(msg.getPayload()));
+//                    pseudo.setRawODataPath(msg.getTopicName());
+                }
                 
-                // Reformat into olingo Format
-                ODataRequest pseudo = new ODataRequest();
-                pseudo.setBody(new ByteBufInputStream(msg.getPayload()));
-                pseudo.setRawODataPath(msg.getTopicName());
-                // 
-                pseudo.set
             }
 
             @Override
             public void onSubscribe(InterceptSubscribeMessage msg) {
-                LOGGER.debug(msg.getClientID());
+                LOGGER.debug("Client with ID: " + msg.getClientID() + "has subscribed");
             }
 
             @Override
             public void onUnsubscribe(InterceptUnsubscribeMessage msg) {
-            }
-
-            @Override
-            public void onMessageAcknowledged(InterceptAcknowledgedMessage msg) {
+                LOGGER.debug("Client with ID: " + msg.getClientID() + "has UNsubscribed");
             }
             
         };

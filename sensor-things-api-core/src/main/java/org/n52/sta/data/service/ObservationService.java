@@ -36,7 +36,6 @@ import java.util.OptionalLong;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
-import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
@@ -53,8 +52,6 @@ import org.n52.series.db.beans.CategoryEntity;
 import org.n52.series.db.beans.CountDataEntity;
 import org.n52.series.db.beans.CountDatasetEntity;
 import org.n52.series.db.beans.DataEntity;
-import org.n52.series.db.beans.ProcedureEntity;
-import org.n52.sta.data.OffsetLimitBasedPageRequest;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.NotInitializedDatasetEntity;
 import org.n52.series.db.beans.OfferingEntity;
@@ -66,12 +63,12 @@ import org.n52.series.db.beans.TextDataEntity;
 import org.n52.series.db.beans.TextDatasetEntity;
 import org.n52.series.db.beans.dataset.Dataset;
 import org.n52.series.db.beans.sta.DatastreamEntity;
-import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
-import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.series.db.query.DatasetQuerySpecifications;
 import org.n52.shetland.ogc.om.OmConstants;
+import org.n52.sta.data.EventHandler;
+import org.n52.sta.data.ObservationCreateEvent;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.FeatureOfInterestMapper;
@@ -80,8 +77,8 @@ import org.n52.sta.service.query.QueryOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.querydsl.core.types.Predicate;
 import com.google.common.collect.Sets;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
 /**
@@ -293,7 +290,7 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
     public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
         return getRepository().count(getFilterPredicate(DataEntity.class, queryOptions));
     }
-
+    
     @Override
     public DataEntity<?> create(DataEntity<?> entity) throws ODataApplicationException {
         if (entity instanceof StaDataEntity) {

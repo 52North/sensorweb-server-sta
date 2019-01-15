@@ -4,6 +4,8 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.beans.DataEntity;
+import org.n52.sta.data.EventHandler;
+import org.n52.sta.data.ObservationCreateEvent;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.AbstractMapper;
@@ -16,12 +18,25 @@ public class ObservationEntityCrudRequestHandler extends AbstractEntityCrudReque
 
     @Autowired
     private ObservationMapper mapper;
-
+    
+    @Autowired
+    private EventHandler mqttclient;
+    
+    
     @Override
     protected Entity handleCreateEntityRequest(Entity entity) throws ODataApplicationException {
         if (entity != null) {
             DataEntity<?> observation = getEntityService().create(mapper.createEntity(getMapper().checkEntity(entity)));
-            return mapToEntity(observation);
+            Entity obs = mapToEntity(observation);
+            
+            //TESTING:
+            ObservationCreateEvent event = new ObservationCreateEvent();
+            event.setObservation(obs);
+            // event.setRelatedDatastream(obs.getNavigationLink("Datastream").getBindingLink());
+            
+            mqttclient.handleEvent(event);
+
+            return obs;
         }
         return null;
     }
