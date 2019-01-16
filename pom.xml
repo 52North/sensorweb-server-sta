@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.n52.sta</groupId>
@@ -11,8 +11,8 @@
 
     <name>52°North Sensor Things API</name>
     <description>52°North implementation of the OGC Sensor Things API</description>
-        
-        
+
+
     <modules>
         <module>sensor-things-api-core</module>
         <module>sensor-things-api-app</module>
@@ -31,6 +31,8 @@
         <series-hbm.version>2-SNAPSHOT</series-hbm.version>
         <arctic-sea.version>5.1.0-SNAPSHOT</arctic-sea.version>
         <spring-boot.version>2.0.3.RELEASE</spring-boot.version>
+        <querydsl.version>4.1.4</querydsl.version>
+        <geolatte-geom.version>1.3.0</geolatte-geom.version>
     </properties>
 
     <dependencyManagement>
@@ -40,7 +42,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
                 <version>${spring-boot.version}</version>
-                <type>pom</type>	
+                <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
@@ -59,13 +61,13 @@
                 <version>7.0</version>
                 <scope>provided</scope>
             </dependency>
-		
+
             <!-- Data Access -->
-            <dependency>
-                <groupId>org.n52.series-api.db</groupId>
-                <artifactId>dao</artifactId>
-                <version>3.0.0-SNAPSHOT</version>
-            </dependency>
+            <!-- <dependency> -->
+            <!-- <groupId>org.n52.series-api.db</groupId> -->
+            <!-- <artifactId>dao</artifactId> -->
+            <!-- <version>3.0.0-SNAPSHOT</version> -->
+            <!-- </dependency> -->
             <dependency>
                 <groupId>org.n52.series.db</groupId>
                 <artifactId>entities</artifactId>
@@ -81,7 +83,17 @@
                 <artifactId>types</artifactId>
                 <version>${series-hbm.version}</version>
             </dependency>
-        
+            <dependency>
+                <groupId>org.n52.series.db</groupId>
+                <artifactId>codegen</artifactId>
+                <version>${series-hbm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.geolatte</groupId>
+                <artifactId>geolatte-geom</artifactId>
+                <version>${geolatte-geom.version}</version>
+            </dependency>
+
             <!-- Olingo -->
             <dependency>
                 <groupId>org.apache.olingo</groupId>
@@ -93,7 +105,7 @@
                 <artifactId>odata-commons-core</artifactId>
                 <version>${odata.version}</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
@@ -108,6 +120,16 @@
                 <groupId>org.n52.arctic-sea</groupId>
                 <artifactId>janmayen</artifactId>
                 <version>${arctic-sea.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.n52.arctic-sea</groupId>
+                <artifactId>shetland</artifactId>
+                <version>${arctic-sea.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.querydsl</groupId>
+                <artifactId>querydsl-spatial</artifactId>
+                <version>${querydsl.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

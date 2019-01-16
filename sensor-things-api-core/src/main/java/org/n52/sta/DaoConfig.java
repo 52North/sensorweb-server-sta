@@ -41,16 +41,8 @@ import org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl;
 import org.hibernate.jpa.boot.spi.TypeContributorList;
 import org.hibernate.type.BasicType;
 import org.n52.hibernate.type.SmallBooleanType;
-import org.n52.io.handler.DefaultIoFactory;
-import org.n52.io.response.dataset.AbstractValue;
-import org.n52.io.response.dataset.DatasetOutput;
-import org.n52.series.db.AnnotationBasedDataRepositoryFactory;
-import org.n52.series.db.DataRepositoryTypeFactory;
-import org.n52.series.db.old.dao.DbQueryFactory;
-import org.n52.series.db.old.dao.DefaultDbQueryFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -66,6 +58,7 @@ public class DaoConfig {
     @Value("META-INF/persistence.xml")
     private String persistenceXmlLocation;
     
+    /*
     @Bean
     public DbQueryFactory dbQueryFactory(@Value("${database.srid:'EPSG:4326'}") String srid) {
         return new DefaultDbQueryFactory(srid);
@@ -80,6 +73,7 @@ public class DaoConfig {
     public DefaultIoFactory<DatasetOutput<AbstractValue< ? >>, AbstractValue< ? >> defaultIoFactory() {
         return new DefaultIoFactory<>();
     }
+    */
     
     @Bean
     public EntityManagerFactory entityManagerFactory(DataSource datasource, JpaProperties properties)
