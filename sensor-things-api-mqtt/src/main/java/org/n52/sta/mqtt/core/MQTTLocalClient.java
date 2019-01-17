@@ -33,6 +33,7 @@ import java.util.HashMap;
 import org.n52.sta.data.EventHandler;
 import org.n52.sta.data.ObservationCreateEvent;
 import org.n52.sta.data.STAEvent;
+import org.n52.sta.mqtt.config.MQTTConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,6 +77,6 @@ public class MQTTLocalClient implements EventHandler {
 
     @Bean
     public IntegrationFlow mqttOutboundFlow() {
-        return f -> f.handle(new MqttPahoMessageHandler("tcp://localhost:1883", "POC"));
+        return f -> f.handle(new MqttPahoMessageHandler("tcp://localhost:1883", MQTTConfiguration.internalClientId));
     }
 }
