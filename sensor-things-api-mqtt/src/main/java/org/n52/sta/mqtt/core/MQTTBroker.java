@@ -49,6 +49,13 @@ import io.moquette.interception.messages.InterceptDisconnectMessage;
 import io.moquette.interception.messages.InterceptPublishMessage;
 import io.moquette.interception.messages.InterceptSubscribeMessage;
 import io.moquette.interception.messages.InterceptUnsubscribeMessage;
+import java.nio.charset.Charset;
+import org.apache.olingo.server.api.ODataApplicationException;
+import org.apache.olingo.server.api.deserializer.DeserializerException;
+import org.apache.olingo.server.core.uri.parser.UriParserException;
+import org.apache.olingo.server.core.uri.validator.UriValidationException;
+import org.n52.sta.mqtt.handler.MqttObservationCreateHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -56,9 +63,12 @@ import io.moquette.interception.messages.InterceptUnsubscribeMessage;
  */
 @Component
 public class MQTTBroker {
-    
+
     final Logger LOGGER = LoggerFactory.getLogger(MQTTBroker.class);
-    
+
+    @Autowired
+    private MqttObservationCreateHandler handler;
+
     @Bean
     public Server initMQTTBroker() {
         Server test = new Server();
@@ -70,7 +80,7 @@ public class MQTTBroker {
         }
         return test;
     }
-    
+
     private InterceptHandler initMessageHandler() {
         InterceptHandler messageHandler = new AbstractInterceptHandler() {
 
@@ -78,7 +88,7 @@ public class MQTTBroker {
             public String getID() {
                 return "STAMessageInterceptor";
             }
-            
+
             @Override
             public void onConnect(InterceptConnectMessage msg) {
                 LOGGER.debug("Client with ID: " + msg.getClientID() + "has connected");
@@ -98,14 +108,16 @@ public class MQTTBroker {
             public void onPublish(InterceptPublishMessage msg) {
                 if (!msg.getClientID().equals(MQTTConfiguration.internalClientId)) {
                     LOGGER.debug(msg.getTopicName());
-                    LOGGER.debug(msg.getPayload().toString());
-                    
-                    // transform mqtt request into olingo request to go through whole olingo pipeline
-//                    ODataRequest pseudo = new ODataRequest();
-//                    pseudo.setBody(new ByteBufInputStream(msg.getPayload()));
-//                    pseudo.setRawODataPath(msg.getTopicName());
+                    LOGGER.debug(msg.getPayload().toString(Charset.forName("UTF-8")));
+                    try {
+                        handler.processMessage(msg);
+                    } catch (UriParserException | UriValidationException
+                            | ODataApplicationException | DeserializerException ex) {
+                        LOGGER.error("Error while processing MQTT message");
+                        LOGGER.debug("Error while processing MQTT message", ex);
+                    }
                 }
-                
+
             }
 
             @Override
@@ -117,13 +129,14 @@ public class MQTTBroker {
             public void onUnsubscribe(InterceptUnsubscribeMessage msg) {
                 LOGGER.debug("Client with ID: " + msg.getClientID() + "has UNsubscribed");
             }
-            
+
         };
         return messageHandler;
     }
-    
+
     private IConfig parseConfig() {
         //TODO: Actually use properties from application properties
         return new MemoryConfig(new Properties());
     }
+
 }
