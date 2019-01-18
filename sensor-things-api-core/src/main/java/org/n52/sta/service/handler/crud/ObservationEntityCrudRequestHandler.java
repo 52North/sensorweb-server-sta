@@ -19,23 +19,11 @@ public class ObservationEntityCrudRequestHandler extends AbstractEntityCrudReque
     @Autowired
     private ObservationMapper mapper;
     
-    @Autowired
-    private EventHandler mqttclient;
-    
-    
     @Override
     protected Entity handleCreateEntityRequest(Entity entity) throws ODataApplicationException {
         if (entity != null) {
             DataEntity<?> observation = getEntityService().create(mapper.createEntity(getMapper().checkEntity(entity)));
             Entity obs = mapToEntity(observation);
-            
-            //TESTING:
-            ObservationCreateEvent event = new ObservationCreateEvent();
-            event.setObservation(obs);
-            // event.setRelatedDatastream(obs.getNavigationLink("Datastream").getBindingLink());
-            
-            mqttclient.handleEvent(event);
-
             return obs;
         }
         return null;

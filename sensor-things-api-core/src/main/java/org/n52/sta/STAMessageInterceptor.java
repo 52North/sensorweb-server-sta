@@ -26,57 +26,52 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.mqtt.core;
+package org.n52.sta;
 
-import java.util.HashMap;
+import java.util.Iterator;
 
+import org.hibernate.EmptyInterceptor;
+import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.sta.data.EventHandler;
 import org.n52.sta.data.ObservationCreateEvent;
 import org.n52.sta.data.STAEvent;
-import org.n52.sta.mqtt.config.MQTTConfiguration;
+import org.n52.sta.mapping.ObservationMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.integration.annotation.IntegrationComponentScan;
-import org.springframework.integration.dsl.IntegrationFlow;
-import org.springframework.integration.mqtt.outbound.MqttPahoMessageHandler;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.support.GenericMessage;
 import org.springframework.stereotype.Component;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
+@SuppressWarnings("serial")
 @Component
-@IntegrationComponentScan
-public class MQTTLocalClient implements EventHandler {
+public class STAMessageInterceptor extends EmptyInterceptor {
+    
+    private final Logger LOGGER = LoggerFactory.getLogger(STAMessageInterceptor.class);
     
     @Autowired
-    IntegrationFlow gate;
-
-    final Logger LOGGER = LoggerFactory.getLogger(MQTTLocalClient.class);
-
-    public void handleEvent(STAEvent staevent) {
-        if (staevent.getEventType().equals(STAEvent.EventType.ObservationCreateEvent)) {
-            ObservationCreateEvent event = (ObservationCreateEvent)staevent;
-
-
-            //TODO: parse the topic based on the event id
-            //TODO: serialize Event to correct json output
-            String topic = "default";
-            String message = staevent.getEvent().toString();
-            Message<String> msg = new GenericMessage<String>(message, new HashMap<String, Object>() {{put("mqtt_topic", topic);}});
-            gate.getInputChannel().send(msg);
-            LOGGER.debug("Topic: " + topic + " Message: " + message);
-        } else {
-            //TODO: Handle other types of events (Update Entity)
+    private EventHandler mqttclient;
+    
+    @Autowired
+    private ObservationMapper mapper;
+    
+    @Override
+    public void postFlush(Iterator entities) {
+        while (entities.hasNext()) {
+            Object entity = entities.next();
+            ObservationCreateEvent event;
+            
+            if (entity instanceof DataEntity< ? >) {
+                event = new ObservationCreateEvent();
+                event.setObservation(mapper.createEntity((DataEntity< ? >)entity));
+            } else {
+                LOGGER.debug("No MQTT Handling defined for:" + entity.toString());
+                continue;
+            }
+            mqttclient.handleEvent(event);
         }
-    }
-
-    @Bean
-    public IntegrationFlow mqttOutboundFlow() {
-        return f -> f.handle(new MqttPahoMessageHandler("tcp://localhost:1883", MQTTConfiguration.internalClientId));
     }
 }
