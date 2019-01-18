@@ -57,24 +57,7 @@ public class DaoConfig {
 
     @Value("META-INF/persistence.xml")
     private String persistenceXmlLocation;
-    
-    /*
-    @Bean
-    public DbQueryFactory dbQueryFactory(@Value("${database.srid:'EPSG:4326'}") String srid) {
-        return new DefaultDbQueryFactory(srid);
-    }
-    
-    @Bean
-    public DataRepositoryTypeFactory dataRepositoryFactory(ApplicationContext appContext) {
-        return new AnnotationBasedDataRepositoryFactory(appContext);
-    }
-    
-    @Bean
-    public DefaultIoFactory<DatasetOutput<AbstractValue< ? >>, AbstractValue< ? >> defaultIoFactory() {
-        return new DefaultIoFactory<>();
-    }
-    */
-    
+
     @Bean
     public EntityManagerFactory entityManagerFactory(DataSource datasource, JpaProperties properties)
             throws IOException {
