@@ -5,17 +5,11 @@
  */
 package org.n52.sta.service.processor;
 
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 
 import java.io.InputStream;
 import java.util.Locale;
 
-import org.apache.olingo.commons.api.Constants;
 import org.apache.olingo.commons.api.data.ContextURL;
-import org.apache.olingo.commons.api.data.Entity;
-import org.apache.olingo.commons.api.data.Link;
-import org.apache.olingo.commons.api.data.Property;
-import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
@@ -27,31 +21,22 @@ import org.apache.olingo.server.api.ODataLibraryException;
 import org.apache.olingo.server.api.ODataRequest;
 import org.apache.olingo.server.api.ODataResponse;
 import org.apache.olingo.server.api.ServiceMetadata;
-import org.apache.olingo.server.api.deserializer.DeserializerException;
 import org.apache.olingo.server.api.deserializer.DeserializerResult;
-import org.apache.olingo.server.api.deserializer.ODataDeserializer;
 import org.apache.olingo.server.api.processor.EntityProcessor;
 import org.apache.olingo.server.api.serializer.EntitySerializerOptions;
 import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
-import org.apache.olingo.server.api.uri.UriResource;
-import org.apache.olingo.server.api.uri.UriResourceEntitySet;
-import org.apache.olingo.server.core.deserializer.DeserializerResultImpl;
-import org.n52.sta.edm.provider.SensorThingsEdmConstants;
 import org.n52.sta.service.deserializer.SensorThingsDeserializer;
 import org.n52.sta.service.handler.AbstractEntityRequestHandler;
-import org.n52.sta.service.handler.crud.AbstractEntityCrudRequestHandler;
-import org.n52.sta.service.handler.crud.EntityCrudRequestHandlerRepository;
 import org.n52.sta.service.query.QueryOptions;
 import org.n52.sta.service.query.QueryOptionsHandler;
 import org.n52.sta.service.query.URIQueryOptions;
 import org.n52.sta.service.response.EntityResponse;
 import org.n52.sta.service.serializer.SensorThingsSerializer;
+import org.n52.sta.utils.CrudHelper;
 import org.n52.sta.utils.EntityAnnotator;
-import org.n52.sta.utils.EntityQueryParams;
-import org.n52.sta.utils.UriResourceNavigationResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -66,16 +51,13 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
     private AbstractEntityRequestHandler requestHandler;
     
     @Autowired
-    private EntityCrudRequestHandlerRepository crudRequestHandlerReportitory;
-
-    @Autowired
     private QueryOptionsHandler queryOptionsHandler;
 
     @Autowired
     private EntityAnnotator entityAnnotator;
-    
+       
     @Autowired
-    private UriResourceNavigationResolver navigationResolver;
+    private CrudHelper crudHelper;
 
 
     private OData odata;
@@ -101,9 +83,9 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
             ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
         QueryOptions queryOptions = new URIQueryOptions(uriInfo, request.getRawBaseUri());
         EntityResponse entityResponse = new EntityResponse();
-        DeserializerResult deserializeRequestBody = deserializeRequestBody(request, uriInfo);
+        DeserializerResult deserializeRequestBody = crudHelper.deserializeRequestBody(request.getBody(), uriInfo);
         if (deserializeRequestBody.getEntity() != null) {
-            entityResponse = getCrudEntityHanlder(uriInfo)
+            entityResponse = crudHelper.getCrudEntityHanlder(uriInfo)
                     .handleCreateEntityRequest(deserializeRequestBody.getEntity(), uriInfo.getUriResourceParts());
 
             entityAnnotator.annotateEntity(entityResponse.getEntity(), entityResponse.getEntitySet().getEntityType(),
@@ -129,9 +111,9 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
         }
         QueryOptions queryOptions = new URIQueryOptions(uriInfo, request.getRawBaseUri());
         EntityResponse entityResponse = new EntityResponse();
-        DeserializerResult deserializeRequestBody = deserializeRequestBody(request, uriInfo);
+        DeserializerResult deserializeRequestBody = crudHelper.deserializeRequestBody(request.getBody(), uriInfo);
         if (deserializeRequestBody.getEntity() != null) {
-            entityResponse = getCrudEntityHanlder(uriInfo).handleUpdateEntityRequest(
+            entityResponse = crudHelper.getCrudEntityHanlder(uriInfo).handleUpdateEntityRequest(
                     deserializeRequestBody.getEntity(), request.getMethod(), uriInfo.getUriResourceParts());
 
             entityAnnotator.annotateEntity(
@@ -155,7 +137,7 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
             throws ODataApplicationException, ODataLibraryException {
         QueryOptions queryOptions = new URIQueryOptions(uriInfo, request.getRawBaseUri());
         EntityResponse entityResponse = new EntityResponse();
-        entityResponse = getCrudEntityHanlder(uriInfo)
+        entityResponse = crudHelper.getCrudEntityHanlder(uriInfo)
                 .handleDeleteEntityRequest(uriInfo.getUriResourceParts());
         entityAnnotator.annotateEntity(entityResponse.getEntity(),
                 entityResponse.getEntitySet().getEntityType(),
@@ -199,52 +181,5 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
         InputStream serializedContent = serializerResult.getContent();
 
         return serializedContent;
-    }
-
-    private DeserializerResult deserializeRequestBody(ODataRequest request, UriInfo uriInfo)
-            throws DeserializerException, ODataApplicationException {
-        if (uriInfo.getUriResourceParts().size() > 1) {
-            EntityQueryParams navigationPaths = navigationResolver.resolveUriResourceNavigationPaths(uriInfo.getUriResourceParts());
-            DeserializerResult target = deserializer.entity(request.getBody(), navigationPaths.getTargetEntitySet().getEntityType());
-            return addNavigationLink(target, getSourceEntity(navigationPaths));
-        }
-        return deserializer.entity(request.getBody(), navigationResolver
-                .resolveRootUriResource(uriInfo.getUriResourceParts().get(0)).getEntityType());
-    }
-    
-    private DeserializerResult addNavigationLink(DeserializerResult target, Entity sourceEntity) {
-        Link link = new Link();
-        link.setTitle(sourceEntity.getType().replaceAll(SensorThingsEdmConstants.NAMESPACE + ".", ""));
-        link.setType(Constants.ENTITY_NAVIGATION_LINK_TYPE);
-        link.setInlineEntity(sourceEntity);
-        target.getEntity().getNavigationLinks().add(link);
-        return target;
-    }
-
-    private Entity getSourceEntity(EntityQueryParams navigationPaths) {
-        Entity entity = new Entity();
-        entity.setType(navigationPaths.getSourceEntityType().getFullQualifiedName().getFullQualifiedNameAsString());
-        addId(entity, navigationPaths.getSourceId());
-        return entity;
-    }
-    
-    private Entity addId(Entity entity, Long id) {
-        return entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, id));
-    }
-
-    private AbstractEntityCrudRequestHandler getCrudEntityHanlder(UriInfo uriInfo) throws ODataApplicationException {
-        if (uriInfo.getUriResourceParts().size() > 1) {
-            return getUriResourceEntitySet(navigationResolver
-                    .resolveUriResourceNavigationPaths(uriInfo.getUriResourceParts()).getTargetEntitySet().getEntityType().getName());
-        }
-        return getCrudEntityHanlder(navigationResolver.resolveRootUriResource(uriInfo.getUriResourceParts().get(0)));
-    }
-    
-    private AbstractEntityCrudRequestHandler getCrudEntityHanlder(UriResourceEntitySet uriResourceEntitySet) {
-        return getUriResourceEntitySet(uriResourceEntitySet.getEntityType().getName());
-    }
-
-    private AbstractEntityCrudRequestHandler getUriResourceEntitySet(String type) {
-        return crudRequestHandlerReportitory.getEntityCrudRequestHandler(type);
     }
 }

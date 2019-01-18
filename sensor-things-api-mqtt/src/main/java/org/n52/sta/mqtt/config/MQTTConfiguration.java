@@ -37,5 +37,5 @@ import org.springframework.stereotype.Component;
 @Component
 public class MQTTConfiguration {
     
-    public static final String internalClientId = "p";
+    public static final String internalClientId = "POC";
 }
