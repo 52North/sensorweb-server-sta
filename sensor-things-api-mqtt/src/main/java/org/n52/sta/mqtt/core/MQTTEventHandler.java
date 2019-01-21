@@ -53,10 +53,9 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @IntegrationComponentScan
-public class MQTTLocalClient implements STAEventHandler {
+public class MQTTEventHandler implements STAEventHandler {
 
-    @Autowired
-    private IntegrationFlow gate;
+    private MessageChannel messageChannel;
 
     @Autowired
     private MQTTConfiguration config;
@@ -71,11 +70,15 @@ public class MQTTLocalClient implements STAEventHandler {
      */
     private Set<String> watchedEntityTypes = new HashSet<String>();
 
-    final Logger LOGGER = LoggerFactory.getLogger(MQTTLocalClient.class);
+    final Logger LOGGER = LoggerFactory.getLogger(MQTTEventHandler.class);
+
+    public MQTTEventHandler(IntegrationFlow gate) {
+        this.messageChannel = gate.getInputChannel();
+    }
 
     @SuppressWarnings({"serial", "unchecked"})
     @Override
-    public void handleEvent(Object rawObject) {
+    public void handleEvent(Object rawObject, Set<String> differenceMap) {
         Entity entity;
 
         //Map beans Object into Olingo Entity
@@ -86,17 +89,16 @@ public class MQTTLocalClient implements STAEventHandler {
             entity = config.getMapper(rawObject.getClass().getName()).createEntity(rawObject);
         }
 
-        MessageChannel channel = gate.getInputChannel();
         // Check all subscriptions for a match
-        subscriptions.forEach((subscrib, count) -> {
-            String topic = subscrib.checkSubscription(entity);
+        subscriptions.forEach((subscrip, count) -> {
+            String topic = subscrip.checkSubscription(entity, differenceMap);
             if (topic != null) {
 
                 //TODO: Actually serialize Object to JSON
                 String message = entity.toString();
 
                 Message<String> msg = new GenericMessage<String>(message, new HashMap<String, Object>() {{put("mqtt_topic", topic);}});
-                channel.send(msg, maxWaitTime);
+                messageChannel.send(msg, maxWaitTime);
                 LOGGER.debug("Posted Message: " + message + " to Topic: " +topic);
             }
         });
@@ -111,7 +113,7 @@ public class MQTTLocalClient implements STAEventHandler {
             watchedEntityTypes.add(MQTTConfiguration.getBeanTypes().get(subscription.getEntityType()));
         }
     }
-    
+
     public void removeSubscription(MQTTSubscription subscription) {
         Integer count = subscriptions.get(subscription);
         if (count != null) {

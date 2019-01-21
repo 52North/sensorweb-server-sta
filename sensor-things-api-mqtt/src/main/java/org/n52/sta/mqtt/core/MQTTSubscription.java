@@ -86,14 +86,49 @@ public class MQTTSubscription {
         case "Observation":
             olingoEntityType = "iot.Observation";
             break;
+        case "Datastreams":
+            isCollection = true;
+        case "Datastream":
+            olingoEntityType = "iot.Datastream";
+            break;
+        case "FeatureOfInterests":
+            isCollection = true;
+        case "FeatureOfInterest":
+            olingoEntityType = "iot.FeatureOfInterest";
+            break;
+        case "HistoricalLocations":
+            isCollection = true;
+        case "HistoricalLocation":
+            olingoEntityType = "iot.HistoricalLocation";
+            break;
+        case "Locations":
+            isCollection = true;
+        case "Location":
+            olingoEntityType = "iot.Location";
+            break;
+        case "ObservedProperties":
+            isCollection = true;
+        case "ObservedProperty":
+            olingoEntityType = "iot.ObservedProperty";
+            break;
+        case "Sensors":
+            isCollection = true;
+        case "Sensor":
+            olingoEntityType = "iot.Sensor";
+            break;
+        case "Things":
+            isCollection = true;
+        case "Thing":
+            olingoEntityType = "iot.Thing";
+            break;
         }
     }
 
-    public String checkSubscription(Entity entity) {
-        return matches(entity) ? topic : null;
+    public String checkSubscription(Entity entity, Set<String> differenceMap) {
+        return matches(entity, differenceMap) ? topic : null;
     }
 
-    private boolean matches(Entity entity) {
+    private boolean matches(Entity entity, Set<String> differenceMap) {
         // Check type and fail-fast on type mismatched
         if (!(entity.getType().equals(olingoEntityType))) {
             return false;
@@ -104,32 +139,33 @@ public class MQTTSubscription {
             return false;
         }
 
+        //TODO: Respect differenceMap for subscriptions on specific properties
         //TODO: Check for more complex Paths
         // Check Resource Path for complete Match
-//        for (String[] elem : pattern) {
-//            String resource = elem[0];
-//            String resourceId = elem[1];
-//
-//            Link navLink = entity.getNavigationLink(resource);
-//            if (navLink == null) {
-//                return false;
-//            }
-//            navLink.getTitle();
-//
-//            // navLink.get
-//            // Check Id
-//        }
+        //        for (String[] elem : pattern) {
+        //            String resource = elem[0];
+        //            String resourceId = elem[1];
+        //
+        //            Link navLink = entity.getNavigationLink(resource);
+        //            if (navLink == null) {
+        //                return false;
+        //            }
+        //            navLink.getTitle();
+        //
+        //            // navLink.get
+        //            // Check Id
+        //        }
         return true;
     }
 
     public String getEntityType() {
         return olingoEntityType;
     }
-    
+
     public String getTopic() {
         return topic;
     }
-    
+
     @Override
     public boolean equals(Object other) {
         return (other instanceof MQTTSubscription && ((MQTTSubscription)other).getTopic().equals(this.topic));

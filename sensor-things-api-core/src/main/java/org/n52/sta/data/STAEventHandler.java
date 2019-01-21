@@ -28,6 +28,8 @@
  */
 package org.n52.sta.data;
 
+import java.util.Set;
+
 /**
  * Interface to be implemented by Handlers responding to Entity Creation (e.g. Handler for MQTT Subscription).
  * 
@@ -35,5 +37,10 @@ package org.n52.sta.data;
  */
 public interface STAEventHandler {
 
-    public void handleEvent(Object ent);
+    /**
+     * Handles a Create/Update Event emitted by the Database.
+     * @param event base entity
+     * @param differenceMap names of properties that changed. null if all properties changed (e.g. new entity)
+     */
+    public void handleEvent(Object event, Set<String> differenceMap);
 }

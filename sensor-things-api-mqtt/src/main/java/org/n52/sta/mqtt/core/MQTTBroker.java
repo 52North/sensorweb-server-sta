@@ -29,12 +29,19 @@
 package org.n52.sta.mqtt.core;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Properties;
 
+import org.apache.olingo.server.api.ODataApplicationException;
+import org.apache.olingo.server.api.deserializer.DeserializerException;
+import org.apache.olingo.server.core.uri.parser.UriParserException;
+import org.apache.olingo.server.core.uri.validator.UriValidationException;
 import org.n52.sta.mqtt.config.MQTTConfiguration;
+import org.n52.sta.mqtt.handler.MqttObservationCreateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
@@ -49,13 +56,6 @@ import io.moquette.interception.messages.InterceptDisconnectMessage;
 import io.moquette.interception.messages.InterceptPublishMessage;
 import io.moquette.interception.messages.InterceptSubscribeMessage;
 import io.moquette.interception.messages.InterceptUnsubscribeMessage;
-import java.nio.charset.Charset;
-import org.apache.olingo.server.api.ODataApplicationException;
-import org.apache.olingo.server.api.deserializer.DeserializerException;
-import org.apache.olingo.server.core.uri.parser.UriParserException;
-import org.apache.olingo.server.core.uri.validator.UriValidationException;
-import org.n52.sta.mqtt.handler.MqttObservationCreateHandler;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -70,7 +70,7 @@ public class MQTTBroker {
     private MqttObservationCreateHandler handler;
     
     @Autowired
-    private MQTTLocalClient localClient;
+    private MQTTEventHandler localClient;
 
     @Bean
     public Server initMQTTBroker() {

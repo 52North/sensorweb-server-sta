@@ -32,7 +32,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.n52.sta.mapping.AbstractMapper;
+import org.n52.sta.mapping.DatastreamMapper;
+import org.n52.sta.mapping.FeatureOfInterestMapper;
+import org.n52.sta.mapping.HistoricalLocationMapper;
+import org.n52.sta.mapping.LocationMapper;
 import org.n52.sta.mapping.ObservationMapper;
+import org.n52.sta.mapping.ObservedPropertyMapper;
+import org.n52.sta.mapping.SensorMapper;
+import org.n52.sta.mapping.ThingMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.integration.dsl.IntegrationFlow;
@@ -50,6 +57,27 @@ public class MQTTConfiguration {
 
     @Autowired
     ObservationMapper obsMapper;
+    
+    @Autowired
+    DatastreamMapper dsMapper;
+    
+    @Autowired
+    FeatureOfInterestMapper foiMapper;
+    
+    @Autowired
+    HistoricalLocationMapper hlocMapper;
+    
+    @Autowired
+    LocationMapper locMapper;
+    
+    @Autowired
+    ObservedPropertyMapper obspropMapper;
+    
+    @Autowired
+    SensorMapper sensorMapper;
+    
+    @Autowired
+    ThingMapper thingMapper;
     
     /**
      * Sets up Local Paho Client to connect to local Broker.
@@ -69,6 +97,20 @@ public class MQTTConfiguration {
         switch(className) {
         case "org.n52.series.db.beans.QuantityDataEntity": 
             return obsMapper;
+        case "org.n52.series.db.beans.sta.DatastreamEntity": 
+            return dsMapper;
+        case "org.n52.series.db.beans.AbstractFeatureEntity": 
+            return foiMapper;
+        case "org.n52.series.db.beans.sta.HistoricalLocationEntity": 
+            return hlocMapper;
+        case "org.n52.series.db.beans.sta.LocationEntity": 
+            return locMapper;
+        case "org.n52.series.db.beans.PhenomenonEntity": 
+            return obspropMapper;
+        case "org.n52.series.db.beans.ProcedureEntity": 
+            return sensorMapper;
+        case "org.n52.series.db.beans.sta.ThingEntity": 
+            return thingMapper;
         default: return null;
         }
     }
@@ -80,6 +122,13 @@ public class MQTTConfiguration {
     public static Map<String, String> getBeanTypes() {
         HashMap<String,String> map = new HashMap<String,String>();
         map.put("iot.Observation", "org.n52.series.db.beans.QuantityDataEntity");
+        map.put("iot.Datastream", "org.n52.series.db.beans.sta.DatastreamEntity");
+        map.put("iot.FeatureOfInterest", "org.n52.series.db.beans.AbstractFeatureEntity");
+        map.put("iot.HistoricalLocation", "org.n52.series.db.beans.sta.HistoricalLocationEntity");
+        map.put("iot.Location", "org.n52.series.db.beans.sta.LocationEntity");
+        map.put("iot.ObservedProperty", "org.n52.series.db.beans.PhenomenonEntity");
+        map.put("iot.Sensor", "org.n52.series.db.beans.ProcedureEntity");
+        map.put("iot.Thing", "org.n52.series.db.beans.sta.ThingEntity");
         return map;
         
     }

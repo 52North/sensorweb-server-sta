@@ -29,7 +29,8 @@
 package org.n52.sta;
 
 import java.io.Serializable;
-import java.util.Iterator;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.type.Type;
@@ -63,7 +64,7 @@ public class HibernateMessageInterceptor extends EmptyInterceptor {
             String[] propertyNames, 
             Type[] types) {
         LOGGER.debug("Parsed Entity to MQTTHandler: " + entity.toString());
-        mqttclient.handleEvent(entity);
+        mqttclient.handleEvent(entity, null);
         return super.onSave(entity, id, state, propertyNames, types);
     }
     
@@ -78,7 +79,18 @@ public class HibernateMessageInterceptor extends EmptyInterceptor {
             Object[] previousState, 
             String[] propertyNames, 
             Type[] types) {
-        LOGGER.debug("Parsing of Property changes not yet implemented!");
+        LOGGER.debug("Parsed Entity to MQTTHandler: " + entity.toString());
+        mqttclient.handleEvent(entity, findDifferences(currentState, previousState, propertyNames));
         return super.onFlushDirty(entity, id, currentState, previousState, propertyNames, types);
+    }
+    
+    private Set<String> findDifferences(Object[] current, Object[] previous, String[] propertyNames) {
+        Set<String> differenceMap = new HashSet<String>();
+        for (int i = 0; i < current.length; i++) {
+            if (current[i] != null && !current[i].equals(previous[i])) {
+                differenceMap.add(propertyNames[i]);
+            }
+        }
+        return differenceMap;
     }
 }
