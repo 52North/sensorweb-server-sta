@@ -35,6 +35,7 @@ import java.util.Properties;
 
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.deserializer.DeserializerException;
+import org.apache.olingo.server.core.uri.parser.Parser;
 import org.apache.olingo.server.core.uri.parser.UriParserException;
 import org.apache.olingo.server.core.uri.validator.UriValidationException;
 import org.n52.sta.mqtt.config.MQTTConfiguration;
@@ -71,6 +72,9 @@ public class MQTTBroker {
     
     @Autowired
     private MQTTEventHandler localClient;
+    
+    @Autowired
+    private Parser parser;
 
     @Bean
     public Server initMQTTBroker() {
@@ -128,7 +132,7 @@ public class MQTTBroker {
                 LOGGER.debug("Client with ID: " + msg.getClientID() + "has subscribed");
                 try {
                     LOGGER.error("Adding new MQTT subscription");
-                    localClient.addSubscription(new MQTTSubscription(msg.getTopicFilter()));
+                    localClient.addSubscription(new MQTTSubscription(msg.getTopicFilter(), parser));
                 } catch (Exception e) {
                     LOGGER.error("Error while processing MQTT subscription");
                     LOGGER.debug("Error while processing MQTT subscription", e);
@@ -140,7 +144,7 @@ public class MQTTBroker {
                 LOGGER.debug("Client with ID: " + msg.getClientID() + "has UNsubscribed");
                 try {
                     LOGGER.error("Adding new MQTT subscription");
-                    localClient.removeSubscription(new MQTTSubscription(msg.getTopicFilter()));
+                    localClient.removeSubscription(new MQTTSubscription(msg.getTopicFilter(), parser));
                 } catch (Exception e) {
                     LOGGER.error("Error while processing MQTT subscription");
                     LOGGER.debug("Error while processing MQTT subscription", e);

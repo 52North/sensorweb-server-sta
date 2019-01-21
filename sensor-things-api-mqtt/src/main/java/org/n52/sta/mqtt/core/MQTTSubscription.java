@@ -28,9 +28,16 @@
  */
 package org.n52.sta.mqtt.core;
 
+import java.util.List;
 import java.util.Set;
 
 import org.apache.olingo.commons.api.data.Entity;
+import org.apache.olingo.server.api.uri.UriInfo;
+import org.apache.olingo.server.api.uri.UriResource;
+import org.apache.olingo.server.api.uri.queryoption.SelectItem;
+import org.apache.olingo.server.core.uri.parser.Parser;
+import org.apache.olingo.server.core.uri.parser.UriParserException;
+import org.apache.olingo.server.core.uri.validator.UriValidationException;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -40,47 +47,33 @@ public class MQTTSubscription {
 
     private String topic;
 
-    private Set<String> fields;
+    private List<SelectItem> fields;
 
-    private String[][] pattern;
+    private List<UriResource> pattern;
 
     private String olingoEntityType;
 
     private boolean isCollection;
-
-    public MQTTSubscription(String topic) throws Exception {
+    
+    /**
+     * Parses Topic String into usable Properties to determine whether Entities fit this Subscription.
+     * @param topic MQTT-Topic
+     * @throws UriValidationException 
+     * @throws UriParserException 
+     * @throws Exception If Topic String is malformed
+     */
+    public MQTTSubscription(String topic, Parser parser) throws UriParserException, UriValidationException {
+        // Validate that Topic is valid URI
+        UriInfo uriInfo = parser.parseUri(topic, null, null, "");
+        
         this.topic = topic;
-
-        // Parse Select Parameter into select List
-        String[] select = topic.split("$select=");
-        switch(select.length) {
-        case 1: break;
-        case 2: {
-            String[] field = select[1].split(",");
-            for (String elem : field) {
-                fields.add(elem);
-            }
-            break;
+        this.pattern = uriInfo.getUriResourceParts();
+        if (uriInfo.getSelectOption() != null) {
+            fields = uriInfo.getSelectOption().getSelectItems();
         }
-        default:
-            throw new Exception("Invalid topic supplied! Found double '$select' in topic pattern.");
-        }
-
-        // Parse Topic into ResourceName+ResourceId Pairs
-        String[] rawpattern = select[0].split("/");
-        pattern = new String[rawpattern.length][2];
-        for (int i = 0; i < rawpattern.length; i++) {
-            String[] splitpattern = rawpattern[i].split("\\(|\\)");
-            pattern[i][0] = splitpattern[0];
-            if (splitpattern.length == 2) {
-                pattern[i][1] = splitpattern[1];
-            } else if (splitpattern.length > 2){
-                throw new Exception("Invalid topic supplied! Cannot Get Resource Ids from Resource Path.");
-            }
-        }
-
+        
         // Parse Entitytype
-        switch(rawpattern[rawpattern.length-1].split("\\(")[0]) {
+        switch(uriInfo.getUriResourceParts().get(uriInfo.getUriResourceParts().size()-1).toString()) {
         case "Observations":
             isCollection = true;
         case "Observation":
@@ -121,40 +114,40 @@ public class MQTTSubscription {
         case "Thing":
             olingoEntityType = "iot.Thing";
             break;
+        default: throw new IllegalArgumentException("Invalid topic supplied! Cannot Get Resource Type.");
         }
     }
 
+    /**
+     * Returns the topic given entity should be posted to. null if the entity does not match this subscription.
+     * @param entity Entity to be posted
+     * @param differenceMap differenceMap names of properties that have changed. if null all properties have changed (new entity)
+     * @return Topic to be posted to. May be null if Entity does not match this subscription.
+     */
     public String checkSubscription(Entity entity, Set<String> differenceMap) {
         return matches(entity, differenceMap) ? topic : null;
     }
 
+    /**
+     * Checks whether given Entity matches this Subscription's topic. 
+     * @param entity Entity newly created/updated
+     * @param differenceMap names of properties that have changed. if null all properties have changed (new entity)
+     * @return true if Entity should be posted to this Subscription
+     */
     private boolean matches(Entity entity, Set<String> differenceMap) {
         // Check type and fail-fast on type mismatched
         if (!(entity.getType().equals(olingoEntityType))) {
             return false;
         }
 
+        //TODO: fix
         // Check ID (if not collection) and fail-fast if wrong id is present
-        if (!isCollection && !pattern[pattern.length-1][1].equals(entity.getProperty("id").getValue())) {
-            return false;
-        }
+//        if (!isCollection && !pattern[pattern.length-1][1].equals(entity.getProperty("id").getValue())) {
+//            return false;
+//        }
 
         //TODO: Respect differenceMap for subscriptions on specific properties
         //TODO: Check for more complex Paths
-        // Check Resource Path for complete Match
-        //        for (String[] elem : pattern) {
-        //            String resource = elem[0];
-        //            String resourceId = elem[1];
-        //
-        //            Link navLink = entity.getNavigationLink(resource);
-        //            if (navLink == null) {
-        //                return false;
-        //            }
-        //            navLink.getTitle();
-        //
-        //            // navLink.get
-        //            // Check Id
-        //        }
         return true;
     }
 

@@ -28,9 +28,15 @@
  */
 package org.n52.sta.mqtt.config;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
+import org.apache.olingo.commons.api.edmx.EdmxReference;
+import org.apache.olingo.server.api.OData;
+import org.apache.olingo.server.api.ServiceMetadata;
+import org.apache.olingo.server.core.uri.parser.Parser;
 import org.n52.sta.mapping.AbstractMapper;
 import org.n52.sta.mapping.DatastreamMapper;
 import org.n52.sta.mapping.FeatureOfInterestMapper;
@@ -54,30 +60,30 @@ import org.springframework.stereotype.Component;
 public class MQTTConfiguration {
 
     public static final String internalClientId = "POC";
-
-    @Autowired
-    ObservationMapper obsMapper;
     
     @Autowired
-    DatastreamMapper dsMapper;
+    private ObservationMapper obsMapper;
     
     @Autowired
-    FeatureOfInterestMapper foiMapper;
+    private DatastreamMapper dsMapper;
     
     @Autowired
-    HistoricalLocationMapper hlocMapper;
+    private FeatureOfInterestMapper foiMapper;
     
     @Autowired
-    LocationMapper locMapper;
+    private HistoricalLocationMapper hlocMapper;
     
     @Autowired
-    ObservedPropertyMapper obspropMapper;
+    private LocationMapper locMapper;
     
     @Autowired
-    SensorMapper sensorMapper;
+    private ObservedPropertyMapper obspropMapper;
     
     @Autowired
-    ThingMapper thingMapper;
+    private SensorMapper sensorMapper;
+    
+    @Autowired
+    private ThingMapper thingMapper;
     
     /**
      * Sets up Local Paho Client to connect to local Broker.
@@ -86,6 +92,14 @@ public class MQTTConfiguration {
     @Bean
     public IntegrationFlow mqttOutboundFlow() {
         return f -> f.handle(new MqttPahoMessageHandler("tcp://localhost:1883", MQTTConfiguration.internalClientId));
+    }
+    
+    @Bean
+    public Parser uriParser(CsdlAbstractEdmProvider provider) {
+        OData odata = OData.newInstance();
+        ServiceMetadata meta = odata.createServiceMetadata(provider, new ArrayList<EdmxReference>());
+        Parser parser = new Parser(meta.getEdm(), odata);
+        return new Parser(meta.getEdm(), odata);
     }
 
     /**
