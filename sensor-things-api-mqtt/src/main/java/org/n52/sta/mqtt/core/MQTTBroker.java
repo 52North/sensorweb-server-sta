@@ -68,6 +68,9 @@ public class MQTTBroker {
 
     @Autowired
     private MqttObservationCreateHandler handler;
+    
+    @Autowired
+    private MQTTLocalClient localClient;
 
     @Bean
     public Server initMQTTBroker() {
@@ -86,7 +89,7 @@ public class MQTTBroker {
 
             @Override
             public String getID() {
-                return "STAMessageInterceptor";
+                return "52N-STA-MQTTBroker";
             }
 
             @Override
@@ -123,11 +126,25 @@ public class MQTTBroker {
             @Override
             public void onSubscribe(InterceptSubscribeMessage msg) {
                 LOGGER.debug("Client with ID: " + msg.getClientID() + "has subscribed");
+                try {
+                    LOGGER.error("Adding new MQTT subscription");
+                    localClient.addSubscription(new MQTTSubscription(msg.getTopicFilter()));
+                } catch (Exception e) {
+                    LOGGER.error("Error while processing MQTT subscription");
+                    LOGGER.debug("Error while processing MQTT subscription", e);
+                }
             }
 
             @Override
             public void onUnsubscribe(InterceptUnsubscribeMessage msg) {
                 LOGGER.debug("Client with ID: " + msg.getClientID() + "has UNsubscribed");
+                try {
+                    LOGGER.error("Adding new MQTT subscription");
+                    localClient.removeSubscription(new MQTTSubscription(msg.getTopicFilter()));
+                } catch (Exception e) {
+                    LOGGER.error("Error while processing MQTT subscription");
+                    LOGGER.debug("Error while processing MQTT subscription", e);
+                }
             }
 
         };

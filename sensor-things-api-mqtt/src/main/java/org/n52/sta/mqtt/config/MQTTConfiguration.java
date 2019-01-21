@@ -28,6 +28,15 @@
  */
 package org.n52.sta.mqtt.config;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.n52.sta.mapping.AbstractMapper;
+import org.n52.sta.mapping.ObservationMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.integration.dsl.IntegrationFlow;
+import org.springframework.integration.mqtt.outbound.MqttPahoMessageHandler;
 import org.springframework.stereotype.Component;
 
 /**
@@ -36,6 +45,43 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class MQTTConfiguration {
-    
+
     public static final String internalClientId = "POC";
+
+    @Autowired
+    ObservationMapper obsMapper;
+    
+    /**
+     * Sets up Local Paho Client to connect to local Broker.
+     * @return
+     */
+    @Bean
+    public IntegrationFlow mqttOutboundFlow() {
+        return f -> f.handle(new MqttPahoMessageHandler("tcp://localhost:1883", MQTTConfiguration.internalClientId));
+    }
+
+    /**
+     * Multiplexes to the different Mappers for transforming Beans into olingo Entities
+     * @param className Name of the base class
+     * @return Mapper appropiate for this class
+     */
+    public AbstractMapper getMapper(String className) {
+        switch(className) {
+        case "org.n52.series.db.beans.QuantityDataEntity": 
+            return obsMapper;
+        default: return null;
+        }
+    }
+
+    /**
+     * Maps olingo Types to Base types. Needed for fail-fast.
+     * @return Translation map from olingo Entities to raw Data Entities
+     */
+    public static Map<String, String> getBeanTypes() {
+        HashMap<String,String> map = new HashMap<String,String>();
+        map.put("iot.Observation", "org.n52.series.db.beans.QuantityDataEntity");
+        return map;
+        
+    }
+
 }

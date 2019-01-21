@@ -29,15 +29,11 @@
 package org.n52.sta.data;
 
 /**
+ * Interface to be implemented by Handlers responding to Entity Creation (e.g. Handler for MQTT Subscription).
+ * 
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- *
  */
-public abstract class STAEvent {
-    
-    // List of all possible Events
-    public enum EventType {ObservationCreateEvent}
-    
-    public abstract EventType getEventType();
-    
-    public Object getEvent() {return this;};
+public interface STAEventHandler {
+
+    public void handleEvent(Object ent);
 }

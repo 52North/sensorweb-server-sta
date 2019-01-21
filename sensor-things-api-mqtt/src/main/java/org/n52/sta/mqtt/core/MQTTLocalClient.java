@@ -29,19 +29,21 @@
 package org.n52.sta.mqtt.core;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
-import org.n52.sta.data.EventHandler;
-import org.n52.sta.data.ObservationCreateEvent;
-import org.n52.sta.data.STAEvent;
+import org.apache.olingo.commons.api.data.Entity;
+import org.n52.sta.data.STAEventHandler;
 import org.n52.sta.mqtt.config.MQTTConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.annotation.IntegrationComponentScan;
 import org.springframework.integration.dsl.IntegrationFlow;
-import org.springframework.integration.mqtt.outbound.MqttPahoMessageHandler;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.GenericMessage;
 import org.springframework.stereotype.Component;
 
@@ -51,32 +53,74 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @IntegrationComponentScan
-public class MQTTLocalClient implements EventHandler {
-    
+public class MQTTLocalClient implements STAEventHandler {
+
     @Autowired
-    IntegrationFlow gate;
+    private IntegrationFlow gate;
+
+    @Autowired
+    private MQTTConfiguration config;
+
+    @Value("${mqtt.localClient.maxWaitTime:1}")
+    private int maxWaitTime;
+
+    private Map<MQTTSubscription, Integer> subscriptions = new HashMap<MQTTSubscription, Integer>();
+
+    /*
+     * List of all Entity Types that are currently subscribed to. Used for fail-fast.
+     */
+    private Set<String> watchedEntityTypes = new HashSet<String>();
 
     final Logger LOGGER = LoggerFactory.getLogger(MQTTLocalClient.class);
 
-    public void handleEvent(STAEvent staevent) {
-        if (staevent.getEventType().equals(STAEvent.EventType.ObservationCreateEvent)) {
-            ObservationCreateEvent event = (ObservationCreateEvent)staevent;
+    @SuppressWarnings({"serial", "unchecked"})
+    @Override
+    public void handleEvent(Object rawObject) {
+        Entity entity;
 
-
-            //TODO: parse the topic based on the event id
-            //TODO: serialize Event to correct json output
-            String topic = "default";
-            String message = staevent.getEvent().toString();
-            Message<String> msg = new GenericMessage<String>(message, new HashMap<String, Object>() {{put("mqtt_topic", topic);}});
-            gate.getInputChannel().send(msg);
-            LOGGER.debug("Topic: " + topic + " Message: " + message);
+        //Map beans Object into Olingo Entity
+        //Fail-fast if nobody is subscribed to this Type
+        if (!watchedEntityTypes.contains(rawObject.getClass().getName())) {
+            return;
         } else {
-            //TODO: Handle other types of events (Update Entity)
+            entity = config.getMapper(rawObject.getClass().getName()).createEntity(rawObject);
         }
+
+        MessageChannel channel = gate.getInputChannel();
+        // Check all subscriptions for a match
+        subscriptions.forEach((subscrib, count) -> {
+            String topic = subscrib.checkSubscription(entity);
+            if (topic != null) {
+
+                //TODO: Actually serialize Object to JSON
+                String message = entity.toString();
+
+                Message<String> msg = new GenericMessage<String>(message, new HashMap<String, Object>() {{put("mqtt_topic", topic);}});
+                channel.send(msg, maxWaitTime);
+                LOGGER.debug("Posted Message: " + message + " to Topic: " +topic);
+            }
+        });
     }
 
-    @Bean
-    public IntegrationFlow mqttOutboundFlow() {
-        return f -> f.handle(new MqttPahoMessageHandler("tcp://localhost:1883", MQTTConfiguration.internalClientId));
+    public void addSubscription(MQTTSubscription subscription) {
+        Integer count = subscriptions.get(subscription);
+        if (count != null) {
+            subscriptions.put(subscription, count++);
+        } else {
+            subscriptions.put(subscription, 1);
+            watchedEntityTypes.add(MQTTConfiguration.getBeanTypes().get(subscription.getEntityType()));
+        }
+    }
+    
+    public void removeSubscription(MQTTSubscription subscription) {
+        Integer count = subscriptions.get(subscription);
+        if (count != null) {
+            if (count == 1) {
+                subscriptions.remove(subscription);
+                watchedEntityTypes.remove(MQTTConfiguration.getBeanTypes().get(subscription.getEntityType()));
+            } else {
+                subscriptions.put(subscription, count--);
+            }
+        }
     }
 }

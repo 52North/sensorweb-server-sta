@@ -28,15 +28,12 @@
  */
 package org.n52.sta;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 import org.hibernate.EmptyInterceptor;
-import org.n52.series.db.beans.DataEntity;
-import org.n52.series.db.beans.QuantityDataEntity;
-import org.n52.sta.data.EventHandler;
-import org.n52.sta.data.ObservationCreateEvent;
-import org.n52.sta.data.STAEvent;
-import org.n52.sta.mapping.ObservationMapper;
+import org.hibernate.type.Type;
+import org.n52.sta.data.STAEventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,30 +45,40 @@ import org.springframework.stereotype.Component;
  */
 @SuppressWarnings("serial")
 @Component
-public class STAMessageInterceptor extends EmptyInterceptor {
+public class HibernateMessageInterceptor extends EmptyInterceptor {
     
-    private final Logger LOGGER = LoggerFactory.getLogger(STAMessageInterceptor.class);
-    
-    @Autowired
-    private EventHandler mqttclient;
+    private final Logger LOGGER = LoggerFactory.getLogger(HibernateMessageInterceptor.class);
     
     @Autowired
-    private ObservationMapper mapper;
+    private STAEventHandler mqttclient;
     
+    /**
+     * Handle new Create Events
+     */
     @Override
-    public void postFlush(Iterator entities) {
-        while (entities.hasNext()) {
-            Object entity = entities.next();
-            ObservationCreateEvent event;
-            
-            if (entity instanceof DataEntity< ? >) {
-                event = new ObservationCreateEvent();
-                event.setObservation(mapper.createEntity((DataEntity< ? >)entity));
-            } else {
-                LOGGER.debug("No MQTT Handling defined for:" + entity.toString());
-                continue;
-            }
-            mqttclient.handleEvent(event);
-        }
+    public boolean onSave(
+            Object entity, 
+            Serializable id, 
+            Object[] state, 
+            String[] propertyNames, 
+            Type[] types) {
+        LOGGER.debug("Parsed Entity to MQTTHandler: " + entity.toString());
+        mqttclient.handleEvent(entity);
+        return super.onSave(entity, id, state, propertyNames, types);
+    }
+    
+    /**
+     * Handle updates of existing Entites
+     */
+    @Override
+    public boolean onFlushDirty(
+            Object entity, 
+            Serializable id, 
+            Object[] currentState, 
+            Object[] previousState, 
+            String[] propertyNames, 
+            Type[] types) {
+        LOGGER.debug("Parsing of Property changes not yet implemented!");
+        return super.onFlushDirty(entity, id, currentState, previousState, propertyNames, types);
     }
 }

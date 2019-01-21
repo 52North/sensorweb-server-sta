@@ -38,7 +38,9 @@ spring:
         
         
 # MQTT Configuration
-
+mqtt:
+  localClient:
+    maxWaitTime: 5
 
 # Logging
 logging:
