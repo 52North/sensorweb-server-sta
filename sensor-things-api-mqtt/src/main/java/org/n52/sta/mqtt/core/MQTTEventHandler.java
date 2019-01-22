@@ -35,7 +35,6 @@ import java.util.Set;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.n52.sta.data.STAEventHandler;
-import org.n52.sta.mqtt.config.MQTTConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,14 +53,16 @@ import org.springframework.stereotype.Component;
 @Component
 @IntegrationComponentScan
 public class MQTTEventHandler implements STAEventHandler {
-
-    private MessageChannel messageChannel;
-
+    
     @Autowired
-    private MQTTConfiguration config;
-
+    private MQTTUtil config;
+    
     @Value("${mqtt.localClient.maxWaitTime:1}")
     private int maxWaitTime;
+    
+    static final String internalClientId = "POC";
+
+    private MessageChannel messageChannel;
 
     private Map<MQTTSubscription, Integer> subscriptions = new HashMap<MQTTSubscription, Integer>();
 
@@ -93,13 +94,9 @@ public class MQTTEventHandler implements STAEventHandler {
         subscriptions.forEach((subscrip, count) -> {
             String topic = subscrip.checkSubscription(entity, differenceMap);
             if (topic != null) {
-
-                //TODO: Actually serialize Object to JSON
-                String message = entity.toString();
-
-                Message<String> msg = new GenericMessage<String>(message, new HashMap<String, Object>() {{put("mqtt_topic", topic);}});
+                Message<String> msg = new GenericMessage<String>(subscrip.encodeEntity(entity), new HashMap<String, Object>() {{put("mqtt_topic", topic);}});
                 messageChannel.send(msg, maxWaitTime);
-                LOGGER.debug("Posted Message: " + message + " to Topic: " +topic);
+                LOGGER.debug("Posted Message to Topic: " + topic);
             }
         });
     }
@@ -110,7 +107,7 @@ public class MQTTEventHandler implements STAEventHandler {
             subscriptions.put(subscription, count++);
         } else {
             subscriptions.put(subscription, 1);
-            watchedEntityTypes.add(MQTTConfiguration.getBeanTypes().get(subscription.getEntityType()));
+            watchedEntityTypes.add(MQTTUtil.getBeanTypes().get(subscription.getEntityType()));
         }
     }
 
@@ -119,10 +116,12 @@ public class MQTTEventHandler implements STAEventHandler {
         if (count != null) {
             if (count == 1) {
                 subscriptions.remove(subscription);
-                watchedEntityTypes.remove(MQTTConfiguration.getBeanTypes().get(subscription.getEntityType()));
+                watchedEntityTypes.remove(MQTTUtil.getBeanTypes().get(subscription.getEntityType()));
             } else {
-                subscriptions.put(subscription, count--);
+                subscriptions.put(subscription, --count);
             }
         }
     }
+    
+
 }

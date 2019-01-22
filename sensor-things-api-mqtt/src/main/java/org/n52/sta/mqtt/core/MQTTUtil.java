@@ -26,11 +26,13 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.mqtt.config;
+package org.n52.sta.mqtt.core;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
 import org.apache.olingo.commons.api.edmx.EdmxReference;
@@ -57,33 +59,39 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-public class MQTTConfiguration {
+public class MQTTUtil {
 
-    public static final String internalClientId = "POC";
-    
     @Autowired
     private ObservationMapper obsMapper;
-    
+
     @Autowired
     private DatastreamMapper dsMapper;
-    
+
     @Autowired
     private FeatureOfInterestMapper foiMapper;
-    
+
     @Autowired
     private HistoricalLocationMapper hlocMapper;
-    
+
     @Autowired
     private LocationMapper locMapper;
-    
+
     @Autowired
     private ObservedPropertyMapper obspropMapper;
-    
+
     @Autowired
     private SensorMapper sensorMapper;
-    
+
     @Autowired
     private ThingMapper thingMapper;
+
+    @Bean
+    public Parser uriParser(CsdlAbstractEdmProvider provider) {
+        OData odata = OData.newInstance();
+        ServiceMetadata meta = odata.createServiceMetadata(provider, new ArrayList<EdmxReference>());
+        Parser parser = new Parser(meta.getEdm(), odata);
+        return new Parser(meta.getEdm(), odata);
+    }
     
     /**
      * Sets up Local Paho Client to connect to local Broker.
@@ -91,15 +99,7 @@ public class MQTTConfiguration {
      */
     @Bean
     public IntegrationFlow mqttOutboundFlow() {
-        return f -> f.handle(new MqttPahoMessageHandler("tcp://localhost:1883", MQTTConfiguration.internalClientId));
-    }
-    
-    @Bean
-    public Parser uriParser(CsdlAbstractEdmProvider provider) {
-        OData odata = OData.newInstance();
-        ServiceMetadata meta = odata.createServiceMetadata(provider, new ArrayList<EdmxReference>());
-        Parser parser = new Parser(meta.getEdm(), odata);
-        return new Parser(meta.getEdm(), odata);
+        return f -> f.handle(new MqttPahoMessageHandler("tcp://localhost:1883", MQTTEventHandler.internalClientId));
     }
 
     /**
@@ -144,7 +144,92 @@ public class MQTTConfiguration {
         map.put("iot.Sensor", "org.n52.series.db.beans.ProcedureEntity");
         map.put("iot.Thing", "org.n52.series.db.beans.sta.ThingEntity");
         return map;
-        
+    }
+
+    /**
+     * Translates Olingo Property into Database Property to check property changes against Event emitted by Database
+     * @param STA property of STA entity
+     * @return Set of all Database field storing property information
+     */
+    public static Set<String> translateSTAtoToDbProperty(String staProperty) {
+        Set<String> returnSet = new HashSet<String>();
+        switch(staProperty) {
+        case "iot.Thing.name":
+        case "iot.Location.name":
+        case "iot.ObservedProperty.name":
+        case "iot.FeatureOfInterest.name":
+        case "iot.Datastream.name":
+            returnSet.add("name");
+            break;
+        case "iot.Thing.description":
+        case "iot.Location.description":
+        case "iot.Sensor.description":
+        case "iot.ObservedProperty.description":
+        case "iot.FeatureOfInterest.description":
+        case "iot.Datastream.description":
+            returnSet.add("description");
+            break;
+        case "iot.Thing.properties":
+            returnSet.add("properties");
+            break;
+        case "iot.Location.encodingType":
+            returnSet.add("locationEncoding");
+            break;
+        case "iot.Location.location":
+            returnSet.add("location");
+            break;
+        case "iot.HistoricalLocation.time":
+            returnSet.add("time");
+            break;
+        case "iot.Sensor.name":
+        case "iot.ObservedProperty.definition":
+            returnSet.add("identifier");
+            break;
+        case "iot.Sensor.encodingType":
+            returnSet.add("format");
+            break;
+        case "iot.Sensor.metadata":
+            returnSet.add("descriptionFile");
+            break;
+        case "iot.FeatureOfInterest.encodingType":
+            returnSet.add("featureType");
+            break;
+        case "iot.FeatureOfInterest.feature":
+            returnSet.add("geometryEntity");
+            break;
+        case "iot.Observation.phenomenonTime":
+        case "iot.Datastream.phenomenonTime":
+            returnSet.add("samplingTimeStart");
+            returnSet.add("samplingTimeEnd");
+            break;
+        case "iot.Observation.resultTime":
+            returnSet.add("resultTime");
+            break;
+        case "iot.Observation.result":
+            returnSet.add("value");
+            break;
+        case "iot.Observation.validTime":
+            returnSet.add("validTimeStart");
+            returnSet.add("validTimeEnd");
+            break;
+        case "iot.Observation.parameters":
+            returnSet.add("parameters");
+            break;
+        case "iot.Datastream.observationType":
+            returnSet.add("observationType");
+            break;
+        case "iot.Datastream.unitOfMeasurement":
+            returnSet.add("unitOfMeasurement");
+            break;
+        case "iot.Datastream.observedArea":
+            returnSet.add("geometryEntity");
+            break;
+        case "iot.Datastream.resultTime":
+            returnSet.add("resultTimeStart");
+            returnSet.add("resultTimeEnd");
+            break;
+        }
+        return returnSet;
     }
 
 }

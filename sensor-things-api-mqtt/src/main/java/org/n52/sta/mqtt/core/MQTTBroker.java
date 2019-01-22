@@ -39,7 +39,6 @@ import org.apache.olingo.server.api.deserializer.DeserializerException;
 import org.apache.olingo.server.core.uri.parser.Parser;
 import org.apache.olingo.server.core.uri.parser.UriParserException;
 import org.apache.olingo.server.core.uri.validator.UriValidationException;
-import org.n52.sta.mqtt.config.MQTTConfiguration;
 import org.n52.sta.mqtt.handler.MqttObservationCreateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,16 +89,16 @@ public class MQTTBroker {
 
     @Bean
     public Server initMQTTBroker() {
-        Server test = new Server();
+        Server mqttServer = new Server();
         try {
-            test.startServer(parseConfig(), Arrays.asList(initMessageHandler()));
-            Runtime.getRuntime().addShutdownHook(new Thread(test::stopServer));
+            mqttServer.startServer(parseConfig(), Arrays.asList(initMessageHandler()));
+            Runtime.getRuntime().addShutdownHook(new Thread(mqttServer::stopServer));
             
         } catch (IOException e) {
-            // TODO Auto-generated catch block
+            LOGGER.error("Error starting/stopping MQTT Broker. Exception: " + e.getMessage());
             e.printStackTrace();
         }
-        return test;
+        return mqttServer;
     }
 
     private InterceptHandler initMessageHandler() {
@@ -127,7 +126,7 @@ public class MQTTBroker {
 
             @Override
             public void onPublish(InterceptPublishMessage msg) {
-                if (!msg.getClientID().equals(MQTTConfiguration.internalClientId)) {
+                if (!msg.getClientID().equals(MQTTEventHandler.internalClientId)) {
                     LOGGER.debug(msg.getTopicName());
                     LOGGER.debug(msg.getPayload().toString(Charset.forName("UTF-8")));
                     try {

@@ -29,6 +29,7 @@
 package org.n52.sta.mqtt.core;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.olingo.commons.api.data.Entity;
@@ -36,6 +37,7 @@ import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.UriParameter;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
+import org.apache.olingo.server.api.uri.UriResourceProperty;
 import org.apache.olingo.server.api.uri.queryoption.SelectItem;
 import org.apache.olingo.server.core.uri.parser.Parser;
 import org.apache.olingo.server.core.uri.parser.UriParserException;
@@ -55,10 +57,12 @@ public class MQTTSubscription {
 
     private String olingoEntityType;
 
+    private Set<String> watchedProperty;
+
     private boolean isCollection;
 
     private Long entityId;
-    
+
     /**
      * Parses Topic String into usable Properties to determine whether Entities fit this Subscription.
      * @param topic MQTT-Topic
@@ -72,19 +76,31 @@ public class MQTTSubscription {
 
         this.topic = topic;
         this.pattern = uriInfo.getUriResourceParts();
+
+        // Parse select Option if present
         if (uriInfo.getSelectOption() != null) {
             fields = uriInfo.getSelectOption().getSelectItems();
         }
-        
-        UriParameter idParameter = ((UriResourceEntitySet)pattern.get(pattern.size()-1)).getKeyPredicates().get(0);
-        if (idParameter == null) {
+
+        // Parse specifically adressed property if present
+        UriResource lastResource = pattern.get(pattern.size()-1);
+        String propertyResource = null;
+        if (!(lastResource instanceof UriResourceEntitySet)) {
+            // Last Resource is property
+            propertyResource = ((UriResourceProperty)lastResource).getProperty().getName();
+            lastResource = pattern.get(pattern.size()-2);
+        }
+
+        // Parse ID if present
+        List<UriParameter> idParameter = ((UriResourceEntitySet)lastResource).getKeyPredicates();
+        if (idParameter.size() == 0) {
             isCollection = true;
         } else {
-            entityId = Long.parseLong(idParameter.getText());
+            entityId = Long.parseLong(idParameter.get(0).getText());
         }
 
         // Parse Entitytype
-        switch(pattern.get(pattern.size()-1).toString()) {
+        switch(lastResource.toString()) {
         case "Observations":
             olingoEntityType = "iot.Observation";
             break;
@@ -110,6 +126,11 @@ public class MQTTSubscription {
             olingoEntityType = "iot.Thing";
             break;
         default: throw new IllegalArgumentException("Invalid topic supplied! Cannot Get Resource Type.");
+        }
+
+        // Parse STA Property to Database Property after entityType has been determined
+        if (propertyResource != null) {
+            watchedProperty = MQTTUtil.translateSTAtoToDbProperty(olingoEntityType + "." + propertyResource);
         }
     }
 
@@ -140,8 +161,21 @@ public class MQTTSubscription {
             return false;
         }
 
-        //TODO: Respect differenceMap for subscriptions on specific properties
-        //TODO: Check for more complex Paths
+        // Check changed property
+        if (!isCollection && watchedProperty != null) {
+            if (differenceMap == null) {
+                return true;
+            } else {
+                for (String changedProperty: differenceMap) {
+                    if (watchedProperty.contains(changedProperty)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+
+        //TODO: Check/Resolve for more complex Paths
         return true;
     }
 
@@ -153,6 +187,20 @@ public class MQTTSubscription {
         return topic;
     }
 
+    public String encodeEntity(Entity entity) {
+        //TODO: Actually serialize Object to JSON
+        if (fields != null) {
+            return entity.toString();
+        } else {
+            return entity.toString();
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(topic);
+    }
+    
     @Override
     public boolean equals(Object other) {
         return (other instanceof MQTTSubscription && ((MQTTSubscription)other).getTopic().equals(this.topic));
