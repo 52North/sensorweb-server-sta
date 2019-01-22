@@ -28,6 +28,7 @@
  */
 package org.n52.sta.mqtt.core;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -46,6 +47,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
+import io.moquette.BrokerConstants;
 import io.moquette.broker.Server;
 import io.moquette.broker.config.IConfig;
 import io.moquette.broker.config.MemoryConfig;
@@ -81,6 +83,8 @@ public class MQTTBroker {
         Server test = new Server();
         try {
             test.startServer(parseConfig(), Arrays.asList(initMessageHandler()));
+            Runtime.getRuntime().addShutdownHook(new Thread(test::stopServer));
+            
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -124,7 +128,6 @@ public class MQTTBroker {
                         LOGGER.debug("Error while processing MQTT message", ex);
                     }
                 }
-
             }
 
             @Override
@@ -157,7 +160,12 @@ public class MQTTBroker {
 
     private IConfig parseConfig() {
         //TODO: Actually use properties from application properties
-        return new MemoryConfig(new Properties());
+        Properties props = new Properties();
+        props.put(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, System.getProperty("user.dir") + File.separator
+                  + "52N-STA-MQTTBroker.h2");
+        props.put(BrokerConstants.AUTOSAVE_INTERVAL_PROPERTY_NAME, 5);
+        props.put(BrokerConstants.ALLOW_ANONYMOUS_PROPERTY_NAME, Boolean.TRUE.toString());
+        return new MemoryConfig(props);
     }
 
 }
