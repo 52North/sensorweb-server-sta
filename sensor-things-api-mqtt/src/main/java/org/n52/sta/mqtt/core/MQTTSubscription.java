@@ -33,7 +33,9 @@ import java.util.Set;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.server.api.uri.UriInfo;
+import org.apache.olingo.server.api.uri.UriParameter;
 import org.apache.olingo.server.api.uri.UriResource;
+import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.queryoption.SelectItem;
 import org.apache.olingo.server.core.uri.parser.Parser;
 import org.apache.olingo.server.core.uri.parser.UriParserException;
@@ -54,6 +56,8 @@ public class MQTTSubscription {
     private String olingoEntityType;
 
     private boolean isCollection;
+
+    private Long entityId;
     
     /**
      * Parses Topic String into usable Properties to determine whether Entities fit this Subscription.
@@ -65,53 +69,44 @@ public class MQTTSubscription {
     public MQTTSubscription(String topic, Parser parser) throws UriParserException, UriValidationException {
         // Validate that Topic is valid URI
         UriInfo uriInfo = parser.parseUri(topic, null, null, "");
-        
+
         this.topic = topic;
         this.pattern = uriInfo.getUriResourceParts();
         if (uriInfo.getSelectOption() != null) {
             fields = uriInfo.getSelectOption().getSelectItems();
         }
         
-        // Parse Entitytype
-        switch(uriInfo.getUriResourceParts().get(uriInfo.getUriResourceParts().size()-1).toString()) {
-        case "Observations":
+        UriParameter idParameter = ((UriResourceEntitySet)pattern.get(pattern.size()-1)).getKeyPredicates().get(0);
+        if (idParameter == null) {
             isCollection = true;
-        case "Observation":
+        } else {
+            entityId = Long.parseLong(idParameter.getText());
+        }
+
+        // Parse Entitytype
+        switch(pattern.get(pattern.size()-1).toString()) {
+        case "Observations":
             olingoEntityType = "iot.Observation";
             break;
         case "Datastreams":
-            isCollection = true;
-        case "Datastream":
             olingoEntityType = "iot.Datastream";
             break;
         case "FeatureOfInterests":
-            isCollection = true;
-        case "FeatureOfInterest":
             olingoEntityType = "iot.FeatureOfInterest";
             break;
         case "HistoricalLocations":
-            isCollection = true;
-        case "HistoricalLocation":
             olingoEntityType = "iot.HistoricalLocation";
             break;
         case "Locations":
-            isCollection = true;
-        case "Location":
             olingoEntityType = "iot.Location";
             break;
         case "ObservedProperties":
-            isCollection = true;
-        case "ObservedProperty":
             olingoEntityType = "iot.ObservedProperty";
             break;
         case "Sensors":
-            isCollection = true;
-        case "Sensor":
             olingoEntityType = "iot.Sensor";
             break;
         case "Things":
-            isCollection = true;
-        case "Thing":
             olingoEntityType = "iot.Thing";
             break;
         default: throw new IllegalArgumentException("Invalid topic supplied! Cannot Get Resource Type.");
@@ -135,16 +130,15 @@ public class MQTTSubscription {
      * @return true if Entity should be posted to this Subscription
      */
     private boolean matches(Entity entity, Set<String> differenceMap) {
-        // Check type and fail-fast on type mismatched
+        // Check type and fail-fast on type mismatch
         if (!(entity.getType().equals(olingoEntityType))) {
             return false;
         }
 
-        //TODO: fix
         // Check ID (if not collection) and fail-fast if wrong id is present
-//        if (!isCollection && !pattern[pattern.length-1][1].equals(entity.getProperty("id").getValue())) {
-//            return false;
-//        }
+        if (!isCollection && !entityId.equals(entity.getProperty("id").getValue())) {
+            return false;
+        }
 
         //TODO: Respect differenceMap for subscriptions on specific properties
         //TODO: Check for more complex Paths
