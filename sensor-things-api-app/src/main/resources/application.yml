@@ -41,7 +41,12 @@ spring:
 mqtt:
   localClient:
     maxWaitTime: 5
-
+  broker:
+    persistence:
+      path: "" # Empty for default path (java "user.dir")
+      filename: "52N-STA-MQTTBroker.h2"
+      autosave_interval: "30"
+    
 # Logging
 logging:
   level:
@@ -50,3 +55,4 @@ logging:
     org.hibernate: INFO
     org.hibernate.type: INFO
     org.hibernate.SQL: INFO
+    # io.moquette: TRACE

@@ -44,6 +44,7 @@ import org.n52.sta.mqtt.handler.MqttObservationCreateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
@@ -69,6 +70,15 @@ public class MQTTBroker {
 
     final Logger LOGGER = LoggerFactory.getLogger(MQTTBroker.class);
 
+    @Value("${mqtt.broker.persistence.path}")
+    private String MOQUETTE_STORE_PATH;
+    
+    @Value("${mqtt.broker.persistence.filename:52N-STA-MQTTBroker.h2}")
+    private String MOQUETTE_STORE_FILENAME;
+    
+    @Value("${mqtt.broker.persistence.autosave_interval:300}")
+    private String AUTOSAVE_INTERVAL_PROPERTY;
+    
     @Autowired
     private MqttObservationCreateHandler handler;
     
@@ -134,7 +144,7 @@ public class MQTTBroker {
             public void onSubscribe(InterceptSubscribeMessage msg) {
                 LOGGER.debug("Client with ID: " + msg.getClientID() + "has subscribed");
                 try {
-                    LOGGER.error("Adding new MQTT subscription");
+                    LOGGER.debug("Adding new MQTT subscription");
                     localClient.addSubscription(new MQTTSubscription(msg.getTopicFilter(), parser));
                 } catch (Exception e) {
                     LOGGER.error("Error while processing MQTT subscription");
@@ -146,7 +156,7 @@ public class MQTTBroker {
             public void onUnsubscribe(InterceptUnsubscribeMessage msg) {
                 LOGGER.debug("Client with ID: " + msg.getClientID() + "has UNsubscribed");
                 try {
-                    LOGGER.error("Adding new MQTT subscription");
+                    LOGGER.debug("Adding new MQTT subscription");
                     localClient.removeSubscription(new MQTTSubscription(msg.getTopicFilter(), parser));
                 } catch (Exception e) {
                     LOGGER.error("Error while processing MQTT subscription");
@@ -159,11 +169,17 @@ public class MQTTBroker {
     }
 
     private IConfig parseConfig() {
-        //TODO: Actually use properties from application properties
         Properties props = new Properties();
-        props.put(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, System.getProperty("user.dir") + File.separator
-                  + "52N-STA-MQTTBroker.h2");
-        props.put(BrokerConstants.AUTOSAVE_INTERVAL_PROPERTY_NAME, 5);
+        // Fallback to default path if not set
+        if (MOQUETTE_STORE_PATH.equals("")) {
+            MOQUETTE_STORE_PATH = System.getProperty("user.dir") + File.separator + MOQUETTE_STORE_FILENAME;
+        }
+        LOGGER.info("Initialized MQTT Broker Persistence with Path: " + MOQUETTE_STORE_PATH);
+        LOGGER.info("Initialized MQTT Broker Persistence with Filename: " + MOQUETTE_STORE_FILENAME);
+        LOGGER.info("Initialized MQTT Broker Persistence with Autosave Interval: " + AUTOSAVE_INTERVAL_PROPERTY);
+        props.put(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, MOQUETTE_STORE_PATH);
+        props.put(BrokerConstants.DEFAULT_MOQUETTE_STORE_H2_DB_FILENAME, MOQUETTE_STORE_FILENAME);
+        props.put(BrokerConstants.AUTOSAVE_INTERVAL_PROPERTY_NAME, AUTOSAVE_INTERVAL_PROPERTY);
         props.put(BrokerConstants.ALLOW_ANONYMOUS_PROPERTY_NAME, Boolean.TRUE.toString());
         return new MemoryConfig(props);
     }
