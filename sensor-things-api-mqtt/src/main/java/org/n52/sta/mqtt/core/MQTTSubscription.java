@@ -192,9 +192,11 @@ public class MQTTSubscription {
 
     public ByteBuf encodeEntity(Entity entity) {
         //TODO: Actually serialize Object to JSON
-        if (fields != null) {
+        if (watchedProperty != null) {
+            // Only return updated property
             return Unpooled.copiedBuffer(entity.toString().getBytes());
         } else {
+            // Return normally serialized object with this.fields selectItems
             return Unpooled.copiedBuffer(entity.toString().getBytes());
         }
     }
