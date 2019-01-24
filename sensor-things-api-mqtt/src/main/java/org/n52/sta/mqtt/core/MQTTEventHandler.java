@@ -41,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import io.moquette.broker.Server;
+import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.mqtt.MqttFixedHeader;
 import io.netty.handler.codec.mqtt.MqttMessageType;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
@@ -87,16 +88,20 @@ public class MQTTEventHandler implements STAEventHandler {
         }
         
         // Check all subscriptions for a match
-        subscriptions.forEach((subscrip, count) -> {
+        ByteBuf serializedEntity = null;
+        for(MQTTSubscription subscrip : subscriptions.keySet()) {
             String topic = subscrip.checkSubscription(entity, differenceMap);
             if (topic != null) {
+                if (serializedEntity == null) {
+                    serializedEntity = subscrip.encodeEntity(entity);
+                }
                 MqttPublishMessage msg = new MqttPublishMessage(mqttFixedHeader,
                                                                 new MqttPublishVariableHeader(topic, 52),
-                                                                subscrip.encodeEntity(entity));
+                                                                serializedEntity);
                 mqttBroker.internalPublish(msg, internalClientId);
                 LOGGER.debug("Posted Message to Topic: " + topic);
             }
-        });
+        };
     }
 
     public void addSubscription(MQTTSubscription subscription) {
