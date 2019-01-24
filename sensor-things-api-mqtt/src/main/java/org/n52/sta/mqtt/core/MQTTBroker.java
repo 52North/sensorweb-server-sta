@@ -92,11 +92,18 @@ public class MQTTBroker {
         Server mqttServer = new Server();
         try {
             mqttServer.startServer(parseConfig(), Arrays.asList(initMessageHandler()));
+            //TODO: uncomment once it is implemented.
+//            List<Subscription> subscriptions = mqttServer.getSubscriptions();
+//            for (Subscription sub : subscriptions) {
+//                localClient.addSubscription(new MQTTSubscription(sub.getTopicFilter().toString(), parser));
+//            }
             Runtime.getRuntime().addShutdownHook(new Thread(mqttServer::stopServer));
-            
         } catch (IOException e) {
             LOGGER.error("Error starting/stopping MQTT Broker. Exception: " + e.getMessage());
             e.printStackTrace();
+//        } catch (UriParserException | UriValidationException e) {
+//            LOGGER.error("Error starting/stopping MQTT Broker. Could not parse stored Subscriptions: Exception: " + e.getMessage());
+//            e.printStackTrace();
         }
         return mqttServer;
     }
