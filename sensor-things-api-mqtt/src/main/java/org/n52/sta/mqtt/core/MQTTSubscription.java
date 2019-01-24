@@ -43,6 +43,9 @@ import org.apache.olingo.server.core.uri.parser.Parser;
 import org.apache.olingo.server.core.uri.parser.UriParserException;
 import org.apache.olingo.server.core.uri.validator.UriValidationException;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
@@ -187,12 +190,12 @@ public class MQTTSubscription {
         return topic;
     }
 
-    public String encodeEntity(Entity entity) {
+    public ByteBuf encodeEntity(Entity entity) {
         //TODO: Actually serialize Object to JSON
         if (fields != null) {
-            return entity.toString();
+            return Unpooled.copiedBuffer(entity.toString().getBytes());
         } else {
-            return entity.toString();
+            return Unpooled.copiedBuffer(entity.toString().getBytes());
         }
     }
 

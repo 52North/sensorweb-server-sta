@@ -38,33 +38,33 @@ import org.n52.sta.data.STAEventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.integration.annotation.IntegrationComponentScan;
-import org.springframework.integration.dsl.IntegrationFlow;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.support.GenericMessage;
 import org.springframework.stereotype.Component;
+
+import io.moquette.broker.Server;
+import io.netty.handler.codec.mqtt.MqttFixedHeader;
+import io.netty.handler.codec.mqtt.MqttMessageType;
+import io.netty.handler.codec.mqtt.MqttPublishMessage;
+import io.netty.handler.codec.mqtt.MqttPublishVariableHeader;
+import io.netty.handler.codec.mqtt.MqttQoS;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
 @Component
-@IntegrationComponentScan
 public class MQTTEventHandler implements STAEventHandler {
     
     @Autowired
     private MQTTUtil config;
     
-    @Value("${mqtt.localClient.maxWaitTime:1}")
-    private int maxWaitTime;
+    @Autowired
+    private Server mqttBroker;
     
     static final String internalClientId = "POC";
 
-    private MessageChannel messageChannel;
-
     private Map<MQTTSubscription, Integer> subscriptions = new HashMap<MQTTSubscription, Integer>();
+    
+    private final MqttFixedHeader mqttFixedHeader = new MqttFixedHeader(MqttMessageType.PUBLISH, false, MqttQoS.AT_LEAST_ONCE, false, 0);
 
     /*
      * List of all Entity Types that are currently subscribed to. Used for fail-fast.
@@ -73,11 +73,7 @@ public class MQTTEventHandler implements STAEventHandler {
 
     final Logger LOGGER = LoggerFactory.getLogger(MQTTEventHandler.class);
 
-    public MQTTEventHandler(IntegrationFlow gate) {
-        this.messageChannel = gate.getInputChannel();
-    }
-
-    @SuppressWarnings({"serial", "unchecked"})
+    @SuppressWarnings({"unchecked"})
     @Override
     public void handleEvent(Object rawObject, Set<String> differenceMap) {
         Entity entity;
@@ -89,13 +85,15 @@ public class MQTTEventHandler implements STAEventHandler {
         } else {
             entity = config.getMapper(rawObject.getClass().getName()).createEntity(rawObject);
         }
-
+        
         // Check all subscriptions for a match
         subscriptions.forEach((subscrip, count) -> {
             String topic = subscrip.checkSubscription(entity, differenceMap);
             if (topic != null) {
-                Message<String> msg = new GenericMessage<String>(subscrip.encodeEntity(entity), new HashMap<String, Object>() {{put("mqtt_topic", topic);}});
-                messageChannel.send(msg, maxWaitTime);
+                MqttPublishMessage msg = new MqttPublishMessage(mqttFixedHeader,
+                                                                new MqttPublishVariableHeader(topic, 52),
+                                                                subscrip.encodeEntity(entity));
+                mqttBroker.internalPublish(msg, internalClientId);
                 LOGGER.debug("Posted Message to Topic: " + topic);
             }
         });

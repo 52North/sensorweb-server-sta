@@ -50,8 +50,6 @@ import org.n52.sta.mapping.SensorMapper;
 import org.n52.sta.mapping.ThingMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.integration.dsl.IntegrationFlow;
-import org.springframework.integration.mqtt.outbound.MqttPahoMessageHandler;
 import org.springframework.stereotype.Component;
 
 /**
@@ -89,17 +87,7 @@ public class MQTTUtil {
     public Parser uriParser(CsdlAbstractEdmProvider provider) {
         OData odata = OData.newInstance();
         ServiceMetadata meta = odata.createServiceMetadata(provider, new ArrayList<EdmxReference>());
-        Parser parser = new Parser(meta.getEdm(), odata);
         return new Parser(meta.getEdm(), odata);
-    }
-    
-    /**
-     * Sets up Local Paho Client to connect to local Broker.
-     * @return
-     */
-    @Bean
-    public IntegrationFlow mqttOutboundFlow() {
-        return f -> f.handle(new MqttPahoMessageHandler("tcp://localhost:1883", MQTTEventHandler.internalClientId));
     }
 
     /**

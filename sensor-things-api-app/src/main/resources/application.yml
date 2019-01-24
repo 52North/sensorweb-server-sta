@@ -39,8 +39,6 @@ spring:
         
 # MQTT Configuration
 mqtt:
-  localClient:
-    maxWaitTime: 5
   broker:
     persistence:
       path: "" # Empty for default path (java "user.dir")
@@ -55,4 +53,4 @@ logging:
     org.hibernate: INFO
     org.hibernate.type: INFO
     org.hibernate.SQL: INFO
-    # io.moquette: TRACE
+    io.moquette: TRACE
