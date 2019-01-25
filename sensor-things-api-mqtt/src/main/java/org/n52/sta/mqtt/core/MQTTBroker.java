@@ -59,6 +59,11 @@ import io.moquette.interception.messages.InterceptDisconnectMessage;
 import io.moquette.interception.messages.InterceptPublishMessage;
 import io.moquette.interception.messages.InterceptSubscribeMessage;
 import io.moquette.interception.messages.InterceptUnsubscribeMessage;
+import java.util.ArrayList;
+import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
+import org.apache.olingo.commons.api.edmx.EdmxReference;
+import org.apache.olingo.server.api.OData;
+import org.apache.olingo.server.api.ServiceMetadata;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -71,33 +76,44 @@ public class MQTTBroker {
 
     @Value("${mqtt.broker.persistence.path}")
     private String MOQUETTE_STORE_PATH;
-    
+
     @Value("${mqtt.broker.persistence.filename:52N-STA-MQTTBroker.h2}")
     private String MOQUETTE_STORE_FILENAME;
-    
+
     @Value("${mqtt.broker.persistence.autosave_interval:300}")
     private String AUTOSAVE_INTERVAL_PROPERTY;
-    
+
     @Autowired
     private MqttObservationCreateHandler handler;
-    
+
     @Autowired
     private MQTTEventHandler localClient;
-    
+
     @Autowired
     private Parser parser;
+
+    @Autowired
+    private CsdlAbstractEdmProvider provider;
+
+    private ServiceMetadata edm;
 
     @Bean
     public Server initMQTTBroker() {
         Server mqttServer = new Server();
         try {
             mqttServer.startServer(parseConfig(), Arrays.asList(initMessageHandler()));
+//            mqttServer.get
             //TODO: uncomment once it is implemented.
 //            List<Subscription> subscriptions = mqttServer.getSubscriptions();
 //            for (Subscription sub : subscriptions) {
 //                localClient.addSubscription(new MQTTSubscription(sub.getTopicFilter().toString(), parser));
 //            }
             Runtime.getRuntime().addShutdownHook(new Thread(mqttServer::stopServer));
+
+            // create odata handler and configure it with EdmProvider and Processor
+            OData odata = OData.newInstance();
+
+            edm = odata.createServiceMetadata(provider, new ArrayList<EdmxReference>());
         } catch (IOException e) {
             LOGGER.error("Error starting/stopping MQTT Broker. Exception: " + e.getMessage());
             e.printStackTrace();
@@ -151,7 +167,7 @@ public class MQTTBroker {
                 LOGGER.debug("Client with ID: " + msg.getClientID() + "has subscribed");
                 try {
                     LOGGER.debug("Adding new MQTT subscription");
-                    localClient.addSubscription(new MQTTSubscription(msg.getTopicFilter(), parser));
+                    localClient.addSubscription(new MQTTSubscription(msg.getTopicFilter(), parser, edm));
                 } catch (Exception e) {
                     LOGGER.error("Error while processing MQTT subscription");
                     LOGGER.debug("Error while processing MQTT subscription", e);
@@ -163,7 +179,7 @@ public class MQTTBroker {
                 LOGGER.debug("Client with ID: " + msg.getClientID() + "has UNsubscribed");
                 try {
                     LOGGER.debug("Adding new MQTT subscription");
-                    localClient.removeSubscription(new MQTTSubscription(msg.getTopicFilter(), parser));
+                    localClient.removeSubscription(new MQTTSubscription(msg.getTopicFilter(), parser, edm));
                 } catch (Exception e) {
                     LOGGER.error("Error while processing MQTT subscription");
                     LOGGER.debug("Error while processing MQTT subscription", e);

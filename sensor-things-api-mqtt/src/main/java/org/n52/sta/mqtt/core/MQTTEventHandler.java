@@ -47,6 +47,9 @@ import io.netty.handler.codec.mqtt.MqttMessageType;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import io.netty.handler.codec.mqtt.MqttPublishVariableHeader;
 import io.netty.handler.codec.mqtt.MqttQoS;
+import java.io.IOException;
+import org.apache.olingo.server.api.serializer.SerializerException;
+import org.n52.sta.service.serializer.PayloadSerializer;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -54,25 +57,28 @@ import io.netty.handler.codec.mqtt.MqttQoS;
  */
 @Component
 public class MQTTEventHandler implements STAEventHandler {
-    
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MQTTEventHandler.class);
+
     @Autowired
     private MQTTUtil config;
-    
+
     @Autowired
     private Server mqttBroker;
-    
+
+    @Autowired
+    private PayloadSerializer serializer;
+
     static final String internalClientId = "POC";
 
     private Map<MQTTSubscription, Integer> subscriptions = new HashMap<MQTTSubscription, Integer>();
-    
+
     private final MqttFixedHeader mqttFixedHeader = new MqttFixedHeader(MqttMessageType.PUBLISH, false, MqttQoS.AT_LEAST_ONCE, false, 0);
 
     /*
      * List of all Entity Types that are currently subscribed to. Used for fail-fast.
      */
     private Set<String> watchedEntityTypes = new HashSet<String>();
-
-    final Logger LOGGER = LoggerFactory.getLogger(MQTTEventHandler.class);
 
     @SuppressWarnings({"unchecked"})
     @Override
@@ -86,20 +92,27 @@ public class MQTTEventHandler implements STAEventHandler {
         } else {
             entity = config.getMapper(rawObject.getClass().getName()).createEntity(rawObject);
         }
-        
+
         // Check all subscriptions for a match
         ByteBuf serializedEntity = null;
-        for(MQTTSubscription subscrip : subscriptions.keySet()) {
+        for (MQTTSubscription subscrip : subscriptions.keySet()) {
             String topic = subscrip.checkSubscription(entity, differenceMap);
             if (topic != null) {
                 if (serializedEntity == null) {
-                    serializedEntity = subscrip.encodeEntity(entity);
+                    try {
+                        //                    serializedEntity = subscrip.encodeEntity(entity);
+                        serializedEntity = encodeEntity(subscrip, entity);
+                        MqttPublishMessage msg = new MqttPublishMessage(mqttFixedHeader,
+                                new MqttPublishVariableHeader(topic, 52),
+                                serializedEntity);
+                        mqttBroker.internalPublish(msg, internalClientId);
+                        LOGGER.debug("Posted Message to Topic: " + topic);
+                    } catch (IOException | SerializerException ex) {
+                        LOGGER.error(ex.getMessage());
+                        LOGGER.debug("Error while serializing payload.", ex);
+                    }
                 }
-                MqttPublishMessage msg = new MqttPublishMessage(mqttFixedHeader,
-                                                                new MqttPublishVariableHeader(topic, 52),
-                                                                serializedEntity);
-                mqttBroker.internalPublish(msg, internalClientId);
-                LOGGER.debug("Posted Message to Topic: " + topic);
+
             }
         };
     }
@@ -125,6 +138,9 @@ public class MQTTEventHandler implements STAEventHandler {
             }
         }
     }
-    
+
+    private ByteBuf encodeEntity(MQTTSubscription subsc, Entity entity) throws IOException, SerializerException {
+        return serializer.encodeEntity(subsc.getMetadata(), entity, subsc.getEdmEntityType(), subsc.getEdmEntitySet(), subsc.getQueryOptions(), watchedEntityTypes);
+    }
 
 }
