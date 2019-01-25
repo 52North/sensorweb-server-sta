@@ -22,6 +22,7 @@ import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.n52.sta.service.query.QueryOptions;
 import org.n52.sta.service.query.QueryOptionsHandler;
+import org.n52.sta.utils.EntityAnnotator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,8 +37,10 @@ public class PayloadSerializer {
     @Autowired
     private QueryOptionsHandler queryOptionsHandler;
 
+    @Autowired
+    EntityAnnotator annotator;
+
     private ServiceMetadata edm;
-   
 
     public ByteBuf encodeEntity(ServiceMetadata serviceMetadata, Entity entity, EdmEntityType entityType, EdmEntitySet entitySet, QueryOptions queryOptions, Set<String> watchedProperties) throws SerializerException, IOException {
         //TODO: Actually serialize Object to JSON
@@ -55,6 +58,7 @@ public class PayloadSerializer {
 
     private InputStream createResponseContent(ServiceMetadata serviceMetadata, Entity entity, EdmEntityType entityType, EdmEntitySet entitySet, QueryOptions queryOptions) throws SerializerException {
         SensorThingsSerializer serializer = new SensorThingsSerializer(ContentType.JSON_NO_METADATA);
+        entity = annotator.annotateEntity(entity, entityType, queryOptions.getBaseURI(), queryOptions.getSelectOption());
 
         ContextURL.Builder contextUrlBuilder = ContextURL.with()
                 .entitySet(entitySet)
