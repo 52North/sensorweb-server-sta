@@ -28,13 +28,16 @@
  */
 package org.n52.sta.mqtt.core;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.olingo.commons.api.data.Entity;
+import org.apache.olingo.server.api.serializer.SerializerException;
 import org.n52.sta.data.STAEventHandler;
+import org.n52.sta.service.serializer.PayloadSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,9 +50,6 @@ import io.netty.handler.codec.mqtt.MqttMessageType;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import io.netty.handler.codec.mqtt.MqttPublishVariableHeader;
 import io.netty.handler.codec.mqtt.MqttQoS;
-import java.io.IOException;
-import org.apache.olingo.server.api.serializer.SerializerException;
-import org.n52.sta.service.serializer.PayloadSerializer;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -98,21 +98,20 @@ public class MQTTEventHandler implements STAEventHandler {
         for (MQTTSubscription subscrip : subscriptions.keySet()) {
             String topic = subscrip.checkSubscription(entity, differenceMap);
             if (topic != null) {
-                if (serializedEntity == null) {
-                    try {
-                        //                    serializedEntity = subscrip.encodeEntity(entity);
+                try {
+                    // Cache Entity for other matching Topics
+                    if (serializedEntity == null) {
                         serializedEntity = encodeEntity(subscrip, entity);
-                        MqttPublishMessage msg = new MqttPublishMessage(mqttFixedHeader,
-                                new MqttPublishVariableHeader(topic, 52),
-                                serializedEntity);
-                        mqttBroker.internalPublish(msg, internalClientId);
-                        LOGGER.debug("Posted Message to Topic: " + topic);
-                    } catch (IOException | SerializerException ex) {
-                        LOGGER.error(ex.getMessage());
-                        LOGGER.debug("Error while serializing payload.", ex);
                     }
+                    MqttPublishMessage msg = new MqttPublishMessage(mqttFixedHeader,
+                            new MqttPublishVariableHeader(topic, 52),
+                            serializedEntity);
+                    mqttBroker.internalPublish(msg, internalClientId);
+                    LOGGER.debug("Posted Message to Topic: " + topic);
+                } catch (IOException | SerializerException ex) {
+                    LOGGER.error(ex.getMessage());
+                    LOGGER.debug("Error while serializing payload.", ex);
                 }
-
             }
         };
     }
