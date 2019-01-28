@@ -63,7 +63,7 @@ public class MQTTSubscription {
 
     private String olingoEntityType;
 
-    private Set<String> watchedProperty;
+    private Set<String> watchedProperties;
 
     private boolean isCollection;
 
@@ -77,91 +77,20 @@ public class MQTTSubscription {
 
     private EdmEntityType entityType;
 
-    /**
-     * Parses Topic String into usable Properties to determine whether Entities
-     * fit this Subscription.
-     *
-     * @param topic MQTT-Topic
-     * @throws UriValidationException
-     * @throws UriParserException
-     * @throws Exception If Topic String is malformed
-     */
-    public MQTTSubscription(String topic, Parser parser, ServiceMetadata edm) throws UriParserException, UriValidationException {
-
-        //TODO set base URI
-        String baseUri = "";
-
-        // Validate that Topic is valid URI
-        UriInfo uriInfo = parser.parseUri(topic, null, null, baseUri);
-
+    public MQTTSubscription(String topic, List<SelectItem> fields, List<UriResource> pattern,
+            String olingoEntityType, Set<String> watchedProperties, boolean isCollection,
+            Long entityId, QueryOptions queryOptions, EdmEntitySet entitySet, EdmEntityType entityType) throws UriParserException, UriValidationException {
         this.topic = topic;
-        this.pattern = uriInfo.getUriResourceParts();
-        this.edm = edm;
-        this.queryOptions = new URIQueryOptions(uriInfo, baseUri);
+        this.fields = fields;
+        this.pattern = pattern;
+        this.olingoEntityType = olingoEntityType;
+        this.watchedProperties = watchedProperties;
+        this.isCollection = isCollection;
+        this.entityId = entityId;
+        this.queryOptions = queryOptions;
+        this.entitySet = entitySet;
+        this.entityType = entityType;
 
-        if (queryOptions.hasSelectOption()) {
-            fields = queryOptions.getSelectOption().getSelectItems();
-        }
-
-        // Parse select Option if present
-//        if (uriInfo.getSelectOption() != null) {
-//            fields = uriInfo.getSelectOption().getSelectItems();
-//        }
-        // Parse specifically adressed property if present
-        UriResource lastResource = pattern.get(pattern.size() - 1);
-
-        String propertyResource = null;
-        if (!(lastResource instanceof UriResourceEntitySet)) {
-            // Last Resource is property
-            propertyResource = ((UriResourceProperty) lastResource).getProperty().getName();
-            lastResource = pattern.get(pattern.size() - 2);
-        }
-
-        // Parse ID if present
-        List<UriParameter> idParameter = ((UriResourceEntitySet) lastResource).getKeyPredicates();
-        entityType = ((UriResourceEntitySet) lastResource).getEntityType();
-        entitySet = ((UriResourceEntitySet) lastResource).getEntitySet();
-
-        if (idParameter.size() == 0) {
-            isCollection = true;
-        } else {
-            entityId = Long.parseLong(idParameter.get(0).getText());
-        }
-
-        // Parse Entitytype
-        switch (lastResource.toString()) {
-            case "Observations":
-                olingoEntityType = "iot.Observation";
-                break;
-            case "Datastreams":
-                olingoEntityType = "iot.Datastream";
-                break;
-            case "FeatureOfInterests":
-                olingoEntityType = "iot.FeatureOfInterest";
-                break;
-            case "HistoricalLocations":
-                olingoEntityType = "iot.HistoricalLocation";
-                break;
-            case "Locations":
-                olingoEntityType = "iot.Location";
-                break;
-            case "ObservedProperties":
-                olingoEntityType = "iot.ObservedProperty";
-                break;
-            case "Sensors":
-                olingoEntityType = "iot.Sensor";
-                break;
-            case "Things":
-                olingoEntityType = "iot.Thing";
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid topic supplied! Cannot Get Resource Type.");
-        }
-
-        // Parse STA Property to Database Property after entityType has been determined
-        if (propertyResource != null) {
-            watchedProperty = MQTTUtil.translateSTAtoToDbProperty(olingoEntityType + "." + propertyResource);
-        }
     }
 
     /**
@@ -198,12 +127,12 @@ public class MQTTSubscription {
         }
 
         // Check changed property
-        if (!isCollection && watchedProperty != null) {
+        if (!isCollection && watchedProperties != null) {
             if (differenceMap == null) {
                 return true;
             } else {
                 for (String changedProperty : differenceMap) {
-                    if (watchedProperty.contains(changedProperty)) {
+                    if (watchedProperties.contains(changedProperty)) {
                         return true;
                     }
                 }
