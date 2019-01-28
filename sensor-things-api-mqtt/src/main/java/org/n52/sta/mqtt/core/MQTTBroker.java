@@ -39,7 +39,7 @@ import org.apache.olingo.server.api.deserializer.DeserializerException;
 import org.apache.olingo.server.core.uri.parser.Parser;
 import org.apache.olingo.server.core.uri.parser.UriParserException;
 import org.apache.olingo.server.core.uri.validator.UriValidationException;
-import org.n52.sta.mqtt.handler.MqttObservationCreateHandler;
+import org.n52.sta.mqtt.handler.MqttMessageHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,11 +59,6 @@ import io.moquette.interception.messages.InterceptDisconnectMessage;
 import io.moquette.interception.messages.InterceptPublishMessage;
 import io.moquette.interception.messages.InterceptSubscribeMessage;
 import io.moquette.interception.messages.InterceptUnsubscribeMessage;
-import java.util.ArrayList;
-import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
-import org.apache.olingo.commons.api.edmx.EdmxReference;
-import org.apache.olingo.server.api.OData;
-import org.apache.olingo.server.api.ServiceMetadata;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -84,18 +79,7 @@ public class MQTTBroker {
     private String AUTOSAVE_INTERVAL_PROPERTY;
 
     @Autowired
-    private MqttObservationCreateHandler handler;
-
-    @Autowired
-    private MQTTEventHandler localClient;
-
-    @Autowired
-    private Parser parser;
-
-    @Autowired
-    private CsdlAbstractEdmProvider provider;
-
-    private ServiceMetadata edm;
+    private MqttMessageHandler handler;
 
     @Bean
     public Server initMQTTBroker() {
@@ -111,9 +95,6 @@ public class MQTTBroker {
             Runtime.getRuntime().addShutdownHook(new Thread(mqttServer::stopServer));
 
             // create odata handler and configure it with EdmProvider and Processor
-            OData odata = OData.newInstance();
-
-            edm = odata.createServiceMetadata(provider, new ArrayList<EdmxReference>());
         } catch (IOException e) {
             LOGGER.error("Error starting/stopping MQTT Broker. Exception: " + e.getMessage());
             e.printStackTrace();
@@ -167,7 +148,7 @@ public class MQTTBroker {
                 LOGGER.debug("Client with ID: " + msg.getClientID() + "has subscribed");
                 try {
                     LOGGER.debug("Adding new MQTT subscription");
-                    localClient.addSubscription(new MQTTSubscription(msg.getTopicFilter(), parser, edm));
+                    handler.processMessage(msg);
                 } catch (Exception e) {
                     LOGGER.error("Error while processing MQTT subscription");
                     LOGGER.debug("Error while processing MQTT subscription", e);
@@ -179,7 +160,7 @@ public class MQTTBroker {
                 LOGGER.debug("Client with ID: " + msg.getClientID() + "has UNsubscribed");
                 try {
                     LOGGER.debug("Adding new MQTT subscription");
-                    localClient.removeSubscription(new MQTTSubscription(msg.getTopicFilter(), parser, edm));
+                    handler.processMessage(msg);
                 } catch (Exception e) {
                     LOGGER.error("Error while processing MQTT subscription");
                     LOGGER.debug("Error while processing MQTT subscription", e);
