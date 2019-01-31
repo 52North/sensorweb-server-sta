@@ -69,7 +69,7 @@ public class MQTTBroker {
 
     final Logger LOGGER = LoggerFactory.getLogger(MQTTBroker.class);
 
-    @Value("${mqtt.broker.persistence.path}")
+    @Value("${mqtt.broker.persistence.path:}")
     private String MOQUETTE_STORE_PATH;
 
     @Value("${mqtt.broker.persistence.filename:52N-STA-MQTTBroker.h2}")
