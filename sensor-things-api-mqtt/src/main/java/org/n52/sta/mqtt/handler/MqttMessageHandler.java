@@ -88,11 +88,11 @@ public class MqttMessageHandler {
     }
 
     public void processSubscribeMessage(InterceptSubscribeMessage msg) throws MqttHandlerException {
-        localClient.addSubscription(createMqttSubscription(msg.getTopicFilter()));
+        localClient.addSubscription(createMqttSubscription(msg.getTopicFilter()), msg.getClientID());
     }
 
     public void processUnsubscribeMessage(InterceptUnsubscribeMessage msg) throws MqttHandlerException {
-        localClient.removeSubscription(createMqttSubscription(msg.getTopicFilter()));
+        localClient.removeSubscription(createMqttSubscription(msg.getTopicFilter()), msg.getClientID());
     }
 
     private AbstractMqttSubscription createMqttSubscription(String topic) throws MqttHandlerException {

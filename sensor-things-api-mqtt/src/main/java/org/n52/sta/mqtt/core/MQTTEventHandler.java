@@ -30,6 +30,7 @@ package org.n52.sta.mqtt.core;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -80,7 +81,7 @@ public class MQTTEventHandler implements STAEventHandler, InitializingBean {
 
     static final String internalClientId = "POC";
 
-    private Map<AbstractMqttSubscription, Integer> subscriptions = new HashMap<AbstractMqttSubscription, Integer>();
+    private Map<AbstractMqttSubscription, Set<String>> subscriptions = new HashMap<AbstractMqttSubscription, Set<String>>();
 
     private final MqttFixedHeader mqttFixedHeader = new MqttFixedHeader(MqttMessageType.PUBLISH, false, MqttQoS.AT_LEAST_ONCE, false, 0);
 
@@ -129,24 +130,25 @@ public class MQTTEventHandler implements STAEventHandler, InitializingBean {
         };
     }
 
-    public void addSubscription(AbstractMqttSubscription subscription) {
-        Integer count = subscriptions.get(subscription);
-        if (count != null) {
-            subscriptions.put(subscription, count++);
-        } else {
-            subscriptions.put(subscription, 1);
+    public void addSubscription(AbstractMqttSubscription subscription, String clientId) {
+        Set<String> clients = subscriptions.get(subscription);
+        if (clients == null) {
+            clients = Collections.emptySet();
             watchedEntityTypes.add(MQTTUtil.getBeanTypes().get(subscription.getEdmEntityType().getName()));
         }
+        clients.add(clientId);
+        subscriptions.put(subscription, clients);
     }
 
-    public void removeSubscription(AbstractMqttSubscription subscription) {
-        Integer count = subscriptions.get(subscription);
-        if (count != null) {
-            if (count == 1) {
+    public void removeSubscription(AbstractMqttSubscription subscription, String clientId) {
+        Set<String> clients = subscriptions.get(subscription);
+        if (clients != null) {
+            if (clients.size() == 1) {
                 subscriptions.remove(subscription);
                 watchedEntityTypes.remove(MQTTUtil.getBeanTypes().get(subscription.getEdmEntityType().getName()));
             } else {
-                subscriptions.put(subscription, --count);
+                clients.remove(clientId);
+                subscriptions.put(subscription, clients);
             }
         }
     }
