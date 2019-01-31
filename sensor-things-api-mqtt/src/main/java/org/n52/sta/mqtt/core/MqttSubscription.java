@@ -45,7 +45,7 @@ import org.n52.sta.service.query.QueryOptions;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
-public class MQTTSubscription {
+public class MqttSubscription {
 
     private String topic;
 
@@ -67,7 +67,7 @@ public class MQTTSubscription {
 
     private EdmEntityType entityType;
 
-    public MQTTSubscription(String topic, List<SelectItem> fields,
+    public MqttSubscription(String topic, List<SelectItem> fields,
             String olingoEntityType, Set<String> watchedProperties, boolean isCollection,
             Long entityId, QueryOptions queryOptions, EdmEntitySet entitySet, EdmEntityType entityType) {
         this.topic = topic;
@@ -159,6 +159,6 @@ public class MQTTSubscription {
 
     @Override
     public boolean equals(Object other) {
-        return (other instanceof MQTTSubscription && ((MQTTSubscription) other).getTopic().equals(this.topic));
+        return (other instanceof MqttSubscription && ((MqttSubscription) other).getTopic().equals(this.topic));
     }
 }

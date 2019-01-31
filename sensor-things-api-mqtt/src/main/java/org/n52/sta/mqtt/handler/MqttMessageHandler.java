@@ -28,9 +28,9 @@ import org.apache.olingo.server.core.uri.parser.UriParserException;
 import org.apache.olingo.server.core.uri.validator.UriValidationException;
 import org.n52.sta.mqtt.MqttHandlerException;
 import org.n52.sta.mqtt.core.AbstractMqttSubscription;
-import org.n52.sta.mqtt.core.MQTTEventHandler;
-import org.n52.sta.mqtt.core.MQTTSubscription;
-import org.n52.sta.mqtt.core.MQTTUtil;
+import org.n52.sta.mqtt.core.MqttEventHandler;
+import org.n52.sta.mqtt.core.MqttSubscription;
+import org.n52.sta.mqtt.core.MqttUtil;
 import org.n52.sta.service.handler.AbstractEntityCollectionRequestHandler;
 import org.n52.sta.service.query.QueryOptions;
 import org.n52.sta.service.query.URIQueryOptions;
@@ -67,7 +67,7 @@ public class MqttMessageHandler {
     private CrudHelper crudHelper;
 
     @Autowired
-    private MQTTEventHandler localClient;
+    private MqttEventHandler localClient;
 
     @Autowired
     private CsdlAbstractEdmProvider provider;

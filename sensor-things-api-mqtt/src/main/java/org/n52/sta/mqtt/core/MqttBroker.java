@@ -64,9 +64,9 @@ import io.moquette.interception.messages.InterceptUnsubscribeMessage;
  *
  */
 @Component
-public class MQTTBroker {
+public class MqttBroker {
 
-    final Logger LOGGER = LoggerFactory.getLogger(MQTTBroker.class);
+    final Logger LOGGER = LoggerFactory.getLogger(MqttBroker.class);
 
     @Value("${mqtt.broker.persistence.path}")
     private String MOQUETTE_STORE_PATH;
@@ -129,7 +129,7 @@ public class MQTTBroker {
 
             @Override
             public void onPublish(InterceptPublishMessage msg) {
-                if (!msg.getClientID().equals(MQTTEventHandler.internalClientId)) {
+                if (!msg.getClientID().equals(MqttEventHandler.internalClientId)) {
                     LOGGER.debug(msg.getTopicName());
                     LOGGER.debug(msg.getPayload().toString(Charset.forName("UTF-8")));
                     try {

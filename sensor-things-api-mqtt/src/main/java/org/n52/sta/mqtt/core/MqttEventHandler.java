@@ -63,12 +63,12 @@ import io.netty.handler.codec.mqtt.MqttQoS;
  *
  */
 @Component
-public class MQTTEventHandler implements STAEventHandler, InitializingBean {
+public class MqttEventHandler implements STAEventHandler, InitializingBean {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MQTTEventHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MqttEventHandler.class);
 
     @Autowired
-    private MQTTUtil config;
+    private MqttUtil config;
 
     @Autowired
     private Server mqttBroker;
@@ -134,7 +134,7 @@ public class MQTTEventHandler implements STAEventHandler, InitializingBean {
         Set<String> clients = subscriptions.get(subscription);
         if (clients == null) {
             clients = Collections.emptySet();
-            watchedEntityTypes.add(MQTTUtil.getBeanTypes().get(subscription.getEdmEntityType().getName()));
+            watchedEntityTypes.add(MqttUtil.getBeanTypes().get(subscription.getEdmEntityType().getName()));
         }
         clients.add(clientId);
         subscriptions.put(subscription, clients);
@@ -145,7 +145,7 @@ public class MQTTEventHandler implements STAEventHandler, InitializingBean {
         if (clients != null) {
             if (clients.size() == 1) {
                 subscriptions.remove(subscription);
-                watchedEntityTypes.remove(MQTTUtil.getBeanTypes().get(subscription.getEdmEntityType().getName()));
+                watchedEntityTypes.remove(MqttUtil.getBeanTypes().get(subscription.getEdmEntityType().getName()));
             } else {
                 clients.remove(clientId);
                 subscriptions.put(subscription, clients);

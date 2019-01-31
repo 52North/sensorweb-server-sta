@@ -57,7 +57,7 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-public class MQTTUtil {
+public class MqttUtil {
 
     @Autowired
     private ObservationMapper obsMapper;

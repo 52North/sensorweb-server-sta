@@ -15,7 +15,7 @@ import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.queryoption.SelectItem;
-import org.n52.sta.mqtt.core.MQTTSubscription;
+import org.n52.sta.mqtt.core.MqttSubscription;
 import org.n52.sta.service.handler.AbstractEntityCollectionRequestHandler;
 import org.n52.sta.service.handler.AbstractEntityRequestHandler;
 import org.n52.sta.service.query.QueryOptions;
