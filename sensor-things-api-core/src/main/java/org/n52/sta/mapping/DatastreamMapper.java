@@ -28,6 +28,7 @@
  */
 package org.n52.sta.mapping;
 
+import java.util.Collections;
 import java.util.HashMap;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_OBSERVATION_TYPE;
@@ -318,12 +319,12 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
     }
 
     @Override
-    public Map<String, Long> getRelatedCollections(Object rawObject) {
-        Map collections = new HashMap();
+    public Map<String, Set<Long>> getRelatedCollections(Object rawObject) {
+        Map<String, Set<Long>> collections = new HashMap<String, Set<Long>> ();
         DatastreamEntity entity = (DatastreamEntity) rawObject;
-        collections.put(ET_THING_NAME, entity.getThing().getId());
-        collections.put(ET_SENSOR_NAME, entity.getProcedure().getId());
-        collections.put(ET_OBSERVED_PROPERTY_NAME, entity.getObservableProperty().getId());
+        collections.put(ET_THING_NAME, Collections.singleton(entity.getThing().getId()));
+        collections.put(ET_SENSOR_NAME, Collections.singleton(entity.getProcedure().getId()));
+        collections.put(ET_OBSERVED_PROPERTY_NAME, Collections.singleton(entity.getObservableProperty().getId()));
         return collections;
     }
 }

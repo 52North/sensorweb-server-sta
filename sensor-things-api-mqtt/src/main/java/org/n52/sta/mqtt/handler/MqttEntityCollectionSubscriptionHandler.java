@@ -32,46 +32,46 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class MqttEntityCollectionSubscriptionHandler {
 
-    @Autowired
-    private UriResourceNavigationResolver navigationResolver;
-
-    public MQTTSubscription handleEntityCollectionRequest(String topic, List<UriResource> resourcePaths, QueryOptions queryOptions) throws ODataApplicationException {
-        MQTTSubscription response = null;
-
-        // handle request depending on the number of UriResource paths
-        // e.g the case: sta/Things
-        if (resourcePaths.size() == 1) {
-            response = createResponseForEntitySet(topic, resourcePaths, queryOptions);
-
-            // e.g. the case: sta/Things(id)/Locations
-        } else {
-            response = createResponseForNavigation(resourcePaths, queryOptions);
-        }
-        return response;
-    }
-
-    private MQTTSubscription createResponseForEntitySet(String topic, List<UriResource> resourcePaths, QueryOptions queryOptions) throws ODataApplicationException {
-        List<SelectItem> fields = new ArrayList();
-        Set<String> watchedProperties = new HashSet();
-        String olingoEntityType = null;
-        boolean isCollection = true;
-        Long entityId = null;
-
-        if (queryOptions.hasSelectOption()) {
-            fields = queryOptions.getSelectOption().getSelectItems();
-        }
-
-        // determine the response EntitySet
-        UriResourceEntitySet uriResourceEntitySet = navigationResolver.resolveRootUriResource(resourcePaths.get(0));
-        EdmEntitySet responseEntitySet = uriResourceEntitySet.getEntitySet();
-        MQTTSubscription subscription = new MQTTSubscription(topic, fields, olingoEntityType, watchedProperties, isCollection, entityId, queryOptions, responseEntitySet, responseEntitySet.getEntityType());
-        return subscription;
-    }
-
-    private MQTTSubscription createResponseForNavigation(String topic, List<UriResource> resourcePaths, QueryOptions queryOptions) throws ODataApplicationException {
-        // determine the target query parameters and fetch EntityCollection for it
-        EntityQueryParams queryParams = navigationResolver.resolveUriResourceNavigationPaths(resourcePaths);
-
-    }
+//    @Autowired
+//    private UriResourceNavigationResolver navigationResolver;
+//
+//    public MQTTSubscription handleEntityCollectionRequest(String topic, List<UriResource> resourcePaths, QueryOptions queryOptions) throws ODataApplicationException {
+//        MQTTSubscription response = null;
+//
+//        // handle request depending on the number of UriResource paths
+//        // e.g the case: sta/Things
+//        if (resourcePaths.size() == 1) {
+//            response = createResponseForEntitySet(topic, resourcePaths, queryOptions);
+//
+//            // e.g. the case: sta/Things(id)/Locations
+//        } else {
+//            response = createResponseForNavigation(resourcePaths, queryOptions);
+//        }
+//        return response;
+//    }
+//
+//    private MQTTSubscription createResponseForEntitySet(String topic, List<UriResource> resourcePaths, QueryOptions queryOptions) throws ODataApplicationException {
+//        List<SelectItem> fields = new ArrayList();
+//        Set<String> watchedProperties = new HashSet();
+//        String olingoEntityType = null;
+//        boolean isCollection = true;
+//        Long entityId = null;
+//
+//        if (queryOptions.hasSelectOption()) {
+//            fields = queryOptions.getSelectOption().getSelectItems();
+//        }
+//
+//        // determine the response EntitySet
+//        UriResourceEntitySet uriResourceEntitySet = navigationResolver.resolveRootUriResource(resourcePaths.get(0));
+//        EdmEntitySet responseEntitySet = uriResourceEntitySet.getEntitySet();
+//        MQTTSubscription subscription = new MQTTSubscription(topic, fields, olingoEntityType, watchedProperties, isCollection, entityId, queryOptions, responseEntitySet, responseEntitySet.getEntityType());
+//        return subscription;
+//    }
+//
+//    private MQTTSubscription createResponseForNavigation(String topic, List<UriResource> resourcePaths, QueryOptions queryOptions) throws ODataApplicationException {
+//        // determine the target query parameters and fetch EntityCollection for it
+//        EntityQueryParams queryParams = navigationResolver.resolveUriResourceNavigationPaths(resourcePaths);
+//
+//    }
 
 }

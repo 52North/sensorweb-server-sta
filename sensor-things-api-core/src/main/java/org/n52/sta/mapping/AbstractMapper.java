@@ -315,5 +315,11 @@ public abstract class AbstractMapper<T> {
         }
     }
 
-    public abstract Map<String, Long> getRelatedCollections(Object rawObject);
+    /**
+     * Gets a Map of all Collections this Entity is part of. Returns null if this Entity is not part of any collection.
+     * 
+     * @param rawObject Raw Database Entity of type T
+     * @return Map of all Collections this Entity is part of
+     */
+    public abstract Map<String, Set<Long>> getRelatedCollections(Object rawObject);
 }

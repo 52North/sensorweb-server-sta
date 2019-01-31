@@ -27,8 +27,14 @@ public class MqttPropertySubscription extends AbstractMqttSubscription {
 
     private Set<String> watchedProperties;
 
-    public MqttPropertySubscription(EdmEntitySet targetEntitySet, EdmEntityType entityType, Long targetId, EdmProperty watchedProperty, String topic, QueryOptions queryOptions, Set<String> watchedProperties) {
-        super(topic, queryOptions, entityType);
+    public MqttPropertySubscription(EdmEntitySet targetEntitySet,
+                                    EdmEntityType entityType,
+                                    Long targetId,
+                                    EdmProperty watchedProperty,
+                                    String topic,
+                                    QueryOptions queryOptions,
+                                    Set<String> watchedProperties) {
+        super(topic, queryOptions, entityType, targetEntitySet);
         this.entitySet = targetEntitySet;
         this.entityId = targetId;
         this.watchedEdmProperty = watchedProperty;
@@ -36,10 +42,10 @@ public class MqttPropertySubscription extends AbstractMqttSubscription {
     }
 
     @Override
-    public boolean matches(Entity entity, Map<String, Long> collections, Set<String> differenceMap) {
+    public boolean matches(Entity entity, Map<String, Set<Long>> collections, Set<String> differenceMap) {
 
         // Check type and fail-fast on type mismatch
-        if (!(entity.getType().equals(getEntityType().getName()))) {
+        if (!(entity.getType().equals(getEdmEntityType().getName()))) {
             return false;
         }
 

@@ -31,12 +31,17 @@ package org.n52.sta.mapping;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ENCODINGTYPE;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_LOCATION;
+import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ES_HISTORICAL_LOCATIONS_NAME;
 import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ES_LOCATIONS_NAME;
 import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATION_FQN;
 import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ES_THINGS_NAME;
+import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.olingo.commons.api.data.Entity;
@@ -133,6 +138,27 @@ public class LocationMapper extends AbstractLocationGeometryMapper<LocationEntit
            }
        }
        return entity;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.n52.sta.mapping.AbstractMapper#getRelatedCollections(java.lang.Object)
+     */
+    @Override
+    public Map<String, Set<Long>> getRelatedCollections(Object rawObject) {
+        Map<String, Set<Long>> collections = new HashMap<String, Set<Long>> ();
+        Set<Long> set = new HashSet<Long>();
+        LocationEntity entity = (LocationEntity) rawObject;
+        
+        entity.getThingEntities().forEach((en)-> {
+            set.add(en.getId());
+        }); 
+        collections.put(ET_THING_NAME, set);
+        set.clear();
+        entity.getHistoricalLocationEntities().forEach((en) -> {
+            set.add(en.getId());
+        });
+        collections.put(ES_HISTORICAL_LOCATIONS_NAME, set);
+        return collections;
     }
 
 }

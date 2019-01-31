@@ -29,17 +29,23 @@
 package org.n52.sta.mqtt.core;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.olingo.commons.api.data.Entity;
+import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
+import org.apache.olingo.commons.api.edmx.EdmxReference;
+import org.apache.olingo.server.api.OData;
+import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.n52.sta.data.STAEventHandler;
 import org.n52.sta.service.serializer.PayloadSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -50,13 +56,6 @@ import io.netty.handler.codec.mqtt.MqttMessageType;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import io.netty.handler.codec.mqtt.MqttPublishVariableHeader;
 import io.netty.handler.codec.mqtt.MqttQoS;
-import java.util.ArrayList;
-import org.apache.olingo.commons.api.data.Linked;
-import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
-import org.apache.olingo.commons.api.edmx.EdmxReference;
-import org.apache.olingo.server.api.OData;
-import org.apache.olingo.server.api.ServiceMetadata;
-import org.springframework.beans.factory.InitializingBean;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -96,7 +95,7 @@ public class MQTTEventHandler implements STAEventHandler, InitializingBean {
     @Override
     public void handleEvent(Object rawObject, Set<String> differenceMap) {
         Entity entity;
-        Map<String, Long> collections ;
+        Map<String, Set<Long>> collections ;
 
         //Map beans Object into Olingo Entity
         //Fail-fast if nobody is subscribed to this Type
@@ -136,7 +135,7 @@ public class MQTTEventHandler implements STAEventHandler, InitializingBean {
             subscriptions.put(subscription, count++);
         } else {
             subscriptions.put(subscription, 1);
-            watchedEntityTypes.add(MQTTUtil.getBeanTypes().get(subscription.getEntityType()));
+            watchedEntityTypes.add(MQTTUtil.getBeanTypes().get(subscription.getEdmEntityType().getName()));
         }
     }
 
@@ -145,7 +144,7 @@ public class MQTTEventHandler implements STAEventHandler, InitializingBean {
         if (count != null) {
             if (count == 1) {
                 subscriptions.remove(subscription);
-                watchedEntityTypes.remove(MQTTUtil.getBeanTypes().get(subscription.getEntityType()));
+                watchedEntityTypes.remove(MQTTUtil.getBeanTypes().get(subscription.getEdmEntityType().getName()));
             } else {
                 subscriptions.put(subscription, --count);
             }

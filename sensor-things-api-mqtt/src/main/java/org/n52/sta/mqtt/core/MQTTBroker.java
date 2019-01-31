@@ -58,8 +58,6 @@ import io.moquette.interception.messages.InterceptDisconnectMessage;
 import io.moquette.interception.messages.InterceptPublishMessage;
 import io.moquette.interception.messages.InterceptSubscribeMessage;
 import io.moquette.interception.messages.InterceptUnsubscribeMessage;
-import java.util.logging.Level;
-import org.n52.sta.mqtt.MqttHandlerException;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -135,13 +133,11 @@ public class MQTTBroker {
                     LOGGER.debug(msg.getTopicName());
                     LOGGER.debug(msg.getPayload().toString(Charset.forName("UTF-8")));
                     try {
-                        handler.processMessage(msg);
+                        handler.processPublishMessage(msg);
                     } catch (UriParserException | UriValidationException
                             | ODataApplicationException | DeserializerException ex) {
                         LOGGER.error("Error while processing MQTT message");
                         LOGGER.debug("Error while processing MQTT message", ex);
-                    } catch (MqttHandlerException ex) {
-                        java.util.logging.Logger.getLogger(MQTTBroker.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
             }
@@ -151,7 +147,7 @@ public class MQTTBroker {
                 LOGGER.debug("Client with ID: " + msg.getClientID() + "has subscribed");
                 try {
                     LOGGER.debug("Adding new MQTT subscription");
-                    handler.processMessage(msg);
+                    handler.processSubscribeMessage(msg);
                 } catch (Exception e) {
                     LOGGER.error("Error while processing MQTT subscription");
                     LOGGER.debug("Error while processing MQTT subscription", e);
@@ -163,7 +159,7 @@ public class MQTTBroker {
                 LOGGER.debug("Client with ID: " + msg.getClientID() + "has UNsubscribed");
                 try {
                     LOGGER.debug("Adding new MQTT subscription");
-                    handler.processMessage(msg);
+                    handler.processUnsubscribeMessage(msg);
                 } catch (Exception e) {
                     LOGGER.error("Error while processing MQTT subscription");
                     LOGGER.debug("Error while processing MQTT subscription", e);

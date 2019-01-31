@@ -6,6 +6,7 @@
 package org.n52.sta.mqtt.core;
 
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
@@ -27,15 +28,36 @@ public class MqttEntityCollectionSubscription extends AbstractMqttSubscription {
     public MqttEntityCollectionSubscription(String topic, QueryOptions queryOption,
             EdmEntityType sourceEntityType, Long sourceId, EdmEntitySet targetEntitySet,
             EdmEntityType entityType) {
-        super(topic, queryOption, entityType);
+        super(topic, queryOption, entityType, targetEntitySet);
         this.sourceEntityType = sourceEntityType;
         this.sourceId = sourceId;
         this.targetEntitySet = targetEntitySet;
+        
     }
 
     @Override
-    public boolean matches(Entity entity, Map<String, Long> collections, Set<String> differenceMap) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.  
+    public boolean matches(Entity entity, Map<String, Set<Long>> collections, Set<String> differenceMap) {
+        // Check type and fail-fast on type mismatch
+        if (!(entity.getType().equals(getEdmEntityType().getName()))) {
+            return false;
+        }
+
+        // Check if Entity belongs to collection of this Subscription
+        if (collections != null) {
+            for (Entry<String, Set<Long>> collection : collections.entrySet()) {
+                //TODO: check if this is ET_THING_NAME etc.
+                String test= targetEntitySet.getName();
+                
+                if (collection.getKey().equals(targetEntitySet.getName())) {
+                    for (Long id : collection.getValue()) {
+                        if (id.equals(sourceId)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
 }
