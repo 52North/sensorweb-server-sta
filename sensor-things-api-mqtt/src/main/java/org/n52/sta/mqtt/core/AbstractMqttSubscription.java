@@ -53,6 +53,7 @@ public abstract class AbstractMqttSubscription {
     }
     
     public abstract boolean matches(Entity entity, Map<String, Set<Long>> collections, Set<String> differenceMap);
+    
     public String getTopic() {
         return topic;
     }

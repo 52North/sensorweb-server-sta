@@ -41,7 +41,13 @@ public class MqttEntityCollectionSubscription extends AbstractMqttSubscription {
         if (!(entity.getType().equals(getEdmEntityType().getName()))) {
             return false;
         }
-
+        
+        // Check if Subscription is on root level (e.g. `/Things`)
+        // Type was already checked so we can success-fast
+        if (sourceId == null) {
+            return true;
+        }
+        
         // Check if Entity belongs to collection of this Subscription
         if (collections != null) {
             for (Entry<String, Set<Long>> collection : collections.entrySet()) {
@@ -54,10 +60,10 @@ public class MqttEntityCollectionSubscription extends AbstractMqttSubscription {
                             return true;
                         }
                     }
+                    return false;
                 }
             }
         }
         return false;
     }
-
 }
