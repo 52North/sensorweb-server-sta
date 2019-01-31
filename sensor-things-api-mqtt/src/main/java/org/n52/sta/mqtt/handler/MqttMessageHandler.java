@@ -32,27 +32,25 @@ import java.util.Set;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
-import org.apache.olingo.commons.api.edmx.EdmxReference;
-import org.apache.olingo.server.api.OData;
-import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.api.uri.UriParameter;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.UriResourceProperty;
 import org.apache.olingo.server.api.uri.queryoption.SelectItem;
+import org.n52.sta.mqtt.MqttHandlerException;
 import org.n52.sta.mqtt.core.MQTTEventHandler;
 import org.n52.sta.mqtt.core.MQTTSubscription;
 import org.n52.sta.mqtt.core.MQTTUtil;
 import org.n52.sta.service.query.QueryOptions;
 import org.n52.sta.service.query.URIQueryOptions;
-import org.springframework.beans.factory.InitializingBean;
+import org.n52.sta.utils.UriResourceNavigationResolver;
 
 /**
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
-public class MqttMessageHandler implements InitializingBean {
+public class MqttMessageHandler {
 
     final Logger LOGGER = LoggerFactory.getLogger(MqttMessageHandler.class);
 
@@ -71,9 +69,10 @@ public class MqttMessageHandler implements InitializingBean {
     @Autowired
     private CsdlAbstractEdmProvider provider;
 
-    private ServiceMetadata edm;
+    @Autowired
+    private UriResourceNavigationResolver navigationResolver;
 
-    public void processMessage(InterceptMessage msg) throws UriParserException, UriValidationException, ODataApplicationException, DeserializerException {
+    public void processMessage(InterceptMessage msg) throws UriParserException, UriValidationException, ODataApplicationException, DeserializerException, MqttHandlerException {
         if (msg instanceof InterceptPublishMessage) {
             processPublishMessage((InterceptPublishMessage) msg);
         } else if (msg instanceof InterceptSubscribeMessage) {
@@ -94,15 +93,15 @@ public class MqttMessageHandler implements InitializingBean {
         }
     }
 
-    private void processSubscribeMessage(InterceptSubscribeMessage msg) throws UriParserException, UriValidationException {
+    private void processSubscribeMessage(InterceptSubscribeMessage msg) throws MqttHandlerException {
         localClient.addSubscription(createMqttSubscription(msg.getTopicFilter()));
     }
 
-    private void processUnsubscribeMessage(InterceptUnsubscribeMessage msg) throws UriParserException, UriValidationException {
+    private void processUnsubscribeMessage(InterceptUnsubscribeMessage msg) throws MqttHandlerException {
         localClient.removeSubscription(createMqttSubscription(msg.getTopicFilter()));
     }
 
-    private MQTTSubscription createMqttSubscription(String topic) throws UriParserException, UriValidationException {
+    private MQTTSubscription createMqttSubscription(String topic) throws MqttHandlerException {
 
         List<SelectItem> fields = new ArrayList();
         Set<String> watchedProperties = new HashSet();
@@ -113,23 +112,21 @@ public class MqttMessageHandler implements InitializingBean {
         //TODO set base URI
         String baseUri = "";
 
-        // Validate that Topic is valid URI
-        UriInfo uriInfo = parser.parseUri(topic, null, null, baseUri);
-
-//        this.topic = topic;
+        UriInfo uriInfo = validateTopicPattern(topic, baseUri);
+        
         List<UriResource> pattern = uriInfo.getUriResourceParts();
-//        this.edm = edm;
         QueryOptions queryOptions = new URIQueryOptions(uriInfo, baseUri);
 
         if (queryOptions.hasSelectOption()) {
             fields = queryOptions.getSelectOption().getSelectItems();
         }
 
-        // Parse select Option if present
-//        if (uriInfo.getSelectOption() != null) {
-//            fields = uriInfo.getSelectOption().getSelectItems();
-//        }
-        // Parse specifically adressed property if present
+//        Parse select Option if present
+//        
+//            if (uriInfo.getSelectOption() != null) {
+//                fields = uriInfo.getSelectOption().getSelectItems();
+//            }
+//        Parse specifically adressed property if present
         UriResource lastResource = pattern.get(pattern.size() - 1);
 
         String propertyResource = null;
@@ -139,7 +136,7 @@ public class MqttMessageHandler implements InitializingBean {
             lastResource = pattern.get(pattern.size() - 2);
         }
 
-        // Parse ID if present
+// Parse ID if present
         List<UriParameter> idParameter = ((UriResourceEntitySet) lastResource).getKeyPredicates();
 
         EdmEntityType entityType = ((UriResourceEntitySet) lastResource).getEntityType();
@@ -151,7 +148,7 @@ public class MqttMessageHandler implements InitializingBean {
             entityId = Long.parseLong(idParameter.get(0).getText());
         }
 
-        // Parse Entitytype
+// Parse Entitytype
         switch (lastResource.toString()) {
             case "Observations":
                 olingoEntityType = "iot.Observation";
@@ -181,18 +178,54 @@ public class MqttMessageHandler implements InitializingBean {
                 throw new IllegalArgumentException("Invalid topic supplied! Cannot Get Resource Type.");
         }
 
-        // Parse STA Property to Database Property after entityType has been determined
+// Parse STA Property to Database Property after entityType has been determined
         if (propertyResource != null) {
             watchedProperties = MQTTUtil.translateSTAtoToDbProperty(olingoEntityType + "." + propertyResource);
         }
-        return new MQTTSubscription(topic, fields, pattern, olingoEntityType, watchedProperties, isCollection, entityId, queryOptions, entitySet, entityType);
+        return new MQTTSubscription(topic, fields, olingoEntityType, watchedProperties, isCollection, entityId, queryOptions, entitySet, entityType);
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        OData odata = OData.newInstance();
+    private UriInfo validateTopicPattern(String topic, String baseUri) throws MqttHandlerException {
+        try {
+            // Validate that Topic is valid URI
+            UriInfo uriInfo = parser.parseUri(topic, null, null, baseUri);
+            switch (uriInfo.getKind()) {
+                case resource:
+                case entityId:
+                    validateRessource(uriInfo);
+                    break;
+                default:
+                    throw new MqttHandlerException("Unsupported MQTT topic pattern.");
+            }
+            return uriInfo;
+        } catch (UriParserException | UriValidationException ex) {
+            throw new MqttHandlerException("Error while parsing MQTT topic.", ex);
+        }
 
-        edm = odata.createServiceMetadata(provider, new ArrayList<EdmxReference>());
+    }
+
+    private void validateRessource(UriInfo uriInfo) throws MqttHandlerException {
+        final int lastPathSegmentIndex = uriInfo.getUriResourceParts().size() - 1;
+        final UriResource lastPathSegment = uriInfo.getUriResourceParts().get(lastPathSegmentIndex);
+
+        switch (lastPathSegment.getKind()) {
+
+            case entitySet:
+            case navigationProperty:
+
+                break;
+
+            case primitiveProperty:
+
+                break;
+
+            case complexProperty:
+
+                break;
+
+            default:
+                throw new MqttHandlerException("Unsupported MQTT topic pattern.");
+        }
     }
 
 }

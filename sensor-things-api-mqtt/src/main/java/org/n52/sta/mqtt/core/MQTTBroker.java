@@ -36,7 +36,6 @@ import java.util.Properties;
 
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.deserializer.DeserializerException;
-import org.apache.olingo.server.core.uri.parser.Parser;
 import org.apache.olingo.server.core.uri.parser.UriParserException;
 import org.apache.olingo.server.core.uri.validator.UriValidationException;
 import org.n52.sta.mqtt.handler.MqttMessageHandler;
@@ -59,6 +58,8 @@ import io.moquette.interception.messages.InterceptDisconnectMessage;
 import io.moquette.interception.messages.InterceptPublishMessage;
 import io.moquette.interception.messages.InterceptSubscribeMessage;
 import io.moquette.interception.messages.InterceptUnsubscribeMessage;
+import java.util.logging.Level;
+import org.n52.sta.mqtt.MqttHandlerException;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -139,6 +140,8 @@ public class MQTTBroker {
                             | ODataApplicationException | DeserializerException ex) {
                         LOGGER.error("Error while processing MQTT message");
                         LOGGER.debug("Error while processing MQTT message", ex);
+                    } catch (MqttHandlerException ex) {
+                        java.util.logging.Logger.getLogger(MQTTBroker.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
             }

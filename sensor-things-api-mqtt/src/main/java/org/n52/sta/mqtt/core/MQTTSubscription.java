@@ -33,21 +33,13 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.apache.olingo.commons.api.data.Entity;
-import org.apache.olingo.server.api.uri.UriInfo;
-import org.apache.olingo.server.api.uri.UriParameter;
 import org.apache.olingo.server.api.uri.UriResource;
-import org.apache.olingo.server.api.uri.UriResourceEntitySet;
-import org.apache.olingo.server.api.uri.UriResourceProperty;
 import org.apache.olingo.server.api.uri.queryoption.SelectItem;
-import org.apache.olingo.server.core.uri.parser.Parser;
-import org.apache.olingo.server.core.uri.parser.UriParserException;
-import org.apache.olingo.server.core.uri.validator.UriValidationException;
 
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.server.api.ServiceMetadata;
 import org.n52.sta.service.query.QueryOptions;
-import org.n52.sta.service.query.URIQueryOptions;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -59,7 +51,7 @@ public class MQTTSubscription {
 
     private List<SelectItem> fields;
 
-    private List<UriResource> pattern;
+//    private List<UriResource> pattern;
 
     private String olingoEntityType;
 
@@ -69,20 +61,17 @@ public class MQTTSubscription {
 
     private Long entityId;
 
-    private ServiceMetadata edm;
-
     private QueryOptions queryOptions;
 
     private EdmEntitySet entitySet;
 
     private EdmEntityType entityType;
 
-    public MQTTSubscription(String topic, List<SelectItem> fields, List<UriResource> pattern,
+    public MQTTSubscription(String topic, List<SelectItem> fields,
             String olingoEntityType, Set<String> watchedProperties, boolean isCollection,
-            Long entityId, QueryOptions queryOptions, EdmEntitySet entitySet, EdmEntityType entityType) throws UriParserException, UriValidationException {
+            Long entityId, QueryOptions queryOptions, EdmEntitySet entitySet, EdmEntityType entityType) {
         this.topic = topic;
-        this.fields = fields;
-        this.pattern = pattern;
+        this.fields = fields;       
         this.olingoEntityType = olingoEntityType;
         this.watchedProperties = watchedProperties;
         this.isCollection = isCollection;
@@ -90,7 +79,6 @@ public class MQTTSubscription {
         this.queryOptions = queryOptions;
         this.entitySet = entitySet;
         this.entityType = entityType;
-
     }
 
     /**
@@ -152,10 +140,6 @@ public class MQTTSubscription {
         return topic;
     }
 
-    public ServiceMetadata getMetadata() {
-        return this.edm;
-    }
-
     public QueryOptions getQueryOptions() {
         return this.queryOptions;
     }
@@ -168,17 +152,6 @@ public class MQTTSubscription {
         return entityType;
     }
 
-//    public ByteBuf encodeEntity(Entity entity) {
-//        //TODO: Actually serialize Object to JSON
-//        InputStream payload = createResponseContent(edm, response, queryOptions);
-//        if (watchedProperty != null) {
-//            // Only return updated property
-//            return Unpooled.copiedBuffer(entity.toString().getBytes());
-//        } else {
-//            // Return normally serialized object with this.fields selectItems
-//            return Unpooled.copiedBuffer(entity.toString().getBytes());
-//        }
-//    }
     @Override
     public int hashCode() {
         return Objects.hash(topic);

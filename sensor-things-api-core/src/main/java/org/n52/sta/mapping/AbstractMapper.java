@@ -43,6 +43,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -50,6 +51,7 @@ import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
+import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.joda.time.DateTime;
@@ -70,21 +72,21 @@ import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class AbstractMapper<T> {
-    
+
     @Autowired
     protected EntityCreationHelper entityCreationHelper;
-    
+
     @Autowired
     private DatastreamMapper datastreamMapper;
-    
+
     public abstract Entity createEntity(T t);
-    
+
     protected abstract T createEntity(Entity entity);
-    
+
     public abstract T merge(T existing, T toMerge) throws ODataApplicationException;
-    
+
     public abstract Entity checkEntity(Entity entity) throws ODataApplicationException;
-    
+
     protected void checkNavigationLink(Entity entity) throws ODataApplicationException {
         if (entity.getProperties().size() == 1) {
             checkPropertyValidity(ID, entity);
@@ -92,23 +94,23 @@ public abstract class AbstractMapper<T> {
             checkEntity(entity);
         }
     }
-    
+
     protected void checkNameAndDescription(Entity entity) throws ODataApplicationException {
         checkPropertyValidity(PROP_NAME, entity);
         checkPropertyValidity(PROP_DESCRIPTION, entity);
     }
-    
+
     protected void checkPropertyValidity(String propName, Entity entity) throws ODataApplicationException {
         if (!checkProperty(entity, propName)) {
             throw new ODataApplicationException(getMissingPropertyExceptionString(propName, entity),
                     HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
         }
     }
-    
+
     protected String getMissingPropertyExceptionString(String propName, Entity entity) {
         return getMissingPropertyExceptionString(propName, entity.getType().replace("iot.", ""));
     }
-    
+
     protected String getMissingPropertyExceptionString(String propName, ComplexValue complexValue) {
         return getMissingPropertyExceptionString(propName, complexValue.getTypeName());
     }
@@ -126,69 +128,69 @@ public abstract class AbstractMapper<T> {
 
     protected void addNameDescriptionProperties(Entity entity, DescribableEntity describableEntity) {
         // add name
-        String name =   describableEntity.getIdentifier();
+        String name = describableEntity.getIdentifier();
         if (describableEntity.isSetName()) {
             name = describableEntity.getName();
         }
         addName(entity, name);
         // add description
-        String description =  "Description of " + describableEntity.getIdentifier();
+        String description = "Description of " + describableEntity.getIdentifier();
         if (describableEntity.isSetDescription()) {
             description = describableEntity.getDescription();
         }
         addDescription(entity, description);
     }
-    
+
     protected boolean checkProperty(Entity entity, String name) {
         return entity.getProperty(name) != null;
     }
-    
+
     protected boolean checkNavigationLink(Entity entity, String name) {
         return entity.getNavigationLink(name) != null;
     }
-    
+
     protected void addName(Entity entity, HasName describableEntity) {
         addName(entity, describableEntity.getName());
     }
-    
+
     protected void addName(Entity entity, String name) {
         entity.addProperty(new Property(null, PROP_NAME, ValueType.PRIMITIVE, name));
     }
-    
+
     protected void addDescription(Entity entity, HasDescription describableEntity) {
         addDescription(entity, describableEntity.getDescription());
     }
-    
+
     protected void addDescription(Entity entity, String description) {
         entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, description));
     }
-    
+
     protected void setId(IdEntity idEntity, Entity entity) {
         if (checkProperty(entity, ID)) {
             idEntity.setId(Long.parseLong(getPropertyValue(entity, ID).toString()));
         } else if (checkProperty(entity, ID_ANNOTATION)) {
             idEntity.setId(Long.parseLong(getPropertyValue(entity, ID_ANNOTATION).toString()));
-        } 
+        }
     }
-    
+
     protected void setNameDescription(DescribableEntity thing, Entity entity) {
         setName(thing, entity);
         setDescription(thing, entity);
     }
-    
+
     protected void setIdentifier(DescribableEntity describableEntity, Entity entity) {
         if (checkProperty(entity, PROP_DEFINITION)) {
             describableEntity.setIdentifier(getPropertyValue(entity, PROP_DEFINITION).toString());
         } else if (checkProperty(entity, PROP_NAME)) {
             describableEntity.setIdentifier(getPropertyValue(entity, PROP_NAME).toString());
         }
-        
+
     }
-    
+
     protected void setName(HasName describableEntity, Entity entity) {
-       if (checkProperty(entity, PROP_NAME)) {
-           describableEntity.setName(getPropertyValue(entity, PROP_NAME).toString());
-       }
+        if (checkProperty(entity, PROP_NAME)) {
+            describableEntity.setName(getPropertyValue(entity, PROP_NAME).toString());
+        }
     }
 
     protected void setDescription(HasDescription describableEntity, Entity entity) {
@@ -196,7 +198,7 @@ public abstract class AbstractMapper<T> {
             describableEntity.setDescription(getPropertyValue(entity, PROP_DESCRIPTION).toString());
         }
     }
-    
+
     protected void setDatastreams(StaRelations.Datastreams<?> datastreams, Entity entity) {
         if (checkNavigationLink(entity, ES_DATASTREAMS_NAME)) {
             Set<DatastreamEntity> ds = new LinkedHashSet<>();
@@ -206,31 +208,31 @@ public abstract class AbstractMapper<T> {
             }
             datastreams.setDatastreams(ds);
         }
-        
+
     }
-    
+
     protected Object getPropertyValue(Entity entity, String name) {
         if (entity.getProperty(name) != null) {
             return entity.getProperty(name).getValue();
         }
         return "";
     }
-    
+
     protected boolean checkProperty(ComplexValue complexValue, String name) {
         return getProperty(complexValue, name) != null;
     }
-    
+
     protected Property getProperty(ComplexValue complexValue, String name) {
         Optional<Property> property = complexValue.getValue().stream().filter(p -> p.getName().equals(name)).findAny();
         return property.isPresent() ? property.get() : null;
-     }
-    
-    protected Object getPropertyValue(ComplexValue complexValue, String name) {
-       Property property = getProperty(complexValue, name);
-       return property != null ? property.getValue() : "";
     }
-    
-    protected void addPhenomenonTime(HasPhenomenonTime phenomenonTime , Entity entity) {
+
+    protected Object getPropertyValue(ComplexValue complexValue, String name) {
+        Property property = getProperty(complexValue, name);
+        return property != null ? property.getValue() : "";
+    }
+
+    protected void addPhenomenonTime(HasPhenomenonTime phenomenonTime, Entity entity) {
         if (checkProperty(entity, PROP_PHENOMENON_TIME)) {
             Time time = parseTime(getPropertyValue(entity, PROP_PHENOMENON_TIME).toString());
             if (time instanceof TimeInstant) {
@@ -242,19 +244,19 @@ public abstract class AbstractMapper<T> {
             }
         }
     }
-    
+
     protected void mergeIdentifierNameDescription(DescribableEntity existing, DescribableEntity toMerge) {
         if (toMerge.isSetIdentifier()) {
             existing.setIdentifier(toMerge.getIdentifier());
         }
         mergeNameDescription(existing, toMerge);
     }
-    
+
     protected void mergeNameDescription(DescribableEntity existing, DescribableEntity toMerge) {
         mergeName(existing, toMerge);
         mergeDescription(existing, toMerge);
     }
-    
+
     protected void mergeName(HasName existing, HasName toMerge) {
         if (toMerge.isSetName()) {
             existing.setName(toMerge.getName());
@@ -266,7 +268,7 @@ public abstract class AbstractMapper<T> {
             existing.setDescription(toMerge.getDescription());
         }
     }
-    
+
     protected void mergeSamplingTime(HasPhenomenonTime existing, HasPhenomenonTime toMerge) {
         if (toMerge.hasSamplingTimeStart() && toMerge.hasSamplingTimeEnd()) {
             existing.setSamplingTimeStart(toMerge.getSamplingTimeStart());
@@ -281,14 +283,12 @@ public abstract class AbstractMapper<T> {
     protected Time createTime(DateTime time) {
         return new TimeInstant(time);
     }
-    
+
     /**
      * Create {@link Time} from {@link DateTime}s
      *
-     * @param start
-     *            Start {@link DateTime}
-     * @param end
-     *            End {@link DateTime}
+     * @param start Start {@link DateTime}
+     * @param end End {@link DateTime}
      * @return Resulting {@link Time}
      */
     protected Time createTime(DateTime start, DateTime end) {
@@ -298,7 +298,7 @@ public abstract class AbstractMapper<T> {
             return new TimePeriod(start, end);
         }
     }
-    
+
     protected Time parseTime(Object object) {
         if (object instanceof Timestamp) {
             Timestamp timestamp = (Timestamp) object;
@@ -308,10 +308,12 @@ public abstract class AbstractMapper<T> {
             if (obj.contains("/")) {
                 String[] split = obj.split("/");
                 return createTime(DateTime.parse(split[0]),
-                                  DateTime.parse(split[1]));
+                        DateTime.parse(split[1]));
             } else {
                 return new TimeInstant(DateTime.parse(obj));
             }
         }
     }
+
+    public abstract Map<String, Long> getRelatedCollections(Object rawObject);
 }

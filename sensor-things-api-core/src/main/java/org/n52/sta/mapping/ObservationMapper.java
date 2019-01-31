@@ -93,6 +93,7 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
 
     public Entity createEntity(DataEntity<?> observation) {
         Entity entity = new Entity();
+
         entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, observation.getId()));
         
         //TODO: urlencode whitespaces to allow for copy pasting into filter expression
