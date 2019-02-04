@@ -28,18 +28,18 @@ public class MqttEntityCollectionSubscriptionHandler {
     private UriResourceNavigationResolver navigationResolver;
 
     public MqttEntityCollectionSubscription handleEntityCollectionRequest(String topic, List<UriResource> resourcePaths, QueryOptions queryOptions) throws ODataApplicationException {
-        MqttEntityCollectionSubscription response = null;
+        MqttEntityCollectionSubscription subscription = null;
 
         // handle request depending on the number of UriResource paths
         // e.g the case: sta/Things
         if (resourcePaths.size() == 1) {
-            response = createResponseForEntitySet(topic, resourcePaths, queryOptions);
+            subscription = createResponseForEntitySet(topic, resourcePaths, queryOptions);
 
             // e.g. the case: sta/Things(id)/Locations
         } else {
-            response = createResponseForNavigation(topic, resourcePaths, queryOptions);
+            subscription = createResponseForNavigation(topic, resourcePaths, queryOptions);
         }
-        return response;
+        return subscription;
     }
 
     private MqttEntityCollectionSubscription createResponseForEntitySet(String topic, List<UriResource> resourcePaths, QueryOptions queryOptions) throws ODataApplicationException {
