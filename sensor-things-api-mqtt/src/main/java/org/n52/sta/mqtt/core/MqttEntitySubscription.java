@@ -18,14 +18,11 @@ import org.n52.sta.service.query.QueryOptions;
  */
 public class MqttEntitySubscription extends AbstractMqttSubscription {
 
-    private EdmEntitySet entitySet;
-
     private Long entityId;
 
-    public MqttEntitySubscription(EdmEntityType sourceEntityType, Long sourceId, EdmEntitySet targetEntitySet, EdmEntityType entityType, Long targetId, String topic, QueryOptions queryOptions) {
-        super(topic, queryOptions, entityType, targetEntitySet);
-        this.entitySet = targetEntitySet;
-        this.entityId = targetId;
+    public MqttEntitySubscription(Long entityId, EdmEntitySet entitySet, EdmEntityType entityType, String topic, QueryOptions queryOptions) {
+        super(topic, queryOptions, entityType, entitySet);
+        this.entityId = entityId;
     }
 
     @Override
