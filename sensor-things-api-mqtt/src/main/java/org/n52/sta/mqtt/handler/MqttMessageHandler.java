@@ -59,6 +59,9 @@ public class MqttMessageHandler {
     @Autowired
     private MqttEntityCollectionSubscriptionHandler mqttEntityCollSubscHandler;
 
+    @Autowired
+    private MqttEntitySubscriptionHandler mqttEntitySubscHandler;
+
     @SuppressWarnings("unchecked")
     public void processPublishMessage(InterceptPublishMessage msg) throws UriParserException, UriValidationException, ODataApplicationException, DeserializerException {
         UriInfo uriInfo = parser.parseUri(msg.getTopicName(), null, null, "");
@@ -115,10 +118,15 @@ public class MqttMessageHandler {
                 case entitySet:
                 case navigationProperty:
                     if (((UriResourcePartTyped) lastPathSegment).isCollection()) {
-                        subscription = mqttEntityCollSubscHandler.handleEntityCollectionRequest(topic, uriInfo.getUriResourceParts(), new URIQueryOptions(uriInfo, BASE_URL));
+                        subscription = mqttEntityCollSubscHandler
+                                .handleEntityCollectionRequest(topic,
+                                        uriInfo.getUriResourceParts(),
+                                        new URIQueryOptions(uriInfo, BASE_URL));
                     } else {
-                        // TODO create MqttEntitySubscription with
-                        // not yet existing MqttEntitySubscriptionHandler
+                        subscription = mqttEntitySubscHandler
+                                .handleEntityCollectionRequest(topic,
+                                        uriInfo.getUriResourceParts(),
+                                        new URIQueryOptions(uriInfo, BASE_URL));
                     }
                     break;
 
