@@ -134,8 +134,8 @@ public class MqttEventHandler implements STAEventHandler, InitializingBean {
         HashSet<String> clients = subscriptions.get(subscription);
         if (clients == null) {
             clients = new HashSet<String>();
-            watchedEntityTypes.add(MqttUtil.getBeanTypes().get(subscription.getEdmEntityType().getName()));
         }
+        watchedEntityTypes.add(MqttUtil.getBeanTypes().get(subscription.getEdmEntityType().getName()));
         clients.add(clientId);
         subscriptions.put(subscription, clients);
     }

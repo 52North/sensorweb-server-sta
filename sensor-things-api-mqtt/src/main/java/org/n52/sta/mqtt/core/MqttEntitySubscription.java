@@ -28,7 +28,7 @@ public class MqttEntitySubscription extends AbstractMqttSubscription {
     @Override
     public boolean matches(Entity entity, Map<String, Set<Long>> collections, Set<String> differenceMap) {
         // Check type and fail-fast on type mismatch
-        if (!(entity.getType().equals(getEdmEntityType().getName()))) {
+        if (!(entity.getType().equals(entityTypeName))) {
             return false;
         }
 

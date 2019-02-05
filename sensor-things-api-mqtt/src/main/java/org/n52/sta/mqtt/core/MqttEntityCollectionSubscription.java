@@ -32,13 +32,12 @@ public class MqttEntityCollectionSubscription extends AbstractMqttSubscription {
         this.sourceEntityType = sourceEntityType;
         this.sourceId = sourceId;
         this.targetEntitySet = targetEntitySet;
-        
     }
 
     @Override
     public boolean matches(Entity entity, Map<String, Set<Long>> collections, Set<String> differenceMap) {
         // Check type and fail-fast on type mismatch
-        if (!(entity.getType().equals(getEdmEntityType().getName()))) {
+        if (!(entity.getType().equals(entityTypeName))) {
             return false;
         }
         
@@ -51,10 +50,7 @@ public class MqttEntityCollectionSubscription extends AbstractMqttSubscription {
         // Check if Entity belongs to collection of this Subscription
         if (collections != null) {
             for (Entry<String, Set<Long>> collection : collections.entrySet()) {
-                //TODO: check if this is ET_THING_NAME etc.
-                String test= targetEntitySet.getName();
-                
-                if (collection.getKey().equals(targetEntitySet.getName())) {
+                if (collection.getKey().equals(sourceEntityType.getName())) {
                     for (Long id : collection.getValue()) {
                         if (id.equals(sourceId)) {
                             return true;

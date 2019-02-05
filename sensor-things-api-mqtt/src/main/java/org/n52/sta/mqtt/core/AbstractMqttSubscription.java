@@ -27,6 +27,8 @@ public abstract class AbstractMqttSubscription {
     private EdmEntityType entityType;
 
     private EdmEntitySet entitySet;
+    
+    protected String entityTypeName;
 
     public AbstractMqttSubscription(String topic,
                                     QueryOptions queryOptions,
@@ -36,6 +38,7 @@ public abstract class AbstractMqttSubscription {
         this.queryOptions = queryOptions;
         this.entityType = entityType;
         this.entitySet = entitySet;
+        this.entityTypeName = "iot." + getEdmEntityType().getName();
     }
 
     /**
