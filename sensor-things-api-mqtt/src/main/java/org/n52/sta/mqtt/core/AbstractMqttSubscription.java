@@ -77,7 +77,7 @@ public abstract class AbstractMqttSubscription {
 
     @Override
     public boolean equals(Object other) {
-        return (other instanceof MqttSubscription && ((MqttSubscription) other).getTopic().equals(this.topic));
+        return (other instanceof AbstractMqttSubscription && ((AbstractMqttSubscription) other).getTopic().equals(this.topic));
     }
 
 }
