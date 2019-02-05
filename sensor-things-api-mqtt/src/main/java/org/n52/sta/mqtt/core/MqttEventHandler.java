@@ -81,7 +81,7 @@ public class MqttEventHandler implements STAEventHandler, InitializingBean {
 
     static final String internalClientId = "POC";
 
-    private Map<AbstractMqttSubscription, Set<String>> subscriptions = new HashMap<AbstractMqttSubscription, Set<String>>();
+    private Map<AbstractMqttSubscription, HashSet<String>> subscriptions = new HashMap<AbstractMqttSubscription, HashSet<String>>();
 
     private final MqttFixedHeader mqttFixedHeader = new MqttFixedHeader(MqttMessageType.PUBLISH, false, MqttQoS.AT_LEAST_ONCE, false, 0);
 
@@ -131,9 +131,9 @@ public class MqttEventHandler implements STAEventHandler, InitializingBean {
     }
 
     public void addSubscription(AbstractMqttSubscription subscription, String clientId) {
-        Set<String> clients = subscriptions.get(subscription);
+        HashSet<String> clients = subscriptions.get(subscription);
         if (clients == null) {
-            clients = Collections.emptySet();
+            clients = new HashSet<String>();
             watchedEntityTypes.add(MqttUtil.getBeanTypes().get(subscription.getEdmEntityType().getName()));
         }
         clients.add(clientId);
@@ -141,7 +141,7 @@ public class MqttEventHandler implements STAEventHandler, InitializingBean {
     }
 
     public void removeSubscription(AbstractMqttSubscription subscription, String clientId) {
-        Set<String> clients = subscriptions.get(subscription);
+        HashSet<String> clients = subscriptions.get(subscription);
         if (clients != null) {
             if (clients.size() == 1) {
                 subscriptions.remove(subscription);
