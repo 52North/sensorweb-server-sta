@@ -191,20 +191,26 @@ public class ThingMapper extends AbstractMapper<ThingEntity> {
         Set<Long> set = new HashSet<Long>();
         ThingEntity entity = (ThingEntity) rawObject;
         
-        entity.getLocationEntities().forEach((en)-> {
-            set.add(en.getId());
-        }); 
-        collections.put(ES_HISTORICAL_LOCATIONS_NAME, set);
+        try {
+            entity.getLocationEntities().forEach((en)-> {
+                set.add(en.getId());
+            });
+            collections.put(ES_LOCATIONS_NAME, set);
+        } catch(NullPointerException e) {}
         set.clear();
-        entity.getHistoricalLocationEntities().forEach((en) -> {
-            set.add(en.getId());
-        });
-        collections.put(ES_HISTORICAL_LOCATIONS_NAME, set);
+        try {
+            entity.getHistoricalLocationEntities().forEach((en) -> {
+                set.add(en.getId());
+            });
+            collections.put(ES_HISTORICAL_LOCATIONS_NAME, set);
+        } catch(NullPointerException e) {}
         set.clear();
-        entity.getDatastreamEntities().forEach((en) -> {
-            set.add(en.getId());
-        });
-        collections.put(ES_DATASTREAMS_NAME, set);
+        try {
+            entity.getDatastreamEntities().forEach((en) -> {
+                set.add(en.getId());
+            });
+            collections.put(ES_DATASTREAMS_NAME, set);
+        } catch(NullPointerException e) {}
         return collections;
     }
 }

@@ -66,10 +66,10 @@ public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationE
 
     @Autowired
     private EntityCreationHelper entityCreationHelper;
-    
+
     @Autowired
     private LocationMapper locationMapper;
-    
+
     @Autowired
     private ThingMapper thingMapper;
 
@@ -107,7 +107,7 @@ public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationE
         }
         return existing;
     }
-    
+
     private void addTime(HistoricalLocationEntity historicalLocation, Entity entity) {
         if (checkProperty(entity, PROP_TIME)) {
             Time time = parseTime(getPropertyValue(entity, PROP_TIME));
@@ -124,7 +124,7 @@ public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationE
             historicalLocation.setThingEntity(thingMapper.createEntity(entity.getNavigationLink(ET_THING_NAME).getInlineEntity()));
         }
     }
-    
+
     private void addLocations(HistoricalLocationEntity historicalLocation, Entity entity) {
         if (checkNavigationLink(entity, ES_LOCATIONS_NAME)) {
             Set<LocationEntity> locations = new LinkedHashSet<>();
@@ -141,7 +141,7 @@ public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationE
         checkPropertyValidity(PROP_TIME, entity);
         return entity;
     }
-    
+
     /* (non-Javadoc)
      * @see org.n52.sta.mapping.AbstractMapper#getRelatedCollections(java.lang.Object)
      */
@@ -149,12 +149,16 @@ public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationE
     public Map<String, Set<Long>> getRelatedCollections(Object rawObject) {
         Map<String, Set<Long>> collections = new HashMap<String, Set<Long>> ();
         HistoricalLocationEntity entity = (HistoricalLocationEntity) rawObject;
-        collections.put(ET_THING_NAME, Collections.singleton(entity.getThingEntity().getId()));
-        Set<Long> locations = new HashSet<Long>();
-        entity.getLocationEntities().forEach((en) -> {
-            locations.add(en.getId());
-        });
-        collections.put(ES_LOCATIONS_NAME, locations);
+        try {
+            collections.put(ET_THING_NAME, Collections.singleton(entity.getThingEntity().getId()));
+        } catch(NullPointerException e) {}
+        try {
+            Set<Long> locations = new HashSet<Long>();
+            entity.getLocationEntities().forEach((en) -> {
+                locations.add(en.getId());
+            });
+            collections.put(ES_LOCATIONS_NAME, locations);
+        } catch(NullPointerException e) {}
         return collections;
     }
 

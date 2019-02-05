@@ -94,25 +94,25 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
         addDescription(entity, datastream);
         addName(entity, datastream);
         entity.addProperty(new Property(null,
-                PROP_OBSERVATION_TYPE,
-                ValueType.PRIMITIVE,
-                datastream.getObservationType().getFormat()));
+                                        PROP_OBSERVATION_TYPE,
+                                        ValueType.PRIMITIVE,
+                                        datastream.getObservationType().getFormat()));
 
         entity.addProperty(new Property(null,
-                PROP_PHENOMENON_TIME,
-                ValueType.PRIMITIVE,
-                DateTimeHelper.format(createTime(createDateTime(datastream.getSamplingTimeStart()),
-                        createDateTime(datastream.getSamplingTimeEnd())))));
+                                        PROP_PHENOMENON_TIME,
+                                        ValueType.PRIMITIVE,
+                                        DateTimeHelper.format(createTime(createDateTime(datastream.getSamplingTimeStart()),
+                                                                         createDateTime(datastream.getSamplingTimeEnd())))));
         entity.addProperty(new Property(null,
-                PROP_RESULT_TIME,
-                ValueType.PRIMITIVE,
-                DateTimeHelper.format(createTime(createDateTime(datastream.getResultTimeStart()),
-                        createDateTime(datastream.getResultTimeEnd())))));
+                                        PROP_RESULT_TIME,
+                                        ValueType.PRIMITIVE,
+                                        DateTimeHelper.format(createTime(createDateTime(datastream.getResultTimeStart()),
+                                                                         createDateTime(datastream.getResultTimeEnd())))));
 
         entity.addProperty(new Property(null,
-                PROP_UOM,
-                ValueType.COMPLEX,
-                resolveUnitOfMeasurement(datastream.getUnitOfMeasurement())));
+                                        PROP_UOM,
+                                        ValueType.COMPLEX,
+                                        resolveUnitOfMeasurement(datastream.getUnitOfMeasurement())));
         addObservedArea(entity, datastream);
 
         entity.setType(ET_DATASTREAM_FQN.getFullQualifiedNameAsString());
@@ -178,8 +178,8 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
         }
         if (checkNavigationLink(entity, ET_OBSERVED_PROPERTY_NAME)) {
             observedPropertyMapper
-                    .checkNavigationLink(entity.getNavigationLink(ET_OBSERVED_PROPERTY_NAME)
-                            .getInlineEntity());
+            .checkNavigationLink(entity.getNavigationLink(ET_OBSERVED_PROPERTY_NAME)
+                                 .getInlineEntity());
         }
         if (checkNavigationLink(entity, ET_THING_NAME)) {
             thingMapper.checkNavigationLink(entity.getNavigationLink(ET_THING_NAME).getInlineEntity());
@@ -198,12 +198,12 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
         if (toMerge.isSetObservationType() && !toMerge.getObservationType().getFormat().equalsIgnoreCase("unknown")
                 && !existing.getObservationType().getFormat().equals(toMerge.getObservationType().getFormat())) {
             throw new ODataApplicationException(
-                    String.format(
-                            "The updated observationType (%s) does not comply with the existing observationType (%s)",
-                            toMerge.getObservationType().getFormat(),
-                            existing.getObservationType().getFormat()),
-                    HttpStatusCode.CONFLICT.getStatusCode(),
-                    Locale.getDefault());
+                                                String.format(
+                                                              "The updated observationType (%s) does not comply with the existing observationType (%s)",
+                                                              toMerge.getObservationType().getFormat(),
+                                                              existing.getObservationType().getFormat()),
+                                                HttpStatusCode.CONFLICT.getStatusCode(),
+                                                Locale.getDefault());
         }
     }
 
@@ -211,18 +211,18 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
         ComplexValue value = new ComplexValue();
         if (uom != null) {
             value.getValue().add(
-                    new Property(null,
-                            UnitOfMeasurementComplexType.PROP_NAME,
-                            ValueType.PRIMITIVE,
-                            uom.getName()));
+                                 new Property(null,
+                                              UnitOfMeasurementComplexType.PROP_NAME,
+                                              ValueType.PRIMITIVE,
+                                              uom.getName()));
             value.getValue().add(new Property(null,
-                    UnitOfMeasurementComplexType.PROP_SYMBOL,
-                    ValueType.PRIMITIVE,
-                    uom.getSymbol()));
+                                              UnitOfMeasurementComplexType.PROP_SYMBOL,
+                                              ValueType.PRIMITIVE,
+                                              uom.getSymbol()));
             value.getValue().add(new Property(null,
-                    UnitOfMeasurementComplexType.PROP_DEFINITION,
-                    ValueType.PRIMITIVE,
-                    uom.getLink()));
+                                              UnitOfMeasurementComplexType.PROP_DEFINITION,
+                                              ValueType.PRIMITIVE,
+                                              uom.getLink()));
 
         }
         return value;
@@ -231,8 +231,8 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
     private DatastreamEntity addFormat(DatastreamEntity datastream, Entity entity) {
         if (checkProperty(entity, PROP_OBSERVATION_TYPE)) {
             return datastream.setObservationType(
-                    new FormatEntity().setFormat(getPropertyValue(entity,
-                            PROP_OBSERVATION_TYPE).toString()));
+                                                 new FormatEntity().setFormat(getPropertyValue(entity,
+                                                                                               PROP_OBSERVATION_TYPE).toString()));
         }
         return datastream.setObservationType(new FormatEntity().setFormat("unknown"));
     }
@@ -275,16 +275,16 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
     private void addSensor(DatastreamEntity datastream, Entity entity) {
         if (checkNavigationLink(entity, ET_SENSOR_NAME)) {
             datastream.setProcedure(
-                    sensorMapper.createEntity(entity.getNavigationLink(ET_SENSOR_NAME)
-                            .getInlineEntity()));
+                                    sensorMapper.createEntity(entity.getNavigationLink(ET_SENSOR_NAME)
+                                                              .getInlineEntity()));
         }
     }
 
     private void addObservedProperty(DatastreamEntity datastream, Entity entity) {
         if (checkNavigationLink(entity, ET_OBSERVED_PROPERTY_NAME)) {
             datastream.setObservableProperty(observedPropertyMapper
-                    .createEntity(entity.getNavigationLink(ET_OBSERVED_PROPERTY_NAME)
-                            .getInlineEntity()));
+                                             .createEntity(entity.getNavigationLink(ET_OBSERVED_PROPERTY_NAME)
+                                                           .getInlineEntity()));
         }
     }
 
@@ -322,9 +322,15 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
     public Map<String, Set<Long>> getRelatedCollections(Object rawObject) {
         Map<String, Set<Long>> collections = new HashMap<String, Set<Long>> ();
         DatastreamEntity entity = (DatastreamEntity) rawObject;
-        collections.put(ET_THING_NAME, Collections.singleton(entity.getThing().getId()));
-        collections.put(ET_SENSOR_NAME, Collections.singleton(entity.getProcedure().getId()));
-        collections.put(ET_OBSERVED_PROPERTY_NAME, Collections.singleton(entity.getObservableProperty().getId()));
+        try {
+            collections.put(ET_THING_NAME, Collections.singleton(entity.getThing().getId()));
+        } catch(NullPointerException e) {}
+        try {
+            collections.put(ET_SENSOR_NAME, Collections.singleton(entity.getProcedure().getId()));
+        } catch(NullPointerException e) {}
+        try {
+            collections.put(ET_OBSERVED_PROPERTY_NAME, Collections.singleton(entity.getObservableProperty().getId()));
+        } catch(NullPointerException e) {}
         return collections;
     }
 }
