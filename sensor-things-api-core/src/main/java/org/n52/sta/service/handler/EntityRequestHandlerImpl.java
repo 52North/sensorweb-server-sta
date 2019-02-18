@@ -14,8 +14,8 @@ import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.n52.sta.data.service.EntityServiceRepository;
-import org.n52.sta.service.query.QueryOptions;
 import org.n52.sta.service.query.QueryOptionsHandler;
+import org.n52.sta.service.request.SensorThingsRequest;
 import org.n52.sta.service.response.EntityResponse;
 import org.n52.sta.utils.EntityAnnotator;
 import org.n52.sta.utils.EntityQueryParams;
@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
-public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
+public class EntityRequestHandlerImpl extends AbstractEntityRequestHandler<SensorThingsRequest, EntityResponse> {
 
     @Autowired
     private EntityServiceRepository serviceRepository;
@@ -44,37 +44,37 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
     EntityAnnotator entityAnnotator;
 
     @Override
-    public EntityResponse handleEntityRequest(List<UriResource> resourcePaths, QueryOptions queryOptions) throws ODataApplicationException {
+    public EntityResponse handleEntityRequest(SensorThingsRequest request) throws ODataApplicationException {
         EntityResponse response = null;
 
         // handle request depending on the number of UriResource paths
         // e.g the case: sta/Things(id)
-        if (resourcePaths.size() == 1) {
-            response = createResponseForEntity(resourcePaths);
+        if (request.getResourcePaths().size() == 1) {
+            response = createResponseForEntity(request.getResourcePaths());
 
             // e.g. the case: sta/Things(id)/Locations(id)
         } else {
-            response = createResponseForNavigation(resourcePaths);
+            response = createResponseForNavigation(request.getResourcePaths());
         }
 
-        if (queryOptions.hasExpandOption()) {
+        if (request.getQueryOptions().hasExpandOption()) {
             entityAnnotator.annotateEntity(
                     response.getEntity(),
                     response.getEntitySet().getEntityType(),
-                    queryOptions.getBaseURI(),
-                    queryOptions.getSelectOption());
+                    request.getQueryOptions().getBaseURI(),
+                    request.getQueryOptions().getSelectOption());
             queryOptionsHandler.handleExpandOption(
                     response.getEntity(),
-                    queryOptions.getExpandOption(),
+                    request.getQueryOptions().getExpandOption(),
                     Long.parseLong(response.getEntity().getProperty(PROP_ID).getValue().toString()),
                     response.getEntitySet().getEntityType(),
-                    queryOptions.getBaseURI());
+                    request.getQueryOptions().getBaseURI());
         } else {
             entityAnnotator.annotateEntity(
                     response.getEntity(),
                     response.getEntitySet().getEntityType(),
-                    queryOptions.getBaseURI(),
-                    queryOptions.getSelectOption());
+                    request.getQueryOptions().getBaseURI(),
+                    request.getQueryOptions().getSelectOption());
         }
         return response;
     }
@@ -82,7 +82,7 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
     private EntityResponse createResponseForEntity(List<UriResource> resourcePaths) throws ODataApplicationException {
 
         UriResourceEntitySet uriResourceEntitySet = navigationResolver.resolveRootUriResource(resourcePaths.get(0));
-        Entity responseEntity = navigationResolver.resolveSimpleEntityRequest(uriResourceEntitySet);
+        Entity responseEntity = resolveSimpleEntityRequest(uriResourceEntitySet);
 
         // set Entity response information
         EntityResponse response = new EntityResponse();
@@ -95,7 +95,7 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
     private EntityResponse createResponseForNavigation(List<UriResource> resourcePaths) throws ODataApplicationException {
         // determine the target query parameters and fetch Entity for it
         EntityQueryParams requestParams = navigationResolver.resolveUriResourceNavigationPaths(resourcePaths);
-        Entity responseEntity = navigationResolver.resolveComplexEntityRequest(resourcePaths, requestParams);
+        Entity responseEntity = resolveComplexEntityRequest(resourcePaths, requestParams);
 
         // set EntityCollection response information
         EntityResponse response = new EntityResponse();

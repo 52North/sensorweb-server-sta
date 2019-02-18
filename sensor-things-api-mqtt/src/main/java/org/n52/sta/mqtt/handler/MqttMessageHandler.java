@@ -32,6 +32,7 @@ import io.moquette.interception.messages.InterceptSubscribeMessage;
 import io.moquette.interception.messages.InterceptUnsubscribeMessage;
 import io.netty.buffer.ByteBufInputStream;
 import org.apache.olingo.server.api.uri.UriResourcePartTyped;
+import org.n52.sta.mqtt.request.SensorThingsMqttRequest;
 
 /**
  *
@@ -124,9 +125,9 @@ public class MqttMessageHandler {
                                         new URIQueryOptions(uriInfo, BASE_URL));
                     } else {
                         subscription = mqttEntitySubscHandler
-                                .handleEntityCollectionRequest(topic,
+                                .handleEntityRequest(new SensorThingsMqttRequest(topic,
                                         uriInfo.getUriResourceParts(),
-                                        new URIQueryOptions(uriInfo, BASE_URL));
+                                        new URIQueryOptions(uriInfo, BASE_URL)));
                     }
                     break;
 

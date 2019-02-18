@@ -14,6 +14,8 @@ import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 import org.n52.sta.mqtt.core.MqttEntitySubscription;
+import org.n52.sta.mqtt.request.SensorThingsMqttRequest;
+import org.n52.sta.service.handler.AbstractEntityRequestHandler;
 import org.n52.sta.service.query.QueryOptions;
 import org.n52.sta.utils.EntityQueryParams;
 import org.n52.sta.utils.UriResourceNavigationResolver;
@@ -25,25 +27,23 @@ import org.springframework.stereotype.Component;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
-public class MqttEntitySubscriptionHandler {
+public class MqttEntitySubscriptionHandler extends AbstractEntityRequestHandler<SensorThingsMqttRequest, MqttEntitySubscription> {
 
     @Autowired
     private UriResourceNavigationResolver navigationResolver;
 
-    @Autowired
-    private EntityServiceRepository serviceRepository;
-
-    public MqttEntitySubscription handleEntityCollectionRequest(String topic, List<UriResource> resourcePaths, QueryOptions queryOptions) throws ODataApplicationException {
+    @Override
+    public MqttEntitySubscription handleEntityRequest(SensorThingsMqttRequest request) throws ODataApplicationException {
         MqttEntitySubscription subscription = null;
 
         // handle request depending on the number of UriResource paths
         // e.g the case: sta/Things
-        if (resourcePaths.size() == 1) {
-            subscription = createResponseForEntity(topic, resourcePaths, queryOptions);
+        if (request.getResourcePaths().size() == 1) {
+            subscription = createResponseForEntity(request.getTopic(), request.getResourcePaths(), request.getQueryOptions());
 
             // e.g. the case: sta/Things(id)/Locations
         } else {
-            subscription = createResponseForNavigation(topic, resourcePaths, queryOptions);
+            subscription = createResponseForNavigation(request.getTopic(), request.getResourcePaths(), request.getQueryOptions());
         }
         return subscription;
     }
@@ -64,4 +64,5 @@ public class MqttEntitySubscriptionHandler {
         return new MqttEntitySubscription((Long) responseEntity.getProperty(PROP_ID).getValue(),
                 requestParams.getTargetEntitySet(), requestParams.getTargetEntitySet().getEntityType(), topic, queryOptions);
     }
+
 }
