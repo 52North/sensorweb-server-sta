@@ -33,16 +33,13 @@ import org.apache.olingo.server.api.serializer.PrimitiveValueSerializerOptions;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
-import org.apache.olingo.server.core.serializer.SerializerResultImpl;
-import org.apache.olingo.server.core.serializer.utils.CircleStreamBuffer;
 import org.n52.sta.service.handler.AbstractPropertyRequestHandler;
 import org.n52.sta.service.response.PropertyResponse;
 import org.n52.sta.service.serializer.SensorThingsSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
+import org.n52.sta.service.request.SensorThingsRequest;
 
 /**
  *
@@ -52,7 +49,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcessor {
 
     @Autowired
-    AbstractPropertyRequestHandler requestHandler;
+    AbstractPropertyRequestHandler<SensorThingsRequest, PropertyResponse> requestHandler;
 
     private OData odata;
     private ServiceMetadata serviceMetadata;
@@ -61,20 +58,20 @@ public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcess
 
     @Override
     public void readPrimitiveValue(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-        PropertyResponse propertyValueReponse = requestHandler.handlePropertyRequest(uriInfo);
+        PropertyResponse propertyValueReponse = requestHandler.handlePropertyRequest(new SensorThingsRequest(uriInfo.getUriResourceParts(), null));
 
         // serialize
         Object propertyValue = propertyValueReponse.getProperty().getValue();
 //        if (propertyValue != null) {
-            //TODO: check for other than primitive types for the property
+        //TODO: check for other than primitive types for the property
 
-            if (propertyValueReponse.getEdmPropertyType() instanceof EdmComplexType) {
-                createComplexValueResponse(response, propertyValueReponse);
-            } else if (propertyValueReponse.getEdmPropertyType() instanceof EdmGeometry) {
-                createGeospatialValueResponse(response, propertyValueReponse);
-            } else {
-                createPrimitiveValueResponse(response, propertyValueReponse);
-            }
+        if (propertyValueReponse.getEdmPropertyType() instanceof EdmComplexType) {
+            createComplexValueResponse(response, propertyValueReponse);
+        } else if (propertyValueReponse.getEdmPropertyType() instanceof EdmGeometry) {
+            createGeospatialValueResponse(response, propertyValueReponse);
+        } else {
+            createPrimitiveValueResponse(response, propertyValueReponse);
+        }
 
 //        } else {
 //            // in case there's no value for the property, we can skip the serialization
@@ -112,16 +109,16 @@ public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcess
         response.setStatusCode(HttpStatusCode.OK.getStatusCode());
         response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.TEXT_PLAIN.toContentTypeString());
     }
-    
+
     private void createGeospatialValueResponse(ODataResponse response, PropertyResponse primitiveResponse) throws SerializerException {
         Property property = primitiveResponse.getProperty();
         EdmPrimitiveType edmPropertyType = (EdmPrimitiveType) primitiveResponse.getEdmPropertyType();
-        
+
         ContextURL contextUrl = ContextURL.with().entitySet(primitiveResponse.getResponseEdmEntitySet()).navOrPropertyPath(property.getName()).build();
         PrimitiveSerializerOptions options = PrimitiveSerializerOptions.with().contextURL(contextUrl).build();
         // serialize
         SerializerResult serializerResult = serializer.geospatialPrimitive(serviceMetadata, edmPropertyType, property, options);
-        
+
         response.setContent(serializerResult.getContent());
         response.setStatusCode(HttpStatusCode.OK.getStatusCode());
         response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.JSON_NO_METADATA.toContentTypeString());
@@ -139,21 +136,21 @@ public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcess
 
     @Override
     public void readPrimitive(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-        PropertyResponse primitiveResponse = requestHandler.handlePropertyRequest(uriInfo);
+        PropertyResponse primitiveResponse = requestHandler.handlePropertyRequest(new SensorThingsRequest(uriInfo.getUriResourceParts(), null));
         InputStream serializedContent;
         if (primitiveResponse.getProperty().getValue() == null) {
-            serializedContent = new ByteArrayInputStream( ("{\"" + primitiveResponse.getProperty().getName() + "\":null}").getBytes() );
+            serializedContent = new ByteArrayInputStream(("{\"" + primitiveResponse.getProperty().getName() + "\":null}").getBytes());
         } else {
             //TODO: check for other than primitive types for the property
             serializedContent = createReponseContent(primitiveResponse.getProperty(),
-                                                     (EdmPrimitiveType) primitiveResponse.getEdmPropertyType(),
-                                                     primitiveResponse.getResponseEdmEntitySet());
+                    (EdmPrimitiveType) primitiveResponse.getEdmPropertyType(),
+                    primitiveResponse.getResponseEdmEntitySet());
         }
 
         response.setContent(serializedContent);
         response.setStatusCode(HttpStatusCode.OK.getStatusCode());
         response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.JSON_NO_METADATA.toContentTypeString());
-}
+    }
 
     @Override
     public void updatePrimitive(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType requestFormat, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {

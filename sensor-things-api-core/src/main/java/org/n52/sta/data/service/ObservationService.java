@@ -39,10 +39,6 @@ import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
-import org.n52.series.db.CategoryRepository;
-import org.n52.series.db.DataRepository;
-import org.n52.series.db.DatasetRepository;
-import org.n52.series.db.OfferingRepository;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.BooleanDataEntity;
 import org.n52.series.db.beans.BooleanDatasetEntity;
@@ -65,11 +61,13 @@ import org.n52.series.db.beans.dataset.Dataset;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
-import org.n52.series.db.query.DatasetQuerySpecifications;
 import org.n52.shetland.ogc.om.OmConstants;
-import org.n52.sta.data.EventHandler;
-import org.n52.sta.data.ObservationCreateEvent;
+import org.n52.sta.data.query.DatasetQuerySpecifications;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
+import org.n52.sta.data.repositories.CategoryRepository;
+import org.n52.sta.data.repositories.DataRepository;
+import org.n52.sta.data.repositories.DatasetRepository;
+import org.n52.sta.data.repositories.OfferingRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.FeatureOfInterestMapper;
 import org.n52.sta.mapping.ObservationMapper;
@@ -104,7 +102,7 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
 
     private ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
     
-    private DatasetQuerySpecifications dQS = DatasetQuerySpecifications.of(null);
+    private DatasetQuerySpecifications dQS = new DatasetQuerySpecifications();
 
     public ObservationService(DataRepository<DataEntity<?>> repository, ObservationMapper mapper) {
         super(repository);

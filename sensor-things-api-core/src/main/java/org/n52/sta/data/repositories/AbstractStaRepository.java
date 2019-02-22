@@ -40,6 +40,5 @@ import org.springframework.data.repository.NoRepositoryBean;
 @NoRepositoryBean
 public interface AbstractStaRepository<T extends AbstractStaEntity> extends JpaRepository<T, Long>, QuerydslPredicateExecutor<T> {
 
-    //TODO: check if other custom Methods are needed
 }
 

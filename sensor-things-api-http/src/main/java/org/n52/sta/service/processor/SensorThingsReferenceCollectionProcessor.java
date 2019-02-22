@@ -30,6 +30,7 @@ import org.apache.olingo.server.api.uri.UriResource;
 import org.n52.sta.service.handler.AbstractEntityCollectionRequestHandler;
 import org.n52.sta.service.query.QueryOptions;
 import org.n52.sta.service.query.URIQueryOptions;
+import org.n52.sta.service.request.SensorThingsRequest;
 import org.n52.sta.service.response.EntityCollectionResponse;
 import org.n52.sta.service.serializer.SensorThingsSerializer;
 import org.n52.sta.utils.EntityAnnotator;
@@ -44,7 +45,7 @@ import org.springframework.stereotype.Component;
 public class SensorThingsReferenceCollectionProcessor implements ReferenceCollectionProcessor {
 
     @Autowired
-    AbstractEntityCollectionRequestHandler requestHandler;
+    AbstractEntityCollectionRequestHandler<SensorThingsRequest, EntityCollectionResponse> requestHandler;
 
     @Autowired
     EntityAnnotator entityAnnotator;
@@ -58,8 +59,9 @@ public class SensorThingsReferenceCollectionProcessor implements ReferenceCollec
         QueryOptions queryOptions = new URIQueryOptions(uriInfo, request.getRawBaseUri());
         List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
         EntityCollectionResponse entityCollectionResponse
-                = requestHandler.handleEntityCollectionRequest(resourcePaths.subList(0, resourcePaths.size() - 1),
-                        queryOptions);
+                = requestHandler.handleEntityCollectionRequest(
+                        new SensorThingsRequest(resourcePaths.subList(0, resourcePaths.size() - 1),
+                                queryOptions));
 
         InputStream serializedContent = createResponseContent(serviceMetadata, entityCollectionResponse, queryOptions);
 

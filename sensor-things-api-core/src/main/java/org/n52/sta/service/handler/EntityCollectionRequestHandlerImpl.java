@@ -21,6 +21,7 @@ import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.service.query.QueryOptions;
 import org.n52.sta.service.query.QueryOptionsHandler;
+import org.n52.sta.service.request.SensorThingsRequest;
 import org.n52.sta.service.response.EntityCollectionResponse;
 import org.n52.sta.utils.EntityAnnotator;
 import org.n52.sta.utils.EntityQueryParams;
@@ -34,7 +35,7 @@ import org.springframework.stereotype.Component;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
-public class EntityCollectionRequestHandlerImpl implements AbstractEntityCollectionRequestHandler {
+public class EntityCollectionRequestHandlerImpl extends AbstractEntityCollectionRequestHandler<SensorThingsRequest, EntityCollectionResponse> {
 
     @Autowired
     private EntityServiceRepository serviceRepository;
@@ -49,32 +50,32 @@ public class EntityCollectionRequestHandlerImpl implements AbstractEntityCollect
     EntityAnnotator entityAnnotator;
 
     @Override
-    public EntityCollectionResponse handleEntityCollectionRequest(List<UriResource> resourcePaths, QueryOptions queryOptions) throws ODataApplicationException {
+    public EntityCollectionResponse handleEntityCollectionRequest(SensorThingsRequest request) throws ODataApplicationException {
         EntityCollectionResponse response = null;
 
         // handle request depending on the number of UriResource paths
         // e.g the case: sta/Things
-        if (resourcePaths.size() == 1) {
-            response = createResponseForEntitySet(resourcePaths, queryOptions);
+        if (request.getResourcePaths().size() == 1) {
+            response = createResponseForEntitySet(request.getResourcePaths(), request.getQueryOptions());
 
             // e.g. the case: sta/Things(id)/Locations
         } else {
-            response = createResponseForNavigation(resourcePaths, queryOptions);
+            response = createResponseForNavigation(request.getResourcePaths(), request.getQueryOptions());
         }
         EdmEntitySet sourceEdmEntitySet = response.getEntitySet();
-        if (queryOptions.hasExpandOption()) {
+        if (request.getQueryOptions().hasExpandOption()) {
             response.getEntityCollection().forEach(entity -> {
                 entityAnnotator.annotateEntity(
                         entity,
                         sourceEdmEntitySet.getEntityType(),
-                        queryOptions.getBaseURI(),
-                        queryOptions.getSelectOption());
+                        request.getQueryOptions().getBaseURI(),
+                        request.getQueryOptions().getSelectOption());
                 queryOptionsHandler.handleExpandOption(
                         entity,
-                        queryOptions.getExpandOption(),
+                        request.getQueryOptions().getExpandOption(),
                         Long.parseLong(entity.getProperty(PROP_ID).getValue().toString()),
                         sourceEdmEntitySet.getEntityType(),
-                        queryOptions.getBaseURI());
+                        request.getQueryOptions().getBaseURI());
                 entity.getBaseURI();
             });
         } else {
@@ -82,8 +83,8 @@ public class EntityCollectionRequestHandlerImpl implements AbstractEntityCollect
                 entityAnnotator.annotateEntity(
                         entity,
                         sourceEdmEntitySet.getEntityType(),
-                        queryOptions.getBaseURI(),
-                        queryOptions.getSelectOption());
+                        request.getQueryOptions().getBaseURI(),
+                        request.getQueryOptions().getSelectOption());
             });
         }
         return response;

@@ -28,3 +28,7 @@ Implementation of the [OGC SensorThings API Part I: Sensing](https://github.com/
 #### Conformance Level 6 (DataArray Extension)
 #### Conformance Level 8 (Receiving Updates via MQTT)
 -  Tracked in branch [feature/subscribe](https://github.com/52North/sensor-things/tree/feature/mqtt-subscribe)
+
+## Notes:
+#### MQTT Extension
+ - Subscription is only possible on Topics (aka REST-Endpoints) that exist. This is checked on Subscription creation. SUBACK Message is send regardless.

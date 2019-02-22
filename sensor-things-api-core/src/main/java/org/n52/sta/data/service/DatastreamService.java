@@ -38,16 +38,9 @@ import java.util.Set;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
-import org.apache.olingo.server.api.ODataApplicationException;
-import org.apache.olingo.server.api.uri.queryoption.QueryOption;
-import org.n52.series.db.beans.sta.DatastreamEntity;
-import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
-import org.n52.series.db.DataRepository;
-import org.n52.series.db.DatasetRepository;
-import org.n52.series.db.FormatRepository;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
@@ -57,10 +50,12 @@ import org.n52.series.db.beans.UnitEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.series.db.beans.sta.ThingEntity;
-import org.n52.series.db.query.DatasetQuerySpecifications;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
+import org.n52.sta.data.repositories.DataRepository;
+import org.n52.sta.data.repositories.DatasetRepository;
 import org.n52.sta.data.repositories.DatastreamRepository;
+import org.n52.sta.data.repositories.FormatRepository;
 import org.n52.sta.data.repositories.UnitRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.DatastreamMapper;
@@ -95,8 +90,6 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     private final static DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
     
     private ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
-    
-    private DatasetQuerySpecifications dsQS = DatasetQuerySpecifications.of(null);
 
     public DatastreamService(DatastreamRepository repository, DatastreamMapper mapper) {
         super(repository);

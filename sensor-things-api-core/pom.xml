@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.n52.sta</groupId>
@@ -8,8 +10,8 @@
     </parent>
     <artifactId>sensor-things-api-core</artifactId>
     <packaging>jar</packaging>
-    
-    <dependencies>		
+
+    <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -27,15 +29,19 @@
             <artifactId>javaee-api</artifactId>
             <scope>provided</scope>
         </dependency>
-		
+
         <!-- Data Access -->
-        <dependency>
-            <groupId>org.n52.series-api.db</groupId>
-            <artifactId>dao</artifactId>
-        </dependency>
+        <!-- <dependency> -->
+        <!-- <groupId>org.n52.series-api.db</groupId> -->
+        <!-- <artifactId>dao</artifactId> -->
+        <!-- </dependency> -->
         <dependency>
             <groupId>org.n52.series.db</groupId>
             <artifactId>entities</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.n52.series.db</groupId>
+            <artifactId>codegen</artifactId>
         </dependency>
         <dependency>
             <groupId>org.n52.series.db</groupId>
@@ -45,7 +51,71 @@
             <groupId>org.n52.series.db</groupId>
             <artifactId>types</artifactId>
         </dependency>
-        
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-spatial</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.geolatte</groupId>
+                    <artifactId>geolatte-geom</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-core</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.code.findbugs</groupId>
+                    <artifactId>jsr305</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.hibernate.javax.persistence</groupId>
+                    <artifactId>hibernate-jpa-2.0-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>xml-apis</groupId>
+                    <artifactId>xml-apis</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-spatial</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate.javax.persistence</groupId>
+            <artifactId>hibernate-jpa-2.1-api</artifactId>
+            <version>1.0.0.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>org.geolatte</groupId>
+            <artifactId>geolatte-geom</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.n52.arctic-sea</groupId>
+            <artifactId>shetland</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.n52.arctic-sea</groupId>
+            <artifactId>janmayen</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.olingo</groupId>
             <artifactId>odata-commons-api</artifactId>
@@ -58,10 +128,21 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
-            <groupId>org.n52.arctic-sea</groupId>
-            <artifactId>janmayen</artifactId>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

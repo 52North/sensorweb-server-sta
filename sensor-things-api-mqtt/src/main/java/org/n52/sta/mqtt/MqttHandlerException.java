@@ -26,12 +26,20 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data;
+package org.n52.sta.mqtt;
 
 /**
- * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
+ * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
-public interface STAMessageBus {
+public class MqttHandlerException extends Exception {
+
+    public MqttHandlerException(String message) {
+        super(message);
+    }
+
+    public MqttHandlerException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
 }

@@ -6,23 +6,22 @@
 package org.n52.sta.service.handler;
 
 import org.apache.olingo.server.api.ODataApplicationException;
-import org.apache.olingo.server.api.uri.UriInfo;
-import org.n52.sta.service.response.PropertyResponse;
+import org.n52.sta.service.request.SensorThingsRequest;
 
 /**
  * Abstract class to handle property requests
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
-public interface AbstractPropertyRequestHandler {
+public abstract class AbstractPropertyRequestHandler<T, S> {
 
     /**
      * Handles a request for a entity property and creates a response
      *
-     * @param uriInfo information for the property request URI
+     * @param request {@Link SensorThingsRequest) for an entity property
      * @return response that contains data for the property reponse
      * @throws ODataApplicationException
      */
-    public PropertyResponse handlePropertyRequest(UriInfo uriInfo) throws ODataApplicationException;
+    public abstract S handlePropertyRequest(T request) throws ODataApplicationException;
 
 }

@@ -33,6 +33,13 @@ import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvid
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ENCODINGTYPE;
 import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ES_FEATURES_OF_INTEREST_NAME;
 import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ET_FEATURE_OF_INTEREST_FQN;
+import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_NAME;
+import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ET_SENSOR_NAME;
+import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
@@ -42,6 +49,7 @@ import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.FormatEntity;
+import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.ogc.om.features.SfConstants;
 import org.n52.shetland.util.JavaHelper;
@@ -142,6 +150,14 @@ public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper<Abst
        checkPropertyValidity(PROP_FEATURE, entity);
        checkEncodingType(entity);
        return entity;
+    }
+
+    /* (non-Javadoc)
+     * @see org.n52.sta.mapping.AbstractMapper#getRelatedCollections(java.lang.Object)
+     */
+    @Override
+    public Map<String, Set<Long>> getRelatedCollections(Object rawObject) {
+        return null;
     }
 
 }

@@ -26,16 +26,21 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.mqtt.config;
+package org.n52.sta.data;
 
-import org.springframework.stereotype.Component;
+import java.util.Set;
 
 /**
+ * Interface to be implemented by Handlers responding to Entity Creation (e.g. Handler for MQTT Subscription).
+ * 
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- *
  */
-@Component
-public class MQTTConfiguration {
-    
-    public static final String internalClientId = "POC";
+public interface STAEventHandler {
+
+    /**
+     * Handles a Create/Update Event emitted by the Database.
+     * @param event base entity
+     * @param differenceMap names of properties that changed. null if all properties changed (e.g. new entity)
+     */
+    public void handleEvent(Object event, Set<String> differenceMap);
 }
