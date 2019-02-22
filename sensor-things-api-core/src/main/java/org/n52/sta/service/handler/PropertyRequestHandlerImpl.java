@@ -38,7 +38,7 @@ import org.springframework.stereotype.Component;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
-public class PropertyRequestHandlerImpl extends AbstractPropertyRequestHandler<PropertyResponse> {
+public class PropertyRequestHandlerImpl extends AbstractPropertyRequestHandler<SensorThingsRequest, PropertyResponse> {
 
     @Autowired
     private EntityServiceRepository serviceRepository;

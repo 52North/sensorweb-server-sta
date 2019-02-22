@@ -13,7 +13,7 @@ import org.n52.sta.service.request.SensorThingsRequest;
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
-public abstract class AbstractEntityCollectionRequestHandler<T> {
+public abstract class AbstractEntityCollectionRequestHandler<T, S> {
 
     /**
      * Handles a request for a EntityCollection and creates a response
@@ -22,6 +22,6 @@ public abstract class AbstractEntityCollectionRequestHandler<T> {
      * @return response that contains data for the EntityCollection
      * @throws ODataApplicationException
      */
-    public abstract T handleEntityCollectionRequest(SensorThingsRequest request) throws ODataApplicationException;
+    public abstract S handleEntityCollectionRequest(T request) throws ODataApplicationException;
 
 }

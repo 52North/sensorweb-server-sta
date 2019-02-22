@@ -10,18 +10,22 @@ import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
+import org.n52.sta.mqtt.core.MqttEntitySubscription;
 import org.n52.sta.mqtt.core.MqttPropertySubscription;
+import org.n52.sta.mqtt.request.SensorThingsMqttRequest;
+import org.n52.sta.service.handler.AbstractPropertyRequestHandler;
 
 /**
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
-public class MqttPropertySubscriptionHandler {
+public class MqttPropertySubscriptionHandler extends AbstractPropertyRequestHandler<SensorThingsMqttRequest, MqttPropertySubscription> {
 
-    public MqttPropertySubscription handlePropertyRequest(UriInfo uriInfo) throws ODataApplicationException {
+    @Override
+    public MqttPropertySubscription handlePropertyRequest(SensorThingsMqttRequest request) throws ODataApplicationException {
         MqttPropertySubscription subscription = null;
 
-        List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
+        List<UriResource> resourcePaths = request.getResourcePaths();
 
         // handle request depending on the number of UriResource paths
         // e.g. the case: sta/Things(id)/Locations(id)/name

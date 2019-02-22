@@ -43,7 +43,7 @@ import org.springframework.stereotype.Component;
 public class SensorThingsEntityCollectionProcessor implements EntityCollectionProcessor {
 
     @Autowired
-    AbstractEntityCollectionRequestHandler<EntityCollectionResponse> requestHandler;
+    AbstractEntityCollectionRequestHandler<SensorThingsRequest, EntityCollectionResponse> requestHandler;
 
     @Autowired
     QueryOptionsHandler queryOptionsHandler;

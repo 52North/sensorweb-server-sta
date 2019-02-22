@@ -49,7 +49,7 @@ import org.n52.sta.service.request.SensorThingsRequest;
 public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcessor {
 
     @Autowired
-    AbstractPropertyRequestHandler<PropertyResponse> requestHandler;
+    AbstractPropertyRequestHandler<SensorThingsRequest, PropertyResponse> requestHandler;
 
     private OData odata;
     private ServiceMetadata serviceMetadata;
