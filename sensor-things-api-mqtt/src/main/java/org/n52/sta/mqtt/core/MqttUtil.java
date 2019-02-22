@@ -57,7 +57,7 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-public class MQTTUtil {
+public class MqttUtil {
 
     @Autowired
     private ObservationMapper obsMapper;
@@ -123,14 +123,14 @@ public class MQTTUtil {
      */
     public static Map<String, String> getBeanTypes() {
         HashMap<String,String> map = new HashMap<String,String>();
-        map.put("iot.Observation", "org.n52.series.db.beans.QuantityDataEntity");
-        map.put("iot.Datastream", "org.n52.series.db.beans.sta.DatastreamEntity");
-        map.put("iot.FeatureOfInterest", "org.n52.series.db.beans.AbstractFeatureEntity");
-        map.put("iot.HistoricalLocation", "org.n52.series.db.beans.sta.HistoricalLocationEntity");
-        map.put("iot.Location", "org.n52.series.db.beans.sta.LocationEntity");
-        map.put("iot.ObservedProperty", "org.n52.series.db.beans.PhenomenonEntity");
-        map.put("iot.Sensor", "org.n52.series.db.beans.ProcedureEntity");
-        map.put("iot.Thing", "org.n52.series.db.beans.sta.ThingEntity");
+        map.put("Observation", "org.n52.series.db.beans.QuantityDataEntity");
+        map.put("Datastream", "org.n52.series.db.beans.sta.DatastreamEntity");
+        map.put("FeatureOfInterest", "org.n52.series.db.beans.AbstractFeatureEntity");
+        map.put("HistoricalLocation", "org.n52.series.db.beans.sta.HistoricalLocationEntity");
+        map.put("Location", "org.n52.series.db.beans.sta.LocationEntity");
+        map.put("ObservedProperty", "org.n52.series.db.beans.PhenomenonEntity");
+        map.put("Sensor", "org.n52.series.db.beans.ProcedureEntity");
+        map.put("Thing", "org.n52.series.db.beans.sta.ThingEntity");
         return map;
     }
 

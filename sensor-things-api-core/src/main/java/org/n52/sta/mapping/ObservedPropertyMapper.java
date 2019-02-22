@@ -33,6 +33,9 @@ import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvid
 import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ES_OBSERVED_PROPERTIES_NAME;
 import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_FQN;
 
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
@@ -99,6 +102,14 @@ public class ObservedPropertyMapper extends AbstractMapper<PhenomenonEntity> {
         checkNameAndDescription(entity);
         checkPropertyValidity(PROP_DEFINITION, entity);
         return entity;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.n52.sta.mapping.AbstractMapper#getRelatedCollections(java.lang.Object)
+     */
+    @Override
+    public Map<String, Set<Long>> getRelatedCollections(Object rawObject) {
+        return null;
     }
 
 }

@@ -8,20 +8,14 @@ package org.n52.sta.service.handler;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 
 import java.util.List;
-import java.util.Locale;
 
 import org.apache.olingo.commons.api.data.Entity;
-import org.apache.olingo.commons.api.edm.EdmEntitySet;
-import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
-import org.apache.olingo.server.api.uri.UriParameter;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
-import org.apache.olingo.server.api.uri.UriResourceNavigation;
-import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
-import org.n52.sta.service.query.QueryOptions;
 import org.n52.sta.service.query.QueryOptionsHandler;
+import org.n52.sta.service.request.SensorThingsRequest;
 import org.n52.sta.service.response.EntityResponse;
 import org.n52.sta.utils.EntityAnnotator;
 import org.n52.sta.utils.EntityQueryParams;
@@ -35,7 +29,7 @@ import org.springframework.stereotype.Component;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
-public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
+public class EntityRequestHandlerImpl extends AbstractEntityRequestHandler<SensorThingsRequest, EntityResponse> {
 
     @Autowired
     private EntityServiceRepository serviceRepository;
@@ -50,60 +44,49 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
     EntityAnnotator entityAnnotator;
 
     @Override
-    public EntityResponse handleEntityRequest(List<UriResource> resourcePaths, QueryOptions queryOptions) throws ODataApplicationException {
+    public EntityResponse handleEntityRequest(SensorThingsRequest request) throws ODataApplicationException {
         EntityResponse response = null;
 
         // handle request depending on the number of UriResource paths
         // e.g the case: sta/Things(id)
-        if (resourcePaths.size() == 1) {
-            response = createResponseForEntity(resourcePaths);
+        if (request.getResourcePaths().size() == 1) {
+            response = createResponseForEntity(request.getResourcePaths());
 
             // e.g. the case: sta/Things(id)/Locations(id)
         } else {
-            response = createResponseForNavigation(resourcePaths);
+            response = createResponseForNavigation(request.getResourcePaths());
         }
 
-        if (queryOptions.hasExpandOption()) {
+        if (request.getQueryOptions().hasExpandOption()) {
             entityAnnotator.annotateEntity(
                     response.getEntity(),
                     response.getEntitySet().getEntityType(),
-                    queryOptions.getBaseURI(),
-                    queryOptions.getSelectOption());
+                    request.getQueryOptions().getBaseURI(),
+                    request.getQueryOptions().getSelectOption());
             queryOptionsHandler.handleExpandOption(
                     response.getEntity(),
-                    queryOptions.getExpandOption(),
+                    request.getQueryOptions().getExpandOption(),
                     Long.parseLong(response.getEntity().getProperty(PROP_ID).getValue().toString()),
                     response.getEntitySet().getEntityType(),
-                    queryOptions.getBaseURI());
+                    request.getQueryOptions().getBaseURI());
         } else {
             entityAnnotator.annotateEntity(
                     response.getEntity(),
                     response.getEntitySet().getEntityType(),
-                    queryOptions.getBaseURI(),
-                    queryOptions.getSelectOption());
+                    request.getQueryOptions().getBaseURI(),
+                    request.getQueryOptions().getSelectOption());
         }
         return response;
     }
 
     private EntityResponse createResponseForEntity(List<UriResource> resourcePaths) throws ODataApplicationException {
 
-        // determine the response EntitySet
-        UriResourceEntitySet uriResourceEntitySet = getUriResourceEntitySet(resourcePaths);
-        EdmEntitySet responseEntitySet = uriResourceEntitySet.getEntitySet();
-
-        // fetch the data from backend for this requested Entity and deliver as Entity
-        List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
-        AbstractSensorThingsEntityService<?,?> responseService = getEntityService(uriResourceEntitySet);
-        Entity responseEntity = responseService.getEntity(navigationResolver.getEntityIdFromKeyParams(keyPredicates));
-
-        if (responseEntity == null) {
-            throw new ODataApplicationException("Entity not found.",
-                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
-        }
+        UriResourceEntitySet uriResourceEntitySet = navigationResolver.resolveRootUriResource(resourcePaths.get(0));
+        Entity responseEntity = resolveSimpleEntityRequest(uriResourceEntitySet);
 
         // set Entity response information
         EntityResponse response = new EntityResponse();
-        response.setEntitySet(responseEntitySet);
+        response.setEntitySet(uriResourceEntitySet.getEntitySet());
         response.setEntity(responseEntity);
 
         return response;
@@ -112,28 +95,7 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
     private EntityResponse createResponseForNavigation(List<UriResource> resourcePaths) throws ODataApplicationException {
         // determine the target query parameters and fetch Entity for it
         EntityQueryParams requestParams = navigationResolver.resolveUriResourceNavigationPaths(resourcePaths);
-
-        UriResource lastSegment = resourcePaths.get(resourcePaths.size() - 1);
-        Entity responseEntity = null;
-
-        if (lastSegment instanceof UriResourceNavigation) {
-
-            List<UriParameter> navKeyPredicates = ((UriResourceNavigation) lastSegment).getKeyPredicates();
-
-            // e.g. /Things(1)/Location
-            if (navKeyPredicates.isEmpty()) {
-                responseEntity = serviceRepository.getEntityService(requestParams.getTargetEntitySet().getEntityType().getName())
-                        .getRelatedEntity(requestParams.getSourceId(), requestParams.getSourceEntityType());
-
-            } else { // e.g. /Things(1)/Locations(1)
-                responseEntity = serviceRepository.getEntityService(requestParams.getTargetEntitySet().getEntityType().getName())
-                        .getRelatedEntity(requestParams.getSourceId(), requestParams.getSourceEntityType(), navigationResolver.getEntityIdFromKeyParams(navKeyPredicates));
-            }
-            if (responseEntity == null) {
-                throw new ODataApplicationException("Entity not found.",
-                        HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
-            }
-        }
+        Entity responseEntity = resolveComplexEntityRequest(resourcePaths, requestParams);
 
         // set EntityCollection response information
         EntityResponse response = new EntityResponse();
@@ -141,17 +103,9 @@ public class EntityRequestHandlerImpl implements AbstractEntityRequestHandler {
         response.setEntity(responseEntity);
         return response;
     }
-    
+
     private UriResourceEntitySet getUriResourceEntitySet(List<UriResource> resourcePaths) throws ODataApplicationException {
         return navigationResolver.resolveRootUriResource(resourcePaths.get(0));
     }
 
-    private AbstractSensorThingsEntityService<?,?> getEntityService(UriResourceEntitySet uriResourceEntitySet) {
-        return getUriResourceEntitySet(uriResourceEntitySet.getEntityType().getName());
-    }
-    
-
-    private AbstractSensorThingsEntityService<?,?> getUriResourceEntitySet(String type) {
-        return serviceRepository.getEntityService(type);
-    }
 }

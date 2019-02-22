@@ -31,14 +31,17 @@ package org.n52.sta.mapping;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PROPERTIES;
 import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ES_DATASTREAMS_NAME;
+import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ES_HISTORICAL_LOCATIONS_NAME;
 import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ES_LOCATIONS_NAME;
 import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ES_THINGS_NAME;
 import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_FQN;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.Optional;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.olingo.commons.api.data.ComplexValue;
@@ -144,6 +147,7 @@ public class ThingMapper extends AbstractMapper<ThingEntity> {
         }
     }
 
+    @SuppressWarnings("finally")
     private JsonNode createJsonProperty(ThingEntity thing) {
         JsonNode node = null;
         try {
@@ -176,5 +180,37 @@ public class ThingMapper extends AbstractMapper<ThingEntity> {
             }
         }
         return entity;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.n52.sta.mapping.AbstractMapper#getRelatedCollections(java.lang.Object)
+     */
+    @Override
+    public Map<String, Set<Long>> getRelatedCollections(Object rawObject) {
+        Map<String, Set<Long>> collections = new HashMap<String, Set<Long>> ();
+        Set<Long> set = new HashSet<Long>();
+        ThingEntity entity = (ThingEntity) rawObject;
+        
+        try {
+            entity.getLocationEntities().forEach((en)-> {
+                set.add(en.getId());
+            });
+            collections.put(ES_LOCATIONS_NAME, set);
+        } catch(NullPointerException e) {}
+        set.clear();
+        try {
+            entity.getHistoricalLocationEntities().forEach((en) -> {
+                set.add(en.getId());
+            });
+            collections.put(ES_HISTORICAL_LOCATIONS_NAME, set);
+        } catch(NullPointerException e) {}
+        set.clear();
+        try {
+            entity.getDatastreamEntities().forEach((en) -> {
+                set.add(en.getId());
+            });
+            collections.put(ES_DATASTREAMS_NAME, set);
+        } catch(NullPointerException e) {}
+        return collections;
     }
 }
