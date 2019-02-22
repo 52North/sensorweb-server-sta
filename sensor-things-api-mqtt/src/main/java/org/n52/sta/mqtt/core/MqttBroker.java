@@ -39,6 +39,7 @@ import org.apache.olingo.server.api.deserializer.DeserializerException;
 import org.apache.olingo.server.core.uri.parser.UriParserException;
 import org.apache.olingo.server.core.uri.validator.UriValidationException;
 import org.h2.mvstore.Cursor;
+import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
 import org.n52.sta.mqtt.MqttHandlerException;
 import org.n52.sta.mqtt.handler.MqttMessageHandler;
@@ -105,14 +106,15 @@ public class MqttBroker {
                 .fileName(storePath)
                 .autoCommitDisabled()
                 .open();
-        Cursor<Object, Object> mapCursor = mvStore.openMap("subscriptions").cursor(String.class);
+        Cursor<Object, Object> mapCursor = mvStore.openMap("subscriptions").cursor(null);
         while (mapCursor.hasNext()) {
             try {
+            	mapCursor.next();
                 Subscription sub = (Subscription) mapCursor.getValue();
                 handler.processSubscribeMessage(new InterceptSubscribeMessage(sub, sub.getClientId()));
-                LOGGER.debug("Restored Subscription to topic: " + sub.getTopicFilter().toString());
+                LOGGER.info("Restored Subscription of client:'" + sub.getClientId() +"' to topic: '" + sub.getTopicFilter().toString() + "'");
             } catch (MqttHandlerException | ClassCastException e) {
-                LOGGER.error("Error while restoring MQTT subscription. Could not parse Subscription");
+                LOGGER.error("Error while restoring MQTT subscription. Could not parse Subscription.");
                 LOGGER.debug("Error while restoring MQTT subscription", e);
             }
         }
