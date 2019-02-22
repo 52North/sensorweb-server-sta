@@ -7,14 +7,13 @@ package org.n52.sta.service.handler;
 
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.sta.service.request.SensorThingsRequest;
-import org.n52.sta.service.response.PropertyResponse;
 
 /**
  * Abstract class to handle property requests
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
-public abstract class AbstractPropertyRequestHandler<T> {
+public abstract class AbstractPropertyRequestHandler<T, S> {
 
     /**
      * Handles a request for a entity property and creates a response
@@ -23,6 +22,6 @@ public abstract class AbstractPropertyRequestHandler<T> {
      * @return response that contains data for the property reponse
      * @throws ODataApplicationException
      */
-    public abstract T handlePropertyRequest(SensorThingsRequest request) throws ODataApplicationException;
+    public abstract S handlePropertyRequest(T request) throws ODataApplicationException;
 
 }

@@ -11,6 +11,9 @@ import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.n52.sta.mqtt.core.MqttEntityCollectionSubscription;
+import org.n52.sta.mqtt.core.MqttEntitySubscription;
+import org.n52.sta.mqtt.request.SensorThingsMqttRequest;
+import org.n52.sta.service.handler.AbstractEntityRequestHandler;
 import org.n52.sta.service.query.QueryOptions;
 import org.n52.sta.utils.EntityQueryParams;
 import org.n52.sta.utils.UriResourceNavigationResolver;
@@ -22,22 +25,23 @@ import org.springframework.stereotype.Component;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
-public class MqttEntityCollectionSubscriptionHandler {
+public class MqttEntityCollectionSubscriptionHandler extends AbstractEntityRequestHandler<SensorThingsMqttRequest, MqttEntityCollectionSubscription> {
 
     @Autowired
     private UriResourceNavigationResolver navigationResolver;
 
-    public MqttEntityCollectionSubscription handleEntityCollectionRequest(String topic, List<UriResource> resourcePaths, QueryOptions queryOptions) throws ODataApplicationException {
+    @Override
+    public MqttEntityCollectionSubscription handleEntityRequest(SensorThingsMqttRequest request) throws ODataApplicationException {
         MqttEntityCollectionSubscription subscription = null;
 
         // handle request depending on the number of UriResource paths
         // e.g the case: sta/Things
-        if (resourcePaths.size() == 1) {
-            subscription = createResponseForEntitySet(topic, resourcePaths, queryOptions);
+        if (request.getResourcePaths().size() == 1) {
+            subscription = createResponseForEntitySet(request.getTopic(), request.getResourcePaths(), request.getQueryOptions());
 
             // e.g. the case: sta/Things(id)/Locations
         } else {
-            subscription = createResponseForNavigation(topic, resourcePaths, queryOptions);
+            subscription = createResponseForNavigation(request.getTopic(), request.getResourcePaths(), request.getQueryOptions());
         }
         return subscription;
     }

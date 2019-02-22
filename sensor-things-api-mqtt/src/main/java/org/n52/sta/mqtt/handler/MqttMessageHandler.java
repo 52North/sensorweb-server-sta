@@ -32,7 +32,10 @@ import io.moquette.interception.messages.InterceptSubscribeMessage;
 import io.moquette.interception.messages.InterceptUnsubscribeMessage;
 import io.netty.buffer.ByteBufInputStream;
 import org.apache.olingo.server.api.uri.UriResourcePartTyped;
+import org.n52.sta.mqtt.core.MqttEntityCollectionSubscription;
+import org.n52.sta.mqtt.core.MqttEntitySubscription;
 import org.n52.sta.mqtt.request.SensorThingsMqttRequest;
+import org.n52.sta.service.handler.AbstractEntityRequestHandler;
 
 /**
  *
@@ -49,19 +52,16 @@ public class MqttMessageHandler {
     private Parser parser;
 
     @Autowired
-    AbstractEntityCollectionRequestHandler requestHandler;
+    AbstractEntityCollectionRequestHandler<SensorThingsMqttRequest, MqttEntityCollectionSubscription> entityCollcetionRequestHandler;
+    
+    @Autowired
+    AbstractEntityRequestHandler<SensorThingsMqttRequest, MqttEntitySubscription> mqttEntitySubscHandler;
 
     @Autowired
     private CrudHelper crudHelper;
 
     @Autowired
     private MqttEventHandler localClient;
-
-    @Autowired
-    private MqttEntityCollectionSubscriptionHandler mqttEntityCollSubscHandler;
-
-    @Autowired
-    private MqttEntitySubscriptionHandler mqttEntitySubscHandler;
 
     @SuppressWarnings("unchecked")
     public void processPublishMessage(InterceptPublishMessage msg) throws UriParserException, UriValidationException, ODataApplicationException, DeserializerException {
@@ -119,10 +119,10 @@ public class MqttMessageHandler {
                 case entitySet:
                 case navigationProperty:
                     if (((UriResourcePartTyped) lastPathSegment).isCollection()) {
-                        subscription = mqttEntityCollSubscHandler
-                                .handleEntityCollectionRequest(topic,
+                        subscription = entityCollcetionRequestHandler
+                                .handleEntityCollectionRequest(new SensorThingsMqttRequest(topic,
                                         uriInfo.getUriResourceParts(),
-                                        new URIQueryOptions(uriInfo, BASE_URL));
+                                        new URIQueryOptions(uriInfo, BASE_URL)));
                     } else {
                         subscription = mqttEntitySubscHandler
                                 .handleEntityRequest(new SensorThingsMqttRequest(topic,

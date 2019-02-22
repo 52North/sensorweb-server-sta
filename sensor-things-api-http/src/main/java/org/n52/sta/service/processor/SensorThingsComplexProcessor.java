@@ -41,7 +41,7 @@ import org.springframework.stereotype.Component;
 public class SensorThingsComplexProcessor implements ComplexProcessor {
 
     @Autowired
-    AbstractPropertyRequestHandler<PropertyResponse> requestHandler;
+    AbstractPropertyRequestHandler<SensorThingsRequest, PropertyResponse> requestHandler;
 
     private OData odata;
     private ServiceMetadata serviceMetadata;
