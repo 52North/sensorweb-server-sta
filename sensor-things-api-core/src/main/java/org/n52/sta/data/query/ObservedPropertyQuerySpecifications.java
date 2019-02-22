@@ -26,40 +26,106 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.query;
 
-import org.n52.series.db.beans.QPhenomenonEntity;
+import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
+import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
+import org.n52.series.db.beans.PhenomenonEntity;
 
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPQLQuery;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
-public class ObservedPropertyQuerySpecifications extends EntityQuerySpecifications {
-    
-    private final static QPhenomenonEntity qobservedproperty = QPhenomenonEntity.phenomenonEntity;
-        
+public class ObservedPropertyQuerySpecifications extends EntityQuerySpecifications<PhenomenonEntity> {
+
     public BooleanExpression withId(Long id) {
         return qobservedproperty.id.eq(id);
     }
-    
+
     public BooleanExpression withDatastream(Long datastreamId) {
-        return qobservedproperty.id.in(dQS.toSubquery(qdatastream.id.eq(datastreamId)).select(qdatastream.observableProperty.id));
+        return qobservedproperty.id.in(dQS.toSubquery(qdatastream,
+                                                      qdatastream.observableProperty.id,
+                                                      qdatastream.id.eq(datastreamId)));
     }
-    
+
     public BooleanExpression withIdentifier(String identifier) {
         return qobservedproperty.identifier.eq(identifier);
     }
-    
+
     /**
-     * Assures that Entity is valid.
-     * Entity is valid if:
-     * - has associated Datastream
+     * Assures that Entity is valid. Entity is valid if:
+     *  - has associated Datastream
      * 
      * @return BooleanExpression evaluating to true if Entity is valid
      */
     public BooleanExpression isValidEntity() {
-        return qobservedproperty.id.in(dQS.toSubquery(qdatastream.isNotNull()).select(qdatastream.observableProperty.id));
+        return qobservedproperty.id.in(dQS.toSubquery(qdatastream,
+                                                      qdatastream.observableProperty.id,
+                                                      qdatastream.isNotNull()));
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.n52.sta.data.query.EntityQuerySpecifications#getIdSubqueryWithFilter(com.querydsl.core.types.dsl.
+     * BooleanExpression)
+     */
+    @Override
+    public JPQLQuery<Long> getIdSubqueryWithFilter(Expression<Boolean> filter) {
+        return this.toSubquery(qobservedproperty, qobservedproperty.id, filter);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.n52.sta.data.query.EntityQuerySpecifications#getFilterForProperty(java.lang.String,
+     * java.lang.Object, org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind)
+     */
+    @Override
+    public Object getFilterForProperty(String propertyName,
+                                       Object propertyValue,
+                                       BinaryOperatorKind operator,
+                                       boolean switched)
+            throws ExpressionVisitException {
+        if (propertyName.equals("Datastreams")) {
+            return handleRelatedPropertyFilter(propertyName, (JPQLQuery<Long>) propertyValue);
+        } else if (propertyName.equals("id")) {
+            return handleDirectNumberPropertyFilter(qobservedproperty.id, propertyValue, operator, switched);
+        } else {
+            return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
+        }
+    }
+
+    private BooleanExpression handleRelatedPropertyFilter(String propertyName, JPQLQuery<Long> propertyValue)
+            throws ExpressionVisitException {
+        return qobservedproperty.id.in(dQS.toSubquery(qdatastream,
+                                                      qdatastream.observableProperty.id,
+                                                      qdatastream.id.eq(propertyValue)));
+    }
+
+    private Object handleDirectPropertyFilter(String propertyName,
+                                              Object propertyValue,
+                                              BinaryOperatorKind operator,
+                                              boolean switched)
+            throws ExpressionVisitException {
+        switch (propertyName) {
+        case "name":
+            return handleDirectStringPropertyFilter(qobservedproperty.name, propertyValue, operator, switched);
+        case "description":
+            return handleDirectStringPropertyFilter(qobservedproperty.description, propertyValue, operator, switched);
+        case "definition":
+        case "identifier":
+            return handleDirectStringPropertyFilter(qobservedproperty.identifier, propertyValue, operator, switched);
+        default:
+            throw new ExpressionVisitException("Error getting filter for Property: \"" + propertyName
+                    + "\". No such property in Entity.");
+        }
+    }
+
 }

@@ -39,6 +39,7 @@ import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider
 import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ES_LOCATIONS_NAME;
 import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
 
+import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -80,7 +81,7 @@ public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationE
         Entity entity = new Entity();
 
         entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, location.getId()));
-        entity.addProperty(new Property(null, PROP_TIME, ValueType.PRIMITIVE,  DateTimeHelper.format(createTime(location))));
+        entity.addProperty(new Property(null, PROP_TIME, ValueType.PRIMITIVE, location.getTime().getTime()));
 
         entity.setType(ET_HISTORICAL_LOCATION_FQN.getFullQualifiedNameAsString());
         entity.setId(entityCreationHelper.createId(entity, ES_HISTORICAL_LOCATIONS_NAME, PROP_ID));
@@ -113,7 +114,7 @@ public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationE
     
     private void addTime(HistoricalLocationEntity historicalLocation, Entity entity) {
         if (checkProperty(entity, PROP_TIME)) {
-            Time time = parseTime(getPropertyValue(entity, PROP_TIME).toString());
+            Time time = parseTime(getPropertyValue(entity, PROP_TIME));
             if (time instanceof TimeInstant) {
                 historicalLocation.setTime(((TimeInstant) time).getValue().toDate());
             } else if (time instanceof TimePeriod) {

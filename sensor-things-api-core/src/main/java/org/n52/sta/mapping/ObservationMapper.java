@@ -40,6 +40,8 @@ import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ES_OBS
 import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ET_OBSERVATION_FQN;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -51,6 +53,7 @@ import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.joda.time.DateTime;
+import org.joda.time.Instant;
 import org.n52.janmayen.Json;
 import org.n52.series.db.beans.BlobDataEntity;
 import org.n52.series.db.beans.BooleanDataEntity;
@@ -64,7 +67,6 @@ import org.n52.series.db.beans.ProfileDataEntity;
 import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.ReferencedDataEntity;
 import org.n52.series.db.beans.TextDataEntity;
-import org.n52.series.db.beans.HibernateRelations.HasPhenomenonTime;
 import org.n52.series.db.beans.parameter.Parameter;
 import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.shetland.ogc.gml.time.Time;
@@ -92,19 +94,21 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
     public Entity createEntity(DataEntity<?> observation) {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, observation.getId()));
-        entity.addProperty(new Property(null, PROP_RESULT, ValueType.PRIMITIVE, this.getResult(observation)));
         
-        Time resultTime = createResultTime(observation);
-        entity.addProperty(new Property(null, PROP_RESULT_TIME, ValueType.PRIMITIVE,
-                resultTime == null ? resultTime : DateTimeHelper.format(resultTime)));
+        //TODO: urlencode whitespaces to allow for copy pasting into filter expression
+        entity.addProperty(new Property(null, PROP_RESULT, ValueType.PRIMITIVE, this.getResult(observation).getBytes()));
+
+        Date resultTime = observation.getResultTime();
+        Date samplingTime = observation.getSamplingTimeEnd();
+        entity.addProperty(new Property(null, PROP_RESULT_TIME, ValueType.PRIMITIVE, (resultTime.equals(samplingTime)) ? null : resultTime.getTime()));
 
         String phenomenonTime = DateTimeHelper.format(createPhenomenonTime(observation));
         entity.addProperty(new Property(null, PROP_PHENOMENON_TIME, ValueType.PRIMITIVE, phenomenonTime));
-
-        if (observation.isSetValidTime()) {
-            entity.addProperty(new Property(null, PROP_VALID_TIME, ValueType.PRIMITIVE,
-                    DateTimeHelper.format(createValidTime(observation))));
-        }
+        
+        
+        entity.addProperty(new Property(null, PROP_VALID_TIME, ValueType.PRIMITIVE, (observation.isSetValidTime())
+                                                                                    ? DateTimeHelper.format(createValidTime(observation))
+                                                                                    : null));
 
         // TODO: check for quality property
         // entity.addProperty(new Property(null, PROP_RESULT_QUALITY,
@@ -190,15 +194,6 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
         return createTime(start, end);
     }
     
-    private Time createResultTime(DataEntity<?> observation) {
-        DateTime resulTime = createDateTime(observation.getResultTime());
-        DateTime samplingTime = createDateTime(observation.getSamplingTimeEnd());
-        if (resulTime.equals(samplingTime)) {
-            return null;
-        }
-        return createTime(createDateTime(observation.getResultTime()));
-    }
-    
     private Time createValidTime(DataEntity<?> observation) {
         final DateTime start = createDateTime(observation.getValidTimeStart());
         DateTime end;
@@ -227,24 +222,20 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
     
     private void addResult(StaDataEntity observation, Entity entity) {
         if (checkProperty(entity, PROP_RESULT)) {
-            observation.setValue(getPropertyValue(entity, PROP_RESULT).toString());
+            observation.setValue(new String((byte[])getPropertyValue(entity, PROP_RESULT)));
         }
     }
 
     private void addResultTime(StaDataEntity observation, Entity entity) {
         if (checkProperty(entity, PROP_RESULT_TIME)) {
-            Time time = parseTime(getPropertyValue(entity, PROP_RESULT_TIME).toString());
-            if (time instanceof TimeInstant) {
-                observation.setResultTime(((TimeInstant) time).getValue().toDate());
-            } else if (time instanceof TimePeriod) {
-                observation.setResultTime(((TimePeriod) time).getEnd().toDate());
-            }
+            Time time = parseTime(getPropertyValue(entity, PROP_RESULT_TIME));
+            observation.setResultTime(((TimeInstant) time).getValue().toDate());
         }
     }
     
     private void addValidTime(StaDataEntity observation, Entity entity) {
         if (checkProperty(entity, PROP_RESULT_TIME)) {
-            Time time = parseTime(getPropertyValue(entity, PROP_RESULT_TIME).toString());
+            Time time = parseTime(getPropertyValue(entity, PROP_RESULT_TIME));
             if (time instanceof TimeInstant) {
                 observation.setValidTimeStart(((TimeInstant) time).getValue().toDate());
                 observation.setValidTimeEnd(((TimeInstant) time).getValue().toDate());

@@ -22,6 +22,7 @@ import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriInfoResource;
 import org.apache.olingo.server.api.uri.UriResource;
+import org.apache.olingo.server.api.uri.queryoption.FilterOption;
 import org.apache.olingo.server.api.uri.queryoption.OrderByItem;
 import org.apache.olingo.server.api.uri.queryoption.OrderByOption;
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
@@ -37,6 +38,7 @@ import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.data.OffsetLimitBasedPageRequest;
+import org.n52.sta.service.query.FilterExpressionVisitor;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.service.query.QueryOptions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +47,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.querydsl.core.types.Predicate;
 
 /**
  * Interface for requesting Sensor Things entities
@@ -75,8 +79,9 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
      * @param queryOptions
      *
      * @return the full EntityCollection
+     * @throws ODataApplicationException if the queryOptions are invalid
      */
-    public abstract EntityCollection getEntityCollection(QueryOptions queryOptions);
+    public abstract EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException;
 
     /**
      * Requests the EntityCollection that is related to a single Entity with the
@@ -88,9 +93,10 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
      *            EntityType of the related Entity
      * @param queryOptions
      * @return the EntityCollection that is related to the given Entity
+     * @throws ODataApplicationException if the queryOptions are invalid
      */
     public abstract EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType,
-            QueryOptions queryOptions);
+            QueryOptions queryOptions) throws ODataApplicationException;
 
     /**
      * Request the count for the EntityCollection that is related to a single
@@ -228,9 +234,31 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
      * @param queryOptions
      * 
      * @return the existing elements
+     * @throws ODataApplicationException if the queryOptions could not be parsed.
      */
-    public long getCount() {
-        return getRepository().count();
+    public abstract long getCount(QueryOptions queryOptions) throws ODataApplicationException;
+    
+    /**
+     * Constructs QueryDSL FilterPredicate based on given queryOptions.
+     * 
+     * @param entityClass Class of the requested Entity
+     * @param queryOptions QueryOptions Object 
+     * @return Predicate based on FilterOption from queryOptions
+     * @throws ODataApplicationException if the queryOptions are invalid
+     */
+    public Predicate getFilterPredicate(Class entityClass, QueryOptions queryOptions) throws ODataApplicationException {
+        if (!queryOptions.hasFilterOption()) {
+            return null;
+        } else {
+            Expression filterExpression = queryOptions.getFilterOption().getExpression();
+            
+            FilterExpressionVisitor visitor = new FilterExpressionVisitor(entityClass, this);
+            try {
+                return (Predicate) filterExpression.accept(visitor);
+            } catch (ExpressionVisitException e) {
+                throw new ODataApplicationException(e.getMessage(), HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ENGLISH);
+            }
+        }
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -279,11 +307,8 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
      * @return {@link PageRequest} of type {@link OffsetLimitBasedPageRequest}
      */
     protected OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions) {
-        int offset = 0;
-        if (queryOptions.hasSkipOption()){
-            offset = queryOptions.getSkipOption().getValue();
-        }
-
+        int offset = queryOptions.hasSkipOption() ? queryOptions.getSkipOption().getValue() : 0;
+        
         Sort sort = Sort.by(Direction.ASC, "id");
         if (queryOptions.hasOrderByOption()) {
             OrderByItem orderByItem = queryOptions.getOrderByOption().getOrders().get(0);
@@ -304,7 +329,7 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
      *            the sorting property to check
      * @return the databse property name
      */
-    protected String checkPropertyForSorting(String property) {
+    public String checkPropertyName(String property) {
         return property;
     }
 
@@ -331,7 +356,7 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
 
         @Override
         public String visitMember(Member member) throws ExpressionVisitException {
-            return service.checkPropertyForSorting(visitMember(member.getResourcePath()));
+            return service.checkPropertyName(visitMember(member.getResourcePath()));
         }
 
         public String visitMember(UriInfoResource member) throws ExpressionVisitException {

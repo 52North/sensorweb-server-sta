@@ -3,6 +3,7 @@ package org.n52.sta.service.query;
 import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.queryoption.CountOption;
 import org.apache.olingo.server.api.uri.queryoption.ExpandOption;
+import org.apache.olingo.server.api.uri.queryoption.FilterOption;
 import org.apache.olingo.server.api.uri.queryoption.OrderByOption;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 import org.apache.olingo.server.api.uri.queryoption.SkipOption;
@@ -148,5 +149,21 @@ public class URIQueryOptions implements QueryOptions {
     @Override
     public ExpandOption getExpandOption() {
         return getUriInfo().getExpandOption();
+    }
+    
+    /* (non-Javadoc)
+     * @see org.n52.sta.service.query.QueryOptions#hasFilterOption()
+     */
+    @Override
+    public boolean hasFilterOption() {
+        return getUriInfo().getFilterOption() != null;
+    }
+
+    /* (non-Javadoc)
+     * @see org.n52.sta.service.query.QueryOptions#getFilterOption()
+     */
+    @Override
+    public FilterOption getFilterOption() {
+        return getUriInfo().getFilterOption();
     }
 }

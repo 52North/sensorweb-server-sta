@@ -37,6 +37,11 @@ import java.util.Set;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.server.api.ODataApplicationException;
+import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
+import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
+import org.n52.series.db.beans.ProcedureEntity;
+import org.n52.series.db.beans.sta.QThingEntity;
 import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
@@ -49,9 +54,11 @@ import org.n52.sta.data.query.ThingQuerySpecifications;
 import org.n52.sta.data.repositories.ThingRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.ThingMapper;
+import org.n52.sta.service.query.FilterExpressionVisitor;
 import org.n52.sta.service.query.QueryOptions;
 import org.springframework.stereotype.Component;
 
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
 /**
@@ -76,9 +83,10 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     }
 
     @Override
-    public EntityCollection getEntityCollection(QueryOptions queryOptions) {
+    public EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException {
         EntityCollection retEntitySet = new EntityCollection();
-        getRepository().findAll(createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        Predicate filter = getFilterPredicate(ThingEntity.class, queryOptions);
+        getRepository().findAll(filter, createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
 
@@ -89,8 +97,10 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     }
 
     @Override
-    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType, QueryOptions queryOptions) {
+    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType, QueryOptions queryOptions) throws ODataApplicationException {
         BooleanExpression filter = tQS.withRelatedLocation(sourceId);
+
+        filter = filter.and(getFilterPredicate(ThingEntity.class, queryOptions));       
         Iterable<ThingEntity> things = getRepository().findAll(filter, createPageableRequest(queryOptions));
 
         EntityCollection retEntitySet = new EntityCollection();
@@ -188,6 +198,11 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
             filter = filter.and(tQS.withId(targetId));
         }
         return getRepository().findOne(filter);
+    }
+    
+    @Override
+    public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
+        return getRepository().count(getFilterPredicate(ThingEntity.class, queryOptions));
     }
 
     @Override

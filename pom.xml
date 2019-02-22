@@ -25,7 +25,7 @@
         <java.version>1.8</java.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <odata.version>4.4.0-STA-SNAPSHOT</odata.version>
+        <odata.version>4.6.0-STA-SNAPSHOT</odata.version>
         <series-hbm.version>2-SNAPSHOT</series-hbm.version>
         <arctic-sea.version>5.1.0-SNAPSHOT</arctic-sea.version>
         <spring-boot.version>2.0.3.RELEASE</spring-boot.version>

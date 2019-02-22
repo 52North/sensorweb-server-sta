@@ -26,54 +26,110 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.query;
 
+import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
+import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 
-import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.JPQLQuery;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
-public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecifications {
+public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecifications<AbstractFeatureEntity< ? >> {
 
     public BooleanExpression withId(Long id) {
-        return  qfeature.id.eq(id);
+        return qfeature.id.eq(id);
     }
-    
+
     public BooleanExpression withObservation(Long observationId) {
         return qfeature.id.in(JPAExpressions
-                              .selectFrom(qdataset)
-                              .where(qdataset.id.in(
-                                                    JPAExpressions
-                                                    .selectFrom(qobservation)
-                                                    .where(qobservation.id.eq(observationId))
-                                                    .select(qobservation.dataset.id)))
-                              .select(qdataset.feature.id));
+                                            .selectFrom(qdataset)
+                                            .where(qdataset.id.in(
+                                                                  JPAExpressions
+                                                                                .selectFrom(qobservation)
+                                                                                .where(qobservation.id.eq(observationId))
+                                                                                .select(qobservation.dataset.id)))
+                                            .select(qdataset.feature.id));
     }
-    
+
     public BooleanExpression withIdentifier(String identifier) {
         return qfeature.identifier.eq(identifier);
-    }
-    
-    /**
-     * Assures that Entity is valid.
-     * Entity is valid if:
-     * - is associated with Dataset associated with any Datastream
-     * 
-     * @return BooleanExpression evaluating to true if Entity is valid
-     */
-    public BooleanExpression isValidEntity() {
-        return qfeature.id.in(JPAExpressions
-                              .selectFrom(qdatastream)
-                              .select(qdatastream.datasets.any().feature.id));
     }
 
     public BooleanExpression withName(String name) {
         return qfeature.name.eq(name);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.n52.sta.data.query.EntityQuerySpecifications#getIdSubqueryWithFilter(com.querydsl.core.types.dsl.
+     * BooleanExpression)
+     */
+    @Override
+    public JPQLQuery<Long> getIdSubqueryWithFilter(Expression<Boolean> filter) {
+        return this.toSubquery(qfeature, qfeature.id, filter);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.n52.sta.data.query.EntityQuerySpecifications#getFilterForProperty(java.lang.String,
+     * java.lang.Object, org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind)
+     */
+    @Override
+    public Object getFilterForProperty(String propertyName,
+                                       Object propertyValue,
+                                       BinaryOperatorKind operator,
+                                       boolean switched)
+            throws ExpressionVisitException {
+        if (propertyName.equals("Observations")) {
+            return handleRelatedPropertyFilter(propertyName, (JPQLQuery<Long>) propertyValue, switched);
+        } else if (propertyName.equals("id")) {
+            return handleDirectNumberPropertyFilter(qfeature.id, propertyValue, operator, switched);
+        } else {
+            return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
+        }
+    }
+
+    private BooleanExpression handleRelatedPropertyFilter(String propertyName,
+                                                          JPQLQuery<Long> propertyValue,
+                                                          boolean switched)
+            throws ExpressionVisitException {
+        return qfeature.id.in(JPAExpressions
+                              .selectFrom(qdataset)
+                              .where(qdataset.id.in(
+                                                    JPAExpressions
+                                                                  .selectFrom(qobservation)
+                                                                  .where(qobservation.id.eq(propertyValue))
+                                                                  .select(qobservation.dataset.id)))
+                              .select(qdataset.feature.id));
+    }
+
+    private Object handleDirectPropertyFilter(String propertyName,
+                                              Object propertyValue,
+                                              BinaryOperatorKind operator,
+                                              boolean switched)
+            throws ExpressionVisitException {
+        switch (propertyName) {
+        case "name":
+            return handleDirectStringPropertyFilter(qfeature.name, propertyValue, operator, switched);
+        case "description":
+            return handleDirectStringPropertyFilter(qfeature.description, propertyValue, operator, switched);
+        case "encodingType":
+        case "featureType":
+            return handleStringFilter(toStringExpression("application/vnd.geo+json"), toStringExpression(propertyValue), operator, switched);
+        default:
+            throw new ExpressionVisitException("Error getting filter for Property: \"" + propertyName
+                    + "\". No such property in Entity.");
+        }
+    }
 }

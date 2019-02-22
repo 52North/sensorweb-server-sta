@@ -107,7 +107,7 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
                     .handleCreateEntityRequest(deserializeRequestBody.getEntity(), uriInfo.getUriResourceParts());
 
             entityAnnotator.annotateEntity(entityResponse.getEntity(), entityResponse.getEntitySet().getEntityType(),
-                    queryOptions.getBaseURI());
+                    queryOptions.getBaseURI(), queryOptions.getSelectOption());
             InputStream serializedContent = createResponseContent(serviceMetadata, entityResponse, queryOptions);
             // configure the response object: set the body, headers and status code
             response.setContent(serializedContent);
@@ -137,7 +137,8 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
             entityAnnotator.annotateEntity(
                     entityResponse.getEntity(),
                     entityResponse.getEntitySet().getEntityType(),
-                    queryOptions.getBaseURI());
+                    queryOptions.getBaseURI(),
+                    queryOptions.getSelectOption());
             InputStream serializedContent = createResponseContent(serviceMetadata, entityResponse, queryOptions);
             // configure the response object: set the body, headers and status code
             response.setContent(serializedContent);
@@ -158,7 +159,8 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
                 .handleDeleteEntityRequest(uriInfo.getUriResourceParts());
         entityAnnotator.annotateEntity(entityResponse.getEntity(),
                 entityResponse.getEntitySet().getEntityType(),
-                queryOptions.getBaseURI());
+                queryOptions.getBaseURI(),
+                queryOptions.getSelectOption());
 //        InputStream serializedContent = createResponseContent(serviceMetadata, entityResponse, queryOptions);
         // configure the response object: set the body, headers and status code
 //        response.setContent(serializedContent);

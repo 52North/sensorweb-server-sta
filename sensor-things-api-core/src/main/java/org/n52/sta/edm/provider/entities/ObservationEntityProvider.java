@@ -41,7 +41,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.olingo.commons.api.edm.EdmPrimitiveType;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
+import org.apache.olingo.commons.api.edm.EdmTypeDefinition;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityType;
@@ -121,19 +123,20 @@ public class ObservationEntityProvider extends AbstractSensorThingsEntityProvide
                 .setType(EdmPrimitiveTypeKind.Int64.getFullQualifiedName())
                 .setNullable(false);
         CsdlProperty phenomenonTime = new CsdlProperty().setName(PROP_PHENOMENON_TIME)
-                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setType(EdmPrimitiveTypeKind.Timespan.getFullQualifiedName())
                 .setNullable(false);
         CsdlProperty result = new CsdlProperty().setName(PROP_RESULT)
-                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setType(EdmPrimitiveTypeKind.Any.getFullQualifiedName())
                 .setNullable(false);
         CsdlProperty resultTime = new CsdlProperty().setName(PROP_RESULT_TIME)
-                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
-                .setNullable(true);
+                .setType(EdmPrimitiveTypeKind.DateTimeOffset.getFullQualifiedName())
+                .setNullable(true)
+                .setPrecision(9);
         CsdlProperty resultQuality = new CsdlProperty().setName(PROP_RESULT_QUALITY)
                 .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
                 .setNullable(true);
         CsdlProperty validTime = new CsdlProperty().setName(PROP_VALID_TIME)
-                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setType(EdmPrimitiveTypeKind.Timespan.getFullQualifiedName())
                 .setNullable(true);
         CsdlProperty parameters = new CsdlProperty().setName(PROP_PARAMETERS)
                 .setType(OpenComplexType.CT_OPEN_TYPE_FQN)

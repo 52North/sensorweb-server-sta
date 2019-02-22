@@ -88,6 +88,7 @@ public class SensorThingsEntityCollectionProcessor implements EntityCollectionPr
         ContextURL contextUrl = contextUrlBuilder.build();
 
         final String id = queryOptions.getBaseURI() + "/" + response.getEntitySet().getName();
+        
         EntityCollectionSerializerOptions opts
                 = EntityCollectionSerializerOptions
                         .with()

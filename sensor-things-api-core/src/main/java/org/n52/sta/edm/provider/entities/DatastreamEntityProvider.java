@@ -146,10 +146,10 @@ public class DatastreamEntityProvider extends AbstractSensorThingsEntityProvider
                 .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
                 .setNullable(false);
         CsdlProperty phenomenonTime = new CsdlProperty().setName(PROP_PHENOMENON_TIME)
-                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setType(EdmPrimitiveTypeKind.Timespan.getFullQualifiedName())
                 .setNullable(true);
         CsdlProperty resultTime = new CsdlProperty().setName(PROP_RESULT_TIME)
-                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+                .setType(EdmPrimitiveTypeKind.Timespan.getFullQualifiedName())
                 .setNullable(true);
 
         //create EntityType complex properties

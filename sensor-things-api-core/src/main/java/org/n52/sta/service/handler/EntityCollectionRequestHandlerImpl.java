@@ -67,20 +67,23 @@ public class EntityCollectionRequestHandlerImpl implements AbstractEntityCollect
                 entityAnnotator.annotateEntity(
                         entity,
                         sourceEdmEntitySet.getEntityType(),
-                        queryOptions.getBaseURI());
+                        queryOptions.getBaseURI(),
+                        queryOptions.getSelectOption());
                 queryOptionsHandler.handleExpandOption(
                         entity,
                         queryOptions.getExpandOption(),
                         Long.parseLong(entity.getProperty(PROP_ID).getValue().toString()),
                         sourceEdmEntitySet.getEntityType(),
                         queryOptions.getBaseURI());
+                entity.getBaseURI();
             });
         } else {
             response.getEntityCollection().forEach(entity -> {
                 entityAnnotator.annotateEntity(
                         entity,
                         sourceEdmEntitySet.getEntityType(),
-                        queryOptions.getBaseURI());
+                        queryOptions.getBaseURI(),
+                        queryOptions.getSelectOption());
             });
         }
         return response;
@@ -99,7 +102,7 @@ public class EntityCollectionRequestHandlerImpl implements AbstractEntityCollect
                 serviceRepository.getEntityService(uriResourceEntitySet.getEntityType().getName());
         EntityCollection responseEntityCollection = responseService.getEntityCollection(queryOptions);
 
-        long count = responseService.getCount();
+        long count = responseService.getCount(queryOptions);
 
         if (queryOptions.hasCountOption()) {
             responseEntityCollection.setCount(Long.valueOf(count).intValue());
@@ -126,6 +129,10 @@ public class EntityCollectionRequestHandlerImpl implements AbstractEntityCollect
 
         long count = entityService.getRelatedEntityCollectionCount(queryParams.getSourceId(), queryParams.getSourceEntityType());
 
+        if (queryOptions.hasCountOption()) {
+            responseEntityCollection.setCount(Long.valueOf(count).intValue());
+        }
+        
         responseEntityCollection.setNext(createNext(count, queryOptions, queryParams));
         // set EntityCollection response information
         EntityCollectionResponse response = new EntityCollectionResponse();

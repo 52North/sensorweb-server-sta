@@ -933,7 +933,7 @@ public class SensorThingsDeserializer implements ODataDeserializer {
         return node.isTextual() && (primKind == EdmPrimitiveTypeKind.String || primKind == EdmPrimitiveTypeKind.Binary
                 || primKind == EdmPrimitiveTypeKind.Date || primKind == EdmPrimitiveTypeKind.DateTimeOffset
                 || primKind == EdmPrimitiveTypeKind.Duration || primKind == EdmPrimitiveTypeKind.Guid
-                || primKind == EdmPrimitiveTypeKind.TimeOfDay);
+                || primKind == EdmPrimitiveTypeKind.TimeOfDay || primKind == EdmPrimitiveTypeKind.Timespan);
     }
 
     @Override

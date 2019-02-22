@@ -3,24 +3,32 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 package org.n52.sta.service.query;
 
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.data.Link;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
+import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.uri.UriHelper;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
+import org.apache.olingo.server.api.uri.queryoption.ExpandItem;
 import org.apache.olingo.server.api.uri.queryoption.ExpandOption;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
+import org.apache.olingo.server.core.uri.queryoption.ExpandItemImpl;
+import org.apache.olingo.server.core.uri.queryoption.ExpandOptionImpl;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.utils.EntityAnnotator;
@@ -56,16 +64,22 @@ public class QueryOptionsHandler {
     }
 
     /**
-     * @param edmEntityType the {@Link EdmEntityType} the select list option is
-     * @param expandOption the {@Link ExpandOption} to get the expand items from
-     * @param selectOption the {@Link SelectOption} to get the select list from
-     * referred to
+     * @param edmEntityType
+     *        the {@Link EdmEntityType} the select list option is
+     * @param expandOption
+     *        the {@Link ExpandOption} to get the expand items from
+     * @param selectOption
+     *        the {@Link SelectOption} to get the select list from referred to
      * @return the select list
      * @throws SerializerException
      */
-    public String getSelectListFromSelectOption(EdmEntityType edmEntityType, ExpandOption expandOption, SelectOption selectOption) throws SerializerException {
+    public String getSelectListFromSelectOption(EdmEntityType edmEntityType,
+                                                ExpandOption expandOption,
+                                                SelectOption selectOption)
+            throws SerializerException {
         String selectList = uriHelper.buildContextURLSelectList(edmEntityType,
-                expandOption, selectOption);
+                                                                expandOption,
+                                                                selectOption);
 
         return selectList;
     }
@@ -73,22 +87,29 @@ public class QueryOptionsHandler {
     /**
      * Handles the $expand Query Parameter
      *
-     * @param entity The entity to handle expand parameter for
-     * @param expandOption Options for expand Parameter
-     * @param sourceId Id of the source Entity
-     * @param sourceEdmEntityType EntityType of the source Entity
-     * @param baseURI baseURI of the Request
+     * @param entity
+     *        The entity to handle expand parameter for
+     * @param expandOption
+     *        Options for expand Parameter
+     * @param sourceId
+     *        Id of the source Entity
+     * @param sourceEdmEntityType
+     *        EntityType of the source Entity
+     * @param baseURI
+     *        baseURI of the Request
      * @return List<Link> List of inlined Entities
      */
-    public List<Link> handleExpandOption(Entity entity, ExpandOption expandOption, Long sourceId, EdmEntityType sourceEdmEntityType, String baseURI) {
-        List<Link> links = new ArrayList<>();
-
-        expandOption.getExpandItems().forEach(expandItem -> {
+    public void handleExpandOption(Entity entity,
+                                    ExpandOption expandOption,
+                                    Long sourceId,
+                                    EdmEntityType sourceEdmEntityType,
+                                    String baseURI) {
+        List<ExpandItem> minimized = expandOption.getExpandItems();
+        minimized.forEach(expandItem -> {
             EdmNavigationProperty edmNavigationProperty = null;
             EdmEntityType targetEdmEntityType = null;
             String targetTitle = null;
 
-            // TODO: Expand to support nested paths
             UriResource uriResource = expandItem.getResourcePath().getUriResourceParts().get(0);
 
             if (uriResource instanceof UriResourceNavigation) {
@@ -103,73 +124,87 @@ public class QueryOptionsHandler {
 
             Link link = entity.getNavigationLink(targetTitle);
 
-            // Either add inline Collection or add single inline Entity          
+            // Either add inline Collection or add single inline Entity
             if (sourceEdmEntityType.getNavigationProperty(targetTitle).isCollection()) {
-                link.setInlineEntitySet(getInlineEntityCollection(sourceId,
-                        sourceEdmEntityType,
-                        targetEdmEntityType,
-                        new ExpandItemQueryOptions(expandItem, baseURI)));
+                try {
+                    link.setInlineEntitySet(getInlineEntityCollection(sourceId,
+                                                                      sourceEdmEntityType,
+                                                                      targetEdmEntityType,
+                                                                      new ExpandItemQueryOptions(expandItem, baseURI)));
+                } catch (ODataApplicationException e) {}
 
-                // Annotate inline Entites with appropiate links
-                final EdmEntityType type = targetEdmEntityType;
             } else {
                 link.setInlineEntity(getInlineEntity(sourceId,
-                        sourceEdmEntityType,
-                        targetEdmEntityType,
-                        new ExpandItemQueryOptions(expandItem, baseURI)));
-
-                // Annotate inline Entites with appropiate links
-                entityAnnotator.annotateEntity(link.getInlineEntity(), targetEdmEntityType, baseURI);
-            }
-            // Only add valid Elements
-            if (link != null) {
-                links.add(link);
+                                                     sourceEdmEntityType,
+                                                     targetEdmEntityType,
+                                                     new ExpandItemQueryOptions(expandItem, baseURI)));
             }
         });
-
-        return links;
     }
 
-    private Entity getInlineEntity(Long sourceId, EdmEntityType sourceType, EdmEntityType targetType, QueryOptions queryOptions) {
-        AbstractSensorThingsEntityService<?,?> responseService = serviceRepository.getEntityService(targetType.getName());
+    private Entity getInlineEntity(Long sourceId,
+                                   EdmEntityType sourceType,
+                                   EdmEntityType targetType,
+                                   QueryOptions queryOptions) {
+        AbstractSensorThingsEntityService< ? , ? > responseService = serviceRepository.getEntityService(targetType.getName());
         Entity entity = responseService.getRelatedEntity(sourceId, sourceType);
 
         if (queryOptions.hasExpandOption()) {
-            entityAnnotator.annotateEntity(entity, targetType, queryOptions.getBaseURI());
-            List<Link> links = handleExpandOption(entity, queryOptions.getExpandOption(),
-                    Long.parseLong(entity.getProperty(PROP_ID).getValue().toString()),
-                    targetType,
-                    queryOptions.getBaseURI());
+            entityAnnotator.annotateEntity(entity,
+                                           targetType,
+                                           queryOptions.getBaseURI(),
+                                           queryOptions.getSelectOption());
+            String id = entity.getProperty(PROP_ID).getValue().toString();
+            handleExpandOption(entity,
+                               queryOptions.getExpandOption(),
+                               Long.parseLong(id),
+                               targetType,
+                               queryOptions.getBaseURI());
         } else {
-            entityAnnotator.annotateEntity(entity, targetType, queryOptions.getBaseURI());
+            entityAnnotator.annotateEntity(entity,
+                                           targetType,
+                                           queryOptions.getBaseURI(),
+                                           queryOptions.getSelectOption());
         }
 
         return entity;
     }
 
-    private EntityCollection getInlineEntityCollection(Long sourceId, EdmEntityType sourceType, EdmEntityType targetType, QueryOptions queryOptions) {
-        AbstractSensorThingsEntityService<?,?> responseService = serviceRepository.getEntityService(targetType.getName());
-        EntityCollection entityCollection = responseService.getRelatedEntityCollection(sourceId, sourceType, queryOptions);
-
-        long count = responseService.getRelatedEntityCollectionCount(sourceId, sourceType);
+    private EntityCollection getInlineEntityCollection(Long sourceId,
+                                                       EdmEntityType sourceType,
+                                                       EdmEntityType targetType,
+                                                       QueryOptions queryOptions)
+            throws ODataApplicationException {
+        AbstractSensorThingsEntityService< ? , ? > responseService = serviceRepository.getEntityService(targetType.getName());
+        EntityCollection entityCollection = responseService.getRelatedEntityCollection(sourceId,
+                                                                                       sourceType,
+                                                                                       queryOptions);
 
         if (queryOptions.hasCountOption()) {
+            long count = responseService.getRelatedEntityCollectionCount(sourceId, sourceType);
             entityCollection.setCount(Long.valueOf(count).intValue());
         }
 
         if (queryOptions.hasExpandOption()) {
             entityCollection.forEach(entity -> {
-                entityAnnotator.annotateEntity(entity, targetType, queryOptions.getBaseURI());
-                List<Link> links = handleExpandOption(entity, queryOptions.getExpandOption(),
-                        Long.parseLong(entity.getProperty(PROP_ID).getValue().toString()),
-                        targetType,
-                        queryOptions.getBaseURI());
+                entityAnnotator.annotateEntity(entity,
+                                               targetType,
+                                               queryOptions.getBaseURI(),
+                                               queryOptions.getSelectOption());
+                String id = entity.getProperty(PROP_ID).getValue().toString();
+                handleExpandOption(entity,
+                                   queryOptions.getExpandOption(),
+                                   Long.parseLong(id),
+                                   targetType,
+                                   queryOptions.getBaseURI());
             });
         } else {
             entityCollection.forEach(entity -> {
-                entityAnnotator.annotateEntity(entity, targetType, queryOptions.getBaseURI());
+                entityAnnotator.annotateEntity(entity,
+                                               targetType,
+                                               queryOptions.getBaseURI(),
+                                               queryOptions.getSelectOption());
             });
-
         }
 
         return entityCollection;

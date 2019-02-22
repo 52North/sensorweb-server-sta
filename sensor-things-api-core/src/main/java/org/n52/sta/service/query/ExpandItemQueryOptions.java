@@ -32,6 +32,7 @@ import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.queryoption.CountOption;
 import org.apache.olingo.server.api.uri.queryoption.ExpandItem;
 import org.apache.olingo.server.api.uri.queryoption.ExpandOption;
+import org.apache.olingo.server.api.uri.queryoption.FilterOption;
 import org.apache.olingo.server.api.uri.queryoption.OrderByOption;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 import org.apache.olingo.server.api.uri.queryoption.SkipOption;
@@ -164,6 +165,22 @@ public class ExpandItemQueryOptions implements QueryOptions {
     @Override
     public ExpandOption getExpandOption() {
         return item.getExpandOption();
+    }
+
+    /* (non-Javadoc)
+     * @see org.n52.sta.service.query.QueryOptions#hasFilterOption()
+     */
+    @Override
+    public boolean hasFilterOption() {
+        return item.getFilterOption() != null;
+    }
+
+    /* (non-Javadoc)
+     * @see org.n52.sta.service.query.QueryOptions#getFilterOption()
+     */
+    @Override
+    public FilterOption getFilterOption() {
+        return item.getFilterOption();
     }
 
 }

@@ -15,6 +15,8 @@ import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.edm.EdmProperty;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
+import org.apache.olingo.commons.core.edm.primitivetype.EdmDateTimeOffset;
+import org.apache.olingo.commons.core.edm.primitivetype.EdmGeometry;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.UriParameter;
@@ -130,10 +132,7 @@ public class PropertyRequestHandlerImpl implements AbstractPropertyRequestHandle
 
         // retrieve the property data from the entity
         Property property = targetEntity.getProperty(edmProperty.getName());
-        if (property == null) {
-            throw new ODataApplicationException("Property not found",
-                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ENGLISH);
-        }
+
         while (resourcePaths.get(i) instanceof UriResourceComplexProperty
                 && i != resourcePaths.size() - 1
                 && !(resourcePaths.get(++i) instanceof UriResourceValue)) {

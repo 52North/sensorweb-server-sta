@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.service;
 
 import java.util.Locale;
@@ -35,6 +36,7 @@ import java.util.OptionalLong;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
@@ -42,8 +44,10 @@ import org.n52.series.db.FormatRepository;
 import org.n52.series.db.ProcedureRepository;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.ProcedureEntity;
+import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.SensorQuerySpecifications;
@@ -55,6 +59,7 @@ import org.n52.sta.service.query.QueryOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
 /**
@@ -91,9 +96,11 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     }
 
     @Override
-    public EntityCollection getEntityCollection(QueryOptions queryOptions) {
+    public EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException {
         EntityCollection retEntitySet = new EntityCollection();
-        getRepository().findAll(createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        Predicate filter = getFilterPredicate(ProcedureEntity.class, queryOptions);
+        getRepository().findAll(filter, createPageableRequest(queryOptions))
+                       .forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
 
@@ -104,7 +111,9 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     }
 
     @Override
-    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType, QueryOptions queryOptions) {
+    public EntityCollection getRelatedEntityCollection(Long sourceId,
+                                                       EdmEntityType sourceEntityType,
+                                                       QueryOptions queryOptions) {
         return null;
     }
 
@@ -120,7 +129,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
 
     @Override
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-        switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
+        switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
         case "iot.Datastream": {
             BooleanExpression filter = sQS.withDatastream(sourceId);
             if (targetId != null) {
@@ -128,7 +137,8 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
             }
             return getRepository().exists(filter);
         }
-        default: return false;
+        default:
+            return false;
         }
     }
 
@@ -162,23 +172,42 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
         }
     }
 
+    @Override
+    public String checkPropertyName(String property) {
+        switch (property) {
+        case "encodingType":
+            return ProcedureEntity.PROPERTY_PROCEDURE_DESCRIPTION_FORMAT;
+        case "metadata":
+            // TODO: Add sorting by HistoricalLocation that replaces Description if it is not present
+            return "descriptionFile";
+        default:
+            return super.checkPropertyName(property);
+        }
+    }
+
     /**
-     * Retrieves Sensor Entity (aka Procedure Entity) with Relation to sourceEntity from Database.
-     * Returns empty if Sensor is not found or Entities are not related.
+     * Retrieves Sensor Entity (aka Procedure Entity) with Relation to sourceEntity from Database. Returns
+     * empty if Sensor is not found or Entities are not related.
      * 
-     * @param sourceId Id of the Source Entity
-     * @param sourceEntityType Type of the Source Entity
-     * @param targetId Id of the Entity to be retrieved
+     * @param sourceId
+     *        Id of the Source Entity
+     * @param sourceEntityType
+     *        Type of the Source Entity
+     * @param targetId
+     *        Id of the Entity to be retrieved
      * @return Optional<ProcedureEntity> Requested Entity
      */
-    private Optional<ProcedureEntity> getRelatedEntityRaw(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+    private Optional<ProcedureEntity> getRelatedEntityRaw(Long sourceId,
+                                                          EdmEntityType sourceEntityType,
+                                                          Long targetId) {
         BooleanExpression filter;
-        switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
+        switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
         case "iot.Datastream": {
             filter = sQS.withDatastream(sourceId);
             break;
         }
-        default: return Optional.empty();
+        default:
+            return Optional.empty();
         }
 
         if (targetId != null) {
@@ -190,11 +219,17 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     /**
      * Constructs SQL Expression to request Entity by ID.
      * 
-     * @param id id of the requested entity
+     * @param id
+     *        id of the requested entity
      * @return BooleanExpression evaluating to true if Entity is found and valid
      */
     private BooleanExpression byId(Long id) {
         return sQS.withId(id);
+    }
+    
+    @Override
+    public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
+        return getRepository().count(getFilterPredicate(ProcedureEntity.class, queryOptions));
     }
 
     @Override

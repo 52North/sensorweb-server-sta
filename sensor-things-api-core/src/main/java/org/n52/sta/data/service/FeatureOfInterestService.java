@@ -37,6 +37,10 @@ import java.util.Set;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.server.api.ODataApplicationException;
+import org.n52.series.db.FeatureRepository;
+import org.n52.series.db.beans.FeatureEntity;
+import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
@@ -63,6 +67,7 @@ import org.n52.sta.service.query.QueryOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
 /**
@@ -107,9 +112,10 @@ public class FeatureOfInterestService
     }
 
     @Override
-    public EntityCollection getEntityCollection(QueryOptions queryOptions) {
+    public EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException {
         EntityCollection retEntitySet = new EntityCollection();
-        getRepository().findAll(createPageableRequest(queryOptions))
+        Predicate filter = getFilterPredicate(AbstractFeatureEntity.class, queryOptions);
+        getRepository().findAll(filter, createPageableRequest(queryOptions))
                 .forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
@@ -212,6 +218,22 @@ public class FeatureOfInterestService
         return getRepository().findOne(filter);
     }
 
+    @Override
+    public String checkPropertyName(String property) {
+        switch (property) {
+            case "encodingType":
+                return AbstractFeatureEntity.PROPERTY_FEATURE_TYPE;
+            default:
+                return property;
+        }
+    }
+
+    
+    @Override
+    public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
+        return getRepository().count(getFilterPredicate(AbstractFeatureEntity.class, queryOptions));
+    }
+    
     /**
      * Constructs SQL Expression to request Entity by ID.
      * 

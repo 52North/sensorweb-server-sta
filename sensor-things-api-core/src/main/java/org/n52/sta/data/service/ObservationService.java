@@ -36,6 +36,7 @@ import java.util.OptionalLong;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
@@ -52,6 +53,8 @@ import org.n52.series.db.beans.CategoryEntity;
 import org.n52.series.db.beans.CountDataEntity;
 import org.n52.series.db.beans.CountDatasetEntity;
 import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.ProcedureEntity;
+import org.n52.sta.data.OffsetLimitBasedPageRequest;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.NotInitializedDatasetEntity;
 import org.n52.series.db.beans.OfferingEntity;
@@ -63,6 +66,7 @@ import org.n52.series.db.beans.TextDataEntity;
 import org.n52.series.db.beans.TextDatasetEntity;
 import org.n52.series.db.beans.dataset.Dataset;
 import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.series.db.beans.sta.ThingEntity;
@@ -76,6 +80,7 @@ import org.n52.sta.service.query.QueryOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.querydsl.core.types.Predicate;
 import com.google.common.collect.Sets;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
@@ -115,9 +120,10 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
     }
 
     @Override
-    public EntityCollection getEntityCollection(QueryOptions queryOptions) {
+    public EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException {
         EntityCollection retEntitySet = new EntityCollection();
-        getRepository().findAll(createPageableRequest(queryOptions))
+        Predicate filter = getFilterPredicate(DataEntity.class, queryOptions);
+        getRepository().findAll(filter, createPageableRequest(queryOptions))
                 .forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
@@ -131,8 +137,9 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
 
     @Override
     public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType,
-            QueryOptions queryOptions) {
+            QueryOptions queryOptions) throws ODataApplicationException {
         BooleanExpression filter = getFilter(sourceId, sourceEntityType);
+        filter = filter.and(getFilterPredicate(DataEntity.class, queryOptions));
         // TODO: check cast
         Iterable<DataEntity<?>> observations =
                 (Iterable<DataEntity<?>>) getRepository().findAll(filter, createPageableRequest(queryOptions));
@@ -226,16 +233,15 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
     }
 
     @Override
-    protected String checkPropertyForSorting(String property) {
+    public String checkPropertyName(String property) {
         switch (property) {
         case "phenomenonTime":
-            return DataEntity.PROPERTY_SAMPLING_TIME_START;
-        case "validTime":
-            return DataEntity.PROPERTY_VALID_TIME_START;
-        // case "result":
-        // return DataEntity.PROPERTY_VALUE;
+            //TODO: proper ISO8601 comparison
+            return DataEntity.PROPERTY_SAMPLING_TIME_END;
+        case "result":
+            return DataEntity.PROPERTY_VALUE;
         default:
-            return super.checkPropertyForSorting(property);
+            return super.checkPropertyName(property);
         }
     }
 
@@ -281,6 +287,11 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
      */
     private BooleanExpression byId(Long id) {
         return oQS.isValidEntity().and(oQS.withId(id));
+    }
+    
+    @Override
+    public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
+        return getRepository().count(getFilterPredicate(DataEntity.class, queryOptions));
     }
 
     @Override

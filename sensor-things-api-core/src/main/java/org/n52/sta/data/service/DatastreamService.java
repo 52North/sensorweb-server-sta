@@ -38,6 +38,10 @@ import java.util.Set;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.server.api.ODataApplicationException;
+import org.apache.olingo.server.api.uri.queryoption.QueryOption;
+import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
@@ -105,9 +109,10 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     }
 
     @Override
-    public EntityCollection getEntityCollection(QueryOptions queryOptions) {
+    public EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException {
         EntityCollection retEntitySet = new EntityCollection();
-        getRepository().findAll(createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        Predicate filter = getFilterPredicate(DatastreamEntity.class, queryOptions);
+        getRepository().findAll(filter, createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
 
@@ -118,9 +123,9 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     }
 
     @Override
-    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType, QueryOptions queryOptions) {
-        Iterable<DatastreamEntity> datastreams = getRepository().findAll(getFilter(sourceId, sourceEntityType), createPageableRequest(queryOptions));
-
+    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType, QueryOptions queryOptions) throws ODataApplicationException {
+        Predicate filter = getFilter(sourceId, sourceEntityType).and(getFilterPredicate(DatastreamEntity.class, queryOptions));
+        Iterable<DatastreamEntity> datastreams = getRepository().findAll(filter, createPageableRequest(queryOptions));
         EntityCollection retEntitySet = new EntityCollection();
         datastreams.forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
@@ -184,16 +189,22 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     }
     
     @Override
-    protected String checkPropertyForSorting(String property) {
+    public String checkPropertyName(String property) {
         switch (property) {
         case "phenomenonTime":
             return DatastreamEntity.PROPERTY_SAMPLING_TIME_START;
         case "resultTime":
             return DatastreamEntity.PROPERTY_RESULT_TIME_START;
         default:
-            return super.checkPropertyForSorting(property);
+            return super.checkPropertyName(property);
         }
     }
+    
+    @Override
+    public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
+        return getRepository().count(getFilterPredicate(DatastreamEntity.class, queryOptions));
+    }
+
 
     /**
      * Retrieves Datastream Entity with Relation to sourceEntity from Database.
@@ -475,4 +486,5 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     private AbstractSensorThingsEntityService<?, DataEntity<?>> getObservationService() {
         return (AbstractSensorThingsEntityService<?, DataEntity<?>>) getEntityService(EntityTypes.Observation);
     }
+
 }

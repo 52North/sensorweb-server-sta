@@ -61,6 +61,7 @@ import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 
 /**
@@ -98,9 +99,10 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     }
 
     @Override
-    public EntityCollection getEntityCollection(QueryOptions queryOptions) {
+    public EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException {
         EntityCollection retEntitySet = new EntityCollection();
-        getRepository().findAll(createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        Predicate filter = getFilterPredicate(LocationEntity.class, queryOptions);
+        getRepository().findAll(filter, createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
 
@@ -111,9 +113,10 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     }
 
     @Override
-    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType, QueryOptions queryOptions) {
+    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType, QueryOptions queryOptions) throws ODataApplicationException {
         BooleanExpression filter = getFilter(sourceId, sourceEntityType);
-
+        filter = filter.and(getFilterPredicate(LocationEntity.class, queryOptions));
+        
         EntityCollection retEntitySet = new EntityCollection();
         Iterable<LocationEntity> locations = getRepository().findAll(filter, createPageableRequest(queryOptions));
         locations.forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
@@ -241,6 +244,11 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     private BooleanExpression byId(Long id) {
         return lQS.withId(id);
     }
+    
+    @Override
+    public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
+        return getRepository().count(getFilterPredicate(LocationEntity.class, queryOptions));
+    }
 
     @Override
     public LocationEntity create(LocationEntity location) throws ODataApplicationException {
@@ -311,6 +319,17 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     @Override
     public void delete(LocationEntity entity) throws ODataApplicationException {
         getRepository().deleteById(entity.getId());
+    }
+    
+    @Override
+    public String checkPropertyName(String property) {
+        if (property.equals("encodingType")) {
+            return LocationEntity.PROPERTY_NAME;
+        } else if (property.equals("location")) {
+            return "name desc";
+        } else {
+            return property;
+        }
     }
 
     private void checkLocationEncoding(LocationEntity location) {
