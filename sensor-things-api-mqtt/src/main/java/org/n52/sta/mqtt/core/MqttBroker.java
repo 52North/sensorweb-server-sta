@@ -38,6 +38,9 @@ import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.deserializer.DeserializerException;
 import org.apache.olingo.server.core.uri.parser.UriParserException;
 import org.apache.olingo.server.core.uri.validator.UriValidationException;
+import org.h2.mvstore.Cursor;
+import org.h2.mvstore.MVStore;
+import org.n52.sta.mqtt.MqttHandlerException;
 import org.n52.sta.mqtt.handler.MqttMessageHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +53,7 @@ import io.moquette.BrokerConstants;
 import io.moquette.broker.Server;
 import io.moquette.broker.config.IConfig;
 import io.moquette.broker.config.MemoryConfig;
+import io.moquette.broker.subscriptions.Subscription;
 import io.moquette.interception.AbstractInterceptHandler;
 import io.moquette.interception.InterceptHandler;
 import io.moquette.interception.messages.InterceptConnectMessage;
@@ -84,24 +88,35 @@ public class MqttBroker {
     public Server initMQTTBroker() {
         Server mqttServer = new Server();
         try {
-            mqttServer.startServer(parseConfig(), Arrays.asList(initMessageHandler()));
-//            mqttServer.get
-            //TODO: uncomment once it is implemented.
-//            List<Subscription> subscriptions = mqttServer.getSubscriptions();
-//            for (Subscription sub : subscriptions) {
-//                localClient.addSubscription(new MQTTSubscription(sub.getTopicFilter().toString(), parser));
-//            }
+            IConfig config = parseConfig();
+            this.restoreSubscriptions(config.getProperty(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME));
+            
+            mqttServer.startServer(config, Arrays.asList(initMessageHandler()));
             Runtime.getRuntime().addShutdownHook(new Thread(mqttServer::stopServer));
-
-            // create odata handler and configure it with EdmProvider and Processor
         } catch (IOException e) {
             LOGGER.error("Error starting/stopping MQTT Broker. Exception: " + e.getMessage());
             e.printStackTrace();
-//        } catch (UriParserException | UriValidationException e) {
-//            LOGGER.error("Error starting/stopping MQTT Broker. Could not parse stored Subscriptions: Exception: " + e.getMessage());
-//            e.printStackTrace();
         }
         return mqttServer;
+    }   
+    
+    private void restoreSubscriptions(String storePath) {
+        MVStore mvStore = new MVStore.Builder()
+                .fileName(storePath)
+                .autoCommitDisabled()
+                .open();
+        Cursor<Object, Object> mapCursor = mvStore.openMap("subscriptions").cursor(String.class);
+        while (mapCursor.hasNext()) {
+            try {
+                Subscription sub = (Subscription) mapCursor.getValue();
+                handler.processSubscribeMessage(new InterceptSubscribeMessage(sub, sub.getClientId()));
+                LOGGER.debug("Restored Subscription to topic: " + sub.getTopicFilter().toString());
+            } catch (MqttHandlerException | ClassCastException e) {
+                LOGGER.error("Error while restoring MQTT subscription. Could not parse Subscription");
+                LOGGER.debug("Error while restoring MQTT subscription", e);
+            }
+        }
+        mvStore.closeImmediately();
     }
 
     private InterceptHandler initMessageHandler() {
