@@ -78,7 +78,7 @@ public class DaoConfig {
     private Map<String, Object> addCustomTypes(JpaProperties jpaProperties) {
         Map<String, Object> properties = new HashMap<>(jpaProperties.getProperties());
         properties.put(EntityManagerFactoryBuilderImpl.TYPE_CONTRIBUTORS, createTypeContributorsList());
-        properties.put("hibernate.ejb.interceptor", mqttInterceptor);
+        properties.put("hibernate.session_factory.interceptor", mqttInterceptor);
         return properties;
     }
 
