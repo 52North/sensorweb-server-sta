@@ -5,7 +5,6 @@
  */
 package org.n52.sta.service.processor;
 
-
 import java.io.InputStream;
 import java.util.Locale;
 
@@ -33,6 +32,7 @@ import org.n52.sta.service.handler.AbstractEntityRequestHandler;
 import org.n52.sta.service.query.QueryOptions;
 import org.n52.sta.service.query.QueryOptionsHandler;
 import org.n52.sta.service.query.URIQueryOptions;
+import org.n52.sta.service.request.SensorThingsRequest;
 import org.n52.sta.service.response.EntityResponse;
 import org.n52.sta.service.serializer.SensorThingsSerializer;
 import org.n52.sta.utils.CrudHelper;
@@ -48,17 +48,16 @@ import org.springframework.stereotype.Component;
 public class SensorThingsEntityProcessor implements EntityProcessor {
 
     @Autowired
-    private AbstractEntityRequestHandler requestHandler;
-    
+    private AbstractEntityRequestHandler<SensorThingsRequest, EntityResponse> requestHandler;
+
     @Autowired
     private QueryOptionsHandler queryOptionsHandler;
 
     @Autowired
     private EntityAnnotator entityAnnotator;
-       
+
     @Autowired
     private CrudHelper crudHelper;
-
 
     private OData odata;
     private ServiceMetadata serviceMetadata;
@@ -68,7 +67,7 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
     @Override
     public void readEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
         QueryOptions queryOptions = new URIQueryOptions(uriInfo, request.getRawBaseUri());
-        EntityResponse entityResponse = requestHandler.handleEntityRequest(uriInfo.getUriResourceParts(), queryOptions);
+        EntityResponse entityResponse = requestHandler.handleEntityRequest(new SensorThingsRequest(uriInfo.getUriResourceParts(), queryOptions));
 
         InputStream serializedContent = createResponseContent(serviceMetadata, entityResponse, queryOptions);
 
@@ -148,7 +147,7 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
 //        response.setContent(serializedContent);
         response.setStatusCode(HttpStatusCode.OK.getStatusCode());
         response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.JSON_NO_METADATA.toContentTypeString());
-        
+
 //        throw new ODataApplicationException("Not supported.", HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
     }
 

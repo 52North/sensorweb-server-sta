@@ -44,6 +44,8 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.olingo.commons.api.data.ComplexValue;
@@ -93,6 +95,7 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
 
     public Entity createEntity(DataEntity<?> observation) {
         Entity entity = new Entity();
+
         entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, observation.getId()));
         
         //TODO: urlencode whitespaces to allow for copy pasting into filter expression
@@ -326,6 +329,15 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
                     .checkNavigationLink(entity.getNavigationLink(ET_DATASTREAM_NAME).getInlineEntity());
         }
         return entity;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.n52.sta.mapping.AbstractMapper#getRelatedCollections(java.lang.Object)
+     */
+    @Override
+    public Map<String, Set<Long>> getRelatedCollections(Object rawObject) {
+        //TODO: Implement
+        return null;
     }
 
 }

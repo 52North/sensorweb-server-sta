@@ -29,17 +29,24 @@
 package org.n52.sta.mqtt.core;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.olingo.commons.api.data.Entity;
+import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
+import org.apache.olingo.commons.api.edmx.EdmxReference;
+import org.apache.olingo.server.api.OData;
+import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.n52.sta.data.STAEventHandler;
 import org.n52.sta.service.serializer.PayloadSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -56,12 +63,12 @@ import io.netty.handler.codec.mqtt.MqttQoS;
  *
  */
 @Component
-public class MQTTEventHandler implements STAEventHandler {
+public class MqttEventHandler implements STAEventHandler, InitializingBean {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MQTTEventHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MqttEventHandler.class);
 
     @Autowired
-    private MQTTUtil config;
+    private MqttUtil config;
 
     @Autowired
     private Server mqttBroker;
@@ -69,11 +76,16 @@ public class MQTTEventHandler implements STAEventHandler {
     @Autowired
     private PayloadSerializer serializer;
 
+    @Autowired
+    private CsdlAbstractEdmProvider provider;
+
     static final String internalClientId = "POC";
 
-    private Map<MQTTSubscription, Integer> subscriptions = new HashMap<MQTTSubscription, Integer>();
+    private Map<AbstractMqttSubscription, HashSet<String>> subscriptions = new HashMap<AbstractMqttSubscription, HashSet<String>>();
 
     private final MqttFixedHeader mqttFixedHeader = new MqttFixedHeader(MqttMessageType.PUBLISH, false, MqttQoS.AT_LEAST_ONCE, false, 0);
+
+    private ServiceMetadata edm;
 
     /*
      * List of all Entity Types that are currently subscribed to. Used for fail-fast.
@@ -84,6 +96,7 @@ public class MQTTEventHandler implements STAEventHandler {
     @Override
     public void handleEvent(Object rawObject, Set<String> differenceMap) {
         Entity entity;
+        Map<String, Set<Long>> collections ;
 
         //Map beans Object into Olingo Entity
         //Fail-fast if nobody is subscribed to this Type
@@ -91,12 +104,13 @@ public class MQTTEventHandler implements STAEventHandler {
             return;
         } else {
             entity = config.getMapper(rawObject.getClass().getName()).createEntity(rawObject);
+            collections = config.getMapper(rawObject.getClass().getName()).getRelatedCollections(rawObject);
         }
 
         // Check all subscriptions for a match
         ByteBuf serializedEntity = null;
-        for (MQTTSubscription subscrip : subscriptions.keySet()) {
-            String topic = subscrip.checkSubscription(entity, differenceMap);
+        for (AbstractMqttSubscription subscrip : subscriptions.keySet()) {
+            String topic = subscrip.checkSubscription(entity, collections, differenceMap);
             if (topic != null) {
                 try {
                     // Cache Entity for other matching Topics
@@ -116,30 +130,37 @@ public class MQTTEventHandler implements STAEventHandler {
         };
     }
 
-    public void addSubscription(MQTTSubscription subscription) {
-        Integer count = subscriptions.get(subscription);
-        if (count != null) {
-            subscriptions.put(subscription, count++);
-        } else {
-            subscriptions.put(subscription, 1);
-            watchedEntityTypes.add(MQTTUtil.getBeanTypes().get(subscription.getEntityType()));
+    public void addSubscription(AbstractMqttSubscription subscription, String clientId) {
+        HashSet<String> clients = subscriptions.get(subscription);
+        if (clients == null) {
+            clients = new HashSet<String>();
         }
+        watchedEntityTypes.add(MqttUtil.getBeanTypes().get(subscription.getEdmEntityType().getName()));
+        clients.add(clientId);
+        subscriptions.put(subscription, clients);
     }
 
-    public void removeSubscription(MQTTSubscription subscription) {
-        Integer count = subscriptions.get(subscription);
-        if (count != null) {
-            if (count == 1) {
+    public void removeSubscription(AbstractMqttSubscription subscription, String clientId) {
+        HashSet<String> clients = subscriptions.get(subscription);
+        if (clients != null) {
+            if (clients.size() == 1) {
                 subscriptions.remove(subscription);
-                watchedEntityTypes.remove(MQTTUtil.getBeanTypes().get(subscription.getEntityType()));
+                watchedEntityTypes.remove(MqttUtil.getBeanTypes().get(subscription.getEdmEntityType().getName()));
             } else {
-                subscriptions.put(subscription, --count);
+                clients.remove(clientId);
+                subscriptions.put(subscription, clients);
             }
         }
     }
 
-    private ByteBuf encodeEntity(MQTTSubscription subsc, Entity entity) throws IOException, SerializerException {
-        return serializer.encodeEntity(subsc.getMetadata(), entity, subsc.getEdmEntityType(), subsc.getEdmEntitySet(), subsc.getQueryOptions(), watchedEntityTypes);
+    private ByteBuf encodeEntity(AbstractMqttSubscription subsc, Entity entity) throws IOException, SerializerException {
+        return serializer.encodeEntity(edm, entity, subsc.getEdmEntityType(), subsc.getEdmEntitySet(), subsc.getQueryOptions(), watchedEntityTypes);
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        OData odata = OData.newInstance();
+        edm = odata.createServiceMetadata(provider, new ArrayList<EdmxReference>());
     }
 
 }

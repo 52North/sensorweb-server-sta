@@ -28,6 +28,7 @@ import org.n52.sta.service.handler.AbstractEntityCollectionRequestHandler;
 import org.n52.sta.service.query.QueryOptions;
 import org.n52.sta.service.query.QueryOptionsHandler;
 import org.n52.sta.service.query.URIQueryOptions;
+import org.n52.sta.service.request.SensorThingsRequest;
 import org.n52.sta.service.response.EntityCollectionResponse;
 import org.n52.sta.service.serializer.SensorThingsSerializer;
 import org.n52.sta.utils.EntityAnnotator;
@@ -42,7 +43,7 @@ import org.springframework.stereotype.Component;
 public class SensorThingsEntityCollectionProcessor implements EntityCollectionProcessor {
 
     @Autowired
-    AbstractEntityCollectionRequestHandler requestHandler;
+    AbstractEntityCollectionRequestHandler<EntityCollectionResponse> requestHandler;
 
     @Autowired
     QueryOptionsHandler queryOptionsHandler;
@@ -59,8 +60,8 @@ public class SensorThingsEntityCollectionProcessor implements EntityCollectionPr
             ContentType contentType) throws ODataApplicationException, ODataLibraryException {
         QueryOptions queryOptions = new URIQueryOptions(uriInfo, request.getRawBaseUri());
 
-        EntityCollectionResponse entityCollectionResponse = requestHandler.handleEntityCollectionRequest(
-                uriInfo.getUriResourceParts(), queryOptions);
+        EntityCollectionResponse entityCollectionResponse = requestHandler
+                .handleEntityCollectionRequest(new SensorThingsRequest(uriInfo.getUriResourceParts(), queryOptions));
 
         InputStream serializedContent = createResponseContent(serviceMetadata, entityCollectionResponse, queryOptions);
 
@@ -88,7 +89,7 @@ public class SensorThingsEntityCollectionProcessor implements EntityCollectionPr
         ContextURL contextUrl = contextUrlBuilder.build();
 
         final String id = queryOptions.getBaseURI() + "/" + response.getEntitySet().getName();
-        
+
         EntityCollectionSerializerOptions opts
                 = EntityCollectionSerializerOptions
                         .with()
