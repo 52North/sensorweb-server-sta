@@ -5,7 +5,6 @@
  */
 package org.n52.sta.mqtt.handler;
 
-import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.deserializer.DeserializerException;
 import org.apache.olingo.server.api.deserializer.DeserializerResult;
@@ -21,7 +20,6 @@ import org.n52.sta.service.handler.AbstractEntityCollectionRequestHandler;
 import org.n52.sta.service.query.URIQueryOptions;
 import org.n52.sta.service.response.EntityResponse;
 import org.n52.sta.utils.CrudHelper;
-import org.n52.sta.utils.UriResourceNavigationResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +32,10 @@ import io.netty.buffer.ByteBufInputStream;
 import org.apache.olingo.server.api.uri.UriResourcePartTyped;
 import org.n52.sta.mqtt.core.MqttEntityCollectionSubscription;
 import org.n52.sta.mqtt.core.MqttEntitySubscription;
+import org.n52.sta.mqtt.core.MqttPropertySubscription;
 import org.n52.sta.mqtt.request.SensorThingsMqttRequest;
 import org.n52.sta.service.handler.AbstractEntityRequestHandler;
+import org.n52.sta.service.handler.AbstractPropertyRequestHandler;
 
 /**
  *
@@ -53,9 +53,12 @@ public class MqttMessageHandler {
 
     @Autowired
     AbstractEntityCollectionRequestHandler<SensorThingsMqttRequest, MqttEntityCollectionSubscription> entityCollcetionRequestHandler;
-    
+
     @Autowired
     AbstractEntityRequestHandler<SensorThingsMqttRequest, MqttEntitySubscription> mqttEntitySubscHandler;
+
+    @Autowired
+    AbstractPropertyRequestHandler<SensorThingsMqttRequest, MqttPropertySubscription> mqttPropertySubscHandler;
 
     @Autowired
     private CrudHelper crudHelper;
@@ -132,13 +135,11 @@ public class MqttMessageHandler {
                     break;
 
                 case primitiveProperty:
-                    // TODO create MqttPropertySubscription with
-                    // not yet existing MqttPropertySubscriptionHandler
-                    break;
-
                 case complexProperty:
-                    // TODO create MqttPropertySubscription with
-                    // not yet existing MqttPropertySubscriptionHandler
+                    subscription = mqttPropertySubscHandler
+                            .handlePropertyRequest(new SensorThingsMqttRequest(topic,
+                                    uriInfo.getUriResourceParts(),
+                                    new URIQueryOptions(uriInfo, BASE_URL)));
                     break;
 
                 default:
