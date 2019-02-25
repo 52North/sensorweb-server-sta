@@ -10,8 +10,6 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
-import org.n52.sta.data.service.AbstractSensorThingsEntityService;
-import org.n52.sta.data.service.EntityServiceRepository;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 import org.n52.sta.mqtt.core.MqttEntitySubscription;
 import org.n52.sta.mqtt.request.SensorThingsMqttRequest;
@@ -59,7 +57,8 @@ public class MqttEntitySubscriptionHandler extends AbstractEntityRequestHandler<
 
     private MqttEntitySubscription createResponseForNavigation(String topic, List<UriResource> resourcePaths, QueryOptions queryOptions) throws ODataApplicationException {
         EntityQueryParams requestParams = navigationResolver.resolveUriResourceNavigationPaths(resourcePaths);
-        Entity responseEntity = navigationResolver.resolveComplexEntityRequest(resourcePaths, requestParams);
+        UriResource lastSegment = resourcePaths.get(resourcePaths.size() - 1);
+        Entity responseEntity = navigationResolver.resolveComplexEntityRequest(lastSegment, requestParams);
 
         return new MqttEntitySubscription((Long) responseEntity.getProperty(PROP_ID).getValue(),
                 requestParams.getTargetEntitySet(), requestParams.getTargetEntitySet().getEntityType(), topic, queryOptions);
