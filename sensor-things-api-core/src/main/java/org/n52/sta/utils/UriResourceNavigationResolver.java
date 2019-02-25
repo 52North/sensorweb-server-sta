@@ -183,14 +183,12 @@ public class UriResourceNavigationResolver {
      * Resolves a complex entity request that conatins one or more navigation
      * paths (e.g. ./Thing(1)/Datastreams(1)/Observations(1)
      *
-     * @param resourcePaths the URI resource paths of the request
      * @param requestParams parameters for the Entity request
      * @return the requested Entity
      * @throws ODataApplicationException
      */
-    public Entity resolveComplexEntityRequest(List<UriResource> resourcePaths, EntityQueryParams requestParams) throws ODataApplicationException {
+    public Entity resolveComplexEntityRequest(UriResource lastSegment, EntityQueryParams requestParams) throws ODataApplicationException {
 
-        UriResource lastSegment = resourcePaths.get(resourcePaths.size() - 1);
         Entity responseEntity = null;
 
         if (lastSegment instanceof UriResourceNavigation) {

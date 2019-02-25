@@ -13,7 +13,6 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
-import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.service.query.QueryOptionsHandler;
 import org.n52.sta.service.request.SensorThingsRequest;
 import org.n52.sta.service.response.EntityResponse;
@@ -30,9 +29,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class EntityRequestHandlerImpl extends AbstractEntityRequestHandler<SensorThingsRequest, EntityResponse> {
-
-    @Autowired
-    private EntityServiceRepository serviceRepository;
 
     @Autowired
     private UriResourceNavigationResolver navigationResolver;
@@ -82,7 +78,7 @@ public class EntityRequestHandlerImpl extends AbstractEntityRequestHandler<Senso
     private EntityResponse createResponseForEntity(List<UriResource> resourcePaths) throws ODataApplicationException {
 
         UriResourceEntitySet uriResourceEntitySet = navigationResolver.resolveRootUriResource(resourcePaths.get(0));
-        Entity responseEntity = resolveSimpleEntityRequest(uriResourceEntitySet);
+        Entity responseEntity = navigationResolver.resolveSimpleEntityRequest(uriResourceEntitySet);
 
         // set Entity response information
         EntityResponse response = new EntityResponse();
@@ -95,7 +91,8 @@ public class EntityRequestHandlerImpl extends AbstractEntityRequestHandler<Senso
     private EntityResponse createResponseForNavigation(List<UriResource> resourcePaths) throws ODataApplicationException {
         // determine the target query parameters and fetch Entity for it
         EntityQueryParams requestParams = navigationResolver.resolveUriResourceNavigationPaths(resourcePaths);
-        Entity responseEntity = resolveComplexEntityRequest(resourcePaths, requestParams);
+        UriResource lastSegment = resourcePaths.get(resourcePaths.size() - 1);
+        Entity responseEntity = navigationResolver.resolveComplexEntityRequest(lastSegment, requestParams);
 
         // set EntityCollection response information
         EntityResponse response = new EntityResponse();
