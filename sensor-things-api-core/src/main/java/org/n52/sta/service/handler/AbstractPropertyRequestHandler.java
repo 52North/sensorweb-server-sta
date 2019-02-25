@@ -6,7 +6,6 @@
 package org.n52.sta.service.handler;
 
 import org.apache.olingo.server.api.ODataApplicationException;
-import org.n52.sta.service.request.SensorThingsRequest;
 
 /**
  * Abstract class to handle property requests
