@@ -41,6 +41,7 @@ spring:
 mqtt:
   broker:
     persistence:
+      enabled: true
       path: "" # Empty for default path (java "user.dir")
       filename: "52N-STA-MQTTBroker.h2"
       autosave_interval: "30"
