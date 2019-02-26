@@ -5,8 +5,11 @@
  */
 package org.n52.sta.mqtt.handler;
 
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
+
 import java.util.List;
 import java.util.Set;
+
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.edm.EdmProperty;
 import org.apache.olingo.server.api.ODataApplicationException;
@@ -14,7 +17,6 @@ import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
 import org.apache.olingo.server.api.uri.UriResourceProperty;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 import org.n52.sta.mqtt.core.MqttPropertySubscription;
 import org.n52.sta.mqtt.core.MqttUtil;
 import org.n52.sta.mqtt.request.SensorThingsMqttRequest;
@@ -23,11 +25,13 @@ import org.n52.sta.service.query.QueryOptions;
 import org.n52.sta.utils.EntityQueryParams;
 import org.n52.sta.utils.UriResourceNavigationResolver;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
+@Component
 public class MqttPropertySubscriptionHandler extends AbstractPropertyRequestHandler<SensorThingsMqttRequest, MqttPropertySubscription> {
 
     @Autowired
