@@ -100,10 +100,10 @@ public class MqttBroker {
             Runtime.getRuntime().addShutdownHook(new Thread(mqttServer::stopServer));
         } catch (IOException e) {
             LOGGER.error("Error starting/stopping MQTT Broker. Exception: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.debug("Error starting/stopping MQTT Broker.", e);
         }
         return mqttServer;
-    }   
+    }
 
     private void restoreSubscriptions(String storePath) {
         MVStore mvStore = new MVStore.Builder()
@@ -116,7 +116,7 @@ public class MqttBroker {
                 mapCursor.next();
                 Subscription sub = (Subscription) mapCursor.getValue();
                 handler.processSubscribeMessage(new InterceptSubscribeMessage(sub, sub.getClientId()));
-                LOGGER.info("Restored Subscription of client:'" + sub.getClientId() +"' to topic: '" + sub.getTopicFilter().toString() + "'");
+                LOGGER.info("Restored Subscription of client:'" + sub.getClientId() + "' to topic: '" + sub.getTopicFilter().toString() + "'");
             } catch (MqttHandlerException | ClassCastException e) {
                 LOGGER.error("Error while restoring MQTT subscription. Could not parse Subscription.");
                 LOGGER.debug("Error while restoring MQTT subscription", e);
