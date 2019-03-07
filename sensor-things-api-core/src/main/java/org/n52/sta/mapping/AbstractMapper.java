@@ -316,10 +316,14 @@ public abstract class AbstractMapper<T> {
     }
 
     /**
-     * Gets a Map of all Collections this Entity is part of. Returns null if this Entity is not part of any collection.
-     * 
+     * Gets a Map<K,V> that holds definitions for all related Entities of the
+     * requested Entity. In this Map K represents the EntityType and V the Set
+     * of IDs for those Entities that has a Collection the requested Entity is
+     * part of. Returns null if this Entity is not part of any collection.
+     *
      * @param rawObject Raw Database Entity of type T
-     * @return Map of all Collections this Entity is part of
+     * @return Map with definitions for all Entities the requested Entity is
+     * related to
      */
     public abstract Map<String, Set<Long>> getRelatedCollections(Object rawObject);
 }

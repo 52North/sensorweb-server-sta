@@ -31,7 +31,6 @@ package org.n52.sta.mapping;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PROPERTIES;
 import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ES_DATASTREAMS_NAME;
-import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ES_HISTORICAL_LOCATIONS_NAME;
 import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ES_LOCATIONS_NAME;
 import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ES_THINGS_NAME;
 import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_FQN;
@@ -60,6 +59,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_NAME;
+import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME;
+import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATION_NAME;
 
 /**
  *
@@ -195,21 +197,21 @@ public class ThingMapper extends AbstractMapper<ThingEntity> {
             entity.getLocationEntities().forEach((en)-> {
                 set.add(en.getId());
             });
-            collections.put(ES_LOCATIONS_NAME, set);
+            collections.put(ET_LOCATION_NAME, new HashSet(set));
         } catch(NullPointerException e) {}
         set.clear();
         try {
             entity.getHistoricalLocationEntities().forEach((en) -> {
                 set.add(en.getId());
             });
-            collections.put(ES_HISTORICAL_LOCATIONS_NAME, set);
+            collections.put(ET_HISTORICAL_LOCATION_NAME,  new HashSet(set));
         } catch(NullPointerException e) {}
         set.clear();
         try {
             entity.getDatastreamEntities().forEach((en) -> {
                 set.add(en.getId());
             });
-            collections.put(ES_DATASTREAMS_NAME, set);
+            collections.put(ET_DATASTREAM_NAME,  new HashSet(set));
         } catch(NullPointerException e) {}
         return collections;
     }

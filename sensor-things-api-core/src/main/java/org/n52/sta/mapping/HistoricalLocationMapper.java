@@ -52,6 +52,7 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
+import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATION_NAME;
 //import org.n52.sta.utils.EntityAnnotator;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -157,7 +158,7 @@ public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationE
             entity.getLocationEntities().forEach((en) -> {
                 locations.add(en.getId());
             });
-            collections.put(ES_LOCATIONS_NAME, locations);
+            collections.put(ET_LOCATION_NAME, locations);
         } catch(NullPointerException e) {}
         return collections;
     }
