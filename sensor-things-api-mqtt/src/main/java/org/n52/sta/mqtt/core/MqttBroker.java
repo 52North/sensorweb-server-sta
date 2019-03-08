@@ -82,6 +82,9 @@ public class MqttBroker {
     @Value("${mqtt.broker.persistence.autosave_interval:300}")
     private String AUTOSAVE_INTERVAL_PROPERTY;
 
+    @Value("${mqtt.broker.persistence.enabled}")
+    private Boolean MOQUETTE_PERSISTENCE_ENABLED;
+
     @Autowired
     private MqttMessageHandler handler;
 
@@ -90,17 +93,18 @@ public class MqttBroker {
         Server mqttServer = new Server();
         try {
             IConfig config = parseConfig();
-            this.restoreSubscriptions(config.getProperty(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME));
-            
+            if (MOQUETTE_PERSISTENCE_ENABLED) {
+                this.restoreSubscriptions(config.getProperty(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME));
+            }
             mqttServer.startServer(config, Arrays.asList(initMessageHandler()));
             Runtime.getRuntime().addShutdownHook(new Thread(mqttServer::stopServer));
         } catch (IOException e) {
             LOGGER.error("Error starting/stopping MQTT Broker. Exception: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.debug("Error starting/stopping MQTT Broker.", e);
         }
         return mqttServer;
-    }   
-    
+    }
+
     private void restoreSubscriptions(String storePath) {
         MVStore mvStore = new MVStore.Builder()
                 .fileName(storePath)
@@ -109,10 +113,10 @@ public class MqttBroker {
         Cursor<Object, Object> mapCursor = mvStore.openMap("subscriptions").cursor(null);
         while (mapCursor.hasNext()) {
             try {
-            	mapCursor.next();
+                mapCursor.next();
                 Subscription sub = (Subscription) mapCursor.getValue();
                 handler.processSubscribeMessage(new InterceptSubscribeMessage(sub, sub.getClientId()));
-                LOGGER.info("Restored Subscription of client:'" + sub.getClientId() +"' to topic: '" + sub.getTopicFilter().toString() + "'");
+                LOGGER.info("Restored Subscription of client:'" + sub.getClientId() + "' to topic: '" + sub.getTopicFilter().toString() + "'");
             } catch (MqttHandlerException | ClassCastException e) {
                 LOGGER.error("Error while restoring MQTT subscription. Could not parse Subscription.");
                 LOGGER.debug("Error while restoring MQTT subscription", e);
@@ -189,16 +193,23 @@ public class MqttBroker {
 
     private IConfig parseConfig() {
         Properties props = new Properties();
-        // Fallback to default path if not set
-        if (MOQUETTE_STORE_PATH.equals("")) {
-            MOQUETTE_STORE_PATH = System.getProperty("user.dir") + File.separator + MOQUETTE_STORE_FILENAME;
+
+        if (MOQUETTE_PERSISTENCE_ENABLED) {
+            // Fallback to default path if not set
+            if (MOQUETTE_STORE_PATH.equals("")) {
+                MOQUETTE_STORE_PATH = System.getProperty("user.dir") + File.separator + MOQUETTE_STORE_FILENAME;
+            }
+            LOGGER.info("Initialized MQTT Broker Persistence with Path: " + MOQUETTE_STORE_PATH);
+            LOGGER.info("Initialized MQTT Broker Persistence with Filename: " + MOQUETTE_STORE_FILENAME);
+            props.put(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, MOQUETTE_STORE_PATH);
+            props.put(BrokerConstants.DEFAULT_MOQUETTE_STORE_H2_DB_FILENAME, MOQUETTE_STORE_FILENAME);
+            
+            LOGGER.info("Initialized MQTT Broker Persistence with Autosave Interval: " + AUTOSAVE_INTERVAL_PROPERTY);
+            props.put(BrokerConstants.AUTOSAVE_INTERVAL_PROPERTY_NAME, AUTOSAVE_INTERVAL_PROPERTY);
+        } else {
+            // In-Memory Subscription Store
+            props.put(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, "");
         }
-        LOGGER.info("Initialized MQTT Broker Persistence with Path: " + MOQUETTE_STORE_PATH);
-        LOGGER.info("Initialized MQTT Broker Persistence with Filename: " + MOQUETTE_STORE_FILENAME);
-        LOGGER.info("Initialized MQTT Broker Persistence with Autosave Interval: " + AUTOSAVE_INTERVAL_PROPERTY);
-        props.put(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, MOQUETTE_STORE_PATH);
-        props.put(BrokerConstants.DEFAULT_MOQUETTE_STORE_H2_DB_FILENAME, MOQUETTE_STORE_FILENAME);
-        props.put(BrokerConstants.AUTOSAVE_INTERVAL_PROPERTY_NAME, AUTOSAVE_INTERVAL_PROPERTY);
         props.put(BrokerConstants.ALLOW_ANONYMOUS_PROPERTY_NAME, Boolean.TRUE.toString());
         return new MemoryConfig(props);
     }

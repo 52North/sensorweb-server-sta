@@ -52,6 +52,7 @@ import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.beans.sta.LocationEncodingEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ThingEntity;
+import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -152,14 +153,14 @@ public class LocationMapper extends AbstractLocationGeometryMapper<LocationEntit
             entity.getThingEntities().forEach((en)-> {
                 set.add(en.getId());
             }); 
-            collections.put(ET_THING_NAME, set);
+            collections.put(ET_THING_NAME, new HashSet(set));
         } catch(NullPointerException e) {}
         set.clear();
         try {
             entity.getHistoricalLocationEntities().forEach((en) -> {
                 set.add(en.getId());
             });
-            collections.put(ES_HISTORICAL_LOCATIONS_NAME, set);
+            collections.put(ET_HISTORICAL_LOCATION_NAME, new HashSet(set));
         } catch(NullPointerException e) {}
         return collections;
     }

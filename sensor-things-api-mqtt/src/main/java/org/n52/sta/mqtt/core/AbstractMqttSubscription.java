@@ -46,13 +46,15 @@ public abstract class AbstractMqttSubscription {
      * does not match this subscription.
      *
      * @param entity Entity to be posted
+     * @param relatedEntities Map with EntityType-ID pairs for the related
+     * entities
      * @param differenceMap differenceMap names of properties that have changed.
      * if null all properties have changed (new entity)
      * @return Topic to be posted to. May be null if Entity does not match this
      * subscription.
      */
-    public String checkSubscription(Entity entity, Map<String, Set<Long>> collections, Set<String> differenceMap) {
-        return matches(entity, collections, differenceMap) ? topic : null;
+    public String checkSubscription(Entity entity, Map<String, Set<Long>> relatedEntities, Set<String> differenceMap) {
+        return matches(entity, relatedEntities, differenceMap) ? topic : null;
     }
     
     public abstract boolean matches(Entity entity, Map<String, Set<Long>> collections, Set<String> differenceMap);

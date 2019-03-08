@@ -31,8 +31,6 @@ package org.n52.sta.mapping;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ENCODINGTYPE;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_METADATA;
-import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ES_DATASTREAMS_NAME;
-import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ES_HISTORICAL_LOCATIONS_NAME;
 import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ES_SENSORS_NAME;
 import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ET_SENSOR_FQN;
 
@@ -52,7 +50,7 @@ import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
-import org.n52.series.db.beans.sta.ThingEntity;
+import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_NAME;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -181,6 +179,16 @@ public class SensorMapper extends AbstractMapper<ProcedureEntity> {
      */
     @Override
     public Map<String, Set<Long>> getRelatedCollections(Object rawObject) {
-        return null;
+        Map<String, Set<Long>> collections = new HashMap<String, Set<Long>>();
+        Set<Long> set = new HashSet<Long>();
+        SensorEntity entity = (SensorEntity) rawObject;
+
+        try {
+            entity.getDatastreams().forEach((en) -> {
+                set.add(en.getId());
+            });
+            collections.put(ET_DATASTREAM_NAME, new HashSet(set));
+        } catch (NullPointerException e) {}
+        return collections;
     }
 }
