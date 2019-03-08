@@ -48,6 +48,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import io.moquette.BrokerConstants;
@@ -88,41 +90,48 @@ public class MqttBroker {
     @Autowired
     private MqttMessageHandler handler;
 
+    private IConfig brokerConfig;
+    
+    private Server mqttServer;
+
     @Bean
     public Server initMQTTBroker() {
-        Server mqttServer = new Server();
-        try {
-            IConfig config = parseConfig();
-            if (MOQUETTE_PERSISTENCE_ENABLED) {
-                this.restoreSubscriptions(config.getProperty(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME));
+        mqttServer = new Server();
+        brokerConfig = parseConfig();
+        return mqttServer;
+    }
+
+    @EventListener({ContextRefreshedEvent.class})
+    private void restoreSubscriptionsAndStartServer() {
+        if (MOQUETTE_PERSISTENCE_ENABLED) {
+            MVStore mvStore = new MVStore.Builder()
+                    .fileName(brokerConfig.getProperty(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME))
+                    .autoCommitDisabled()
+                    .open();
+            MVMap<Object, Object> subscriptions = mvStore.openMap("subscriptions");
+            Cursor<Object, Object> subscriptionsCursor = subscriptions.cursor(null);
+            while (subscriptionsCursor.hasNext()) {
+                try {
+                    subscriptionsCursor.next();
+                    Subscription sub = (Subscription) subscriptionsCursor.getValue();
+                    handler.processSubscribeMessage(new InterceptSubscribeMessage(sub, sub.getClientId()));
+                    LOGGER.info("Restored Subscription of client:'" + sub.getClientId() + "' to topic: '" + sub.getTopicFilter().toString() + "'");
+                } catch (MqttHandlerException | ClassCastException e) {
+                    subscriptions.remove(subscriptionsCursor.getKey());
+                    LOGGER.error("Error while restoring MQTT subscription. Invalid Subscription: " + subscriptionsCursor.getValue() + " was removed from storage.");
+                    LOGGER.debug("Error while restoring MQTT subscription", e);
+                }
             }
-            mqttServer.startServer(config, Arrays.asList(initMessageHandler()));
+            mvStore.close();
+        }
+        
+        try {
+            mqttServer.startServer(brokerConfig, Arrays.asList(initMessageHandler()));
             Runtime.getRuntime().addShutdownHook(new Thread(mqttServer::stopServer));
         } catch (IOException e) {
             LOGGER.error("Error starting/stopping MQTT Broker. Exception: " + e.getMessage());
             LOGGER.debug("Error starting/stopping MQTT Broker.", e);
         }
-        return mqttServer;
-    }
-
-    private void restoreSubscriptions(String storePath) {
-        MVStore mvStore = new MVStore.Builder()
-                .fileName(storePath)
-                .autoCommitDisabled()
-                .open();
-        Cursor<Object, Object> mapCursor = mvStore.openMap("subscriptions").cursor(null);
-        while (mapCursor.hasNext()) {
-            try {
-                mapCursor.next();
-                Subscription sub = (Subscription) mapCursor.getValue();
-                handler.processSubscribeMessage(new InterceptSubscribeMessage(sub, sub.getClientId()));
-                LOGGER.info("Restored Subscription of client:'" + sub.getClientId() + "' to topic: '" + sub.getTopicFilter().toString() + "'");
-            } catch (MqttHandlerException | ClassCastException e) {
-                LOGGER.error("Error while restoring MQTT subscription. Could not parse Subscription.");
-                LOGGER.debug("Error while restoring MQTT subscription", e);
-            }
-        }
-        mvStore.closeImmediately();
     }
 
     private InterceptHandler initMessageHandler() {
@@ -203,7 +212,7 @@ public class MqttBroker {
             LOGGER.info("Initialized MQTT Broker Persistence with Filename: " + MOQUETTE_STORE_FILENAME);
             props.put(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, MOQUETTE_STORE_PATH);
             props.put(BrokerConstants.DEFAULT_MOQUETTE_STORE_H2_DB_FILENAME, MOQUETTE_STORE_FILENAME);
-            
+
             LOGGER.info("Initialized MQTT Broker Persistence with Autosave Interval: " + AUTOSAVE_INTERVAL_PROPERTY);
             props.put(BrokerConstants.AUTOSAVE_INTERVAL_PROPERTY_NAME, AUTOSAVE_INTERVAL_PROPERTY);
         } else {
