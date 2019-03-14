@@ -30,7 +30,6 @@ package org.n52.sta.mqtt.core;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -57,6 +56,8 @@ import io.netty.handler.codec.mqtt.MqttMessageType;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import io.netty.handler.codec.mqtt.MqttPublishVariableHeader;
 import io.netty.handler.codec.mqtt.MqttQoS;
+import org.n52.sta.data.service.AbstractSensorThingsEntityService;
+import org.n52.sta.data.service.EntityServiceRepository;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -79,6 +80,9 @@ public class MqttEventHandler implements STAEventHandler, InitializingBean {
     @Autowired
     private CsdlAbstractEdmProvider provider;
 
+    @Autowired
+    private EntityServiceRepository serviceRepository;
+
     static final String internalClientId = "POC";
 
     private Map<AbstractMqttSubscription, HashSet<String>> subscriptions = new HashMap<AbstractMqttSubscription, HashSet<String>>();
@@ -96,7 +100,7 @@ public class MqttEventHandler implements STAEventHandler, InitializingBean {
     @Override
     public void handleEvent(Object rawObject, Set<String> differenceMap) {
         Entity entity;
-        Map<String, Set<Long>> collections ;
+        Map<String, Set<Long>> collections;
 
         //Map beans Object into Olingo Entity
         //Fail-fast if nobody is subscribed to this Type
@@ -104,7 +108,12 @@ public class MqttEventHandler implements STAEventHandler, InitializingBean {
             return;
         } else {
             entity = config.getMapper(rawObject.getClass().getName()).createEntity(rawObject);
-            collections = config.getMapper(rawObject.getClass().getName()).getRelatedCollections(rawObject);
+            AbstractSensorThingsEntityService< ?, ?> responseService
+                    = serviceRepository.getEntityService(
+                            MqttUtil.getEntityTypes()
+                                    .get(rawObject.getClass().getName()));
+
+            collections = responseService.getRelatedCollections(rawObject);
         }
 
         // Check all subscriptions for a match

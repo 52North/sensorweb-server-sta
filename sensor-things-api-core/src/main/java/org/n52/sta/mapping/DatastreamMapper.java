@@ -317,20 +317,4 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
             checkProperty(uomComplexValue, UnitOfMeasurementComplexType.PROP_DEFINITION);
         }
     }
-
-    @Override
-    public Map<String, Set<Long>> getRelatedCollections(Object rawObject) {
-        Map<String, Set<Long>> collections = new HashMap<String, Set<Long>> ();
-        DatastreamEntity entity = (DatastreamEntity) rawObject;
-        try {
-            collections.put(ET_THING_NAME, Collections.singleton(entity.getThing().getId()));
-        } catch(NullPointerException e) {}
-        try {
-            collections.put(ET_SENSOR_NAME, Collections.singleton(entity.getProcedure().getId()));
-        } catch(NullPointerException e) {}
-        try {
-            collections.put(ET_OBSERVED_PROPERTY_NAME, Collections.singleton(entity.getObservableProperty().getId()));
-        } catch(NullPointerException e) {}
-        return collections;
-    }
 }

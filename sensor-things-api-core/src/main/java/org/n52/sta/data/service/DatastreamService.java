@@ -65,6 +65,12 @@ import org.springframework.stereotype.Component;
 
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_NAME;
+import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ET_SENSOR_NAME;
+import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -478,6 +484,25 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     
     private AbstractSensorThingsEntityService<?, DataEntity<?>> getObservationService() {
         return (AbstractSensorThingsEntityService<?, DataEntity<?>>) getEntityService(EntityTypes.Observation);
+    }
+
+    @Override
+     /* (non-Javadoc)
+     * @see org.n52.sta.mapping.AbstractMapper#getRelatedCollections(java.lang.Object)
+     */
+    public Map<String, Set<Long>> getRelatedCollections(Object rawObject) {
+        Map<String, Set<Long>> collections = new HashMap<String, Set<Long>> ();
+        DatastreamEntity entity = (DatastreamEntity) rawObject;
+        try {
+            collections.put(ET_THING_NAME, Collections.singleton(entity.getThing().getId()));
+        } catch(NullPointerException e) {}
+        try {
+            collections.put(ET_SENSOR_NAME, Collections.singleton(entity.getProcedure().getId()));
+        } catch(NullPointerException e) {}
+        try {
+            collections.put(ET_OBSERVED_PROPERTY_NAME, Collections.singleton(entity.getObservableProperty().getId()));
+        } catch(NullPointerException e) {}
+        return collections;
     }
 
 }

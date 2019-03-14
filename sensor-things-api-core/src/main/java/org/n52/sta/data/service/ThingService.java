@@ -60,6 +60,12 @@ import org.springframework.stereotype.Component;
 
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_NAME;
+import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME;
+import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATION_NAME;
 
 /**
  *
@@ -360,6 +366,38 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     private AbstractSensorThingsEntityService<?, DatastreamEntity> getDatastreamService() {
         return (AbstractSensorThingsEntityService<?, DatastreamEntity>) getEntityService(
                 EntityTypes.Datastream);
+    }
+
+     /* (non-Javadoc)
+     * @see org.n52.sta.mapping.AbstractMapper#getRelatedCollections(java.lang.Object)
+     */
+    @Override
+    public Map<String, Set<Long>> getRelatedCollections(Object rawObject) {
+        Map<String, Set<Long>> collections = new HashMap<String, Set<Long>> ();
+        Set<Long> set = new HashSet<Long>();
+        ThingEntity entity = (ThingEntity) rawObject;
+        
+        try {
+            entity.getLocationEntities().forEach((en)-> {
+                set.add(en.getId());
+            });
+            collections.put(ET_LOCATION_NAME, new HashSet(set));
+        } catch(NullPointerException e) {}
+        set.clear();
+        try {
+            entity.getHistoricalLocationEntities().forEach((en) -> {
+                set.add(en.getId());
+            });
+            collections.put(ET_HISTORICAL_LOCATION_NAME,  new HashSet(set));
+        } catch(NullPointerException e) {}
+        set.clear();
+        try {
+            entity.getDatastreamEntities().forEach((en) -> {
+                set.add(en.getId());
+            });
+            collections.put(ET_DATASTREAM_NAME,  new HashSet(set));
+        } catch(NullPointerException e) {}
+        return collections;
     }
 
 }

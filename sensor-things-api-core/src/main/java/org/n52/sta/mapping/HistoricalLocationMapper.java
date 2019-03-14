@@ -142,25 +142,4 @@ public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationE
         checkPropertyValidity(PROP_TIME, entity);
         return entity;
     }
-
-    /* (non-Javadoc)
-     * @see org.n52.sta.mapping.AbstractMapper#getRelatedCollections(java.lang.Object)
-     */
-    @Override
-    public Map<String, Set<Long>> getRelatedCollections(Object rawObject) {
-        Map<String, Set<Long>> collections = new HashMap<String, Set<Long>> ();
-        HistoricalLocationEntity entity = (HistoricalLocationEntity) rawObject;
-        try {
-            collections.put(ET_THING_NAME, Collections.singleton(entity.getThingEntity().getId()));
-        } catch(NullPointerException e) {}
-        try {
-            Set<Long> locations = new HashSet<Long>();
-            entity.getLocationEntities().forEach((en) -> {
-                locations.add(en.getId());
-            });
-            collections.put(ET_LOCATION_NAME, locations);
-        } catch(NullPointerException e) {}
-        return collections;
-    }
-
 }

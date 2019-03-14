@@ -141,28 +141,4 @@ public class LocationMapper extends AbstractLocationGeometryMapper<LocationEntit
         return entity;
     }
 
-    /* (non-Javadoc)
-     * @see org.n52.sta.mapping.AbstractMapper#getRelatedCollections(java.lang.Object)
-     */
-    @Override
-    public Map<String, Set<Long>> getRelatedCollections(Object rawObject) {
-        Map<String, Set<Long>> collections = new HashMap<String, Set<Long>> ();
-        Set<Long> set = new HashSet<Long>();
-        LocationEntity entity = (LocationEntity) rawObject;
-        try {
-            entity.getThingEntities().forEach((en)-> {
-                set.add(en.getId());
-            }); 
-            collections.put(ET_THING_NAME, new HashSet(set));
-        } catch(NullPointerException e) {}
-        set.clear();
-        try {
-            entity.getHistoricalLocationEntities().forEach((en) -> {
-                set.add(en.getId());
-            });
-            collections.put(ET_HISTORICAL_LOCATION_NAME, new HashSet(set));
-        } catch(NullPointerException e) {}
-        return collections;
-    }
-
 }

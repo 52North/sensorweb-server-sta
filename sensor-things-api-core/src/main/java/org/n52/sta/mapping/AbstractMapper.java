@@ -34,11 +34,9 @@ import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvid
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DESCRIPTION;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_NAME;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PHENOMENON_TIME;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_RESULT_TIME;
 import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ES_DATASTREAMS_NAME;
 
 import java.sql.Timestamp;
-import java.text.DateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -51,7 +49,6 @@ import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
-import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.joda.time.DateTime;
@@ -67,7 +64,6 @@ import org.n52.series.db.beans.sta.StaRelations;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
-import org.n52.shetland.util.DateTimeHelper;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -314,16 +310,4 @@ public abstract class AbstractMapper<T> {
             }
         }
     }
-
-    /**
-     * Gets a Map<K,V> that holds definitions for all related Entities of the
-     * requested Entity. In this Map K represents the EntityType and V the Set
-     * of IDs for those Entities that has a Collection the requested Entity is
-     * part of. Returns null if this Entity is not part of any collection.
-     *
-     * @param rawObject Raw Database Entity of type T
-     * @return Map with definitions for all Entities the requested Entity is
-     * related to
-     */
-    public abstract Map<String, Set<Long>> getRelatedCollections(Object rawObject);
 }

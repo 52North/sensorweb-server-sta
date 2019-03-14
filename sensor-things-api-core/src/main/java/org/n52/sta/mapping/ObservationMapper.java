@@ -40,7 +40,6 @@ import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ES_OBS
 import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ET_OBSERVATION_FQN;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -55,7 +54,6 @@ import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.joda.time.DateTime;
-import org.joda.time.Instant;
 import org.n52.janmayen.Json;
 import org.n52.series.db.beans.BlobDataEntity;
 import org.n52.series.db.beans.BooleanDataEntity;
@@ -79,6 +77,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.n52.sta.data.query.DatastreamQuerySpecifications;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -86,18 +85,22 @@ import com.fasterxml.jackson.databind.JsonNode;
  */
 @Component
 public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
-    
+
     @Autowired
     private DatastreamMapper datastreamMapper;
-    
+
     @Autowired
     private FeatureOfInterestMapper featureMapper;
+
+//    @Autowired
+//    private ObservationService observationService;
+    private final static DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
 
     public Entity createEntity(DataEntity<?> observation) {
         Entity entity = new Entity();
 
         entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, observation.getId()));
-        
+
         //TODO: urlencode whitespaces to allow for copy pasting into filter expression
         entity.addProperty(new Property(null, PROP_RESULT, ValueType.PRIMITIVE, this.getResult(observation).getBytes()));
 
@@ -107,11 +110,10 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
 
         String phenomenonTime = DateTimeHelper.format(createPhenomenonTime(observation));
         entity.addProperty(new Property(null, PROP_PHENOMENON_TIME, ValueType.PRIMITIVE, phenomenonTime));
-        
-        
+
         entity.addProperty(new Property(null, PROP_VALID_TIME, ValueType.PRIMITIVE, (observation.isSetValidTime())
-                                                                                    ? DateTimeHelper.format(createValidTime(observation))
-                                                                                    : null));
+                ? DateTimeHelper.format(createValidTime(observation))
+                : null));
 
         // TODO: check for quality property
         // entity.addProperty(new Property(null, PROP_RESULT_QUALITY,
@@ -185,7 +187,7 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
         cv.getValue().add(new Property(null, null, ValueType.PRIMITIVE, createParameterProperty(p)));
         return cv;
     }
-    
+
     private Time createPhenomenonTime(DataEntity<?> observation) {
         final DateTime start = createDateTime(observation.getSamplingTimeStart());
         DateTime end;
@@ -196,7 +198,7 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
         }
         return createTime(start, end);
     }
-    
+
     private Time createValidTime(DataEntity<?> observation) {
         final DateTime start = createDateTime(observation.getValidTimeStart());
         DateTime end;
@@ -222,10 +224,10 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
         addResult(observation, entity);
         return observation;
     }
-    
+
     private void addResult(StaDataEntity observation, Entity entity) {
         if (checkProperty(entity, PROP_RESULT)) {
-            observation.setValue(new String((byte[])getPropertyValue(entity, PROP_RESULT)));
+            observation.setValue(new String((byte[]) getPropertyValue(entity, PROP_RESULT)));
         }
     }
 
@@ -235,7 +237,7 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
             observation.setResultTime(((TimeInstant) time).getValue().toDate());
         }
     }
-    
+
     private void addValidTime(StaDataEntity observation, Entity entity) {
         if (checkProperty(entity, PROP_RESULT_TIME)) {
             Time time = parseTime(getPropertyValue(entity, PROP_RESULT_TIME));
@@ -251,7 +253,7 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
 
     private void addParameter(StaDataEntity observation, Entity entity) {
         // TODO Auto-generated method stub
-        
+
     }
 
     private void addFeatureOfInterest(StaDataEntity observation, Entity entity) {
@@ -295,7 +297,7 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
         }
         super.mergeSamplingTime(existing, toMerge);
     }
-    
+
     private void checkValue(DataEntity<?> existing, DataEntity<?> toMerge) throws ODataApplicationException {
         if (existing instanceof QuantityDataEntity) {
             ((QuantityDataEntity) existing)
@@ -329,15 +331,6 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
                     .checkNavigationLink(entity.getNavigationLink(ET_DATASTREAM_NAME).getInlineEntity());
         }
         return entity;
-    }
-    
-    /* (non-Javadoc)
-     * @see org.n52.sta.mapping.AbstractMapper#getRelatedCollections(java.lang.Object)
-     */
-    @Override
-    public Map<String, Set<Long>> getRelatedCollections(Object rawObject) {
-        //TODO: Implement
-        return null;
     }
 
 }

@@ -63,6 +63,12 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Sets;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATION_NAME;
+import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -374,6 +380,26 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     
     private AbstractSensorThingsEntityService<?, HistoricalLocationEntity> getHistoricalLocationService() {
         return (AbstractSensorThingsEntityService<?, HistoricalLocationEntity>) getEntityService(EntityTypes.HistoricalLocation);
+    }
+
+     /* (non-Javadoc)
+     * @see org.n52.sta.mapping.AbstractMapper#getRelatedCollections(java.lang.Object)
+     */
+    @Override
+    public Map<String, Set<Long>> getRelatedCollections(Object rawObject) {
+        Map<String, Set<Long>> collections = new HashMap<String, Set<Long>> ();
+        HistoricalLocationEntity entity = (HistoricalLocationEntity) rawObject;
+        try {
+            collections.put(ET_THING_NAME, Collections.singleton(entity.getThingEntity().getId()));
+        } catch(NullPointerException e) {}
+        try {
+            Set<Long> locations = new HashSet<Long>();
+            entity.getLocationEntities().forEach((en) -> {
+                locations.add(en.getId());
+            });
+            collections.put(ET_LOCATION_NAME, locations);
+        } catch(NullPointerException e) {}
+        return collections;
     }
     
 }

@@ -49,6 +49,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.querydsl.core.types.Predicate;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Interface for requesting Sensor Things entities
@@ -217,6 +219,18 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
      *         the given ID
      */
     public abstract Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId);
+    
+     /**
+     * Gets a Map<K,V> that holds definitions for all related Entities of the
+     * requested Entity. In this Map K represents the EntityType and V the Set
+     * of IDs for those Entities that has a Collection the requested Entity is
+     * part of. Returns null if this Entity is not part of any collection.
+     *
+     * @param rawObject Raw Database Entity of type T
+     * @return Map with definitions for all Entities the requested Entity is
+     * related to
+     */
+    public abstract Map<String, Set<Long>> getRelatedCollections(Object rawObject);
 
     /**
      * Get the {@link JpaRepository} for this

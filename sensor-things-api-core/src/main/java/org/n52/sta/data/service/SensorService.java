@@ -58,6 +58,11 @@ import org.springframework.stereotype.Component;
 
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_NAME;
 
 /**
  *
@@ -343,5 +348,23 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     private AbstractSensorThingsEntityService<?, DatastreamEntity> getDatastreamService() {
         return (AbstractSensorThingsEntityService<?, DatastreamEntity>) getEntityService(
                 EntityTypes.Datastream);
+    }
+
+     /* (non-Javadoc)
+     * @see org.n52.sta.mapping.AbstractMapper#getRelatedCollections(java.lang.Object)
+     */
+    @Override
+    public Map<String, Set<Long>> getRelatedCollections(Object rawObject) {
+        Map<String, Set<Long>> collections = new HashMap<String, Set<Long>>();
+        Set<Long> set = new HashSet<Long>();
+        SensorEntity entity = (SensorEntity) rawObject;
+
+        try {
+            entity.getDatastreams().forEach((en) -> {
+                set.add(en.getId());
+            });
+            collections.put(ET_DATASTREAM_NAME, new HashSet(set));
+        } catch (NullPointerException e) {}
+        return collections;
     }
 }

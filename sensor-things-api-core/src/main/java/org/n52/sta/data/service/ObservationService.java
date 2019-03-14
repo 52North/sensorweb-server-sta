@@ -78,6 +78,14 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Sets;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import org.n52.sta.data.query.DatastreamQuerySpecifications;
+import org.n52.sta.data.repositories.DatastreamRepository;
+import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_NAME;
+import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ET_FEATURE_OF_INTEREST_NAME;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -98,11 +106,16 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
     private OfferingRepository offeringRepository;
     
     @Autowired
+    private DatastreamRepository datastreamRepository;
+    
+    @Autowired
     private DatasetRepository<DatasetEntity> datasetRepository;
 
     private ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
     
     private DatasetQuerySpecifications dQS = new DatasetQuerySpecifications();
+    
+    private DatastreamQuerySpecifications dSQS = new DatastreamQuerySpecifications();
 
     public ObservationService(DataRepository<DataEntity<?>> repository, ObservationMapper mapper) {
         super(repository);
@@ -589,5 +602,29 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
             data.setValidTimeEnd(observation.getValidTimeEnd());
         }
         return data;
+    }
+    
+     /* (non-Javadoc)
+     * @see org.n52.sta.mapping.AbstractMapper#getRelatedCollections(java.lang.Object)
+     */
+    @Override
+    public Map<String, Set<Long>> getRelatedCollections(Object rawObject) {
+        Map<String, Set<Long>> collections = new HashMap<String, Set<Long>>();
+
+        DataEntity<?> entity = (DataEntity<?>) rawObject;
+
+        try {
+            collections.put(ET_FEATURE_OF_INTEREST_NAME,
+                    Collections.singleton(entity.getDataset().getFeature().getId()));
+            Optional<DatastreamEntity> datastreamEntity = datastreamRepository
+                    .findOne(dSQS.withObservation(entity.getId()));
+            if (datastreamEntity.isPresent()) {
+                collections.put(ET_DATASTREAM_NAME,
+                        Collections.singleton(datastreamEntity.get().getId()));
+            }
+        } catch (NullPointerException e) {
+        }
+
+        return collections;
     }
 }

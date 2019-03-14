@@ -133,6 +133,24 @@ public class MqttUtil {
         map.put("Thing", "org.n52.series.db.beans.sta.ThingEntity");
         return map;
     }
+    
+     /**
+     * Maps olingo Base types to Olingo types. Needed for retrieving 
+     * the corresponding EntityServices.
+     * @return Translation map from olingo Entities to raw Data Entities
+     */
+    public static Map<String, String> getEntityTypes() {
+        HashMap<String,String> map = new HashMap<String,String>();
+        map.put("org.n52.series.db.beans.QuantityDataEntity", "Observation");
+        map.put("org.n52.series.db.beans.sta.DatastreamEntity", "Datastream");
+        map.put("org.n52.series.db.beans.AbstractFeatureEntity", "FeatureOfInterest");
+        map.put("org.n52.series.db.beans.sta.HistoricalLocationEntity", "HistoricalLocation");
+        map.put("org.n52.series.db.beans.sta.LocationEntity", "Location");
+        map.put("org.n52.series.db.beans.PhenomenonEntity", "ObservedProperty");
+        map.put("org.n52.series.db.beans.ProcedureEntity", "Sensor");
+        map.put("org.n52.series.db.beans.sta.ThingEntity", "Thing");
+        return map;
+    }
 
     /**
      * Translates Olingo Property into Database Property to check property changes against Event emitted by Database

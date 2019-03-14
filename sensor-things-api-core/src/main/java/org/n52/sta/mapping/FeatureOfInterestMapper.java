@@ -58,6 +58,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.vividsolutions.jts.geom.Geometry;
+import java.util.HashSet;
+import org.n52.series.db.beans.sta.SensorEntity;
+import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_NAME;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -96,7 +99,7 @@ public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper<Abst
         featureOfInterest.setFeatureType(createFeatureType(featureOfInterest.getGeometry()));
         return featureOfInterest;
     }
-    
+
     public AbstractFeatureEntity<?> createFeatureOfInterest(LocationEntity location) {
         FeatureEntity featureOfInterest = new FeatureEntity();
         featureOfInterest.setIdentifier(location.getName());
@@ -126,18 +129,18 @@ public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper<Abst
         FormatEntity formatEntity = new FormatEntity();
         if (geometry != null) {
             switch (geometry.getGeometryType()) {
-            case "Point":
-                formatEntity.setFormat(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_POINT);
-                break;
-            case "LineString":
-                formatEntity.setFormat(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_CURVE);
-                break;
-            case "Polygon":
-                formatEntity.setFormat(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_SURFACE);
-                break;
-            default:
-                formatEntity.setFormat(SfConstants.SAMPLING_FEAT_TYPE_SF_SPATIAL_SAMPLING_FEATURE);
-                break;
+                case "Point":
+                    formatEntity.setFormat(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_POINT);
+                    break;
+                case "LineString":
+                    formatEntity.setFormat(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_CURVE);
+                    break;
+                case "Polygon":
+                    formatEntity.setFormat(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_SURFACE);
+                    break;
+                default:
+                    formatEntity.setFormat(SfConstants.SAMPLING_FEAT_TYPE_SF_SPATIAL_SAMPLING_FEATURE);
+                    break;
             }
             return formatEntity;
         }
@@ -145,19 +148,11 @@ public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper<Abst
     }
 
     @Override
-    public Entity  checkEntity(Entity entity) throws ODataApplicationException {
-       checkNameAndDescription(entity);
-       checkPropertyValidity(PROP_FEATURE, entity);
-       checkEncodingType(entity);
-       return entity;
-    }
-
-    /* (non-Javadoc)
-     * @see org.n52.sta.mapping.AbstractMapper#getRelatedCollections(java.lang.Object)
-     */
-    @Override
-    public Map<String, Set<Long>> getRelatedCollections(Object rawObject) {
-        return null;
+    public Entity checkEntity(Entity entity) throws ODataApplicationException {
+        checkNameAndDescription(entity);
+        checkPropertyValidity(PROP_FEATURE, entity);
+        checkEncodingType(entity);
+        return entity;
     }
 
 }

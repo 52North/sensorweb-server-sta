@@ -174,21 +174,4 @@ public class SensorMapper extends AbstractMapper<ProcedureEntity> {
         return entity;
     }
     
-    /* (non-Javadoc)
-     * @see org.n52.sta.mapping.AbstractMapper#getRelatedCollections(java.lang.Object)
-     */
-    @Override
-    public Map<String, Set<Long>> getRelatedCollections(Object rawObject) {
-        Map<String, Set<Long>> collections = new HashMap<String, Set<Long>>();
-        Set<Long> set = new HashSet<Long>();
-        SensorEntity entity = (SensorEntity) rawObject;
-
-        try {
-            entity.getDatastreams().forEach((en) -> {
-                set.add(en.getId());
-            });
-            collections.put(ET_DATASTREAM_NAME, new HashSet(set));
-        } catch (NullPointerException e) {}
-        return collections;
-    }
 }
