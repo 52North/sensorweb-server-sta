@@ -616,15 +616,15 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
         try {
             collections.put(ET_FEATURE_OF_INTEREST_NAME,
                     Collections.singleton(entity.getDataset().getFeature().getId()));
+            } catch (NullPointerException e) {
+        }
             Optional<DatastreamEntity> datastreamEntity = datastreamRepository
                     .findOne(dSQS.withObservation(entity.getId()));
             if (datastreamEntity.isPresent()) {
                 collections.put(ET_DATASTREAM_NAME,
                         Collections.singleton(datastreamEntity.get().getId()));
             }
-        } catch (NullPointerException e) {
-        }
-
+        
         return collections;
     }
 }
