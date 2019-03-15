@@ -67,7 +67,9 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ET_OBSERVATION_NAME;
 import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_NAME;
 import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ET_SENSOR_NAME;
 import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
@@ -502,6 +504,14 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
         try {
             collections.put(ET_OBSERVED_PROPERTY_NAME, Collections.singleton(entity.getObservableProperty().getId()));
         } catch(NullPointerException e) {}
+        
+        Iterable<DataEntity<?>> observations = dataRepository.findAll(dQS.withId(entity.getId()));
+        Set<Long> observationIds = new HashSet<Long>();
+        observations.forEach((o) -> {
+            observationIds.add(o.getId());
+        });
+        collections.put(ET_OBSERVATION_NAME, observationIds);
+        
         return collections;
     }
 
