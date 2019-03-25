@@ -116,7 +116,7 @@ public class MqttBroker {
                     Subscription sub = (Subscription) subscriptionsCursor.getValue();
                     handler.processSubscribeMessage(new InterceptSubscribeMessage(sub, sub.getClientId()));
                     LOGGER.info("Restored Subscription of client:'" + sub.getClientId() + "' to topic: '" + sub.getTopicFilter().toString() + "'");
-                } catch (MqttHandlerException | ClassCastException e) {
+                } catch (Exception e) {
                     subscriptions.remove(subscriptionsCursor.getKey());
                     LOGGER.error("Error while restoring MQTT subscription. Invalid Subscription: " + subscriptionsCursor.getValue() + " was removed from storage.");
                     LOGGER.debug("Error while restoring MQTT subscription", e);

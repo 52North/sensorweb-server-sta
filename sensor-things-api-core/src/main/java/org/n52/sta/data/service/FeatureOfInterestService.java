@@ -61,8 +61,11 @@ import org.springframework.stereotype.Component;
 
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ET_FEATURE_OF_INTEREST_NAME;
 
 /**
  *
@@ -83,16 +86,16 @@ public class FeatureOfInterestService
 
     @Autowired
     private DatasetRepository<DatasetEntity> datasetRepository;
-    
+
     @Autowired
     private DatastreamRepository datastreamRepository;
-    
+
     private final static FeatureOfInterestQuerySpecifications foiQS = new FeatureOfInterestQuerySpecifications();
 
     private ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
 
     private DatasetQuerySpecifications dQS = new DatasetQuerySpecifications();
-    
+
     private DatastreamQuerySpecifications dsQS = new DatastreamQuerySpecifications();
 
     public FeatureOfInterestService(FeatureOfInterestRepository repository, FeatureOfInterestMapper mapper) {
@@ -139,15 +142,15 @@ public class FeatureOfInterestService
     @Override
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-        case "iot.Observation": {
-            BooleanExpression filter = foiQS.withObservation(sourceId);
-            if (targetId != null) {
-                filter = filter.and(foiQS.withId(targetId));
+            case "iot.Observation": {
+                BooleanExpression filter = foiQS.withObservation(sourceId);
+                if (targetId != null) {
+                    filter = filter.and(foiQS.withId(targetId));
+                }
+                return getRepository().exists(filter);
             }
-            return getRepository().exists(filter);
-        }
-        default:
-            return false;
+            default:
+                return false;
         }
     }
 
@@ -185,25 +188,22 @@ public class FeatureOfInterestService
      * Retrieves FeatureOfInterest Entity (aka Feature Entity) with Relation to
      * sourceEntity from Database. Returns empty if Feature is not found or
      * Entities are not related.
-     * 
-     * @param sourceId
-     *            Id of the Source Entity
-     * @param sourceEntityType
-     *            Type of the Source Entity
-     * @param targetId
-     *            Id of the Entity to be retrieved
+     *
+     * @param sourceId Id of the Source Entity
+     * @param sourceEntityType Type of the Source Entity
+     * @param targetId Id of the Entity to be retrieved
      * @return Optional<FeatureEntity> Requested Entity
      */
     private Optional<AbstractFeatureEntity<?>> getRelatedEntityRaw(Long sourceId, EdmEntityType sourceEntityType,
             Long targetId) {
         BooleanExpression filter;
         switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-        case "iot.Observation": {
-            filter = foiQS.withObservation(sourceId);
-            break;
-        }
-        default:
-            return Optional.empty();
+            case "iot.Observation": {
+                filter = foiQS.withObservation(sourceId);
+                break;
+            }
+            default:
+                return Optional.empty();
         }
 
         if (targetId != null) {
@@ -222,17 +222,15 @@ public class FeatureOfInterestService
         }
     }
 
-    
     @Override
     public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
         return getRepository().count(getFilterPredicate(AbstractFeatureEntity.class, queryOptions));
     }
-    
+
     /**
      * Constructs SQL Expression to request Entity by ID.
-     * 
-     * @param id
-     *            id of the requested entity
+     *
+     * @param id id of the requested entity
      * @return BooleanExpression evaluating to true if Entity is found and valid
      */
     private BooleanExpression byId(Long id) {
@@ -308,7 +306,7 @@ public class FeatureOfInterestService
     }
 
     private void deleteRelatedObservationsAndUpdateDatasets(Long featureId) {
-        
+
         // set dataset first/last to null
         Iterable<DatasetEntity> datasets = datasetRepository.findAll(dQS.matchFeatures(Long.toString(featureId)));
         // update datasets
@@ -326,7 +324,7 @@ public class FeatureOfInterestService
             datastreamRepository.findAll(dsQS.withDataset(d.getId())).forEach(ds -> {
                 ds.getDatasets().remove(d);
                 datastreamRepository.saveAndFlush(ds);
-                
+
             });
         });
         // delete datasets
@@ -351,7 +349,7 @@ public class FeatureOfInterestService
         }
         feature.setFeatureType(format);
     }
-    
+
     private void generateIdentifier(AbstractFeatureEntity<?> feature) {
         feature.setIdentifier(JavaHelper.generateID(feature.getIdentifier()));
     }
@@ -361,11 +359,22 @@ public class FeatureOfInterestService
                 EntityTypes.Datastream);
     }
 
-     /* (non-Javadoc)
+    /* (non-Javadoc)
      * @see org.n52.sta.mapping.AbstractMapper#getRelatedCollections(java.lang.Object)
      */
     @Override
     public Map<String, Set<Long>> getRelatedCollections(Object rawObject) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Map<String, Set<Long>> collections = new HashMap<String, Set<Long>>();
+
+        AbstractFeatureEntity<?> entity = (AbstractFeatureEntity<?>) rawObject;
+
+        Iterable<DataEntity<?>> observations = dataRepository.findAll(foiQS.withId(entity.getId()));
+        Set<Long> observationIds = new HashSet<Long>();
+        observations.forEach((o) -> {
+            observationIds.add(o.getId());
+        });
+        collections.put(ET_FEATURE_OF_INTEREST_NAME, observationIds);
+
+        return collections;
     }
 }
