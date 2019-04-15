@@ -43,8 +43,6 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.olingo.commons.api.data.ComplexValue;
@@ -67,7 +65,7 @@ import org.n52.series.db.beans.ProfileDataEntity;
 import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.ReferencedDataEntity;
 import org.n52.series.db.beans.TextDataEntity;
-import org.n52.series.db.beans.parameter.Parameter;
+import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
@@ -96,6 +94,7 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
 //    private ObservationService observationService;
     private final static DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
 
+    @Override
     public Entity createEntity(DataEntity<?> observation) {
         Entity entity = new Entity();
 
@@ -178,11 +177,11 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
         return "";
     }
 
-    private JsonNode createParameterProperty(Parameter<?> p) {
+    private JsonNode createParameterProperty(ParameterEntity<?> p) {
         return Json.nodeFactory().objectNode().put(p.getName(), p.getValueAsString());
     }
 
-    private ComplexValue createParameterComplexValue(Parameter<?> p) {
+    private ComplexValue createParameterComplexValue(ParameterEntity<?> p) {
         ComplexValue cv = new ComplexValue();
         cv.getValue().add(new Property(null, null, ValueType.PRIMITIVE, createParameterProperty(p)));
         return cv;
@@ -210,6 +209,7 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
         return createTime(start, end);
     }
 
+    @Override
     public StaDataEntity createEntity(Entity entity) {
         StaDataEntity observation = new StaDataEntity();
         setId(observation, entity);
@@ -292,7 +292,7 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
     }
 
     protected void mergeSamplingTimeAndCheckResultTime(DataEntity<?> existing, DataEntity<?> toMerge) {
-        if (toMerge.hasSamplingTimeEnd() && existing.getSamplingTimeEnd().equals(existing.getResultTime())) {
+        if (toMerge.getSamplingTimeEnd() != null && existing.getSamplingTimeEnd().equals(existing.getResultTime())) {
             existing.setResultTime(toMerge.getSamplingTimeEnd());
         }
         super.mergeSamplingTime(existing, toMerge);

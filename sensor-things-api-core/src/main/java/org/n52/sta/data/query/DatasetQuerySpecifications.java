@@ -56,4 +56,16 @@ public class DatasetQuerySpecifications {
     public BooleanExpression matchPhenomena(final String id) {
         return QDatasetEntity.datasetEntity.phenomenon.id.eq(Long.valueOf(id));
     }
+    
+    /**
+     * Matches datasets having platform with given id.
+     *
+     * @param id
+     *        the id to match
+     * @return a boolean expression
+     * @see #matchPlatform(Collection)
+     */
+    public BooleanExpression matchPlatform(final String id) {
+        return QDatasetEntity.datasetEntity.platform.id.eq(Long.valueOf(id));
+    }
 }

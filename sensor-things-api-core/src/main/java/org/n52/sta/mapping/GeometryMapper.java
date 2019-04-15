@@ -22,15 +22,14 @@ import org.apache.olingo.commons.api.edm.geo.MultiPolygon;
 import org.apache.olingo.commons.api.edm.geo.Point;
 import org.apache.olingo.commons.api.edm.geo.Polygon;
 import org.apache.olingo.commons.api.edm.geo.SRID;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.n52.series.db.beans.GeometryEntity;
 import org.n52.sta.edm.provider.complextypes.FeatureComplexType;
 import org.springframework.stereotype.Component;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LinearRing;
-import com.vividsolutions.jts.geom.PrecisionModel;
 
 /**
  *
@@ -62,38 +61,38 @@ public class GeometryMapper {
         return value;
     }
     
-    private Geospatial createGeospatial(com.vividsolutions.jts.geom.Geometry geom, SRID srid) {
+    private Geospatial createGeospatial(org.locationtech.jts.geom.Geometry geom, SRID srid) {
         if (srid == null) {
             srid = getSRID(geom);
         }
-        if (geom instanceof com.vividsolutions.jts.geom.Point) {
-            return createPoint((com.vividsolutions.jts.geom.Point) geom);
-        } else if (geom instanceof com.vividsolutions.jts.geom.LineString) {
-            return createLineString((com.vividsolutions.jts.geom.LineString) geom, srid);
-        } else if (geom instanceof com.vividsolutions.jts.geom.Polygon) {
-            com.vividsolutions.jts.geom.Polygon poly = (com.vividsolutions.jts.geom.Polygon) geom;
+        if (geom instanceof org.locationtech.jts.geom.Point) {
+            return createPoint((org.locationtech.jts.geom.Point) geom);
+        } else if (geom instanceof org.locationtech.jts.geom.LineString) {
+            return createLineString((org.locationtech.jts.geom.LineString) geom, srid);
+        } else if (geom instanceof org.locationtech.jts.geom.Polygon) {
+            org.locationtech.jts.geom.Polygon poly = (org.locationtech.jts.geom.Polygon) geom;
             return new Polygon(Geospatial.Dimension.GEOMETRY, srid, createInteriorPointList(poly, srid),
                     createPointList(poly.getExteriorRing().getCoordinates(), srid));
             // would be supported in Olingo 4.6.0
             // return new Polygon(Geospatial.Dimension.GEOMETRY,
             // srid, createLineStringList(poly, srid),
             // createLineString(poly.getExteriorRing(), srid));
-        } else if (geom instanceof com.vividsolutions.jts.geom.MultiPoint) {
+        } else if (geom instanceof org.locationtech.jts.geom.MultiPoint) {
             return new MultiPoint(Geospatial.Dimension.GEOMETRY, srid,
-                    createPointList(((com.vividsolutions.jts.geom.MultiPoint) geom).getCoordinates(), srid));
-        } else if (geom instanceof com.vividsolutions.jts.geom.MultiLineString) {
+                    createPointList(((org.locationtech.jts.geom.MultiPoint) geom).getCoordinates(), srid));
+        } else if (geom instanceof org.locationtech.jts.geom.MultiLineString) {
             return new MultiLineString(Geospatial.Dimension.GEOMETRY, srid,
-                    createLineStringList((com.vividsolutions.jts.geom.MultiLineString) geom, srid));
-        } else if (geom instanceof com.vividsolutions.jts.geom.MultiPolygon) {
-            return new MultiPolygon(Geospatial.Dimension.GEOMETRY, srid,  createPolygonList((com.vividsolutions.jts.geom.MultiPolygon) geom, srid));
-        } else if (geom instanceof com.vividsolutions.jts.geom.GeometryCollection) {
+                    createLineStringList((org.locationtech.jts.geom.MultiLineString) geom, srid));
+        } else if (geom instanceof org.locationtech.jts.geom.MultiPolygon) {
+            return new MultiPolygon(Geospatial.Dimension.GEOMETRY, srid,  createPolygonList((org.locationtech.jts.geom.MultiPolygon) geom, srid));
+        } else if (geom instanceof org.locationtech.jts.geom.GeometryCollection) {
             return new GeospatialCollection(Geospatial.Dimension.GEOMETRY, srid,
-                    createGeospatialList((com.vividsolutions.jts.geom.GeometryCollection) geom, srid));
+                    createGeospatialList((org.locationtech.jts.geom.GeometryCollection) geom, srid));
         }
         return null;
     }
 
-    private Point createPoint(com.vividsolutions.jts.geom.Point geometry) {
+    private Point createPoint(org.locationtech.jts.geom.Point geometry) {
         return createPoint(geometry.getCoordinate(), getSRID(geometry));
     }
 
@@ -115,7 +114,7 @@ public class GeometryMapper {
         return list;
     }
 
-    private List<Point> createInteriorPointList(com.vividsolutions.jts.geom.Polygon poly, SRID srid) {
+    private List<Point> createInteriorPointList(org.locationtech.jts.geom.Polygon poly, SRID srid) {
         List<Point> list = new LinkedList<>();
         for (int i = 0; i < poly.getNumInteriorRing(); i++) {
             list.addAll(createPointList(poly.getInteriorRingN(i).getCoordinates(), srid));
@@ -123,13 +122,13 @@ public class GeometryMapper {
         return list;
     }
 
-    private LineString createLineString(com.vividsolutions.jts.geom.LineString geom, SRID srid) {
+    private LineString createLineString(org.locationtech.jts.geom.LineString geom, SRID srid) {
         return new LineString(Geospatial.Dimension.GEOMETRY, srid == null ? getSRID(geom) : srid,
                 createPointList(geom.getCoordinates(), getSRID(geom)));
     }
 
     
-     private List<LineString> createLineStringList(com.vividsolutions.jts.geom.MultiLineString geom, SRID srid) {
+     private List<LineString> createLineStringList(org.locationtech.jts.geom.MultiLineString geom, SRID srid) {
         List<LineString> list = new LinkedList<>();
         for (int i = 0; i < geom.getNumGeometries(); i++) {
             list.add((LineString) createGeospatial(geom.getGeometryN(i), srid));
@@ -138,7 +137,7 @@ public class GeometryMapper {
     }
 
    // would be used for Olingo 4.6.0
-    private List<LineString> createLineStringList(com.vividsolutions.jts.geom.Polygon poly, SRID srid) {
+    private List<LineString> createLineStringList(org.locationtech.jts.geom.Polygon poly, SRID srid) {
         List<LineString> list = new LinkedList<>();
         for (int i = 0; i < poly.getNumInteriorRing(); i++) {
             list.add(createLineString(poly.getInteriorRingN(i), srid));
@@ -146,7 +145,7 @@ public class GeometryMapper {
         return list;
     }
     
-    private List<Polygon> createPolygonList(com.vividsolutions.jts.geom.MultiPolygon geom, SRID srid) {
+    private List<Polygon> createPolygonList(org.locationtech.jts.geom.MultiPolygon geom, SRID srid) {
         List<Polygon> list = new LinkedList<>();
         for (int i = 0; i < geom.getNumGeometries(); i++) {
             list.add((Polygon) createGeospatial(geom.getGeometryN(i), srid));
@@ -154,7 +153,7 @@ public class GeometryMapper {
         return list;
     }
 
-    private List<Geospatial> createGeospatialList(com.vividsolutions.jts.geom.GeometryCollection geom, SRID srid) {
+    private List<Geospatial> createGeospatialList(org.locationtech.jts.geom.GeometryCollection geom, SRID srid) {
         List<Geospatial> list = new LinkedList<>();
         for (int i = 0; i < geom.getNumGeometries(); i++) {
             list.add(createGeospatial(geom.getGeometryN(i), srid));
@@ -216,27 +215,27 @@ public class GeometryMapper {
         return null;
     }
 
-    private com.vividsolutions.jts.geom.Point createPoint(Point point) {
+    private org.locationtech.jts.geom.Point createPoint(Point point) {
         return factory.createPoint(createCoordinate(point));
     }
 
-    private com.vividsolutions.jts.geom.LineString createLineString(LineString lineString) {
+    private org.locationtech.jts.geom.LineString createLineString(LineString lineString) {
         return factory.createLineString(createCoordinates(lineString.iterator()));
     }
 
-    private com.vividsolutions.jts.geom.Polygon createPolygon(Polygon polygon) {
+    private org.locationtech.jts.geom.Polygon createPolygon(Polygon polygon) {
         return factory.createPolygon(createLinearRing(polygon.getExterior()), createLinearRings(polygon.getInterior()));
     }
 
-    private com.vividsolutions.jts.geom.MultiPoint createMultiPoint(MultiPoint multiPoint) {
+    private org.locationtech.jts.geom.MultiPoint createMultiPoint(MultiPoint multiPoint) {
         return factory.createMultiPoint(createPoints(multiPoint.iterator()));
     }
 
-    private com.vividsolutions.jts.geom.MultiLineString createMultiLineString(MultiLineString multiLineString) {
+    private org.locationtech.jts.geom.MultiLineString createMultiLineString(MultiLineString multiLineString) {
         return factory.createMultiLineString(createLineStrings(multiLineString.iterator()));
     }
 
-    private com.vividsolutions.jts.geom.MultiPolygon createMultiPolygon(MultiPolygon multiPolygon) {
+    private org.locationtech.jts.geom.MultiPolygon createMultiPolygon(MultiPolygon multiPolygon) {
         return factory.createMultiPolygon(createMultyPolygons(multiPolygon.iterator()));
     }
 
@@ -252,25 +251,25 @@ public class GeometryMapper {
     private Coordinate[] createCoordinates(Iterator<Point> iterator) {
         List<Coordinate> coordinates = new LinkedList<>();
         while (iterator.hasNext()) {
-            coordinates.add(createCoordinate((Point) iterator.next()));
+            coordinates.add(createCoordinate(iterator.next()));
         }
         return coordinates.toArray(new Coordinate[0]);
     }
     
-    private com.vividsolutions.jts.geom.Point[] createPoints(Iterator<Point> iterator) {
-        List<com.vividsolutions.jts.geom.Point> points = new LinkedList<>();
+    private org.locationtech.jts.geom.Point[] createPoints(Iterator<Point> iterator) {
+        List<org.locationtech.jts.geom.Point> points = new LinkedList<>();
         while (iterator.hasNext()) {
             points.add(createPoint(iterator.next()));
         }
-        return points.toArray(new com.vividsolutions.jts.geom.Point[0]);
+        return points.toArray(new org.locationtech.jts.geom.Point[0]);
     }
 
-    private com.vividsolutions.jts.geom.LineString[] createLineStrings(Iterator<LineString> iterator) {
-        List<com.vividsolutions.jts.geom.LineString> lineStrings = new LinkedList<>();
+    private org.locationtech.jts.geom.LineString[] createLineStrings(Iterator<LineString> iterator) {
+        List<org.locationtech.jts.geom.LineString> lineStrings = new LinkedList<>();
         while (iterator.hasNext()) {
            lineStrings.add(createLineString(iterator.next()));
         }
-        return lineStrings.toArray(new com.vividsolutions.jts.geom.LineString[0]);
+        return lineStrings.toArray(new org.locationtech.jts.geom.LineString[0]);
     }
 
     private LinearRing createLinearRing(ComposedGeospatial<Point> ring) {
@@ -286,12 +285,12 @@ public class GeometryMapper {
         return null;
     }
 
-    private com.vividsolutions.jts.geom.Polygon[] createMultyPolygons(Iterator<Polygon> iterator) {
-        List<com.vividsolutions.jts.geom.Polygon> polygons = new LinkedList<>();
+    private org.locationtech.jts.geom.Polygon[] createMultyPolygons(Iterator<Polygon> iterator) {
+        List<org.locationtech.jts.geom.Polygon> polygons = new LinkedList<>();
         while (iterator.hasNext()) {
             polygons.add(createPolygon(iterator.next()));
         }
-        return polygons.toArray(new com.vividsolutions.jts.geom.Polygon[0]);
+        return polygons.toArray(new org.locationtech.jts.geom.Polygon[0]);
     }
 
     private Geometry[] createGeometries(Iterator<Geospatial> iterator) {

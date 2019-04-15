@@ -42,7 +42,7 @@ public class QuerySpecificationRepository {
 
     public static EntityQuerySpecifications getSpecification(String name) throws ODataApplicationException {
         switch (name) {
-        case "ThingEntity":
+        case "PlatformEntity":
         case "Thing":
         case "Things": {
             return new ThingQuerySpecifications();

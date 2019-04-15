@@ -48,9 +48,9 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.server.api.ODataApplicationException;
+import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
-import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.n52.sta.utils.JsonHelper;
 import org.slf4j.Logger;
@@ -68,7 +68,7 @@ import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATI
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
-public class ThingMapper extends AbstractMapper<ThingEntity> {
+public class ThingMapper extends AbstractMapper<PlatformEntity> {
 
     private static final Logger LOG = LoggerFactory.getLogger(ThingMapper.class);
 
@@ -85,7 +85,7 @@ public class ThingMapper extends AbstractMapper<ThingEntity> {
     private DatastreamMapper datastreamMapper;
 
     @Override
-    public Entity createEntity(ThingEntity thing) {
+    public Entity createEntity(PlatformEntity thing) {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, thing.getId()));
         addDescription(entity, thing);
@@ -100,8 +100,8 @@ public class ThingMapper extends AbstractMapper<ThingEntity> {
     }
 
     @Override
-    public ThingEntity createEntity(Entity entity) {
-        ThingEntity thing = new ThingEntity();
+    public PlatformEntity createEntity(Entity entity) {
+        PlatformEntity thing = new PlatformEntity();
         setId(thing, entity);
         setName(thing, entity);
         setDescription(thing, entity);
@@ -118,7 +118,7 @@ public class ThingMapper extends AbstractMapper<ThingEntity> {
     }
 
     @Override
-    public ThingEntity merge(ThingEntity existing, ThingEntity toMerge) {
+    public PlatformEntity merge(PlatformEntity existing, PlatformEntity toMerge) {
         mergeName(existing, toMerge);
         mergeDescription(existing, toMerge);
         if (toMerge.hasProperties()) {
@@ -127,35 +127,35 @@ public class ThingMapper extends AbstractMapper<ThingEntity> {
         return existing;
     }
 
-    private void addLocations(ThingEntity thing, Entity entity) {
+    private void addLocations(PlatformEntity thing, Entity entity) {
         if (checkNavigationLink(entity, ES_LOCATIONS_NAME)) {
             Set<LocationEntity> locations = new LinkedHashSet<>();
             Iterator<Entity> iterator = entity.getNavigationLink(ES_LOCATIONS_NAME).getInlineEntitySet().iterator();
             while (iterator.hasNext()) {
-                locations.add(locationMapper.createEntity((Entity) iterator.next()));
+                locations.add(locationMapper.createEntity(iterator.next()));
             }
             thing.setLocationEntities(locations);
         }
     }
 
-    private void addDatastreams(ThingEntity thing, Entity entity) {
+    private void addDatastreams(PlatformEntity thing, Entity entity) {
         if (checkNavigationLink(entity, ES_DATASTREAMS_NAME)) {
             Set<DatastreamEntity> datastreams = new LinkedHashSet<>();
             Iterator<Entity> iterator = entity.getNavigationLink(ES_DATASTREAMS_NAME).getInlineEntitySet().iterator();
             while (iterator.hasNext()) {
-                datastreams.add(datastreamMapper.createEntity((Entity) iterator.next()));
+                datastreams.add(datastreamMapper.createEntity(iterator.next()));
             }
             thing.setDatastreamEntities(datastreams);
         }
     }
 
     @SuppressWarnings("finally")
-    private JsonNode createJsonProperty(ThingEntity thing) {
+    private JsonNode createJsonProperty(PlatformEntity thing) {
         JsonNode node = null;
         try {
             node = jsonHelper.readJsonString(thing.getProperties());
         } catch (IOException ex) {
-            LOG.warn("Could not parse properties for ThingEntity: {}", thing.getId(), ex.getMessage());
+            LOG.warn("Could not parse properties for PlatformEntity: {}", thing.getId(), ex.getMessage());
             LOG.debug(ex.getMessage(), ex);
         } finally {
             if (node == null) {
@@ -172,13 +172,13 @@ public class ThingMapper extends AbstractMapper<ThingEntity> {
         if (checkNavigationLink(entity, ES_LOCATIONS_NAME)) {
             Iterator<Entity> iterator = entity.getNavigationLink(ES_LOCATIONS_NAME).getInlineEntitySet().iterator();
             while (iterator.hasNext()) {
-                locationMapper.checkNavigationLink((Entity) iterator.next());
+                locationMapper.checkNavigationLink(iterator.next());
             }
         }
         if (checkNavigationLink(entity, ES_DATASTREAMS_NAME)) {
             Iterator<Entity> iterator = entity.getNavigationLink(ES_DATASTREAMS_NAME).getInlineEntitySet().iterator();
             while (iterator.hasNext()) {
-                datastreamMapper.checkNavigationLink((Entity) iterator.next());
+                datastreamMapper.checkNavigationLink(iterator.next());
             }
         }
         return entity;

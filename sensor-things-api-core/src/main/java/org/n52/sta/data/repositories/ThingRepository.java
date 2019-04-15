@@ -28,7 +28,7 @@
  */
 package org.n52.sta.data.repositories;
 
-import org.n52.series.db.beans.sta.ThingEntity;
+import org.n52.series.db.beans.PlatformEntity;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -36,6 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
  *
  */
 @Transactional
-public interface ThingRepository extends AbstractStaRepository<ThingEntity> {
+public interface ThingRepository extends AbstractStaRepository<PlatformEntity> {
 
 }

@@ -3,7 +3,7 @@ package org.n52.sta.service.handler.crud;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.server.api.ODataApplicationException;
-import org.n52.series.db.beans.sta.ThingEntity;
+import org.n52.series.db.beans.PlatformEntity;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.AbstractMapper;
@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ThingEntityCrudRequestHandler extends AbstractEntityCrudRequestHandler<ThingEntity> {
+public class ThingEntityCrudRequestHandler extends AbstractEntityCrudRequestHandler<PlatformEntity> {
 
     @Autowired
     private ThingMapper mapper;
@@ -20,7 +20,7 @@ public class ThingEntityCrudRequestHandler extends AbstractEntityCrudRequestHand
     @Override
     protected Entity handleCreateEntityRequest(Entity entity) throws ODataApplicationException {
         if (entity != null) {
-            ThingEntity thing = getEntityService().create(mapper.createEntity(getMapper().checkEntity(entity)));
+            PlatformEntity thing = getEntityService().create(mapper.createEntity(getMapper().checkEntity(entity)));
             return mapToEntity(thing);
         }
         return null;
@@ -30,7 +30,7 @@ public class ThingEntityCrudRequestHandler extends AbstractEntityCrudRequestHand
     protected Entity handleUpdateEntityRequest(Entity entity, HttpMethod method)
             throws ODataApplicationException {
         if (entity != null) {
-            ThingEntity thing = getEntityService().update(mapper.createEntity(entity), method);
+            PlatformEntity thing = getEntityService().update(mapper.createEntity(entity), method);
             return mapToEntity(thing);
         }
         return null;
@@ -43,12 +43,12 @@ public class ThingEntityCrudRequestHandler extends AbstractEntityCrudRequestHand
     }
     
     @Override
-    protected AbstractMapper<ThingEntity> getMapper() {
+    protected AbstractMapper<PlatformEntity> getMapper() {
         return mapper;
     }
 
-    private AbstractSensorThingsEntityService<?, ThingEntity> getEntityService() {
-        return (AbstractSensorThingsEntityService<?, ThingEntity>) getEntityService(EntityTypes.Thing);
+    private AbstractSensorThingsEntityService<?, PlatformEntity> getEntityService() {
+        return (AbstractSensorThingsEntityService<?, PlatformEntity>) getEntityService(EntityTypes.Thing);
     }
 
 }

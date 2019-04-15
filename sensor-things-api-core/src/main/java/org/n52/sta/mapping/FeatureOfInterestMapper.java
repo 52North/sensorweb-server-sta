@@ -30,37 +30,24 @@ package org.n52.sta.mapping;
 
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_FEATURE;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ENCODINGTYPE;
 import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ES_FEATURES_OF_INTEREST_NAME;
 import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ET_FEATURE_OF_INTEREST_FQN;
-import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_NAME;
-import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ET_SENSOR_NAME;
-import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.edm.geo.Geospatial;
 import org.apache.olingo.server.api.ODataApplicationException;
+import org.locationtech.jts.geom.Geometry;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.FormatEntity;
-import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.ogc.om.features.SfConstants;
 import org.n52.shetland.util.JavaHelper;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.vividsolutions.jts.geom.Geometry;
-import java.util.HashSet;
-import org.n52.series.db.beans.sta.SensorEntity;
-import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_NAME;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -73,6 +60,7 @@ public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper<Abst
     @Autowired
     private EntityCreationHelper entityCreationHelper;
 
+    @Override
     public Entity createEntity(AbstractFeatureEntity<?> feature) {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, feature.getId()));
@@ -83,6 +71,7 @@ public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper<Abst
         return entity;
     }
 
+    @Override
     public AbstractFeatureEntity<?> createEntity(Entity entity) {
         FeatureEntity featureOfInterest = new FeatureEntity();
         setId(featureOfInterest, entity);

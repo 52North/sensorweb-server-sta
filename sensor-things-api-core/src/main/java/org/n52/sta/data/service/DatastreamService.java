@@ -45,11 +45,11 @@ import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
+import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.UnitEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
-import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
 import org.n52.sta.data.repositories.DataRepository;
@@ -472,8 +472,8 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
         return datastream;
     }
 
-    private AbstractSensorThingsEntityService<?, ThingEntity> getThingService() {
-        return (AbstractSensorThingsEntityService<?, ThingEntity>) getEntityService(EntityTypes.Thing);
+    private AbstractSensorThingsEntityService<?, PlatformEntity> getThingService() {
+        return (AbstractSensorThingsEntityService<?, PlatformEntity>) getEntityService(EntityTypes.Thing);
     }
     
     private AbstractSensorThingsEntityService<?, ProcedureEntity> getSensorService() {
@@ -493,7 +493,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
      * @see org.n52.sta.mapping.AbstractMapper#getRelatedCollections(java.lang.Object)
      */
     public Map<String, Set<Long>> getRelatedCollections(Object rawObject) {
-        Map<String, Set<Long>> collections = new HashMap<String, Set<Long>> ();
+        Map<String, Set<Long>> collections = new HashMap<> ();
         DatastreamEntity entity = (DatastreamEntity) rawObject;
         try {
             collections.put(ET_THING_NAME, Collections.singleton(entity.getThing().getId()));
@@ -506,7 +506,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
         } catch(NullPointerException e) {}
         
         Iterable<DataEntity<?>> observations = dataRepository.findAll(dQS.withId(entity.getId()));
-        Set<Long> observationIds = new HashSet<Long>();
+        Set<Long> observationIds = new HashSet<>();
         observations.forEach((o) -> {
             observationIds.add(o.getId());
         });

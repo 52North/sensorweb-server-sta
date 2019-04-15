@@ -37,11 +37,11 @@ import org.n52.series.db.beans.QAbstractFeatureEntity;
 import org.n52.series.db.beans.QDataEntity;
 import org.n52.series.db.beans.QDatasetEntity;
 import org.n52.series.db.beans.QPhenomenonEntity;
+import org.n52.series.db.beans.QPlatformEntity;
 import org.n52.series.db.beans.QProcedureEntity;
 import org.n52.series.db.beans.sta.QDatastreamEntity;
 import org.n52.series.db.beans.sta.QHistoricalLocationEntity;
 import org.n52.series.db.beans.sta.QLocationEntity;
-import org.n52.series.db.beans.sta.QThingEntity;
 
 import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Expression;
@@ -73,7 +73,8 @@ public abstract class EntityQuerySpecifications<T> {
     final static QDataEntity qobservation = QDataEntity.dataEntity;
     final static QAbstractFeatureEntity qfeature = QAbstractFeatureEntity.abstractFeatureEntity;
     final static QDatasetEntity qdataset = QDatasetEntity.datasetEntity;
-    final static QThingEntity qthing = QThingEntity.thingEntity;
+    // aka Thing
+    final static QPlatformEntity qPlatform = QPlatformEntity.platformEntity;
     final static QPhenomenonEntity qobservedproperty = QPhenomenonEntity.phenomenonEntity;
 
     /**

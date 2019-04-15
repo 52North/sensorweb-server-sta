@@ -44,7 +44,6 @@ import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.sta.ObservablePropertyEntity;
-import org.n52.series.db.beans.sta.ThingEntity;
 import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_NAME;
 import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME;
 import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATION_NAME;
@@ -62,6 +61,7 @@ public class ObservedPropertyMapper extends AbstractMapper<PhenomenonEntity> {
     @Autowired
     EntityCreationHelper entityCreationHelper;
 
+    @Override
     public Entity createEntity(PhenomenonEntity observedProperty) {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, observedProperty.getId()));
@@ -78,6 +78,7 @@ public class ObservedPropertyMapper extends AbstractMapper<PhenomenonEntity> {
         return createEntity(observedProperty);
     }
     
+    @Override
     public ObservablePropertyEntity createEntity(Entity entity) {
         ObservablePropertyEntity phenomenon = new ObservablePropertyEntity();
         setId(phenomenon, entity);

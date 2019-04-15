@@ -49,9 +49,9 @@ import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.edm.geo.Geospatial;
 import org.apache.olingo.server.api.ODataApplicationException;
+import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.LocationEncodingEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
-import org.n52.series.db.beans.sta.ThingEntity;
 import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -79,6 +79,7 @@ public class LocationMapper extends AbstractLocationGeometryMapper<LocationEntit
         return entity;
     }
 
+    @Override
     public LocationEntity createEntity(Entity entity) {
         LocationEntity location = new LocationEntity();
         setId(location, entity);
@@ -118,10 +119,10 @@ public class LocationMapper extends AbstractLocationGeometryMapper<LocationEntit
 
     private void addThings(LocationEntity location, Entity entity) {
         if (checkNavigationLink(entity, ES_THINGS_NAME)) {
-            Set<ThingEntity> things = new LinkedHashSet<>();
+            Set<PlatformEntity> things = new LinkedHashSet<>();
             Iterator<Entity> iterator = entity.getNavigationLink(ES_THINGS_NAME).getInlineEntitySet().iterator();
             while (iterator.hasNext()) {
-                things.add(thingMapper.createEntity((Entity) iterator.next()));
+                things.add(thingMapper.createEntity(iterator.next()));
             }
             location.setThingEntities(things);
         }
@@ -135,7 +136,7 @@ public class LocationMapper extends AbstractLocationGeometryMapper<LocationEntit
         if (checkNavigationLink(entity, ES_THINGS_NAME)) {
             Iterator<Entity> iterator = entity.getNavigationLink(ES_THINGS_NAME).getInlineEntitySet().iterator();
             while (iterator.hasNext()) {
-                thingMapper.checkNavigationLink((Entity) iterator.next());
+                thingMapper.checkNavigationLink(iterator.next());
             }
         }
         return entity;
