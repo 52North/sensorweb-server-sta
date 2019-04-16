@@ -35,23 +35,11 @@ import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKin
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.n52.series.db.beans.DataEntity;
 
-import com.querydsl.core.types.Expression;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.DateTimeExpression;
-import com.querydsl.core.types.dsl.NumberPath;
-import com.querydsl.core.types.dsl.PathBuilder;
-import com.querydsl.jpa.JPAExpressions;
-import com.querydsl.jpa.JPQLQuery;
-
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
 public class ObservationQuerySpecifications extends EntityQuerySpecifications<DataEntity< ? >> {
-
-    public BooleanExpression withId(Long id) {
-        return qobservation.id.eq(id);
-    }
 
     public BooleanExpression withFeatureOfInterest(Long featureId) {
         return qobservation.dataset.id.in(JPAExpressions
@@ -140,7 +128,7 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
         switch (propertyName) {
         case "value":
             NumberPath<Double> property = new PathBuilder(DataEntity.class, qobservation.getRoot().toString())
-                                                                                                              .getNumber((String) propertyName,
+                                                                                                              .getNumber(propertyName,
                                                                                                                          Double.class);
             return handleDirectNumberPropertyFilter(property, propertyValue, operator, switched);
         case "samplingTimeEnd":

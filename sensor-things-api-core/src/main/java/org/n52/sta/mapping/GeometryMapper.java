@@ -277,7 +277,7 @@ public class GeometryMapper {
     }
 
     private LinearRing[] createLinearRings(ComposedGeospatial<Point> ring) {
-        if (!ring.isEmpty()) {
+        if (ring != null && !ring.isEmpty()) {
             List<LinearRing> rings = new LinkedList<>();
             rings.add(createLinearRing(ring));
             return rings.toArray(new LinearRing[0]);

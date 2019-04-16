@@ -41,6 +41,7 @@ import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
+import org.hibernate.annotations.Where;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
@@ -61,10 +62,9 @@ import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.DatastreamMapper;
 import org.n52.sta.service.query.QueryOptions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
-import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.dsl.BooleanExpression;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -112,14 +112,15 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     @Override
     public EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException {
         EntityCollection retEntitySet = new EntityCollection();
-        Predicate filter = getFilterPredicate(DatastreamEntity.class, queryOptions);
+        Specification<DatastreamEntity> filter = getFilterPredicate(DatastreamEntity.class, queryOptions);
+        
         getRepository().findAll(filter, createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
 
     @Override
     public Entity getEntity(Long id) {
-        Optional<DatastreamEntity> entity = getRepository().findOne(byId(id));
+        Optional<DatastreamEntity> entity = getRepository().findById(id);
         return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
 
@@ -139,7 +140,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     
     @Override
     public boolean existsEntity(Long id) {
-        return getRepository().exists(byId(id));
+        return getRepository().existsById(id);
     }
 
     @Override
@@ -217,7 +218,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
      * @return Optional<DatastreamEntity> Requested Entity
      */
     private Optional<DatastreamEntity> getRelatedEntityRaw(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-        BooleanExpression filter = getFilter(sourceId, sourceEntityType);
+        Specification<DatastreamEntity> filter = getFilter(sourceId, sourceEntityType);
         if (filter == null) {
             return Optional.empty();
         }
@@ -235,8 +236,8 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
      * @param sourceEntityType Type of Source Entity
      * @return BooleanExpression Filter
      */
-    private BooleanExpression getFilter(Long sourceId, EdmEntityType sourceEntityType) {
-        BooleanExpression filter;
+    private Specification<DatastreamEntity> getFilter(Long sourceId, EdmEntityType sourceEntityType) {
+        Specification<DatastreamEntity> filter;
         switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
         case "iot.Thing": {
             filter = dQS.withThing(sourceId);
@@ -254,20 +255,20 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
             filter = dQS.withObservation(sourceId);
             break;
         }
-        default: return null;
+            default: return null;
         }
-        return filter;
+        return Specification.where(filter);
     }
 
-    /**
-     * Constructs SQL Expression to request Entity by ID.
-     * 
-     * @param id id of the requested entity
-     * @return BooleanExpression evaluating to true if Entity is found and valid
-     */
-    private BooleanExpression byId(Long id) {
-        return dQS.withId(id);
-    }
+//    /**
+//     * Constructs SQL Expression to request Entity by ID.
+//     * 
+//     * @param id id of the requested entity
+//     * @return BooleanExpression evaluating to true if Entity is found and valid
+//     */
+//    private BooleanExpression byId(Long id) {
+//        return dQS.withId(id);
+//    }
 
     @Override
     public DatastreamEntity create(DatastreamEntity datastream) throws ODataApplicationException {

@@ -124,7 +124,7 @@ public class LocationMapper extends AbstractLocationGeometryMapper<LocationEntit
             while (iterator.hasNext()) {
                 things.add(thingMapper.createEntity(iterator.next()));
             }
-            location.setThingEntities(things);
+            location.setThings(things);
         }
     }
 

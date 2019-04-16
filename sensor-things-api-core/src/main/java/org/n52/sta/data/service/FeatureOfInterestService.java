@@ -43,6 +43,7 @@ import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.shetland.util.JavaHelper;
 import org.n52.sta.data.query.DatasetQuerySpecifications;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
@@ -57,6 +58,7 @@ import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.FeatureOfInterestMapper;
 import org.n52.sta.service.query.QueryOptions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
 import com.querydsl.core.types.Predicate;
@@ -111,7 +113,7 @@ public class FeatureOfInterestService
     @Override
     public EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException {
         EntityCollection retEntitySet = new EntityCollection();
-        Predicate filter = getFilterPredicate(AbstractFeatureEntity.class, queryOptions);
+        Specification<AbstractFeatureEntity<?>> filter = getFilterPredicate(AbstractFeatureEntity.class, queryOptions);
         getRepository().findAll(filter, createPageableRequest(queryOptions))
                 .forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
@@ -119,7 +121,7 @@ public class FeatureOfInterestService
 
     @Override
     public Entity getEntity(Long id) {
-        Optional<AbstractFeatureEntity<?>> entity = getRepository().findOne(byId(id));
+        Optional<AbstractFeatureEntity<?>> entity = getRepository().findById(id);
         return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
 
@@ -127,11 +129,6 @@ public class FeatureOfInterestService
     public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType,
             QueryOptions queryOptions) {
         return null;
-    }
-
-    @Override
-    public boolean existsEntity(Long id) {
-        return getRepository().exists(byId(id));
     }
 
     @Override
@@ -227,22 +224,12 @@ public class FeatureOfInterestService
         return getRepository().count(getFilterPredicate(AbstractFeatureEntity.class, queryOptions));
     }
 
-    /**
-     * Constructs SQL Expression to request Entity by ID.
-     *
-     * @param id id of the requested entity
-     * @return BooleanExpression evaluating to true if Entity is found and valid
-     */
-    private BooleanExpression byId(Long id) {
-        return foiQS.withId(id);
-    }
-
     @Override
     public AbstractFeatureEntity<?> create(AbstractFeatureEntity<?> feature) {
         if (feature.getId() != null && !feature.isSetName()) {
-            return getRepository().findOne(foiQS.withId(feature.getId())).get();
+            return getRepository().findById(feature.getId()).get();
         }
-        if (getRepository().exists(foiQS.withName(feature.getName()))) {
+        if (getRepository().existsByName(feature.getName())) {
             Iterable<AbstractFeatureEntity<?>> features = getRepository().findAll(foiQS.withName(feature.getName()));
             AbstractFeatureEntity<?> f = alreadyExistsFeature(features, feature);
             if (f != null) {
@@ -268,7 +255,7 @@ public class FeatureOfInterestService
     public AbstractFeatureEntity<?> update(AbstractFeatureEntity<?> entity, HttpMethod method)
             throws ODataApplicationException {
         if (HttpMethod.PATCH.equals(method)) {
-            Optional<AbstractFeatureEntity<?>> existing = getRepository().findOne(foiQS.withId(entity.getId()));
+            Optional<AbstractFeatureEntity<?>> existing = getRepository().findById(entity.getId());
             if (existing.isPresent()) {
                 AbstractFeatureEntity<?> merged = mapper.merge(existing.get(), entity);
                 return getRepository().save(merged);
@@ -364,12 +351,12 @@ public class FeatureOfInterestService
      */
     @Override
     public Map<String, Set<Long>> getRelatedCollections(Object rawObject) {
-        Map<String, Set<Long>> collections = new HashMap<String, Set<Long>>();
+        Map<String, Set<Long>> collections = new HashMap<>();
 
         AbstractFeatureEntity<?> entity = (AbstractFeatureEntity<?>) rawObject;
 
         Iterable<DataEntity<?>> observations = dataRepository.findAll(foiQS.withId(entity.getId()));
-        Set<Long> observationIds = new HashSet<Long>();
+        Set<Long> observationIds = new HashSet<>();
         observations.forEach((o) -> {
             observationIds.add(o.getId());
         });

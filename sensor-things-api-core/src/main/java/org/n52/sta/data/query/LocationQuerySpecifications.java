@@ -29,13 +29,21 @@
 
 package org.n52.sta.data.query;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
+
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
+import org.n52.series.db.beans.AbstractFeatureEntity;
+import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.DatasetEntity;
+import org.n52.series.db.beans.DescribableEntity;
+import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
-
-import com.querydsl.core.types.Expression;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.JPQLQuery;
+import org.springframework.data.jpa.domain.Specification;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -43,20 +51,32 @@ import com.querydsl.jpa.JPQLQuery;
  */
 public class LocationQuerySpecifications extends EntityQuerySpecifications<LocationEntity> {
 
-    public BooleanExpression withRelatedHistoricalLocation(Long historicalId) {
-        return qlocation.historicalLocationEntities.any().id.eq(historicalId);
+//    public BooleanExpression withRelatedHistoricalLocation(Long historicalId) {
+//        return qlocation.historicalLocationEntities.any().id.eq(historicalId);
+//    }
+    
+    public Specification<LocationEntity> withRelatedHistoricalLocation(Long historicalId) {
+        return (root, query, builder) -> {
+            Subquery<LocationEntity> sq = query.subquery(LocationEntity.class);
+            Root<HistoricalLocationEntity> dataset = sq.from(HistoricalLocationEntity.class);
+            Join<HistoricalLocationEntity, LocationEntity> joinFeature = dataset.join(HistoricalLocationEntity.PROPERTY_LOCATIONS);
+            sq.select(joinFeature).where(builder.equal(LocationEntity.get(DescribableEntity.PROPERTY_ID), historicalId));
+            return builder.in(root).value(sq);
+        };
     }
 
-    public BooleanExpression withRelatedThing(Long thingId) {
-        return qlocation.thingEntities.any().id.eq(thingId);
-    }
-
-    public BooleanExpression withId(Long id) {
-        return qlocation.id.eq(id);
-    }
-
-    public BooleanExpression withName(String name) {
-        return qlocation.name.eq(name);
+//    public BooleanExpression withRelatedThing(Long thingId) {
+//        return qlocation.thingEntities.any().id.eq(thingId);
+//    }
+//    
+    public Specification<LocationEntity> withRelatedThing(Long thingId) {
+        return (root, query, builder) -> {
+            Subquery<LocationEntity> sq = query.subquery(LocationEntity.class);
+            Root<ThingEntity> dataset = sq.from(ThingEntity.class);
+            Join<ThingEntity, LocationEntity> joinFeature = dataset.join(ThingEntity.PROPERTY_LOCATIONS);
+            sq.select(joinFeature).where(builder.equal(LocationEntity.get(DescribableEntity.PROPERTY_ID), thingId));
+            return builder.in(root).value(sq);
+        };
     }
 
     /*
@@ -101,16 +121,18 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
         }
     }
 
-    private Object handleDirectPropertyFilter(String propertyName,
+    private Predicate handleDirectPropertyFilter(String propertyName,
                                               Object propertyValue,
                                               BinaryOperatorKind operator,
+                                              Root<?> root,
+                                              CriteriaBuilder criteriaBuilder,
                                               boolean switched)
             throws ExpressionVisitException {
         switch (propertyName) {
         case "name":
-            return handleDirectStringPropertyFilter(qlocation.name, propertyValue, operator, switched);
+            return handleDirectStringPropertyFilter(root.get(LocationEntity.PROPERTY_NAME), propertyValue, operator, criteriaBuilder, switched);
         case "description":
-            return handleDirectStringPropertyFilter(qlocation.description, propertyValue, operator, switched);
+            return handleDirectStringPropertyFilter(root.get(LocationEntity.PROPERTY_NAME), propertyValue, operator, criteriaBuilder, switched);
         case "encodingType":
             return handleDirectStringPropertyFilter(qlocation.locationEncoding.encodingType,
                                                     propertyValue,

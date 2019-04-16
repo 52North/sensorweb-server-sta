@@ -33,7 +33,6 @@ import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKin
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.n52.series.db.beans.PhenomenonEntity;
 
-import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPQLQuery;
 
@@ -43,18 +42,10 @@ import com.querydsl.jpa.JPQLQuery;
  */
 public class ObservedPropertyQuerySpecifications extends EntityQuerySpecifications<PhenomenonEntity> {
 
-    public BooleanExpression withId(Long id) {
-        return qobservedproperty.id.eq(id);
-    }
-
     public BooleanExpression withDatastream(Long datastreamId) {
         return qobservedproperty.id.in(dQS.toSubquery(qdatastream,
                                                       qdatastream.observableProperty.id,
                                                       qdatastream.id.eq(datastreamId)));
-    }
-
-    public BooleanExpression withIdentifier(String identifier) {
-        return qobservedproperty.identifier.eq(identifier);
     }
 
     /**

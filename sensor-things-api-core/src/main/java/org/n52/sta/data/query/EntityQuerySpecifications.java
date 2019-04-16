@@ -31,32 +31,17 @@ package org.n52.sta.data.query;
 
 import java.util.Date;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Subquery;
+
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
-import org.n52.series.db.beans.QAbstractFeatureEntity;
-import org.n52.series.db.beans.QDataEntity;
-import org.n52.series.db.beans.QDatasetEntity;
-import org.n52.series.db.beans.QPhenomenonEntity;
-import org.n52.series.db.beans.QPlatformEntity;
-import org.n52.series.db.beans.QProcedureEntity;
-import org.n52.series.db.beans.sta.QDatastreamEntity;
-import org.n52.series.db.beans.sta.QHistoricalLocationEntity;
-import org.n52.series.db.beans.sta.QLocationEntity;
-
-import com.querydsl.core.types.EntityPath;
-import com.querydsl.core.types.Expression;
-import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.ComparableExpressionBase;
-import com.querydsl.core.types.dsl.DateTimeExpression;
-import com.querydsl.core.types.dsl.DateTimePath;
-import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.NumberExpression;
-import com.querydsl.core.types.dsl.NumberPath;
-import com.querydsl.core.types.dsl.StringExpression;
-import com.querydsl.core.types.dsl.StringPath;
-import com.querydsl.jpa.JPAExpressions;
-import com.querydsl.jpa.JPQLQuery;
+import org.n52.series.db.beans.DescribableEntity;
+import org.n52.series.db.beans.ProcedureEntity;
+import org.springframework.data.jpa.domain.Specification;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -66,16 +51,16 @@ public abstract class EntityQuerySpecifications<T> {
     final static DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
     final static ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
 
-    final static QDatastreamEntity qdatastream = QDatastreamEntity.datastreamEntity;
-    final static QLocationEntity qlocation = QLocationEntity.locationEntity;
-    final static QHistoricalLocationEntity qhistoricallocation = QHistoricalLocationEntity.historicalLocationEntity;
-    final static QProcedureEntity qsensor = QProcedureEntity.procedureEntity;
-    final static QDataEntity qobservation = QDataEntity.dataEntity;
-    final static QAbstractFeatureEntity qfeature = QAbstractFeatureEntity.abstractFeatureEntity;
-    final static QDatasetEntity qdataset = QDatasetEntity.datasetEntity;
-    // aka Thing
-    final static QPlatformEntity qPlatform = QPlatformEntity.platformEntity;
-    final static QPhenomenonEntity qobservedproperty = QPhenomenonEntity.phenomenonEntity;
+//    final static QDatastreamEntity qdatastream = QDatastreamEntity.datastreamEntity;
+//    final static QLocationEntity qlocation = QLocationEntity.locationEntity;
+//    final static QHistoricalLocationEntity qhistoricallocation = QHistoricalLocationEntity.historicalLocationEntity;
+//    final static QProcedureEntity qsensor = QProcedureEntity.procedureEntity;
+//    final static QDataEntity qobservation = QDataEntity.dataEntity;
+//    final static QAbstractFeatureEntity qfeature = QAbstractFeatureEntity.abstractFeatureEntity;
+//    final static QDatasetEntity qdataset = QDatasetEntity.datasetEntity;
+//    // aka Thing
+//    final static QPlatformEntity qPlatform = QPlatformEntity.platformEntity;
+//    final static QPhenomenonEntity qobservedproperty = QPhenomenonEntity.phenomenonEntity;
 
     /**
      * Gets Subquery returning the IDs of the Entities
@@ -84,7 +69,7 @@ public abstract class EntityQuerySpecifications<T> {
      *        BooleanExpression filtering the Entites whose IDs are returned
      * @return JPQLQuery<Long> Subquery
      */
-    public abstract JPQLQuery<Long> getIdSubqueryWithFilter(Expression<Boolean> filter);
+    public abstract Subquery<Long> getIdSubqueryWithFilter(Expression<Boolean> filter);
 
     /**
      * Gets Entity-specific Filter for property with given name. Filters may not accept all BinaryOperators,
@@ -106,106 +91,135 @@ public abstract class EntityQuerySpecifications<T> {
                                                 BinaryOperatorKind operator,
                                                 boolean switched)
             throws ExpressionVisitException;
+    
+    public Specification<T> withName(final String name) {
+        return (root, query, builder) -> {
+            return builder.equal(root.get(DescribableEntity.PROPERTY_NAME), name);
+        };
+    }
+    
+    public Specification<T> withIdentifier(final String name) {
+        return (root, query, builder) -> {
+            return builder.equal(root.get(DescribableEntity.PROPERTY_IDENTIFIER), name);
+        };
+    }
+    
+    public Specification<T> withId(final Long id) {
+        return (root, query, builder) -> {
+            return builder.equal(root.get(DescribableEntity.PROPERTY_ID), id);
+        };
+    }
 
     // TODO:JavaDoc
-    protected JPQLQuery<Long> toSubquery(EntityPath<T> relation, Expression<Long> selector, Expression<Boolean> filter) {
-        return JPAExpressions.selectFrom(relation)
-                             .select(selector)
-                             .where((Predicate)filter);
+//    protected Subquery<Long> toSubquery(Path<T> relation, Expression<Long> selector, Expression<Boolean> filter) {
+//        return JPAExpressions.selectFrom(relation)
+//                             .select(selector)
+//                             .where(filter);
+//    }
+    
+    private Subquery<Long> toSubquery(Class<ProcedureEntity> clazz, String propertyId, Expression<Boolean> filter) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
-    protected StringExpression toStringExpression(Object expr) throws ExpressionVisitException {
-        if (expr instanceof String) {
-            return Expressions.asString((String) expr);
-        } else if (expr instanceof StringExpression) {
-            return (StringExpression) expr;
+    protected Expression<String> toStringExpression(Object expr) throws ExpressionVisitException {
+//        if (expr instanceof String) {
+//            return Expressions.asString((String) expr);
+//        } else 
+        if (expr instanceof Expression) {
+            return (Expression<String>) expr;
         } else {
             throw new ExpressionVisitException("Error converting Argument to NumberExpression");
         }
     }
 
     @SuppressWarnings("unchecked")
-    protected NumberExpression<Double> toNumberExpression(Object expr) throws ExpressionVisitException {
-        if (expr instanceof String) {
-            return Expressions.asNumber((Double) expr);
-        } else if (expr instanceof NumberExpression) {
-            return (NumberExpression<Double>) expr;
-        } else if (expr instanceof StringExpression) {
-            return ((StringExpression) expr).castToNum(Double.class);
+    protected Expression<Number> toNumberExpression(Object expr) throws ExpressionVisitException {
+//        if (expr instanceof String) {
+//            return Expressions.asNumber((Double) expr);
+//        } else 
+        if (expr instanceof Expression<?>) {
+            return ((Expression) expr).as(Number.class);
         } else {
             throw new ExpressionVisitException("Error converting Argument to NumberExpression");
         }
     }
 
     @SuppressWarnings("unchecked")
-    protected DateTimeExpression<Date> toDateTimeExpression(Object expr) throws ExpressionVisitException {
-        if (expr instanceof String) {
-            // TODO: check if this fails
-            return Expressions.asDateTime((Date) expr);
-        } else if (expr instanceof DateTimeExpression) {
-            return (DateTimeExpression<Date>) expr;
+    protected Expression<Date> toDateTimeExpression(Object expr) throws ExpressionVisitException {
+//        if (expr instanceof String) {
+//            // TODO: check if this fails
+//            return Expressions.asDateTime((Date) expr);
+//        } else 
+        if (expr instanceof Expression<?>) {
+            return (Expression<Date>) expr;
         } else {
             throw new ExpressionVisitException("Error converting Argument to NumberExpression");
         }
     }
 
     // Wrapper
-    protected Object handleDirectStringPropertyFilter(StringPath stringPath,
+    protected Predicate handleDirectStringPropertyFilter(Path<String> stringPath,
                                                       Object propertyValue,
                                                       BinaryOperatorKind operator,
+                                                      CriteriaBuilder builder,
                                                       boolean switched)
             throws ExpressionVisitException {
-        return this.handleStringFilter(stringPath, toStringExpression(propertyValue), operator, switched);
+        return this.handleStringFilter(stringPath, toStringExpression(propertyValue), operator, builder, switched);
     }
 
-    protected Object handleDirectNumberPropertyFilter(NumberPath< ? > numberPath,
+    protected Object handleDirectNumberPropertyFilter(Path<Number> numberPath,
                                                       Object propertyValue,
                                                       BinaryOperatorKind operator,
+                                                      CriteriaBuilder builder,
                                                       boolean switched)
             throws ExpressionVisitException {
-        return this.handleNumberFilter(numberPath, toNumberExpression(propertyValue), operator, switched);
+        return this.handleNumberFilter(numberPath, toNumberExpression(propertyValue), operator, builder, switched);
     }
 
-    protected Object handleDirectDateTimePropertyFilter(DateTimePath<Date> time,
+    protected Predicate handleDirectDateTimePropertyFilter(Path<Date> time,
                                                         Object propertyValue,
                                                         BinaryOperatorKind operator,
+                                                        CriteriaBuilder builder,
                                                         boolean switched)
             throws ExpressionVisitException {
-        return this.handleDateFilter(time, toDateTimeExpression(propertyValue), operator, switched);
+        return this.handleDateFilter(time, toDateTimeExpression(propertyValue), operator, builder, switched);
     }
 
-    public Object handleStringFilter(StringExpression left,
-                                     StringExpression right,
+    public Predicate handleStringFilter(Expression<String> left,
+                                     Expression<String> right,
                                      BinaryOperatorKind operator,
+                                     CriteriaBuilder builder,
                                      boolean switched)
             throws ExpressionVisitException {
         operator = (switched) ? reverseOperator(operator) : operator;
 
         switch (operator) {
         case EQ:
-            return left.eq(right);
+            return builder.equal(left, right);
         case NE:
-            return left.ne(right);
+            return builder.notEqual(left, right);
         case LT:
-            return left.lt(right);
+            return builder.lessThan(left, right);
         case LE:
-            return left.loe(right);
+            return builder.lessThanOrEqualTo(left, right);
         case GT:
-            return left.gt(right);
+            return builder.greaterThan(left, right);
         case GE:
-            return left.goe(right);
+            return builder.greaterThanOrEqualTo(left, right);
         default:
             throw new ExpressionVisitException("Error getting filter. Invalid Operator");
         }
     }
 
-    public Object handleNumberFilter(NumberExpression< ? > left,
-                                     NumberExpression< ? > right,
+    public Object handleNumberFilter(Expression<Number> left,
+                                     Expression<Number> right,
                                      BinaryOperatorKind operator,
+                                     CriteriaBuilder builder,
                                      boolean switched)
             throws ExpressionVisitException {
-        NumberExpression< ? > leftExpr;
-        NumberExpression< ? > rightExpr;
+        Expression<Number> leftExpr;
+        Expression<Number> rightExpr;
         if (switched) {
             leftExpr = right;
             rightExpr = left;
@@ -215,41 +229,42 @@ public abstract class EntityQuerySpecifications<T> {
         }
 
         switch (operator) {
-        case GE:
-            return leftExpr.goe(rightExpr);
-        case GT:
-            return leftExpr.gt(rightExpr);
-        case LE:
-            return leftExpr.loe(rightExpr);
-        case LT:
-            return leftExpr.lt(rightExpr);
         case EQ:
-            return ((ComparableExpressionBase) leftExpr).eq(rightExpr);
+            return builder.equal(leftExpr, right);
         case NE:
-            return ((ComparableExpressionBase) leftExpr).ne(rightExpr);
+            return builder.notEqual(leftExpr, rightExpr);
+        case LT:
+            return builder.lessThan(leftExpr.as(Comparable.class), rightExpr.as(Comparable.class));
+        case LE:
+            return builder.lessThanOrEqualTo(leftExpr.as(Comparable.class), rightExpr.as(Comparable.class));
+        case GT:
+            return builder.greaterThan(leftExpr.as(Comparable.class), rightExpr.as(Comparable.class));
+        case GE:
+            return builder.greaterThanOrEqualTo(leftExpr.as(Comparable.class), rightExpr.as(Comparable.class));
         case ADD:
-            return leftExpr.add(rightExpr);
+            return builder.sum(leftExpr, rightExpr);
         case DIV:
-            return leftExpr.divide(rightExpr);
+            return builder.quot(leftExpr, rightExpr);
         case MOD:
-            return leftExpr.castToNum(Integer.class).mod(rightExpr.castToNum(Integer.class));
+            return builder.mod(leftExpr.as(Integer.class), rightExpr.as(Integer.class));
         case MUL:
-            return leftExpr.multiply(rightExpr);
+            return builder.prod(leftExpr, rightExpr);
         case SUB:
-            return leftExpr.subtract(rightExpr);
+            return builder.diff(leftExpr, rightExpr);
         default:
             throw new ExpressionVisitException("Operator \"" + operator.toString()
                     + "\" is not supported for given arguments.");
         }
     }
 
-    public Object handleDateFilter(DateTimeExpression<Date> left,
-                                   DateTimeExpression<Date> right,
+    public Predicate handleDateFilter(Expression<Date> left,
+                                   Expression<Date> right,
                                    BinaryOperatorKind operator,
+                                   CriteriaBuilder builder,
                                    boolean switched)
             throws ExpressionVisitException {
-        DateTimeExpression<Date> leftExpr;
-        DateTimeExpression<Date> rightExpr;
+        Expression<Date> leftExpr;
+        Expression<Date> rightExpr;
         if (switched) {
             leftExpr = right;
             rightExpr = left;
@@ -259,18 +274,18 @@ public abstract class EntityQuerySpecifications<T> {
         }
 
         switch (operator) {
-        case GE:
-            return leftExpr.goe(rightExpr);
-        case GT:
-            return leftExpr.gt(rightExpr);
-        case LE:
-            return leftExpr.loe(rightExpr);
-        case LT:
-            return leftExpr.lt(rightExpr);
         case EQ:
-            return leftExpr.eq(rightExpr);
+            return builder.equal(leftExpr, rightExpr);
         case NE:
-            return leftExpr.ne(rightExpr);
+            return builder.notEqual(leftExpr, rightExpr);
+        case LT:
+            return builder.lessThan(leftExpr, rightExpr);
+        case LE:
+            return builder.lessThanOrEqualTo(leftExpr, rightExpr);
+        case GT:
+            return builder.greaterThan(leftExpr, rightExpr);
+        case GE:
+            return builder.greaterThanOrEqualTo(leftExpr, rightExpr);
         default:
             throw new ExpressionVisitException("Operator \"" + operator.toString()
                     + "\" is not supported for DateTimeExpression");

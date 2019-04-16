@@ -29,14 +29,21 @@
 
 package org.n52.sta.data.query;
 
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
+
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.n52.series.db.beans.AbstractFeatureEntity;
-
-import com.querydsl.core.types.Expression;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.JPAExpressions;
-import com.querydsl.jpa.JPQLQuery;
+import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.DatasetEntity;
+import org.n52.series.db.beans.DescribableEntity;
+import org.n52.series.db.beans.ProcedureEntity;
+import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.springframework.data.jpa.domain.Specification;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -44,27 +51,37 @@ import com.querydsl.jpa.JPQLQuery;
  */
 public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecifications<AbstractFeatureEntity< ? >> {
 
-    public BooleanExpression withId(Long id) {
-        return qfeature.id.eq(id);
+//    public BooleanExpression withObservation(Long observationId) {
+//        return qfeature.id.in(JPAExpressions
+//                                            .selectFrom(qdataset)
+//                                            .where(qdataset.id.in(
+//                                                                  JPAExpressions
+//                                                                                .selectFrom(qobservation)
+//                                                                                .where(qobservation.id.eq(observationId))
+//                                                                                .select(qobservation.dataset.id)))
+//                                            .select(qdataset.feature.id));
+//    }
+    
+    public Specification<AbstractFeatureEntity<?>> withObservation(Long observationId) {
+        return (root, query, builder) -> {
+            Subquery<AbstractFeatureEntity> sq = query.subquery(AbstractFeatureEntity.class);
+            Root<DatasetEntity> dataset = sq.from(DatasetEntity.class);
+            Join<DatasetEntity, AbstractFeatureEntity> joinFeature = dataset.join(DatasetEntity.PROPERTY_FEATURE);
+            
+            Subquery<AbstractFeatureEntity> sqData = query.subquery(AbstractFeatureEntity.class);
+            Root<DataEntity> observation = sqData.from(DataEntity.class);
+            Join<DataEntity, DatasetEntity> joinDataset = dataset.join(DataEntity.PROPERTY_DATASET);
+            
+            sq.select(joinFeature).where(builder.equal(DatasetEntity.get(DescribableEntity.PROPERTY_ID), observationId));
+            return builder.in(root).value(sq);
+        };
     }
 
-    public BooleanExpression withObservation(Long observationId) {
-        return qfeature.id.in(JPAExpressions
-                                            .selectFrom(qdataset)
-                                            .where(qdataset.id.in(
-                                                                  JPAExpressions
-                                                                                .selectFrom(qobservation)
-                                                                                .where(qobservation.id.eq(observationId))
-                                                                                .select(qobservation.dataset.id)))
-                                            .select(qdataset.feature.id));
-    }
-
-    public BooleanExpression withIdentifier(String identifier) {
-        return qfeature.identifier.eq(identifier);
-    }
-
-    public BooleanExpression withName(String name) {
-        return qfeature.name.eq(name);
+    @Override
+    public Specification<AbstractFeatureEntity<?>> withIdentifier(final String identifier) {
+        return (root, query, builder) -> {
+            return builder.equal(root.get(DescribableEntity.PROPERTY_ID), identifier);
+        };
     }
 
     /*
@@ -75,7 +92,7 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
      * BooleanExpression)
      */
     @Override
-    public JPQLQuery<Long> getIdSubqueryWithFilter(Expression<Boolean> filter) {
+    public Subquery<Long> getIdSubqueryWithFilter(Expression<Boolean> filter) {
         return this.toSubquery(qfeature, qfeature.id, filter);
     }
 

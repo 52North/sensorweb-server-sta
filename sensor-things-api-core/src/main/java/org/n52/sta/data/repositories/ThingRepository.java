@@ -28,6 +28,8 @@
  */
 package org.n52.sta.data.repositories;
 
+import java.util.Optional;
+
 import org.n52.series.db.beans.PlatformEntity;
 import org.springframework.transaction.annotation.Transactional;
 

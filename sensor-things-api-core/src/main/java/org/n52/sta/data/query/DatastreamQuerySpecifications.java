@@ -31,14 +31,20 @@ package org.n52.sta.data.query;
 
 import java.util.Collection;
 
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Subquery;
+
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
+import org.n52.series.db.beans.DatasetEntity;
+import org.n52.series.db.beans.DescribableEntity;
+import org.n52.series.db.beans.PhenomenonEntity;
+import org.n52.series.db.beans.PlatformEntity;
+import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
-
-import com.querydsl.core.types.Expression;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.JPAExpressions;
-import com.querydsl.jpa.JPQLQuery;
+import org.springframework.data.jpa.domain.Specification;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -46,46 +52,70 @@ import com.querydsl.jpa.JPQLQuery;
  */
 public class DatastreamQuerySpecifications extends EntityQuerySpecifications<DatastreamEntity> {
 
-    public BooleanExpression withId(Long id) {
-        return qdatastream.id.eq(id);
+    public Specification<DatastreamEntity> withObservedProperty(final Long thingId) {
+        return (root, query, builder) -> {
+            final Join<DatasetEntity, PhenomenonEntity> join =
+                    root.join(DatasetEntity.PROPERTY_PHENOMENON, JoinType.INNER);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), thingId);
+        };
     }
 
-    public BooleanExpression withName(String name) {
-        return qdatastream.name.eq(name);
+    public Specification<DatastreamEntity> withObservedProperty(final String name) {
+        return (root, query, builder) -> {
+            final Join<DatasetEntity, PhenomenonEntity> join =
+                    root.join(DatasetEntity.PROPERTY_PHENOMENON, JoinType.INNER);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_NAME), name);
+        };
+    }
+    
+    public Specification<DatastreamEntity> withThing(final Long thingId) {
+        return (root, query, builder) -> {
+            final Join<DatasetEntity, PlatformEntity> join =
+                    root.join(DatasetEntity.PROPERTY_PLATFORM, JoinType.INNER);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), thingId);
+        };
     }
 
-    public BooleanExpression withObservedProperty(Long observedPropertyId) {
-        return qdatastream.observableProperty.id.eq(observedPropertyId);
+    public Specification<DatastreamEntity> withThing(final String name) {
+        return (root, query, builder) -> {
+            final Join<DatasetEntity, PlatformEntity> join =
+                    root.join(DatasetEntity.PROPERTY_PLATFORM, JoinType.INNER);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_NAME), name);
+        };
     }
 
-    public BooleanExpression withObservedProperty(String name) {
-        return qdatastream.observableProperty.name.eq(name);
+    public Specification<DatastreamEntity> withSensor(final Long thingId) {
+        return (root, query, builder) -> {
+            final Join<DatasetEntity, ProcedureEntity> join =
+                    root.join(DatasetEntity.PROPERTY_PLATFORM, JoinType.INNER);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), thingId);
+        };
     }
 
-    public BooleanExpression withThing(Long thingId) {
-        return qdatastream.thing.id.eq(thingId);
+    public Specification<DatastreamEntity> withSensor(final String name) {
+        return (root, query, builder) -> {
+            final Join<DatasetEntity, ProcedureEntity> join =
+                    root.join(DatasetEntity.PROPERTY_PLATFORM, JoinType.INNER);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_NAME), name);
+        };
     }
 
-    public BooleanExpression withThing(String name) {
-        return qdatastream.thing.name.eq(name);
+    public Specification<DatastreamEntity> withDataset(final Long thingId) {
+        return (root, query, builder) -> {
+            final Join<DatasetEntity, PlatformEntity> join =
+                    root.join(DatasetEntity.PROPERTY_PLATFORM, JoinType.INNER);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), thingId);
+        };
     }
 
-    public BooleanExpression withSensor(Long sensorId) {
-        return qdatastream.procedure.id.eq(sensorId);
+    public Specification<DatastreamEntity> withDataset(final Collection<Long> datasetIds) {
+        return (root, query, builder) -> {
+            final Join<DatasetEntity, PlatformEntity> join =
+                    root.join(DatasetEntity.PROPERTY_PLATFORM, JoinType.INNER);
+            return join.get(DescribableEntity.PROPERTY_NAME).in(datasetIds);
+        };
     }
-
-    public BooleanExpression withSensor(String name) {
-        return qdatastream.procedure.name.eq(name);
-    }
-
-    public BooleanExpression withDataset(Long datasetId) {
-        return qdatastream.datasets.any().id.eq(datasetId);
-    }
-
-    public BooleanExpression withDataset(Collection<Long> datasetIds) {
-        return qdatastream.datasets.any().id.in(datasetIds);
-    }
-
+    
     public BooleanExpression withObservation(Long observationId) {
         return qdatastream.datasets.any().id.in(JPAExpressions
                                                               .selectFrom(qobservation)
@@ -93,7 +123,8 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
                                                               .select(qobservation.dataset.id));
     }
 
-    public JPQLQuery<Long> getIdSubqueryWithFilter(Expression<Boolean> filter) {
+    @Override
+    public Subquery<Long> getIdSubqueryWithFilter(Expression<Boolean> filter) {
         return this.toSubquery(qdatastream, qdatastream.id, filter);
     }
 
@@ -104,7 +135,7 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
                                        boolean switched)
             throws ExpressionVisitException {
         if (propertyName.equals("Sensor") || propertyName.equals("ObservedProperty") || propertyName.equals("Thing") || propertyName.equals("Observations")) {
-            return handleRelatedPropertyFilter(propertyName, (JPQLQuery<Long>) propertyValue, switched);
+            return handleRelatedPropertyFilter(propertyName, propertyValue, switched);
         } else if (propertyName.equals("id")) {
             return handleDirectNumberPropertyFilter(qdatastream.id, propertyValue, operator, switched);
         } else {

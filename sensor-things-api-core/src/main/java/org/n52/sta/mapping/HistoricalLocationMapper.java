@@ -122,7 +122,7 @@ public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationE
 
     private void addThing(HistoricalLocationEntity historicalLocation, Entity entity) {
         if (checkNavigationLink(entity, ET_THING_NAME)) {
-            historicalLocation.setThingEntity(thingMapper.createEntity(entity.getNavigationLink(ET_THING_NAME).getInlineEntity()));
+            historicalLocation.setThing(thingMapper.createEntity(entity.getNavigationLink(ET_THING_NAME).getInlineEntity()));
         }
     }
 
@@ -133,7 +133,7 @@ public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationE
             while (iterator.hasNext()) {
                 locations.add(locationMapper.createEntity((Entity) iterator.next()));
             }
-            historicalLocation.setLocationEntities(locations);
+            historicalLocation.setLocations(locations);
         }
     }
 

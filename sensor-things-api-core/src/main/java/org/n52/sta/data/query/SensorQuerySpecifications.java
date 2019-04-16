@@ -29,13 +29,23 @@
 
 package org.n52.sta.data.query;
 
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
+
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
+import org.n52.series.db.beans.DescribableEntity;
+import org.n52.series.db.beans.PhenomenonEntity;
+import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
-
-import com.querydsl.core.types.Expression;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.JPQLQuery;
+import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.HistoricalLocationEntity;
+import org.n52.series.db.beans.sta.StaRelations.Datastream;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.query.Procedure;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -43,22 +53,14 @@ import com.querydsl.jpa.JPQLQuery;
  */
 public class SensorQuerySpecifications extends EntityQuerySpecifications<ProcedureEntity> {
 
-    public BooleanExpression withId(Long id) {
-        return qsensor.id.eq(id);
-    }
-
-    public BooleanExpression wihtName(String name) {
-        return qsensor.name.eq(name);
-    }
-
-    public BooleanExpression withIdentifier(String identifier) {
-        return qsensor.identifier.eq(identifier);
-    }
-
-    public BooleanExpression withDatastream(Long datastreamId) {
-        return qsensor.id.in(dQS.toSubquery(qdatastream,
-                                            qdatastream.procedure.id,
-                                            qdatastream.id.eq(datastreamId)));
+    public Specification<ProcedureEntity> withDatastream(Long datastreamId) {
+        return (root, query, builder) -> {
+            Subquery<ProcedureEntity> sq = query.subquery(ProcedureEntity.class);
+            Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
+            Join<DatastreamEntity, ProcedureEntity> join = datastream.join(DatastreamEntity.PROPERTY_PROCEDURE);
+            sq.select(join).where(builder.equal(datastream.get(DescribableEntity.PROPERTY_ID), datastreamId));
+            return builder.in(root).value(sq);
+        };
     }
 
     /**
@@ -66,10 +68,18 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications<Procedu
      * 
      * @return BooleanExpression evaluating to true if Entity is valid
      */
-    public BooleanExpression isValidEntity() {
-        return qsensor.id.in(dQS.toSubquery(qdatastream,
-                                            qdatastream.procedure.id,
-                                            qdatastream.isNotNull()));
+    public Specification<ProcedureEntity> isValidEntity() {
+//        return qsensor.id.in(dQS.toSubquery(qdatastream,
+//                                            qdatastream.procedure.id,
+//                                            qdatastream.isNotNull()));
+        
+        return (root, query, builder) -> {
+            Subquery<ProcedureEntity> sq = query.subquery(ProcedureEntity.class);
+            Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
+            Join<DatastreamEntity, ProcedureEntity> join = datastream.join(DatastreamEntity.PROPERTY_PROCEDURE);
+            sq.select(join).where(builder.isNotNull(datastream));
+            return builder.in(root).value(sq);
+        };
     }
 
     /*
@@ -80,8 +90,8 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications<Procedu
      * BooleanExpression)
      */
     @Override
-    public JPQLQuery<Long> getIdSubqueryWithFilter(Expression<Boolean> filter) {
-        return this.toSubquery(qsensor, qsensor.id, filter);
+    public Subquery<Long> getIdSubqueryWithFilter(Expression<Boolean> filter) {
+        return this.toSubquery(ProcedureEntity.class, DescribableEntity.PROPERTY_ID, filter);
     }
 
     /*

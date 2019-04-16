@@ -103,6 +103,7 @@ public class ThingMapper extends AbstractMapper<PlatformEntity> {
     public PlatformEntity createEntity(Entity entity) {
         PlatformEntity thing = new PlatformEntity();
         setId(thing, entity);
+        setIdentifier(thing, entity);
         setName(thing, entity);
         setDescription(thing, entity);
         if (entity.getProperty(PROP_PROPERTIES) != null) {
@@ -134,7 +135,7 @@ public class ThingMapper extends AbstractMapper<PlatformEntity> {
             while (iterator.hasNext()) {
                 locations.add(locationMapper.createEntity(iterator.next()));
             }
-            thing.setLocationEntities(locations);
+            thing.setLocations(locations);
         }
     }
 

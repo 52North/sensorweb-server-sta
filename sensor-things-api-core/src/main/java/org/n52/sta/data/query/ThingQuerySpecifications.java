@@ -29,38 +29,46 @@
 
 package org.n52.sta.data.query;
 
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
+import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.PlatformEntity;
-
-import com.querydsl.core.types.Expression;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.JPQLQuery;
+import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.HistoricalLocationEntity;
+import org.n52.series.db.beans.sta.LocationEntity;
+import org.springframework.data.jpa.domain.Specification;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
 public class ThingQuerySpecifications extends EntityQuerySpecifications<PlatformEntity> {
-
-    public BooleanExpression withRelatedLocation(Long locationId) {
-        return qPlatform.locationEntities.any().id.eq(locationId);
+    
+    public Specification<PlatformEntity> withRelatedLocation(Long locationId) {
+        return (root, query, builder) -> {
+            final Join<PlatformEntity, LocationEntity> join =
+                    root.join(PlatformEntity.PROPERTY_LOCATIONS, JoinType.INNER);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), locationId);
+        };
     }
 
-    public BooleanExpression withRelatedHistoricalLocation(Long historicalId) {
-        return qPlatform.historicalLocationEntities.any().id.eq(historicalId);
+    public Specification<PlatformEntity>  withRelatedHistoricalLocation(Long historicalId) {
+        return (root, query, builder) -> {
+            final Join<PlatformEntity, HistoricalLocationEntity> join =
+                    root.join(PlatformEntity.PROPERTY_HISTORICAL_LOCATIONS, JoinType.INNER);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), historicalId);
+        };
     }
-
-    public BooleanExpression withRelatedDatastream(Long datastreamId) {
-        return qPlatform.datastreamEntities.any().id.eq(datastreamId);
-    }
-
-    public BooleanExpression withId(Long id) {
-        return qPlatform.id.eq(id);
-    }
-
-    public BooleanExpression withName(String name) {
-        return qPlatform.name.eq(name);
+    
+    public Specification<PlatformEntity> withRelatedDatastream(Long datastreamId) {
+        return (root, query, builder) -> {
+            final Join<PlatformEntity, DatastreamEntity> join =
+                    root.join(PlatformEntity.PROPERTY_DATASTREAMS, JoinType.INNER);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), datastreamId);
+        };
     }
 
     /*

@@ -97,7 +97,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
 
     @Override
     public Entity getEntity(Long id) {
-        Optional<PlatformEntity> entity = getRepository().findOne(tQS.withId(id));
+        Optional<PlatformEntity> entity = getRepository().findById(id);
         return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
 
@@ -120,7 +120,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
 
     @Override
     public boolean existsEntity(Long id) {
-        return getRepository().exists(tQS.withId(id));
+        return getRepository().existsById(id);
     }
 
     @Override
@@ -214,10 +214,10 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     public PlatformEntity create(PlatformEntity thing) throws ODataApplicationException {
         if (!thing.isProcesssed()) {
             if (thing.getId() != null && !thing.isSetName()) {
-                return getRepository().findOne(tQS.withId(thing.getId())).get();
+                return getRepository().findById(thing.getId()).get();
             }
-            if (getRepository().exists(tQS.withName(thing.getName()))) {
-                Optional<PlatformEntity> optional = getRepository().findOne(tQS.withName(thing.getName()));
+            if (getRepository().existsByName(thing.getName())) {
+                Optional<PlatformEntity> optional = getRepository().findByName(thing.getName());
                 return optional.isPresent() ? optional.get() : null;
             }
             thing.setProcesssed(true);
@@ -235,11 +235,11 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     public PlatformEntity update(PlatformEntity entity, HttpMethod method) throws ODataApplicationException {
         checkUpdate(entity);
         if (HttpMethod.PATCH.equals(method)) {
-            Optional<PlatformEntity> existing = getRepository().findOne(tQS.withId(entity.getId()));
+            Optional<PlatformEntity> existing = getRepository().findById(entity.getId());
             if (existing.isPresent()) {
                 PlatformEntity merged = mapper.merge(existing.get(), entity);
                 if (entity.hasLocationEntities()) {
-                    merged.setLocationEntities(entity.getLocationEntities());
+                    merged.setLocations(entity.getLocations());
                     processLocations(merged);
                     merged = getRepository().save(merged);
                     processHistoricalLocations(merged);
@@ -258,7 +258,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     
     private void checkUpdate(PlatformEntity thing) throws ODataApplicationException {
         if (thing.hasLocationEntities()) {
-            for (LocationEntity location : thing.getLocationEntities()) {
+            for (LocationEntity location : thing.getLocations()) {
                 checkInlineLocation(location);
             }
         }
@@ -288,7 +288,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
                 }
             });
             // delete historicalLocation
-            thing.getHistoricalLocationEntities().forEach(hl -> {
+            thing.getHistoricalLocations().forEach(hl -> {
                 try {
                     getHistoricalLocationService().delete(hl);
                 } catch (ODataApplicationException e) {
@@ -323,21 +323,21 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     private void processLocations(PlatformEntity thing) throws ODataApplicationException {
         if (thing.hasLocationEntities()) {
             Set<LocationEntity> locations = new LinkedHashSet<>();
-            for (LocationEntity location : thing.getLocationEntities()) {
+            for (LocationEntity location : thing.getLocations()) {
                 LocationEntity optionalLocation = getLocationService().create(location);
                 locations.add(optionalLocation != null ? optionalLocation : location);
             }
-            thing.setLocationEntities(locations);
+            thing.setLocations(locations);
         }
     }
 
     private void processHistoricalLocations(PlatformEntity thing) throws ODataApplicationException {
         if (thing != null && thing.hasLocationEntities()) {
             Set<HistoricalLocationEntity> historicalLocations = thing.hasHistoricalLocationEntities()
-                    ? new LinkedHashSet<>(thing.getHistoricalLocationEntities())
+                    ? new LinkedHashSet<>(thing.getHistoricalLocations())
                     : new LinkedHashSet<>();
             HistoricalLocationEntity historicalLocation = new HistoricalLocationEntity();
-            historicalLocation.setThingEntity(thing);
+            historicalLocation.setThing(thing);
             historicalLocation.setTime(DateTime.now().toDate());
             historicalLocation.setProcesssed(true);
             HistoricalLocationEntity createdHistoricalLocation =
@@ -345,11 +345,11 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
             if (createdHistoricalLocation != null) {
                 historicalLocations.add(createdHistoricalLocation);
             }
-            for (LocationEntity location : thing.getLocationEntities()) {
-                location.setHistoricalLocationEntities(historicalLocations);
+            for (LocationEntity location : thing.getLocations()) {
+                location.setHistoricalLocations(historicalLocations);
                 getLocationService().createOrUpdate(location);
             }
-            thing.setHistoricalLocationEntities(historicalLocations);
+            thing.setHistoricalLocations(historicalLocations);
         }
     }
 
@@ -377,14 +377,14 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
         PlatformEntity entity = (PlatformEntity) rawObject;
         
         try {
-            entity.getLocationEntities().forEach((en)-> {
+            entity.getLocations().forEach((en)-> {
                 set.add(en.getId());
             });
             collections.put(ET_LOCATION_NAME, new HashSet(set));
         } catch(NullPointerException e) {}
         set.clear();
         try {
-            entity.getHistoricalLocationEntities().forEach((en) -> {
+            entity.getHistoricalLocations().forEach((en) -> {
                 set.add(en.getId());
             });
             collections.put(ET_HISTORICAL_LOCATION_NAME,  new HashSet(set));

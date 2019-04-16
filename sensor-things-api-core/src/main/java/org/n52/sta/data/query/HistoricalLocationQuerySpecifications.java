@@ -29,13 +29,16 @@
 
 package org.n52.sta.data.query;
 
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
+import org.n52.series.db.beans.DescribableEntity;
+import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
-
-import com.querydsl.core.types.Expression;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.JPQLQuery;
+import org.n52.series.db.beans.sta.LocationEntity;
+import org.springframework.data.jpa.domain.Specification;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -43,16 +46,28 @@ import com.querydsl.jpa.JPQLQuery;
  */
 public class HistoricalLocationQuerySpecifications extends EntityQuerySpecifications<HistoricalLocationEntity> {
 
-    public BooleanExpression withRelatedLocation(Long historicalId) {
-        return qhistoricallocation.locationEntities.any().id.eq(historicalId);
+//    public BooleanExpression withRelatedLocation(Long historicalId) {
+//        return qhistoricallocation.locationEntities.any().id.eq(historicalId);
+//    }
+    
+    public Specification<HistoricalLocationEntity> withRelatedLocation(final String historicalId) {
+        return (root, query, builder) -> {
+            final Join<HistoricalLocationEntity, LocationEntity> join =
+                    root.join(HistoricalLocationEntity.PROPERTY_LOCATIONS, JoinType.INNER);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), historicalId);
+        };
     }
 
-    public BooleanExpression withRelatedThing(Long thingId) {
-        return qhistoricallocation.thingEntity.id.eq(thingId);
-    }
-
-    public BooleanExpression withId(Long id) {
-        return qhistoricallocation.id.eq(id);
+//    public BooleanExpression withRelatedThing(Long thingId) {
+//        return qhistoricallocation.thingEntity.id.eq(thingId);
+//    }
+    
+    public Specification<HistoricalLocationEntity> withRelatedThing(final String thingId) {
+        return (root, query, builder) -> {
+            final Join<HistoricalLocationEntity, PlatformEntity> join =
+                    root.join(HistoricalLocationEntity.PROPERTY_THING, JoinType.INNER);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), thingId);
+        };
     }
 
     /*

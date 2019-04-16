@@ -51,6 +51,7 @@ import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.HistoricalLocationMapper;
 import org.n52.sta.service.query.QueryOptions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
 import com.querydsl.core.types.Predicate;
@@ -92,7 +93,7 @@ public class HistoricalLocationService extends AbstractSensorThingsEntityService
     @Override
     public EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException {
         EntityCollection retEntitySet = new EntityCollection();
-        Predicate filter = getFilterPredicate(HistoricalLocationEntity.class, queryOptions);
+        Specification<HistoricalLocationEntity> filter = getFilterPredicate(HistoricalLocationEntity.class, queryOptions);
 
         getRepository().findAll(filter, createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
@@ -117,7 +118,7 @@ public class HistoricalLocationService extends AbstractSensorThingsEntityService
 
     @Override
     public long getRelatedEntityCollectionCount(Long sourceId, EdmEntityType sourceEntityType) {
-        BooleanExpression filter = getFilter(sourceId, sourceEntityType);
+        Specification<HistoricalLocationEntity> filter = getFilter(sourceId, sourceEntityType);
         return getRepository().count(filter);
     }
 
@@ -136,11 +137,6 @@ public class HistoricalLocationService extends AbstractSensorThingsEntityService
                 return null;
         }
         return filter;
-    }
-
-    @Override
-    public boolean existsEntity(Long id) {
-        return getRepository().exists(byId(id));
     }
 
     @Override
@@ -231,16 +227,6 @@ public class HistoricalLocationService extends AbstractSensorThingsEntityService
         return getRepository().findOne(filter);
     }
 
-    /**
-     * Constructs SQL Expression to request Entity by ID.
-     *
-     * @param id id of the requested entity
-     * @return BooleanExpression evaluating to true if Entity is found and valid
-     */
-    private BooleanExpression byId(Long id) {
-        return hlQS.withId(id);
-    }
-
     @Override
     public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
         return getRepository().count(getFilterPredicate(HistoricalLocationEntity.class, queryOptions));
@@ -258,35 +244,35 @@ public class HistoricalLocationService extends AbstractSensorThingsEntityService
     }
 
     private void check(HistoricalLocationEntity historicalLocation) throws ODataApplicationException {
-        if (historicalLocation.getThingEntity() == null && historicalLocation.getLocationEntities() != null) {
+        if (historicalLocation.getThing() == null && historicalLocation.getLocations() != null) {
             throw new ODataApplicationException("The datastream to create is invalid",
                     HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
         }
     }
 
     private HistoricalLocationEntity processThing(HistoricalLocationEntity historicalLocation) throws ODataApplicationException {
-        PlatformEntity thing = getThingService().createOrUpdate(historicalLocation.getThingEntity());
-        historicalLocation.setThingEntity(thing);
+        PlatformEntity thing = getThingService().createOrUpdate(historicalLocation.getThing());
+        historicalLocation.setThing(thing);
         HistoricalLocationEntity created = getRepository().save(historicalLocation);
         created.setProcesssed(true);
         getThingService().update(thing.addHistoricalLocation(created));
-        return created.setLocationEntities(historicalLocation.getLocationEntities());
+        return created.setLocations(historicalLocation.getLocations());
     }
 
     private void processLocations(HistoricalLocationEntity historicalLocation) throws ODataApplicationException {
         Set<LocationEntity> locations = new LinkedHashSet<>();
-        for (LocationEntity l : historicalLocation.getLocationEntities()) {
+        for (LocationEntity l : historicalLocation.getLocations()) {
             LocationEntity location = locationRepository.getOne(l.getId());
             location.addHistoricalLocation(historicalLocation);
             locations.add(getLocationService().createOrUpdate(location));
         }
-        historicalLocation.setLocationEntities(locations);
+        historicalLocation.setLocations(locations);
     }
 
     @Override
     public HistoricalLocationEntity update(HistoricalLocationEntity entity, HttpMethod method) throws ODataApplicationException {
         if (HttpMethod.PATCH.equals(method)) {
-            Optional<HistoricalLocationEntity> existing = getRepository().findOne(hlQS.withId(entity.getId()));
+            Optional<HistoricalLocationEntity> existing = getRepository().findById(entity.getId());
             if (existing.isPresent()) {
                 HistoricalLocationEntity merged = mapper.merge(existing.get(), entity);
                 return getRepository().save(merged);
@@ -322,9 +308,9 @@ public class HistoricalLocationService extends AbstractSensorThingsEntityService
     @Override
     public void delete(HistoricalLocationEntity entity) throws ODataApplicationException {
         // delete historicalLocation
-        entity.getLocationEntities().forEach(l -> {
+        entity.getLocations().forEach(l -> {
             try {
-                l.getHistoricalLocationEntities().remove(entity);
+                l.getHistoricalLocations().remove(entity);
                 getLocationService().update(l);
             } catch (ODataApplicationException e) {
                 // TODO Auto-generated catch block
@@ -336,14 +322,14 @@ public class HistoricalLocationService extends AbstractSensorThingsEntityService
     }
 
     private void updateLocations(HistoricalLocationEntity historicalLocation) throws ODataApplicationException {
-        for (LocationEntity location : historicalLocation.getLocationEntities()) {
-            location.getHistoricalLocationEntities().remove(historicalLocation);
+        for (LocationEntity location : historicalLocation.getLocations()) {
+            location.getHistoricalLocations().remove(historicalLocation);
             getLocationService().update(location);
         }
     }
 
     private void updateThing(HistoricalLocationEntity historicalLocation) throws ODataApplicationException {
-        getThingService().update(historicalLocation.getThingEntity().setHistoricalLocationEntities(null));
+        getThingService().update(historicalLocation.getThing().setHistoricalLocations(null));
     }
 
     private AbstractSensorThingsEntityService<?, PlatformEntity> getThingService() {
@@ -364,11 +350,11 @@ public class HistoricalLocationService extends AbstractSensorThingsEntityService
 
         try {
             collections.put(ET_THING_NAME,
-                    Collections.singleton(entity.getThingEntity().getId()));
+                    Collections.singleton(entity.getThing().getId()));
         } catch (NullPointerException e) {
         }
         Set<Long> set = new HashSet<>();
-        entity.getLocationEntities().forEach((en) -> {
+        entity.getLocations().forEach((en) -> {
             set.add(en.getId());
         });
         collections.put(ET_LOCATION_NAME, set);

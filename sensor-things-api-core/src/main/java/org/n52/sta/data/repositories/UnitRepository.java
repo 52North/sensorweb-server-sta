@@ -30,10 +30,11 @@ package org.n52.sta.data.repositories;
 
 import org.n52.series.db.beans.UnitEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
-public interface UnitRepository extends JpaRepository<UnitEntity, Long> {
+public interface UnitRepository extends JpaRepository<UnitEntity, Long>, JpaSpecificationExecutor<UnitEntity> {
 
     boolean existsByIdentifier(String identifier);
 

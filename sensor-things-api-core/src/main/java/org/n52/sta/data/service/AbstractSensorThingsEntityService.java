@@ -11,6 +11,9 @@ import java.util.OptionalLong;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
@@ -45,10 +48,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.querydsl.core.types.Predicate;
 import java.util.Map;
 import java.util.Set;
 
@@ -161,8 +165,10 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
      * @return true if an Entity that is conform to the given key predicates
      *         exists
      */
-    public abstract boolean existsEntity(Long id);
-
+    public boolean existsEntity(Long id) {
+        return getRepository().existsById(id);
+    }
+    
     /**
      * Checks if an Entity exists that is related to a single Entity of the
      * given EntityType
@@ -260,13 +266,13 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
      * @return Predicate based on FilterOption from queryOptions
      * @throws ODataApplicationException if the queryOptions are invalid
      */
-    public Predicate getFilterPredicate(Class entityClass, QueryOptions queryOptions) throws ODataApplicationException {
+    public Specification<S> getFilterPredicate(Class entityClass, QueryOptions queryOptions, CriteriaBuilder criteriaBuilder) throws ODataApplicationException {
         if (!queryOptions.hasFilterOption()) {
             return null;
         } else {
             Expression filterExpression = queryOptions.getFilterOption().getExpression();
             
-            FilterExpressionVisitor visitor = new FilterExpressionVisitor(entityClass, this);
+            FilterExpressionVisitor visitor = new FilterExpressionVisitor(entityClass, this, criteriaBuilder);
             try {
                 return (Predicate) filterExpression.accept(visitor);
             } catch (ExpressionVisitException e) {
