@@ -29,9 +29,15 @@
 
 package org.n52.sta.data.service;
 
+import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_NAME;
+
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.Set;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
@@ -56,12 +62,6 @@ import org.n52.sta.service.query.QueryOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_NAME;
 
 /**
  *
@@ -99,7 +99,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     @Override
     public EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException {
         EntityCollection retEntitySet = new EntityCollection();
-        Specification<ProcedureEntity> filter = getFilterPredicate(ProcedureEntity.class, queryOptions);
+        Specification<ProcedureEntity> filter = getFilterPredicate(ProcedureEntity.class, queryOptions, null, null);
         getRepository().findAll(filter, createPageableRequest(queryOptions))
                        .forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
@@ -136,7 +136,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
             if (targetId != null) {
                 filter = filter.and(sQS.withId(targetId));
             }
-            return getRepository().exists(filter);
+            return getRepository().count(filter) > 0;
         }
         default:
             return false;
@@ -219,7 +219,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
 
     @Override
     public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
-        return getRepository().count(getFilterPredicate(ProcedureEntity.class, queryOptions));
+        return getRepository().count(getFilterPredicate(ProcedureEntity.class, queryOptions, null, null));
     }
 
     @Override

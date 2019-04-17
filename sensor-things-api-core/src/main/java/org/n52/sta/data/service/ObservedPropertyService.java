@@ -93,7 +93,7 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
     @Override
     public EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException {
         EntityCollection retEntitySet = new EntityCollection();
-        Specification<PhenomenonEntity> filter = getFilterPredicate(PhenomenonEntity.class, queryOptions);
+        Specification<PhenomenonEntity> filter = getFilterPredicate(PhenomenonEntity.class, queryOptions, null, null);
         getRepository().findAll(filter, createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
@@ -210,7 +210,7 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
 
     @Override
     public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
-        return getRepository().count(getFilterPredicate(PhenomenonEntity.class, queryOptions));
+        return getRepository().count(getFilterPredicate(PhenomenonEntity.class, queryOptions, null, null));
     }
 
     @Override
@@ -306,7 +306,7 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
         PhenomenonEntity entity = (PhenomenonEntity) rawObject;
 
         Iterable<DatastreamEntity> observations = datastreamRepository
-                .findAll(oQS.withId(entity.getId()));
+                .findAll(dQS.withObservedProperty(entity.getId()));
         observations.forEach((o) -> {
             datastreamIds.add(o.getId());
         });

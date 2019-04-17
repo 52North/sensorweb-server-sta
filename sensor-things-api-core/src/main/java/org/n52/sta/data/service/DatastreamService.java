@@ -28,9 +28,17 @@
  */
 package org.n52.sta.data.service;
 
+import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ET_OBSERVATION_NAME;
+import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_NAME;
+import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ET_SENSOR_NAME;
+import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
+
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
@@ -41,7 +49,6 @@ import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
-import org.hibernate.annotations.Where;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
@@ -64,15 +71,6 @@ import org.n52.sta.service.query.QueryOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ET_OBSERVATION_NAME;
-import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_NAME;
-import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ET_SENSOR_NAME;
-import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -112,7 +110,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     @Override
     public EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException {
         EntityCollection retEntitySet = new EntityCollection();
-        Specification<DatastreamEntity> filter = getFilterPredicate(DatastreamEntity.class, queryOptions);
+        Specification<DatastreamEntity> filter = getFilterPredicate(DatastreamEntity.class, queryOptions, null, null);
         
         getRepository().findAll(filter, createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
@@ -126,7 +124,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
 
     @Override
     public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType, QueryOptions queryOptions) throws ODataApplicationException {
-        Predicate filter = getFilter(sourceId, sourceEntityType).and(getFilterPredicate(DatastreamEntity.class, queryOptions));
+        Specification<DatastreamEntity> filter = getFilter(sourceId, sourceEntityType).and(getFilterPredicate(DatastreamEntity.class, queryOptions, null, null));
         Iterable<DatastreamEntity> datastreams = getRepository().findAll(filter, createPageableRequest(queryOptions));
         EntityCollection retEntitySet = new EntityCollection();
         datastreams.forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
@@ -150,14 +148,14 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
 
     @Override
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-        BooleanExpression filter = getFilter(sourceId, sourceEntityType);
+        Specification<DatastreamEntity> filter = getFilter(sourceId, sourceEntityType);
         if (filter == null) {
             return false;
         }
         if (targetId != null) {
             filter = filter.and(dQS.withId(targetId));
         }
-        return getRepository().exists(filter);
+        return getRepository().count(filter) > 0;
     }
 
     @Override
@@ -204,7 +202,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     
     @Override
     public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
-        return getRepository().count(getFilterPredicate(DatastreamEntity.class, queryOptions));
+        return getRepository().count(getFilterPredicate(DatastreamEntity.class, queryOptions, null, null));
     }
 
 
@@ -277,8 +275,8 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
                 return getRepository().findOne(dQS.withId(datastream.getId())).get();
             }
             check(datastream);
-            Predicate predicate = createQuery(datastream);
-            if (getRepository().exists(predicate)) {
+            Specification<DatastreamEntity> predicate = createQuery(datastream);
+            if (getRepository().count() > 0) {
                 DatastreamEntity optional = getRepository().findOne(predicate).get();
                 return processObservation((DatastreamEntity) optional.setProcesssed(true), datastream.getObservations());
             }
@@ -295,8 +293,8 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
         return datastream;
     }
 
-    private Predicate createQuery(DatastreamEntity datastream) {
-        BooleanExpression expression;
+    private Specification<DatastreamEntity> createQuery(DatastreamEntity datastream) {
+        Specification<DatastreamEntity> expression;
         if (datastream.getThing().getId() != null && !datastream.getThing().isSetName()) {
             expression = dQS.withThing(datastream.getThing().getId());
         } else {
@@ -506,12 +504,12 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
             collections.put(ET_OBSERVED_PROPERTY_NAME, Collections.singleton(entity.getObservableProperty().getId()));
         } catch(NullPointerException e) {}
         
-        Iterable<DataEntity<?>> observations = dataRepository.findAll(dQS.withId(entity.getId()));
-        Set<Long> observationIds = new HashSet<>();
-        observations.forEach((o) -> {
-            observationIds.add(o.getId());
-        });
-        collections.put(ET_OBSERVATION_NAME, observationIds);
+//        Iterable<DataEntity<?>> observations = dataRepository.findAll(dQS.withId(entity.getId()));
+//        Set<Long> observationIds = new HashSet<>();
+//        observations.forEach((o) -> {
+//            observationIds.add(o.getId());
+//        });
+//        collections.put(ET_OBSERVATION_NAME, observationIds);
         
         return collections;
     }

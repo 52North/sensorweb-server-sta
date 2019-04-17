@@ -7,12 +7,13 @@ package org.n52.sta.data.service;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.OptionalLong;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.apache.olingo.commons.api.data.Entity;
@@ -25,7 +26,6 @@ import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriInfoResource;
 import org.apache.olingo.server.api.uri.UriResource;
-import org.apache.olingo.server.api.uri.queryoption.FilterOption;
 import org.apache.olingo.server.api.uri.queryoption.OrderByItem;
 import org.apache.olingo.server.api.uri.queryoption.OrderByOption;
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
@@ -37,12 +37,11 @@ import org.apache.olingo.server.api.uri.queryoption.expression.Member;
 import org.apache.olingo.server.api.uri.queryoption.expression.MethodKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.UnaryOperatorKind;
 import org.n52.series.db.beans.IdEntity;
-import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.data.OffsetLimitBasedPageRequest;
-import org.n52.sta.service.query.FilterExpressionVisitor;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
+import org.n52.sta.service.query.FilterExpressionVisitor;
 import org.n52.sta.service.query.QueryOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -50,11 +49,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Interface for requesting Sensor Things entities
@@ -266,15 +261,15 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
      * @return Predicate based on FilterOption from queryOptions
      * @throws ODataApplicationException if the queryOptions are invalid
      */
-    public Specification<S> getFilterPredicate(Class entityClass, QueryOptions queryOptions, CriteriaBuilder criteriaBuilder) throws ODataApplicationException {
+    public Specification<S> getFilterPredicate(Class entityClass, QueryOptions queryOptions, CriteriaBuilder criteriaBuilder, Root<T> root) throws ODataApplicationException {
         if (!queryOptions.hasFilterOption()) {
             return null;
         } else {
             Expression filterExpression = queryOptions.getFilterOption().getExpression();
             
-            FilterExpressionVisitor visitor = new FilterExpressionVisitor(entityClass, this, criteriaBuilder);
+            FilterExpressionVisitor visitor = new FilterExpressionVisitor(entityClass, this, criteriaBuilder, root);
             try {
-                return (Predicate) filterExpression.accept(visitor);
+                return (Specification<S>) filterExpression.accept(visitor);
             } catch (ExpressionVisitException e) {
                 throw new ODataApplicationException(e.getMessage(), HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ENGLISH);
             }
@@ -303,14 +298,14 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
     
     protected void checkInlineDatastream(DatastreamEntity datastream) throws ODataApplicationException {
         if (datastream.getId() == null || datastream.isSetName() || datastream.isSetDescription() || datastream.isSetUnit()) {
-            throw new ODataApplicationException("Inlined entities are not allowed for updates!",
+            throw new ODataApplicationException("Inlined datastream entities are not allowed for updates!",
                     HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
         }
     }
     
     protected void checkInlineLocation(LocationEntity location) throws ODataApplicationException {
         if (location.getId() == null || location.isSetName() || location.isSetDescription()) {
-            throw new ODataApplicationException("Inlined entities are not allowed for updates!",
+            throw new ODataApplicationException("Inlined location entities are not allowed for updates!",
                     HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
         }
     }

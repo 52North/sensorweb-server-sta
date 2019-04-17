@@ -29,11 +29,13 @@
 
 package org.n52.sta.data.query;
 
-import java.util.Date;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Subquery;
 
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.n52.series.db.beans.DataEntity;
+import org.springframework.data.jpa.domain.Specification;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -41,22 +43,25 @@ import org.n52.series.db.beans.DataEntity;
  */
 public class ObservationQuerySpecifications extends EntityQuerySpecifications<DataEntity< ? >> {
 
-    public BooleanExpression withFeatureOfInterest(Long featureId) {
-        return qobservation.dataset.id.in(JPAExpressions
-                                                        .selectFrom(qdataset)
-                                                        .where(qdataset.feature.id.eq(featureId))
-                                                        .select(qdataset.id));
+    public Specification<DataEntity< ? >> withFeatureOfInterest(Long featureId) {
+//        return qobservation.dataset.id.in(JPAExpressions
+//                                                        .selectFrom(qdataset)
+//                                                        .where(qdataset.feature.id.eq(featureId))
+//                                                        .select(qdataset.id));
+        return null;
     }
 
-    public BooleanExpression withDatastream(Long datastreamId) {
-        return qobservation.dataset.id.in(JPAExpressions
-                                                        .selectFrom(qdatastream)
-                                                        .where(qdatastream.id.eq(datastreamId))
-                                                        .select(qdatastream.datasets.any().id));
+    public Specification<DataEntity< ? >> withDatastream(Long datastreamId) {
+//        return qobservation.dataset.id.in(JPAExpressions
+//                                                        .selectFrom(qdatastream)
+//                                                        .where(qdatastream.id.eq(datastreamId))
+//                                                        .select(qdatastream.datasets.any().id));
+        return null;
     }
 
-    public BooleanExpression withDataset(Long datasetId) {
-        return qobservation.dataset.id.eq(datasetId);
+    public Specification<DataEntity< ? >> withDataset(Long datasetId) {
+//        return qobservation.dataset.id.eq(datasetId);
+        return null;
     }
 
     /**
@@ -64,10 +69,11 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
      * 
      * @return BooleanExpression evaluating to true if Entity is valid
      */
-    public BooleanExpression isValidEntity() {
-        return qobservation.dataset.id.in(dQS.toSubquery(qdatastream,
-                                                         qdatastream.datasets.any().id,
-                                                         qdatastream.datasets.contains(qobservation.dataset)));
+    public Specification<DataEntity< ? >> isValidEntity() {
+//        return qobservation.dataset.id.in(dQS.toSubquery(qdatastream,
+//                                                         qdatastream.datasets.any().id,
+//                                                         qdatastream.datasets.contains(qobservation.dataset)));
+        return null;
     }
 
     /*
@@ -78,8 +84,9 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
      * BooleanExpression)
      */
     @Override
-    public JPQLQuery<Long> getIdSubqueryWithFilter(Expression<Boolean> filter) {
-        return this.toSubquery(qobservation, qobservation.id, filter);
+    public Subquery<Long> getIdSubqueryWithFilter(Expression<Boolean> filter) {
+//        return this.toSubquery(qobservation, qobservation.id, filter);
+        return null;
     }
 
     /*
@@ -94,79 +101,80 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
                                        BinaryOperatorKind operator,
                                        boolean switched)
             throws ExpressionVisitException {
-        if (propertyName.equals("Datastream") || propertyName.equals("FeatureOfInterest")) {
-            return handleRelatedPropertyFilter(propertyName, (JPQLQuery<Long>) propertyValue);
-        } else if (propertyName.equals("id")) {
-            return handleDirectNumberPropertyFilter(qobservation.id, propertyValue, operator, switched);
-        } else {
-            return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
-        }
+//        if (propertyName.equals("Datastream") || propertyName.equals("FeatureOfInterest")) {
+//            return handleRelatedPropertyFilter(propertyName, (JPQLQuery<Long>) propertyValue);
+//        } else if (propertyName.equals("id")) {
+//            return handleDirectNumberPropertyFilter(qobservation.id, propertyValue, operator, switched);
+//        } else {
+//            return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
+//        }
+        return null;
     }
 
-    private BooleanExpression handleRelatedPropertyFilter(String propertyName, JPQLQuery<Long> propertyValue)
-            throws ExpressionVisitException {
-        if (propertyName.equals("Datastream")) {
-            return qobservation.dataset.id.in(JPAExpressions
-                                              .selectFrom(qdatastream)
-                                              .where(qdatastream.id.eq(propertyValue))
-                                              .select(qdatastream.datasets.any().id));
-        } else {
-            return qobservation.dataset.id.in(JPAExpressions
-                                              .selectFrom(qdataset)
-                                              .where(qdataset.feature.id.eq(propertyValue))
-                                              .select(qdataset.id));
-        }
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private Object handleDirectPropertyFilter(String propertyName,
-                                              Object propertyValue,
-                                              BinaryOperatorKind operator,
-                                              boolean switched)
-            throws ExpressionVisitException {
-
-        switch (propertyName) {
-        case "value":
-            NumberPath<Double> property = new PathBuilder(DataEntity.class, qobservation.getRoot().toString())
-                                                                                                              .getNumber(propertyName,
-                                                                                                                         Double.class);
-            return handleDirectNumberPropertyFilter(property, propertyValue, operator, switched);
-        case "samplingTimeEnd":
-            DateTimeExpression<Date> value = (DateTimeExpression<Date>) propertyValue;
-            switch (operator) {
-            case LT:
-            case LE:
-                return handleDirectDateTimePropertyFilter(qobservation.samplingTimeEnd, value, operator, switched);
-            case GT:
-            case GE:
-                return handleDirectDateTimePropertyFilter(qobservation.samplingTimeStart, value, operator, switched);
-            case EQ:
-                BooleanExpression eqStart = (BooleanExpression) handleDirectDateTimePropertyFilter(qobservation.samplingTimeStart,
-                                                                                                   value,
-                                                                                                   operator,
-                                                                                                   switched);
-                BooleanExpression eqEnd = (BooleanExpression) handleDirectDateTimePropertyFilter(qobservation.samplingTimeEnd,
-                                                                                                 value,
-                                                                                                 operator,
-                                                                                                 switched);
-                return eqStart.and(eqEnd);
-            case NE:
-                BooleanExpression neStart = (BooleanExpression) handleDirectDateTimePropertyFilter(qobservation.samplingTimeStart,
-                                                                                                   value,
-                                                                                                   operator,
-                                                                                                   switched);
-                BooleanExpression neEnd = (BooleanExpression) handleDirectDateTimePropertyFilter(qobservation.samplingTimeEnd,
-                                                                                                 value,
-                                                                                                 operator,
-                                                                                                 switched);
-                return neStart.or(neEnd);
-            default:
-                throw new ExpressionVisitException("Currently not implemented!");
-            }
-        case "resultTime":
-            return this.handleDirectDateTimePropertyFilter(qobservation.resultTime, propertyValue, operator, switched);
-        default:
-            throw new ExpressionVisitException("Currently not implemented!");
-        }
-    }
+//    private BooleanExpression handleRelatedPropertyFilter(String propertyName, JPQLQuery<Long> propertyValue)
+//            throws ExpressionVisitException {
+//        if (propertyName.equals("Datastream")) {
+//            return qobservation.dataset.id.in(JPAExpressions
+//                                              .selectFrom(qdatastream)
+//                                              .where(qdatastream.id.eq(propertyValue))
+//                                              .select(qdatastream.datasets.any().id));
+//        } else {
+//            return qobservation.dataset.id.in(JPAExpressions
+//                                              .selectFrom(qdataset)
+//                                              .where(qdataset.feature.id.eq(propertyValue))
+//                                              .select(qdataset.id));
+//        }
+//    }
+//
+//    @SuppressWarnings({"unchecked", "rawtypes"})
+//    private Object handleDirectPropertyFilter(String propertyName,
+//                                              Object propertyValue,
+//                                              BinaryOperatorKind operator,
+//                                              boolean switched)
+//            throws ExpressionVisitException {
+//
+//        switch (propertyName) {
+//        case "value":
+//            NumberPath<Double> property = new PathBuilder(DataEntity.class, qobservation.getRoot().toString())
+//                                                                                                              .getNumber(propertyName,
+//                                                                                                                         Double.class);
+//            return handleDirectNumberPropertyFilter(property, propertyValue, operator, switched);
+//        case "samplingTimeEnd":
+//            DateTimeExpression<Date> value = (DateTimeExpression<Date>) propertyValue;
+//            switch (operator) {
+//            case LT:
+//            case LE:
+//                return handleDirectDateTimePropertyFilter(qobservation.samplingTimeEnd, value, operator, switched);
+//            case GT:
+//            case GE:
+//                return handleDirectDateTimePropertyFilter(qobservation.samplingTimeStart, value, operator, switched);
+//            case EQ:
+//                BooleanExpression eqStart = (BooleanExpression) handleDirectDateTimePropertyFilter(qobservation.samplingTimeStart,
+//                                                                                                   value,
+//                                                                                                   operator,
+//                                                                                                   switched);
+//                BooleanExpression eqEnd = (BooleanExpression) handleDirectDateTimePropertyFilter(qobservation.samplingTimeEnd,
+//                                                                                                 value,
+//                                                                                                 operator,
+//                                                                                                 switched);
+//                return eqStart.and(eqEnd);
+//            case NE:
+//                BooleanExpression neStart = (BooleanExpression) handleDirectDateTimePropertyFilter(qobservation.samplingTimeStart,
+//                                                                                                   value,
+//                                                                                                   operator,
+//                                                                                                   switched);
+//                BooleanExpression neEnd = (BooleanExpression) handleDirectDateTimePropertyFilter(qobservation.samplingTimeEnd,
+//                                                                                                 value,
+//                                                                                                 operator,
+//                                                                                                 switched);
+//                return neStart.or(neEnd);
+//            default:
+//                throw new ExpressionVisitException("Currently not implemented!");
+//            }
+//        case "resultTime":
+//            return this.handleDirectDateTimePropertyFilter(qobservation.resultTime, propertyValue, operator, switched);
+//        default:
+//            throw new ExpressionVisitException("Currently not implemented!");
+//        }
+//    }
 }

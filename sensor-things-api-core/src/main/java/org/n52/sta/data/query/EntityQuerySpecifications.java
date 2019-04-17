@@ -40,7 +40,6 @@ import javax.persistence.criteria.Subquery;
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.n52.series.db.beans.DescribableEntity;
-import org.n52.series.db.beans.ProcedureEntity;
 import org.springframework.data.jpa.domain.Specification;
 
 /**
@@ -117,19 +116,19 @@ public abstract class EntityQuerySpecifications<T> {
 //                             .where(filter);
 //    }
     
-    private Subquery<Long> toSubquery(Class<ProcedureEntity> clazz, String propertyId, Expression<Boolean> filter) {
+    private Subquery<Long> toSubquery(Class<?> clazz, String propertyId, Expression<Boolean> filter) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    protected Expression<String> toStringExpression(Object expr) throws ExpressionVisitException {
-//        if (expr instanceof String) {
-//            return Expressions.asString((String) expr);
-//        } else 
+    protected String toStringExpression(Object expr) throws ExpressionVisitException {
+        if (expr instanceof String) {
+            return (String) expr;
+        } else 
         if (expr instanceof Expression) {
-            return (Expression<String>) expr;
+            return (String) expr;
         } else {
-            throw new ExpressionVisitException("Error converting Argument to NumberExpression");
+            throw new ExpressionVisitException("Error converting Argument to Expression<String>");
         }
     }
 
@@ -186,8 +185,8 @@ public abstract class EntityQuerySpecifications<T> {
         return this.handleDateFilter(time, toDateTimeExpression(propertyValue), operator, builder, switched);
     }
 
-    public Predicate handleStringFilter(Expression<String> left,
-                                     Expression<String> right,
+    public Predicate handleStringFilter(Path<String> left,
+                                     String right,
                                      BinaryOperatorKind operator,
                                      CriteriaBuilder builder,
                                      boolean switched)

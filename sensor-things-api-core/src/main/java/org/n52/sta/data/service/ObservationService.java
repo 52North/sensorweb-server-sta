@@ -28,10 +28,17 @@
  */
 package org.n52.sta.data.service;
 
+import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_NAME;
+import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ET_FEATURE_OF_INTEREST_NAME;
+
 import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.Set;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
@@ -51,40 +58,30 @@ import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.TextDataEntity;
+import org.n52.series.db.beans.dataset.DatasetType;
+import org.n52.series.db.beans.dataset.ObservationType;
 import org.n52.series.db.beans.dataset.ValueType;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.shetland.ogc.om.OmConstants;
 import org.n52.sta.data.query.DatasetQuerySpecifications;
+import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
 import org.n52.sta.data.repositories.CategoryRepository;
 import org.n52.sta.data.repositories.DataRepository;
 import org.n52.sta.data.repositories.DatasetRepository;
+import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.OfferingRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.FeatureOfInterestMapper;
 import org.n52.sta.mapping.ObservationMapper;
 import org.n52.sta.service.query.QueryOptions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
-import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import org.n52.sta.data.query.DatastreamQuerySpecifications;
-import org.n52.sta.data.repositories.DatastreamRepository;
-import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_NAME;
-import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ET_FEATURE_OF_INTEREST_NAME;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -129,7 +126,7 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
     @Override
     public EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException {
         EntityCollection retEntitySet = new EntityCollection();
-        Specification<DataEntity<?>> filter = getFilterPredicate(DataEntity.class, queryOptions);
+        Specification<DataEntity<?>> filter = getFilterPredicate(DataEntity.class, queryOptions, null, null);
         getRepository().findAll(filter, createPageableRequest(queryOptions))
                 .forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
@@ -146,7 +143,7 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
     public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType,
             QueryOptions queryOptions) throws ODataApplicationException {
         Specification<DataEntity<?>> filter = getFilter(sourceId, sourceEntityType);
-        filter = filter.and(getFilterPredicate(DataEntity.class, queryOptions));
+        filter = filter.and(getFilterPredicate(DataEntity.class, queryOptions, null, null));
         // TODO: check cast
         Iterable<DataEntity<?>> observations =
                 getRepository().findAll(filter, createPageableRequest(queryOptions));
@@ -206,7 +203,7 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
         if (targetId != null) {
             filter = filter.and(oQS.withId(targetId));
         }
-        return getRepository().exists(filter);
+        return getRepository().count(filter) > 0;
     }
 
     @Override
@@ -287,7 +284,7 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
 
     @Override
     public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
-        return getRepository().count(getFilterPredicate(DataEntity.class, queryOptions));
+        return getRepository().count(getFilterPredicate(DataEntity.class, queryOptions, null, null));
     }
     
     @Override
@@ -464,6 +461,7 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
        dataset.setCategory(category);
        dataset.setFeature(feature);
        dataset.setOffering(offering);
+       dataset.setPlatform(dataset.getPlatform());
        dataset.setUnit(datastream.getUnit());
        dataset.setOmObservationType(datastream.getObservationType());
        Specification<DatasetEntity> query = dQS.matchProcedures(Long.toString(datastream.getProcedure().getId()))
@@ -521,19 +519,20 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
     }
     
     private DatasetEntity getDatasetEntity(String observationType) {
+        DatasetEntity dataset = new DatasetEntity().setObservationType(ObservationType.simple).setDatasetType(DatasetType.timeseries);
         switch (observationType) {
             case OmConstants.OBS_TYPE_MEASUREMENT:
-                return new DatasetEntity().setValueType(ValueType.quantity);
+                return dataset.setValueType(ValueType.quantity);
             case OmConstants.OBS_TYPE_CATEGORY_OBSERVATION:
-                return new DatasetEntity().setValueType(ValueType.category);
+                return dataset.setValueType(ValueType.category);
             case OmConstants.OBS_TYPE_COUNT_OBSERVATION:
-                return new DatasetEntity().setValueType(ValueType.count);
+                return dataset.setValueType(ValueType.count);
             case OmConstants.OBS_TYPE_TEXT_OBSERVATION:
-                return new DatasetEntity().setValueType(ValueType.text);
+                return dataset.setValueType(ValueType.text);
             case OmConstants.OBS_TYPE_TRUTH_OBSERVATION:
-                return new DatasetEntity().setValueType(ValueType.bool);
+                return dataset.setValueType(ValueType.bool);
             default:
-                return new DatasetEntity();
+                return dataset;
         }
     }
     

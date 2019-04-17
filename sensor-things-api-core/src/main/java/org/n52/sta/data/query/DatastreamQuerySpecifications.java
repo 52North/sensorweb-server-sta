@@ -31,15 +31,20 @@ package org.n52.sta.data.query;
 
 import java.util.Collection;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
+import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
@@ -54,78 +59,80 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
 
     public Specification<DatastreamEntity> withObservedProperty(final Long thingId) {
         return (root, query, builder) -> {
-            final Join<DatasetEntity, PhenomenonEntity> join =
-                    root.join(DatasetEntity.PROPERTY_PHENOMENON, JoinType.INNER);
+            final Join<DatastreamEntity, PhenomenonEntity> join =
+                    root.join(DatastreamEntity.PROPERTY_PHENOMENON, JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_ID), thingId);
         };
     }
 
     public Specification<DatastreamEntity> withObservedProperty(final String name) {
         return (root, query, builder) -> {
-            final Join<DatasetEntity, PhenomenonEntity> join =
-                    root.join(DatasetEntity.PROPERTY_PHENOMENON, JoinType.INNER);
+            final Join<DatastreamEntity, PhenomenonEntity> join =
+                    root.join(DatastreamEntity.PROPERTY_PHENOMENON, JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_NAME), name);
         };
     }
     
     public Specification<DatastreamEntity> withThing(final Long thingId) {
         return (root, query, builder) -> {
-            final Join<DatasetEntity, PlatformEntity> join =
-                    root.join(DatasetEntity.PROPERTY_PLATFORM, JoinType.INNER);
+            final Join<DatastreamEntity, PlatformEntity> join =
+                    root.join(DatastreamEntity.PROPERTY_THING, JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_ID), thingId);
         };
     }
 
     public Specification<DatastreamEntity> withThing(final String name) {
         return (root, query, builder) -> {
-            final Join<DatasetEntity, PlatformEntity> join =
-                    root.join(DatasetEntity.PROPERTY_PLATFORM, JoinType.INNER);
+            final Join<DatastreamEntity, PlatformEntity> join =
+                    root.join(DatastreamEntity.PROPERTY_THING, JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_NAME), name);
         };
     }
 
     public Specification<DatastreamEntity> withSensor(final Long thingId) {
         return (root, query, builder) -> {
-            final Join<DatasetEntity, ProcedureEntity> join =
-                    root.join(DatasetEntity.PROPERTY_PLATFORM, JoinType.INNER);
+            final Join<DatastreamEntity, ProcedureEntity> join =
+                    root.join(DatastreamEntity.PROPERTY_PROCEDURE, JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_ID), thingId);
         };
     }
 
     public Specification<DatastreamEntity> withSensor(final String name) {
         return (root, query, builder) -> {
-            final Join<DatasetEntity, ProcedureEntity> join =
-                    root.join(DatasetEntity.PROPERTY_PLATFORM, JoinType.INNER);
+            final Join<DatastreamEntity, ProcedureEntity> join =
+                    root.join(DatastreamEntity.PROPERTY_PROCEDURE, JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_NAME), name);
         };
     }
 
-    public Specification<DatastreamEntity> withDataset(final Long thingId) {
+    public Specification<DatastreamEntity> withDataset(final Long datasetId) {
         return (root, query, builder) -> {
-            final Join<DatasetEntity, PlatformEntity> join =
-                    root.join(DatasetEntity.PROPERTY_PLATFORM, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), thingId);
+            final Join<DatastreamEntity, DatasetEntity> join =
+                    root.join(DatastreamEntity.PROPERTY_DATASETS, JoinType.INNER);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), datasetId);
         };
     }
 
     public Specification<DatastreamEntity> withDataset(final Collection<Long> datasetIds) {
         return (root, query, builder) -> {
-            final Join<DatasetEntity, PlatformEntity> join =
-                    root.join(DatasetEntity.PROPERTY_PLATFORM, JoinType.INNER);
-            return join.get(DescribableEntity.PROPERTY_NAME).in(datasetIds);
+            final Join<DatastreamEntity, DatasetEntity> join =
+                    root.join(DatastreamEntity.PROPERTY_DATASETS, JoinType.INNER);
+            return join.get(DescribableEntity.PROPERTY_ID).in(datasetIds);
         };
     }
     
-    public BooleanExpression withObservation(Long observationId) {
-        return qdatastream.datasets.any().id.in(JPAExpressions
-                                                              .selectFrom(qobservation)
-                                                              .where(qobservation.id.eq(observationId))
-                                                              .select(qobservation.dataset.id));
+    public Specification<DatastreamEntity> withObservation(Long observationId) {
+//        return qdatastream.datasets.any().id.in(JPAExpressions
+//                                                              .selectFrom(qobservation)
+//                                                              .where(qobservation.id.eq(observationId))
+//                                                              .select(qobservation.dataset.id));
+        return null;
     }
 
     @Override
     public Subquery<Long> getIdSubqueryWithFilter(Expression<Boolean> filter) {
-        return this.toSubquery(qdatastream, qdatastream.id, filter);
+//        return this.toSubquery(qdatastream, qdatastream.id, filter);
+        return null;
     }
 
     @Override
@@ -134,84 +141,116 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
                                        BinaryOperatorKind operator,
                                        boolean switched)
             throws ExpressionVisitException {
-        if (propertyName.equals("Sensor") || propertyName.equals("ObservedProperty") || propertyName.equals("Thing") || propertyName.equals("Observations")) {
-            return handleRelatedPropertyFilter(propertyName, propertyValue, switched);
-        } else if (propertyName.equals("id")) {
-            return handleDirectNumberPropertyFilter(qdatastream.id, propertyValue, operator, switched);
-        } else {
+//        if (propertyName.equals("Sensor") || propertyName.equals("ObservedProperty") || propertyName.equals("Thing") || propertyName.equals("Observations")) {
+//            return handleRelatedPropertyFilter(propertyName, propertyValue, switched);
+//        } else if (propertyName.equals("id")) {
+//            return handleDirectNumberPropertyFilter(DatastreamEntity.PROPERTY_ID, propertyValue, operator, switched);
+//        } else {
             return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
-        }
+//        }
+//        return null;
     }
 
-    /**
-     * Handles filtering of properties embedded in this Entity.
-     * 
-     * @param propertyName
-     *        Name of property
-     * @param propertyValue
-     *        Supposed value of Property
-     * @param operator
-     *        Comparison operator between propertyValue and actual Value
-     * @return BooleanExpression evaluating to true if Entity is not filtered out
-     * @throws ExpressionVisitException
-     */
-    private Object handleDirectPropertyFilter(String propertyName,
-                                              Object propertyValue,
-                                              BinaryOperatorKind operator,
-                                              boolean switched)
-            throws ExpressionVisitException {
-        switch (propertyName) {
-        case "name":
-            return handleDirectStringPropertyFilter(qdatastream.name, propertyValue, operator, switched);
-        case "description":
-            return handleDirectStringPropertyFilter(qdatastream.description, propertyValue, operator, switched);
-        case "observationType":
-            return handleDirectStringPropertyFilter(qdatastream.observationType.format,
-                                                    propertyValue,
-                                                    operator,
-                                                    switched);
-        default:
-            throw new ExpressionVisitException("Error getting filter for Property: \"" + propertyName
-                    + "\". No such property in Entity.");
-        }
+//    /**
+//     * Handles filtering of properties embedded in this Entity.
+//     * 
+//     * @param propertyName
+//     *        Name of property
+//     * @param propertyValue
+//     *        Supposed value of Property
+//     * @param operator
+//     *        Comparison operator between propertyValue and actual Value
+//     * @return BooleanExpression evaluating to true if Entity is not filtered out
+//     * @throws ExpressionVisitException
+//     */
+//    private Object handleDirectPropertyFilter(String propertyName,
+//                                              Object propertyValue,
+//                                              BinaryOperatorKind operator,
+//                                              boolean switched)
+//            throws ExpressionVisitException {
+//        switch (propertyName) {
+//        case "name":
+//            return handleDirectStringPropertyFilter(qdatastream.name, propertyValue, operator, switched);
+//        case "description":
+//            return handleDirectStringPropertyFilter(qdatastream.description, propertyValue, operator, switched);
+//        case "observationType":
+//            return handleDirectStringPropertyFilter(qdatastream.observationType.format,
+//                                                    propertyValue,
+//                                                    operator,
+//                                                    switched);
+//        default:
+//            throw new ExpressionVisitException("Error getting filter for Property: \"" + propertyName
+//                    + "\". No such property in Entity.");
+//        }
+//    }
+    
+    
+    private Specification<ProcedureEntity> handleDirectPropertyFilter(String propertyName, Object propertyValue,
+            BinaryOperatorKind operator, boolean switched) {
+        return new Specification<ProcedureEntity>() {
+            @Override
+            public Predicate toPredicate(Root<ProcedureEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
+                try {
+                    switch (propertyName) {
+                    case "name":
+                        return handleDirectStringPropertyFilter(root.<String> get(DescribableEntity.PROPERTY_NAME),
+                                propertyValue, operator, builder, switched);
+                    case "description":
+                        return handleDirectStringPropertyFilter(
+                                root.<String> get(DescribableEntity.PROPERTY_DESCRIPTION), propertyValue, operator,
+                                builder, switched);
+                    case "observationType":
+                        Join<DatastreamEntity, FormatEntity> join = root.join(DatastreamEntity.PROPERTY_OBSERVATION_TYPE);
+                        return handleDirectStringPropertyFilter(join.<String> get(FormatEntity.FORMAT), propertyValue, operator, builder, 
+                                switched);
+                    default:
+                        throw new RuntimeException("Error getting filter for Property: \"" + propertyName
+                                + "\". No such property in Entity.");
+                    }
+                } catch (ExpressionVisitException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
     }
-
-    /**
-     * Handles filtering of properties in related Entities.
-     * 
-     * @param propertyName
-     *        Name of property
-     * @param propertyValue
-     *        Supposed value of Property
-     * @param operator
-     *        Comparison operator between propertyValue and actual Value
-     * @return BooleanExpression evaluating to true if Entity is not filtered out
-     */
-    private BooleanExpression handleRelatedPropertyFilter(String propertyName,
-                                                          JPQLQuery<Long> propertyValue,
-                                                          boolean switched)
-            throws ExpressionVisitException {
-
-        // TODO: handle switched Parameter
-        switch (propertyName) {
-        case "Sensor": {
-            return qdatastream.procedure.id.eqAny(propertyValue);
-        }
-        case "ObservedProperty": {
-            return qdatastream.observableProperty.id.eqAny(propertyValue);
-        }
-        case "Thing": {
-            return qdatastream.thing.id.eqAny(propertyValue);
-        }
-        case "Observations": {
-            return qdatastream.datasets.any().id.in(JPAExpressions
-                                                    .selectFrom(qobservation)
-                                                    .where(qobservation.id.eq(propertyValue))
-                                                    .select(qobservation.dataset.id));
-        }
-        default:
-            throw new ExpressionVisitException("Error getting filter for Property: \"" + propertyName
-                    + "\". No such related Entity.");
-        }
-    }
+    
+    
+//    /**
+//     * Handles filtering of properties in related Entities.
+//     * 
+//     * @param propertyName
+//     *        Name of property
+//     * @param propertyValue
+//     *        Supposed value of Property
+//     * @param operator
+//     *        Comparison operator between propertyValue and actual Value
+//     * @return BooleanExpression evaluating to true if Entity is not filtered out
+//     */
+//    private Specification<DatastreamEntity> handleRelatedPropertyFilter(String propertyName,
+//                                                          Object propertyValue,
+//                                                          boolean switched)
+//            throws ExpressionVisitException {
+//
+//        // TODO: handle switched Parameter
+//        switch (propertyName) {
+//        case "Sensor": {
+//            return qdatastream.procedure.id.eqAny(propertyValue);
+//        }
+//        case "ObservedProperty": {
+//            return qdatastream.observableProperty.id.eqAny(propertyValue);
+//        }
+//        case "Thing": {
+//            return qdatastream.thing.id.eqAny(propertyValue);
+//        }
+//        case "Observations": {
+//            return qdatastream.datasets.any().id.in(JPAExpressions
+//                                                    .selectFrom(qobservation)
+//                                                    .where(qobservation.id.eq(propertyValue))
+//                                                    .select(qobservation.dataset.id));
+//        }
+//        default:
+//            throw new ExpressionVisitException("Error getting filter for Property: \"" + propertyName
+//                    + "\". No such related Entity.");
+//        }
+//    }
 }

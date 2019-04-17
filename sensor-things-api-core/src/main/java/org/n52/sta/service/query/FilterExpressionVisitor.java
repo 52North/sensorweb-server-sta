@@ -41,6 +41,7 @@ import java.util.Locale;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Root;
 
 import org.apache.olingo.commons.api.edm.EdmEnumType;
@@ -120,12 +121,15 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
 
     private CriteriaBuilder criteriaBuilder;
 
-    public FilterExpressionVisitor(Class sourceType, AbstractSensorThingsEntityService service, CriteriaBuilder criteriaBuilder)
+    private Root<?> root;
+
+    public FilterExpressionVisitor(Class sourceType, AbstractSensorThingsEntityService service, CriteriaBuilder criteriaBuilder, Root<?> root)
             throws ODataApplicationException {
         this.sourceType = sourceType;
         this.service = service;
         this.rootQS = QuerySpecificationRepository.getSpecification(sourceType.getSimpleName());
         this.criteriaBuilder = criteriaBuilder;
+        this.root = root;
 
         // TODO: Replace fragile simpleName (with lowercase first letter) with better alternative (e.g.
         // <QType>.getRoot())
@@ -203,7 +207,8 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
         javax.persistence.criteria.Expression<? extends Comparable< ? >> leftExpr = convertToArithmeticExpression(left);
         javax.persistence.criteria.Expression<? extends Comparable< ? >> rightExpr = convertToArithmeticExpression(right);
 
-        return rootQS.handleNumberFilter(leftExpr, rightExpr, operator, criteriaBuilder, false);
+//        return rootQS.handleNumberFilter(leftExpr, rightExpr, operator, criteriaBuilder, false);
+        return null;
     }
 
     /**
@@ -245,7 +250,8 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
 
                 javax.persistence.criteria.Expression< ? extends Comparable< ? >> leftExpr = convertToArithmeticExpression(left);
                 javax.persistence.criteria.Expression< ? extends Comparable< ? >> rightExpr = convertToArithmeticExpression(right);
-                return rootQS.handleNumberFilter(leftExpr, rightExpr, operator, criteriaBuilder, false);
+//                return rootQS.handleNumberFilter(leftExpr, rightExpr, operator, criteriaBuilder, false);
+                return null;
             } catch (ODataApplicationException e) {
             }
 
@@ -255,8 +261,8 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
                 if (! (left instanceof List< ? > || right instanceof List< ? >)) {
 
                     // Fallback to String comparison
-                    javax.persistence.criteria.Expression<String> leftExpr = convertToStringExpression(left);
-                    javax.persistence.criteria.Expression<String> rightExpr = convertToStringExpression(right);
+                    Path<String> leftExpr = root.get((String) left);
+                    String rightExpr = convertToString(right);
                     return rootQS.handleStringFilter(leftExpr, rightExpr, operator, criteriaBuilder, false);
                 } else {
                     // Handle foreign properties
@@ -417,7 +423,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
      *         if Object cannot be converted to StringExpression
      */
     private javax.persistence.criteria.Expression<String> convertToStringExpression(Object expr) throws ODataApplicationException {
-        if (expr instanceof Expression) {
+        if (expr instanceof javax.persistence.criteria.Expression) {
             // SubExpression
             return (javax.persistence.criteria.Expression<String>) expr;
         } else {
@@ -425,6 +431,16 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
                                                 HttpStatusCode.BAD_REQUEST.getStatusCode(),
                                                 Locale.ENGLISH);
         }
+    }
+
+    private String convertToString(Object expr) throws ODataApplicationException {
+        if (expr instanceof String) {
+            return (String) expr;
+        } else {
+            throw new ODataApplicationException("Could not convert " + expr.toString() + " to StringExpression",
+                    HttpStatusCode.BAD_REQUEST.getStatusCode(),
+                    Locale.ENGLISH);
+        } 
     }
 
     /**
@@ -486,8 +502,6 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
     ODataApplicationException {
         Object arg1 = parameters.get(0);
         Object arg2 = parameters.get(1);
-        Root root = criteriaBuilder.createQuery(sourceType).from(sourceType);
-        
 
         switch (methodCall) {
         // String Functions
@@ -639,9 +653,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
                 if (literal.getText().length() > 2) {
                     stringLiteral = literalAsString.substring(1, literalAsString.length() - 1);
                 }
-                final Class<?> defaultType = type.getDefaultType();
-                final Constructor<?> c = defaultType.getConstructor(String.class);
-                return c.newInstance(type.fromUriLiteral(stringLiteral));
+                return stringLiteral;
     //            return Expressions.asString(stringLiteral);
             } else if (type instanceof EdmBoolean) {
                 // TODO: Check if boolean literals are actually supported by STA Spec
@@ -699,7 +711,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
                 }
             }
         } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
-                | IllegalArgumentException | InvocationTargetException | EdmPrimitiveTypeException e) {
+                | IllegalArgumentException | InvocationTargetException e) {
             throw new ODataApplicationException("Could not parse literal. Error was: " + e.getMessage(),
                     HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ENGLISH);
         }

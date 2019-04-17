@@ -42,9 +42,6 @@ import org.springframework.data.repository.NoRepositoryBean;
 @NoRepositoryBean
 public interface AbstractStaRepository<T extends AbstractStaEntity> extends JpaRepository<T, Long>, JpaSpecificationExecutor<T> {
 
-    boolean existsByName(String name);
-
-    Optional<T> findByName(String name);
     
 }
 

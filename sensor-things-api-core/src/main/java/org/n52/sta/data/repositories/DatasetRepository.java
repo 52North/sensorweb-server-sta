@@ -2,9 +2,6 @@
 package org.n52.sta.data.repositories;
 
 import org.n52.series.db.beans.DatasetEntity;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional

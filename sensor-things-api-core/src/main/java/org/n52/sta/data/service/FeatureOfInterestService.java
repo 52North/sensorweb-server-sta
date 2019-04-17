@@ -28,9 +28,15 @@
  */
 package org.n52.sta.data.service;
 
+import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ET_FEATURE_OF_INTEREST_NAME;
+
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.Set;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
@@ -43,7 +49,6 @@ import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
-import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.shetland.util.JavaHelper;
 import org.n52.sta.data.query.DatasetQuerySpecifications;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
@@ -60,14 +65,6 @@ import org.n52.sta.service.query.QueryOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
-
-import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ET_FEATURE_OF_INTEREST_NAME;
 
 /**
  *
@@ -113,7 +110,7 @@ public class FeatureOfInterestService
     @Override
     public EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException {
         EntityCollection retEntitySet = new EntityCollection();
-        Specification<AbstractFeatureEntity<?>> filter = getFilterPredicate(AbstractFeatureEntity.class, queryOptions);
+        Specification<AbstractFeatureEntity<?>> filter = getFilterPredicate(AbstractFeatureEntity.class, queryOptions, null, null);
         getRepository().findAll(filter, createPageableRequest(queryOptions))
                 .forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
@@ -140,11 +137,11 @@ public class FeatureOfInterestService
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
             case "iot.Observation": {
-                BooleanExpression filter = foiQS.withObservation(sourceId);
+                Specification<AbstractFeatureEntity<?>> filter = foiQS.withObservation(sourceId);
                 if (targetId != null) {
                     filter = filter.and(foiQS.withId(targetId));
                 }
-                return getRepository().exists(filter);
+                return getRepository().count(filter) > 0;
             }
             default:
                 return false;
@@ -193,7 +190,7 @@ public class FeatureOfInterestService
      */
     private Optional<AbstractFeatureEntity<?>> getRelatedEntityRaw(Long sourceId, EdmEntityType sourceEntityType,
             Long targetId) {
-        BooleanExpression filter;
+        Specification<AbstractFeatureEntity<?>> filter;
         switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
             case "iot.Observation": {
                 filter = foiQS.withObservation(sourceId);
@@ -221,7 +218,7 @@ public class FeatureOfInterestService
 
     @Override
     public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
-        return getRepository().count(getFilterPredicate(AbstractFeatureEntity.class, queryOptions));
+        return getRepository().count(getFilterPredicate(AbstractFeatureEntity.class, queryOptions, null, null));
     }
 
     @Override
@@ -355,12 +352,12 @@ public class FeatureOfInterestService
 
         AbstractFeatureEntity<?> entity = (AbstractFeatureEntity<?>) rawObject;
 
-        Iterable<DataEntity<?>> observations = dataRepository.findAll(foiQS.withId(entity.getId()));
-        Set<Long> observationIds = new HashSet<>();
-        observations.forEach((o) -> {
-            observationIds.add(o.getId());
-        });
-        collections.put(ET_FEATURE_OF_INTEREST_NAME, observationIds);
+//        Iterable<DataEntity<?>> observations = dataRepository.findAll(d.withId(entity.getId()));
+//        Set<Long> observationIds = new HashSet<>();
+//        observations.forEach((o) -> {
+//            observationIds.add(o.getId());
+//        });
+//        collections.put(ET_FEATURE_OF_INTEREST_NAME, observationIds);
 
         return collections;
     }

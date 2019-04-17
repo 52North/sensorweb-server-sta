@@ -146,7 +146,7 @@ public class ThingMapper extends AbstractMapper<PlatformEntity> {
             while (iterator.hasNext()) {
                 datastreams.add(datastreamMapper.createEntity(iterator.next()));
             }
-            thing.setDatastreamEntities(datastreams);
+            thing.setDatastreams(datastreams);
         }
     }
 

@@ -29,12 +29,21 @@
 
 package org.n52.sta.data.query;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
+
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
+import org.n52.series.db.beans.DescribableEntity;
+import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
-
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.JPQLQuery;
+import org.n52.series.db.beans.ProcedureEntity;
+import org.springframework.data.jpa.domain.Specification;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -42,10 +51,11 @@ import com.querydsl.jpa.JPQLQuery;
  */
 public class ObservedPropertyQuerySpecifications extends EntityQuerySpecifications<PhenomenonEntity> {
 
-    public BooleanExpression withDatastream(Long datastreamId) {
-        return qobservedproperty.id.in(dQS.toSubquery(qdatastream,
-                                                      qdatastream.observableProperty.id,
-                                                      qdatastream.id.eq(datastreamId)));
+    public Specification<PhenomenonEntity> withDatastream(Long datastreamId) {
+//        return qobservedproperty.id.in(dQS.toSubquery(qdatastream,
+//                                                      qdatastream.observableProperty.id,
+//                                                      qdatastream.id.eq(datastreamId)));
+        return null;
     }
 
     /**
@@ -54,10 +64,11 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
      * 
      * @return BooleanExpression evaluating to true if Entity is valid
      */
-    public BooleanExpression isValidEntity() {
-        return qobservedproperty.id.in(dQS.toSubquery(qdatastream,
-                                                      qdatastream.observableProperty.id,
-                                                      qdatastream.isNotNull()));
+    public Specification<PhenomenonEntity> isValidEntity() {
+//        return qobservedproperty.id.in(dQS.toSubquery(qdatastream,
+//                                                      qdatastream.observableProperty.id,
+//                                                      qdatastream.isNotNull()));
+        return null;
     }
 
     /*
@@ -68,8 +79,9 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
      * BooleanExpression)
      */
     @Override
-    public JPQLQuery<Long> getIdSubqueryWithFilter(Expression<Boolean> filter) {
-        return this.toSubquery(qobservedproperty, qobservedproperty.id, filter);
+    public Subquery<Long> getIdSubqueryWithFilter(Expression<Boolean> filter) {
+//        return this.toSubquery(qobservedproperty, qobservedproperty.id, filter);
+        return null;
     }
 
     /*
@@ -84,39 +96,70 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
                                        BinaryOperatorKind operator,
                                        boolean switched)
             throws ExpressionVisitException {
-        if (propertyName.equals("Datastreams")) {
-            return handleRelatedPropertyFilter(propertyName, (JPQLQuery<Long>) propertyValue);
-        } else if (propertyName.equals("id")) {
-            return handleDirectNumberPropertyFilter(qobservedproperty.id, propertyValue, operator, switched);
-        } else {
+//        if (propertyName.equals("Datastreams")) {
+//            return handleRelatedPropertyFilter(propertyName, (JPQLQuery<Long>) propertyValue);
+//        } else if (propertyName.equals("id")) {
+//            return handleDirectNumberPropertyFilter(qobservedproperty.id, propertyValue, operator, switched);
+//        } else {
             return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
-        }
+//        }
+//        return null;
     }
 
-    private BooleanExpression handleRelatedPropertyFilter(String propertyName, JPQLQuery<Long> propertyValue)
-            throws ExpressionVisitException {
-        return qobservedproperty.id.in(dQS.toSubquery(qdatastream,
-                                                      qdatastream.observableProperty.id,
-                                                      qdatastream.id.eq(propertyValue)));
-    }
-
-    private Object handleDirectPropertyFilter(String propertyName,
-                                              Object propertyValue,
-                                              BinaryOperatorKind operator,
-                                              boolean switched)
-            throws ExpressionVisitException {
-        switch (propertyName) {
-        case "name":
-            return handleDirectStringPropertyFilter(qobservedproperty.name, propertyValue, operator, switched);
-        case "description":
-            return handleDirectStringPropertyFilter(qobservedproperty.description, propertyValue, operator, switched);
-        case "definition":
-        case "identifier":
-            return handleDirectStringPropertyFilter(qobservedproperty.identifier, propertyValue, operator, switched);
-        default:
-            throw new ExpressionVisitException("Error getting filter for Property: \"" + propertyName
-                    + "\". No such property in Entity.");
-        }
+//    private BooleanExpression handleRelatedPropertyFilter(String propertyName, JPQLQuery<Long> propertyValue)
+//            throws ExpressionVisitException {
+//        return qobservedproperty.id.in(dQS.toSubquery(qdatastream,
+//                                                      qdatastream.observableProperty.id,
+//                                                      qdatastream.id.eq(propertyValue)));
+//    }
+//
+//    private Object handleDirectPropertyFilter(String propertyName,
+//                                              Object propertyValue,
+//                                              BinaryOperatorKind operator,
+//                                              boolean switched)
+//            throws ExpressionVisitException {
+//        switch (propertyName) {
+//        case "name":
+//            return handleDirectStringPropertyFilter(qobservedproperty.name, propertyValue, operator, switched);
+//        case "description":
+//            return handleDirectStringPropertyFilter(qobservedproperty.description, propertyValue, operator, switched);
+//        case "definition":
+//        case "identifier":
+//            return handleDirectStringPropertyFilter(qobservedproperty.identifier, propertyValue, operator, switched);
+//        default:
+//            throw new ExpressionVisitException("Error getting filter for Property: \"" + propertyName
+//                    + "\". No such property in Entity.");
+//        }
+//    }
+    
+    private Specification<ProcedureEntity> handleDirectPropertyFilter(String propertyName, Object propertyValue,
+            BinaryOperatorKind operator, boolean switched) {
+        return new Specification<ProcedureEntity>() {
+            @Override
+            public Predicate toPredicate(Root<ProcedureEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
+                try {
+                    switch (propertyName) {
+                    case "name":
+                        return handleDirectStringPropertyFilter(root.<String> get(DescribableEntity.PROPERTY_NAME),
+                                propertyValue, operator, builder, switched);
+                    case "description":
+                        return handleDirectStringPropertyFilter(
+                                root.<String> get(DescribableEntity.PROPERTY_DESCRIPTION), propertyValue, operator,
+                                builder, switched);
+                    case "definition":
+                    case "identifier":
+                        return handleDirectStringPropertyFilter(
+                                root.<String> get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue, operator,
+                                builder, switched);
+                    default:
+                        throw new RuntimeException("Error getting filter for Property: \"" + propertyName
+                                + "\". No such property in Entity.");
+                    }
+                } catch (ExpressionVisitException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
     }
 
 }

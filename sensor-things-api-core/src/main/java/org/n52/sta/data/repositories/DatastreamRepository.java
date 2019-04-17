@@ -36,6 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
  *
  */
 @Transactional
-public interface DatastreamRepository extends AbstractStaRepository<DatastreamEntity> {
+public interface DatastreamRepository extends NameRepository<DatastreamEntity> {
 
 }

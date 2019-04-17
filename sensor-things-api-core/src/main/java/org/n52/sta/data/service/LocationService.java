@@ -28,8 +28,14 @@
  */
 package org.n52.sta.data.service;
 
+import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME;
+import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
+
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
@@ -62,15 +68,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
-import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME;
-import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATION_NAME;
-import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -109,7 +106,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     @Override
     public EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException {
         EntityCollection retEntitySet = new EntityCollection();
-        Specification<LocationEntity> filter = getFilterPredicate(LocationEntity.class, queryOptions);
+        Specification<LocationEntity> filter = getFilterPredicate(LocationEntity.class, queryOptions, null, null);
         getRepository().findAll(filter, createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
@@ -122,8 +119,8 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
 
     @Override
     public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType, QueryOptions queryOptions) throws ODataApplicationException {
-        BooleanExpression filter = getFilter(sourceId, sourceEntityType);
-        filter = filter.and(getFilterPredicate(LocationEntity.class, queryOptions));
+        Specification<LocationEntity> filter = getFilter(sourceId, sourceEntityType);
+        filter = filter.and(getFilterPredicate(LocationEntity.class, queryOptions, null, null));
 
         EntityCollection retEntitySet = new EntityCollection();
         Iterable<LocationEntity> locations = getRepository().findAll(filter, createPageableRequest(queryOptions));
@@ -133,12 +130,12 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
 
     @Override
     public long getRelatedEntityCollectionCount(Long sourceId, EdmEntityType sourceEntityType) {
-        BooleanExpression filter = getFilter(sourceId, sourceEntityType);
+        Specification<LocationEntity> filter = getFilter(sourceId, sourceEntityType);
         return getRepository().count(filter);
     }
 
-    private BooleanExpression getFilter(Long sourceId, EdmEntityType sourceEntityType) {
-        BooleanExpression filter;
+    private Specification<LocationEntity> getFilter(Long sourceId, EdmEntityType sourceEntityType) {
+        Specification<LocationEntity> filter;
         switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
             case "iot.HistoricalLocation": {
                 filter = lQS.withRelatedHistoricalLocation(sourceId);
@@ -166,7 +163,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
 
     @Override
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-        BooleanExpression filter;
+        Specification<LocationEntity> filter;
         switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
             case "iot.Thing": {
                 filter = lQS.withRelatedThing(sourceId);
@@ -182,7 +179,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
         if (targetId != null) {
             filter = filter.and(lQS.withId(targetId));
         }
-        return getRepository().exists(filter);
+        return getRepository().count(filter) > 0;
     }
 
     @Override
@@ -225,7 +222,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
      * @return Optional<PlatformEntity> Requested Entity
      */
     private Optional<LocationEntity> getRelatedEntityRaw(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-        BooleanExpression filter;
+        Specification<LocationEntity> filter;
         switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
             case "iot.HistoricalLocation": {
                 filter = lQS.withRelatedHistoricalLocation(sourceId);
@@ -247,7 +244,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
 
     @Override
     public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
-        return getRepository().count(getFilterPredicate(LocationEntity.class, queryOptions));
+        return getRepository().count(getFilterPredicate(LocationEntity.class, queryOptions, null, null));
     }
 
     @Override
@@ -358,12 +355,18 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
         if (location.hasThings()) {
             Set<PlatformEntity> things = new LinkedHashSet<>();
             for (PlatformEntity thing : location.getThings()) {
-                thing.setLocations(Sets.newHashSet(location));
+                thing.setLocations(Sets.newHashSet(createReferencedLocation(location)));
                 PlatformEntity optionalThing = getThingService().createOrUpdate(thing);
                 things.add(optionalThing != null ? optionalThing : thing);
             }
             location.setThings(things);
         }
+    }
+
+    private LocationEntity createReferencedLocation(LocationEntity location) {
+        LocationEntity referenced = new LocationEntity();
+        referenced.setId(location.getId());
+        return referenced;
     }
 
     private AbstractSensorThingsEntityService<?, PlatformEntity> getThingService() {

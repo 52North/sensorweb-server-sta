@@ -30,5 +30,17 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
+         <dependency>
+            <groupId>org.geolatte</groupId>
+            <artifactId>geolatte-geom</artifactId>
+        </dependency>
+        <dependency>
+           <groupId>org.hibernate</groupId>
+           <artifactId>hibernate-core</artifactId>
+        </dependency>
+        <dependency>
+           <groupId>org.hibernate</groupId>
+           <artifactId>hibernate-spatial</artifactId>
+        </dependency>
     </dependencies>
 </project>

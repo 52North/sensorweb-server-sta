@@ -30,7 +30,6 @@ package org.n52.sta;
 
 import java.io.Serializable;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 import org.hibernate.EmptyInterceptor;
@@ -87,7 +86,7 @@ public class HibernateMessageInterceptor extends EmptyInterceptor {
     }
 
     private Set<String> findDifferences(Object[] current, Object[] previous, String[] propertyNames) {
-        Set<String> differenceMap = new HashSet<String>();
+        Set<String> differenceMap = new HashSet<>();
         for (int i = 0; i < current.length; i++) {
             if (current[i] != null
             && !(current[i] instanceof PlatformEntity)

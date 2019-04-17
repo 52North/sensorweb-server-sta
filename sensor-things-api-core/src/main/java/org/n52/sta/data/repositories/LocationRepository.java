@@ -36,6 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
  *
  */
 @Transactional
-public interface LocationRepository extends AbstractStaRepository<LocationEntity> {
+public interface LocationRepository extends NameRepository<LocationEntity> {
 
 }

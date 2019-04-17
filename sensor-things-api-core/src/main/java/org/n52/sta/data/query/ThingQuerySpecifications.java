@@ -29,8 +29,14 @@
 
 package org.n52.sta.data.query;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
@@ -79,8 +85,9 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
      * BooleanExpression)
      */
     @Override
-    public JPQLQuery<Long> getIdSubqueryWithFilter(Expression<Boolean> filter) {
-        return this.toSubquery(qPlatform, qPlatform.id, filter);
+    public Subquery<Long> getIdSubqueryWithFilter(Expression<Boolean> filter) {
+//        return this.toSubquery(qPlatform, qPlatform.id, filter);
+        return null;
     }
 
     /*
@@ -95,50 +102,61 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
                                        BinaryOperatorKind operator,
                                        boolean switched)
             throws ExpressionVisitException {
-        if (propertyName.equals("Datastreams") || propertyName.equals("Locations")
-                || propertyName.equals("HistoricalLocations")) {
-            return handleRelatedPropertyFilter(propertyName, (JPQLQuery<Long>) propertyValue);
-        } else if (propertyName.equals("id")) {
-            return handleDirectNumberPropertyFilter(qPlatform.id, propertyValue, operator, switched);
-        } else {
+//        if (propertyName.equals("Datastreams") || propertyName.equals("Locations")
+//                || propertyName.equals("HistoricalLocations")) {
+//            return handleRelatedPropertyFilter(propertyName, (Subquer<y<Long>) propertyValue);
+//        } else if (propertyName.equals("id")) {
+//            return handleDirectNumberPropertyFilter(qPlatform.id, propertyValue, operator, switched);
+//        } else {
             return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
-        }
+//        }
+//        return null;
     }
 
-    private BooleanExpression handleRelatedPropertyFilter(String propertyName, JPQLQuery<Long> propertyValue)
-            throws ExpressionVisitException {
-        switch(propertyName) {
-        case "Datastreams": {
-            return qPlatform.datastreamEntities.any().id.eqAny(propertyValue);
-        }
-        case "Locations": {
-            return qPlatform.locationEntities.any().id.eqAny(propertyValue);
-        }
-        case "HistoricalLocations": {
-            return qPlatform.historicalLocationEntities.any().id.eqAny(propertyValue);
-        }
-        default:
-            throw new ExpressionVisitException("Filtering by Related Properties with cardinality >1 is currently not supported!");
-        }
-    }
-
-    private Object handleDirectPropertyFilter(String propertyName,
-                                              Object propertyValue,
-                                              BinaryOperatorKind operator,
-                                              boolean switched)
-            throws ExpressionVisitException {
-        switch (propertyName) {
-        case "name":
-            return handleDirectStringPropertyFilter(qPlatform.name, propertyValue, operator, switched);
-        case "description":
-            return handleDirectStringPropertyFilter(qPlatform.description, propertyValue, operator, switched);
-        case "properties":
-            // TODO 
-//            qPlatform.parameters.any().name.eq("properties")
-            return handleDirectStringPropertyFilter(qPlatform.properties, propertyValue, operator, switched);
-        default:
-            throw new ExpressionVisitException("Error getting filter for Property: \"" + propertyName
-                    + "\". No such property in Entity.");
-        }
+//    private BooleanExpression handleRelatedPropertyFilter(String propertyName, JPQLQuery<Long> propertyValue)
+//            throws ExpressionVisitException {
+//        switch(propertyName) {
+//        case "Datastreams": {
+//            return qPlatform.datastreamEntities.any().id.eqAny(propertyValue);
+//        }
+//        case "Locations": {
+//            return qPlatform.locationEntities.any().id.eqAny(propertyValue);
+//        }
+//        case "HistoricalLocations": {
+//            return qPlatform.historicalLocationEntities.any().id.eqAny(propertyValue);
+//        }
+//        default:
+//            throw new ExpressionVisitException("Filtering by Related Properties with cardinality >1 is currently not supported!");
+//        }
+//    }
+//
+    private Specification<PlatformEntity> handleDirectPropertyFilter(String propertyName, Object propertyValue,
+            BinaryOperatorKind operator, boolean switched) {
+        return new Specification<PlatformEntity>() {
+            @Override
+            public Predicate toPredicate(Root<PlatformEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
+                try {
+                    switch (propertyName) {
+                    case "name":
+                        return handleDirectStringPropertyFilter(root.<String> get(DescribableEntity.PROPERTY_NAME),
+                                propertyValue, operator, builder, switched);
+                    case "description":
+                        return handleDirectStringPropertyFilter(
+                                root.<String> get(DescribableEntity.PROPERTY_DESCRIPTION), propertyValue, operator,
+                                builder, switched);
+                    case "properties":
+                        // TODO
+                        // qPlatform.parameters.any().name.eq("properties")
+                        return handleDirectStringPropertyFilter(root.<String> get(PlatformEntity.PROPERTY_PROPERTIES),
+                                propertyValue, operator, builder, switched);
+                    default:
+                        throw new RuntimeException("Error getting filter for Property: \"" + propertyName
+                                + "\". No such property in Entity.");
+                    }
+                } catch (ExpressionVisitException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
     }
 }
