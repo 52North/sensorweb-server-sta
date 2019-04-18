@@ -51,10 +51,6 @@ import org.springframework.data.jpa.domain.Specification;
 public class ObservationQuerySpecifications extends EntityQuerySpecifications<DataEntity< ? >> {
 
     public Specification<DataEntity< ? >> withFeatureOfInterest(Long featureId) {
-//        return qobservation.dataset.id.in(JPAExpressions
-//                                                        .selectFrom(qdataset)
-//                                                        .where(qdataset.feature.id.eq(featureId))
-//                                                        .select(qdataset.id));
         return (root, query, builder) -> {
             Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
             Root<DatasetEntity> dataset = sq.from(DatasetEntity.class);
@@ -65,10 +61,6 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
     }
 
     public Specification<DataEntity< ? >> withDatastream(Long datastreamId) {
-//        return qobservation.dataset.id.in(JPAExpressions
-//                                                        .selectFrom(qdatastream)
-//                                                        .where(qdatastream.id.eq(datastreamId))
-//                                                        .select(qdatastream.datasets.any().id));
         return (root, query, builder) -> {
             Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
             Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
@@ -79,7 +71,6 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
     }
 
     public Specification<DataEntity< ? >> withDataset(Long datasetId) {
-//        return qobservation.dataset.id.eq(datasetId);
         return (root, query, builder) -> {
             final Join<DataEntity, DatasetEntity> join =
                     root.join(DataEntity.PROPERTY_DATASET, JoinType.INNER);
@@ -87,37 +78,12 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
         };
     }
 
-    /**
-     * Assures that Entity is valid. Entity is valid if: - has Datastream associated with it
-     * 
-     * @return BooleanExpression evaluating to true if Entity is valid
-     */
-    public Specification<DataEntity< ? >> isValidEntity() {
-//        return qobservation.dataset.id.in(dQS.toSubquery(qdatastream,
-//                                                         qdatastream.datasets.any().id,
-//                                                         qdatastream.datasets.contains(qobservation.dataset)));
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.n52.sta.data.query.EntityQuerySpecifications#getIdSubqueryWithFilter(com.querydsl.core.types.dsl.
-     * BooleanExpression)
-     */
     @Override
     public Subquery<Long> getIdSubqueryWithFilter(Expression<Boolean> filter) {
 //        return this.toSubquery(qobservation, qobservation.id, filter);
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.n52.sta.data.query.EntityQuerySpecifications#getFilterForProperty(java.lang.String,
-     * java.lang.Object, org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind)
-     */
     @Override
     public Object getFilterForProperty(String propertyName,
                                        Object propertyValue,

@@ -61,44 +61,13 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications<Procedu
         };
     }
 
-    /**
-     * Assures that Entity is valid. Entity is valid if: - has Datastream associated with it
-     * 
-     * @return BooleanExpression evaluating to true if Entity is valid
-     */
-    public Specification<ProcedureEntity> isValidEntity() {
-//        return qsensor.id.in(dQS.toSubquery(qdatastream,
-//                                            qdatastream.procedure.id,
-//                                            qdatastream.isNotNull()));
-        
-        return (root, query, builder) -> {
-            Subquery<ProcedureEntity> sq = query.subquery(ProcedureEntity.class);
-            Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
-            Join<DatastreamEntity, ProcedureEntity> join = datastream.join(DatastreamEntity.PROPERTY_SENSOR);
-            sq.select(join).where(builder.isNotNull(datastream));
-            return builder.in(root).value(sq);
-        };
-    }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.n52.sta.data.query.EntityQuerySpecifications#getIdSubqueryWithFilter(com.querydsl.core.types.dsl.
-     * BooleanExpression)
-     */
     @Override
     public Subquery<Long> getIdSubqueryWithFilter(Expression<Boolean> filter) {
 //        return this.toSubquery(ProcedureEntity.class, DescribableEntity.PROPERTY_ID, filter);
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.n52.sta.data.query.EntityQuerySpecifications#getFilterForProperty(java.lang.String,
-     * java.lang.Object, org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind)
-     */
     @Override
     public Object getFilterForProperty(String propertyName,
                                        Object propertyValue,

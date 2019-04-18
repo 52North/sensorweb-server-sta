@@ -41,9 +41,7 @@ import javax.persistence.criteria.Subquery;
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.n52.series.db.beans.DescribableEntity;
-import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
-import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -54,9 +52,6 @@ import org.springframework.data.jpa.domain.Specification;
 public class ObservedPropertyQuerySpecifications extends EntityQuerySpecifications<PhenomenonEntity> {
 
     public Specification<PhenomenonEntity> withDatastream(Long datastreamId) {
-//        return qobservedproperty.id.in(dQS.toSubquery(qdatastream,
-//                                                      qdatastream.observableProperty.id,
-//                                                      qdatastream.id.eq(datastreamId)));
         return (root, query, builder) -> {
             final Join<PhenomenonEntity, DatastreamEntity> join =
                     root.join(DatastreamEntity.PROPERTY_OBSERVABLE_PROPERTY, JoinType.INNER);
@@ -64,38 +59,12 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
         };
     }
 
-    /**
-     * Assures that Entity is valid. Entity is valid if:
-     *  - has associated Datastream
-     * 
-     * @return BooleanExpression evaluating to true if Entity is valid
-     */
-    public Specification<PhenomenonEntity> isValidEntity() {
-//        return qobservedproperty.id.in(dQS.toSubquery(qdatastream,
-//                                                      qdatastream.observableProperty.id,
-//                                                      qdatastream.isNotNull()));
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.n52.sta.data.query.EntityQuerySpecifications#getIdSubqueryWithFilter(com.querydsl.core.types.dsl.
-     * BooleanExpression)
-     */
     @Override
     public Subquery<Long> getIdSubqueryWithFilter(Expression<Boolean> filter) {
 //        return this.toSubquery(qobservedproperty, qobservedproperty.id, filter);
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.n52.sta.data.query.EntityQuerySpecifications#getFilterForProperty(java.lang.String,
-     * java.lang.Object, org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind)
-     */
     @Override
     public Object getFilterForProperty(String propertyName,
                                        Object propertyValue,
