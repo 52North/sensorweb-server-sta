@@ -30,11 +30,18 @@
 package org.n52.sta.data.query;
 
 import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
+import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.DatasetEntity;
+import org.n52.series.db.beans.DescribableEntity;
+import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.springframework.data.jpa.domain.Specification;
 
 /**
@@ -48,7 +55,13 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
 //                                                        .selectFrom(qdataset)
 //                                                        .where(qdataset.feature.id.eq(featureId))
 //                                                        .select(qdataset.id));
-        return null;
+        return (root, query, builder) -> {
+            Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
+            Root<DatasetEntity> dataset = sq.from(DatasetEntity.class);
+            Join<DatastreamEntity, DatasetEntity> join = dataset.join(DatasetEntity.PROPERTY_FEATURE);
+            sq.select(join.get(AbstractFeatureEntity.PROPERTY_ID)).where(builder.equal(dataset.get(DescribableEntity.PROPERTY_ID), featureId));
+            return builder.in(root.get(DataEntity.PROPERTY_DATASET)).value(sq);
+        };
     }
 
     public Specification<DataEntity< ? >> withDatastream(Long datastreamId) {
@@ -56,12 +69,22 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
 //                                                        .selectFrom(qdatastream)
 //                                                        .where(qdatastream.id.eq(datastreamId))
 //                                                        .select(qdatastream.datasets.any().id));
-        return null;
+        return (root, query, builder) -> {
+            Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
+            Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
+            Join<DatastreamEntity, DatasetEntity> join = datastream.join(DatastreamEntity.PROPERTY_DATASETS);
+            sq.select(join.get(DatasetEntity.PROPERTY_ID)).where(builder.equal(datastream.get(DescribableEntity.PROPERTY_ID), datastreamId));
+            return builder.in(root.get(DataEntity.PROPERTY_DATASET)).value(sq);
+        };
     }
 
     public Specification<DataEntity< ? >> withDataset(Long datasetId) {
 //        return qobservation.dataset.id.eq(datasetId);
-        return null;
+        return (root, query, builder) -> {
+            final Join<DataEntity, DatasetEntity> join =
+                    root.join(DataEntity.PROPERTY_DATASET, JoinType.INNER);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), datasetId);
+        };
     }
 
     /**
