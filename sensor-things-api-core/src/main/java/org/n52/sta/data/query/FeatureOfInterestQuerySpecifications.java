@@ -32,20 +32,16 @@ package org.n52.sta.data.query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
-import org.hibernate.metamodel.model.domain.internal.SingularAttributeImpl;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
-import org.n52.series.db.beans.FormatEntity;
-import org.n52.series.db.beans.ProcedureEntity;
 import org.springframework.data.jpa.domain.Specification;
 
 /**
@@ -67,20 +63,17 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
     
     public Specification<AbstractFeatureEntity<?>> withObservation(Long observationId) {
         return (root, query, builder) -> {
-//            Subquery<AbstractFeatureEntity> sq = query.subquery(AbstractFeatureEntity.class);
-//            Root<DatasetEntity> dataset = sq.from(DatasetEntity.class);
-//            Join<DatasetEntity, AbstractFeatureEntity> joinFeature = dataset.join(DatasetEntity.PROPERTY_FEATURE);
-//            
-//            Subquery<AbstractFeatureEntity> sqData = query.subquery(AbstractFeatureEntity.class);
-//            Root<DataEntity> observation = sqData.from(DataEntity.class);
-//            Join<DataEntity, DatasetEntity> joinDataset = dataset.join(DataEntity.PROPERTY_DATASET);
-//            
-//            sq.select(joinFeature).where(builder.equal(dataset.get(DescribableEntity.PROPERTY_ID), observationId));
-//            return builder.in(root).value(sq);
-            return null;
+            Subquery<Long> sqFeature = query.subquery(Long.class);
+            Root<DatasetEntity> dataset = sqFeature.from(DatasetEntity.class);
+            Subquery<DatasetEntity> sqDataset = query.subquery(DatasetEntity.class);
+            Root<DataEntity> data = sqDataset.from(DataEntity.class);
+            sqDataset.select(data.get(DataEntity.PROPERTY_DATASET))
+                    .where(builder.equal(data.get(DescribableEntity.PROPERTY_ID), observationId));
+            sqFeature.select(dataset.get(DatasetEntity.PROPERTY_FEATURE)).where(builder.in(dataset).value(sqDataset));
+            return builder.in(root.get(AbstractFeatureEntity.PROPERTY_ID)).value(sqFeature);
         };
     }
-
+    
     @Override
     public Specification<AbstractFeatureEntity<?>> withIdentifier(final String identifier) {
         return (root, query, builder) -> {
@@ -108,25 +101,24 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
      * java.lang.Object, org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind)
      */
     @Override
-    public Object getFilterForProperty(String propertyName,
+    public Specification<AbstractFeatureEntity<?>> getFilterForProperty(String propertyName,
                                        Object propertyValue,
                                        BinaryOperatorKind operator,
                                        boolean switched)
             throws ExpressionVisitException {
-//        if (propertyName.equals("Observations")) {
-//            return handleRelatedPropertyFilter(propertyName, (JPQLQuery<Long>) propertyValue, switched);
+        if (propertyName.equals("Observations")) {
+            return handleRelatedPropertyFilter(propertyName, (Subquery<Long>) propertyValue, switched);
 //        } else if (propertyName.equals("id")) {
 //            return handleDirectNumberPropertyFilter(qfeature.id, propertyValue, operator, switched);
-//        } else {
-//            return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
-//        }
-        return null;
+        } else {
+            return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
+        }
     }
 
-//    private BooleanExpression handleRelatedPropertyFilter(String propertyName,
-//                                                          JPQLQuery<Long> propertyValue,
-//                                                          boolean switched)
-//            throws ExpressionVisitException {
+    private Specification<AbstractFeatureEntity<?>> handleRelatedPropertyFilter(String propertyName,
+                                                          Subquery<Long> propertyValue,
+                                                          boolean switched)
+            throws ExpressionVisitException {
 //        return qfeature.id.in(JPAExpressions
 //                              .selectFrom(qdataset)
 //                              .where(qdataset.id.in(
@@ -135,7 +127,19 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
 //                                                                  .where(qobservation.id.eq(propertyValue))
 //                                                                  .select(qobservation.dataset.id)))
 //                              .select(qdataset.feature.id));
-//    }
+//        
+        return (root, query, builder) -> {
+            // TODO ???
+            Subquery<Long> sqFeature = query.subquery(Long.class);
+            Root<DatasetEntity> dataset = sqFeature.from(DatasetEntity.class);
+            Subquery<DatasetEntity> sqDataset = query.subquery(DatasetEntity.class);
+            Root<DataEntity> data = sqDataset.from(DataEntity.class);
+            sqDataset.select(data.get(DataEntity.PROPERTY_DATASET))
+                    .where(builder.equal(data.get(DescribableEntity.PROPERTY_ID), propertyValue));
+            sqFeature.select(dataset.get(DatasetEntity.PROPERTY_FEATURE)).where(builder.in(dataset).value(sqDataset));
+            return builder.in(root.get(AbstractFeatureEntity.PROPERTY_ID)).value(sqFeature);
+        };
+    }
 //
 //    private Object handleDirectPropertyFilter(String propertyName,
 //                                              Object propertyValue,
