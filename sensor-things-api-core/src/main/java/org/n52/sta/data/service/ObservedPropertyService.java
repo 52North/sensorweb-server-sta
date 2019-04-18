@@ -123,7 +123,7 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
         return (root, query, builder) -> {
             Subquery<PhenomenonEntity> sq = query.subquery(PhenomenonEntity.class);
             Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
-            Join<DatastreamEntity, PhenomenonEntity> join = datastream.join(DatastreamEntity.PROPERTY_PHENOMENON);
+            Join<DatastreamEntity, PhenomenonEntity> join = datastream.join(DatastreamEntity.PROPERTY_SENSOR);
             sq.select(join).where(builder.equal(datastream.get(DescribableEntity.PROPERTY_ID), datastreamId));
             if (obsPropId != null) {
                 return builder.and(builder.in(root).value(sq), builder.equal(root.get(DescribableEntity.PROPERTY_ID), obsPropId));

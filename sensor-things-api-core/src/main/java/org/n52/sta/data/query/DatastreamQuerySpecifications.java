@@ -58,18 +58,18 @@ import org.springframework.data.jpa.domain.Specification;
  */
 public class DatastreamQuerySpecifications extends EntityQuerySpecifications<DatastreamEntity> {
 
-    public Specification<DatastreamEntity> withObservedProperty(final Long thingId) {
+    public Specification<DatastreamEntity> withObservedProperty(final Long observablePropertyId) {
         return (root, query, builder) -> {
             final Join<DatastreamEntity, PhenomenonEntity> join =
-                    root.join(DatastreamEntity.PROPERTY_PHENOMENON, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), thingId);
+                    root.join(DatastreamEntity.PROPERTY_OBSERVABLE_PROPERTY, JoinType.INNER);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), observablePropertyId);
         };
     }
 
     public Specification<DatastreamEntity> withObservedProperty(final String name) {
         return (root, query, builder) -> {
             final Join<DatastreamEntity, PhenomenonEntity> join =
-                    root.join(DatastreamEntity.PROPERTY_PHENOMENON, JoinType.INNER);
+                    root.join(DatastreamEntity.PROPERTY_OBSERVABLE_PROPERTY, JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_NAME), name);
         };
     }
@@ -93,7 +93,7 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
     public Specification<DatastreamEntity> withSensor(final Long thingId) {
         return (root, query, builder) -> {
             final Join<DatastreamEntity, ProcedureEntity> join =
-                    root.join(DatastreamEntity.PROPERTY_PROCEDURE, JoinType.INNER);
+                    root.join(DatastreamEntity.PROPERTY_SENSOR, JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_ID), thingId);
         };
     }
@@ -101,7 +101,7 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
     public Specification<DatastreamEntity> withSensor(final String name) {
         return (root, query, builder) -> {
             final Join<DatastreamEntity, ProcedureEntity> join =
-                    root.join(DatastreamEntity.PROPERTY_PROCEDURE, JoinType.INNER);
+                    root.join(DatastreamEntity.PROPERTY_SENSOR, JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_NAME), name);
         };
     }

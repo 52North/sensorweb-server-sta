@@ -33,6 +33,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
@@ -43,6 +44,7 @@ import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.ProcedureEntity;
+import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.springframework.data.jpa.domain.Specification;
 
 /**
@@ -55,7 +57,11 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
 //        return qobservedproperty.id.in(dQS.toSubquery(qdatastream,
 //                                                      qdatastream.observableProperty.id,
 //                                                      qdatastream.id.eq(datastreamId)));
-        return null;
+        return (root, query, builder) -> {
+            final Join<PhenomenonEntity, DatastreamEntity> join =
+                    root.join(DatastreamEntity.PROPERTY_OBSERVABLE_PROPERTY, JoinType.INNER);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), datastreamId);
+        };
     }
 
     /**

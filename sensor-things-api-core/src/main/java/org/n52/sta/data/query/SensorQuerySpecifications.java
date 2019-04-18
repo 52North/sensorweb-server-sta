@@ -55,7 +55,7 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications<Procedu
         return (root, query, builder) -> {
             Subquery<ProcedureEntity> sq = query.subquery(ProcedureEntity.class);
             Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
-            Join<DatastreamEntity, ProcedureEntity> join = datastream.join(DatastreamEntity.PROPERTY_PROCEDURE);
+            Join<DatastreamEntity, ProcedureEntity> join = datastream.join(DatastreamEntity.PROPERTY_SENSOR);
             sq.select(join).where(builder.equal(datastream.get(DescribableEntity.PROPERTY_ID), datastreamId));
             return builder.in(root).value(sq);
         };
@@ -74,7 +74,7 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications<Procedu
         return (root, query, builder) -> {
             Subquery<ProcedureEntity> sq = query.subquery(ProcedureEntity.class);
             Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
-            Join<DatastreamEntity, ProcedureEntity> join = datastream.join(DatastreamEntity.PROPERTY_PROCEDURE);
+            Join<DatastreamEntity, ProcedureEntity> join = datastream.join(DatastreamEntity.PROPERTY_SENSOR);
             sq.select(join).where(builder.isNotNull(datastream));
             return builder.in(root).value(sq);
         };
