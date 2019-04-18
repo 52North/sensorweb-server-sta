@@ -42,6 +42,7 @@ import javax.persistence.criteria.Subquery;
 
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
+import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.FormatEntity;
@@ -122,11 +123,13 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
     }
     
     public Specification<DatastreamEntity> withObservation(Long observationId) {
-//        return qdatastream.datasets.any().id.in(JPAExpressions
-//                                                              .selectFrom(qobservation)
-//                                                              .where(qobservation.id.eq(observationId))
-//                                                              .select(qobservation.dataset.id));
-        return null;
+        return (root, query, builder) -> {
+            Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
+            Root<DataEntity> data = sq.from(DataEntity.class);
+            sq.select(data.get(DataEntity.PROPERTY_DATASET)).where(builder.equal(data.get(DescribableEntity.PROPERTY_ID), observationId));
+            Join<DatastreamEntity, DatasetEntity> join = root.join(DatastreamEntity.PROPERTY_DATASETS);
+            return builder.in(join.get(DatasetEntity.PROPERTY_ID)).value(sq);
+        };
     }
 
     @Override
