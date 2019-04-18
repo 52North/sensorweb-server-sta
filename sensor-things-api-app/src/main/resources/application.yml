@@ -22,6 +22,7 @@ spring:
         hbm2ddl:
           # hbm2ddl values: validate | update | create | create-drop
           auto: create-drop
+          # hbm2ddl values: validate | update | create | create-drop | none
         jdbc:
           time_zone: UTC
           # https://hibernate.atlassian.net/browse/HHH-12368
