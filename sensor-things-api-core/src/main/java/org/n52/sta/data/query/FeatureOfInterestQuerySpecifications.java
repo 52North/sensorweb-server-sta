@@ -32,6 +32,7 @@ package org.n52.sta.data.query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
@@ -43,6 +44,7 @@ import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.expression.spel.CompiledExpression;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -50,17 +52,6 @@ import org.springframework.data.jpa.domain.Specification;
  */
 public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecifications<AbstractFeatureEntity< ? >> {
 
-//    public BooleanExpression withObservation(Long observationId) {
-//        return qfeature.id.in(JPAExpressions
-//                                            .selectFrom(qdataset)
-//                                            .where(qdataset.id.in(
-//                                                                  JPAExpressions
-//                                                                                .selectFrom(qobservation)
-//                                                                                .where(qobservation.id.eq(observationId))
-//                                                                                .select(qobservation.dataset.id)))
-//                                            .select(qdataset.feature.id));
-//    }
-    
     public Specification<AbstractFeatureEntity<?>> withObservation(Long observationId) {
         return (root, query, builder) -> {
             Subquery<Long> sqFeature = query.subquery(Long.class);
@@ -176,10 +167,10 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
                                 builder, switched);
                     case "encodingType":
                     case "featureType":
-                        return handleStringFilter(root.<String> get("application/vnd.geo+json"), (String) propertyValue, operator, builder, switched);
-//                        Join<AbstractFeatureEntity<?>, FormatEntity> join = root.join(ProcedureEntity.PROPERTY_PROCEDURE_DESCRIPTION_FORMAT);
-//                        return handleDirectStringPropertyFilter(join.<String> get(FormatEntity.FORMAT), propertyValue, operator, builder, 
-//                                switched);
+                        if ("application/vnd.geo+json".equals(propertyValue) || "application/vnd.geo json".equals(propertyValue)) {
+                            return builder.isNotNull(root.get(DescribableEntity.PROPERTY_ID));
+                        } 
+                        return builder.isNull(root.get(DescribableEntity.PROPERTY_ID));
                     default:
                         throw new RuntimeException("Error getting filter for Property: \"" + propertyName
                                 + "\". No such property in Entity.");
