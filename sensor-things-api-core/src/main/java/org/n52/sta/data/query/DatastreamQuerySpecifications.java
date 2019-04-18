@@ -185,11 +185,11 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
 //    }
     
     
-    private Specification<ProcedureEntity> handleDirectPropertyFilter(String propertyName, Object propertyValue,
+    private Specification<DatastreamEntity> handleDirectPropertyFilter(String propertyName, Object propertyValue,
             BinaryOperatorKind operator, boolean switched) {
-        return new Specification<ProcedureEntity>() {
+        return new Specification<DatastreamEntity>() {
             @Override
-            public Predicate toPredicate(Root<ProcedureEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
+            public Predicate toPredicate(Root<DatastreamEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
                 try {
                     switch (propertyName) {
                     case "name":

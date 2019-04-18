@@ -132,11 +132,11 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
 //        }
 //    }
     
-    private Specification<ProcedureEntity> handleDirectPropertyFilter(String propertyName, Object propertyValue,
+    private Specification<PhenomenonEntity> handleDirectPropertyFilter(String propertyName, Object propertyValue,
             BinaryOperatorKind operator, boolean switched) {
-        return new Specification<ProcedureEntity>() {
+        return new Specification<PhenomenonEntity>() {
             @Override
-            public Predicate toPredicate(Root<ProcedureEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
+            public Predicate toPredicate(Root<PhenomenonEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
                 try {
                     switch (propertyName) {
                     case "name":

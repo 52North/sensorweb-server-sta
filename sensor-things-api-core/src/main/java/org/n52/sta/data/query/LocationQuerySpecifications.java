@@ -148,11 +148,11 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
 //        }
 //    }
     
-    private Specification<ProcedureEntity> handleDirectPropertyFilter(String propertyName, Object propertyValue,
+    private Specification<LocationEntity> handleDirectPropertyFilter(String propertyName, Object propertyValue,
             BinaryOperatorKind operator, boolean switched) {
-        return new Specification<ProcedureEntity>() {
+        return new Specification<LocationEntity>() {
             @Override
-            public Predicate toPredicate(Root<ProcedureEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
+            public Predicate toPredicate(Root<LocationEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
                 try {
                     switch (propertyName) {
                     case "name":

@@ -44,7 +44,6 @@ import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKin
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.PlatformEntity;
-import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.springframework.data.jpa.domain.Specification;
@@ -54,11 +53,7 @@ import org.springframework.data.jpa.domain.Specification;
  *
  */
 public class HistoricalLocationQuerySpecifications extends EntityQuerySpecifications<HistoricalLocationEntity> {
-
-//    public BooleanExpression withRelatedLocation(Long historicalId) {
-//        return qhistoricallocation.locationEntities.any().id.eq(historicalId);
-//    }
-    
+   
     public Specification<HistoricalLocationEntity> withRelatedLocation(final Long historicalId) {
         return (root, query, builder) -> {
             final Join<HistoricalLocationEntity, LocationEntity> join =
@@ -66,11 +61,7 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
             return builder.equal(join.get(DescribableEntity.PROPERTY_ID), historicalId);
         };
     }
-
-//    public BooleanExpression withRelatedThing(Long thingId) {
-//        return qhistoricallocation.thingEntity.id.eq(thingId);
-//    }
-    
+   
     public Specification<HistoricalLocationEntity> withRelatedThing(final Long thingId) {
         return (root, query, builder) -> {
             final Join<HistoricalLocationEntity, PlatformEntity> join =
@@ -138,11 +129,11 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
 //        }
 //    }
     
-    private Specification<ProcedureEntity> handleDirectPropertyFilter(String propertyName, Object propertyValue,
+    private Specification<HistoricalLocationEntity> handleDirectPropertyFilter(String propertyName, Object propertyValue,
             BinaryOperatorKind operator, boolean switched) {
-        return new Specification<ProcedureEntity>() {
+        return new Specification<HistoricalLocationEntity>() {
             @Override
-            public Predicate toPredicate(Root<ProcedureEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
+            public Predicate toPredicate(Root<HistoricalLocationEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
                 try {
                     switch (propertyName) {
                     case "time":

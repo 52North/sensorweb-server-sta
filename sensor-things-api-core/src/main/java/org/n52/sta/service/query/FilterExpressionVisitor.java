@@ -92,19 +92,6 @@ import org.springframework.boot.autoconfigure.couchbase.CouchbaseProperties.Buck
 import org.springframework.boot.autoconfigure.info.ProjectInfoProperties.Build;
 import org.springframework.util.backoff.ExponentialBackOff;
 
-//import com.querydsl.core.BooleanBuilder;
-//import com.querydsl.core.types.Ops;
-//import com.querydsl.core.types.dsl.BooleanExpression;
-//import com.querydsl.core.types.dsl.DateTimeExpression;
-//import com.querydsl.core.types.dsl.Expressions;
-//import com.querydsl.core.types.dsl.NumberExpression;
-//import com.querydsl.core.types.dsl.PathBuilder;
-//import com.querydsl.core.types.dsl.StringExpression;
-//import com.querydsl.jpa.JPQLQuery;
-//import com.querydsl.spatial.GeometryExpression;
-//import com.querydsl.spatial.GeometryExpressions;
-//import com.querydsl.spatial.SpatialOps;
-
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
