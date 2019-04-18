@@ -1,0 +1,1255 @@
+{
+	"info": {
+		"_postman_id": "731e4471-1c8b-4622-982f-4ed4eacf33db",
+		"name": "STA",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create",
+			"item": [
+				{
+					"name": "Thing",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"disabled": false
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\"name\": \"thermostat\",\r\n\"description\":\"This is a smart thermostat with WiFi communication capabilities.\",\r\n\"properties\": {\r\n        \"reference\": \"first\"\r\n   }\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Things",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Things"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Thing with Location",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"thermostat-2\",\r\n    \"description\":\"This is a smart thermostat with WiFi communication capabilities.\",\r\n\t\"Locations\": [\r\n\t\t{\r\n\t\t\t\"name\": \"CCIT-2\",\r\n\t\t\t\"description\": \"Calgary Centre for Innovative Technologies\",\r\n\t\t\t\"encodingType\": \"application/vnd.geo+json\",\r\n\t\t\t\"location\": {\r\n\t\t\t\t\"type\": \"Point\",\r\n\t\t\t\t\"coordinates\": [\r\n\t\t\t\t\t10,\r\n\t\t\t\t\t10\r\n\t\t\t\t]\r\n\t\t\t}\r\n\t\t}\r\n\t]\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Things",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Things"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Thing with Location and GeoJSON Feature",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"name\": \"thermostat-3\",\r\n\t\"description\":\"This is a smart thermostat with WiFi communication capabilities.\",\r\n\t\"Locations\": [\r\n\t\t{\r\n\t\t\t\"name\": \"CCIT-3\",\r\n\t\t\t\"description\": \"Calgary Centre for Innovative Technologies\",\r\n\t\t\t\"encodingType\": \"application/vnd.geo+json\",\r\n\t\t\t\"location\": {\r\n\t\t\t\t\"type\": \"Feature\",\r\n\t\t\t\t\"geometry\": {\r\n\t\t\t\t\t\"type\": \"Point\",\r\n\t\t\t\t\t\"coordinates\": [\r\n\t\t\t\t\t\t20,\r\n\t\t\t\t\t\t20\r\n\t\t\t\t\t]\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t]\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Things",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Things"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Location with Thing (1)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"disabled": false,
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"CCIT-1\",\n\t\"description\": \"Calgary Centre for Innovative Technologies\",\n\t\"encodingType\": \"application/vnd.geo+json\",\n\t\"location\": {\n\t\t\"type\": \"Feature\",\n\t\t\"geometry\": {\n\t\t\t\"type\": \"Point\",\n\t\t\t\"coordinates\": [\n\t\t\t\t10,\n\t\t\t\t10\n\t\t\t]\n\t\t}\n\t},\n\t\"Things\": [\n\t\t{\n\t\t\t\"@iot.id\": 1\n\t\t}\t\n\t]\n}\n"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Locations",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Locations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Location with Thing",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"disabled": false,
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"CCIT-4\",\n\t\"description\": \"Calgary Centre for Innovative Technologies\",\n\t\"encodingType\": \"application/vnd.geo+json\",\n\t\"location\": {\n\t\t\"type\": \"Feature\",\n\t\t\"geometry\": {\n\t\t\t\"type\": \"Point\",\n\t\t\t\"coordinates\": [\n\t\t\t\t10,\n\t\t\t\t10\n\t\t\t]\n\t\t}\n\t},\n\t\"Things\": [\n\t\t{\n\t\t\t\"name\": \"thermostat-4\",\n\t\t\t\"description\":\"This is a smart thermostat with WiFi communication capabilities.\"\n\t\t}\t\n\t]\n}\n"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Locations",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Locations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Location",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"disabled": false
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"CCIT\",\n\t\"description\": \"Calgary Centre for Innovative Technologies\",\n\t\"encodingType\": \"application/vnd.geo+json\",\n\t\"location\": {\n\t\t\"type\": \"Feature\",\n\t\t\"geometry\": {\n\t\t\t\"type\": \"Point\",\n\t\t\t\"coordinates\": [\n\t\t\t\t10,\n\t\t\t\t10\n\t\t\t]\n\t\t}\n\t}\n}\n"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Locations",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Locations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "HistoricalLocation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"disabled": false,
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"time\": \"2015-03-01T00:40:00.000Z\",\n\t\"Thing\": {\n\t\t\"@iot.id\": 5\n\t},\n\t\"Locations\": [\n\t\t{\n\t\t\t\"@iot.id\": 3\n\t\t}]\n}\n"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/HistoricalLocations",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"HistoricalLocations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sensor with PDF",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"DS18B20\",\n\t\"description\": \"DS18B20 is an air temperature sensor…\",\n\t\"encodingType\": \"application/pdf\",\n\t\"metadata\": \"http://datasheets.maxim-ic.com/en/ds/DS18B20.pdf\"\n}"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Sensors",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Sensors"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sensor with PDF Copy",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Fuguro Barometer\",\n \"description\": \"Fuguro Barometer\",\n \"encodingType\": \"application/pdf\",\n \"metadata\": \"Barometer\"\n}"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Sensors",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Sensors"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sensor with SensorML 2.0",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"DS18B20-SML\",\n\t\"description\": \"DS18B20 is an air temperature sensor…\",\n\t\"encodingType\": \"http://www.opengis.net/doc/IS/SensorML/2.0\",\n\t\"metadata\": \"<sml:PhysicalSystem xmlns:swe=\\\"http://www.opengis.net/swe/2.0\\\" xmlns:gco=\\\"http://www.isotc211.org/2005/gco\\\" xmlns:sml=\\\"http://www.opengis.net/sensorml/2.0\\\" xmlns:gml=\\\"http://www.opengis.net/gml/3.2\\\" xmlns:gmd=\\\"http://www.isotc211.org/2005/gmd\\\" xmlns:xlink=\\\"http://www.w3.org/1999/xlink\\\" gml:id=\\\"marine-weather-sos\\\">\\r\\n  <gml:identifier codeSpace=\\\"uniqueID\\\">AIRMAR-RINVILLE-1</gml:identifier>\\r\\n  <sml:identification>\\r\\n    <sml:IdentifierList>\\r\\n      <sml:identifier>\\r\\n        <sml:Term definition=\\\"http://vocab.nerc.ac.uk/collection/W07/current/IDEN0002/\\\">\\r\\n          <sml:label>Long name</sml:label>\\r\\n          <sml:value>Marine Institute - AIRMAR Weather Station</sml:value>\\r\\n        </sml:Term>\\r\\n      </sml:identifier>\\r\\n      <sml:identifier>\\r\\n        <sml:Term definition=\\\"http://vocab.nerc.ac.uk/collection/W07/current/IDEN0006/\\\">\\r\\n          <sml:label>Short name</sml:label>\\r\\n          <sml:value>Marine Institute - AIRMAR WX Series WeatherStation</sml:value>\\r\\n        </sml:Term>\\r\\n      </sml:identifier>\\r\\n      <sml:identifier>\\r\\n        <sml:Term definition=\\\"http://vocab.nerc.ac.uk/collection/W07/current/IDEN0012/\\\">\\r\\n          <sml:label>Manufacturer</sml:label>\\r\\n          <sml:value>AIRMAR</sml:value>\\r\\n        </sml:Term>\\r\\n      </sml:identifier>\\r\\n      <sml:identifier>\\r\\n        <sml:Term definition=\\\"http://vocab.nerc.ac.uk/collection/W07/current/IDEN0003/\\\">\\r\\n          <sml:label>Model name</sml:label>\\r\\n          <sml:value>300WX</sml:value>\\r\\n        </sml:Term>\\r\\n      </sml:identifier>\\r\\n      <sml:identifier>\\r\\n        <sml:Term definition=\\\"http://vocab.nerc.ac.uk/collection/W07/current/IDEN0005/\\\">\\r\\n          <sml:label>Serial number</sml:label>\\r\\n          <sml:value>4252</sml:value>\\r\\n        </sml:Term>\\r\\n      </sml:identifier>\\r\\n    </sml:IdentifierList>\\r\\n  </sml:identification>\\r\\n  <sml:featuresOfInterest>\\r\\n    <sml:FeatureList>\\r\\n      <sml:feature>\\r\\n        <ns1:SF_SpatialSamplingFeature xmlns:ns1=\\\"http://www.opengis.net/samplingSpatial/2.0\\\" gml:id=\\\"MarineInstitute\\\">\\r\\n          <gml:identifier codeSpace=\\\"http://www.opengis.net/def/nil/OGC/0/unknown\\\">MarineInstitute</gml:identifier>\\r\\n          <gml:name codeSpace=\\\"http://www.opengis.net/def/nil/OGC/0/unknown\\\">Marine Institute</gml:name>\\r\\n          <ns2:type xmlns:ns2=\\\"http://www.opengis.net/sampling/2.0\\\" xlink:href=\\\"http://www.opengis.net/def/samplingFeatureType/OGC-OM/2.0/SF_SamplingPoint\\\"/>\\r\\n          <ns2:sampledFeature xmlns:ns2=\\\"http://www.opengis.net/sampling/2.0\\\" xlink:href=\\\"http://www.opengis.net/def/nil/OGC/0/unknown\\\"/>\\r\\n          <ns1:shape>\\r\\n            <ns:Point xmlns:ns=\\\"http://www.opengis.net/gml/3.2\\\" ns:id=\\\"Point_MarineInstitute\\\">\\r\\n              <ns:pos srsName=\\\"http://www.opengis.net/def/crs/EPSG/0/4326\\\">53.247642 -8.977098</ns:pos>\\r\\n            </ns:Point>\\r\\n          </ns1:shape>\\r\\n        </ns1:SF_SpatialSamplingFeature>\\r\\n      </sml:feature>\\r\\n    </sml:FeatureList>\\r\\n  </sml:featuresOfInterest>\\r\\n  <sml:outputs>\\r\\n    <sml:OutputList>\\r\\n      <sml:output name=\\\"AirTemperature\\\">\\r\\n        <swe:Quantity definition=\\\"http://vocab.nerc.ac.uk/collection/B39/current/airtemp/\\\">\\r\\n          <swe:label>air temperature</swe:label>\\r\\n          <swe:description>Air temperature is the bulk temperature of the air, not the surface (skin) temperature.</swe:description>\\r\\n          <swe:uom code=\\\"degC\\\" xlink:href=\\\"http://vocab.nerc.ac.uk/collection/P06/current/UPAA/\\\" xlink:title=\\\"Degrees Celsius\\\"/>\\r\\n        </swe:Quantity>\\r\\n      </sml:output>\\r\\n      <sml:output name=\\\"RelativeHumidity\\\">\\r\\n        <swe:Quantity definition=\\\"http://vocab.nerc.ac.uk/collection/B39/current/humidity/\\\">\\r\\n          <swe:label>relative_humidity</swe:label>\\r\\n          <swe:description>The ratio of the amount of water vapour in the air compared to the maximum amount of water vapour that can theoretically be held at the air's temperature</swe:description>\\r\\n          <swe:uom code=\\\"%\\\" xlink:href=\\\"http://vocab.nerc.ac.uk/collection/P06/current/UPCT/\\\" xlink:title=\\\"Percent\\\"/>\\r\\n        </swe:Quantity>\\r\\n      </sml:output>\\r\\n      <sml:output name=\\\"DewPoint\\\">\\r\\n        <swe:Quantity definition=\\\"http://vocab.nerc.ac.uk/collection/P01/current/CDEWZZ01/\\\">\\r\\n          <swe:label>DewPoint</swe:label>\\r\\n          <swe:description>The temperature to which air must cool to become saturated with water vapour</swe:description>\\r\\n          <swe:uom code=\\\"degC\\\" xlink:href=\\\"http://vocab.nerc.ac.uk/collection/P06/current/UPAA/\\\" xlink:title=\\\"Degrees Celsius\\\"/>\\r\\n        </swe:Quantity>\\r\\n      </sml:output>\\r\\n      <sml:output name=\\\"WindDirection\\\">\\r\\n        <swe:Quantity definition=\\\"http://vocab.nerc.ac.uk/collection/B39/current/truewinddir/\\\">\\r\\n          <swe:label>earthrelativewinddirection</swe:label>\\r\\n          <swe:description>Direction from of wind relative to True North wind direction in the atmosphere by in-situ anemometer</swe:description>\\r\\n          <swe:uom code=\\\"degT\\\" xlink:href=\\\"http://vocab.nerc.ac.uk/collection/P06/current/UABB/\\\" xlink:title=\\\"Degrees True\\\"/>\\r\\n        </swe:Quantity>\\r\\n      </sml:output>\\r\\n      <sml:output name=\\\"WindSpeed\\\">\\r\\n        <swe:Quantity definition=\\\"http://vocab.nerc.ac.uk/collection/B39/current/truewindspeed/\\\">\\r\\n          <swe:label>earth relative wind speed</swe:label>\\r\\n          <swe:description>Speed of wind wind speed in the atmosphere by in-situ anemometer</swe:description>\\r\\n          <swe:uom code=\\\"m/s\\\" xlink:href=\\\"http://vocab.nerc.ac.uk/collection/P06/current/UVAA/\\\" xlink:title=\\\"Metres per second\\\"/>\\r\\n        </swe:Quantity>\\r\\n      </sml:output>\\r\\n    </sml:OutputList>\\r\\n  </sml:outputs>\\r\\n  <sml:position>\\r\\n    <swe:Vector referenceFrame=\\\"urn:ogc:def:crs:EPSG::4326\\\">\\r\\n      <swe:coordinate name=\\\"easting\\\">\\r\\n        <swe:Quantity axisID=\\\"x\\\">\\r\\n          <swe:uom code=\\\"degree\\\"/>\\r\\n          <swe:value>-8.977098</swe:value>\\r\\n        </swe:Quantity>\\r\\n      </swe:coordinate>\\r\\n      <swe:coordinate name=\\\"northing\\\">\\r\\n        <swe:Quantity axisID=\\\"y\\\">\\r\\n          <swe:uom code=\\\"degree\\\"/>\\r\\n          <swe:value>53.247642</swe:value>\\r\\n        </swe:Quantity>\\r\\n      </swe:coordinate>\\r\\n      <swe:coordinate name=\\\"altitude\\\">\\r\\n        <swe:Quantity axisID=\\\"z\\\">\\r\\n          <swe:uom code=\\\"m\\\"/>\\r\\n          <swe:value>17</swe:value>\\r\\n        </swe:Quantity>\\r\\n      </swe:coordinate>\\r\\n    </swe:Vector>\\r\\n  </sml:position>\\r\\n</sml:PhysicalSystem>\"\n}"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Sensors",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Sensors"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ObservableProperty",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"disabled": false
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"DewPoint Temperature\",\n\t\"definition\": \"http://sweet.jpl.nasa.gov/ontology/property.owl#DewPointTemperature\",\n\t\"description\": \"The dewpoint temperature is the temperature to which the air must be cooled, at constant pressure, for dew to form. As the grass and other objects near the ground cool to the dewpoint, some of the water vapor in the atmosphere condenses into liquid water on the objects.\"\n}"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/ObservedProperties",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"ObservedProperties"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "FeatureOfInterest",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"disabled": false
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"CCIT #361\",\n\t\"description\": \"This is CCIT #361, Noah’s dad’s office\",\n\t\"encodingType\": \"application/vnd.geo+json\",\n\t\"feature\": {\n\t\t\"type\": \"Feature\",\n\t\t\"geometry\": {\n\t\t\t\"type\": \"Polygon\",\n\t\t\t\"coordinates\": [\n\t\t\t\t[\n\t\t\t\t\t[\n\t\t\t\t\t\t100,\n\t\t\t\t\t\t50\n\t\t\t\t\t],\n\t\t\t\t\t[\n\t\t\t\t\t\t10,\n\t\t\t\t\t\t9\n\t\t\t\t\t],\n\t\t\t\t\t[\n\t\t\t\t\t\t23,\n\t\t\t\t\t\t4\n\t\t\t\t\t],\n\t\t\t\t\t[\n\t\t\t\t\t\t100,\n\t\t\t\t\t\t50\n\t\t\t\t\t]\n\t\t\t\t],\n\t\t\t\t[\n\t\t\t\t\t[\n\t\t\t\t\t\t30,\n\t\t\t\t\t\t20\n\t\t\t\t\t],\n\t\t\t\t\t[\n\t\t\t\t\t\t10,\n\t\t\t\t\t\t4\n\t\t\t\t\t],\n\t\t\t\t\t[\n\t\t\t\t\t\t4,\n\t\t\t\t\t\t22\n\t\t\t\t\t],\n\t\t\t\t\t[\n\t\t\t\t\t\t30,\n\t\t\t\t\t\t20\n\t\t\t\t\t]\n\t\t\t\t]\n\t\t\t]\n\t\t}\n\t}\n}\n"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/FeaturesOfInterest",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"FeaturesOfInterest"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Observation with no Feature",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"disabled": false,
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"phenomenonTime\": \"2012-06-25T03:42:02-06:00\",\n\t\"result\": 70.5,\n\t\"Datastream\": {\n\t\t\"@iot.id\": 25\n\t}\n}"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Observations",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Observations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Observation with resultTime and no Feature",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"disabled": false,
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"phenomenonTime\": \"2015-03-01T00:00:00.000Z\",\n\t\"resultTime\": \"2015-03-01T01:00:00.000Z\",\n\t\"result\": 100,\n\t\"Datastream\": {\n\t\t\"@iot.id\": 6\n\t}\n}"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Observations",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Observations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Full",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"disabled": false,
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"description\": \"This an oven with a temperature datastream.\",\n\t\"name\": \"oven\",\n\t\"Locations\": [\n\t\t{\n\t\t\t\"name\": \"CCIT\",\n\t\t\t\"description\": \"Calgary Centre for Innovative Technologies\",\n\t\t\t\"encodingType\": \"application/vnd.geo+json\",\n\t\t\t\"location\": {\n\t\t\t\t\"type\": \"Feature\",\n\t\t\t\t\"geometry\": {\n\t\t\t\t\t\"type\": \"Point\",\n\t\t\t\t\t\"coordinates\": [\n\t\t\t\t\t\t10,\n\t\t\t\t\t\t10\n\t\t\t\t\t]\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t],\n\t\"Datastreams\": [\n\t\t{\n\t\t\t\"name\": \"oven temperature\",\n\t\t\t\"description\": \"This is a datastream for an oven’s internal temperature.\",\n\t\t\t\"unitOfMeasurement\": {\n\t\t\t\t\"name\": \"degree Celsius\",\n\t\t\t\t\"symbol\": \"°C\",\n\t\t\t\t\"definition\": \"http://unitsofmeasure.org/ucum.html#para-30\"\n\t\t\t},\n\t\t\t\"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n\t\t\t\"observedArea\": {\n\t\t\t\t\"type\": \"Polygon\",\n\t\t\t\t\"coordinates\": [\n\t\t\t\t\t[\n\t\t\t\t\t\t[\n\t\t\t\t\t\t\t100,\n\t\t\t\t\t\t\t0\n\t\t\t\t\t\t],\n\t\t\t\t\t\t[\n\t\t\t\t\t\t\t101,\n\t\t\t\t\t\t\t0\n\t\t\t\t\t\t],\n\t\t\t\t\t\t[\n\t\t\t\t\t\t\t101,\n\t\t\t\t\t\t\t1\n\t\t\t\t\t\t],\n\t\t\t\t\t\t[\n\t\t\t\t\t\t\t100,\n\t\t\t\t\t\t\t1\n\t\t\t\t\t\t],\n\t\t\t\t\t\t[\n\t\t\t\t\t\t\t100,\n\t\t\t\t\t\t\t0\n\t\t\t\t\t\t]\n\t\t\t\t\t]\n\t\t\t\t]\n\t\t\t},\n\t\t\t\"phenomenonTime\": \"2009-01-11T16:22:25.00Z/2011-08-21T08:32:10.00Z\",\n\t\t\t\"Observations\": [\n\t\t\t\t{\n\t\t\t\t\t\"phenomenonTime\": \"2012-06-26T03:42:02-06:00\",\n\t\t\t\t\t\"result\": 70.4,\n\t\t\t\t\t\"FeatureOfInterest\": {\n\t\t\t\t\t\t\"name\": \"CCIT #361\",\n\t\t\t\t\t\t\"description\": \"This is CCIT #361, Noah’s dad’s office\",\n\t\t\t\t\t\t\"encodingType\": \"application/vnd.geo+json\",\n\t\t\t\t\t\t\"feature\": {\n\t\t\t\t\t\t\t\"type\": \"Feature\",\n\t\t\t\t\t\t\t\"geometry\": {\n\t\t\t\t\t\t\t\t\"type\": \"Polygon\",\n\t\t\t\t\t\t\t\t\"coordinates\": [\n\t\t\t\t\t\t\t\t\t[\n\t\t\t\t\t\t\t\t\t\t[\n\t\t\t\t\t\t\t\t\t\t\t100,\n\t\t\t\t\t\t\t\t\t\t\t50\n\t\t\t\t\t\t\t\t\t\t],\n\t\t\t\t\t\t\t\t\t\t[\n\t\t\t\t\t\t\t\t\t\t\t10,\n\t\t\t\t\t\t\t\t\t\t\t9\n\t\t\t\t\t\t\t\t\t\t],\n\t\t\t\t\t\t\t\t\t\t[\n\t\t\t\t\t\t\t\t\t\t\t23,\n\t\t\t\t\t\t\t\t\t\t\t4\n\t\t\t\t\t\t\t\t\t\t],\n\t\t\t\t\t\t\t\t\t\t[\n\t\t\t\t\t\t\t\t\t\t\t100,\n\t\t\t\t\t\t\t\t\t\t\t50\n\t\t\t\t\t\t\t\t\t\t]\n\t\t\t\t\t\t\t\t\t],\n\t\t\t\t\t\t\t\t\t[\n\t\t\t\t\t\t\t\t\t\t[\n\t\t\t\t\t\t\t\t\t\t\t30,\n\t\t\t\t\t\t\t\t\t\t\t20\n\t\t\t\t\t\t\t\t\t\t],\n\t\t\t\t\t\t\t\t\t\t[\n\t\t\t\t\t\t\t\t\t\t\t10,\n\t\t\t\t\t\t\t\t\t\t\t4\n\t\t\t\t\t\t\t\t\t\t],\n\t\t\t\t\t\t\t\t\t\t[\n\t\t\t\t\t\t\t\t\t\t\t4,\n\t\t\t\t\t\t\t\t\t\t\t22\n\t\t\t\t\t\t\t\t\t\t],\n\t\t\t\t\t\t\t\t\t\t[\n\t\t\t\t\t\t\t\t\t\t\t30,\n\t\t\t\t\t\t\t\t\t\t\t20\n\t\t\t\t\t\t\t\t\t\t]\n\t\t\t\t\t\t\t\t\t]\n\t\t\t\t\t\t\t\t]\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t],\n\t\t\t\"ObservedProperty\": {\n\t\t\t\t\"name\": \"DewPoint Temperature\",\n\t\t\t\t\"definition\": \"http://sweet.jpl.nasa.gov/ontology/property.owl#DewPointTemperature\",\n\t\t\t\t\"description\": \"The dewpoint temperature is the temperature .\"\n\t\t\t},\n\t\t\t\"Sensor\": {\n\t\t\t\t\"name\": \"DS18B20\",\n\t\t\t\t\"description\": \"DS18B20 is an air temperature sensor…\",\n\t\t\t\t\"encodingType\": \"application/pdf\",\n\t\t\t\t\"metadata\": \"http://datasheets.maxim-ic.com/en/ds/DS18B20.pdf\"\n\t\t\t}\n\t\t}\n\t]\n}"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Things",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Things"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Full Test",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"disabled": false,
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"thing 1\",\r\n    \"description\": \"thing 1\",\r\n    \"properties\": {\r\n        \"reference\": \"first\"\r\n    },\r\n    \"Locations\": [\r\n        {\r\n            \"name\": \"location 1\",\r\n            \"description\": \"location 1\",\r\n            \"location\": {\r\n                \"type\": \"Point\",\r\n                \"coordinates\": [\r\n                    -117.05,\r\n                    51.05\r\n                ]\r\n            },\r\n            \"encodingType\": \"application/vnd.geo+json\"\r\n        }\r\n    ],\r\n    \"Datastreams\": [\r\n        {\r\n            \"unitOfMeasurement\": {\r\n                \"name\": \"Lumen\",\r\n                \"symbol\": \"lm\",\r\n                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\"\r\n            },\r\n            \"name\": \"datastream 1\",\r\n            \"description\": \"datastream 1\",\r\n            \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\r\n            \"ObservedProperty\": {\r\n                \"name\": \"Luminous Flux\",\r\n                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html/LuminousFlux\",\r\n                \"description\": \"observedProperty 1\"\r\n            },\r\n            \"Sensor\": {\r\n                \"name\": \"sensor 1\",\r\n                \"description\": \"sensor 1\",\r\n                \"encodingType\": \"application/pdf\",\r\n                \"metadata\": \"Light flux sensor\"\r\n            }\r\n        },\r\n        {\r\n            \"unitOfMeasurement\": {\r\n                \"name\": \"Centigrade\",\r\n                \"symbol\": \"C\",\r\n                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\"\r\n            },\r\n            \"name\": \"datastream 2\",\r\n            \"description\": \"datastream 2\",\r\n            \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\r\n            \"ObservedProperty\": {\r\n                \"name\": \"Tempretaure\",\r\n                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html/Tempreture\",\r\n                \"description\": \"observedProperty 2\"\r\n            },\r\n            \"Sensor\": {\r\n                \"name\": \"sensor 2\",\r\n                \"description\": \"sensor 2\",\r\n                \"encodingType\": \"application/pdf\",\r\n                \"metadata\": \"Tempreture sensor\"\r\n            }\r\n        }\r\n    ]\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Things",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Things"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Full Test Copy",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"disabled": false,
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"thing 1\",\r\n    \"description\": \"thing 1\",\r\n    \"properties\": {\r\n        \"reference\": \"first\"\r\n    },\r\n    \"Locations\": [\r\n        {\r\n            \"name\": \"location 1\",\r\n            \"description\": \"location 1\",\r\n            \"location\": {\r\n                \"type\": \"Point\",\r\n                \"coordinates\": [\r\n                    -117.05,\r\n                    51.05\r\n                ]\r\n            },\r\n            \"encodingType\": \"application/vnd.geo+json\"\r\n        }\r\n    ],\r\n    \"Datastreams\": [\r\n        {\r\n            \"unitOfMeasurement\": {\r\n                \"name\": \"Lumen\",\r\n                \"symbol\": \"lm\",\r\n                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\"\r\n            },\r\n            \"name\": \"datastream 1\",\r\n            \"description\": \"datastream 1\",\r\n            \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\r\n            \"ObservedProperty\": {\r\n                \"name\": \"Luminous Flux\",\r\n                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html/LuminousFlux\",\r\n                \"description\": \"observedProperty 1\"\r\n            },\r\n            \"Sensor\": {\r\n                \"name\": \"sensor 1\",\r\n                \"description\": \"sensor 1\",\r\n                \"encodingType\": \"application/pdf\",\r\n                \"metadata\": \"Light flux sensor\"\r\n            }\r\n        },\r\n        {\r\n            \"unitOfMeasurement\": {\r\n                \"name\": \"Centigrade\",\r\n                \"symbol\": \"C\",\r\n                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\"\r\n            },\r\n            \"name\": \"datastream 2\",\r\n            \"description\": \"datastream 2\",\r\n            \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\r\n            \"ObservedProperty\": {\r\n                \"name\": \"Tempretaure\",\r\n                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html/Tempreture\",\r\n                \"description\": \"observedProperty 2\"\r\n            },\r\n            \"Sensor\": {\r\n                \"name\": \"sensor 2\",\r\n                \"description\": \"sensor 2\",\r\n                \"encodingType\": \"application/pdf\",\r\n                \"metadata\": \"Tempreture sensor\"\r\n            }\r\n        }\r\n    ]\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Things",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Things"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Observation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"disabled": false,
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"phenomenonTime\": \"2012-06-26T03:43:02-0600\",\n\t\"result\": 70.4,\n\t\"Datastream\": {\n\t\t\"@iot.id\": 1\n\t},\n\t\"FeatureOfInterest\": {\n\t\t\"@iot.id\": 1\n\t}\n}\n"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Observations",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Observations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Datastreams(1)/Observations",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"disabled": false,
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"unitOfMeasurement\": {\n\t\t\"name\": \"Celsius\",\n\t\t\"symbol\": \"degC\",\n\t\t\"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n\t},\n\t\"name\": \"test datastream.\",\n\t\"description\": \"test datastream.\",\n\t\"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n\t\"Thing\": {\n\t\t\"@iot.id\": 15\n\t},\n\t\"ObservedProperty\": {\n\t\t\"name\": \"Luminous Flux\",\n\t\t\"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n\t\t\"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light.\"\n\t},\n\t\"Sensor\": {\n\t\t\"name\": \"Acme Fluxomatic 1000\",\n\t\t\"description\": \"Acme Fluxomatic 1000\",\n\t\t\"encodingType\": \"application/pdf\",\n\t\t\"metadata\": \"Light flux sensor\"\n\t},\n\t\"Observations\": [\n\t\t{\n\t\t\t\"phenomenonTime\": \"2015-03-01T00:10:00Z\",\n\t\t\t\"result\": 10\n\t\t}\n\t]\n}"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Datastreams(",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Datastreams("
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Observation Invalid",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"disabled": false,
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"phenomenonTime\": \"2012-06-26T03:43:02-0600\",\n\t\"result\": 70.4,\n\t\"Datastream\": {\n\t\t\"@iot.id\": 1\n\t},\n\t\"FeatureOfInterest\": {\n\t\t\"@iot.id\": 1\n\t}\n}\n"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Observations",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Observations"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Update-Patch",
+			"item": [
+				{
+					"name": "Thing 1",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\"name\": \"thermostat\",\r\n\"description\":\"This is a smart thermostat with WIFI communication capabilities.\"\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Things(1)",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Things(1)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Thing 1 with Inline Locations",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"Locations\": [\r\n\t\t{\r\n\t\t\t\"name\": \"West Roof\",\r\n\t\t\t\"description\": \"West Roof\",\r\n\t\t\t\"location\": {\r\n\t\t\t\t\"type\": \"Point\",\r\n\t\t\t\t\"coordinates\": [\r\n\t\t\t\t\t-117.05,\r\n\t\t\t\t\t51.05\r\n\t\t\t\t]\r\n\t\t\t},\r\n\t\t\t\"encodingType\": \"application/vnd.geo+json\"\r\n\t\t}\r\n\t]\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Things(1)",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Things(1)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Thing 1 with Inline Datastreams",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"Datastreams\": [\r\n\t\t{\r\n\t\t\t\"unitOfMeasurement\": {\r\n\t\t\t\t\"name\": \"Lumen\",\r\n\t\t\t\t\"symbol\": \"lm\",\r\n\t\t\t\t\"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Lumen\"\r\n\t\t\t}\r\n\t\t}\r\n\t]\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Things(1)",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Things(1)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "HistoricalLocation 1",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\"time\":\"2015-07-05T00:00:00.000Z\"\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/HistoricalLocations(1)",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"HistoricalLocations(1)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sensor 1 with Inline Datastream",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"Datastreams\": [\n\t\t{\n\t\t\t\"unitOfMeasurement\": {\n\t\t\t\t\"name\": \"Lumen\",\n\t\t\t\t\"symbol\": \"lm\",\n\t\t\t\t\"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Lumen\"\n\t\t\t},\n\t\t\t\"Thing\": {\n\t\t\t\t\"@iot.id\": 1\n\t\t\t}\n\t\t}\n\t]\n}"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Sensors(1)",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Sensors(1)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sensor 1",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"metadata\":\"PATCH\"\n}"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Sensors(1)",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Sensors(1)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ObserveProperty 1 with Inline Datastream",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"Datastreams\": [\n\t\t{\n\t\t\t\"unitOfMeasurement\": {\n\t\t\t\t\"name\": \"Lumen\",\n\t\t\t\t\"symbol\": \"lm\",\n\t\t\t\t\"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Lumen\"\n\t\t\t},\n\t\t\t\"Thing\": {\n\t\t\t\t\"@iot.id\": 1\n\t\t\t}\n\t\t}\n\t]\n}"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/ObservedProperties(1)",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"ObservedProperties(1)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Datastream 1 with Inline ObservedProperty",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"ObservedProperty\": {\r\n\t\t\"name\": \"Count\",\r\n\t\t\"definition\": \"http://qudt.org/vocab/unit#Dimensionless\",\r\n\t\t\"name\": \"Count is a dimensionless property.\",\r\n\t\t\"description\": \"Count is a dimensionless property.\"\r\n\t}\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Datastreams(1)",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Datastreams(1)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Datastream 1 with Inline Sensor",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"Sensor\": {\r\n\t\t\"name\": \"Acme Traffic 2000\",\r\n\t\t\"description\": \"Acme Traffic 2000\",\r\n\t\t\"encodingType\": \"application/pdf\",\r\n\t\t\"metadata\": \"Traffic counting device\"\r\n\t}\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Datastreams(1)",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Datastreams(1)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Datastream 1 with Inline Thing",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"Thing\": {\r\n\t\t\"name\": \"test\",\r\n\t\t\"description\": \"test\"\r\n\t}\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Datastreams(1)",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Datastreams(1)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Datastream 1",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"description\": \"Patched Description\"\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Datastreams(1)",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Datastreams(1)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Datastream 1 with Inline Observations",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"Observations\": [\r\n\t\t{\r\n\t\t\t\"phenomenonTime\": \"2015-03-01T00:00:00Z\",\r\n\t\t\t\"result\": 92122,\r\n\t\t\t\"resultQuality\": \"High\"\r\n\t\t}\r\n\t]\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Datastreams(1)",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Datastreams(1)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Observations 1",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"Observations\": [\r\n\t\t{\r\n\t\t\t\"phenomenonTime\": \"2015-03-01T00:00:00Z\",\r\n\t\t\t\"result\": 92122,\r\n\t\t\t\"resultQuality\": \"High\"\r\n\t\t}\r\n\t]\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Datastreams(1)",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Datastreams(1)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update-Thing 1 with new Location",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\"Locations\": [\r\n\t\t{\r\n\t\t\t\"@iot.id\": 5\r\n\t\t}\r\n\t]\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Things(1)",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Things(1)"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Delete",
+			"item": [
+				{
+					"name": "Observation 1",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Observations(1)",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Observations(1)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "FeatuerOfInterst 1",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "localhost:8081/sta/FeaturesOfInterest(1)",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"FeaturesOfInterest(1)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "HistoricalLocation 1",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "localhost:8081/sta/HistoricalLocations(1)",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"HistoricalLocations(1)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Location 1",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Locations(1)",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Locations(1)"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Test",
+			"item": [
+				{
+					"name": "Thing 1",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"disabled": false,
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"thing 1\",\r\n    \"description\": \"thing 1\",\r\n    \"properties\": {\r\n        \"reference\": \"first\"\r\n    },\r\n    \"Locations\": [\r\n        {\r\n            \"name\": \"location 1\",\r\n            \"description\": \"location 1\",\r\n            \"location\": {\r\n                \"type\": \"Point\",\r\n                \"coordinates\": [\r\n                    -117.05,\r\n                    51.05\r\n                ]\r\n            },\r\n            \"encodingType\": \"application/vnd.geo+json\"\r\n        }\r\n    ],\r\n    \"Datastreams\": [\r\n        {\r\n            \"unitOfMeasurement\": {\r\n                \"name\": \"Lumen\",\r\n                \"symbol\": \"lm\",\r\n                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\"\r\n            },\r\n            \"name\": \"datastream 1\",\r\n            \"description\": \"datastream 1\",\r\n            \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\r\n            \"ObservedProperty\": {\r\n                \"name\": \"Luminous Flux\",\r\n                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html/LuminousFlux\",\r\n                \"description\": \"observedProperty 1\"\r\n            },\r\n            \"Sensor\": {\r\n                \"name\": \"sensor 1\",\r\n                \"description\": \"sensor 1\",\r\n                \"encodingType\": \"application/pdf\",\r\n                \"metadata\": \"Light flux sensor\"\r\n            }\r\n        },\r\n        {\r\n            \"unitOfMeasurement\": {\r\n                \"name\": \"Centigrade\",\r\n                \"symbol\": \"C\",\r\n                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\"\r\n            },\r\n            \"name\": \"datastream 2\",\r\n            \"description\": \"datastream 2\",\r\n            \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\r\n            \"ObservedProperty\": {\r\n                \"name\": \"Tempretaure\",\r\n                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html/Tempreture\",\r\n                \"description\": \"observedProperty 2\"\r\n            },\r\n            \"Sensor\": {\r\n                \"name\": \"sensor 2\",\r\n                \"description\": \"sensor 2\",\r\n                \"encodingType\": \"application/pdf\",\r\n                \"metadata\": \"Tempreture sensor\"\r\n            }\r\n        }\r\n    ]\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Things",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Things"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Thing 2",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"disabled": false,
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"thing 2\",\r\n    \"description\": \"thing 2\",\r\n    \"properties\": {\r\n        \"reference\": \"second\"\r\n    },\r\n    \"Locations\": [\r\n        {\r\n            \"name\": \"location 2\",\r\n            \"description\": \"location 2\",\r\n            \"location\": {\r\n                \"type\": \"Point\",\r\n                \"coordinates\": [\r\n                    -100.05,\r\n                    50.05\r\n                ]\r\n            },\r\n            \"encodingType\": \"application/vnd.geo+json\"\r\n        }\r\n    ],\r\n    \"Datastreams\": [\r\n        {\r\n            \"unitOfMeasurement\": {\r\n                \"name\": \"Lumen\",\r\n                \"symbol\": \"lm\",\r\n                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\"\r\n            },\r\n            \"name\": \"datastream 3\",\r\n            \"description\": \"datastream 3\",\r\n            \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\r\n            \"ObservedProperty\": {\r\n                \"name\": \"Second Luminous Flux\",\r\n                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html/LuminousFlux2\",\r\n                \"description\": \"observedProperty 3\"\r\n            },\r\n            \"Sensor\": {\r\n                \"name\": \"sensor 3\",\r\n                \"description\": \"sensor 3\",\r\n                \"encodingType\": \"application/pdf\",\r\n                \"metadata\": \"Second Light flux sensor\"\r\n            }\r\n        },\r\n        {\r\n            \"unitOfMeasurement\": {\r\n                \"name\": \"Centigrade\",\r\n                \"symbol\": \"C\",\r\n                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\"\r\n            },\r\n            \"name\": \"datastream 2\",\r\n            \"description\": \"datastream 2\",\r\n            \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\r\n            \"ObservedProperty\": {\r\n                \"@iot.id\": 1\r\n            },\r\n            \"Sensor\": {\r\n                \"name\": \"sensor 4 \",\r\n                \"description\": \"sensor 4 \",\r\n                \"encodingType\": \"application/pdf\",\r\n                \"metadata\": \"Second Tempreture sensor\"\r\n            }\r\n        }\r\n    ]\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Things",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Things"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Thing 1",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"Locations\": [\r\n    {\r\n      \"@iot.id\": 2\r\n    }\r\n  ]}"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Things(1)",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Things(1)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Thing 2",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"Locations\": [\r\n    {\r\n      \"@iot.id\": 1\r\n    }\r\n  ]}"
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Things(2)",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Things(2)"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Request",
+			"item": [
+				{
+					"name": "localhost:8081/sta/Observations(1)/Datastream",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Observations(1)/Datastream",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Observations(1)",
+								"Datastream"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "localhost:8081/sta/Observations(1)/FeatureOfInterest",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "localhost:8081/sta/Observations(1)/FeatureOfInterest",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"sta",
+								"Observations(1)",
+								"FeatureOfInterest"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
