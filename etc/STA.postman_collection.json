@@ -1080,174 +1080,783 @@
 			]
 		},
 		{
-			"name": "Test",
-			"item": [
-				{
-					"name": "Thing 1",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"disabled": false,
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"thing 1\",\r\n    \"description\": \"thing 1\",\r\n    \"properties\": {\r\n        \"reference\": \"first\"\r\n    },\r\n    \"Locations\": [\r\n        {\r\n            \"name\": \"location 1\",\r\n            \"description\": \"location 1\",\r\n            \"location\": {\r\n                \"type\": \"Point\",\r\n                \"coordinates\": [\r\n                    -117.05,\r\n                    51.05\r\n                ]\r\n            },\r\n            \"encodingType\": \"application/vnd.geo+json\"\r\n        }\r\n    ],\r\n    \"Datastreams\": [\r\n        {\r\n            \"unitOfMeasurement\": {\r\n                \"name\": \"Lumen\",\r\n                \"symbol\": \"lm\",\r\n                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\"\r\n            },\r\n            \"name\": \"datastream 1\",\r\n            \"description\": \"datastream 1\",\r\n            \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\r\n            \"ObservedProperty\": {\r\n                \"name\": \"Luminous Flux\",\r\n                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html/LuminousFlux\",\r\n                \"description\": \"observedProperty 1\"\r\n            },\r\n            \"Sensor\": {\r\n                \"name\": \"sensor 1\",\r\n                \"description\": \"sensor 1\",\r\n                \"encodingType\": \"application/pdf\",\r\n                \"metadata\": \"Light flux sensor\"\r\n            }\r\n        },\r\n        {\r\n            \"unitOfMeasurement\": {\r\n                \"name\": \"Centigrade\",\r\n                \"symbol\": \"C\",\r\n                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\"\r\n            },\r\n            \"name\": \"datastream 2\",\r\n            \"description\": \"datastream 2\",\r\n            \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\r\n            \"ObservedProperty\": {\r\n                \"name\": \"Tempretaure\",\r\n                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html/Tempreture\",\r\n                \"description\": \"observedProperty 2\"\r\n            },\r\n            \"Sensor\": {\r\n                \"name\": \"sensor 2\",\r\n                \"description\": \"sensor 2\",\r\n                \"encodingType\": \"application/pdf\",\r\n                \"metadata\": \"Tempreture sensor\"\r\n            }\r\n        }\r\n    ]\r\n}"
-						},
-						"url": {
-							"raw": "localhost:8081/sta/Things",
-							"host": [
-								"localhost"
-							],
-							"port": "8081",
-							"path": [
-								"sta",
-								"Things"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Thing 2",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"disabled": false,
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"thing 2\",\r\n    \"description\": \"thing 2\",\r\n    \"properties\": {\r\n        \"reference\": \"second\"\r\n    },\r\n    \"Locations\": [\r\n        {\r\n            \"name\": \"location 2\",\r\n            \"description\": \"location 2\",\r\n            \"location\": {\r\n                \"type\": \"Point\",\r\n                \"coordinates\": [\r\n                    -100.05,\r\n                    50.05\r\n                ]\r\n            },\r\n            \"encodingType\": \"application/vnd.geo+json\"\r\n        }\r\n    ],\r\n    \"Datastreams\": [\r\n        {\r\n            \"unitOfMeasurement\": {\r\n                \"name\": \"Lumen\",\r\n                \"symbol\": \"lm\",\r\n                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\"\r\n            },\r\n            \"name\": \"datastream 3\",\r\n            \"description\": \"datastream 3\",\r\n            \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\r\n            \"ObservedProperty\": {\r\n                \"name\": \"Second Luminous Flux\",\r\n                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html/LuminousFlux2\",\r\n                \"description\": \"observedProperty 3\"\r\n            },\r\n            \"Sensor\": {\r\n                \"name\": \"sensor 3\",\r\n                \"description\": \"sensor 3\",\r\n                \"encodingType\": \"application/pdf\",\r\n                \"metadata\": \"Second Light flux sensor\"\r\n            }\r\n        },\r\n        {\r\n            \"unitOfMeasurement\": {\r\n                \"name\": \"Centigrade\",\r\n                \"symbol\": \"C\",\r\n                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\"\r\n            },\r\n            \"name\": \"datastream 2\",\r\n            \"description\": \"datastream 2\",\r\n            \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\r\n            \"ObservedProperty\": {\r\n                \"@iot.id\": 1\r\n            },\r\n            \"Sensor\": {\r\n                \"name\": \"sensor 4 \",\r\n                \"description\": \"sensor 4 \",\r\n                \"encodingType\": \"application/pdf\",\r\n                \"metadata\": \"Second Tempreture sensor\"\r\n            }\r\n        }\r\n    ]\r\n}"
-						},
-						"url": {
-							"raw": "localhost:8081/sta/Things",
-							"host": [
-								"localhost"
-							],
-							"port": "8081",
-							"path": [
-								"sta",
-								"Things"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Thing 1",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\"Locations\": [\r\n    {\r\n      \"@iot.id\": 2\r\n    }\r\n  ]}"
-						},
-						"url": {
-							"raw": "localhost:8081/sta/Things(1)",
-							"host": [
-								"localhost"
-							],
-							"port": "8081",
-							"path": [
-								"sta",
-								"Things(1)"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Thing 2",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\"Locations\": [\r\n    {\r\n      \"@iot.id\": 1\r\n    }\r\n  ]}"
-						},
-						"url": {
-							"raw": "localhost:8081/sta/Things(2)",
-							"host": [
-								"localhost"
-							],
-							"port": "8081",
-							"path": [
-								"sta",
-								"Things(2)"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
 			"name": "Request",
 			"item": [
 				{
-					"name": "localhost:8081/sta/Observations(1)/Datastream",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
+					"name": "Datastream",
+					"item": [
+						{
+							"name": "localhost:8081/sta/Datastreams",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8081/sta/Datastreams",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"sta",
+										"Datastreams"
+									]
+								}
+							},
+							"response": []
 						},
-						"url": {
-							"raw": "localhost:8081/sta/Observations(1)/Datastream",
-							"host": [
-								"localhost"
-							],
-							"port": "8081",
-							"path": [
-								"sta",
-								"Observations(1)",
-								"Datastream"
-							]
+						{
+							"name": "localhost:8081/sta/Datastreams(1)",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8081/sta/Datastreams(1)",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"sta",
+										"Datastreams(1)"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "localhost:8081/sta/Datastreams(1)/Observations",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8081/sta/Datastreams(1)/Observations",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"sta",
+										"Datastreams(1)",
+										"Observations"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "localhost:8081/sta/Datastreams(1)/Thing",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8081/sta/Datastreams(1)/Thing",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"sta",
+										"Datastreams(1)",
+										"Thing"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "localhost:8081/sta/Datastreams(1)/Sensor",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8081/sta/Datastreams(1)/Sensor",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"sta",
+										"Datastreams(1)",
+										"Sensor"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "localhost:8081/sta/Datastreams(1)/ObservedProperty",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8081/sta/Datastreams(1)/ObservedProperty",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"sta",
+										"Datastreams(1)",
+										"ObservedProperty"
+									]
+								}
+							},
+							"response": []
 						}
-					},
-					"response": []
+					],
+					"_postman_isSubFolder": true
 				},
 				{
-					"name": "localhost:8081/sta/Observations(1)/FeatureOfInterest",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
+					"name": "FeatureOfInterst",
+					"item": [
+						{
+							"name": "localhost:8081/sta/FeaturesOfInterest",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8081/sta/FeaturesOfInterest",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"sta",
+										"FeaturesOfInterest"
+									]
+								}
+							},
+							"response": []
 						},
-						"url": {
-							"raw": "localhost:8081/sta/Observations(1)/FeatureOfInterest",
-							"host": [
-								"localhost"
-							],
-							"port": "8081",
-							"path": [
-								"sta",
-								"Observations(1)",
-								"FeatureOfInterest"
-							]
+						{
+							"name": "localhost:8081/sta/FeaturesOfInterest(1)",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8081/sta/FeaturesOfInterest(1)",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"sta",
+										"FeaturesOfInterest(1)"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "localhost:8081/sta/FeaturesOfInterest(1)/Observations",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8081/sta/FeaturesOfInterest(1)/Observations",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"sta",
+										"FeaturesOfInterest(1)",
+										"Observations"
+									]
+								}
+							},
+							"response": []
 						}
-					},
-					"response": []
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "HistoricalLocation",
+					"item": [
+						{
+							"name": "localhost:8081/sta/HistoricalLocations",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8081/sta/HistoricalLocations",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"sta",
+										"HistoricalLocations"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "localhost:8081/sta/HistoricalLocations(1)",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8081/sta/HistoricalLocations(1)",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"sta",
+										"HistoricalLocations(1)"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "localhost:8081/sta/HistoricalLocations(1)/Locations",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8081/sta/HistoricalLocations(1)/Locations",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"sta",
+										"HistoricalLocations(1)",
+										"Locations"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "localhost:8081/sta/HistoricalLocations(1)/Thing",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8081/sta/HistoricalLocations(1)/Thing",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"sta",
+										"HistoricalLocations(1)",
+										"Thing"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Location",
+					"item": [
+						{
+							"name": "localhost:8081/sta/Locations",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8081/sta/Locations",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"sta",
+										"Locations"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "localhost:8081/sta/Locations(1)",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8081/sta/Locations(1)",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"sta",
+										"Locations(1)"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "localhost:8081/sta/Locations(1)/HistoricalLocations",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8081/sta/Locations(1)/HistoricalLocations",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"sta",
+										"Locations(1)",
+										"HistoricalLocations"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "localhost:8081/sta/Locations(1)/Things",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8081/sta/Locations(1)/Things",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"sta",
+										"Locations(1)",
+										"Things"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Observations",
+					"item": [
+						{
+							"name": "localhost:8081/sta/Observations",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8081/sta/Observations",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"sta",
+										"Observations"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "localhost:8081/sta/Observations(1)",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8081/sta/Observations(1)",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"sta",
+										"Observations(1)"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "localhost:8081/sta/Observations(1)/Datastream",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8081/sta/Observations(1)/Datastream",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"sta",
+										"Observations(1)",
+										"Datastream"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "localhost:8081/sta/Observations(1)/FeatureOfInterest",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8081/sta/Observations(1)/FeatureOfInterest",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"sta",
+										"Observations(1)",
+										"FeatureOfInterest"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "ObservedProperty",
+					"item": [
+						{
+							"name": "localhost:8081/sta/ObservedProperties",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8081/sta/ObservedProperties",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"sta",
+										"ObservedProperties"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "localhost:8081/sta/ObservedProperties(1)",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8081/sta/ObservedProperties(1)",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"sta",
+										"ObservedProperties(1)"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "localhost:8081/sta/ObservedProperties(1)/Datastreams",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8081/sta/ObservedProperties(1)/Datastreams",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"sta",
+										"ObservedProperties(1)",
+										"Datastreams"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Sensor",
+					"item": [
+						{
+							"name": "localhost:8081/sta/Sensors",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8081/sta/Sensors",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"sta",
+										"Sensors"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "localhost:8081/sta/Sensors(1)",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8081/sta/Sensors(1)",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"sta",
+										"Sensors(1)"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "localhost:8081/sta/Sensors(1)/Datastreams",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8081/sta/Sensors(1)/Datastreams",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"sta",
+										"Sensors(1)",
+										"Datastreams"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Thing",
+					"item": [
+						{
+							"name": "localhost:8081/sta/Things",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8081/sta/Things",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"sta",
+										"Things"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "localhost:8081/sta/Things(1)",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8081/sta/Things(1)",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"sta",
+										"Things(1)"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "localhost:8081/sta/Things(1)/HistoricalLocations",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8081/sta/Things(1)/HistoricalLocations",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"sta",
+										"Things(1)",
+										"HistoricalLocations"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "localhost:8081/sta/Things(1)/Locations",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8081/sta/Things(1)/Locations",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"sta",
+										"Things(1)",
+										"Locations"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
 				}
 			]
 		}
