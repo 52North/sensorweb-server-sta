@@ -275,11 +275,11 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
                 return getRepository().findOne(dQS.withId(datastream.getId())).get();
             }
             check(datastream);
-            Specification<DatastreamEntity> predicate = createQuery(datastream);
-            if (getRepository().count() > 0) {
-                DatastreamEntity optional = getRepository().findOne(predicate).get();
-                return processObservation((DatastreamEntity) optional.setProcesssed(true), datastream.getObservations());
-            }
+//            Specification<DatastreamEntity> predicate = createQuery(datastream);
+//            if (getRepository().count() > 0) {
+//                DatastreamEntity optional = getRepository().findOne(predicate).get();
+//                return processObservation((DatastreamEntity) optional.setProcesssed(true), datastream.getObservations());
+//            }
             datastream.setProcesssed(true);
             checkObservationType(datastream);
             checkUnit(datastream);
