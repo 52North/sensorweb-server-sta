@@ -40,6 +40,7 @@ import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ES_OBS
 import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ET_OBSERVATION_FQN;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -120,8 +121,8 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
         // List<JsonNode> parameters = observation.getParameters().stream()
         // .map(p -> createParameterProperty(p))
         // .collect(Collectors.toList());
-        List<ComplexValue> parameters = observation.getParameters().stream().map(p -> createParameterComplexValue(p))
-                .collect(Collectors.toList());
+        List<ComplexValue> parameters = observation.hasParameters() ? observation.getParameters().stream().map(p -> createParameterComplexValue(p))
+                .collect(Collectors.toList()) : Collections.emptyList();
 
         entity.addProperty(new Property(null, PROP_PARAMETERS, ValueType.COLLECTION_COMPLEX, parameters));
 
