@@ -33,15 +33,14 @@ import java.util.Date;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
 
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
+import org.joda.time.DateTime;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
@@ -54,11 +53,11 @@ import org.springframework.data.jpa.domain.Specification;
  */
 public class HistoricalLocationQuerySpecifications extends EntityQuerySpecifications<HistoricalLocationEntity> {
    
-    public Specification<HistoricalLocationEntity> withRelatedLocation(final Long historicalId) {
+    public Specification<HistoricalLocationEntity> withRelatedLocation(final Long locationId) {
         return (root, query, builder) -> {
             final Join<HistoricalLocationEntity, LocationEntity> join =
                     root.join(HistoricalLocationEntity.PROPERTY_LOCATIONS, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), historicalId);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), locationId);
         };
     }
    
@@ -70,65 +69,49 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
         };
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.n52.sta.data.query.EntityQuerySpecifications#getIdSubqueryWithFilter(com.querydsl.core.types.dsl.
-     * BooleanExpression)
-     */
     @Override
-    public Subquery<Long> getIdSubqueryWithFilter(Expression<Boolean> filter) {
-//        return this.toSubquery(qhistoricallocation, qhistoricallocation.id, filter);
-        return null;
+    public Specification<Long> getIdSubqueryWithFilter(Specification filter) {
+        return this.toSubquery(HistoricalLocationEntity.class, HistoricalLocationEntity.PROPERTY_ID, filter);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.n52.sta.data.query.EntityQuerySpecifications#getFilterForProperty(java.lang.String,
-     * java.lang.Object, org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind)
-     */
     @Override
-    public Object getFilterForProperty(String propertyName,
+    public Specification<HistoricalLocationEntity> getFilterForProperty(String propertyName,
                                        Object propertyValue,
                                        BinaryOperatorKind operator,
                                        boolean switched)
             throws ExpressionVisitException {
-//        if (propertyName.equals("Thing") || propertyName.equals("Locations")) {
-//            return handleRelatedPropertyFilter(propertyName, (JPQLQuery<Long>) propertyValue, switched);
-//        } else if (propertyName.equals("id")) {
-//            return handleDirectNumberPropertyFilter(qhistoricallocation.id, propertyValue, operator, switched);
-//        } else {
+        if (propertyName.equals("Thing") || propertyName.equals("Locations")) {
+            return handleRelatedPropertyFilter(propertyName, (Specification<Long>) propertyValue, switched);
+        } else if (propertyName.equals("id")) {
+            return (root, query, builder) -> {
+                try {
+                    return handleDirectNumberPropertyFilter(root.<Long> get(HistoricalLocationEntity.PROPERTY_ID),
+                            Long.getLong(propertyValue.toString()), operator, builder);
+                } catch (ExpressionVisitException e) {
+                    throw new RuntimeException(e);
+                }
+                //
+            };
+        } else {
             return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
-//        }
-//        return null;
+        }
     }
-//
-//    private BooleanExpression handleRelatedPropertyFilter(String propertyName,
-//                                                          JPQLQuery<Long> propertyValue,
-//                                                          boolean switched)
-//            throws ExpressionVisitException {
-//        if (propertyName.equals("Thing")) {
-//            return qhistoricallocation.thingEntity.id.eqAny(propertyValue);
-//        } else {
-//            return qhistoricallocation.locationEntities.any().id.eqAny(propertyValue);
-//        }
-//    }
-//
-//    private Object handleDirectPropertyFilter(String propertyName,
-//                                              Object propertyValue,
-//                                              BinaryOperatorKind operator,
-//                                              boolean switched)
-//            throws ExpressionVisitException {
-//        switch (propertyName) {
-//        case "time":
-//            return handleDirectDateTimePropertyFilter(qhistoricallocation.time, propertyValue, operator, switched);
-//        default:
-//            throw new ExpressionVisitException("Currently not implemented!");
-//        }
-//    }
-    
+
+    private Specification<HistoricalLocationEntity> handleRelatedPropertyFilter(String propertyName,
+            Specification<Long> propertyValue, boolean switched) throws ExpressionVisitException {
+        return (root, query, builder) -> {
+            if (propertyName.equals("Thing")) {
+                final Join<HistoricalLocationEntity, PlatformEntity> join =
+                        root.join(HistoricalLocationEntity.PROPERTY_THING, JoinType.INNER);
+                return builder.equal(join.get(DescribableEntity.PROPERTY_ID), propertyValue);
+            } else {
+                final Join<HistoricalLocationEntity, LocationEntity> join =
+                        root.join(HistoricalLocationEntity.PROPERTY_LOCATIONS, JoinType.INNER);
+                return builder.equal(join.get(DescribableEntity.PROPERTY_ID), propertyValue);
+            }
+        };
+    }
+
     private Specification<HistoricalLocationEntity> handleDirectPropertyFilter(String propertyName, Object propertyValue,
             BinaryOperatorKind operator, boolean switched) {
         return new Specification<HistoricalLocationEntity>() {
@@ -138,8 +121,8 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
                     switch (propertyName) {
                     case "time":
                         return handleDirectDateTimePropertyFilter(
-                                root.<Date> get(HistoricalLocationEntity.PROPERTY_TIME), propertyValue, operator,
-                                builder, switched);
+                                root.<Date> get(HistoricalLocationEntity.PROPERTY_TIME), new DateTime(propertyValue).toDate(), operator,
+                                builder);
                     default:
                         throw new RuntimeException("Error getting filter for Property: \"" + propertyName
                                 + "\". No such property in Entity.");

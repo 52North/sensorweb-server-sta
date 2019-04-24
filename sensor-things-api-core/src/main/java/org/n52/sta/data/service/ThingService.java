@@ -361,9 +361,6 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
                 EntityTypes.Datastream);
     }
 
-     /* (non-Javadoc)
-     * @see org.n52.sta.mapping.AbstractMapper#getRelatedCollections(java.lang.Object)
-     */
     @Override
     public Map<String, Set<Long>> getRelatedCollections(Object rawObject) {
         Map<String, Set<Long>> collections = new HashMap<> ();

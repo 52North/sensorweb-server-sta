@@ -31,12 +31,10 @@ package org.n52.sta.data.query;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
 
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
@@ -60,53 +58,42 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
     }
 
     @Override
-    public Subquery<Long> getIdSubqueryWithFilter(Expression<Boolean> filter) {
-//        return this.toSubquery(qobservedproperty, qobservedproperty.id, filter);
-        return null;
+    public Specification<Long> getIdSubqueryWithFilter(Specification filter) {
+        return this.toSubquery(PhenomenonEntity.class, PhenomenonEntity.PROPERTY_ID, filter);
     }
 
     @Override
-    public Object getFilterForProperty(String propertyName,
+    public Specification<PhenomenonEntity> getFilterForProperty(String propertyName,
                                        Object propertyValue,
                                        BinaryOperatorKind operator,
                                        boolean switched)
             throws ExpressionVisitException {
-//        if (propertyName.equals("Datastreams")) {
-//            return handleRelatedPropertyFilter(propertyName, (JPQLQuery<Long>) propertyValue);
-//        } else if (propertyName.equals("id")) {
-//            return handleDirectNumberPropertyFilter(qobservedproperty.id, propertyValue, operator, switched);
-//        } else {
+        if (propertyName.equals("Datastreams")) {
+            return handleRelatedPropertyFilter(propertyName, (Specification<Long>) propertyValue);
+        } else if (propertyName.equals("id")) {
+            return (root, query, builder) -> {
+                try {
+                    return handleDirectNumberPropertyFilter(root.<Long> get(PhenomenonEntity.PROPERTY_ID),
+                            Long.getLong(propertyValue.toString()), operator, builder);
+                } catch (ExpressionVisitException e) {
+                    throw new RuntimeException(e);
+                }
+                //
+            };
+        } else {
             return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
-//        }
-//        return null;
+        }
     }
 
-//    private BooleanExpression handleRelatedPropertyFilter(String propertyName, JPQLQuery<Long> propertyValue)
-//            throws ExpressionVisitException {
-//        return qobservedproperty.id.in(dQS.toSubquery(qdatastream,
-//                                                      qdatastream.observableProperty.id,
-//                                                      qdatastream.id.eq(propertyValue)));
-//    }
-//
-//    private Object handleDirectPropertyFilter(String propertyName,
-//                                              Object propertyValue,
-//                                              BinaryOperatorKind operator,
-//                                              boolean switched)
-//            throws ExpressionVisitException {
-//        switch (propertyName) {
-//        case "name":
-//            return handleDirectStringPropertyFilter(qobservedproperty.name, propertyValue, operator, switched);
-//        case "description":
-//            return handleDirectStringPropertyFilter(qobservedproperty.description, propertyValue, operator, switched);
-//        case "definition":
-//        case "identifier":
-//            return handleDirectStringPropertyFilter(qobservedproperty.identifier, propertyValue, operator, switched);
-//        default:
-//            throw new ExpressionVisitException("Error getting filter for Property: \"" + propertyName
-//                    + "\". No such property in Entity.");
-//        }
-//    }
-    
+    private Specification<PhenomenonEntity> handleRelatedPropertyFilter(String propertyName, Specification<Long> propertyValue)
+            throws ExpressionVisitException {
+        return (root, query, builder) -> {
+            final Join<PhenomenonEntity, DatastreamEntity> join =
+                    root.join(DatastreamEntity.PROPERTY_OBSERVABLE_PROPERTY, JoinType.INNER);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), propertyValue);
+        };
+    }
+
     private Specification<PhenomenonEntity> handleDirectPropertyFilter(String propertyName, Object propertyValue,
             BinaryOperatorKind operator, boolean switched) {
         return new Specification<PhenomenonEntity>() {
@@ -116,15 +103,15 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
                     switch (propertyName) {
                     case "name":
                         return handleDirectStringPropertyFilter(root.<String> get(DescribableEntity.PROPERTY_NAME),
-                                propertyValue, operator, builder, switched);
+                                propertyValue.toString(), operator, builder, switched);
                     case "description":
                         return handleDirectStringPropertyFilter(
-                                root.<String> get(DescribableEntity.PROPERTY_DESCRIPTION), propertyValue, operator,
+                                root.<String> get(DescribableEntity.PROPERTY_DESCRIPTION), propertyValue.toString(), operator,
                                 builder, switched);
                     case "definition":
                     case "identifier":
                         return handleDirectStringPropertyFilter(
-                                root.<String> get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue, operator,
+                                root.<String> get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue.toString(), operator,
                                 builder, switched);
                     default:
                         throw new RuntimeException("Error getting filter for Property: \"" + propertyName

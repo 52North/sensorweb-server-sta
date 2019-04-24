@@ -105,7 +105,7 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
     private DatastreamRepository datastreamRepository;
     
     @Autowired
-    private DatasetRepository<DatasetEntity> datasetRepository;
+    private DatasetRepository datasetRepository;
 
     private ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
     

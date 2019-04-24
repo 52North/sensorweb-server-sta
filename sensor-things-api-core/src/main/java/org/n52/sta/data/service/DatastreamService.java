@@ -28,7 +28,6 @@
  */
 package org.n52.sta.data.service;
 
-import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ET_OBSERVATION_NAME;
 import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_NAME;
 import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ET_SENSOR_NAME;
 import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
@@ -88,10 +87,10 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     private FormatRepository formatRepository;
     
     @Autowired
-    private DataRepository<DataEntity<?>> dataRepository;
+    private DataRepository dataRepository;
     
     @Autowired
-    private DatasetRepository<DatasetEntity> datasetRepository;
+    private DatasetRepository datasetRepository;
     
     private final static DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
     

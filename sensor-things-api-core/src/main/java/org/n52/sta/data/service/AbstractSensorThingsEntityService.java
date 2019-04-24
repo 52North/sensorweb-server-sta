@@ -323,13 +323,20 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
      */
     protected OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions) {
         int offset = queryOptions.hasSkipOption() ? queryOptions.getSkipOption().getValue() : 0;
-        
         Sort sort = Sort.by(Direction.ASC, "id");
         if (queryOptions.hasOrderByOption()) {
-            OrderByItem orderByItem = queryOptions.getOrderByOption().getOrders().get(0);
+            boolean first = true;
             try {
-                sort = Sort.by(orderByItem.isDescending() ? Direction.DESC : Direction.ASC,
-                        orderByItem.getExpression().accept(new ExpressionGenerator(this)));
+                for (OrderByItem orderByItem : queryOptions.getOrderByOption().getOrders()) {
+                    if (first) {
+                        sort = Sort.by(orderByItem.isDescending() ? Direction.DESC : Direction.ASC,
+                                orderByItem.getExpression().accept(new ExpressionGenerator(this)));
+                        first = false;
+                    } else {
+                        sort.and(Sort.by(orderByItem.isDescending() ? Direction.DESC : Direction.ASC,
+                                orderByItem.getExpression().accept(new ExpressionGenerator(this))));
+                    }
+                }
             } catch (ExpressionVisitException | ODataApplicationException e) {
                 // use default sort
             }

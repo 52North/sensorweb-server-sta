@@ -29,18 +29,21 @@
 
 package org.n52.sta.data.query;
 
-import javax.persistence.criteria.Expression;
+import java.util.Date;
+
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
-import org.n52.series.db.beans.AbstractFeatureEntity;
+import org.joda.time.DateTime;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
+import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -54,8 +57,7 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
         return (root, query, builder) -> {
             Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
             Root<DatasetEntity> dataset = sq.from(DatasetEntity.class);
-            Join<DatastreamEntity, DatasetEntity> join = dataset.join(DatasetEntity.PROPERTY_FEATURE);
-            sq.select(join.get(AbstractFeatureEntity.PROPERTY_ID)).where(builder.equal(dataset.get(DescribableEntity.PROPERTY_ID), featureId));
+            sq.select(dataset.get(DatasetEntity.PROPERTY_ID)).where(builder.equal(dataset.get(DatasetEntity.PROPERTY_FEATURE), featureId));
             return builder.in(root.get(DataEntity.PROPERTY_DATASET)).value(sq);
         };
     }
@@ -65,7 +67,7 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
             Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
             Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
             Join<DatastreamEntity, DatasetEntity> join = datastream.join(DatastreamEntity.PROPERTY_DATASETS);
-            sq.select(join.get(DatasetEntity.PROPERTY_ID)).where(builder.equal(datastream.get(DescribableEntity.PROPERTY_ID), datastreamId));
+            sq.select(join.get(DatasetEntity.PROPERTY_ID)).where(builder.equal(datastream.get(DatastreamEntity.PROPERTY_ID), datastreamId));
             return builder.in(root.get(DataEntity.PROPERTY_DATASET)).value(sq);
         };
     }
@@ -79,91 +81,119 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
     }
 
     @Override
-    public Subquery<Long> getIdSubqueryWithFilter(Expression<Boolean> filter) {
-//        return this.toSubquery(qobservation, qobservation.id, filter);
-        return null;
+    public Specification<Long> getIdSubqueryWithFilter(Specification filter) {
+        return this.toSubquery(DataEntity.class, DataEntity.PROPERTY_ID, filter);
     }
 
     @Override
-    public Object getFilterForProperty(String propertyName,
-                                       Object propertyValue,
-                                       BinaryOperatorKind operator,
-                                       boolean switched)
-            throws ExpressionVisitException {
-//        if (propertyName.equals("Datastream") || propertyName.equals("FeatureOfInterest")) {
-//            return handleRelatedPropertyFilter(propertyName, (JPQLQuery<Long>) propertyValue);
-//        } else if (propertyName.equals("id")) {
-//            return handleDirectNumberPropertyFilter(qobservation.id, propertyValue, operator, switched);
-//        } else {
-//            return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
-//        }
-        return null;
+    public Specification<DataEntity<?>> getFilterForProperty(String propertyName, Object propertyValue,
+            BinaryOperatorKind operator, boolean switched) throws ExpressionVisitException {
+
+        if (propertyName.equals("Datastream") || propertyName.equals("FeatureOfInterest")) {
+             return handleRelatedPropertyFilter(propertyName, (Specification<Long>) propertyValue);
+        } else if (propertyName.equals("id")) {
+            return (root, query, builder) -> {
+                try {
+                    return handleDirectNumberPropertyFilter(root.<Long> get(DataEntity.PROPERTY_ID),
+                            Long.getLong(propertyValue.toString()), operator, builder);
+                } catch (ExpressionVisitException e) {
+                    throw new RuntimeException(e);
+                }
+                //
+            };
+        } else {
+            return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
+        }
     }
 
-//    private BooleanExpression handleRelatedPropertyFilter(String propertyName, JPQLQuery<Long> propertyValue)
-//            throws ExpressionVisitException {
-//        if (propertyName.equals("Datastream")) {
-//            return qobservation.dataset.id.in(JPAExpressions
-//                                              .selectFrom(qdatastream)
-//                                              .where(qdatastream.id.eq(propertyValue))
-//                                              .select(qdatastream.datasets.any().id));
-//        } else {
-//            return qobservation.dataset.id.in(JPAExpressions
-//                                              .selectFrom(qdataset)
-//                                              .where(qdataset.feature.id.eq(propertyValue))
-//                                              .select(qdataset.id));
-//        }
-//    }
-//
-//    @SuppressWarnings({"unchecked", "rawtypes"})
-//    private Object handleDirectPropertyFilter(String propertyName,
-//                                              Object propertyValue,
-//                                              BinaryOperatorKind operator,
-//                                              boolean switched)
-//            throws ExpressionVisitException {
-//
-//        switch (propertyName) {
-//        case "value":
-//            NumberPath<Double> property = new PathBuilder(DataEntity.class, qobservation.getRoot().toString())
-//                                                                                                              .getNumber(propertyName,
-//                                                                                                                         Double.class);
-//            return handleDirectNumberPropertyFilter(property, propertyValue, operator, switched);
-//        case "samplingTimeEnd":
-//            DateTimeExpression<Date> value = (DateTimeExpression<Date>) propertyValue;
-//            switch (operator) {
-//            case LT:
-//            case LE:
-//                return handleDirectDateTimePropertyFilter(qobservation.samplingTimeEnd, value, operator, switched);
-//            case GT:
-//            case GE:
-//                return handleDirectDateTimePropertyFilter(qobservation.samplingTimeStart, value, operator, switched);
-//            case EQ:
-//                BooleanExpression eqStart = (BooleanExpression) handleDirectDateTimePropertyFilter(qobservation.samplingTimeStart,
-//                                                                                                   value,
-//                                                                                                   operator,
-//                                                                                                   switched);
-//                BooleanExpression eqEnd = (BooleanExpression) handleDirectDateTimePropertyFilter(qobservation.samplingTimeEnd,
-//                                                                                                 value,
-//                                                                                                 operator,
-//                                                                                                 switched);
-//                return eqStart.and(eqEnd);
-//            case NE:
-//                BooleanExpression neStart = (BooleanExpression) handleDirectDateTimePropertyFilter(qobservation.samplingTimeStart,
-//                                                                                                   value,
-//                                                                                                   operator,
-//                                                                                                   switched);
-//                BooleanExpression neEnd = (BooleanExpression) handleDirectDateTimePropertyFilter(qobservation.samplingTimeEnd,
-//                                                                                                 value,
-//                                                                                                 operator,
-//                                                                                                 switched);
-//                return neStart.or(neEnd);
-//            default:
-//                throw new ExpressionVisitException("Currently not implemented!");
-//            }
-//        case "resultTime":
-//            return this.handleDirectDateTimePropertyFilter(qobservation.resultTime, propertyValue, operator, switched);
-//        default:
-//            throw new ExpressionVisitException("Currently not implemented!");
-//        }
-//    }
+    private Specification<DataEntity<?>> handleRelatedPropertyFilter(String propertyName, Specification<Long> propertyValue)
+            throws ExpressionVisitException {
+        return (root, query, builder) -> {
+            try {
+                if (propertyName.equals("Datastream")) {
+                    Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
+                    Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
+                    Join<DatastreamEntity, DatasetEntity> join = datastream.join(DatastreamEntity.PROPERTY_DATASETS);
+                    sq.select(join.get(DatasetEntity.PROPERTY_ID))
+                            .where(builder.equal(datastream.get(DatastreamEntity.PROPERTY_ID), propertyValue));
+                    return builder.in(root.get(DataEntity.PROPERTY_DATASET)).value(sq);
+                    // return qobservation.dataset.id.in(JPAExpressions
+                    // .selectFrom(qdatastream)
+                    // .where(qdatastream.id.eq(propertyValue))
+                    // .select(qdatastream.datasets.any().id));
+                } else {
+                    final Join<DataEntity, DatasetEntity> join =
+                            root.join(DataEntity.PROPERTY_DATASET, JoinType.INNER);
+                    return builder.equal(join.get(DescribableEntity.PROPERTY_ID), propertyValue);
+                    // return qobservation.dataset.id.in(JPAExpressions
+                    // .selectFrom(qdataset)
+                    // .where(qdataset.feature.id.eq(propertyValue))
+                    // .select(qdataset.id));
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        };
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private Specification<DataEntity<?>> handleDirectPropertyFilter(String propertyName, Object propertyValue,
+            BinaryOperatorKind operator, boolean switched) throws ExpressionVisitException {
+        return (root, query, builder) -> {
+            try {
+                switch (propertyName) {
+                case "value":
+                    if (switched) {
+                        
+                    }
+                    Subquery<QuantityDataEntity> sq = query.subquery(QuantityDataEntity.class);
+                    Root<QuantityDataEntity> dataset = sq.from(QuantityDataEntity.class);
+                    Predicate predicate = handleDirectNumberPropertyFilter(dataset.<Double> get(propertyName),
+                            Double.valueOf(propertyValue.toString()), operator, builder);
+                    sq.select(dataset.get(QuantityDataEntity.PROPERTY_ID)).where(predicate);
+                    return builder.in(root.get(DataEntity.PROPERTY_ID)).value(sq);
+//                    return handleDirectNumberPropertyFilter(dataset.<Number> get(propertyName), propertyValue, operator,
+//                            builder, switched);
+                case "samplingTimeEnd":
+                    switch (operator) {
+                    case LT:
+                    case LE:
+                        return handleDirectDateTimePropertyFilter(
+                                root.<Date> get(DataEntity.PROPERTY_SAMPLING_TIME_END), new DateTime(propertyValue).toDate(), operator,
+                                builder);
+                    case GT:
+                    case GE:
+                        return handleDirectDateTimePropertyFilter(
+                                root.<Date> get(DataEntity.PROPERTY_SAMPLING_TIME_START), new DateTime(propertyValue).toDate(), operator,
+                                builder);
+                    case EQ:
+                        Predicate eqStart = handleDirectDateTimePropertyFilter(
+                                root.<Date> get(DataEntity.PROPERTY_SAMPLING_TIME_START), new DateTime(propertyValue).toDate(), operator,
+                                builder);
+                        Predicate eqEnd = handleDirectDateTimePropertyFilter(
+                                root.<Date> get(DataEntity.PROPERTY_SAMPLING_TIME_END), new DateTime(propertyValue).toDate(), operator,
+                                builder);
+                        return builder.and(eqStart, eqEnd);
+                    case NE:
+                        Predicate neStart = handleDirectDateTimePropertyFilter(
+                                root.<Date> get(DataEntity.PROPERTY_SAMPLING_TIME_START), new DateTime(propertyValue).toDate(), operator,
+                                builder);
+                        Predicate neEnd = handleDirectDateTimePropertyFilter(
+                                root.<Date> get(DataEntity.PROPERTY_SAMPLING_TIME_END), new DateTime(propertyValue).toDate(), operator,
+                                builder);
+                        return builder.or(neStart, neEnd);
+                    default:
+                        throw new ExpressionVisitException("Currently not implemented!");
+                    }
+                case "resultTime":
+                    return this.handleDirectDateTimePropertyFilter(root.<Date> get(DataEntity.PROPERTY_RESULT_TIME),
+                            new DateTime(propertyValue).toDate(), operator, builder);
+                default:
+                    throw new ExpressionVisitException("Currently not implemented!");
+                }
+            } catch (ExpressionVisitException e) {
+                throw new RuntimeException(e);
+            }
+        };
+    }
 }

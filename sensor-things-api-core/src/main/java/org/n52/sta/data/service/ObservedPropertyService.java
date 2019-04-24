@@ -265,7 +265,7 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
     public void delete(Long id) throws ODataApplicationException {
         if (getRepository().existsById(id)) {
             // delete datastreams
-            datastreamRepository.findAll(dQS.withSensor(id)).forEach(d -> {
+            datastreamRepository.findAll(dQS.withObservedProperty(id)).forEach(d -> {
                 try {
                     getDatastreamService().delete(d.getId());
                 } catch (ODataApplicationException e) {

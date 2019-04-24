@@ -31,7 +31,6 @@ package org.n52.sta.data.query;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -63,56 +62,48 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications<Procedu
 
 
     @Override
-    public Subquery<Long> getIdSubqueryWithFilter(Expression<Boolean> filter) {
-//        return this.toSubquery(ProcedureEntity.class, DescribableEntity.PROPERTY_ID, filter);
-        return null;
+    public Specification<Long> getIdSubqueryWithFilter(Specification filter) {
+        return this.toSubquery(ProcedureEntity.class, ProcedureEntity.PROPERTY_ID, filter);
     }
 
     @Override
-    public Object getFilterForProperty(String propertyName,
+    public Specification<ProcedureEntity> getFilterForProperty(String propertyName,
                                        Object propertyValue,
                                        BinaryOperatorKind operator,
                                        boolean switched)
             throws ExpressionVisitException {
-//        if (propertyName.equals("Datastreams")) {
-//            return handleRelatedPropertyFilter(propertyName, (JPQLQuery<Long>) propertyValue);
-//        } else if (propertyName.equals("id")) {
-//            return handleDirectNumberPropertyFilter(qsensor.id, propertyValue, operator, switched);
-//        } else {
+        if (propertyName.equals("Datastreams")) {
+            return handleRelatedPropertyFilter(propertyName, (Specification<Long>) propertyValue);
+        } else if (propertyName.equals("id")) {
+            return (root, query, builder) -> {
+                try {
+                    return handleDirectNumberPropertyFilter(root.<Long> get(ProcedureEntity.PROPERTY_ID),
+                            Long.getLong(propertyValue.toString()), operator, builder);
+                } catch (ExpressionVisitException e) {
+                    throw new RuntimeException(e);
+                }
+                //
+            };
+        } else {
             return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
-//        }
-//        return null;
+        }
     }
 
-//    private BooleanExpression handleRelatedPropertyFilter(String propertyName, JPQLQuery<Long> propertyValue)
-//            throws ExpressionVisitException {
-//            return qsensor.id.in(dQS.toSubquery(qdatastream,
-//                                                qdatastream.procedure.id,
-//                                                qdatastream.id.eq(propertyValue)));
-//    }
-//
-//    private Object handleDirectPropertyFilter(String propertyName,
-//                                              Object propertyValue,
-//                                              BinaryOperatorKind operator,
-//                                              boolean switched)
-//            throws ExpressionVisitException {
-//
-//        switch (propertyName) {
-//        case "name":
-//            return handleDirectStringPropertyFilter(qsensor.name, propertyValue, operator, switched);
-//        case "description":
-//            return handleDirectStringPropertyFilter(qsensor.description, propertyValue, operator, switched);
-//        case "format":
-//        case "encodingType":
-//            return handleDirectStringPropertyFilter(qsensor.format.format, propertyValue, operator, switched);
-//        case "metadata":
-//            return handleDirectStringPropertyFilter(qsensor.descriptionFile, propertyValue, operator, switched);
-//        default:
-//            throw new ExpressionVisitException("Error getting filter for Property: \"" + propertyName
-//                    + "\". No such property in Entity.");
-//        }
-//    }
-    
+    private Specification<ProcedureEntity> handleRelatedPropertyFilter(String propertyName,
+            Specification<Long> propertyValue) {
+        return (root, query, builder) -> {
+            Subquery<ProcedureEntity> sq = query.subquery(ProcedureEntity.class);
+            Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
+            Join<DatastreamEntity, ProcedureEntity> join = datastream.join(DatastreamEntity.PROPERTY_SENSOR);
+            sq.select(join).where(builder.equal(datastream.get(DescribableEntity.PROPERTY_ID), propertyValue));
+            return builder.in(root).value(sq);
+        };
+        // throws ExpressionVisitException {
+        // return qsensor.id.in(dQS.toSubquery(qdatastream,
+        // qdatastream.procedure.id,
+        // qdatastream.id.eq(propertyValue)));
+    }
+
     private Specification<ProcedureEntity> handleDirectPropertyFilter(String propertyName, Object propertyValue,
             BinaryOperatorKind operator, boolean switched) {
         return new Specification<ProcedureEntity>() {
@@ -122,20 +113,21 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications<Procedu
                     switch (propertyName) {
                     case "name":
                         return handleDirectStringPropertyFilter(root.<String> get(DescribableEntity.PROPERTY_NAME),
-                                propertyValue, operator, builder, switched);
+                                propertyValue.toString(), operator, builder, switched);
                     case "description":
                         return handleDirectStringPropertyFilter(
-                                root.<String> get(DescribableEntity.PROPERTY_DESCRIPTION), propertyValue, operator,
-                                builder, switched);
+                                root.<String> get(DescribableEntity.PROPERTY_DESCRIPTION), propertyValue.toString(),
+                                operator, builder, switched);
                     case "format":
                     case "encodingType":
-                        Join<ProcedureEntity, FormatEntity> join = root.join(ProcedureEntity.PROPERTY_PROCEDURE_DESCRIPTION_FORMAT);
-                        return handleDirectStringPropertyFilter(join.<String> get(FormatEntity.FORMAT), propertyValue, operator, builder, 
-                                switched);
+                        Join<ProcedureEntity, FormatEntity> join =
+                                root.join(ProcedureEntity.PROPERTY_PROCEDURE_DESCRIPTION_FORMAT);
+                        return handleDirectStringPropertyFilter(join.<String> get(FormatEntity.FORMAT),
+                                propertyValue.toString(), operator, builder, switched);
                     case "metadata":
                         return handleDirectStringPropertyFilter(
-                                root.<String> get(ProcedureEntity.PROPERTY_DESCRIPTION_FILE), propertyValue, operator,
-                                builder, switched);
+                                root.<String> get(ProcedureEntity.PROPERTY_DESCRIPTION_FILE), propertyValue.toString(),
+                                operator, builder, switched);
                     default:
                         throw new RuntimeException("Error getting filter for Property: \"" + propertyName
                                 + "\". No such property in Entity.");

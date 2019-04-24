@@ -28,8 +28,6 @@
  */
 package org.n52.sta.data.repositories;
 
-import java.util.Optional;
-
 import org.n52.series.db.beans.sta.AbstractStaEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;

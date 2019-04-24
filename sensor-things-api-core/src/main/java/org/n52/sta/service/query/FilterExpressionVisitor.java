@@ -43,6 +43,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 
 import org.apache.olingo.commons.api.edm.EdmEnumType;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveType;
@@ -85,11 +86,13 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.criteria.internal.CriteriaBuilderImpl;
 import org.hibernate.query.criteria.internal.expression.function.TrimFunction;
 import org.hibernate.spatial.criterion.SpatialRestrictions;
+import org.joda.time.DateTime;
 import org.n52.sta.data.query.EntityQuerySpecifications;
 import org.n52.sta.data.query.QuerySpecificationRepository;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.springframework.boot.autoconfigure.couchbase.CouchbaseProperties.Bucket;
 import org.springframework.boot.autoconfigure.info.ProjectInfoProperties.Build;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.backoff.ExponentialBackOff;
 
 /**
@@ -109,7 +112,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
     private CriteriaBuilder criteriaBuilder;
 
     private Root<?> root;
-
+    
     public FilterExpressionVisitor(Class sourceType, AbstractSensorThingsEntityService service, CriteriaBuilder criteriaBuilder, Root<?> root)
             throws ODataApplicationException {
         this.sourceType = sourceType;
@@ -270,10 +273,9 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
 
             // Fallback to Date comparison
             try {
-                javax.persistence.criteria.Expression<Date> leftExpr = convertToDateTimeExpression(left);
-                javax.persistence.criteria.Expression<Date> rightExpr = convertToDateTimeExpression(right);
-
-                return rootQS.handleDateFilter(leftExpr, rightExpr, operator, criteriaBuilder, false);
+                javax.persistence.criteria.Expression<Date> leftExpr = root.<Date> get((String) left);
+                Date rightExpr = convertToDateTimeExpression(right);
+                return rootQS.handleDateFilter(leftExpr, rightExpr, operator, criteriaBuilder);
             } catch (ODataApplicationException e) {
             }
 
@@ -323,20 +325,16 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
         }
     }
 
-    private javax.persistence.criteria.Expression<Date> convertToDateTimeExpression(Object expr) throws ODataApplicationException {
-        if (expr instanceof javax.persistence.criteria.Expression< ? >) {
+    private Date convertToDateTimeExpression(Object expr) throws ODataApplicationException {
+        if (expr instanceof Date) {
             // Literal
-            return ((javax.persistence.criteria.Expression<Date>) expr);
-//        } else if (expr instanceof Date) {
-//            // Literal
-//            return Expressions.asDateTime((Date) expr);
-//        } else if (expr instanceof String) {
-//            // Property
-//            return new PathBuilder(sourceType, sourcePath).getDateTime((String) expr, Date.class);
-        } else
-            throw new ODataApplicationException("Could not convert " + expr.toString() + "to BooleanExpression",
-                                                HttpStatusCode.BAD_REQUEST.getStatusCode(),
-                                                Locale.ENGLISH);
+            return (Date) expr;
+        } else if (expr instanceof String) {
+            // Property
+            return new DateTime(expr).toDate();
+        }
+        throw new ODataApplicationException("Could not convert " + expr.toString() + "to BooleanExpression",
+                HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ENGLISH);
     }
 
     private javax.persistence.criteria.Expression<Date>[] convertToTimespanExpression(Object expr) throws ODataApplicationException {
@@ -372,32 +370,30 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
      * @throws ODataApplicationException
      *         If no QuerySpecification for given related Entity was found.
      */
-    private javax.persistence.criteria.Expression<Boolean> convertToForeignExpression(List<UriResource> uriResources,
+    private Specification<?> convertToForeignExpression(List<UriResource> uriResources,
                                                          Object value,
                                                          BinaryOperatorKind operator)
                                                                  throws ExpressionVisitException,
                                                                  ODataApplicationException {
-//        JPQLQuery<Long> idQuery = null;
-//        int uriLength = uriResources.size();
-//        String lastResource = uriResources.get(uriLength-2).toString();
-//
-//        // Get filter on Entity
-//        EntityQuerySpecifications stepQS = QuerySpecificationRepository.getSpecification(lastResource);
-//        Object filter = stepQS.getFilterForProperty(uriResources.get(uriLength-1).toString(), value, operator, false);
-//        idQuery = stepQS.getIdSubqueryWithFilter((com.querydsl.core.types.Expression<Boolean>)filter);
-//
-//        for (int i = uriLength-3; i > 0; i-- ) {
-//            // Get QuerySpecifications for subQuery
-//            stepQS = QuerySpecificationRepository.getSpecification(uriResources.get(i).toString());
-//            // Get new IdQuery based on Filter
-//            BooleanExpression expr = (BooleanExpression) stepQS.getFilterForProperty(uriResources.get(i+1).toString(), idQuery, null, false);
-//            idQuery = stepQS.getIdSubqueryWithFilter(expr);
-//        }
-//        //
-//        // // Filter by Id on main Query
-//        //TODO check if this cast is legit
-//        return  (BooleanExpression) rootQS.getFilterForProperty(uriResources.get(0).toString(), idQuery, null, false);
-        return null;
+        Specification idQuery = null;
+        int uriLength = uriResources.size();
+        String lastResource = uriResources.get(uriLength - 2).toString();
+        // Get filter on Entity
+        EntityQuerySpecifications stepQS = QuerySpecificationRepository.getSpecification(lastResource);
+        Specification<?> filter =
+                stepQS.getFilterForProperty(uriResources.get(uriLength - 1).toString(), value, operator, false);
+        idQuery = stepQS.getIdSubqueryWithFilter(filter);
+        for (int i = uriLength - 3; i > 0; i--) {
+            // Get QuerySpecifications for subQuery
+            stepQS = QuerySpecificationRepository.getSpecification(uriResources.get(i).toString());
+            // Get new IdQuery based on Filter
+            Specification<?> expr =
+                    stepQS.getFilterForProperty(uriResources.get(i + 1).toString(), idQuery, null, false);
+            idQuery = stepQS.getIdSubqueryWithFilter(expr);
+        }
+        // Filter by Id on main Query
+        // TODO check if this cast is legit
+        return rootQS.getFilterForProperty(uriResources.get(0).toString(), idQuery, null, false);
     }
 
     /**
@@ -649,10 +645,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
                                                     HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(),
                                                     Locale.ENGLISH);
             } else if (type instanceof EdmDateTimeOffset) {
-                final Class<?> defaultType = type.getDefaultType();
-                final Constructor<?> c = defaultType.getConstructor(Date.class);
-                return c.newInstance(Date.from(OffsetDateTime.parse(literal.getText()).toInstant()));
-    //            return Expressions.asDateTime(Date.from(OffsetDateTime.parse(literal.getText()).toInstant()));
+                return new DateTime(literal.getText());
             } else if (type instanceof EdmGeography || type instanceof EdmGeometry
                     || type instanceof EdmGeographyPoint || type instanceof EdmGeometryPoint
                     || type instanceof EdmGeographyMultiPoint || type instanceof EdmGeometryMultiPoint
@@ -686,10 +679,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
             } else {
                 // Coerce literal numbers into Double
                 try {
-                    final Class<?> defaultType = type.getDefaultType();
-                    final Constructor<?> c = defaultType.getConstructor(Double.class);
-                    return c.newInstance(Double.parseDouble(literalAsString));
-    //                return Expressions.asNumber(Double.parseDouble(literalAsString));
+                    return Double.parseDouble(literalAsString);
                 } catch (NumberFormatException e) {
                     throw new ODataApplicationException("Could not parse literal Numeric Value to Double. Error was: "
                             + e.getMessage(),

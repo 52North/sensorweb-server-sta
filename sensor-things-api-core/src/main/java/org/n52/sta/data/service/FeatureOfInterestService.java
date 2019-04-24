@@ -28,10 +28,7 @@
  */
 package org.n52.sta.data.service;
 
-import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ET_FEATURE_OF_INTEREST_NAME;
-
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -45,7 +42,6 @@ import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.beans.AbstractFeatureEntity;
-import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
@@ -81,10 +77,10 @@ public class FeatureOfInterestService
     private FormatRepository formatRepository;
 
     @Autowired
-    private DataRepository<DataEntity<?>> dataRepository;
+    private DataRepository dataRepository;
 
     @Autowired
-    private DatasetRepository<DatasetEntity> datasetRepository;
+    private DatasetRepository datasetRepository;
 
     @Autowired
     private DatastreamRepository datastreamRepository;

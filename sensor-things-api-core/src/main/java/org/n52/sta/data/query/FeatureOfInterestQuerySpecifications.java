@@ -31,8 +31,6 @@ package org.n52.sta.data.query;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
@@ -44,7 +42,6 @@ import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.expression.spel.CompiledExpression;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -72,25 +69,11 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
         };
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.n52.sta.data.query.EntityQuerySpecifications#getIdSubqueryWithFilter(com.querydsl.core.types.dsl.
-     * BooleanExpression)
-     */
     @Override
-    public Subquery<Long> getIdSubqueryWithFilter(Expression<Boolean> filter) {
-//        return this.toSubquery(qfeature, qfeature.id, filter);
-        return null;
+    public Specification<Long> getIdSubqueryWithFilter(Specification filter) {
+        return this.toSubquery(AbstractFeatureEntity.class, AbstractFeatureEntity.PROPERTY_ID, filter);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.n52.sta.data.query.EntityQuerySpecifications#getFilterForProperty(java.lang.String,
-     * java.lang.Object, org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind)
-     */
     @Override
     public Specification<AbstractFeatureEntity<?>> getFilterForProperty(String propertyName,
                                        Object propertyValue,
@@ -99,8 +82,16 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
             throws ExpressionVisitException {
         if (propertyName.equals("Observations")) {
             return handleRelatedPropertyFilter(propertyName, (Subquery<Long>) propertyValue, switched);
-//        } else if (propertyName.equals("id")) {
-//            return handleDirectNumberPropertyFilter(qfeature.id, propertyValue, operator, switched);
+        } else if (propertyName.equals("id")) {
+            return (root, query, builder) -> {
+                try {
+                    return handleDirectNumberPropertyFilter(root.<Long> get(AbstractFeatureEntity.PROPERTY_ID),
+                            Long.getLong(propertyValue.toString()), operator, builder);
+                } catch (ExpressionVisitException e) {
+                    throw new RuntimeException(e);
+                }
+                //
+            };
         } else {
             return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
         }
@@ -110,15 +101,6 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
                                                           Subquery<Long> propertyValue,
                                                           boolean switched)
             throws ExpressionVisitException {
-//        return qfeature.id.in(JPAExpressions
-//                              .selectFrom(qdataset)
-//                              .where(qdataset.id.in(
-//                                                    JPAExpressions
-//                                                                  .selectFrom(qobservation)
-//                                                                  .where(qobservation.id.eq(propertyValue))
-//                                                                  .select(qobservation.dataset.id)))
-//                              .select(qdataset.feature.id));
-//        
         return (root, query, builder) -> {
             // TODO ???
             Subquery<Long> sqFeature = query.subquery(Long.class);
@@ -131,26 +113,7 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
             return builder.in(root.get(AbstractFeatureEntity.PROPERTY_ID)).value(sqFeature);
         };
     }
-//
-//    private Object handleDirectPropertyFilter(String propertyName,
-//                                              Object propertyValue,
-//                                              BinaryOperatorKind operator,
-//                                              boolean switched)
-//            throws ExpressionVisitException {
-//        switch (propertyName) {
-//        case "name":
-//            return handleDirectStringPropertyFilter(qfeature.name, propertyValue, operator, switched);
-//        case "description":
-//            return handleDirectStringPropertyFilter(qfeature.description, propertyValue, operator, switched);
-//        case "encodingType":
-//        case "featureType":
-//            return handleStringFilter("application/vnd.geo+json"), propertyValue, operator, switched);
-//        default:
-//            throw new ExpressionVisitException("Error getting filter for Property: \"" + propertyName
-//                    + "\". No such property in Entity.");
-//        }
-//    }
-    
+
     private Specification<AbstractFeatureEntity<?>> handleDirectPropertyFilter(String propertyName, Object propertyValue,
             BinaryOperatorKind operator, boolean switched) {
         return new Specification<AbstractFeatureEntity<?>>() {
@@ -160,14 +123,14 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
                     switch (propertyName) {
                     case "name":
                         return handleDirectStringPropertyFilter(root.<String> get(DescribableEntity.PROPERTY_NAME),
-                                propertyValue, operator, builder, switched);
+                                propertyValue.toString(), operator, builder, switched);
                     case "description":
                         return handleDirectStringPropertyFilter(
-                                root.<String> get(DescribableEntity.PROPERTY_DESCRIPTION), propertyValue, operator,
+                                root.<String> get(DescribableEntity.PROPERTY_DESCRIPTION), propertyValue.toString(), operator,
                                 builder, switched);
                     case "encodingType":
                     case "featureType":
-                        if ("application/vnd.geo+json".equals(propertyValue) || "application/vnd.geo json".equals(propertyValue)) {
+                        if (operator.equals(BinaryOperatorKind.EQ) && ("application/vnd.geo+json".equals(propertyValue) || "application/vnd.geo json".equals(propertyValue))) {
                             return builder.isNotNull(root.get(DescribableEntity.PROPERTY_ID));
                         } 
                         return builder.isNull(root.get(DescribableEntity.PROPERTY_ID));
