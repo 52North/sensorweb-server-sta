@@ -4,7 +4,7 @@
              http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd"
     version="2.1">
     <persistence-unit name="default-unit">
-        <description>Default Mappings</description>
+        <description>SensorThings Mappings</description>
         <mapping-file>/hbm/transactional/core/CategoryResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/CodespaceResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/FeatureResource.hbm.xml</mapping-file>
@@ -31,6 +31,9 @@
         <mapping-file>/hbm/sta/DatastreamResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/sta/LocationResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/sta/PlatformResource.hbm.xml</mapping-file>
-        <!--<mapping-file>/hbm/sta/ThingResource.hbm.xml</mapping-file>-->
+        <exclude-unlisted-classes>true</exclude-unlisted-classes>
+        <properties>
+          <property name="hibernate.archive.autodetection" value="class"/>
+        </properties>
     </persistence-unit>
 </persistence>
