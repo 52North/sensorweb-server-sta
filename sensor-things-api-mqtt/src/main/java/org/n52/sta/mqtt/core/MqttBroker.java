@@ -41,7 +41,6 @@ import org.apache.olingo.server.core.uri.validator.UriValidationException;
 import org.h2.mvstore.Cursor;
 import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
-import org.n52.sta.mqtt.MqttHandlerException;
 import org.n52.sta.mqtt.handler.MqttMessageHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,7 +93,7 @@ public class MqttBroker {
     
     private Server mqttServer;
 
-    @Bean
+    @Bean(destroyMethod = "stopServer")
     public Server initMQTTBroker() {
         mqttServer = new Server();
         brokerConfig = parseConfig();
