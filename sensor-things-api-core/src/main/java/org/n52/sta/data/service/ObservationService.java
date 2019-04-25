@@ -126,7 +126,7 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
     @Override
     public EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException {
         EntityCollection retEntitySet = new EntityCollection();
-        Specification<DataEntity<?>> filter = getFilterPredicate(DataEntity.class, queryOptions, null, null);
+        Specification<DataEntity<?>> filter = getFilterPredicate(DataEntity.class, queryOptions);
         getRepository().findAll(filter, createPageableRequest(queryOptions))
                 .forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
@@ -143,7 +143,7 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
     public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType,
             QueryOptions queryOptions) throws ODataApplicationException {
         Specification<DataEntity<?>> filter = getFilter(sourceId, sourceEntityType);
-        filter = filter.and(getFilterPredicate(DataEntity.class, queryOptions, null, null));
+        filter = filter.and(getFilterPredicate(DataEntity.class, queryOptions));
         // TODO: check cast
         Iterable<DataEntity<?>> observations =
                 getRepository().findAll(filter, createPageableRequest(queryOptions));
@@ -284,7 +284,7 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
 
     @Override
     public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
-        return getRepository().count(getFilterPredicate(DataEntity.class, queryOptions, null, null));
+        return getRepository().count(getFilterPredicate(DataEntity.class, queryOptions));
     }
     
     @Override

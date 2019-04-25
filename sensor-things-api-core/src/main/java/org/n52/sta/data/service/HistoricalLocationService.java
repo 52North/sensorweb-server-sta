@@ -91,7 +91,7 @@ public class HistoricalLocationService extends AbstractSensorThingsEntityService
     @Override
     public EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException {
         EntityCollection retEntitySet = new EntityCollection();
-        Specification<HistoricalLocationEntity> filter = getFilterPredicate(HistoricalLocationEntity.class, queryOptions, null, null);
+        Specification<HistoricalLocationEntity> filter = getFilterPredicate(HistoricalLocationEntity.class, queryOptions);
 
         getRepository().findAll(filter, createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
@@ -106,7 +106,7 @@ public class HistoricalLocationService extends AbstractSensorThingsEntityService
     @Override
     public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType, QueryOptions queryOptions) throws ODataApplicationException {
         Specification<HistoricalLocationEntity> filter = getFilter(sourceId, sourceEntityType);
-        filter = filter.and(getFilterPredicate(HistoricalLocationEntity.class, queryOptions, null, null));
+        filter = filter.and(getFilterPredicate(HistoricalLocationEntity.class, queryOptions));
 
         Iterable<HistoricalLocationEntity> locations = getRepository().findAll(filter, createPageableRequest(queryOptions));
         EntityCollection retEntitySet = new EntityCollection();
@@ -227,7 +227,7 @@ public class HistoricalLocationService extends AbstractSensorThingsEntityService
 
     @Override
     public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
-        return getRepository().count(getFilterPredicate(HistoricalLocationEntity.class, queryOptions, null, null));
+        return getRepository().count(getFilterPredicate(HistoricalLocationEntity.class, queryOptions));
     }
 
     @Override

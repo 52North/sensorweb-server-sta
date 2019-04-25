@@ -261,19 +261,28 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
      * @return Predicate based on FilterOption from queryOptions
      * @throws ODataApplicationException if the queryOptions are invalid
      */
-    public Specification<S> getFilterPredicate(Class entityClass, QueryOptions queryOptions, CriteriaBuilder criteriaBuilder, Root<T> root) throws ODataApplicationException {
-        if (!queryOptions.hasFilterOption()) {
-            return null;
-        } else {
-            Expression filterExpression = queryOptions.getFilterOption().getExpression();
-            
-            FilterExpressionVisitor visitor = new FilterExpressionVisitor(entityClass, this, criteriaBuilder, root);
+    public Specification<S> getFilterPredicate(Class entityClass, QueryOptions queryOptions) throws ODataApplicationException {
+        return (root, query, builder) -> {
             try {
-                return (Specification<S>) filterExpression.accept(visitor);
-            } catch (ExpressionVisitException e) {
-                throw new ODataApplicationException(e.getMessage(), HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ENGLISH);
+                if (queryOptions.hasOrderByOption()) {
+                    // TODO: add orderby option for observation.result here?
+                }
+                if (!queryOptions.hasFilterOption()) {
+                    return null;
+                } else {
+                    Expression filterExpression = queryOptions.getFilterOption().getExpression();
+                    
+                    FilterExpressionVisitor visitor = new FilterExpressionVisitor(entityClass, this, builder, root);
+                    try {
+                        return ((Specification<S>) filterExpression.accept(visitor)).toPredicate(root, query, builder);
+                    } catch (ExpressionVisitException e) {
+                        throw new ODataApplicationException(e.getMessage(), HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ENGLISH);
+                    }
+                }
+            } catch (ODataApplicationException e) {
+                throw new RuntimeException(e);
             }
-        }
+        };
     }
 
     @Transactional(rollbackFor = Exception.class)

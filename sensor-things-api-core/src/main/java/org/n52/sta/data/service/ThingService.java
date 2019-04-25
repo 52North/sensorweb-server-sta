@@ -84,7 +84,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     @Override
     public EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException {
         EntityCollection retEntitySet = new EntityCollection();
-        Specification<PlatformEntity> filter = getFilterPredicate(PlatformEntity.class, queryOptions, null, null);
+        Specification<PlatformEntity> filter = getFilterPredicate(PlatformEntity.class, queryOptions);
         getRepository().findAll(filter, createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
@@ -99,7 +99,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType, QueryOptions queryOptions) throws ODataApplicationException {
         Specification<PlatformEntity> filter = tQS.withRelatedLocation(sourceId);
 
-        filter = filter.and(getFilterPredicate(PlatformEntity.class, queryOptions, null, null));       
+        filter = filter.and(getFilterPredicate(PlatformEntity.class, queryOptions));       
         Iterable<PlatformEntity> things = getRepository().findAll(filter, createPageableRequest(queryOptions));
 
         EntityCollection retEntitySet = new EntityCollection();
@@ -201,7 +201,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     
     @Override
     public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
-        return getRepository().count(getFilterPredicate(PlatformEntity.class, queryOptions, null, null));
+        return getRepository().count(getFilterPredicate(PlatformEntity.class, queryOptions));
     }
 
     @Override

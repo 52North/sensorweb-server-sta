@@ -106,7 +106,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     @Override
     public EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException {
         EntityCollection retEntitySet = new EntityCollection();
-        Specification<LocationEntity> filter = getFilterPredicate(LocationEntity.class, queryOptions, null, null);
+        Specification<LocationEntity> filter = getFilterPredicate(LocationEntity.class, queryOptions);
         getRepository().findAll(filter, createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
@@ -120,7 +120,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     @Override
     public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType, QueryOptions queryOptions) throws ODataApplicationException {
         Specification<LocationEntity> filter = getFilter(sourceId, sourceEntityType);
-        filter = filter.and(getFilterPredicate(LocationEntity.class, queryOptions, null, null));
+        filter = filter.and(getFilterPredicate(LocationEntity.class, queryOptions));
 
         EntityCollection retEntitySet = new EntityCollection();
         Iterable<LocationEntity> locations = getRepository().findAll(filter, createPageableRequest(queryOptions));
@@ -244,7 +244,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
 
     @Override
     public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
-        return getRepository().count(getFilterPredicate(LocationEntity.class, queryOptions, null, null));
+        return getRepository().count(getFilterPredicate(LocationEntity.class, queryOptions));
     }
 
     @Override

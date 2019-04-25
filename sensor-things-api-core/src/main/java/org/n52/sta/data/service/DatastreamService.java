@@ -109,7 +109,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     @Override
     public EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException {
         EntityCollection retEntitySet = new EntityCollection();
-        Specification<DatastreamEntity> filter = getFilterPredicate(DatastreamEntity.class, queryOptions, null, null);
+        Specification<DatastreamEntity> filter = getFilterPredicate(DatastreamEntity.class, queryOptions);
         
         getRepository().findAll(filter, createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
@@ -123,7 +123,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
 
     @Override
     public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType, QueryOptions queryOptions) throws ODataApplicationException {
-        Specification<DatastreamEntity> filter = getFilter(sourceId, sourceEntityType).and(getFilterPredicate(DatastreamEntity.class, queryOptions, null, null));
+        Specification<DatastreamEntity> filter = getFilter(sourceId, sourceEntityType).and(getFilterPredicate(DatastreamEntity.class, queryOptions));
         Iterable<DatastreamEntity> datastreams = getRepository().findAll(filter, createPageableRequest(queryOptions));
         EntityCollection retEntitySet = new EntityCollection();
         datastreams.forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
@@ -201,7 +201,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     
     @Override
     public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
-        return getRepository().count(getFilterPredicate(DatastreamEntity.class, queryOptions, null, null));
+        return getRepository().count(getFilterPredicate(DatastreamEntity.class, queryOptions));
     }
 
 

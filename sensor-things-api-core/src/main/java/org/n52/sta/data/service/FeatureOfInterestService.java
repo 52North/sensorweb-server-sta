@@ -106,7 +106,7 @@ public class FeatureOfInterestService
     @Override
     public EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException {
         EntityCollection retEntitySet = new EntityCollection();
-        Specification<AbstractFeatureEntity<?>> filter = getFilterPredicate(AbstractFeatureEntity.class, queryOptions, null, null);
+        Specification<AbstractFeatureEntity<?>> filter = getFilterPredicate(AbstractFeatureEntity.class, queryOptions);
         getRepository().findAll(filter, createPageableRequest(queryOptions))
                 .forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
@@ -214,7 +214,7 @@ public class FeatureOfInterestService
 
     @Override
     public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
-        return getRepository().count(getFilterPredicate(AbstractFeatureEntity.class, queryOptions, null, null));
+        return getRepository().count(getFilterPredicate(AbstractFeatureEntity.class, queryOptions));
     }
 
     @Override
