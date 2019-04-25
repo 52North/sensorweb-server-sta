@@ -3,8 +3,8 @@
 debug: false
 trace: false
 
-server:
-  port: 8081
+#server:
+#  port: 8081
 #TODO: Check if this is needed. 
 database:
   jpa:
@@ -18,9 +18,15 @@ spring:
     password: postgres
     url: jdbc:postgresql://localhost:5432/sta
     initialization-mode: always
+  hikari:
+    connection-timeout: 20000
+    maximum-pool-size: 10
+    minimum-idle: 5
+    idle-timeout: 300000 
   jpa:
     properties:
-      hibernate: 
+      hibernate:
+        default_schema: sensorweb4
         hbm2ddl:
           # hbm2ddl values: validate | update | create | create-drop | none
           auto: none
@@ -30,7 +36,6 @@ spring:
           # https://hibernate.atlassian.net/browse/HHH-12368
           lob.non_contextual_creation: true
         format_sql: true
-        default_schema: public
         dialect: org.hibernate.spatial.dialect.postgis.PostgisPG95Dialect
 
         # disable driver's feature detection
@@ -52,11 +57,13 @@ mqtt:
     
 # Logging
 logging:
+  file: logs/52n-sensorthings-webapp.log
+  logging.file.max-history: 10
   level:
     # root: TRACE
-    org.apache.coyote.http11.Http11InputBuffer: TRAC
-    org.n52.sta: DEBUG
+    org.apache.coyote.http11.Http11InputBuffer: INFO
+    org.n52.sta: INFO
     org.hibernate: INFO
-    org.hibernate.type: DEBUGG
-    org.hibernate.SQL: DEBUG
-    io.moquette: TRACE
+    org.hibernate.type: INFO
+    org.hibernate.SQL: INFO
+    io.moquette: INFO

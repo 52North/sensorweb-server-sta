@@ -16,9 +16,9 @@
     <modules>
         <module>sensor-things-api-core</module>
         <module>sensor-things-api-app</module>
-        <module>sensor-things-api-webapp</module>
         <module>sensor-things-api-http</module>
         <module>sensor-things-api-mqtt</module>
+        <module>sensor-things-api-webapp</module>
     </modules>
 
     <properties>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hibernate-mapping package="org.n52.series.db.beans"
+    xmlns="http://www.hibernate.org/xsd/hibernate-mapping"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.hibernate.org/xsd/hibernate-mapping http://www.hibernate.org/xsd/hibernate-mapping/hibernate-mapping-4.0.xsd">
+    <class name="RelatedFeatureEntity" table="related_feature">
+        <comment>Storage of relations between offerings and features. This table is used by the SOS to fulfill the standard.</comment>
+        <id name="id" type="long">
+            <column name="related_feature_id">
+                <comment>PK column of the table</comment>
+            </column>
+            <generator class="native">
+                <param name="sequence_name">related_feature_seq</param>
+            </generator>
+        </id>
+        <many-to-one name="feature" class="AbstractFeatureEntity" foreign-key="fk_related_feature">
+            <column name="fk_feature_id" not-null="true">
+                <comment>Reference to the feature that is related to the offering.</comment>
+            </column>
+        </many-to-one>
+       <property name="role" type="string">
+            <column name="role" not-null="true">
+                <comment>The role of the related feature.</comment>
+            </column>
+        </property>
+        <!-- Comments for the columns are defined in the OfferingResource.hbm.xml file! -->
+        <set name="offerings" table="offering_related_feature" inverse="true">
+            <key foreign-key="fk_offering_related_feature">
+                <column name="fk_related_feature_id" not-null="true"/>
+            </key>
+            <many-to-many class="OfferingEntity" foreign-key="fk_related_feature_offering">
+                <column name="fk_offering_id" not-null="true"/>
+            </many-to-many>
+        </set>
+    </class>
+</hibernate-mapping>

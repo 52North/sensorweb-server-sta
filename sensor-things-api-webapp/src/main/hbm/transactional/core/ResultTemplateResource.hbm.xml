@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hibernate-mapping package="org.n52.series.db.beans"
+    xmlns="http://www.hibernate.org/xsd/hibernate-mapping"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.hibernate.org/xsd/hibernate-mapping http://www.hibernate.org/xsd/hibernate-mapping/hibernate-mapping-4.0.xsd">
+    <class name="ResultTemplateEntity" table="result_template">
+        <comment>Storage of templates for the result handling operations</comment>
+        <id name="id" type="long">
+            <column name="result_template_id">
+                <comment>PK column of the table</comment>
+            </column>
+            <generator class="native">
+                <param name="sequence_name">result_template_seq</param>
+            </generator>
+        </id>
+        <many-to-one name="offering" class="OfferingEntity" foreign-key="fk_result_template_offering">
+            <column index="idx_result_template_offering" name="fk_offering_id" not-null="true">
+                <comment>The offering that is associated with the result template</comment>
+            </column>
+        </many-to-one>
+        <many-to-one name="phenomenon" class="PhenomenonEntity" foreign-key="fk_result_template_phenomenon">
+            <column index="idx_result_template_phenomenon" name="fk_phenomenon_id" not-null="true">
+                <comment>The phenomenon that is associated with the result template</comment>
+            </column>
+        </many-to-one>
+        <many-to-one name="procedure" class="ProcedureEntity" foreign-key="fk_result_template_procedure">
+            <column index="idx_result_template_procedure" name="fk_procedure_id" not-null="false">
+                <comment>The procedure that is associated with the result template. Can be null if the feature is defined in the structure.</comment>
+            </column>
+        </many-to-one>
+        <many-to-one name="feature" class="AbstractFeatureEntity" foreign-key="fk_result_template_feature">
+            <column index="idx_result_template_feature" name="fk_feature_id" not-null="false">
+                <comment>The feature that is associated with the result template. Can be null if the feature is defined in the structure.</comment>
+            </column>
+        </many-to-one>
+        <property name="identifier" type="string">
+            <column index="idx_result_template_identifier" name="identifier" not-null="true">
+                <comment>Unique identifier of the result template used for insertion operation</comment>
+            </column>
+        </property>
+
+        <property name="structure" type="text">
+            <column name="structure" not-null="true">
+                <comment>The structure of the result template, should be a XML encoded swe:DataRecord</comment>
+            </column>
+        </property>
+
+        <property name="encoding" type="text">
+            <column name="encoding" not-null="true">
+                <comment>The encding of the result template, should be a XML encoded swe:TextEncoding</comment>
+            </column>
+        </property>
+    </class>
+</hibernate-mapping>
