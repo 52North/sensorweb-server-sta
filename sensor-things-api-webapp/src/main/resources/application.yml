@@ -13,7 +13,7 @@ spring:
     platform: postgres
     # the db user name
     username: postgres
-    the db user password
+    # the db user password
     password: postgres
     # here 'sta' is the name of the database
     url: jdbc:postgresql://localhost:5432/sta
