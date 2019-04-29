@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2018 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -26,9 +26,10 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-
 package org.n52.sta.mapping;
 
+import java.util.Collections;
+import java.util.HashMap;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_OBSERVATION_TYPE;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_OBSERVED_AREA;
@@ -45,12 +46,14 @@ import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAM
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
+import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.geo.Geospatial;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
@@ -175,8 +178,8 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
         }
         if (checkNavigationLink(entity, ET_OBSERVED_PROPERTY_NAME)) {
             observedPropertyMapper
-                                  .checkNavigationLink(entity.getNavigationLink(ET_OBSERVED_PROPERTY_NAME)
-                                                             .getInlineEntity());
+            .checkNavigationLink(entity.getNavigationLink(ET_OBSERVED_PROPERTY_NAME)
+                                 .getInlineEntity());
         }
         if (checkNavigationLink(entity, ET_THING_NAME)) {
             thingMapper.checkNavigationLink(entity.getNavigationLink(ET_THING_NAME).getInlineEntity());
@@ -273,15 +276,15 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
         if (checkNavigationLink(entity, ET_SENSOR_NAME)) {
             datastream.setProcedure(
                                     sensorMapper.createEntity(entity.getNavigationLink(ET_SENSOR_NAME)
-                                                                    .getInlineEntity()));
+                                                              .getInlineEntity()));
         }
     }
 
     private void addObservedProperty(DatastreamEntity datastream, Entity entity) {
         if (checkNavigationLink(entity, ET_OBSERVED_PROPERTY_NAME)) {
             datastream.setObservableProperty(observedPropertyMapper
-                                                                   .createEntity(entity.getNavigationLink(ET_OBSERVED_PROPERTY_NAME)
-                                                                                       .getInlineEntity()));
+                                             .createEntity(entity.getNavigationLink(ET_OBSERVED_PROPERTY_NAME)
+                                                           .getInlineEntity()));
         }
     }
 

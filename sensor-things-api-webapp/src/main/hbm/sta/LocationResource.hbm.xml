@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hibernate-mapping package="org.n52.series.db.beans.sta"
+                   xmlns="http://www.hibernate.org/xsd/hibernate-mapping"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.hibernate.org/xsd/hibernate-mapping http://www.hibernate.org/xsd/hibernate-mapping/hibernate-mapping-4.0.xsd">
+    <class name="LocationEntity" table="location">
+        <id name="id" type="long">
+            <column name="location_id"/>
+            <generator class="native">
+                <param name="sequence_name">location_seq</param>
+            </generator>
+        </id>
+        <property name="name" type="string">
+            <column name="name" not-null="true"/>
+        </property>
+        <property name="description" type="text">
+            <column name="description" not-null="true"/>
+        </property>
+        <property name="location" type="text">
+            <column name="location" not-null="false"/>
+        </property>
+        <component class="org.n52.series.db.beans.GeometryEntity" name="geometryEntity">
+            <property name="geometry" type="jts_geometry">
+                <column name="geom" not-null="false"/>
+            </property>
+        </component>
+        <many-to-one name="locationEncoding" class="LocationEncodingEntity" foreign-key="fk_location_location_encoding">
+            <column name="fk_location_encoding_id" not-null="true"/>
+        </many-to-one>
+        <set name="things" table="thing_location" inverse="true">
+            <key foreign-key="fk_location_thing">
+                <column name="fk_location_id" not-null="false"/>
+            </key>
+            <many-to-many class="org.n52.series.db.beans.PlatformEntity" foreign-key="fk_thing_location">
+                <column name="fk_thing_id" not-null="false"/>
+            </many-to-many>
+        </set>
+        <set name="historicalLocations" table="location_historical_location" inverse="false">
+            <key foreign-key="fk_location_historical_location">
+                <column name="fk_location_id" not-null="true"/>
+            </key>
+            <many-to-many class="HistoricalLocationEntity" foreign-key="fk_historical_location_location">
+                <column name="fk_historical_location_id" not-null="true"/>
+            </many-to-many>
+        </set>
+    </class>
+
+    <class name="LocationEncodingEntity" table="location_encoding">
+        <id name="id" type="long">
+            <column name="location_encoding_id"/>
+            <generator class="native">
+                <param name="sequence_name">location_encoding_seq</param>
+            </generator>
+        </id>
+        <property name="encodingType" type="string">
+            <column name="encoding_type" not-null="true" unique-key="un_encoding_type"/>
+        </property>
+    </class>
+
+    <class name="HistoricalLocationEntity" table="historical_location">
+        <id name="id" type="long">
+            <column name="historical_location_id"/>
+            <generator class="native">
+                <param name="sequence_name">historical_location_seq</param>
+            </generator>
+        </id>
+        <many-to-one name="thing" class="org.n52.series.db.beans.PlatformEntity" foreign-key="fk_thing_historical_location">
+            <column name="fk_thing_id" not-null="true"/>
+        </many-to-one>
+        <set name="locations" table="location_historical_location" inverse="true">
+            <key foreign-key="fk_historical_location_location">
+                <column name="fk_historical_location_id" not-null="true"/>
+            </key>
+            <many-to-many class="LocationEntity" foreign-key="fk_location_historical_location">
+                <column name="fk_location_id" not-null="true"/>
+            </many-to-many>
+        </set>
+        <property name="time" type="timestamp">
+            <column name="time" length="29" not-null="true" />
+        </property>
+    </class>
+
+    <class name="org.n52.series.db.beans.i18n.I18nLocationEntity" table="location_i18n">
+        <id name="id" type="long">
+            <column name="location_i18n_id">
+                <comment>PK column of the table</comment>
+            </column>
+            <generator class="native">
+                <param name="sequence_name">location_i18n_seq</param>
+            </generator>
+        </id>
+        <many-to-one name="entity" class="LocationEntity" foreign-key="fk_location">
+            <column name="fk_location_id" not-null="true">
+                <comment>Reference to the feature table this internationalization belongs to.</comment>
+            </column>
+        </many-to-one>
+        <property name="locale" not-null="true" type="string">
+            <column name="locale">
+                <comment>Locale/language specification for this entry</comment>
+            </column>
+        </property>
+        <property name="name" type="string">
+            <column name="name">
+                <comment>Locale/language specific name of the location</comment>
+            </column>
+        </property>
+        <property name="description" type="text">
+            <column name="description">
+                <comment>Locale/language specific description of the location</comment>
+            </column>
+        </property>
+        <property name="location" type="text">
+            <column name="location">
+                <comment>Locale/language specific location property of the location</comment>
+            </column>
+        </property>
+    </class>
+
+</hibernate-mapping>

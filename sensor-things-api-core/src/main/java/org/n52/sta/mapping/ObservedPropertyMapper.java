@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2018 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -28,10 +28,15 @@
  */
 package org.n52.sta.mapping;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DEFINITION;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ES_OBSERVED_PROPERTIES_NAME;
 import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_FQN;
+
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
@@ -39,6 +44,9 @@ import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.sta.ObservablePropertyEntity;
+import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_NAME;
+import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME;
+import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATION_NAME;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -53,22 +61,24 @@ public class ObservedPropertyMapper extends AbstractMapper<PhenomenonEntity> {
     @Autowired
     EntityCreationHelper entityCreationHelper;
 
+    @Override
     public Entity createEntity(PhenomenonEntity observedProperty) {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, observedProperty.getId()));
         addNameDescriptionProperties(entity, observedProperty);
         entity.addProperty(new Property(null, PROP_DEFINITION, ValueType.PRIMITIVE, observedProperty.getIdentifier()));
-    
+
         entity.setType(ET_OBSERVED_PROPERTY_FQN.getFullQualifiedNameAsString());
         entity.setId(entityCreationHelper.createId(entity, ES_OBSERVED_PROPERTIES_NAME, PROP_ID));
-    
+
         return entity;
     }
 
     public Entity createEntity(ObservablePropertyEntity observedProperty) {
         return createEntity(observedProperty);
     }
-    
+
+    @Override
     public ObservablePropertyEntity createEntity(Entity entity) {
         ObservablePropertyEntity phenomenon = new ObservablePropertyEntity();
         setId(phenomenon, entity);
@@ -84,7 +94,7 @@ public class ObservedPropertyMapper extends AbstractMapper<PhenomenonEntity> {
         mergeIdentifierNameDescription(existing, toMerge);
         return existing;
     }
-    
+
     public ObservablePropertyEntity mergeObservablePropertyEntity(ObservablePropertyEntity existing, ObservablePropertyEntity toMerge) {
         if (toMerge.hasDatastreams()) {
             toMerge.getDatastreams().forEach(d -> {
@@ -93,7 +103,7 @@ public class ObservedPropertyMapper extends AbstractMapper<PhenomenonEntity> {
         }
         return (ObservablePropertyEntity) merge(existing, toMerge);
     }
-    
+
     @Override
     public Entity  checkEntity(Entity entity) throws ODataApplicationException {
         checkNameAndDescription(entity);

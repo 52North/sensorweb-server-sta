@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2018 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -30,7 +30,7 @@ package org.n52.sta.data.repositories;
 
 import org.n52.series.db.beans.sta.AbstractStaEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.NoRepositoryBean;
 
 /**
@@ -38,8 +38,8 @@ import org.springframework.data.repository.NoRepositoryBean;
  *
  */
 @NoRepositoryBean
-public interface AbstractStaRepository<T extends AbstractStaEntity> extends JpaRepository<T, Long>, QuerydslPredicateExecutor<T> {
+public interface AbstractStaRepository<T extends AbstractStaEntity> extends JpaRepository<T, Long>, JpaSpecificationExecutor<T> {
 
-    //TODO: check if other custom Methods are needed
+
 }
 

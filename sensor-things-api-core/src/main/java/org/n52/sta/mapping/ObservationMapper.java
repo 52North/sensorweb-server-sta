@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2018 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -40,7 +40,7 @@ import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ES_OBS
 import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ET_OBSERVATION_FQN;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -53,7 +53,6 @@ import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.joda.time.DateTime;
-import org.joda.time.Instant;
 import org.n52.janmayen.Json;
 import org.n52.series.db.beans.BlobDataEntity;
 import org.n52.series.db.beans.BooleanDataEntity;
@@ -67,7 +66,7 @@ import org.n52.series.db.beans.ProfileDataEntity;
 import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.ReferencedDataEntity;
 import org.n52.series.db.beans.TextDataEntity;
-import org.n52.series.db.beans.parameter.Parameter;
+import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
@@ -77,6 +76,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.n52.sta.data.query.DatastreamQuerySpecifications;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -84,17 +84,23 @@ import com.fasterxml.jackson.databind.JsonNode;
  */
 @Component
 public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
-    
+
     @Autowired
     private DatastreamMapper datastreamMapper;
-    
+
     @Autowired
     private FeatureOfInterestMapper featureMapper;
 
+//    @Autowired
+//    private ObservationService observationService;
+    private final static DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
+
+    @Override
     public Entity createEntity(DataEntity<?> observation) {
         Entity entity = new Entity();
+
         entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, observation.getId()));
-        
+
         //TODO: urlencode whitespaces to allow for copy pasting into filter expression
         entity.addProperty(new Property(null, PROP_RESULT, ValueType.PRIMITIVE, this.getResult(observation).getBytes()));
 
@@ -104,11 +110,10 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
 
         String phenomenonTime = DateTimeHelper.format(createPhenomenonTime(observation));
         entity.addProperty(new Property(null, PROP_PHENOMENON_TIME, ValueType.PRIMITIVE, phenomenonTime));
-        
-        
+
         entity.addProperty(new Property(null, PROP_VALID_TIME, ValueType.PRIMITIVE, (observation.isSetValidTime())
-                                                                                    ? DateTimeHelper.format(createValidTime(observation))
-                                                                                    : null));
+                ? DateTimeHelper.format(createValidTime(observation))
+                : null));
 
         // TODO: check for quality property
         // entity.addProperty(new Property(null, PROP_RESULT_QUALITY,
@@ -116,8 +121,8 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
         // List<JsonNode> parameters = observation.getParameters().stream()
         // .map(p -> createParameterProperty(p))
         // .collect(Collectors.toList());
-        List<ComplexValue> parameters = observation.getParameters().stream().map(p -> createParameterComplexValue(p))
-                .collect(Collectors.toList());
+        List<ComplexValue> parameters = observation.hasParameters() ? observation.getParameters().stream().map(p -> createParameterComplexValue(p))
+                .collect(Collectors.toList()) : Collections.emptyList();
 
         entity.addProperty(new Property(null, PROP_PARAMETERS, ValueType.COLLECTION_COMPLEX, parameters));
 
@@ -173,16 +178,16 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
         return "";
     }
 
-    private JsonNode createParameterProperty(Parameter<?> p) {
+    private JsonNode createParameterProperty(ParameterEntity<?> p) {
         return Json.nodeFactory().objectNode().put(p.getName(), p.getValueAsString());
     }
 
-    private ComplexValue createParameterComplexValue(Parameter<?> p) {
+    private ComplexValue createParameterComplexValue(ParameterEntity<?> p) {
         ComplexValue cv = new ComplexValue();
         cv.getValue().add(new Property(null, null, ValueType.PRIMITIVE, createParameterProperty(p)));
         return cv;
     }
-    
+
     private Time createPhenomenonTime(DataEntity<?> observation) {
         final DateTime start = createDateTime(observation.getSamplingTimeStart());
         DateTime end;
@@ -193,7 +198,7 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
         }
         return createTime(start, end);
     }
-    
+
     private Time createValidTime(DataEntity<?> observation) {
         final DateTime start = createDateTime(observation.getValidTimeStart());
         DateTime end;
@@ -205,6 +210,7 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
         return createTime(start, end);
     }
 
+    @Override
     public StaDataEntity createEntity(Entity entity) {
         StaDataEntity observation = new StaDataEntity();
         setId(observation, entity);
@@ -219,10 +225,10 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
         addResult(observation, entity);
         return observation;
     }
-    
+
     private void addResult(StaDataEntity observation, Entity entity) {
         if (checkProperty(entity, PROP_RESULT)) {
-            observation.setValue(new String((byte[])getPropertyValue(entity, PROP_RESULT)));
+            observation.setValue(new String((byte[]) getPropertyValue(entity, PROP_RESULT)));
         }
     }
 
@@ -232,7 +238,7 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
             observation.setResultTime(((TimeInstant) time).getValue().toDate());
         }
     }
-    
+
     private void addValidTime(StaDataEntity observation, Entity entity) {
         if (checkProperty(entity, PROP_RESULT_TIME)) {
             Time time = parseTime(getPropertyValue(entity, PROP_RESULT_TIME));
@@ -248,7 +254,7 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
 
     private void addParameter(StaDataEntity observation, Entity entity) {
         // TODO Auto-generated method stub
-        
+
     }
 
     private void addFeatureOfInterest(StaDataEntity observation, Entity entity) {
@@ -287,12 +293,12 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
     }
 
     protected void mergeSamplingTimeAndCheckResultTime(DataEntity<?> existing, DataEntity<?> toMerge) {
-        if (toMerge.hasSamplingTimeEnd() && existing.getSamplingTimeEnd().equals(existing.getResultTime())) {
+        if (toMerge.getSamplingTimeEnd() != null && existing.getSamplingTimeEnd().equals(existing.getResultTime())) {
             existing.setResultTime(toMerge.getSamplingTimeEnd());
         }
         super.mergeSamplingTime(existing, toMerge);
     }
-    
+
     private void checkValue(DataEntity<?> existing, DataEntity<?> toMerge) throws ODataApplicationException {
         if (existing instanceof QuantityDataEntity) {
             ((QuantityDataEntity) existing)

@@ -1,20 +1,30 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements. See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership. The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Software GmbH
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation.
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * If the program is linked with libraries which are licensed under one of
+ * the following licenses, the combination of the program with the linked
+ * library is not considered a "derivative work" of the program:
+ *
+ *     - Apache License, version 2.0
+ *     - Apache Software License, version 1.0
+ *     - GNU Lesser General Public License, version 3
+ *     - Mozilla Public License, versions 1.0, 1.1 and 2.0
+ *     - Common Development and Distribution License (CDDL), version 1.0
+ *
+ * Therefore the distribution of the program linked with libraries licensed
+ * under the aforementioned licenses, is permitted by the copyright holders
+ * if the distribution is compliant with both the GNU General Public
+ * License version 2 and the aforementioned licenses.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details.
  */
 package org.n52.sta.service.deserializer;
 
@@ -91,7 +101,7 @@ public class SensorThingsDeserializer implements ODataDeserializer {
 
     private static final Map<String, Class<? extends Geospatial>> jsonNameToGeoDataType;
     static {
-        Map<String, Class<? extends Geospatial>> temp = new HashMap<String, Class<? extends Geospatial>>();
+        Map<String, Class<? extends Geospatial>> temp = new HashMap<>();
         temp.put(Constants.ELEM_POINT, Point.class);
         temp.put(Constants.ELEM_MULTIPOINT, MultiPoint.class);
         temp.put(Constants.ELEM_LINESTRING, LineString.class);
@@ -155,7 +165,7 @@ public class SensorThingsDeserializer implements ODataDeserializer {
     private List<Entity> consumeEntitySetArray(final EdmEntityType edmEntityType, final JsonNode jsonNode,
             final ExpandTreeBuilder expandBuilder) throws DeserializerException {
         if (jsonNode.isArray()) {
-            List<Entity> entities = new ArrayList<Entity>();
+            List<Entity> entities = new ArrayList<>();
             for (JsonNode arrayElement : jsonNode) {
                 if (arrayElement.isArray() || arrayElement.isValueNode()) {
                     throw new DeserializerException(
@@ -244,7 +254,7 @@ public class SensorThingsDeserializer implements ODataDeserializer {
             // The binding parameter must not occur in the payload.
             parameterNames = parameterNames.subList(1, parameterNames.size());
         }
-        Map<String, Parameter> parameters = new LinkedHashMap<String, Parameter>();
+        Map<String, Parameter> parameters = new LinkedHashMap<>();
         for (final String paramName : parameterNames) {
             final EdmParameter edmParameter = edmAction.getParameter(paramName);
 
@@ -303,7 +313,14 @@ public class SensorThingsDeserializer implements ODataDeserializer {
         return parameter;
     }
 
-    /** Reads a parameter value from a String. */
+
+    /**
+     * Reads a parameter value from a String.
+     * @param content Content of the parameter
+     * @param parameter The OData {@link EdmParameter}
+     * @return The Odata {@link Parameter}
+     * @throws DeserializerException if an error occurs
+     */
     public Parameter parameter(final String content, final EdmParameter parameter) throws DeserializerException {
         try {
             JsonParser parser = new JsonFactory(
@@ -341,7 +358,7 @@ public class SensorThingsDeserializer implements ODataDeserializer {
      */
     private void consumeRemainingJsonNodeFields(final EdmEntityType edmEntityType, final ObjectNode node,
             final Entity entity) throws DeserializerException {
-        final List<String> toRemove = new ArrayList<String>();
+        final List<String> toRemove = new ArrayList<>();
         Iterator<Entry<String, JsonNode>> fieldsIterator = node.fields();
         while (fieldsIterator.hasNext()) {
             Entry<String, JsonNode> field = fieldsIterator.next();
@@ -466,7 +483,7 @@ public class SensorThingsDeserializer implements ODataDeserializer {
                 throw new DeserializerException("Binding annotation: " + key + " must be an array.",
                         DeserializerException.MessageKeys.INVALID_ANNOTATION_TYPE, key);
             }
-            List<String> bindingLinkStrings = new ArrayList<String>();
+            List<String> bindingLinkStrings = new ArrayList<>();
             for (JsonNode arrayValue : jsonNode) {
                 assertIsNullNode(key, arrayValue);
                 if (!arrayValue.isTextual()) {
@@ -565,7 +582,7 @@ public class SensorThingsDeserializer implements ODataDeserializer {
             throw new DeserializerException("Value for property: " + name + " must be an array but is not.",
                     DeserializerException.MessageKeys.INVALID_JSON_TYPE_FOR_PROPERTY, name);
         }
-        List<Object> valueArray = new ArrayList<Object>();
+        List<Object> valueArray = new ArrayList<>();
         Iterator<JsonNode> iterator = jsonNode.iterator();
         switch (type.getKind()) {
         case PRIMITIVE:
@@ -673,7 +690,7 @@ public class SensorThingsDeserializer implements ODataDeserializer {
     /**
      * Reads a geospatial JSON value following the GeoJSON specification defined
      * in RFC 7946.
-     * 
+     *
      * @param name
      *            property name
      * @param type
@@ -718,7 +735,7 @@ public class SensorThingsDeserializer implements ODataDeserializer {
                         // array currently is zero.
                         return new LineString(dimension, null, readGeoPointValues(name, dimension, 0, false, topNode));
                     } else if (geoDataType.equals(MultiLineString.class)) {
-                        List<LineString> lines = new ArrayList<LineString>();
+                        List<LineString> lines = new ArrayList<>();
                         for (final JsonNode element : topNode) {
                             // Line strings can be empty (see above).
                             lines.add(new LineString(dimension, null,
@@ -728,13 +745,13 @@ public class SensorThingsDeserializer implements ODataDeserializer {
                     } else if (geoDataType.equals(Polygon.class)) {
                         return readGeoPolygon(name, dimension, topNode);
                     } else if (geoDataType.equals(MultiPolygon.class)) {
-                        List<Polygon> polygons = new ArrayList<Polygon>();
+                        List<Polygon> polygons = new ArrayList<>();
                         for (final JsonNode element : topNode) {
                             polygons.add(readGeoPolygon(name, dimension, element));
                         }
                         return new MultiPolygon(dimension, null, polygons);
                     } else if (geoDataType.equals(GeospatialCollection.class)) {
-                        List<Geospatial> elements = new ArrayList<Geospatial>();
+                        List<Geospatial> elements = new ArrayList<>();
                         for (final JsonNode element : topNode) {
                             if (element.isObject()) {
                                 elements.add(readPrimitiveGeoValue(name, null, (ObjectNode) element));
@@ -785,7 +802,7 @@ public class SensorThingsDeserializer implements ODataDeserializer {
             final int minimalSize, final boolean closed, JsonNode node)
             throws DeserializerException, EdmPrimitiveTypeException {
         if (node.isArray()) {
-            List<Point> points = new ArrayList<Point>();
+            List<Point> points = new ArrayList<>();
             for (final JsonNode element : node) {
                 points.add(readGeoPointValue(name, dimension, element));
             }
@@ -816,7 +833,7 @@ public class SensorThingsDeserializer implements ODataDeserializer {
     /**
      * Returns the primitive type's default class or the manually mapped class
      * if present.
-     * 
+     *
      * @param mapping
      * @param edmPrimitiveType
      * @return the java class to be used during deserialization
@@ -832,7 +849,7 @@ public class SensorThingsDeserializer implements ODataDeserializer {
     /**
      * Check if JsonNode is a value node (<code>jsonNode.isValueNode()</code>)
      * and if not throw an DeserializerException.
-     * 
+     *
      * @param name
      *            name of property which is checked
      * @param jsonNode
@@ -848,12 +865,12 @@ public class SensorThingsDeserializer implements ODataDeserializer {
     }
 
     private void removeAnnotations(final ObjectNode tree) throws DeserializerException {
-        List<String> toRemove = new ArrayList<String>();
+        List<String> toRemove = new ArrayList<>();
         Iterator<Entry<String, JsonNode>> fieldsIterator = tree.fields();
         while (fieldsIterator.hasNext()) {
             Map.Entry<String, JsonNode> field = fieldsIterator.next();
 
-            if (field.getKey().contains(ODATA_CONTROL_INFORMATION_PREFIX) 
+            if (field.getKey().contains(ODATA_CONTROL_INFORMATION_PREFIX)
                     || field.getKey().contains(SensorThingsEdmConstants.CONTROL_ANNOTATION_PREFIX)) {
                 // Control Information is ignored for requests as per
                 // specification chapter "4.5 Control Information"
@@ -870,7 +887,7 @@ public class SensorThingsDeserializer implements ODataDeserializer {
 
     /**
      * Validates that node is empty (<code>node.size() == 0</code>).
-     * 
+     *
      * @param node
      *            node to be checked
      * @throws DeserializerException
@@ -965,7 +982,7 @@ public class SensorThingsDeserializer implements ODataDeserializer {
     @Override
     public DeserializerResult entityReferences(final InputStream stream) throws DeserializerException {
         try {
-            List<URI> parsedValues = new ArrayList<URI>();
+            List<URI> parsedValues = new ArrayList<>();
             final ObjectNode tree = parseJsonTree(stream);
             final String key = Constants.JSON_ID;
             JsonNode jsonNode = tree.get(Constants.VALUE);

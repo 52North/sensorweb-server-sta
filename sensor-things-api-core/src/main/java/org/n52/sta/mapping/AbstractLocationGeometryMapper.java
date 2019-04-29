@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2018 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -52,7 +52,7 @@ public abstract class AbstractLocationGeometryMapper<T> extends AbstractMapper<T
 
     @Autowired
     private GeometryMapper geometryMapper;
-    
+
     protected void checkEncodingType(Entity entity) throws ODataApplicationException {
         checkPropertyValidity(PROP_ENCODINGTYPE, entity);
         if (!getPropertyValue(entity, PROP_ENCODINGTYPE).equals(ENCODINGTYPE_GEOJSON)) {
@@ -65,7 +65,7 @@ public abstract class AbstractLocationGeometryMapper<T> extends AbstractMapper<T
     protected void addGeometry(Entity entity, HasGeometry<?> geometryEntity) {
         addWithEncoding(entity, geometryEntity, PROP_FEATURE);
     }
-    
+
     protected void addLocation(Entity entity, HasGeometry<?> locationEntity) {
         addWithEncoding(entity, locationEntity, PROP_LOCATION);
     }
@@ -73,7 +73,7 @@ public abstract class AbstractLocationGeometryMapper<T> extends AbstractMapper<T
     protected void addObservedArea(Entity entity, HasGeometry<?> geometryEntity) {
         add(entity, geometryEntity, PROP_OBSERVED_AREA);
     }
-    
+
     protected void addWithEncoding(Entity entity, HasGeometry<?> geometryLocationEntity, String property) {
         if (geometryLocationEntity.isSetGeometry()) {
             entity.addProperty(new Property(null, PROP_ENCODINGTYPE, ValueType.PRIMITIVE, ENCODINGTYPE_GEOJSON));
@@ -90,15 +90,15 @@ public abstract class AbstractLocationGeometryMapper<T> extends AbstractMapper<T
         }
 
     }
-    
+
     protected GeometryEntity parseGeometry(ComplexValue value) {
         return geometryMapper.createGeometryEntity(value);
     }
-    
+
     protected GeometryEntity parseGeometry(Geospatial geospatial) {
         return geometryMapper.createGeometryEntity(geospatial);
     }
-    
+
     protected void mergeGeometry(HasGeometry<?> existing, HasGeometry<?> toMerge) {
         if (toMerge.isSetGeometry()) {
             existing.setGeometryEntity(toMerge.getGeometryEntity());

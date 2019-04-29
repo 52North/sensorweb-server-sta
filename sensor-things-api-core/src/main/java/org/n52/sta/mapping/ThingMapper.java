@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2018 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -36,9 +36,11 @@ import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ES_THINGS_NA
 import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_FQN;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.Optional;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.olingo.commons.api.data.ComplexValue;
@@ -46,9 +48,9 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.server.api.ODataApplicationException;
+import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
-import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.n52.sta.utils.JsonHelper;
 import org.slf4j.Logger;
@@ -57,13 +59,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_NAME;
+import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME;
+import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATION_NAME;
 
 /**
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
-public class ThingMapper extends AbstractMapper<ThingEntity> {
+public class ThingMapper extends AbstractMapper<PlatformEntity> {
 
     private static final Logger LOG = LoggerFactory.getLogger(ThingMapper.class);
 
@@ -72,15 +77,15 @@ public class ThingMapper extends AbstractMapper<ThingEntity> {
 
     @Autowired
     private JsonHelper jsonHelper;
-    
+
     @Autowired
     private LocationMapper locationMapper;
-    
+
     @Autowired
     private DatastreamMapper datastreamMapper;
 
     @Override
-    public Entity createEntity(ThingEntity thing) {
+    public Entity createEntity(PlatformEntity thing) {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, thing.getId()));
         addDescription(entity, thing);
@@ -95,9 +100,10 @@ public class ThingMapper extends AbstractMapper<ThingEntity> {
     }
 
     @Override
-    public ThingEntity createEntity(Entity entity) {
-        ThingEntity thing = new ThingEntity();
+    public PlatformEntity createEntity(Entity entity) {
+        PlatformEntity thing = new PlatformEntity();
         setId(thing, entity);
+        setIdentifier(thing, entity);
         setName(thing, entity);
         setDescription(thing, entity);
         if (entity.getProperty(PROP_PROPERTIES) != null) {
@@ -113,7 +119,7 @@ public class ThingMapper extends AbstractMapper<ThingEntity> {
     }
 
     @Override
-    public ThingEntity merge(ThingEntity existing, ThingEntity toMerge) {
+    public PlatformEntity merge(PlatformEntity existing, PlatformEntity toMerge) {
         mergeName(existing, toMerge);
         mergeDescription(existing, toMerge);
         if (toMerge.hasProperties()) {
@@ -122,34 +128,35 @@ public class ThingMapper extends AbstractMapper<ThingEntity> {
         return existing;
     }
 
-    private void addLocations(ThingEntity thing, Entity entity) {
+    private void addLocations(PlatformEntity thing, Entity entity) {
         if (checkNavigationLink(entity, ES_LOCATIONS_NAME)) {
             Set<LocationEntity> locations = new LinkedHashSet<>();
             Iterator<Entity> iterator = entity.getNavigationLink(ES_LOCATIONS_NAME).getInlineEntitySet().iterator();
             while (iterator.hasNext()) {
-                locations.add(locationMapper.createEntity((Entity) iterator.next()));
+                locations.add(locationMapper.createEntity(iterator.next()));
             }
-            thing.setLocationEntities(locations);
+            thing.setLocations(locations);
         }
     }
 
-    private void addDatastreams(ThingEntity thing, Entity entity) {
+    private void addDatastreams(PlatformEntity thing, Entity entity) {
         if (checkNavigationLink(entity, ES_DATASTREAMS_NAME)) {
             Set<DatastreamEntity> datastreams = new LinkedHashSet<>();
             Iterator<Entity> iterator = entity.getNavigationLink(ES_DATASTREAMS_NAME).getInlineEntitySet().iterator();
             while (iterator.hasNext()) {
-                datastreams.add(datastreamMapper.createEntity((Entity) iterator.next()));
+                datastreams.add(datastreamMapper.createEntity(iterator.next()));
             }
-            thing.setDatastreamEntities(datastreams);
+            thing.setDatastreams(datastreams);
         }
     }
 
-    private JsonNode createJsonProperty(ThingEntity thing) {
+    @SuppressWarnings("finally")
+    private JsonNode createJsonProperty(PlatformEntity thing) {
         JsonNode node = null;
         try {
             node = jsonHelper.readJsonString(thing.getProperties());
         } catch (IOException ex) {
-            LOG.warn("Could not parse properties for ThingEntity: {}", thing.getId(), ex.getMessage());
+            LOG.warn("Could not parse properties for PlatformEntity: {}", thing.getId(), ex.getMessage());
             LOG.debug(ex.getMessage(), ex);
         } finally {
             if (node == null) {
@@ -166,15 +173,16 @@ public class ThingMapper extends AbstractMapper<ThingEntity> {
         if (checkNavigationLink(entity, ES_LOCATIONS_NAME)) {
             Iterator<Entity> iterator = entity.getNavigationLink(ES_LOCATIONS_NAME).getInlineEntitySet().iterator();
             while (iterator.hasNext()) {
-                locationMapper.checkNavigationLink((Entity) iterator.next());
+                locationMapper.checkNavigationLink(iterator.next());
             }
         }
         if (checkNavigationLink(entity, ES_DATASTREAMS_NAME)) {
             Iterator<Entity> iterator = entity.getNavigationLink(ES_DATASTREAMS_NAME).getInlineEntitySet().iterator();
             while (iterator.hasNext()) {
-                datastreamMapper.checkNavigationLink((Entity) iterator.next());
+                datastreamMapper.checkNavigationLink(iterator.next());
             }
         }
         return entity;
     }
+
 }

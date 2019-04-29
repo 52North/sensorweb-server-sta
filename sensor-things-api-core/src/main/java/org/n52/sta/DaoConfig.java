@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2018 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -36,23 +36,18 @@ import java.util.Map;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
+import org.hibernate.Interceptor;
 import org.hibernate.boot.model.TypeContributor;
 import org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl;
 import org.hibernate.jpa.boot.spi.TypeContributorList;
 import org.hibernate.type.BasicType;
 import org.n52.hibernate.type.SmallBooleanType;
-import org.n52.io.handler.DefaultIoFactory;
-import org.n52.io.response.dataset.AbstractValue;
-import org.n52.io.response.dataset.DatasetOutput;
-import org.n52.series.db.AnnotationBasedDataRepositoryFactory;
-import org.n52.series.db.DataRepositoryTypeFactory;
-import org.n52.series.db.old.dao.DbQueryFactory;
-import org.n52.series.db.old.dao.DefaultDbQueryFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 
@@ -65,22 +60,10 @@ public class DaoConfig {
 
     @Value("META-INF/persistence.xml")
     private String persistenceXmlLocation;
-    
-    @Bean
-    public DbQueryFactory dbQueryFactory(@Value("${database.srid:'EPSG:4326'}") String srid) {
-        return new DefaultDbQueryFactory(srid);
-    }
-    
-    @Bean
-    public DataRepositoryTypeFactory dataRepositoryFactory(ApplicationContext appContext) {
-        return new AnnotationBasedDataRepositoryFactory(appContext);
-    }
-    
-    @Bean
-    public DefaultIoFactory<DatasetOutput<AbstractValue< ? >>, AbstractValue< ? >> defaultIoFactory() {
-        return new DefaultIoFactory<>();
-    }
-    
+
+    @Autowired
+    Interceptor mqttInterceptor;
+
     @Bean
     public EntityManagerFactory entityManagerFactory(DataSource datasource, JpaProperties properties)
             throws IOException {
@@ -96,6 +79,7 @@ public class DaoConfig {
     private Map<String, Object> addCustomTypes(JpaProperties jpaProperties) {
         Map<String, Object> properties = new HashMap<>(jpaProperties.getProperties());
         properties.put(EntityManagerFactoryBuilderImpl.TYPE_CONTRIBUTORS, createTypeContributorsList());
+        properties.put("hibernate.session_factory.interceptor", mqttInterceptor);
         return properties;
     }
 
@@ -106,5 +90,5 @@ public class DaoConfig {
     private <T extends BasicType> TypeContributor toTypeContributor(T type, String... keys) {
         return (typeContributions, serviceRegistry) -> typeContributions.contributeType(type, keys);
     }
-    
+
 }

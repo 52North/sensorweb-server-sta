@@ -3,31 +3,37 @@
     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence
              http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd"
     version="2.1">
-    <persistence-unit name="sensorthingsapi-mapping">
-        <description>Sensor Things API Mappings</description>
-        <mapping-file>/hbm/core/ProcedureResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/core/OfferingResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/core/CategoryResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/core/CodespaceResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/core/FeatureResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/core/FormatResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/core/OfferingResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/core/ParameterResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/core/PhenomenonResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/core/PlatformResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/core/ProcedureHistoryResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/core/RelatedFeatureResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/core/ResultTemplateResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/core/UnitResource.hbm.xml</mapping-file>
-        
-        <mapping-file>/hbm/dataset/DataResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/dataset/DatasetResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/dataset/RelatedDataResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/dataset/RelatedDatasetResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/dataset/SamplingGeometryResource.hbm.xml</mapping-file>
-        
+    <persistence-unit name="default-unit">
+        <description>SensorThings Mappings</description>
+        <mapping-file>/hbm/transactional/core/CategoryResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/core/CodespaceResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/core/FeatureResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/core/FormatResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/core/OfferingResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/core/ParameterResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/core/PhenomenonResource.hbm.xml</mapping-file>
+
+        <mapping-file>/hbm/transactional/core/ProcedureHistoryResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/core/ProcedureResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/core/RelatedDataResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/core/RelatedDatasetResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/core/RelatedFeatureResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/core/ResultTemplateResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/core/ServiceResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/core/UnitResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/core/VerticalMetadataResource.hbm.xml</mapping-file>
+
+        <mapping-file>/hbm/transactional/sampling/DataResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/sampling/DatasetResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/sampling/MeasuringProgram.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/sampling/Sampling.hbm.xml</mapping-file>
+
         <mapping-file>/hbm/sta/DatastreamResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/sta/LocationResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/sta/ThingResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/sta/PlatformResource.hbm.xml</mapping-file>
+        <exclude-unlisted-classes>true</exclude-unlisted-classes>
+        <properties>
+          <property name="hibernate.archive.autodetection" value="class"/>
+        </properties>
     </persistence-unit>
 </persistence>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2018 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -26,7 +26,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-
 package org.n52.sta.data.query;
 
 import java.util.Locale;
@@ -42,7 +41,7 @@ public class QuerySpecificationRepository {
 
     public static EntityQuerySpecifications getSpecification(String name) throws ODataApplicationException {
         switch (name) {
-        case "ThingEntity":
+        case "PlatformEntity":
         case "Thing":
         case "Things": {
             return new ThingQuerySpecifications();

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2018 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -28,7 +28,7 @@
  */
 package org.n52.sta.data.repositories;
 
-import org.n52.series.db.beans.sta.ThingEntity;
+import org.n52.series.db.beans.PlatformEntity;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -36,6 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
  *
  */
 @Transactional
-public interface ThingRepository extends AbstractStaRepository<ThingEntity> {
+public interface ThingRepository extends NameRepository<PlatformEntity> {
 
 }

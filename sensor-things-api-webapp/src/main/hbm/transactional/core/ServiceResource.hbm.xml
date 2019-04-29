@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hibernate-mapping package="org.n52.series.db.beans"
+    xmlns="http://www.hibernate.org/xsd/hibernate-mapping"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.hibernate.org/xsd/hibernate-mapping http://www.hibernate.org/xsd/hibernate-mapping/hibernate-mapping-4.0.xsd">
+    <class name="ServiceEntity" table="service">
+        <id name="id" type="long">
+            <column name="service_id" />
+            <!--<generator class="assigned"/> -->
+            <generator class="native">
+                <param name="sequence_name">service_seq</param>
+            </generator>
+        </id>
+        <property column="name" name="name" type="string" not-null="true" unique-key="un_service_name" />
+        <property column="description" name="description" type="string" />
+        <property column="url" name="url" type="string" />
+        <property column="type" name="type" type="string" />
+        <property column="version" name="version" type="string" />
+
+    </class>
+</hibernate-mapping>

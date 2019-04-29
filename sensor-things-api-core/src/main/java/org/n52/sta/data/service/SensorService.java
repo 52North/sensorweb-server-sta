@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2018 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -26,41 +26,41 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-
 package org.n52.sta.data.service;
 
+import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_NAME;
+
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.Set;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
-import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
-import org.n52.series.db.FormatRepository;
-import org.n52.series.db.ProcedureRepository;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.ProcedureEntity;
-import org.n52.series.db.beans.sta.ThingEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
-import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.SensorQuerySpecifications;
 import org.n52.sta.data.repositories.DatastreamRepository;
+import org.n52.sta.data.repositories.FormatRepository;
 import org.n52.sta.data.repositories.ProcedureHistoryRepository;
+import org.n52.sta.data.repositories.ProcedureRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.SensorMapper;
 import org.n52.sta.service.query.QueryOptions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
-
-import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.dsl.BooleanExpression;
 
 /**
  *
@@ -71,25 +71,25 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 public class SensorService extends AbstractSensorThingsEntityService<ProcedureRepository, ProcedureEntity> {
 
     private SensorMapper mapper;
-    
+
     @Autowired
     private FormatRepository formatRepository;
-    
+
     @Autowired(required=false)
     private ProcedureHistoryRepository procedureHistoryRepository;
-    
+
     @Autowired
     private DatastreamRepository datastreamRepository;
 
     private final static SensorQuerySpecifications sQS = new SensorQuerySpecifications();
-    
+
     private final static DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
 
     public SensorService(ProcedureRepository repository, SensorMapper mapper) {
         super(repository);
         this.mapper = mapper;
     }
-    
+
     @Override
     public EntityTypes getType() {
         return EntityTypes.Sensor;
@@ -98,7 +98,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     @Override
     public EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException {
         EntityCollection retEntitySet = new EntityCollection();
-        Predicate filter = getFilterPredicate(ProcedureEntity.class, queryOptions);
+        Specification<ProcedureEntity> filter = getFilterPredicate(ProcedureEntity.class, queryOptions);
         getRepository().findAll(filter, createPageableRequest(queryOptions))
                        .forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
@@ -106,7 +106,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
 
     @Override
     public Entity getEntity(Long id) {
-        Optional<ProcedureEntity> entity = getRepository().findOne(byId(id));
+        Optional<ProcedureEntity> entity = getRepository().findById(id);
         return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
 
@@ -119,7 +119,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
 
     @Override
     public boolean existsEntity(Long id) {
-        return getRepository().exists(byId(id));
+        return getRepository().existsById(id);
     }
 
     @Override
@@ -131,11 +131,11 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
         case "iot.Datastream": {
-            BooleanExpression filter = sQS.withDatastream(sourceId);
+            Specification<ProcedureEntity> filter = sQS.withDatastream(sourceId);
             if (targetId != null) {
                 filter = filter.and(sQS.withId(targetId));
             }
-            return getRepository().exists(filter);
+            return getRepository().count(filter) > 0;
         }
         default:
             return false;
@@ -188,7 +188,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     /**
      * Retrieves Sensor Entity (aka Procedure Entity) with Relation to sourceEntity from Database. Returns
      * empty if Sensor is not found or Entities are not related.
-     * 
+     *
      * @param sourceId
      *        Id of the Source Entity
      * @param sourceEntityType
@@ -200,7 +200,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     private Optional<ProcedureEntity> getRelatedEntityRaw(Long sourceId,
                                                           EdmEntityType sourceEntityType,
                                                           Long targetId) {
-        BooleanExpression filter;
+        Specification<ProcedureEntity> filter;
         switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
         case "iot.Datastream": {
             filter = sQS.withDatastream(sourceId);
@@ -216,17 +216,6 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
         return getRepository().findOne(filter);
     }
 
-    /**
-     * Constructs SQL Expression to request Entity by ID.
-     * 
-     * @param id
-     *        id of the requested entity
-     * @return BooleanExpression evaluating to true if Entity is found and valid
-     */
-    private BooleanExpression byId(Long id) {
-        return sQS.withId(id);
-    }
-    
     @Override
     public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
         return getRepository().count(getFilterPredicate(ProcedureEntity.class, queryOptions));
@@ -235,12 +224,12 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     @Override
     public ProcedureEntity create(ProcedureEntity sensor) throws ODataApplicationException {
         if (sensor.getId() != null && !sensor.isSetName()) {
-            return getRepository().findOne(sQS.withId(sensor.getId())).get();
+            return getRepository().findById(sensor.getId()).get();
         }
-        if (getRepository().exists(sQS.withIdentifier(sensor.getIdentifier()))
-                || getRepository().exists(sQS.wihtName(sensor.getName()))) {
+        if (getRepository().existsByIdentifier(sensor.getIdentifier())
+                || getRepository().existsByName(sensor.getName())) {
             Optional<ProcedureEntity> optional = getRepository()
-                    .findOne(sQS.withIdentifier(sensor.getIdentifier()).or(sQS.wihtName(sensor.getName())));
+                    .findOne(sQS.withIdentifier(sensor.getIdentifier()).or(sQS.withName(sensor.getName())));
             return optional.isPresent() ?  optional.get() : null;
         }
         checkFormat(sensor);
@@ -253,7 +242,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     public ProcedureEntity update(ProcedureEntity entity, HttpMethod method) throws ODataApplicationException {
         checkUpdate(entity);
         if (HttpMethod.PATCH.equals(method)) {
-            Optional<ProcedureEntity> existing = getRepository().findOne(sQS.withId(entity.getId()));
+            Optional<ProcedureEntity> existing = getRepository().findById(entity.getId());
             if (existing.isPresent()) {
                 ProcedureEntity merged = mapper.merge(existing.get(), entity);
                 if (entity instanceof SensorEntity) {
@@ -281,7 +270,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
             }
         }
     }
-    
+
     @Override
     protected ProcedureEntity update(ProcedureEntity entity) throws ODataApplicationException {
         return getRepository().save(getAsProcedureEntity(entity));
@@ -336,15 +325,33 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
             }
         }
     }
-    
+
     private ProcedureEntity getAsProcedureEntity(ProcedureEntity sensor) {
         return  sensor instanceof SensorEntity
                 ? ((SensorEntity) sensor).asProcedureEntity()
                 : sensor;
     }
-    
+
     private AbstractSensorThingsEntityService<?, DatastreamEntity> getDatastreamService() {
         return (AbstractSensorThingsEntityService<?, DatastreamEntity>) getEntityService(
                 EntityTypes.Datastream);
+    }
+
+     /* (non-Javadoc)
+     * @see org.n52.sta.mapping.AbstractMapper#getRelatedCollections(java.lang.Object)
+     */
+    @Override
+    public Map<String, Set<Long>> getRelatedCollections(Object rawObject) {
+        Map<String, Set<Long>> collections = new HashMap<>();
+        Set<Long> set = new HashSet<>();
+        SensorEntity entity = (SensorEntity) rawObject;
+
+        try {
+            entity.getDatastreams().forEach((en) -> {
+                set.add(en.getId());
+            });
+            collections.put(ET_DATASTREAM_NAME, new HashSet(set));
+        } catch (NullPointerException e) {}
+        return collections;
     }
 }

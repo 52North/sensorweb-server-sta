@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2018 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -30,7 +30,6 @@ package org.n52.sta.mapping;
 
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_FEATURE;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ENCODINGTYPE;
 import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ES_FEATURES_OF_INTEREST_NAME;
 import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ET_FEATURE_OF_INTEREST_FQN;
 
@@ -39,6 +38,7 @@ import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.edm.geo.Geospatial;
 import org.apache.olingo.server.api.ODataApplicationException;
+import org.locationtech.jts.geom.Geometry;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.FormatEntity;
@@ -48,8 +48,6 @@ import org.n52.shetland.util.JavaHelper;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -62,6 +60,7 @@ public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper<Abst
     @Autowired
     private EntityCreationHelper entityCreationHelper;
 
+    @Override
     public Entity createEntity(AbstractFeatureEntity<?> feature) {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, feature.getId()));
@@ -72,6 +71,7 @@ public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper<Abst
         return entity;
     }
 
+    @Override
     public AbstractFeatureEntity<?> createEntity(Entity entity) {
         FeatureEntity featureOfInterest = new FeatureEntity();
         setId(featureOfInterest, entity);
@@ -88,7 +88,7 @@ public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper<Abst
         featureOfInterest.setFeatureType(createFeatureType(featureOfInterest.getGeometry()));
         return featureOfInterest;
     }
-    
+
     public AbstractFeatureEntity<?> createFeatureOfInterest(LocationEntity location) {
         FeatureEntity featureOfInterest = new FeatureEntity();
         featureOfInterest.setIdentifier(location.getName());
@@ -118,18 +118,18 @@ public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper<Abst
         FormatEntity formatEntity = new FormatEntity();
         if (geometry != null) {
             switch (geometry.getGeometryType()) {
-            case "Point":
-                formatEntity.setFormat(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_POINT);
-                break;
-            case "LineString":
-                formatEntity.setFormat(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_CURVE);
-                break;
-            case "Polygon":
-                formatEntity.setFormat(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_SURFACE);
-                break;
-            default:
-                formatEntity.setFormat(SfConstants.SAMPLING_FEAT_TYPE_SF_SPATIAL_SAMPLING_FEATURE);
-                break;
+                case "Point":
+                    formatEntity.setFormat(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_POINT);
+                    break;
+                case "LineString":
+                    formatEntity.setFormat(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_CURVE);
+                    break;
+                case "Polygon":
+                    formatEntity.setFormat(SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_SURFACE);
+                    break;
+                default:
+                    formatEntity.setFormat(SfConstants.SAMPLING_FEAT_TYPE_SF_SPATIAL_SAMPLING_FEATURE);
+                    break;
             }
             return formatEntity;
         }
@@ -137,11 +137,11 @@ public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper<Abst
     }
 
     @Override
-    public Entity  checkEntity(Entity entity) throws ODataApplicationException {
-       checkNameAndDescription(entity);
-       checkPropertyValidity(PROP_FEATURE, entity);
-       checkEncodingType(entity);
-       return entity;
+    public Entity checkEntity(Entity entity) throws ODataApplicationException {
+        checkNameAndDescription(entity);
+        checkPropertyValidity(PROP_FEATURE, entity);
+        checkEncodingType(entity);
+        return entity;
     }
 
 }

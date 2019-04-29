@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2018 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -31,12 +31,17 @@ package org.n52.sta.mapping;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ENCODINGTYPE;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_LOCATION;
+import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ES_HISTORICAL_LOCATIONS_NAME;
 import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ES_LOCATIONS_NAME;
 import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATION_FQN;
 import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ES_THINGS_NAME;
+import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.olingo.commons.api.data.Entity;
@@ -44,9 +49,10 @@ import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.edm.geo.Geospatial;
 import org.apache.olingo.server.api.ODataApplicationException;
+import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.LocationEncodingEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
-import org.n52.series.db.beans.sta.ThingEntity;
+import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -56,10 +62,10 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class LocationMapper extends AbstractLocationGeometryMapper<LocationEntity> {
-    
+
     @Autowired
     private ThingMapper thingMapper;
-    
+
     public Entity createEntity(LocationEntity location) {
         Entity entity = new Entity();
         entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, location.getId()));
@@ -73,6 +79,7 @@ public class LocationMapper extends AbstractLocationGeometryMapper<LocationEntit
         return entity;
     }
 
+    @Override
     public LocationEntity createEntity(Entity entity) {
         LocationEntity location = new LocationEntity();
         setId(location, entity);
@@ -92,7 +99,7 @@ public class LocationMapper extends AbstractLocationGeometryMapper<LocationEntit
         addThings(location, entity);
         return location;
     }
-    
+
     private LocationEncodingEntity createLocationEncodingEntity(Property property) {
         LocationEncodingEntity locationEncodingEntity = new LocationEncodingEntity();
         locationEncodingEntity.setEncodingType(property.getValue().toString());
@@ -109,30 +116,30 @@ public class LocationMapper extends AbstractLocationGeometryMapper<LocationEntit
         mergeGeometry(existing, toMerge);
         return existing;
     }
-    
+
     private void addThings(LocationEntity location, Entity entity) {
         if (checkNavigationLink(entity, ES_THINGS_NAME)) {
-            Set<ThingEntity> things = new LinkedHashSet<>();
+            Set<PlatformEntity> things = new LinkedHashSet<>();
             Iterator<Entity> iterator = entity.getNavigationLink(ES_THINGS_NAME).getInlineEntitySet().iterator();
             while (iterator.hasNext()) {
-                things.add(thingMapper.createEntity((Entity) iterator.next()));
+                things.add(thingMapper.createEntity(iterator.next()));
             }
-            location.setThingEntities(things);
+            location.setThings(things);
         }
     }
-    
+
     @Override
     public Entity  checkEntity(Entity entity) throws ODataApplicationException {
-       checkNameAndDescription(entity);
-       checkPropertyValidity(PROP_LOCATION, entity);
-       checkEncodingType(entity);
-       if (checkNavigationLink(entity, ES_THINGS_NAME)) {
-           Iterator<Entity> iterator = entity.getNavigationLink(ES_THINGS_NAME).getInlineEntitySet().iterator();
-           while (iterator.hasNext()) {
-               thingMapper.checkNavigationLink((Entity) iterator.next());
-           }
-       }
-       return entity;
+        checkNameAndDescription(entity);
+        checkPropertyValidity(PROP_LOCATION, entity);
+        checkEncodingType(entity);
+        if (checkNavigationLink(entity, ES_THINGS_NAME)) {
+            Iterator<Entity> iterator = entity.getNavigationLink(ES_THINGS_NAME).getInlineEntitySet().iterator();
+            while (iterator.hasNext()) {
+                thingMapper.checkNavigationLink(iterator.next());
+            }
+        }
+        return entity;
     }
 
 }

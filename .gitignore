@@ -8,6 +8,9 @@ dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
 
+# Ignore Moquette persistent storage
+*.h2
+
 # Avoid ignoring Maven wrapper jar file (.jar files are usually ignored)
 !/.mvn/wrapper/maven-wrapper.jar
 
@@ -15,9 +18,14 @@ buildNumber.properties
 .classpath
 .project
 .settings/*
+*.factorypath
+
 sensor-things-api-app/.settings/
 sensor-things-api-core/.settings/
 sensor-things-api-webapp/.settings/
+sensor-things-api-http/.settings/
+sensor-things-api-mqtt/.settings/
+
 sensor-things-api-app/console.log
 
 # IntelliJ IDE Files
