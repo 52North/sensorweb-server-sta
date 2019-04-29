@@ -182,12 +182,22 @@
     <build>
         <pluginManagement>
             <plugins>
-                <!-- FIXME remove this once all problems are resolved -->
+                 <!-- FIXME remove this once all problems are resolved -->
                 <plugin>
                     <groupId>com.github.spotbugs</groupId>
                     <artifactId>spotbugs-maven-plugin</artifactId>
                     <configuration>
                         <failOnError>false</failOnError>
+                    </configuration>
+                </plugin>
+                 <!-- FIXME remove this once all problems are resolved -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <configuration>
+                        <ignoreNonCompile>false</ignoreNonCompile>
+                        <failOnWarning>false</failOnWarning>
+                        <failBuild>false</failBuild>
                     </configuration>
                 </plugin>
                 <!-- FIXME remove this once all problems are resolved -->
@@ -204,6 +214,21 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <configuration>
                         <testFailureIgnore>true</testFailureIgnore>
+                    </configuration>
+                </plugin>
+                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <configuration>
+                        <rules>
+                            <requireNoRepositories>
+                                <banRepositories>false</banRepositories>
+                                <allowSnapshotRepositories>true</allowSnapshotRepositories>
+                                <allowedRepositories>
+                                    <id>sonatype-nexus-snapshots,edu-repo,n52-releases,n52-snapshots,refractions,hibernate-spatial,unidata-releases, bintray</id>
+                                </allowedRepositories>
+                            </requireNoRepositories>
+                        </rules>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -234,6 +259,44 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot.version}</version>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>timestamp-property</id>
+                        <goals>
+                            <goal>timestamp-property</goal>
+                        </goals>
+                        <configuration>
+                            <locale>en_US</locale>
+                            <name>currentYearDynamic</name>
+                            <pattern>yyyy</pattern>
+                        </configuration>
+                    </execution>
+                </executions>
+              </plugin>
+               <plugin>
+                    <!-- license headers -->
+                    <groupId>com.mycila</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
+                    <configuration>
+                        <header>etc/52N_GPLv2_License.xt</header>
+                        <properties>
+                            <year>${project.inceptionYear}-${currentYearDynamic}</year>
+                        </properties>
+                        <includes>
+                            <include>**/src/**/*.java</include>
+                        </includes>
+                        <excludes>
+                            <exclude>**/logback.xml</exclude>
+                            <exclude>**/logback-test.xml</exclude>
+                            <exclude>etc/**</exclude>
+                        </excludes>
+                        <strictCheck>true</strictCheck>
+                    </configuration>
+                </plugin>
         </plugins>
     </build>
 </project>
