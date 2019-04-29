@@ -32,7 +32,6 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.beans.DataEntity;
-import org.n52.sta.HibernateMessageInterceptor;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.AbstractMapper;
@@ -45,9 +44,6 @@ public class ObservationEntityCrudRequestHandler extends AbstractEntityCrudReque
 
     @Autowired
     private ObservationMapper mapper;
-
-    @Autowired
-    private HibernateMessageInterceptor mqttInterceptor;
 
     @Override
     protected Entity handleCreateEntityRequest(Entity entity) throws ODataApplicationException {
