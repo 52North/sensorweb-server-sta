@@ -4,11 +4,10 @@
     <parent>
         <groupId>org.n52.sta</groupId>
         <artifactId>sensor-things-api</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>sensor-things-api-webapp</artifactId>
     <packaging>war</packaging>
-    
     <dependencies>
         <dependency>
            <groupId>org.springframework.boot</groupId>
@@ -23,10 +22,9 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
-         <dependency>
-            <groupId>org.n52.sta</groupId>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>sensor-things-api-core</artifactId>
-            <version>1.0.0</version>
             <exclusions>
               <exclusion>
                   <groupId>org.n52.series.db</groupId>
@@ -35,14 +33,12 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.n52.sta</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>sensor-things-api-http</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.n52.sta</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>sensor-things-api-mqtt</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
         </dependency>
          <dependency>
             <groupId>org.geolatte</groupId>
