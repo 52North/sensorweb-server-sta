@@ -3,7 +3,9 @@
 debug: false
 trace: false
 
-# Database Configuration
+server:
+  port: 8081
+#TODO: Check if this is needed. 
 database:
   jpa:
     persistence-location: classpath:META-INF/persistence.xml
@@ -14,15 +16,14 @@ spring:
     platform: postgres
     username: postgres
     password: postgres
-    url: jdbc:postgresql://localhost:5432/ets_sta10_2
+    url: jdbc:postgresql://localhost:5432/sta
     initialization-mode: always
   jpa:
     properties:
       hibernate: 
         hbm2ddl:
-          # hbm2ddl values: validate | update | create | create-drop
-          auto: create-drop
           # hbm2ddl values: validate | update | create | create-drop | none
+          auto: create-drop
         jdbc:
           time_zone: UTC
           # https://hibernate.atlassian.net/browse/HHH-12368
@@ -51,8 +52,9 @@ mqtt:
 logging:
   level:
     # root: TRACE
-    org.n52.sta: DEBUG
+    org.opengis.cite: TRACE
+    org.apache.coyote.http11.Http11InputBuffer: TRACE
     org.hibernate: INFO
     org.hibernate.type: INFO
-    org.hibernate.SQL: INFO
+    org.hibernate.SQL: DEBUG
     io.moquette: TRACE
