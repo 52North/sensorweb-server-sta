@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.n52.sta</groupId>
         <artifactId>sensor-things-api</artifactId>
-        <version>1.0.0-alpha.1</version>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>sensor-things-api-mqtt</artifactId>
     <packaging>jar</packaging>
