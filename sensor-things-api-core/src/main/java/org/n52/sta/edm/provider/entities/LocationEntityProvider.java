@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2018 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -67,7 +67,7 @@ public class LocationEntityProvider extends AbstractSensorThingsEntityProvider {
     protected CsdlEntityType createEntityType() {
         List<CsdlProperty> properties = createCsdlProperties();
         List<CsdlNavigationProperty> navigationProperties = createCsdlNavigationProperties();
-        
+
         // create CsdlPropertyRef for Key element
         CsdlPropertyRef propertyRef = new CsdlPropertyRef();
         propertyRef.setName(PROP_ID);
@@ -130,7 +130,7 @@ public class LocationEntityProvider extends AbstractSensorThingsEntityProvider {
         CsdlProperty location = new CsdlProperty().setName(PROP_LOCATION)
                 .setType(EdmPrimitiveTypeKind.Geometry.getFullQualifiedName())
                 .setNullable(false);
-        
+
         return Arrays.asList(
                 id,
                 name,

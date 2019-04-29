@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2018 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -91,7 +91,7 @@ import com.google.common.collect.Sets;
 public class ObservationService extends AbstractSensorThingsEntityService<DataRepository<DataEntity<?>>, DataEntity<?>> {
 
     private ObservationMapper mapper;
-    
+
     @Autowired
     private FeatureOfInterestMapper featureMapper;
 
@@ -100,17 +100,17 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
 
     @Autowired
     private OfferingRepository offeringRepository;
-    
+
     @Autowired
     private DatastreamRepository datastreamRepository;
-    
+
     @Autowired
     private DatasetRepository datasetRepository;
 
     private ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
-    
+
     private DatasetQuerySpecifications dQS = new DatasetQuerySpecifications();
-    
+
     private DatastreamQuerySpecifications dSQS = new DatastreamQuerySpecifications();
 
     public ObservationService(DataRepository<DataEntity<?>> repository, ObservationMapper mapper) {
@@ -252,7 +252,7 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
     /**
      * Retrieves Observation Entity with Relation to sourceEntity from Database.
      * Returns empty if Observation is not found or Entities are not related.
-     * 
+     *
      * @param sourceId
      *            Id of the Source Entity
      * @param sourceEntityType
@@ -286,7 +286,7 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
     public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
         return getRepository().count(getFilterPredicate(DataEntity.class, queryOptions));
     }
-    
+
     @Override
     public DataEntity<?> create(DataEntity<?> entity) throws ODataApplicationException {
         if (entity instanceof StaDataEntity) {
@@ -345,7 +345,7 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
     public DataEntity<?> update(DataEntity<?> entity) throws ODataApplicationException {
         return getRepository().save(entity);
     }
-    
+
     @Override
     public void delete(Long id) throws ODataApplicationException {
         if (getRepository().existsById(id)) {
@@ -431,7 +431,7 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
             offering.setGeometryEntity(datastream.getGeometryEntity());
         }
         offering.setObservationTypes(Sets.newHashSet(datastream.getObservationType()));
-        
+
         if (!offeringRepository.existsByIdentifier(offering.getIdentifier())) {
             return offeringRepository.save(offering);
         } else {
@@ -517,7 +517,7 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
         return (AbstractSensorThingsEntityService<?, AbstractFeatureEntity<?>>) getEntityService(
                 EntityTypes.FeatureOfInterest);
     }
-    
+
     private DatasetEntity getDatasetEntity(String observationType) {
         DatasetEntity dataset = new DatasetEntity().setObservationType(ObservationType.simple).setDatasetType(DatasetType.timeseries);
         switch (observationType) {
@@ -535,7 +535,7 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
                 return dataset;
         }
     }
-    
+
     private DataEntity<?> getDataEntity(StaDataEntity observation, DatasetEntity dataset) {
         DataEntity<?> data = null;
         switch (dataset.getOmObservationType().getFormat()) {
@@ -591,7 +591,7 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
         }
         return data;
     }
-    
+
      /* (non-Javadoc)
      * @see org.n52.sta.mapping.AbstractMapper#getRelatedCollections(java.lang.Object)
      */
@@ -612,7 +612,7 @@ public class ObservationService extends AbstractSensorThingsEntityService<DataRe
                 collections.put(ET_DATASTREAM_NAME,
                         Collections.singleton(datastreamEntity.get().getId()));
             }
-        
+
         return collections;
     }
 

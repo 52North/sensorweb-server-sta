@@ -1,3 +1,31 @@
+/*
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Software GmbH
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation.
+ *
+ * If the program is linked with libraries which are licensed under one of
+ * the following licenses, the combination of the program with the linked
+ * library is not considered a "derivative work" of the program:
+ *
+ *     - Apache License, version 2.0
+ *     - Apache Software License, version 1.0
+ *     - GNU Lesser General Public License, version 3
+ *     - Mozilla Public License, versions 1.0, 1.1 and 2.0
+ *     - Common Development and Distribution License (CDDL), version 1.0
+ *
+ * Therefore the distribution of the program linked with libraries licensed
+ * under the aforementioned licenses, is permitted by the copyright holders
+ * if the distribution is compliant with both the GNU General Public
+ * License version 2 and the aforementioned licenses.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details.
+ */
 package org.n52.sta.service.handler.crud;
 
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
@@ -27,15 +55,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 public abstract class AbstractEntityCrudRequestHandler<T extends IdEntity> {
-    
+
     @Autowired
     private EntityServiceRepository serviceRepository;
-    
+
     @Autowired
     private UriResourceNavigationResolver navigationResolver;
-    
+
     protected abstract AbstractMapper<T> getMapper();
-    
+
     @Transactional(rollbackFor=Exception.class)
     public EntityResponse handleCreateEntityRequest(Entity entity, List<UriResource> resourcePaths) throws ODataApplicationException {
         UriResourceEntitySet uriResourceEntitySet = getUriResourceEntitySet(resourcePaths);
@@ -50,7 +78,7 @@ public abstract class AbstractEntityCrudRequestHandler<T extends IdEntity> {
         response.setEntity(responseEntity);
         return response;
     }
-    
+
     protected abstract Entity handleCreateEntityRequest(Entity entity) throws ODataApplicationException;
 
     @Transactional(rollbackFor=Exception.class)
@@ -65,7 +93,7 @@ public abstract class AbstractEntityCrudRequestHandler<T extends IdEntity> {
         return response;
     }
 
-    
+
     protected abstract Entity handleUpdateEntityRequest(Entity entity, HttpMethod httpMethod) throws ODataApplicationException;
 
     @Transactional(rollbackFor=Exception.class)
@@ -78,7 +106,7 @@ public abstract class AbstractEntityCrudRequestHandler<T extends IdEntity> {
 //        response.setEntity(responseEntity);
         return response;
     }
-    
+
     protected abstract void handleDeleteEntityRequest(Long id) throws ODataApplicationException;
 
     protected UriResourceEntitySet getUriResourceEntitySet(List<UriResource> resourcePaths) throws ODataApplicationException {
@@ -92,11 +120,11 @@ public abstract class AbstractEntityCrudRequestHandler<T extends IdEntity> {
     protected AbstractSensorThingsEntityService<?, ?> getUriResourceEntitySet(String type) {
         return serviceRepository.getEntityService(type);
     }
-    
+
     protected AbstractSensorThingsEntityService<?, ?> getEntityService(EntityTypes type) {
         return serviceRepository.getEntityService(type);
     }
-    
+
     protected Entity mapToEntity(T entity) {
         return entity != null ? getMapper().createEntity(entity) : null;
     }
@@ -117,5 +145,5 @@ public abstract class AbstractEntityCrudRequestHandler<T extends IdEntity> {
         throw new ODataApplicationException("The request URL does not contain an required 'ID'!",
                 HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
     }
-    
+
 }

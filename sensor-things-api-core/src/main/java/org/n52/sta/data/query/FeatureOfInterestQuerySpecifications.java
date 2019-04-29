@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2018 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -26,7 +26,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-
 package org.n52.sta.data.query;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -61,7 +60,7 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
             return builder.in(root.get(AbstractFeatureEntity.PROPERTY_ID)).value(sqFeature);
         };
     }
-    
+
     @Override
     public Specification<AbstractFeatureEntity<?>> withIdentifier(final String identifier) {
         return (root, query, builder) -> {
@@ -132,7 +131,7 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
                     case "featureType":
                         if (operator.equals(BinaryOperatorKind.EQ) && ("application/vnd.geo+json".equals(propertyValue) || "application/vnd.geo json".equals(propertyValue))) {
                             return builder.isNotNull(root.get(DescribableEntity.PROPERTY_ID));
-                        } 
+                        }
                         return builder.isNull(root.get(DescribableEntity.PROPERTY_ID));
                     default:
                         throw new RuntimeException("Error getting filter for Property: \"" + propertyName

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2019 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -32,7 +32,7 @@ import java.util.Set;
 
 /**
  * Interface to be implemented by Handlers responding to Entity Creation (e.g. Handler for MQTT Subscription).
- * 
+ *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 public interface STAEventHandler {

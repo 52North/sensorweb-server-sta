@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2018 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -36,7 +36,7 @@ import org.springframework.data.domain.Sort.Direction;
 /**
  * Java Bean implementation of {@code AbstractPageRequest} to support offset and
  * limit instead of page and size.
- * 
+ *
  * @author <a href="mailto:c.hollmann@52north.org">Carsten Hollmann</a>
  * @since 1.0.0
  *
@@ -50,7 +50,7 @@ public class OffsetLimitBasedPageRequest extends AbstractPageRequest {
     /**
      * Creates a new {@link OffsetLimitBasedPageRequest}. Pages are zero indexed,
      * thus providing 0 for {@code page} will return the first page.
-     * 
+     *
      * @param offset
      *            zero-based offset index.
      * @param limit
@@ -63,7 +63,7 @@ public class OffsetLimitBasedPageRequest extends AbstractPageRequest {
     /**
      * Creates a new {@link OffsetLimitBasedPageRequest} with sort parameters
      * applied.
-     * 
+     *
      * @param offset
      *            zero-based offset index.
      * @param limit
@@ -82,7 +82,7 @@ public class OffsetLimitBasedPageRequest extends AbstractPageRequest {
     /**
      * Creates a new {@link OffsetLimitBasedPageRequest} with sort parameters
      * applied.
-     * 
+     *
      * @param offset
      *            zero-based offset index.
      * @param limit

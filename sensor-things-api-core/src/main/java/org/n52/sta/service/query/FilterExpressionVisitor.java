@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2018 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -26,7 +26,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-
 package org.n52.sta.service.query;
 
 import java.lang.reflect.Constructor;
@@ -112,7 +111,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
     private CriteriaBuilder criteriaBuilder;
 
     private Root<?> root;
-    
+
     public FilterExpressionVisitor(Class sourceType, AbstractSensorThingsEntityService service, CriteriaBuilder criteriaBuilder, Root<?> root)
             throws ODataApplicationException {
         this.sourceType = sourceType;
@@ -129,7 +128,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitor#visitBinaryOperator(org.
      * apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind, java.lang.Object,
      * java.lang.Object)
@@ -163,7 +162,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitor#visitUnaryOperator(org.apache
      * .olingo.server.api.uri.queryoption.expression.UnaryOperatorKind, java.lang.Object)
@@ -203,12 +202,12 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
 
     /**
      * Evaluates Comparison operation for various Types. Comparison is attempted in the following order:
-     * 
+     *
      * Number Comparison > String Comparison > Date Comparison > Timespan Comparison.
-     * 
+     *
      * If parameters can not be converted into comparable Datatypes or all Comparisons fail an error is
      * thrown.
-     * 
+     *
      * @param operator
      *        Operator to be used for comparison
      * @param left
@@ -353,11 +352,11 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
     }
 
     /**
-     * 
+     *
      * Constructs a Subquery based on given Path to property of related Entity to evaluate Filters on those
      * properties. Returned Expression evaluates to true if Entity should be included. TODO: Expand to support
      * deeper nested properties
-     * 
+     *
      * @param uriResources
      *        Path to foreign property
      * @param value
@@ -398,7 +397,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
 
     /**
      * Converts an Object into a computable StringExpression. Throws an Exception if Conversion fails.
-     * 
+     *
      * @param expr
      *        Object to be coerced into StringExpression
      * @return StringExpression equivalent to expr
@@ -423,12 +422,12 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
             throw new ODataApplicationException("Could not convert " + expr.toString() + " to StringExpression",
                     HttpStatusCode.BAD_REQUEST.getStatusCode(),
                     Locale.ENGLISH);
-        } 
+        }
     }
 
     /**
      * Converts an Object into a computable NumberExpression. Throws an Exception if Conversion fails.
-     * 
+     *
      * @param expr
      *        Object to be coerced into NumberExpression
      * @return NumberExpression equivalent to expr
@@ -447,7 +446,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
 //        } else if (expr instanceof javax.persistence.criteria.Expression< ? >) {
 //            // SubExpression
 //            return (javax.persistence.criteria.Expression< ? >) expr;
-//        } 
+//        }
         throw new ODataApplicationException("Could not convert " + expr.toString() + " to NumberExpression",
                                             HttpStatusCode.BAD_REQUEST.getStatusCode(),
                                             Locale.ENGLISH);
@@ -455,7 +454,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
 
     /**
      * Converts an Object into a GeometryExpression. Throws an Exception if Conversion fails.
-     * 
+     *
      * @param expr
      *        Object to be coerced into GeometryExpression
      * @return GeometryExpression equivalent to expr
@@ -475,7 +474,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitor#visitMethodCall(org.apache.
      * olingo.server.api.uri.queryoption.expression.MethodKind, java.util.List)
@@ -492,7 +491,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
         case SUBSTRINGOF:
             return criteriaBuilder.function(
                     "CONTAINS", Boolean.class,
-                    root.<String>get((String) arg1), 
+                    root.<String>get((String) arg1),
                     criteriaBuilder.parameter(String.class, (String) arg2));
 //            return criteriaBuilder.function(name, type, args)(x)convertToStringExpression(arg1).contains(convertToStringExpression(arg2));
         case ENDSWITH:
@@ -596,7 +595,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
             return SpatialRestrictions.within((String) arg1, JTS.to((Geometry) arg2));
         default:
             break;
-        } 
+        }
         // Fallback to Error in case of ODATA-conform but not STA-conform Method or unimplemented method
         throw new ODataApplicationException("Invalid Method: " + methodCall.name()
         + " is not included in STA Specification.",
@@ -606,7 +605,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitor#visitLambdaExpression(java.
      * lang.String, java.lang.String, org.apache.olingo.server.api.uri.queryoption.expression.Expression)
@@ -621,7 +620,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitor#visitLiteral(org.apache.
      * olingo.server.api.uri.queryoption.expression.Literal)
      */
@@ -663,7 +662,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
     //            return GeometryExpressions.asGeometry(Wkt.fromWkt(wkt));
             } else if (type instanceof EdmTimespan) {
                 Date[] timespan = new Date[2];
-    
+
                 SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
                 String[] split = literalAsString.split("/");
                 try {
@@ -696,7 +695,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitor#visitMember(org.apache.olingo
      * .server.api.uri.queryoption.expression.Member)
@@ -721,7 +720,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitor#visitAlias(java.lang.String)
      */
@@ -733,7 +732,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitor#visitTypeLiteral(org.apache.
      * olingo.commons.api.edm.EdmType)
@@ -746,7 +745,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitor#visitLambdaReference(java.
      * lang.String)
@@ -759,7 +758,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitor#visitEnum(org.apache.olingo.
      * commons.api.edm.EdmEnumType, java.util.List)

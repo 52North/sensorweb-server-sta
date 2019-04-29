@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2018 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -60,7 +60,7 @@ public class DaoConfig {
 
     @Value("META-INF/persistence.xml")
     private String persistenceXmlLocation;
-    
+
     @Autowired
     Interceptor mqttInterceptor;
 
@@ -90,5 +90,5 @@ public class DaoConfig {
     private <T extends BasicType> TypeContributor toTypeContributor(T type, String... keys) {
         return (typeContributions, serviceRegistry) -> typeContributions.contributeType(type, keys);
     }
-    
+
 }

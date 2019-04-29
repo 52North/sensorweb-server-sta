@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2018 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -26,7 +26,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-
 package org.n52.sta.data.query;
 
 import java.util.Date;
@@ -51,30 +50,19 @@ public abstract class EntityQuerySpecifications<T> {
     final static DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
     final static ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
 
-//    final static QDatastreamEntity qdatastream = QDatastreamEntity.datastreamEntity;
-//    final static QLocationEntity qlocation = QLocationEntity.locationEntity;
-//    final static QHistoricalLocationEntity qhistoricallocation = QHistoricalLocationEntity.historicalLocationEntity;
-//    final static QProcedureEntity qsensor = QProcedureEntity.procedureEntity;
-//    final static QDataEntity qobservation = QDataEntity.dataEntity;
-//    final static QAbstractFeatureEntity qfeature = QAbstractFeatureEntity.abstractFeatureEntity;
-//    final static QDatasetEntity qdataset = QDatasetEntity.datasetEntity;
-//    // aka Thing
-//    final static QPlatformEntity qPlatform = QPlatformEntity.platformEntity;
-//    final static QPhenomenonEntity qobservedproperty = QPhenomenonEntity.phenomenonEntity;
-
     /**
      * Gets Subquery returning the IDs of the Entities
-     * 
+     *
      * @param filter
      *        BooleanExpression filtering the Entites whose IDs are returned
-     * @return JPQLQuery<Long> Subquery
+     * @return Specification Subquery
      */
     public abstract Specification<Long> getIdSubqueryWithFilter(Specification filter);
 
     /**
      * Gets Entity-specific Filter for property with given name. Filters may not accept all BinaryOperators,
      * as they may not be defined for the datatype of the property.
-     * 
+     *
      * @param propertyName
      *        Name of the property to be filtered on
      * @param propertyValue
@@ -82,41 +70,35 @@ public abstract class EntityQuerySpecifications<T> {
      * @param operator
      *        Operator to be used for comparing propertyValue and actual Value
      * @param switched
-     *        true if Expression adheres to template: <value> <operator> <name>. False otherwise (Template
-     *        <name> <operator> <value>)
-     * @return BooleanExpression evaluating to true if Entity is not to be filtered out
+     *        true if Expression adheres to template: value, operator, name. False otherwise (Template
+     *        name, operator, value)
+     * @return Specification evaluating to true if Entity is not to be filtered out
+     * @throws ExpressionVisitException if an error occurs
      */
     public abstract Specification<T> getFilterForProperty(String propertyName,
                                                 Object propertyValue,
                                                 BinaryOperatorKind operator,
                                                 boolean switched)
             throws ExpressionVisitException;
-    
+
     public Specification<T> withName(final String name) {
         return (root, query, builder) -> {
             return builder.equal(root.get(DescribableEntity.PROPERTY_NAME), name);
         };
     }
-    
+
     public Specification<T> withIdentifier(final String name) {
         return (root, query, builder) -> {
             return builder.equal(root.get(DescribableEntity.PROPERTY_IDENTIFIER), name);
         };
     }
-    
+
     public Specification<T> withId(final Long id) {
         return (root, query, builder) -> {
             return builder.equal(root.get(DescribableEntity.PROPERTY_ID), id);
         };
     }
 
-    // TODO:JavaDoc
-//    protected Subquery<Long> toSubquery(Path<T> relation, Expression<Long> selector, Expression<Boolean> filter) {
-//        return JPAExpressions.selectFrom(relation)
-//                             .select(selector)
-//                             .where(filter);
-//    }
-    
     protected Specification<Long> toSubquery(Class<?> clazz, String propert, Specification filter) {
         return (root, query, builder) -> {
             Subquery<?> sq = query.subquery(clazz);
@@ -151,7 +133,7 @@ public abstract class EntityQuerySpecifications<T> {
     throws ExpressionVisitException {
     return this.handleNumberFilter(numberPath, propertyValue, operator, builder);
     }
-    
+
     protected Predicate handleDirectNumberPropertyFilter(Path<Integer> numberPath,
                                                         Integer propertyValue,
                                                         BinaryOperatorKind operator,
@@ -159,7 +141,7 @@ public abstract class EntityQuerySpecifications<T> {
     throws ExpressionVisitException {
     return this.handleNumberFilter(numberPath, propertyValue, operator, builder);
     }
-    
+
     protected Predicate handleDirectDateTimePropertyFilter(Path<Date> time,
                                                         Date propertyValue,
                                                         BinaryOperatorKind operator,
@@ -228,7 +210,7 @@ public abstract class EntityQuerySpecifications<T> {
                     + "\" is not supported for given arguments.");
         }
     }
-    
+
     public Predicate handleNumberFilter(Expression<Long> left,
             Long right,
             BinaryOperatorKind operator,
@@ -264,7 +246,7 @@ public abstract class EntityQuerySpecifications<T> {
                     "Operator \"" + operator.toString() + "\" is not supported for given arguments.");
         }
     }
-    
+
     public Predicate handleNumberFilter(Expression<Integer> left,
             Integer right,
             BinaryOperatorKind operator,
@@ -328,7 +310,7 @@ public abstract class EntityQuerySpecifications<T> {
 
     /**
      * Reverses an operator if this operator is easily revertible.
-     * 
+     *
      * @param operator
      *        to be reversed
      * @return String representation of reversed Operator

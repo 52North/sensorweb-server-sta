@@ -1,4 +1,32 @@
 /*
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Software GmbH
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation.
+ *
+ * If the program is linked with libraries which are licensed under one of
+ * the following licenses, the combination of the program with the linked
+ * library is not considered a "derivative work" of the program:
+ *
+ *     - Apache License, version 2.0
+ *     - Apache Software License, version 1.0
+ *     - GNU Lesser General Public License, version 3
+ *     - Mozilla Public License, versions 1.0, 1.1 and 2.0
+ *     - Common Development and Distribution License (CDDL), version 1.0
+ *
+ * Therefore the distribution of the program linked with libraries licensed
+ * under the aforementioned licenses, is permitted by the copyright holders
+ * if the distribution is compliant with both the GNU General Public
+ * License version 2 and the aforementioned licenses.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details.
+ */
+/*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
@@ -41,7 +69,7 @@ public class UriResourceNavigationResolver {
      *
      * @param uriResource the URI resource paths to resolve
      * @return the root UriResourceEntitySet
-     * @throws ODataApplicationException
+     * @throws ODataApplicationException if an error occurs
      */
     public UriResourceEntitySet resolveRootUriResource(UriResource uriResource) throws ODataApplicationException {
 
@@ -56,11 +84,11 @@ public class UriResourceNavigationResolver {
 
     /**
      * Resolves complex URI resource Navigation paths to determine the target
-     * {@link NavigationLink}
+     * navigationLink
      *
      * @param navigationResourcePaths the URI resource paths to resolve
-     * @return the target {@link NavigationLink}
-     * @throws ODataApplicationException
+     * @return the target the navigation link
+     * @throws ODataApplicationException if an error occurs
      */
     public EntityQueryParams resolveUriResourceNavigationPaths(List<UriResource> navigationResourcePaths) throws ODataApplicationException {
         UriResourceEntitySet uriResourceEntitySet = resolveRootUriResource(navigationResourcePaths.get(0));
@@ -132,7 +160,7 @@ public class UriResourceNavigationResolver {
      * @param edmNavigationProperty the navigation property from one entity type
      * to another
      * @return the target EntitySet for the navigation property
-     * @throws ODataApplicationException
+     * @throws ODataApplicationException if an error occurs
      */
     public static EdmEntitySet getNavigationTargetEntitySet(EdmEntitySet startEdmEntitySet,
             EdmNavigationProperty edmNavigationProperty)
@@ -164,7 +192,7 @@ public class UriResourceNavigationResolver {
      * @param uriResourceEntitySet the root UriResource that contains EntitySet
      * information about the requested Entity
      * @return the requested Entity
-     * @throws ODataApplicationException
+     * @throws ODataApplicationException if an error occurs
      */
     public Entity resolveSimpleEntityRequest(UriResourceEntitySet uriResourceEntitySet) throws ODataApplicationException {
         // fetch the data from backend for this requested Entity and deliver as Entity
@@ -183,9 +211,10 @@ public class UriResourceNavigationResolver {
      * Resolves a complex entity request that conatins one or more navigation
      * paths (e.g. ./Thing(1)/Datastreams(1)/Observations(1)
      *
+     * @param lastSegment the last segment
      * @param requestParams parameters for the Entity request
      * @return the requested Entity
-     * @throws ODataApplicationException
+     * @throws ODataApplicationException if an error occurs
      */
     public Entity resolveComplexEntityRequest(UriResource lastSegment, EntityQueryParams requestParams) throws ODataApplicationException {
 

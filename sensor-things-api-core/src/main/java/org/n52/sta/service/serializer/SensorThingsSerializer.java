@@ -1,23 +1,30 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements. See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership. The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
- *
- * Modifications Copyright (C) 2012-2018 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
  * Software GmbH
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation.
+ *
+ * If the program is linked with libraries which are licensed under one of
+ * the following licenses, the combination of the program with the linked
+ * library is not considered a "derivative work" of the program:
+ *
+ *     - Apache License, version 2.0
+ *     - Apache Software License, version 1.0
+ *     - GNU Lesser General Public License, version 3
+ *     - Mozilla Public License, versions 1.0, 1.1 and 2.0
+ *     - Common Development and Distribution License (CDDL), version 1.0
+ *
+ * Therefore the distribution of the program linked with libraries licensed
+ * under the aforementioned licenses, is permitted by the copyright holders
+ * if the distribution is compliant with both the GNU General Public
+ * License version 2 and the aforementioned licenses.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details.
  */
 package org.n52.sta.service.serializer;
 
@@ -102,7 +109,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
     private static final Map<Geospatial.Type, String> geoValueTypeToJsonName;
 
     static {
-        Map<Geospatial.Type, String> temp = new EnumMap<Geospatial.Type, String>(Geospatial.Type.class);
+        Map<Geospatial.Type, String> temp = new EnumMap<>(Geospatial.Type.class);
         temp.put(Geospatial.Type.POINT, Constants.ELEM_POINT);
         temp.put(Geospatial.Type.MULTIPOINT, Constants.ELEM_MULTIPOINT);
         temp.put(Geospatial.Type.LINESTRING, Constants.ELEM_LINESTRING);
@@ -365,7 +372,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
         boolean cycle = false;
         if (expand != null) {
             if (ancestors == null) {
-                ancestors = new HashSet<String>();
+                ancestors = new HashSet<>();
             }
             cycle = !ancestors.add(getEntityId(entity, entityType, name));
         }
@@ -404,7 +411,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
                 }
 
                 final boolean all = ExpandSelectHelper.isAll(select);
-                final Set<String> selected = all ? new HashSet<String>()
+                final Set<String> selected = all ? new HashSet<>()
                         : ExpandSelectHelper.getSelectedPropertyNames(select.getSelectItems());
 
                 for (final String propertyName : entityType.getKeyPredicateNames()) {
@@ -500,7 +507,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
             final SelectOption select, final JsonGenerator json)
             throws IOException, SerializerException {
         final boolean all = ExpandSelectHelper.isAll(select);
-        final Set<String> selected = all ? new HashSet<String>()
+        final Set<String> selected = all ? new HashSet<>()
                 : ExpandSelectHelper.getSelectedPropertyNames(select.getSelectItems());
         for (final String propertyName : type.getPropertyNames()) {
             if (all || selected.contains(propertyName)) {
@@ -821,11 +828,11 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
             switch (property.getValueType()) {
                 case COLLECTION_COMPLEX:
                     derivedType = ((ComplexValue) value).getTypeName() != null ? metadata.getEdm().getComplexType(new FullQualifiedName(((ComplexValue) value).getTypeName())) : type;
-                    if (((EdmComplexType) derivedType).isOpenType()
-                            && (((EdmComplexType) derivedType).getPropertyNames() == null
-                            || ((EdmComplexType) derivedType).getPropertyNames().isEmpty())) {
+                    if (derivedType.isOpenType()
+                            && (derivedType.getPropertyNames() == null
+                            || derivedType.getPropertyNames().isEmpty())) {
                         for (Property p : ((ComplexValue) value).getValue()) {
-                            writeOpenTypeComplex(metadata, (EdmComplexType) derivedType, p, json);
+                            writeOpenTypeComplex(metadata, derivedType, p, json);
                         }
 
                     } else {
@@ -912,6 +919,14 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
     /**
      * Writes a geospatial value following the GeoJSON specification defined in
      * RFC 7946.
+     * @param name The name
+     * @param type The type
+     * @param geoValue The geo value
+     * @param isNullable Flag if it is nullable
+     * @param json The json representation
+     * @throws EdmPrimitiveTypeException if an error occurs
+     * @throws IOException if an error occurs
+     * @throws SerializerException if an error occurs
      */
     protected void writeGeoValue(final String name, final EdmPrimitiveType type, final Geospatial geoValue,
             final Boolean isNullable, JsonGenerator json)
@@ -1028,7 +1043,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
         }
         return null;
     }
-    
+
 
     public SerializerResult geospatialPrimitive(final ServiceMetadata metadata, final EdmPrimitiveType type,
             final Property property, final PrimitiveSerializerOptions options) throws SerializerException {
@@ -1115,12 +1130,12 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
             outputStream = buffer.getOutputStream();
             JsonGenerator json = new JsonFactory().createGenerator(outputStream);
 
-            if (((EdmComplexType) type).isOpenType()
-                    && (((EdmComplexType) type).getPropertyNames() == null
-                    || ((EdmComplexType) type).getPropertyNames().isEmpty())) {
+            if (type.isOpenType()
+                    && (type.getPropertyNames() == null
+                    || type.getPropertyNames().isEmpty())) {
                 writeContextURL(contextURL, json);
                 writeMetadataETag(metadata, json);
-                writeOpenTypeComplex(metadata, (EdmComplexType) type, property, json);
+                writeOpenTypeComplex(metadata, type, property, json);
             } else {
                 json.writeStartObject();
                 writeContextURL(contextURL, json);
@@ -1186,11 +1201,11 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
             json.writeFieldName(property.getName());
 
             // apply customized serializing for OpenType properties
-            if (((EdmComplexType) type).isOpenType()
-                    && (((EdmComplexType) type).getPropertyNames() == null
-                    || ((EdmComplexType) type).getPropertyNames().isEmpty())) {
+            if (type.isOpenType()
+                    && (type.getPropertyNames() == null
+                    || type.getPropertyNames().isEmpty())) {
 //                json.writeFieldName(property.getName());
-                writeOpenTypeComplex(metadata, (EdmComplexType) type, property, json);
+                writeOpenTypeComplex(metadata, type, property, json);
             } else {
                 json.writeStartObject();
                 EdmComplexType resolvedType = null;

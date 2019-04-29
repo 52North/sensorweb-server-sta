@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2019 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -97,21 +97,21 @@ public class MqttUtil {
      */
     public AbstractMapper getMapper(String className) {
         switch(className) {
-        case "org.n52.series.db.beans.QuantityDataEntity": 
+        case "org.n52.series.db.beans.QuantityDataEntity":
             return obsMapper;
-        case "org.n52.series.db.beans.sta.DatastreamEntity": 
+        case "org.n52.series.db.beans.sta.DatastreamEntity":
             return dsMapper;
-        case "org.n52.series.db.beans.AbstractFeatureEntity": 
+        case "org.n52.series.db.beans.AbstractFeatureEntity":
             return foiMapper;
-        case "org.n52.series.db.beans.sta.HistoricalLocationEntity": 
+        case "org.n52.series.db.beans.sta.HistoricalLocationEntity":
             return hlocMapper;
-        case "org.n52.series.db.beans.sta.LocationEntity": 
+        case "org.n52.series.db.beans.sta.LocationEntity":
             return locMapper;
-        case "org.n52.series.db.beans.PhenomenonEntity": 
+        case "org.n52.series.db.beans.PhenomenonEntity":
             return obspropMapper;
-        case "org.n52.series.db.beans.ProcedureEntity": 
+        case "org.n52.series.db.beans.ProcedureEntity":
             return sensorMapper;
-        case "org.n52.series.db.beans.sta.ThingEntity": 
+        case "org.n52.series.db.beans.sta.ThingEntity":
             return thingMapper;
         default: return null;
         }
@@ -122,7 +122,7 @@ public class MqttUtil {
      * @return Translation map from olingo Entities to raw Data Entities
      */
     public static Map<String, String> getBeanTypes() {
-        HashMap<String,String> map = new HashMap<String,String>();
+        HashMap<String,String> map = new HashMap<>();
         map.put("Observation", "org.n52.series.db.beans.QuantityDataEntity");
         map.put("Datastream", "org.n52.series.db.beans.sta.DatastreamEntity");
         map.put("FeatureOfInterest", "org.n52.series.db.beans.AbstractFeatureEntity");
@@ -133,14 +133,14 @@ public class MqttUtil {
         map.put("Thing", "org.n52.series.db.beans.sta.ThingEntity");
         return map;
     }
-    
+
      /**
-     * Maps olingo Base types to Olingo types. Needed for retrieving 
+     * Maps olingo Base types to Olingo types. Needed for retrieving
      * the corresponding EntityServices.
      * @return Translation map from olingo Entities to raw Data Entities
      */
     public static Map<String, String> getEntityTypes() {
-        HashMap<String,String> map = new HashMap<String,String>();
+        HashMap<String,String> map = new HashMap<>();
         map.put("org.n52.series.db.beans.QuantityDataEntity", "Observation");
         map.put("org.n52.series.db.beans.sta.DatastreamEntity", "Datastream");
         map.put("org.n52.series.db.beans.AbstractFeatureEntity", "FeatureOfInterest");
@@ -154,11 +154,11 @@ public class MqttUtil {
 
     /**
      * Translates Olingo Property into Database Property to check property changes against Event emitted by Database
-     * @param STA property of STA entity
+     * @param staProperty STA property of STA entity
      * @return Set of all Database field storing property information
      */
     public static Set<String> translateSTAtoToDbProperty(String staProperty) {
-        Set<String> returnSet = new HashSet<String>();
+        Set<String> returnSet = new HashSet<>();
         switch(staProperty) {
         case "iot.Thing.name":
         case "iot.Location.name":

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2018 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -26,7 +26,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-
 package org.n52.sta.data.query;
 
 import java.util.Collection;
@@ -72,7 +71,7 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
             return builder.equal(join.get(DescribableEntity.PROPERTY_NAME), name);
         };
     }
-    
+
     public Specification<DatastreamEntity> withThing(final Long thingId) {
         return (root, query, builder) -> {
             final Join<DatastreamEntity, PlatformEntity> join =
@@ -120,7 +119,7 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
             return join.get(DescribableEntity.PROPERTY_ID).in(datasetIds);
         };
     }
-    
+
     public Specification<DatastreamEntity> withObservation(Long observationId) {
         return (root, query, builder) -> {
             Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
@@ -159,7 +158,7 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
             return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
         }
     }
-    
+
     private Specification<DatastreamEntity> handleDirectPropertyFilter(String propertyName, Object propertyValue,
             BinaryOperatorKind operator, boolean switched) {
         return new Specification<DatastreamEntity>() {
@@ -189,11 +188,11 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
             }
         };
     }
-    
-    
+
+
     /**
      * Handles filtering of properties in related Entities.
-     * 
+     *
      * @param propertyName
      *        Name of property
      * @param propertyValue

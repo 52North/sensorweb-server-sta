@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2019 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -90,7 +90,7 @@ public class MqttBroker {
     private MqttMessageHandler handler;
 
     private IConfig brokerConfig;
-    
+
     private Server mqttServer;
 
     @Bean(destroyMethod = "stopServer")
@@ -123,7 +123,7 @@ public class MqttBroker {
             }
             mvStore.close();
         }
-        
+
         try {
             mqttServer.startServer(brokerConfig, Arrays.asList(initMessageHandler()));
             Runtime.getRuntime().addShutdownHook(new Thread(mqttServer::stopServer));

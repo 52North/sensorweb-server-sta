@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2018 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -131,7 +131,7 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
             return builder.in(root).value(sq);
         };
     }
-    
+
     @Override
     public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
         switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {

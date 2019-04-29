@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2018 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -26,7 +26,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-
 package org.n52.sta.data.query;
 
 import java.util.Date;
@@ -52,7 +51,7 @@ import org.springframework.data.jpa.domain.Specification;
  *
  */
 public class HistoricalLocationQuerySpecifications extends EntityQuerySpecifications<HistoricalLocationEntity> {
-   
+
     public Specification<HistoricalLocationEntity> withRelatedLocation(final Long locationId) {
         return (root, query, builder) -> {
             final Join<HistoricalLocationEntity, LocationEntity> join =
@@ -60,7 +59,7 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
             return builder.equal(join.get(DescribableEntity.PROPERTY_ID), locationId);
         };
     }
-   
+
     public Specification<HistoricalLocationEntity> withRelatedThing(final Long thingId) {
         return (root, query, builder) -> {
             final Join<HistoricalLocationEntity, PlatformEntity> join =

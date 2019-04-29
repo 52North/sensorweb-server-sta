@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2018 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -26,7 +26,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-
 package org.n52.sta.service.query;
 
 import org.apache.olingo.server.api.uri.UriInfo;
@@ -41,15 +40,15 @@ import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 
 /**
  * Abstract Interface to hold Query Parameters for {@link AbstractSensorThingsEntityService}
- * 
- * @author Carsten Hollmann <c.hollmann@52north.org>
+ *
+ * @author <a href="mailto:c.hollmann@52north.org">Carsten Hollmann</a>
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
 public interface QueryOptions {
 
     static final int DEFAULT_TOP = 100;
-    
+
     /**
      * Get the {@link UriInfo}
      *
@@ -63,7 +62,7 @@ public interface QueryOptions {
      * @return the baseURI
      */
     public String getBaseURI();
-    
+
     /**
      * Check if {@link CountOption} is present
      *
@@ -77,9 +76,9 @@ public interface QueryOptions {
      * @return the {@link CountOption}
      */
     CountOption getCountOption();
-    
+
     /**
-     * Get the {@link TopOption}. If {@link TopOption} is missing return {@link QueryOptions.DEFAULT_TOP}
+     * Get the {@link TopOption}. If {@link TopOption} is missing return {@link QueryOptions#DEFAULT_TOP}
      *
      * @return the {@link TopOption}
      */
@@ -140,7 +139,7 @@ public interface QueryOptions {
      * @return the {@link ExpandOption}
      */
     ExpandOption getExpandOption();
-    
+
     /**
      * * Check if {@link ExpandOption} is present
      *

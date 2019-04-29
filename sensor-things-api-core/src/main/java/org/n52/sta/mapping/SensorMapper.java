@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2018 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -61,9 +61,9 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class SensorMapper extends AbstractMapper<ProcedureEntity> {
-    
+
     private static final String STA_SENSORML_2 = "http://www.opengis.net/doc/IS/SensorML/2.0";
-    
+
     private static final String SENSORML_2 = "http://www.opengis.net/sensorml/2.0";
 
     @Autowired
@@ -90,11 +90,11 @@ public class SensorMapper extends AbstractMapper<ProcedureEntity> {
 
         return entity;
     }
-    
+
     public Entity createEntity(SensorEntity sensor) {
         return createEntity(sensor);
     }
-    
+
     public SensorEntity createAndCheckEntity(Entity entity) throws ODataApplicationException {
         checkEntity(entity);
         return createEntity(entity);
@@ -124,7 +124,7 @@ public class SensorMapper extends AbstractMapper<ProcedureEntity> {
         }
         return existing;
     }
-    
+
     public SensorEntity mergeSensorEntity(SensorEntity existing, SensorEntity toMerge) {
        if (toMerge.hasDatastreams()) {
            toMerge.getDatastreams().forEach(d -> {
@@ -158,14 +158,14 @@ public class SensorMapper extends AbstractMapper<ProcedureEntity> {
         }
         return format;
     }
-    
+
     private String checkInsertEncodingType(String format) {
         if (format.equalsIgnoreCase(STA_SENSORML_2)) {
             return SENSORML_2;
         }
         return format;
     }
-    
+
     @Override
     public Entity  checkEntity(Entity entity) throws ODataApplicationException {
         checkNameAndDescription(entity);
@@ -173,5 +173,5 @@ public class SensorMapper extends AbstractMapper<ProcedureEntity> {
         checkPropertyValidity(PROP_METADATA, entity);
         return entity;
     }
-    
+
 }

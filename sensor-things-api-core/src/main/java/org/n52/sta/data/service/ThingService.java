@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2018 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -75,7 +75,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
         super(repository);
         this.mapper = mapper;
     }
-    
+
     @Override
     public EntityTypes getType() {
         return EntityTypes.Thing;
@@ -99,7 +99,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType, QueryOptions queryOptions) throws ODataApplicationException {
         Specification<PlatformEntity> filter = tQS.withRelatedLocation(sourceId);
 
-        filter = filter.and(getFilterPredicate(PlatformEntity.class, queryOptions));       
+        filter = filter.and(getFilterPredicate(PlatformEntity.class, queryOptions));
         Iterable<PlatformEntity> things = getRepository().findAll(filter, createPageableRequest(queryOptions));
 
         EntityCollection retEntitySet = new EntityCollection();
@@ -169,7 +169,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     /**
      * Retrieves Thing Entity with Relation to sourceEntity from Database.
      * Returns empty if Thing is not found or Entities are not related.
-     * 
+     *
      * @param sourceId Id of the Source Entity
      * @param sourceEntityType Type of the Source Entity
      * @param targetId Id of the Thing to be retrieved
@@ -198,7 +198,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
         }
         return getRepository().findOne(filter);
     }
-    
+
     @Override
     public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
         return getRepository().count(getFilterPredicate(PlatformEntity.class, queryOptions));
@@ -222,7 +222,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
             thing = getRepository().save(thing);
         }
         return thing;
-        
+
     }
 
     @Override
@@ -249,7 +249,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
         throw new ODataApplicationException("Invalid http method for updating entity!",
                 HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
     }
-    
+
     private void checkUpdate(PlatformEntity thing) throws ODataApplicationException {
         if (thing.hasLocationEntities()) {
             for (LocationEntity location : thing.getLocations()) {
@@ -366,7 +366,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
         Map<String, Set<Long>> collections = new HashMap<> ();
         Set<Long> set = new HashSet<>();
         PlatformEntity entity = (PlatformEntity) rawObject;
-        
+
         try {
             entity.getLocations().forEach((en)-> {
                 set.add(en.getId());

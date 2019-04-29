@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2019 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -59,10 +59,10 @@ public class HibernateMessageInterceptor extends EmptyInterceptor {
      */
     @Override
     public boolean onSave(
-                          Object entity, 
-                          Serializable id, 
-                          Object[] state, 
-                          String[] propertyNames, 
+                          Object entity,
+                          Serializable id,
+                          Object[] state,
+                          String[] propertyNames,
                           Type[] types) {
         LOGGER.debug("Parsed Entity to MQTTHandler: " + entity.toString());
         mqttclient.handleEvent(entity, null);
@@ -74,11 +74,11 @@ public class HibernateMessageInterceptor extends EmptyInterceptor {
      */
     @Override
     public boolean onFlushDirty(
-                                Object entity, 
-                                Serializable id, 
-                                Object[] currentState, 
-                                Object[] previousState, 
-                                String[] propertyNames, 
+                                Object entity,
+                                Serializable id,
+                                Object[] currentState,
+                                Object[] previousState,
+                                String[] propertyNames,
                                 Type[] types) {
         LOGGER.debug("Parsed Entity to MQTTHandler: " + entity.toString());
         mqttclient.handleEvent(entity, findDifferences(currentState, previousState, propertyNames));

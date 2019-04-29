@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2018 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -26,7 +26,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-
 package org.n52.sta.data.query;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -51,7 +50,7 @@ import org.springframework.data.jpa.domain.Specification;
  *
  */
 public class ThingQuerySpecifications extends EntityQuerySpecifications<PlatformEntity> {
-    
+
     public Specification<PlatformEntity> withRelatedLocation(Long locationId) {
         return (root, query, builder) -> {
             final Join<PlatformEntity, LocationEntity> join =
@@ -67,7 +66,7 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
             return builder.equal(join.get(DescribableEntity.PROPERTY_ID), historicalId);
         };
     }
-    
+
     public Specification<PlatformEntity> withRelatedDatastream(Long datastreamId) {
         return (root, query, builder) -> {
             final Join<PlatformEntity, DatastreamEntity> join =

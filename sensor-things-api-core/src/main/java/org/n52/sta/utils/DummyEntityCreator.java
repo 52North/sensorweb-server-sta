@@ -1,3 +1,31 @@
+/*
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Software GmbH
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation.
+ *
+ * If the program is linked with libraries which are licensed under one of
+ * the following licenses, the combination of the program with the linked
+ * library is not considered a "derivative work" of the program:
+ *
+ *     - Apache License, version 2.0
+ *     - Apache Software License, version 1.0
+ *     - GNU Lesser General Public License, version 3
+ *     - Mozilla Public License, versions 1.0, 1.1 and 2.0
+ *     - Common Development and Distribution License (CDDL), version 1.0
+ *
+ * Therefore the distribution of the program linked with libraries licensed
+ * under the aforementioned licenses, is permitted by the copyright holders
+ * if the distribution is compliant with both the GNU General Public
+ * License version 2 and the aforementioned licenses.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details.
+ */
 ///*
 // * To change this license header, choose License Headers in Project Properties.
 // * To change this template file, choose Tools | Templates
@@ -78,7 +106,7 @@
 //    private ObservationMapper observationMapper;
 //    @Autowired
 //    private FeatureOfInterestMapper featureOfInterestMapper;
-//    
+//
 //    public Entity createEntity(String type, String id) {
 //        Entity entity = null;
 //
@@ -119,7 +147,7 @@
 //
 //        return entityCollection;
 //    }
-//    
+//
 //    private Entity createThingEntityForId(String id) {
 //        String name;
 //        ThingEntity e1 = new ThingEntity();
@@ -131,7 +159,7 @@
 //        e1.setLocationEntities(new HashSet<LocationEntity>(createLocationEntities()));
 //        return thingMapper.createThingEntity(e1);
 //    }
-//    
+//
 //    private Entity createLocationEntityForId(String id) {
 //        LocationEntity loc1 = new LocationEntity();
 //        loc1.setId(Long.parseLong(id));
@@ -140,7 +168,7 @@
 //        loc1.setGeometry(new GeometryFactory().createPoint(new Coordinate(Math.random() * 90, Math.random() * 180)));
 //        return locationMapper.createLocationEntity(loc1);
 //    }
-//    
+//
 //    private Entity createHistoricalLocationEntityForId(String id) {
 //        HistoricalLocationEntity loc = new HistoricalLocationEntity();
 //        loc.setTime(new Date());
@@ -148,7 +176,7 @@
 //        loc.setLocationEntity((LocationEntity) createLocationEntities().get(0));
 //        return historicalLocationMapper.createHistoricalLocationEntity(loc);
 //    }
-//    
+//
 //    private Entity createSensorEntityForId(String id) {
 //        ProcedureEntity e1 = new ProcedureEntity();
 //        e1.setId(Long.parseLong(id));
@@ -158,7 +186,7 @@
 //        e1.setFormat(new FormatEntity().setFormat("Demo Sensor Format"));
 //        return sensorMapper.createSensorEntity(e1);
 //    }
-//    
+//
 //    private Entity createDatastreamEntityForId(String id) {
 //        String name;
 //        DatastreamEntity e1 = new DatastreamEntity();
@@ -167,16 +195,16 @@
 //        e1.setName(name);
 //        e1.setDescription("Nice Datastream");
 //        e1.setObservationType(new FormatEntity().setFormat("Test Format"));
-//        
+//
 //        UnitEntity uom = new UnitEntity();
 //        uom.setName("Test UOM");
 //        uom.setSymbol("Test UOM Symbol");
 //        uom.setLink("Test UOM Link");
 //        e1.setUnitOfMeasurement(uom);
-//        
+//
 //        return datastreamMapper.createDatastreamEntity(e1);
 //    }
-//    
+//
 //    private Entity createObservedPropertyEntityForId(String id) {
 //        String name;
 //        PhenomenonEntity e1 = new PhenomenonEntity();
@@ -187,7 +215,7 @@
 //        e1.setIdentifier("Test Identifier");
 //        return observedPropertyMapper.createObservedPropertyEntity(e1);
 //    }
-//    
+//
 //    private Entity createObservationEntityForId(String id) {
 //        String name;
 //        CountDataEntity e1 = new CountDataEntity();
@@ -200,7 +228,7 @@
 //        e1.setValue(42);
 //        return observationMapper.createObservationEntity(e1);
 //    }
-//    
+//
 //    private Entity createFeatureOfInterestEntityForId(String id) {
 //        String name;
 //        FeatureEntity e1 = new FeatureEntity();
@@ -211,7 +239,7 @@
 //        e1.setGeometry(new GeometryFactory().createPoint(new Coordinate(Math.random() * 90, Math.random() * 180)));
 //        return featureOfInterestMapper.createFeatureOfInterestEntity(e1);
 //    }
-//    
+//
 //    private EntityCollection createThingEntityCollection() {
 //        String name;
 //        EntityCollection retEntitySet = new EntityCollection();
@@ -240,14 +268,14 @@
 //
 //        return retEntitySet;
 //    }
-//    
+//
 //    private EntityCollection createLocationEntityCollection() {
 //        EntityCollection retEntitySet = new EntityCollection();
-//        
+//
 //        createLocationEntities().forEach(t -> retEntitySet.getEntities().add(locationMapper.createLocationEntity(t)));
 //        return retEntitySet;
 //    }
-//    
+//
 //    private List<LocationEntity> createLocationEntities() {
 //        List<LocationEntity> locations = new ArrayList<>();
 //
@@ -288,13 +316,13 @@
 //        retEntitySet.getEntities().add(this.createSensorEntityForId("53"));
 //        return retEntitySet;
 //    }
-//    
+//
 //    private EntityCollection createObservationEntityCollection() {
 //        EntityCollection retEntitySet = new EntityCollection();
 //
 //        GeometryEntity geom = new GeometryEntity();
 //        geom.setGeometry(new GeometryFactory().createPoint(new Coordinate(58, 58)));
-//        
+//
 //        retEntitySet.getEntities().add(this.createObservationEntity("52", new QuantityDataEntity(), new BigDecimal(52)));
 //        retEntitySet.getEntities().add(this.createObservationEntity("53", new BlobDataEntity(), 53));
 //        retEntitySet.getEntities().add(this.createObservationEntity("54", new BooleanDataEntity(), true));
@@ -310,7 +338,7 @@
 ////      retEntitySet.getEntities().add(this.createObservationEntity("61", new ProfileDataEntity(), ));
 //        return retEntitySet;
 //    }
-//    
+//
 //    @SuppressWarnings("unchecked")
 //	private <T extends DataEntity, V> Entity createObservationEntity(String id, T element, V value) {
 //    	Date timestamp = new Date((long) (Math.random() * 100000));
@@ -319,7 +347,7 @@
 //    	element.setSamplingTimeStart(timestamp);
 //    	element.setSamplingTimeEnd(timestamp);
 //    	element.setValue(value);
-//        return observationMapper.createObservationEntity(element);	
+//        return observationMapper.createObservationEntity(element);
 //    }
 //
 //    private EntityCollection createFeatureOfInterestEntityCollection() {

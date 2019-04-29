@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2018 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -45,8 +45,8 @@ import org.n52.sta.data.service.AbstractSensorThingsEntityService;
  * Class that holds an {@link ExpandItem} to get {@link SystemQueryOption}s to
  * use them in the {@link AbstractSensorThingsEntityService}s.
  *
- * @see org.n52.sta.service.query.QueryOptions 
- * 
+ * @see org.n52.sta.service.query.QueryOptions
+ *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  * @since 1.0.0
  */
@@ -54,12 +54,12 @@ public class ExpandItemQueryOptions implements QueryOptions {
 
     private ExpandItem item;
     private String baseURI;
-    
+
     public ExpandItemQueryOptions(ExpandItem item, String baseURI) {
         this.item = item;
         this.baseURI = baseURI;
     }
-    
+
     /* (non-Javadoc)
      * @see org.n52.sta.service.query.QueryOptions#getUriInfo()
      */
