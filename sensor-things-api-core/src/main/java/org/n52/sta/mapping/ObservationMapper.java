@@ -66,6 +66,7 @@ import org.n52.series.db.beans.ProfileDataEntity;
 import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.ReferencedDataEntity;
 import org.n52.series.db.beans.TextDataEntity;
+import org.n52.series.db.beans.HibernateRelations.HasPhenomenonTime;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.shetland.ogc.gml.time.Time;
@@ -224,6 +225,16 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
         addDatastream(observation, entity);
         addResult(observation, entity);
         return observation;
+    }
+    
+    protected void addPhenomenonTime(HasPhenomenonTime phenomenonTime, Entity entity) {
+        if (checkProperty(entity, PROP_PHENOMENON_TIME)) {
+           super.addPhenomenonTime(phenomenonTime, entity);
+        } else {
+            Date date = DateTime.now().toDate();
+            phenomenonTime.setSamplingTimeStart(date);
+            phenomenonTime.setSamplingTimeEnd(date);
+        }
     }
 
     private void addResult(StaDataEntity observation, Entity entity) {
