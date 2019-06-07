@@ -50,22 +50,22 @@ import org.springframework.data.jpa.domain.Specification;
  */
 public class LocationQuerySpecifications extends EntityQuerySpecifications<LocationEntity> {
 
-    public Specification<LocationEntity> withRelatedHistoricalLocation(Long historicalId) {
+    public Specification<LocationEntity> withRelatedHistoricalLocationIdentifier(final String historicalLocationIdentifier) {
         return (root, query, builder) -> {
             Subquery<LocationEntity> sq = query.subquery(LocationEntity.class);
             Root<HistoricalLocationEntity> dataset = sq.from(HistoricalLocationEntity.class);
             Join<HistoricalLocationEntity, LocationEntity> joinFeature = dataset.join(HistoricalLocationEntity.PROPERTY_LOCATIONS);
-            sq.select(joinFeature).where(builder.equal(dataset.get(DescribableEntity.PROPERTY_ID), historicalId));
+            sq.select(joinFeature).where(builder.equal(dataset.get(DescribableEntity.PROPERTY_IDENTIFIER), historicalLocationIdentifier));
             return builder.in(root).value(sq);
         };
     }
 
-    public Specification<LocationEntity> withRelatedThing(Long thingId) {
+    public Specification<LocationEntity> withRelatedThing(final String thingIdentifier) {
         return (root, query, builder) -> {
             Subquery<LocationEntity> sq = query.subquery(LocationEntity.class);
             Root<PlatformEntity> dataset = sq.from(PlatformEntity.class);
             Join<PlatformEntity, LocationEntity> joinFeature = dataset.join(PlatformEntity.PROPERTY_LOCATIONS);
-            sq.select(joinFeature).where(builder.equal(dataset.get(DescribableEntity.PROPERTY_ID), thingId));
+            sq.select(joinFeature).where(builder.equal(dataset.get(DescribableEntity.PROPERTY_IDENTIFIER), thingIdentifier));
             return builder.in(root).value(sq);
         };
     }
@@ -86,8 +86,8 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
         } else if (propertyName.equals("id")) {
             return (root, query, builder) -> {
                 try {
-                    return handleDirectNumberPropertyFilter(root.<Long> get(LocationEntity.PROPERTY_ID),
-                            Long.getLong(propertyValue.toString()), operator, builder);
+                    return handleDirectStringPropertyFilter(root.get(LocationEntity.PROPERTY_IDENTIFIER),
+                            propertyValue.toString(), operator, builder, false);
                 } catch (ExpressionVisitException e) {
                     throw new RuntimeException(e);
                 }
@@ -99,20 +99,20 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
     }
 
     private Specification<LocationEntity> handleRelatedPropertyFilter(String propertyName,
-            Specification<Long> propertyValue) throws ExpressionVisitException {
+            Specification<Long> propertyValue) {
         return (root, query, builder) -> {
             if (propertyName.equals("Things")) {
                 Subquery<LocationEntity> sq = query.subquery(LocationEntity.class);
                 Root<PlatformEntity> dataset = sq.from(PlatformEntity.class);
                 Join<PlatformEntity, LocationEntity> joinFeature = dataset.join(PlatformEntity.PROPERTY_LOCATIONS);
-                sq.select(joinFeature).where(builder.equal(dataset.get(DescribableEntity.PROPERTY_ID), propertyValue));
+                sq.select(joinFeature).where(builder.equal(dataset.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue));
                 return builder.in(root).value(sq);
             } else {
                 Subquery<LocationEntity> sq = query.subquery(LocationEntity.class);
                 Root<HistoricalLocationEntity> dataset = sq.from(HistoricalLocationEntity.class);
                 Join<HistoricalLocationEntity, LocationEntity> joinFeature =
                         dataset.join(HistoricalLocationEntity.PROPERTY_LOCATIONS);
-                sq.select(joinFeature).where(builder.equal(dataset.get(DescribableEntity.PROPERTY_ID), propertyValue));
+                sq.select(joinFeature).where(builder.equal(dataset.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue));
                 return builder.in(root).value(sq);
             }
         };

@@ -48,17 +48,17 @@ import org.springframework.data.jpa.domain.Specification;
  */
 public class ObservedPropertyQuerySpecifications extends EntityQuerySpecifications<PhenomenonEntity> {
 
-    public Specification<PhenomenonEntity> withDatastream(Long datastreamId) {
+    public Specification<PhenomenonEntity> withDatastreamIdentifier(final String datastreamIdentifier) {
         return (root, query, builder) -> {
             final Join<PhenomenonEntity, DatastreamEntity> join =
                     root.join(DatastreamEntity.PROPERTY_OBSERVABLE_PROPERTY, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), datastreamId);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), datastreamIdentifier);
         };
     }
 
     @Override
-    public Specification<Long> getIdSubqueryWithFilter(Specification filter) {
-        return this.toSubquery(PhenomenonEntity.class, PhenomenonEntity.PROPERTY_ID, filter);
+    public Specification<String> getIdSubqueryWithFilter(Specification filter) {
+        return this.toSubquery(PhenomenonEntity.class, PhenomenonEntity.PROPERTY_IDENTIFIER, filter);
     }
 
     @Override
@@ -68,12 +68,12 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
                                        boolean switched)
             throws ExpressionVisitException {
         if (propertyName.equals("Datastreams")) {
-            return handleRelatedPropertyFilter(propertyName, (Specification<Long>) propertyValue);
+            return handleRelatedPropertyFilter(propertyName, (Specification<String>) propertyValue);
         } else if (propertyName.equals("id")) {
             return (root, query, builder) -> {
                 try {
-                    return handleDirectNumberPropertyFilter(root.<Long> get(PhenomenonEntity.PROPERTY_ID),
-                            Long.getLong(propertyValue.toString()), operator, builder);
+                    return handleDirectStringPropertyFilter(root.get(PhenomenonEntity.PROPERTY_IDENTIFIER),
+                            propertyValue.toString(), operator, builder, false);
                 } catch (ExpressionVisitException e) {
                     throw new RuntimeException(e);
                 }
@@ -84,12 +84,12 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
         }
     }
 
-    private Specification<PhenomenonEntity> handleRelatedPropertyFilter(String propertyName, Specification<Long> propertyValue)
+    private Specification<PhenomenonEntity> handleRelatedPropertyFilter(String propertyName, Specification<String> propertyValue)
             throws ExpressionVisitException {
         return (root, query, builder) -> {
             final Join<PhenomenonEntity, DatastreamEntity> join =
                     root.join(DatastreamEntity.PROPERTY_OBSERVABLE_PROPERTY, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), propertyValue);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue);
         };
     }
 

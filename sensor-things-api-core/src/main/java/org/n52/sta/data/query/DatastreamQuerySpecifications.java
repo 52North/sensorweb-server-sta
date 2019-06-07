@@ -56,15 +56,15 @@ import org.springframework.data.jpa.domain.Specification;
  */
 public class DatastreamQuerySpecifications extends EntityQuerySpecifications<DatastreamEntity> {
 
-    public Specification<DatastreamEntity> withObservedProperty(final Long observablePropertyId) {
+    public Specification<DatastreamEntity> withObservedPropertyIdentifier(final String observablePropertyIdentifier) {
         return (root, query, builder) -> {
             final Join<DatastreamEntity, PhenomenonEntity> join =
                     root.join(DatastreamEntity.PROPERTY_OBSERVABLE_PROPERTY, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), observablePropertyId);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), observablePropertyIdentifier);
         };
     }
 
-    public Specification<DatastreamEntity> withObservedProperty(final String name) {
+    public Specification<DatastreamEntity> withObservedPropertyName(final String name) {
         return (root, query, builder) -> {
             final Join<DatastreamEntity, PhenomenonEntity> join =
                     root.join(DatastreamEntity.PROPERTY_OBSERVABLE_PROPERTY, JoinType.INNER);
@@ -72,15 +72,15 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
         };
     }
 
-    public Specification<DatastreamEntity> withThing(final Long thingId) {
+    public Specification<DatastreamEntity> withThingIdentifier(final String thingIdentifier) {
         return (root, query, builder) -> {
             final Join<DatastreamEntity, PlatformEntity> join =
                     root.join(DatastreamEntity.PROPERTY_THING, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), thingId);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), thingIdentifier);
         };
     }
 
-    public Specification<DatastreamEntity> withThing(final String name) {
+    public Specification<DatastreamEntity> withThingName(final String name) {
         return (root, query, builder) -> {
             final Join<DatastreamEntity, PlatformEntity> join =
                     root.join(DatastreamEntity.PROPERTY_THING, JoinType.INNER);
@@ -88,15 +88,15 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
         };
     }
 
-    public Specification<DatastreamEntity> withSensor(final Long thingId) {
+    public Specification<DatastreamEntity> withSensorIdentifier(final String sensorIdentifier) {
         return (root, query, builder) -> {
             final Join<DatastreamEntity, ProcedureEntity> join =
                     root.join(DatastreamEntity.PROPERTY_SENSOR, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), thingId);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), sensorIdentifier);
         };
     }
 
-    public Specification<DatastreamEntity> withSensor(final String name) {
+    public Specification<DatastreamEntity> withSensorName(final String name) {
         return (root, query, builder) -> {
             final Join<DatastreamEntity, ProcedureEntity> join =
                     root.join(DatastreamEntity.PROPERTY_SENSOR, JoinType.INNER);
@@ -116,23 +116,23 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
         return (root, query, builder) -> {
             final Join<DatastreamEntity, DatasetEntity> join =
                     root.join(DatastreamEntity.PROPERTY_DATASETS, JoinType.INNER);
-            return join.get(DescribableEntity.PROPERTY_ID).in(datasetIds);
+            return join.get(DescribableEntity.PROPERTY_IDENTIFIER).in(datasetIds);
         };
     }
 
-    public Specification<DatastreamEntity> withObservation(Long observationId) {
+    public Specification<DatastreamEntity> withObservation(String observationIdentifier) {
         return (root, query, builder) -> {
             Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
             Root<DataEntity> data = sq.from(DataEntity.class);
-            sq.select(data.get(DataEntity.PROPERTY_DATASET)).where(builder.equal(data.get(DescribableEntity.PROPERTY_ID), observationId));
+            sq.select(data.get(DataEntity.PROPERTY_DATASET)).where(builder.equal(data.get(DescribableEntity.PROPERTY_IDENTIFIER), observationIdentifier));
             Join<DatastreamEntity, DatasetEntity> join = root.join(DatastreamEntity.PROPERTY_DATASETS);
-            return builder.in(join.get(DatasetEntity.PROPERTY_ID)).value(sq);
+            return builder.in(join.get(DatasetEntity.PROPERTY_IDENTIFIER)).value(sq);
         };
     }
 
     @Override
     public Specification<Long> getIdSubqueryWithFilter(Specification filter) {
-        return this.toSubquery(DatastreamEntity.class, DatastreamEntity.PROPERTY_ID, filter);
+        return this.toSubquery(DatastreamEntity.class, DatastreamEntity.PROPERTY_IDENTIFIER, filter);
     }
 
     @Override
@@ -147,8 +147,8 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
         } else if (propertyName.equals("id")) {
             return (root, query, builder) -> {
                 try {
-                    return handleDirectNumberPropertyFilter(root.<Long> get(DatastreamEntity.PROPERTY_ID),
-                            Long.getLong(propertyValue.toString()), operator, builder);
+                    return handleDirectStringPropertyFilter(root.get(DatastreamEntity.PROPERTY_IDENTIFIER),
+                            propertyValue.toString(), operator, builder, false);
                 } catch (ExpressionVisitException e) {
                     throw new RuntimeException(e);
                 }
@@ -197,8 +197,6 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
      *        Name of property
      * @param propertyValue
      *        Supposed value of Property
-     * @param operator
-     *        Comparison operator between propertyValue and actual Value
      * @return BooleanExpression evaluating to true if Entity is not filtered out
      */
     private Specification<DatastreamEntity> handleRelatedPropertyFilter(String propertyName,
@@ -212,26 +210,26 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
                 case "Sensor": {
                     final Join<DatastreamEntity, ProcedureEntity> join =
                             root.join(DatastreamEntity.PROPERTY_SENSOR, JoinType.INNER);
-                    return builder.equal(join.get(DescribableEntity.PROPERTY_ID), propertyValue);
+                    return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue);
 
                 }
                 case "ObservedProperty": {
                     final Join<DatastreamEntity, PhenomenonEntity> join =
                             root.join(DatastreamEntity.PROPERTY_OBSERVABLE_PROPERTY, JoinType.INNER);
-                    return builder.equal(join.get(DescribableEntity.PROPERTY_ID), propertyValue);
+                    return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue);
                 }
                 case "Thing": {
                     final Join<DatastreamEntity, PlatformEntity> join =
                             root.join(DatastreamEntity.PROPERTY_THING, JoinType.INNER);
-                    return builder.equal(join.get(DescribableEntity.PROPERTY_ID), propertyValue);
+                    return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue);
                 }
                 case "Observations": {
                     Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
                     Root<DataEntity> data = sq.from(DataEntity.class);
                     sq.select(data.get(DataEntity.PROPERTY_DATASET))
-                            .where(builder.equal(data.get(DescribableEntity.PROPERTY_ID), propertyValue));
+                            .where(builder.equal(data.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue));
                     Join<DatastreamEntity, DatasetEntity> join = root.join(DatastreamEntity.PROPERTY_DATASETS);
-                    return builder.in(join.get(DatasetEntity.PROPERTY_ID)).value(sq);
+                    return builder.in(join.get(DatasetEntity.PROPERTY_IDENTIFIER)).value(sq);
                 }
                 default:
                     throw new ExpressionVisitException(

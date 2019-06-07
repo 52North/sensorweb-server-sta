@@ -39,10 +39,7 @@ import javax.persistence.criteria.Subquery;
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.joda.time.DateTime;
-import org.n52.series.db.beans.DataEntity;
-import org.n52.series.db.beans.DatasetEntity;
-import org.n52.series.db.beans.DescribableEntity;
-import org.n52.series.db.beans.QuantityDataEntity;
+import org.n52.series.db.beans.*;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -52,36 +49,39 @@ import org.springframework.data.jpa.domain.Specification;
  */
 public class ObservationQuerySpecifications extends EntityQuerySpecifications<DataEntity< ? >> {
 
-    public Specification<DataEntity< ? >> withFeatureOfInterest(Long featureId) {
+    public Specification<DataEntity< ? >> withFeatureOfInterestIdentifier(final String featureIdentifier) {
         return (root, query, builder) -> {
             Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
             Root<DatasetEntity> dataset = sq.from(DatasetEntity.class);
-            sq.select(dataset.get(DatasetEntity.PROPERTY_ID)).where(builder.equal(dataset.get(DatasetEntity.PROPERTY_FEATURE), featureId));
+            Subquery<FeatureEntity> subquery = query.subquery(FeatureEntity.class);
+            Root<FeatureEntity> feature = subquery.from(FeatureEntity.class);
+            subquery.select(feature.get(FeatureEntity.PROPERTY_ID)).where(builder.equal(feature.get(FeatureEntity.IDENTIFIER), featureIdentifier));
+            sq.select(dataset.get(DatasetEntity.PROPERTY_IDENTIFIER)).where(builder.equal(dataset.get(DatasetEntity.PROPERTY_FEATURE), subquery));
             return builder.in(root.get(DataEntity.PROPERTY_DATASET)).value(sq);
         };
     }
 
-    public Specification<DataEntity< ? >> withDatastream(Long datastreamId) {
+    public Specification<DataEntity< ? >> withDatastreamIdentifier(final String datastreamIdentifier) {
         return (root, query, builder) -> {
             Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
             Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
             Join<DatastreamEntity, DatasetEntity> join = datastream.join(DatastreamEntity.PROPERTY_DATASETS);
-            sq.select(join.get(DatasetEntity.PROPERTY_ID)).where(builder.equal(datastream.get(DatastreamEntity.PROPERTY_ID), datastreamId));
+            sq.select(join.get(DatasetEntity.PROPERTY_IDENTIFIER)).where(builder.equal(datastream.get(DatastreamEntity.PROPERTY_IDENTIFIER), datastreamIdentifier));
             return builder.in(root.get(DataEntity.PROPERTY_DATASET)).value(sq);
         };
     }
 
-    public Specification<DataEntity< ? >> withDataset(Long datasetId) {
+    public Specification<DataEntity< ? >> withDataset(final String datasetIdentifier) {
         return (root, query, builder) -> {
             final Join<DataEntity, DatasetEntity> join =
                     root.join(DataEntity.PROPERTY_DATASET, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), datasetId);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), datasetIdentifier);
         };
     }
 
     @Override
-    public Specification<Long> getIdSubqueryWithFilter(Specification filter) {
-        return this.toSubquery(DataEntity.class, DataEntity.PROPERTY_ID, filter);
+    public Specification<String> getIdSubqueryWithFilter(Specification filter) {
+        return this.toSubquery(DataEntity.class, DataEntity.PROPERTY_IDENTIFIER, filter);
     }
 
     @Override
@@ -89,12 +89,12 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
             BinaryOperatorKind operator, boolean switched) throws ExpressionVisitException {
 
         if (propertyName.equals("Datastream") || propertyName.equals("FeatureOfInterest")) {
-             return handleRelatedPropertyFilter(propertyName, (Specification<Long>) propertyValue);
+             return handleRelatedPropertyFilter(propertyName, (Specification<String>) propertyValue);
         } else if (propertyName.equals("id")) {
             return (root, query, builder) -> {
                 try {
-                    return handleDirectNumberPropertyFilter(root.<Long> get(DataEntity.PROPERTY_ID),
-                            Long.getLong(propertyValue.toString()), operator, builder);
+                    return handleDirectStringPropertyFilter(root.get(DataEntity.PROPERTY_IDENTIFIER),
+                            propertyValue.toString(), operator, builder, false);
                 } catch (ExpressionVisitException e) {
                     throw new RuntimeException(e);
                 }
@@ -105,16 +105,15 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
         }
     }
 
-    private Specification<DataEntity<?>> handleRelatedPropertyFilter(String propertyName, Specification<Long> propertyValue)
-            throws ExpressionVisitException {
+    private Specification<DataEntity<?>> handleRelatedPropertyFilter(String propertyName, Specification<String> propertyValue) {
         return (root, query, builder) -> {
             try {
                 if (propertyName.equals("Datastream")) {
                     Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
                     Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
                     Join<DatastreamEntity, DatasetEntity> join = datastream.join(DatastreamEntity.PROPERTY_DATASETS);
-                    sq.select(join.get(DatasetEntity.PROPERTY_ID))
-                            .where(builder.equal(datastream.get(DatastreamEntity.PROPERTY_ID), propertyValue));
+                    sq.select(join.get(DatasetEntity.PROPERTY_IDENTIFIER))
+                            .where(builder.equal(datastream.get(DatastreamEntity.PROPERTY_IDENTIFIER), propertyValue));
                     return builder.in(root.get(DataEntity.PROPERTY_DATASET)).value(sq);
                     // return qobservation.dataset.id.in(JPAExpressions
                     // .selectFrom(qdatastream)
@@ -123,7 +122,7 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
                 } else {
                     final Join<DataEntity, DatasetEntity> join =
                             root.join(DataEntity.PROPERTY_DATASET, JoinType.INNER);
-                    return builder.equal(join.get(DescribableEntity.PROPERTY_ID), propertyValue);
+                    return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue);
                     // return qobservation.dataset.id.in(JPAExpressions
                     // .selectFrom(qdataset)
                     // .where(qdataset.feature.id.eq(propertyValue))
@@ -149,8 +148,8 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
                     Root<QuantityDataEntity> dataset = sq.from(QuantityDataEntity.class);
                     Predicate predicate = handleDirectNumberPropertyFilter(dataset.<Double> get(propertyName),
                             Double.valueOf(propertyValue.toString()), operator, builder);
-                    sq.select(dataset.get(QuantityDataEntity.PROPERTY_ID)).where(predicate);
-                    return builder.in(root.get(DataEntity.PROPERTY_ID)).value(sq);
+                    sq.select(dataset.get(QuantityDataEntity.PROPERTY_IDENTIFIER)).where(predicate);
+                    return builder.in(root.get(DataEntity.PROPERTY_IDENTIFIER)).value(sq);
 //                    return handleDirectNumberPropertyFilter(dataset.<Number> get(propertyName), propertyValue, operator,
 //                            builder, switched);
                 case "samplingTimeEnd":

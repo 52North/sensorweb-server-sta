@@ -49,35 +49,34 @@ import org.springframework.data.jpa.domain.Specification;
  */
 public class SensorQuerySpecifications extends EntityQuerySpecifications<ProcedureEntity> {
 
-    public Specification<ProcedureEntity> withDatastream(Long datastreamId) {
+    public Specification<ProcedureEntity> withDatastreamIdentifier(final String datastreamIdentifier) {
         return (root, query, builder) -> {
             Subquery<ProcedureEntity> sq = query.subquery(ProcedureEntity.class);
             Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
             Join<DatastreamEntity, ProcedureEntity> join = datastream.join(DatastreamEntity.PROPERTY_SENSOR);
-            sq.select(join).where(builder.equal(datastream.get(DescribableEntity.PROPERTY_ID), datastreamId));
+            sq.select(join).where(builder.equal(datastream.get(DescribableEntity.PROPERTY_IDENTIFIER), datastreamIdentifier));
             return builder.in(root).value(sq);
         };
     }
 
 
     @Override
-    public Specification<Long> getIdSubqueryWithFilter(Specification filter) {
-        return this.toSubquery(ProcedureEntity.class, ProcedureEntity.PROPERTY_ID, filter);
+    public Specification<String> getIdSubqueryWithFilter(Specification filter) {
+        return this.toSubquery(ProcedureEntity.class, ProcedureEntity.PROPERTY_IDENTIFIER, filter);
     }
 
     @Override
     public Specification<ProcedureEntity> getFilterForProperty(String propertyName,
                                        Object propertyValue,
                                        BinaryOperatorKind operator,
-                                       boolean switched)
-            throws ExpressionVisitException {
+                                       boolean switched) {
         if (propertyName.equals("Datastreams")) {
-            return handleRelatedPropertyFilter(propertyName, (Specification<Long>) propertyValue);
+            return handleRelatedPropertyFilter(propertyName, (Specification<String>) propertyValue);
         } else if (propertyName.equals("id")) {
             return (root, query, builder) -> {
                 try {
-                    return handleDirectNumberPropertyFilter(root.<Long> get(ProcedureEntity.PROPERTY_ID),
-                            Long.getLong(propertyValue.toString()), operator, builder);
+                    return handleDirectStringPropertyFilter(root.get(ProcedureEntity.PROPERTY_IDENTIFIER),
+                            propertyValue.toString(), operator, builder, false);
                 } catch (ExpressionVisitException e) {
                     throw new RuntimeException(e);
                 }
@@ -89,12 +88,12 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications<Procedu
     }
 
     private Specification<ProcedureEntity> handleRelatedPropertyFilter(String propertyName,
-            Specification<Long> propertyValue) {
+            Specification<String> propertyValue) {
         return (root, query, builder) -> {
             Subquery<ProcedureEntity> sq = query.subquery(ProcedureEntity.class);
             Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
             Join<DatastreamEntity, ProcedureEntity> join = datastream.join(DatastreamEntity.PROPERTY_SENSOR);
-            sq.select(join).where(builder.equal(datastream.get(DescribableEntity.PROPERTY_ID), propertyValue));
+            sq.select(join).where(builder.equal(datastream.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue));
             return builder.in(root).value(sq);
         };
         // throws ExpressionVisitException {

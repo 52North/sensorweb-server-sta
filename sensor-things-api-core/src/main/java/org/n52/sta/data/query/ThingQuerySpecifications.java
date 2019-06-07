@@ -51,33 +51,33 @@ import org.springframework.data.jpa.domain.Specification;
  */
 public class ThingQuerySpecifications extends EntityQuerySpecifications<PlatformEntity> {
 
-    public Specification<PlatformEntity> withRelatedLocation(Long locationId) {
+    public Specification<PlatformEntity> withRelatedLocationIdentfier(final String locationIdentifier) {
         return (root, query, builder) -> {
             final Join<PlatformEntity, LocationEntity> join =
                     root.join(PlatformEntity.PROPERTY_LOCATIONS, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), locationId);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), locationIdentifier);
         };
     }
 
-    public Specification<PlatformEntity>  withRelatedHistoricalLocation(Long historicalId) {
+    public Specification<PlatformEntity>  withRelatedHistoricalLocationIdentifier(final String historicalIdentifier) {
         return (root, query, builder) -> {
             final Join<PlatformEntity, HistoricalLocationEntity> join =
                     root.join(PlatformEntity.PROPERTY_HISTORICAL_LOCATIONS, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), historicalId);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), historicalIdentifier);
         };
     }
 
-    public Specification<PlatformEntity> withRelatedDatastream(Long datastreamId) {
+    public Specification<PlatformEntity> withRelatedDatastreamIdentifier(final String datastreamIdentifier) {
         return (root, query, builder) -> {
             final Join<PlatformEntity, DatastreamEntity> join =
                     root.join(PlatformEntity.PROPERTY_DATASTREAMS, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), datastreamId);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), datastreamIdentifier);
         };
     }
 
     @Override
-    public Specification<Long> getIdSubqueryWithFilter(Specification filter) {
-        return this.toSubquery(PlatformEntity.class, PlatformEntity.PROPERTY_ID, filter);
+    public Specification<String> getIdSubqueryWithFilter(Specification filter) {
+        return this.toSubquery(PlatformEntity.class, PlatformEntity.PROPERTY_IDENTIFIER, filter);
     }
 
     @Override
@@ -88,12 +88,12 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
             throws ExpressionVisitException {
         if (propertyName.equals("Datastreams") || propertyName.equals("Locations")
                 || propertyName.equals("HistoricalLocations")) {
-            return handleRelatedPropertyFilter(propertyName, (Subquery<Long>) propertyValue);
+            return handleRelatedPropertyFilter(propertyName, (Subquery<String>) propertyValue);
         } else if (propertyName.equals("id")) {
             return (root, query, builder) -> {
                 try {
-                    return handleDirectNumberPropertyFilter(root.<Long> get(PlatformEntity.PROPERTY_ID),
-                            Long.getLong(propertyValue.toString()), operator, builder);
+                    return handleDirectStringPropertyFilter(root.get(PlatformEntity.PROPERTY_IDENTIFIER),
+                            propertyValue.toString(), operator, builder, false);
                 } catch (ExpressionVisitException e) {
                     throw new RuntimeException(e);
                 }
@@ -105,22 +105,34 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
     }
 
     private Specification<PlatformEntity> handleRelatedPropertyFilter(String propertyName,
-            Subquery<Long> propertyValue) throws ExpressionVisitException {
+            Subquery<String> propertyValue) {
         return (root, query, builder) -> {
             try {
                 switch (propertyName) {
                 case "Datastreams": {
-                    return builder.in(root.get(PlatformEntity.PROPERTY_DATASTREAMS)).value(propertyValue);
+                    Subquery<DatastreamEntity> subquery = query.subquery(DatastreamEntity.class);
+                    Root<DatastreamEntity> datastream = subquery.from(DatastreamEntity.class);
+                    subquery.select(datastream.get(DatastreamEntity.PROPERTY_ID))
+                            .where(builder.equal(datastream.get(DatastreamEntity.PROPERTY_IDENTIFIER), propertyValue));
+                    return builder.in(root.get(PlatformEntity.PROPERTY_DATASTREAMS)).value(subquery);
                     // return
                     // qPlatform.datastreamEntities.any().id.eqAny(propertyValue);
                 }
                 case "Locations": {
-                    return builder.in(root.get(PlatformEntity.PROPERTY_LOCATIONS)).value(propertyValue);
+                    Subquery<LocationEntity> subquery = query.subquery(LocationEntity.class);
+                    Root<LocationEntity> location = subquery.from(LocationEntity.class);
+                    subquery.select(location.get(LocationEntity.PROPERTY_ID))
+                            .where(builder.equal(location.get(LocationEntity.PROPERTY_IDENTIFIER), propertyValue));
+                    return builder.in(root.get(PlatformEntity.PROPERTY_LOCATIONS)).value(subquery);
                     // return
                     // qPlatform.locationEntities.any().id.eqAny(propertyValue);
                 }
-                case "HistoricalLocations": {
-                    return builder.in(root.get(PlatformEntity.PROPERTY_HISTORICAL_LOCATIONS)).value(propertyValue);
+                case "HistoricalLocations":
+                    Subquery<HistoricalLocationEntity> subquery = query.subquery(HistoricalLocationEntity.class);
+                    Root<HistoricalLocationEntity> historicalLocation = subquery.from(HistoricalLocationEntity.class);
+                    subquery.select(historicalLocation.get(HistoricalLocationEntity.PROPERTY_ID))
+                            .where(builder.equal(historicalLocation.get(HistoricalLocationEntity.PROPERTY_IDENTIFIER), propertyValue));{
+                    return builder.in(root.get(PlatformEntity.PROPERTY_HISTORICAL_LOCATIONS)).value(subquery);
                     // return
                     // qPlatform.historicalLocationEntities.any().id.eqAny(propertyValue);
                 }

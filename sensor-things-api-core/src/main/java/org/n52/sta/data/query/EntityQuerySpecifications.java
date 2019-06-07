@@ -47,8 +47,6 @@ import org.springframework.data.jpa.domain.Specification;
  *
  */
 public abstract class EntityQuerySpecifications<T> {
-    final static DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
-    final static ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
 
     /**
      * Gets Subquery returning the IDs of the Entities
@@ -57,7 +55,7 @@ public abstract class EntityQuerySpecifications<T> {
      *        BooleanExpression filtering the Entites whose IDs are returned
      * @return Specification Subquery
      */
-    public abstract Specification<Long> getIdSubqueryWithFilter(Specification filter);
+    public abstract Specification<String> getIdSubqueryWithFilter(Specification filter);
 
     /**
      * Gets Entity-specific Filter for property with given name. Filters may not accept all BinaryOperators,
@@ -93,18 +91,18 @@ public abstract class EntityQuerySpecifications<T> {
         };
     }
 
-    public Specification<T> withId(final Long id) {
-        return (root, query, builder) -> {
-            return builder.equal(root.get(DescribableEntity.PROPERTY_ID), id);
-        };
-    }
+//    public Specification<T> withId(final Long id) {
+//        return (root, query, builder) -> {
+//            return builder.equal(root.get(DescribableEntity.PROPERTY_IDENTIFIER), id);
+//        };
+//    }
 
-    protected Specification<Long> toSubquery(Class<?> clazz, String propert, Specification filter) {
+    protected Specification<String> toSubquery(Class<?> clazz, String propert, Specification filter) {
         return (root, query, builder) -> {
             Subquery<?> sq = query.subquery(clazz);
             Root<?> from = sq.from(clazz);
             sq.select(from.get(propert)).where(filter.toPredicate(root, query, builder));
-            return builder.in(root.get(DescribableEntity.PROPERTY_ID)).value(sq);
+            return builder.in(root.get(DescribableEntity.PROPERTY_IDENTIFIER)).value(sq);
         };
     }
 

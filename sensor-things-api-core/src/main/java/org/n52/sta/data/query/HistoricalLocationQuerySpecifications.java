@@ -52,25 +52,25 @@ import org.springframework.data.jpa.domain.Specification;
  */
 public class HistoricalLocationQuerySpecifications extends EntityQuerySpecifications<HistoricalLocationEntity> {
 
-    public Specification<HistoricalLocationEntity> withRelatedLocation(final Long locationId) {
+    public Specification<HistoricalLocationEntity> withRelatedLocationIdentifier(final String locationIdentifier) {
         return (root, query, builder) -> {
             final Join<HistoricalLocationEntity, LocationEntity> join =
                     root.join(HistoricalLocationEntity.PROPERTY_LOCATIONS, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), locationId);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), locationIdentifier);
         };
     }
 
-    public Specification<HistoricalLocationEntity> withRelatedThing(final Long thingId) {
+    public Specification<HistoricalLocationEntity> withRelatedThingIdentifier(final String thingIdentifier) {
         return (root, query, builder) -> {
             final Join<HistoricalLocationEntity, PlatformEntity> join =
                     root.join(HistoricalLocationEntity.PROPERTY_THING, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), thingId);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), thingIdentifier);
         };
     }
 
     @Override
     public Specification<Long> getIdSubqueryWithFilter(Specification filter) {
-        return this.toSubquery(HistoricalLocationEntity.class, HistoricalLocationEntity.PROPERTY_ID, filter);
+        return this.toSubquery(HistoricalLocationEntity.class, HistoricalLocationEntity.PROPERTY_IDENTIFIER, filter);
     }
 
     @Override
@@ -84,8 +84,8 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
         } else if (propertyName.equals("id")) {
             return (root, query, builder) -> {
                 try {
-                    return handleDirectNumberPropertyFilter(root.<Long> get(HistoricalLocationEntity.PROPERTY_ID),
-                            Long.getLong(propertyValue.toString()), operator, builder);
+                    return handleDirectStringPropertyFilter(root.get(HistoricalLocationEntity.PROPERTY_IDENTIFIER),
+                            propertyValue.toString(), operator, builder, false);
                 } catch (ExpressionVisitException e) {
                     throw new RuntimeException(e);
                 }
@@ -102,11 +102,11 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
             if (propertyName.equals("Thing")) {
                 final Join<HistoricalLocationEntity, PlatformEntity> join =
                         root.join(HistoricalLocationEntity.PROPERTY_THING, JoinType.INNER);
-                return builder.equal(join.get(DescribableEntity.PROPERTY_ID), propertyValue);
+                return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue);
             } else {
                 final Join<HistoricalLocationEntity, LocationEntity> join =
                         root.join(HistoricalLocationEntity.PROPERTY_LOCATIONS, JoinType.INNER);
-                return builder.equal(join.get(DescribableEntity.PROPERTY_ID), propertyValue);
+                return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue);
             }
         };
     }

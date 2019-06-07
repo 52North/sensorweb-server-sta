@@ -161,11 +161,11 @@ public abstract class AbstractMapper<T> {
         entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, description));
     }
 
-    protected void setId(IdEntity idEntity, Entity entity) {
+    protected void setId(DescribableEntity idEntity, Entity entity) {
         if (checkProperty(entity, ID)) {
-            idEntity.setId(Long.parseLong(getPropertyValue(entity, ID).toString()));
+            idEntity.setIdentifier(getPropertyValue(entity, ID).toString());
         } else if (checkProperty(entity, ID_ANNOTATION)) {
-            idEntity.setId(Long.parseLong(getPropertyValue(entity, ID_ANNOTATION).toString()));
+            idEntity.setIdentifier(getPropertyValue(entity, ID_ANNOTATION).toString());
         }
     }
 
