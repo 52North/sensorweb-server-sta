@@ -65,8 +65,9 @@ public class HibernateMessageInterceptor extends EmptyInterceptor {
                           String[] propertyNames,
                           Type[] types) {
         LOGGER.debug("Parsed Entity to MQTTHandler: " + entity.toString());
+        boolean result = super.onSave(entity, id, state, propertyNames, types);
         mqttclient.handleEvent(entity, null);
-        return super.onSave(entity, id, state, propertyNames, types);
+        return result;
     }
 
     /**
@@ -81,8 +82,9 @@ public class HibernateMessageInterceptor extends EmptyInterceptor {
                                 String[] propertyNames,
                                 Type[] types) {
         LOGGER.debug("Parsed Entity to MQTTHandler: " + entity.toString());
+        boolean result = super.onFlushDirty(entity, id, currentState, previousState, propertyNames, types);
         mqttclient.handleEvent(entity, findDifferences(currentState, previousState, propertyNames));
-        return super.onFlushDirty(entity, id, currentState, previousState, propertyNames, types);
+        return result;
     }
 
     private Set<String> findDifferences(Object[] current, Object[] previous, String[] propertyNames) {
