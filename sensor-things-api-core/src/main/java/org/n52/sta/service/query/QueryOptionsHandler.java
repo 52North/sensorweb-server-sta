@@ -34,10 +34,6 @@
 
 package org.n52.sta.service.query;
 
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
-
-import java.util.List;
-
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.data.Link;
@@ -58,6 +54,10 @@ import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
+
 /**
  * Class to handle query options
  *
@@ -66,16 +66,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class QueryOptionsHandler {
 
+    protected UriHelper uriHelper;
+
+    @Autowired
+    private EntityCreationHelper entityCreationHelper;
+
+    @Autowired
+    private EntityAnnotator entityAnnotator;
+
     @Autowired
     private EntityServiceRepository serviceRepository;
-
-    @Autowired
-    EntityCreationHelper entityCreationHelper;
-
-    @Autowired
-    EntityAnnotator entityAnnotator;
-
-    protected UriHelper uriHelper;
 
     public UriHelper getUriHelper() {
         return uriHelper;
@@ -86,12 +86,9 @@ public class QueryOptionsHandler {
     }
 
     /**
-     * @param edmEntityType
-     *        the {@link EdmEntityType} the select list option is
-     * @param expandOption
-     *        the {@link ExpandOption} to get the expand items from
-     * @param selectOption
-     *        the {@link SelectOption} to get the select list from referred to
+     * @param edmEntityType the {@link EdmEntityType} the select list option is
+     * @param expandOption  the {@link ExpandOption} to get the expand items from
+     * @param selectOption  the {@link SelectOption} to get the select list from referred to
      * @return the select list
      * @throws SerializerException if an error occurs
      */
@@ -100,8 +97,8 @@ public class QueryOptionsHandler {
                                                 SelectOption selectOption)
             throws SerializerException {
         String selectList = uriHelper.buildContextURLSelectList(edmEntityType,
-                                                                expandOption,
-                                                                selectOption);
+                expandOption,
+                selectOption);
 
         return selectList;
     }
@@ -109,22 +106,17 @@ public class QueryOptionsHandler {
     /**
      * Handles the $expand Query Parameter
      *
-     * @param entity
-     *        The entity to handle expand parameter for
-     * @param expandOption
-     *        Options for expand Parameter
-     * @param sourceId
-     *        Id of the source Entity
-     * @param sourceEdmEntityType
-     *        EntityType of the source Entity
-     * @param baseURI
-     *        baseURI of the Request
+     * @param entity              The entity to handle expand parameter for
+     * @param expandOption        Options for expand Parameter
+     * @param sourceId            Id of the source Entity
+     * @param sourceEdmEntityType EntityType of the source Entity
+     * @param baseURI             baseURI of the Request
      */
     public void handleExpandOption(Entity entity,
-                                    ExpandOption expandOption,
-                                    Long sourceId,
-                                    EdmEntityType sourceEdmEntityType,
-                                    String baseURI) {
+                                   ExpandOption expandOption,
+                                   String sourceId,
+                                   EdmEntityType sourceEdmEntityType,
+                                   String baseURI) {
         List<ExpandItem> minimized = expandOption.getExpandItems();
         minimized.forEach(expandItem -> {
             EdmNavigationProperty edmNavigationProperty = null;
@@ -149,57 +141,58 @@ public class QueryOptionsHandler {
             if (sourceEdmEntityType.getNavigationProperty(targetTitle).isCollection()) {
                 try {
                     link.setInlineEntitySet(getInlineEntityCollection(sourceId,
-                                                                      sourceEdmEntityType,
-                                                                      targetEdmEntityType,
-                                                                      new ExpandItemQueryOptions(expandItem, baseURI)));
-                } catch (ODataApplicationException e) {}
+                            sourceEdmEntityType,
+                            targetEdmEntityType,
+                            new ExpandItemQueryOptions(expandItem, baseURI)));
+                } catch (ODataApplicationException e) {
+                }
 
             } else {
                 link.setInlineEntity(getInlineEntity(sourceId,
-                                                     sourceEdmEntityType,
-                                                     targetEdmEntityType,
-                                                     new ExpandItemQueryOptions(expandItem, baseURI)));
+                        sourceEdmEntityType,
+                        targetEdmEntityType,
+                        new ExpandItemQueryOptions(expandItem, baseURI)));
             }
         });
     }
 
-    private Entity getInlineEntity(Long sourceId,
+    private Entity getInlineEntity(String sourceId,
                                    EdmEntityType sourceType,
                                    EdmEntityType targetType,
                                    QueryOptions queryOptions) {
-        AbstractSensorThingsEntityService< ? , ? > responseService = serviceRepository.getEntityService(targetType.getName());
+        AbstractSensorThingsEntityService<?, ?> responseService = serviceRepository.getEntityService(targetType.getName());
         Entity entity = responseService.getRelatedEntity(sourceId, sourceType);
 
         if (queryOptions.hasExpandOption()) {
             entityAnnotator.annotateEntity(entity,
-                                           targetType,
-                                           queryOptions.getBaseURI(),
-                                           queryOptions.getSelectOption());
+                    targetType,
+                    queryOptions.getBaseURI(),
+                    queryOptions.getSelectOption());
             String id = entity.getProperty(PROP_ID).getValue().toString();
             handleExpandOption(entity,
-                               queryOptions.getExpandOption(),
-                               Long.parseLong(id),
-                               targetType,
-                               queryOptions.getBaseURI());
+                    queryOptions.getExpandOption(),
+                    id,
+                    targetType,
+                    queryOptions.getBaseURI());
         } else {
             entityAnnotator.annotateEntity(entity,
-                                           targetType,
-                                           queryOptions.getBaseURI(),
-                                           queryOptions.getSelectOption());
+                    targetType,
+                    queryOptions.getBaseURI(),
+                    queryOptions.getSelectOption());
         }
 
         return entity;
     }
 
-    private EntityCollection getInlineEntityCollection(Long sourceId,
+    private EntityCollection getInlineEntityCollection(String sourceId,
                                                        EdmEntityType sourceType,
                                                        EdmEntityType targetType,
                                                        QueryOptions queryOptions)
             throws ODataApplicationException {
-        AbstractSensorThingsEntityService< ? , ? > responseService = serviceRepository.getEntityService(targetType.getName());
+        AbstractSensorThingsEntityService<?, ?> responseService = serviceRepository.getEntityService(targetType.getName());
         EntityCollection entityCollection = responseService.getRelatedEntityCollection(sourceId,
-                                                                                       sourceType,
-                                                                                       queryOptions);
+                sourceType,
+                queryOptions);
 
         if (queryOptions.hasCountOption()) {
             long count = responseService.getRelatedEntityCollectionCount(sourceId, sourceType);
@@ -209,22 +202,22 @@ public class QueryOptionsHandler {
         if (queryOptions.hasExpandOption()) {
             entityCollection.forEach(entity -> {
                 entityAnnotator.annotateEntity(entity,
-                                               targetType,
-                                               queryOptions.getBaseURI(),
-                                               queryOptions.getSelectOption());
+                        targetType,
+                        queryOptions.getBaseURI(),
+                        queryOptions.getSelectOption());
                 String id = entity.getProperty(PROP_ID).getValue().toString();
                 handleExpandOption(entity,
-                                   queryOptions.getExpandOption(),
-                                   Long.parseLong(id),
-                                   targetType,
-                                   queryOptions.getBaseURI());
+                        queryOptions.getExpandOption(),
+                        id,
+                        targetType,
+                        queryOptions.getBaseURI());
             });
         } else {
             entityCollection.forEach(entity -> {
                 entityAnnotator.annotateEntity(entity,
-                                               targetType,
-                                               queryOptions.getBaseURI(),
-                                               queryOptions.getSelectOption());
+                        targetType,
+                        queryOptions.getBaseURI(),
+                        queryOptions.getSelectOption());
             });
         }
 

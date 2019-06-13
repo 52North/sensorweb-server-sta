@@ -87,7 +87,7 @@ public class ThingMapper extends AbstractMapper<PlatformEntity> {
     @Override
     public Entity createEntity(PlatformEntity thing) {
         Entity entity = new Entity();
-        entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, thing.getId()));
+        entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, thing.getIdentifier()));
         addDescription(entity, thing);
         addName(entity, thing);
 

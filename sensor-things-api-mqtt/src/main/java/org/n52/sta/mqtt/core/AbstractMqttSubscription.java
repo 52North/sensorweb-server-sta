@@ -81,11 +81,11 @@ public abstract class AbstractMqttSubscription {
      * @return Topic to be posted to. May be null if Entity does not match this
      * subscription.
      */
-    public String checkSubscription(Entity entity, Map<String, Set<Long>> relatedEntities, Set<String> differenceMap) {
+    public String checkSubscription(Entity entity, Map<String, Set<String>> relatedEntities, Set<String> differenceMap) {
         return matches(entity, relatedEntities, differenceMap) ? topic : null;
     }
 
-    public abstract boolean matches(Entity entity, Map<String, Set<Long>> collections, Set<String> differenceMap);
+    public abstract boolean matches(Entity entity, Map<String, Set<String>> collections, Set<String> differenceMap);
 
     public String getTopic() {
         return topic;

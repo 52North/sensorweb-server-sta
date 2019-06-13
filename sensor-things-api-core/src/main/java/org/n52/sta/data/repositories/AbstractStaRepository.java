@@ -33,13 +33,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.NoRepositoryBean;
 
+import java.util.List;
+import java.util.Optional;
+
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
  */
 @NoRepositoryBean
-public interface AbstractStaRepository<T extends AbstractStaEntity> extends JpaRepository<T, Long>, JpaSpecificationExecutor<T> {
-
+public interface AbstractStaRepository<T extends AbstractStaEntity> extends IdentifierRepository<T>, JpaRepository<T, Long>, JpaSpecificationExecutor<T> {
 
 }
 

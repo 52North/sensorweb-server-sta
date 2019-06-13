@@ -28,15 +28,12 @@
  */
 package org.n52.sta.mapping;
 
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
+
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DEFINITION;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ES_OBSERVED_PROPERTIES_NAME;
 import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_FQN;
-
-import java.util.Map;
-import java.util.Set;
 
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
@@ -51,6 +48,8 @@ import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static org.n52.sta.edm.provider.SensorThingsEdmConstants.ID;
+import static org.n52.sta.edm.provider.SensorThingsEdmConstants.ID_ANNOTATION;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
@@ -64,7 +63,7 @@ public class ObservedPropertyMapper extends AbstractMapper<PhenomenonEntity> {
     @Override
     public Entity createEntity(PhenomenonEntity observedProperty) {
         Entity entity = new Entity();
-        entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, observedProperty.getId()));
+        entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, observedProperty.getStaIdentifier()));
         addNameDescriptionProperties(entity, observedProperty);
         entity.addProperty(new Property(null, PROP_DEFINITION, ValueType.PRIMITIVE, observedProperty.getIdentifier()));
 
@@ -81,12 +80,22 @@ public class ObservedPropertyMapper extends AbstractMapper<PhenomenonEntity> {
     @Override
     public ObservablePropertyEntity createEntity(Entity entity) {
         ObservablePropertyEntity phenomenon = new ObservablePropertyEntity();
-        setId(phenomenon, entity);
+        setStaIdentifier(phenomenon, entity);
         setIdentifier(phenomenon, entity);
         setName(phenomenon, entity);
         setDescription(phenomenon, entity);
         setDatastreams(phenomenon, entity);
         return phenomenon;
+    }
+
+    protected void setStaIdentifier(PhenomenonEntity idEntity, Entity entity) {
+        if (checkProperty(entity, ID)) {
+            idEntity.setStaIdentifier(getPropertyValue(entity, ID).toString());
+        } else if (checkProperty(entity, ID_ANNOTATION)) {
+            idEntity.setStaIdentifier(getPropertyValue(entity, ID_ANNOTATION).toString());
+        } else {
+            idEntity.setStaIdentifier(UUID.randomUUID().toString());
+        }
     }
 
     @Override

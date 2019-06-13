@@ -64,13 +64,18 @@ public class HistoricalLocationEntityCrudRequestHandler extends AbstractEntityCr
     }
 
     @Override
-    protected void handleDeleteEntityRequest(Long id) throws ODataApplicationException {
+    protected void handleDeleteEntityRequest(String id) throws ODataApplicationException {
         getEntityService().delete(id);
     }
 
     @Override
     protected AbstractMapper<HistoricalLocationEntity> getMapper() {
         return mapper;
+    }
+
+    @Override
+    public EntityTypes getType() {
+        return EntityTypes.HistoricalLocation;
     }
 
     private AbstractSensorThingsEntityService<?, HistoricalLocationEntity> getEntityService() {

@@ -51,7 +51,7 @@ import org.springframework.data.jpa.domain.Specification;
  */
 public class ThingQuerySpecifications extends EntityQuerySpecifications<PlatformEntity> {
 
-    public Specification<PlatformEntity> withRelatedLocationIdentfier(final String locationIdentifier) {
+    public Specification<PlatformEntity> withRelatedLocationIdentifier(final String locationIdentifier) {
         return (root, query, builder) -> {
             final Join<PlatformEntity, LocationEntity> join =
                     root.join(PlatformEntity.PROPERTY_LOCATIONS, JoinType.INNER);

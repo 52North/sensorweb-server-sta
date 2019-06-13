@@ -79,7 +79,7 @@ public class MqttEntitySubscriptionHandler extends AbstractEntityRequestHandler<
         Entity responseEntity = navigationResolver.resolveSimpleEntityRequest(uriResourceEntitySet);
 
         //TODO ensure Long typecasting
-        return new MqttEntitySubscription((Long) responseEntity.getProperty(PROP_ID).getValue(),
+        return new MqttEntitySubscription(responseEntity.getProperty(PROP_ID).getValue().toString(),
                 uriResourceEntitySet.getEntitySet(), uriResourceEntitySet.getEntityType(), topic, queryOptions);
     }
 
@@ -88,7 +88,7 @@ public class MqttEntitySubscriptionHandler extends AbstractEntityRequestHandler<
         UriResource lastSegment = resourcePaths.get(resourcePaths.size() - 1);
         Entity responseEntity = navigationResolver.resolveComplexEntityRequest(lastSegment, requestParams);
 
-        return new MqttEntitySubscription((Long) responseEntity.getProperty(PROP_ID).getValue(),
+        return new MqttEntitySubscription(responseEntity.getProperty(PROP_ID).getValue().toString(),
                 requestParams.getTargetEntitySet(), requestParams.getTargetEntitySet().getEntityType(), topic, queryOptions);
     }
 

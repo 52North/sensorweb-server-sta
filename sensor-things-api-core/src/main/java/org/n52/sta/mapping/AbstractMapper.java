@@ -28,23 +28,6 @@
  */
 package org.n52.sta.mapping;
 
-import static org.n52.sta.edm.provider.SensorThingsEdmConstants.ID;
-import static org.n52.sta.edm.provider.SensorThingsEdmConstants.ID_ANNOTATION;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DEFINITION;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DESCRIPTION;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_NAME;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PHENOMENON_TIME;
-import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ES_DATASTREAMS_NAME;
-
-import java.sql.Timestamp;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
 import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
@@ -58,7 +41,6 @@ import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.HibernateRelations.HasDescription;
 import org.n52.series.db.beans.HibernateRelations.HasName;
 import org.n52.series.db.beans.HibernateRelations.HasPhenomenonTime;
-import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.StaRelations;
 import org.n52.shetland.ogc.gml.time.Time;
@@ -66,6 +48,14 @@ import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.sql.Timestamp;
+import java.util.*;
+
+import static org.n52.sta.edm.provider.SensorThingsEdmConstants.ID;
+import static org.n52.sta.edm.provider.SensorThingsEdmConstants.ID_ANNOTATION;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.*;
+import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ES_DATASTREAMS_NAME;
 
 public abstract class AbstractMapper<T> {
 
@@ -166,6 +156,8 @@ public abstract class AbstractMapper<T> {
             idEntity.setIdentifier(getPropertyValue(entity, ID).toString());
         } else if (checkProperty(entity, ID_ANNOTATION)) {
             idEntity.setIdentifier(getPropertyValue(entity, ID_ANNOTATION).toString());
+        } else {
+            idEntity.setIdentifier(UUID.randomUUID().toString());
         }
     }
 
@@ -284,7 +276,7 @@ public abstract class AbstractMapper<T> {
      * Create {@link Time} from {@link DateTime}s
      *
      * @param start Start {@link DateTime}
-     * @param end End {@link DateTime}
+     * @param end   End {@link DateTime}
      * @return Resulting {@link Time}
      */
     protected Time createTime(DateTime start, DateTime end) {

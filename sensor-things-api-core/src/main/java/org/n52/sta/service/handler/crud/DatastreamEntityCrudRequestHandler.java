@@ -65,13 +65,18 @@ public class DatastreamEntityCrudRequestHandler extends AbstractEntityCrudReques
     }
 
     @Override
-    protected void handleDeleteEntityRequest(Long id) throws ODataApplicationException {
+    protected void handleDeleteEntityRequest(String id) throws ODataApplicationException {
         getEntityService().delete(id);
     }
 
     @Override
     protected AbstractMapper<DatastreamEntity> getMapper() {
         return mapper;
+    }
+
+    @Override
+    public EntityTypes getType() {
+        return EntityTypes.Datastream;
     }
 
     private AbstractSensorThingsEntityService<?, DatastreamEntity> getEntityService() {

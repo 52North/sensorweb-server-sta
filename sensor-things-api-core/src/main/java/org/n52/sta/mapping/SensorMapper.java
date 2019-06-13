@@ -71,7 +71,7 @@ public class SensorMapper extends AbstractMapper<ProcedureEntity> {
 
     public Entity createEntity(ProcedureEntity sensor) {
         Entity entity = new Entity();
-        entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, sensor.getId()));
+        entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, sensor.getIdentifier()));
         addNameDescriptionProperties(entity, sensor);
         entity.addProperty(new Property(null, PROP_ENCODINGTYPE, ValueType.PRIMITIVE, checkQueryEncodingType(sensor.getFormat().getFormat())));
         String metadata = "metadata";

@@ -46,15 +46,15 @@ import org.n52.sta.service.query.QueryOptions;
  */
 public class MqttEntitySubscription extends AbstractMqttSubscription {
 
-    private Long entityId;
+    private String entityId;
 
-    public MqttEntitySubscription(Long entityId, EdmEntitySet entitySet, EdmEntityType entityType, String topic, QueryOptions queryOptions) {
+    public MqttEntitySubscription(String entityId, EdmEntitySet entitySet, EdmEntityType entityType, String topic, QueryOptions queryOptions) {
         super(topic, queryOptions, entityType, entitySet);
         this.entityId = entityId;
     }
 
     @Override
-    public boolean matches(Entity entity, Map<String, Set<Long>> collections, Set<String> differenceMap) {
+    public boolean matches(Entity entity, Map<String, Set<String>> collections, Set<String> differenceMap) {
         // Check type and fail-fast on type mismatch
         if (!(entity.getType().equals(entityTypeName))) {
             return false;

@@ -28,20 +28,6 @@
  */
 package org.n52.sta.data.service;
 
-import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_NAME;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.OptionalLong;
-import java.util.Set;
-
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
-
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
@@ -54,7 +40,6 @@ import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.ObservablePropertyEntity;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
-import org.n52.sta.data.query.ObservedPropertyQuerySpecifications;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.PhenomenonRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
@@ -64,21 +49,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
+import java.util.*;
+
+import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_NAME;
+
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- *
  */
 @Component
 public class ObservedPropertyService extends AbstractSensorThingsEntityService<PhenomenonRepository, PhenomenonEntity> {
 
-    private ObservedPropertyMapper mapper;
+    private final static DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
 
     @Autowired
     private DatastreamRepository datastreamRepository;
 
-    private final static ObservedPropertyQuerySpecifications oQS = new ObservedPropertyQuerySpecifications();
-
-    private final static DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
+    private ObservedPropertyMapper mapper;
 
     public ObservedPropertyService(PhenomenonRepository repository, ObservedPropertyMapper mapper) {
         super(repository);
@@ -99,41 +88,41 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
     }
 
     @Override
-    public Entity getEntity(Long id) {
-        Optional<PhenomenonEntity> entity = getRepository().findById(id);
+    public Entity getEntity(String id) {
+        Optional<PhenomenonEntity> entity = getRepository().findByIdentifier(id);
         return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
 
     @Override
-    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType, QueryOptions queryOptions) {
+    public EntityCollection getRelatedEntityCollection(String sourceId, EdmEntityType sourceEntityType, QueryOptions queryOptions) {
         return null;
     }
 
     @Override
-    public boolean existsEntity(Long id) {
-        return getRepository().existsById(id);
+    public boolean existsEntity(String id) {
+        return getRepository().existsByIdentifier(id);
     }
 
     @Override
-    public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
+    public boolean existsRelatedEntity(String sourceId, EdmEntityType sourceEntityType) {
         return this.existsRelatedEntity(sourceId, sourceEntityType, null);
     }
 
-    private Specification<PhenomenonEntity> relatedEntitySpecification(Long datastreamId, Long obsPropId) {
+    private Specification<PhenomenonEntity> relatedEntitySpecification(String datastreamId, String obsPropId) {
         return (root, query, builder) -> {
             Subquery<PhenomenonEntity> sq = query.subquery(PhenomenonEntity.class);
             Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
             Join<DatastreamEntity, PhenomenonEntity> join = datastream.join(DatastreamEntity.PROPERTY_OBSERVABLE_PROPERTY);
-            sq.select(join).where(builder.equal(datastream.get(DescribableEntity.PROPERTY_ID), datastreamId));
+            sq.select(join).where(builder.equal(datastream.get(DescribableEntity.PROPERTY_IDENTIFIER), datastreamId));
             if (obsPropId != null) {
-                return builder.and(builder.in(root).value(sq), builder.equal(root.get(DescribableEntity.PROPERTY_ID), obsPropId));
+                return builder.and(builder.in(root).value(sq), builder.equal(root.get(DescribableEntity.PROPERTY_IDENTIFIER), obsPropId));
             }
             return builder.in(root).value(sq);
         };
     }
 
     @Override
-    public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+    public boolean existsRelatedEntity(String sourceId, EdmEntityType sourceEntityType, String targetId) {
         switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
             case "iot.Datastream": {
 //                BooleanExpression filter = oQS.withDatastream(sourceId);
@@ -148,33 +137,25 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
     }
 
     @Override
-    public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
+    public Optional<String> getIdForRelatedEntity(String sourceId, EdmEntityType sourceEntityType) {
         return this.getIdForRelatedEntity(sourceId, sourceEntityType, null);
     }
 
     @Override
-    public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+    public Optional<String> getIdForRelatedEntity(String sourceId, EdmEntityType sourceEntityType, String targetId) {
         Optional<PhenomenonEntity> sensor = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
-        if (sensor.isPresent()) {
-            return OptionalLong.of(sensor.get().getId());
-        } else {
-            return OptionalLong.empty();
-        }
+        return sensor.map(phenomenonEntity -> Optional.of(phenomenonEntity.getIdentifier())).orElseGet(Optional::empty);
     }
 
     @Override
-    public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
+    public Entity getRelatedEntity(String sourceId, EdmEntityType sourceEntityType) {
         return this.getRelatedEntity(sourceId, sourceEntityType, null);
     }
 
     @Override
-    public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+    public Entity getRelatedEntity(String sourceId, EdmEntityType sourceEntityType, String targetId) {
         Optional<PhenomenonEntity> entity = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
-        if (entity.isPresent()) {
-            return mapper.createEntity(entity.get());
-        } else {
-            return null;
-        }
+        return entity.map(phenomenonEntity -> mapper.createEntity(phenomenonEntity)).orElse(null);
     }
 
     @Override
@@ -192,12 +173,12 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
      * sourceEntity from Database. Returns empty if Entity is not found or
      * Entities are not related.
      *
-     * @param sourceId Id of the Source Entity
+     * @param sourceId         Id of the Source Entity
      * @param sourceEntityType Type of the Source Entity
-     * @param targetId Id of the Entity to be retrieved
+     * @param targetId         Id of the Entity to be retrieved
      * @return Optional<PhenomenonEntity> Requested Entity
      */
-    private Optional<PhenomenonEntity> getRelatedEntityRaw(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+    private Optional<PhenomenonEntity> getRelatedEntityRaw(String sourceId, EdmEntityType sourceEntityType, String targetId) {
         switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
             case "iot.Datastream": {
                 break;
@@ -257,23 +238,23 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
     }
 
     @Override
-    protected PhenomenonEntity update(PhenomenonEntity entity) throws ODataApplicationException {
+    protected PhenomenonEntity update(PhenomenonEntity entity) {
         return getRepository().save(getAsPhenomenonEntity(entity));
     }
 
     @Override
-    public void delete(Long id) throws ODataApplicationException {
-        if (getRepository().existsById(id)) {
+    public void delete(String id) throws ODataApplicationException {
+        if (getRepository().existsByIdentifier(id)) {
             // delete datastreams
-            datastreamRepository.findAll(dQS.withObservedProperty(id)).forEach(d -> {
+            datastreamRepository.findAll(dQS.withObservedPropertyIdentifier(id)).forEach(d -> {
                 try {
-                    getDatastreamService().delete(d.getId());
+                    getDatastreamService().delete(d.getIdentifier());
                 } catch (ODataApplicationException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
             });
-            getRepository().deleteById(id);
+            getRepository().deleteByIdentifier(id);
         } else {
             throw new ODataApplicationException("Entity not found.", HttpStatusCode.NOT_FOUND.getStatusCode(),
                     Locale.ROOT);
@@ -281,8 +262,16 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
     }
 
     @Override
-    protected void delete(PhenomenonEntity entity) throws ODataApplicationException {
+    protected void delete(PhenomenonEntity entity) {
         getRepository().deleteById(entity.getId());
+    }
+
+    @Override
+    protected PhenomenonEntity createOrUpdate(PhenomenonEntity entity) throws ODataApplicationException {
+        if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
+            return update(entity, HttpMethod.PATCH);
+        }
+        return create(entity);
     }
 
     private PhenomenonEntity getAsPhenomenonEntity(PhenomenonEntity observableProperty) {
@@ -300,18 +289,17 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
      * @see org.n52.sta.mapping.AbstractMapper#getRelatedCollections(java.lang.Object)
      */
     @Override
-    public Map<String, Set<Long>> getRelatedCollections(Object rawObject) {
-        Map<String, Set<Long>> collections = new HashMap<>();
-        Set<Long> datastreamIds = new HashSet<>();
+    public Map<String, Set<String>> getRelatedCollections(Object rawObject) {
+        Map<String, Set<String>> collections = new HashMap<>();
+        Set<String> datastreamIds = new HashSet<>();
         PhenomenonEntity entity = (PhenomenonEntity) rawObject;
 
         Iterable<DatastreamEntity> observations = datastreamRepository
-                .findAll(dQS.withObservedProperty(entity.getId()));
+                .findAll(dQS.withObservedPropertyIdentifier(entity.getIdentifier()));
         observations.forEach((o) -> {
-            datastreamIds.add(o.getId());
+            datastreamIds.add(o.getIdentifier());
         });
         collections.put(ET_DATASTREAM_NAME, datastreamIds);
-
         return collections;
     }
 }

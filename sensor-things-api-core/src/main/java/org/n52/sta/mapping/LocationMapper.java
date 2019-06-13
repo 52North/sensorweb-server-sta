@@ -68,7 +68,7 @@ public class LocationMapper extends AbstractLocationGeometryMapper<LocationEntit
 
     public Entity createEntity(LocationEntity location) {
         Entity entity = new Entity();
-        entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, location.getId()));
+        entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, location.getIdentifier()));
         addDescription(entity, location);
         addName(entity, location);
         addLocation(entity, location);

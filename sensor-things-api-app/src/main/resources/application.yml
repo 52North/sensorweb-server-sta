@@ -16,7 +16,7 @@ spring:
     platform: postgres
     username: postgres
     password: postgres
-    url: jdbc:postgresql://localhost:5432/sta
+    url: jdbc:postgresql://localhost:5432/sta_test
     initialization-mode: always
   jpa:
     properties:
@@ -52,9 +52,10 @@ mqtt:
 logging:
   level:
     # root: TRACE
-    org.opengis.cite: TRACE
-    org.apache.coyote.http11.Http11InputBuffer: TRACE
+#    org.opengis.cite: TRACE
+#    org.apache.coyote.http11.Http11InputBuffer: TRACE
     org.hibernate: INFO
     org.hibernate.type: INFO
-    org.hibernate.SQL: DEBUG
+#    org.hibernate.SQL: DEBUG
     io.moquette: TRACE
+    org.n52: TRACE

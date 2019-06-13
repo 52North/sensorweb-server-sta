@@ -28,13 +28,9 @@
  */
 package org.n52.sta.mqtt.core;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
+import io.moquette.broker.Server;
+import io.netty.buffer.ByteBuf;
+import io.netty.handler.codec.mqtt.*;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
 import org.apache.olingo.commons.api.edmx.EdmxReference;
@@ -42,6 +38,8 @@ import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.n52.sta.data.STAEventHandler;
+import org.n52.sta.data.service.AbstractSensorThingsEntityService;
+import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.service.serializer.PayloadSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,24 +47,18 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import io.moquette.broker.Server;
-import io.netty.buffer.ByteBuf;
-import io.netty.handler.codec.mqtt.MqttFixedHeader;
-import io.netty.handler.codec.mqtt.MqttMessageType;
-import io.netty.handler.codec.mqtt.MqttPublishMessage;
-import io.netty.handler.codec.mqtt.MqttPublishVariableHeader;
-import io.netty.handler.codec.mqtt.MqttQoS;
-import org.n52.sta.data.service.AbstractSensorThingsEntityService;
-import org.n52.sta.data.service.EntityServiceRepository;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- *
  */
 @Component
 public class MqttEventHandler implements STAEventHandler, InitializingBean {
 
+    static final String internalClientId = "POC";
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttEventHandler.class);
+    private final MqttFixedHeader mqttFixedHeader = new MqttFixedHeader(MqttMessageType.PUBLISH, false, MqttQoS.AT_LEAST_ONCE, false, 0);
 
     @Autowired
     private MqttUtil config;
@@ -82,13 +74,7 @@ public class MqttEventHandler implements STAEventHandler, InitializingBean {
 
     @Autowired
     private EntityServiceRepository serviceRepository;
-
-    static final String internalClientId = "POC";
-
     private Map<AbstractMqttSubscription, HashSet<String>> subscriptions = new HashMap<AbstractMqttSubscription, HashSet<String>>();
-
-    private final MqttFixedHeader mqttFixedHeader = new MqttFixedHeader(MqttMessageType.PUBLISH, false, MqttQoS.AT_LEAST_ONCE, false, 0);
-
     private ServiceMetadata edm;
 
     /*
@@ -100,7 +86,7 @@ public class MqttEventHandler implements STAEventHandler, InitializingBean {
     @Override
     public void handleEvent(Object rawObject, Set<String> differenceMap) {
         Entity entity;
-        Map<String, Set<Long>> collections;
+        Map<String, Set<String>> collections;
 
         //Map beans Object into Olingo Entity
         //Fail-fast if nobody is subscribed to this Type
@@ -108,10 +94,10 @@ public class MqttEventHandler implements STAEventHandler, InitializingBean {
             return;
         } else {
             entity = config.getMapper(rawObject.getClass().getName()).createEntity(rawObject);
-            AbstractSensorThingsEntityService< ?, ?> responseService
+            AbstractSensorThingsEntityService<?, ?> responseService
                     = serviceRepository.getEntityService(
-                            MqttUtil.getEntityTypes()
-                                    .get(rawObject.getClass().getName()));
+                    MqttUtil.getEntityTypes()
+                            .get(rawObject.getClass().getName()));
 
             collections = responseService.getRelatedCollections(rawObject);
         }
@@ -136,7 +122,8 @@ public class MqttEventHandler implements STAEventHandler, InitializingBean {
                     LOGGER.debug("Error while serializing payload.", ex);
                 }
             }
-        };
+        }
+        ;
     }
 
     public void addSubscription(AbstractMqttSubscription subscription, String clientId) {

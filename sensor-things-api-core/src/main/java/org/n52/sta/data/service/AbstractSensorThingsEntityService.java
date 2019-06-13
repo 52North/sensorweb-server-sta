@@ -33,17 +33,6 @@
  */
 package org.n52.sta.data.service;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.OptionalLong;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Root;
-
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
@@ -56,18 +45,12 @@ import org.apache.olingo.server.api.uri.UriInfoResource;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.queryoption.OrderByItem;
 import org.apache.olingo.server.api.uri.queryoption.OrderByOption;
-import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
-import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
-import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
-import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitor;
-import org.apache.olingo.server.api.uri.queryoption.expression.Literal;
-import org.apache.olingo.server.api.uri.queryoption.expression.Member;
-import org.apache.olingo.server.api.uri.queryoption.expression.MethodKind;
-import org.apache.olingo.server.api.uri.queryoption.expression.UnaryOperatorKind;
+import org.apache.olingo.server.api.uri.queryoption.expression.*;
 import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.data.OffsetLimitBasedPageRequest;
+import org.n52.sta.data.repositories.IdentifierRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.service.query.FilterExpressionVisitor;
 import org.n52.sta.service.query.QueryOptions;
@@ -79,12 +62,16 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
+import java.util.*;
+import java.util.stream.Collectors;
+
 /**
  * Interface for requesting Sensor Things entities
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
-public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<?, Long>, S extends IdEntity> {
+public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepository<S>, S extends IdEntity> {
 
     @Autowired
     private EntityServiceRepository serviceRepository;
@@ -106,7 +93,6 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
      * Requests the full EntityCollection
      *
      * @param queryOptions {@link QueryOptions}
-     *
      * @return the full EntityCollection
      * @throws ODataApplicationException if the queryOptions are invalid
      */
@@ -116,140 +102,118 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
      * Requests the EntityCollection that is related to a single Entity with the
      * given ID and type
      *
-     * @param sourceId
-     *            the ID of the Entity the EntityCollection is related to
-     * @param sourceEntityType
-     *            EntityType of the related Entity
-     * @param queryOptions {@link QueryOptions}
+     * @param sourceId         the ID of the Entity the EntityCollection is related to
+     * @param sourceEntityType EntityType of the related Entity
+     * @param queryOptions     {@link QueryOptions}
      * @return the EntityCollection that is related to the given Entity
      * @throws ODataApplicationException if the queryOptions are invalid
      */
-    public abstract EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType,
-            QueryOptions queryOptions) throws ODataApplicationException;
+    public abstract EntityCollection getRelatedEntityCollection(String sourceId, EdmEntityType sourceEntityType,
+                                                                QueryOptions queryOptions) throws ODataApplicationException;
 
     /**
      * Request the count for the EntityCollection that is related to a single
      * Entity with the given ID and type
      *
-     * @param sourceId
-     *            the ID of the Entity the EntityCollection is related to
-     * @param sourceEntityType
-     *            EntityType of the related Entity
+     * @param sourceId         the ID of the Entity the EntityCollection is related to
+     * @param sourceEntityType EntityType of the related Entity
      * @return the count of related entities
      */
-    public long getRelatedEntityCollectionCount(Long sourceId, EdmEntityType sourceEntityType) {
+    public long getRelatedEntityCollectionCount(String sourceId, EdmEntityType sourceEntityType) {
         return 0;
     }
 
     /**
      * Requests the Entity in accordance to a given ID
      *
-     * @param id
-     *            the ID to determine the Entity for
+     * @param id the ID to determine the Entity for
      * @return the Entity that is conform to the given key predicates
      */
-    public abstract Entity getEntity(Long id);
+    public abstract Entity getEntity(String id);
 
     /**
      * Requests the ID for an Entity that is related to a single Entity with the
      * given ID
      *
-     * @param sourceId
-     *            the ID for the Entity the requested Entity is related to
-     * @param sourceEntityType
-     *            EntityType of the related Entity
+     * @param sourceId         the ID for the Entity the requested Entity is related to
+     * @param sourceEntityType EntityType of the related Entity
      * @return the ID for the Entity that is related to the Entity with the
-     *         given Id
+     * given Id
      */
-    public abstract OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType);
+    public abstract Optional<String> getIdForRelatedEntity(String sourceId, EdmEntityType sourceEntityType);
 
     /**
      * Requests the ID for the Entity that is related to a single Entity with a
      * given ID and in accordance to a given ID
      *
-     * @param sourceId
-     *            the ID for the Entity the requested Entity is related to
-     * @param sourceEntityType
-     *            EntityType of the related Entity
-     * @param targetId
-     *            the ID for the requested Entity
+     * @param sourceId         the ID for the Entity the requested Entity is related to
+     * @param sourceEntityType EntityType of the related Entity
+     * @param targetId         the ID for the requested Entity
      * @return the Entity that is related to the given Entity and is conform to
-     *         the given ID
+     * the given ID
      */
-    public abstract OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId);
+    public abstract Optional<String> getIdForRelatedEntity(String sourceId, EdmEntityType sourceEntityType, String targetId);
 
     /**
      * Checks if an Entity exists in accordance to a given list of key
      * predicates
      *
-     * @param id
-     *            the ID to check the existence of an Entity for
-     *
+     * @param id the ID to check the existence of an Entity for
      * @return true if an Entity that is conform to the given key predicates
-     *         exists
+     * exists
      */
-    public boolean existsEntity(Long id) {
-        return getRepository().existsById(id);
+    public boolean existsEntity(String id) {
+        return getRepository().existsByIdentifier(id);
     }
 
     /**
      * Checks if an Entity exists that is related to a single Entity of the
      * given EntityType
      *
-     * @param sourceId
-     *            ID of the related Entity
-     * @param sourceEntityType
-     *            EntityType of the related Entity
+     * @param sourceId         ID of the related Entity
+     * @param sourceEntityType EntityType of the related Entity
      * @return true if an Entity exists that is related to a single Entity of
-     *         the given EntityType and with the given KeyPredicates
+     * the given EntityType and with the given KeyPredicates
      */
-    public abstract boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType);
+    public abstract boolean existsRelatedEntity(String sourceId, EdmEntityType sourceEntityType);
 
     /**
      * Checks if an Entity exists that is conform to given KeyPredicates and is
      * related to a single Entity of the given EntityType and with the given
      * KeyPredicates in accordance
      *
-     * @param sourceId
-     *            ID of the related Entity
-     * @param sourceEntityType
-     *            EntityType of the related Entity
-     * @param targetId
-     *            ID of the requested Entity
+     * @param sourceId         ID of the related Entity
+     * @param sourceEntityType EntityType of the related Entity
+     * @param targetId         ID of the requested Entity
      * @return true if an Entity exists that is conform to the given
-     *         KeyPredicates and is related to a single Entity of the given
-     *         EntityType and with the given KeyPredicates
+     * KeyPredicates and is related to a single Entity of the given
+     * EntityType and with the given KeyPredicates
      */
-    public abstract boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId);
+    public abstract boolean existsRelatedEntity(String sourceId, EdmEntityType sourceEntityType, String targetId);
 
     /**
      * Requests the Entity that is related to a single Entity with a given ID
      * and type
      *
-     * @param sourceId
-     *            ID of the related Entity
-     * @param sourceEntityType
-     *            EntityType of the related Entity
+     * @param sourceId         ID of the related Entity
+     * @param sourceEntityType EntityType of the related Entity
      * @return the Entity that is related to the Entity with given ID and type
      */
-    public abstract Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType);
+    public abstract Entity getRelatedEntity(String sourceId, EdmEntityType sourceEntityType);
 
     /**
      * Requests the Entity that is related to a single Entity with a given ID
      * and type and that is conform to a given ID
      *
-     * @param sourceId
-     *            ID of the related Entity
-     * @param sourceEntityType
-     *            EntityType of the related Entity
-     * @param targetId
-     *            ID of the requested Entity
+     * @param sourceId         ID of the related Entity
+     * @param sourceEntityType EntityType of the related Entity
+     * @param targetId         ID of the requested Entity
      * @return the Entity that is related to the given Entity and is conform to
-     *         the given ID
+     * the given ID
      */
-    public abstract Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId);
+    public abstract Entity getRelatedEntity(String sourceId, EdmEntityType sourceEntityType, String targetId);
 
-     /**
+    /**
      * Gets a Map that holds definitions for all related Entities of the
      * requested Entity. In this Map K represents the EntityType and V the Set
      * of IDs for those Entities that has a Collection the requested Entity is
@@ -259,7 +223,7 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
      * @return Map with definitions for all Entities the requested Entity is
      * related to
      */
-    public abstract Map<String, Set<Long>> getRelatedCollections(Object rawObject);
+    public abstract Map<String, Set<String>> getRelatedCollections(Object rawObject);
 
     /**
      * Get the {@link JpaRepository} for this
@@ -275,7 +239,6 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
      * Query for the number of element.
      *
      * @param queryOptions {@link QueryOptions}
-     *
      * @return the existing elements
      * @throws ODataApplicationException if the queryOptions could not be parsed.
      */
@@ -284,7 +247,7 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
     /**
      * Constructs QueryDSL FilterPredicate based on given queryOptions.
      *
-     * @param entityClass Class of the requested Entity
+     * @param entityClass  Class of the requested Entity
      * @param queryOptions QueryOptions Object
      * @return Predicate based on FilterOption from queryOptions
      * @throws ODataApplicationException if the queryOptions are invalid
@@ -322,16 +285,26 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
     protected abstract S update(S entity) throws ODataApplicationException;
 
     @Transactional(rollbackFor = Exception.class)
-    public abstract void delete(Long id) throws ODataApplicationException;
+    public abstract void delete(String id) throws ODataApplicationException;
 
     protected abstract void delete(S entity) throws ODataApplicationException;
 
-    protected S createOrUpdate(S entity) throws ODataApplicationException {
-        if (entity.getId() != null && getRepository().existsById(entity.getId())) {
-            return update(entity, HttpMethod.PATCH);
-        }
-        return create(entity);
-    }
+    /**
+     * Must be implemented by each Service individually as S is not known to have identifier here.
+     * Example Code to be pasted into each Service below
+     *
+     * @param entity entity to be persisted or updated
+     * @return updated entity
+     * @throws ODataApplicationException if an error occurred
+     */
+    protected abstract S createOrUpdate(S entity) throws ODataApplicationException;
+//    protected S createOrUpdate(S entity) throws ODataApplicationException {
+//        if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
+//            return update(entity, HttpMethod.PATCH);
+//        }
+//        return create(entity);
+
+//    }
 
     protected void checkInlineDatastream(DatastreamEntity datastream) throws ODataApplicationException {
         if (datastream.getId() == null || datastream.isSetName() || datastream.isSetDescription() || datastream.isSetUnit()) {
@@ -354,8 +327,7 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
     /**
      * Create {@link PageRequest}
      *
-     * @param queryOptions
-     *            {@link QueryOptions} to create {@link PageRequest}
+     * @param queryOptions {@link QueryOptions} to create {@link PageRequest}
      * @return {@link PageRequest} of type {@link OffsetLimitBasedPageRequest}
      */
     protected OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions) {
@@ -384,8 +356,7 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
     /**
      * Check property for sorting if different in database
      *
-     * @param property
-     *            the sorting property to check
+     * @param property the sorting property to check
      * @return the databse property name
      */
     public String checkPropertyName(String property) {
@@ -397,9 +368,9 @@ public abstract class AbstractSensorThingsEntityService<T extends JpaRepository<
      */
     private static final class ExpressionGenerator implements ExpressionVisitor<String> {
 
-        private AbstractSensorThingsEntityService<?,?> service;
+        private AbstractSensorThingsEntityService<?, ?> service;
 
-        public ExpressionGenerator(AbstractSensorThingsEntityService<?,?> service) {
+        public ExpressionGenerator(AbstractSensorThingsEntityService<?, ?> service) {
             this.service = service;
         }
 

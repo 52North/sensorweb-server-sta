@@ -28,13 +28,6 @@
  */
 package org.n52.sta.data.service;
 
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.OptionalLong;
-import java.util.Set;
-
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
@@ -50,11 +43,7 @@ import org.n52.sta.data.query.DatasetQuerySpecifications;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.FeatureOfInterestQuerySpecifications;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
-import org.n52.sta.data.repositories.DataRepository;
-import org.n52.sta.data.repositories.DatasetRepository;
-import org.n52.sta.data.repositories.DatastreamRepository;
-import org.n52.sta.data.repositories.FeatureOfInterestRepository;
-import org.n52.sta.data.repositories.FormatRepository;
+import org.n52.sta.data.repositories.*;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.FeatureOfInterestMapper;
 import org.n52.sta.service.query.QueryOptions;
@@ -62,16 +51,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
+import java.util.*;
+
 /**
- *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- *
  */
 @Component
 public class FeatureOfInterestService
         extends AbstractSensorThingsEntityService<FeatureOfInterestRepository, AbstractFeatureEntity<?>> {
 
-    private FeatureOfInterestMapper mapper;
+    private final static FeatureOfInterestQuerySpecifications foiQS = new FeatureOfInterestQuerySpecifications();
 
     @Autowired
     private FormatRepository formatRepository;
@@ -85,7 +74,7 @@ public class FeatureOfInterestService
     @Autowired
     private DatastreamRepository datastreamRepository;
 
-    private final static FeatureOfInterestQuerySpecifications foiQS = new FeatureOfInterestQuerySpecifications();
+    private FeatureOfInterestMapper mapper;
 
     private ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
 
@@ -113,29 +102,29 @@ public class FeatureOfInterestService
     }
 
     @Override
-    public Entity getEntity(Long id) {
-        Optional<AbstractFeatureEntity<?>> entity = getRepository().findById(id);
+    public Entity getEntity(String id) {
+        Optional<AbstractFeatureEntity<?>> entity = getRepository().findByIdentifier(id);
         return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
 
     @Override
-    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType,
-            QueryOptions queryOptions) {
+    public EntityCollection getRelatedEntityCollection(String sourceId, EdmEntityType sourceEntityType,
+                                                       QueryOptions queryOptions) {
         return null;
     }
 
     @Override
-    public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
+    public boolean existsRelatedEntity(String sourceId, EdmEntityType sourceEntityType) {
         return this.existsRelatedEntity(sourceId, sourceEntityType, null);
     }
 
     @Override
-    public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+    public boolean existsRelatedEntity(String sourceId, EdmEntityType sourceEntityType, String targetId) {
         switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
             case "iot.Observation": {
-                Specification<AbstractFeatureEntity<?>> filter = foiQS.withObservation(sourceId);
+                Specification<AbstractFeatureEntity<?>> filter = foiQS.withObservationIdentifier(sourceId);
                 if (targetId != null) {
-                    filter = filter.and(foiQS.withId(targetId));
+                    filter = filter.and(foiQS.withIdentifier(targetId));
                 }
                 return getRepository().count(filter) > 0;
             }
@@ -145,33 +134,25 @@ public class FeatureOfInterestService
     }
 
     @Override
-    public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
+    public Optional<String> getIdForRelatedEntity(String sourceId, EdmEntityType sourceEntityType) {
         return this.getIdForRelatedEntity(sourceId, sourceEntityType, null);
     }
 
     @Override
-    public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+    public Optional<String> getIdForRelatedEntity(String sourceId, EdmEntityType sourceEntityType, String targetId) {
         Optional<AbstractFeatureEntity<?>> foi = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
-        if (foi.isPresent()) {
-            return OptionalLong.of(foi.get().getId());
-        } else {
-            return OptionalLong.empty();
-        }
+        return foi.map(abstractFeatureEntity -> Optional.of(abstractFeatureEntity.getIdentifier())).orElseGet(Optional::empty);
     }
 
     @Override
-    public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
+    public Entity getRelatedEntity(String sourceId, EdmEntityType sourceEntityType) {
         return this.getRelatedEntity(sourceId, sourceEntityType, null);
     }
 
     @Override
-    public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+    public Entity getRelatedEntity(String sourceId, EdmEntityType sourceEntityType, String targetId) {
         Optional<AbstractFeatureEntity<?>> feature = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
-        if (feature.isPresent()) {
-            return mapper.createEntity(feature.get());
-        } else {
-            return null;
-        }
+        return feature.map(abstractFeatureEntity -> mapper.createEntity(abstractFeatureEntity)).orElse(null);
     }
 
     /**
@@ -179,17 +160,17 @@ public class FeatureOfInterestService
      * sourceEntity from Database. Returns empty if Feature is not found or
      * Entities are not related.
      *
-     * @param sourceId Id of the Source Entity
+     * @param sourceId         Id of the Source Entity
      * @param sourceEntityType Type of the Source Entity
-     * @param targetId Id of the Entity to be retrieved
+     * @param targetId         Id of the Entity to be retrieved
      * @return Optional<FeatureEntity> Requested Entity
      */
-    private Optional<AbstractFeatureEntity<?>> getRelatedEntityRaw(Long sourceId, EdmEntityType sourceEntityType,
-            Long targetId) {
+    private Optional<AbstractFeatureEntity<?>> getRelatedEntityRaw(String sourceId, EdmEntityType sourceEntityType,
+                                                                   String targetId) {
         Specification<AbstractFeatureEntity<?>> filter;
         switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
             case "iot.Observation": {
-                filter = foiQS.withObservation(sourceId);
+                filter = foiQS.withObservationIdentifier(sourceId);
                 break;
             }
             default:
@@ -197,7 +178,7 @@ public class FeatureOfInterestService
         }
 
         if (targetId != null) {
-            filter = filter.and(foiQS.withId(targetId));
+            filter = filter.and(foiQS.withIdentifier(targetId));
         }
         return getRepository().findOne(filter);
     }
@@ -219,8 +200,8 @@ public class FeatureOfInterestService
 
     @Override
     public AbstractFeatureEntity<?> create(AbstractFeatureEntity<?> feature) {
-        if (feature.getId() != null && !feature.isSetName()) {
-            return getRepository().findById(feature.getId()).get();
+        if (feature.getIdentifier() != null && !feature.isSetName()) {
+            return getRepository().findByIdentifier(feature.getIdentifier()).get();
         }
         if (getRepository().existsByName(feature.getName())) {
             Iterable<AbstractFeatureEntity<?>> features = getRepository().findAll(foiQS.withName(feature.getName()));
@@ -234,7 +215,7 @@ public class FeatureOfInterestService
     }
 
     private AbstractFeatureEntity<?> alreadyExistsFeature(Iterable<AbstractFeatureEntity<?>> features,
-            AbstractFeatureEntity<?> feature) {
+                                                          AbstractFeatureEntity<?> feature) {
         for (AbstractFeatureEntity<?> f : features) {
             if (f.isSetGeometry() && feature.isSetGeometry() && f.getGeometry().equals(feature.getGeometry())
                     && f.getDescription().equals(feature.getDescription())) {
@@ -248,7 +229,7 @@ public class FeatureOfInterestService
     public AbstractFeatureEntity<?> update(AbstractFeatureEntity<?> entity, HttpMethod method)
             throws ODataApplicationException {
         if (HttpMethod.PATCH.equals(method)) {
-            Optional<AbstractFeatureEntity<?>> existing = getRepository().findById(entity.getId());
+            Optional<AbstractFeatureEntity<?>> existing = getRepository().findByIdentifier(entity.getIdentifier());
             if (existing.isPresent()) {
                 AbstractFeatureEntity<?> merged = mapper.merge(existing.get(), entity);
                 return getRepository().save(merged);
@@ -264,16 +245,16 @@ public class FeatureOfInterestService
     }
 
     @Override
-    protected AbstractFeatureEntity<?> update(AbstractFeatureEntity<?> entity) throws ODataApplicationException {
+    protected AbstractFeatureEntity<?> update(AbstractFeatureEntity<?> entity) {
         return getRepository().save(entity);
     }
 
     @Override
-    public void delete(Long id) throws ODataApplicationException {
-        if (getRepository().existsById(id)) {
+    public void delete(String id) throws ODataApplicationException {
+        if (getRepository().existsByIdentifier(id)) {
             // check observations
             deleteRelatedObservationsAndUpdateDatasets(id);
-            getRepository().deleteById(id);
+            getRepository().deleteByIdentifier(id);
         } else {
             throw new ODataApplicationException("Entity not found.", HttpStatusCode.NOT_FOUND.getStatusCode(),
                     Locale.ROOT);
@@ -282,13 +263,21 @@ public class FeatureOfInterestService
 
     @Override
     protected void delete(AbstractFeatureEntity<?> entity) throws ODataApplicationException {
-        getRepository().deleteById(entity.getId());
+        getRepository().deleteByIdentifier(entity.getIdentifier());
     }
 
-    private void deleteRelatedObservationsAndUpdateDatasets(Long featureId) {
+    @Override
+    protected AbstractFeatureEntity<?> createOrUpdate(AbstractFeatureEntity<?> entity) throws ODataApplicationException {
+        if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
+            return update(entity, HttpMethod.PATCH);
+        }
+        return create(entity);
+    }
+
+    private void deleteRelatedObservationsAndUpdateDatasets(String featureId) {
 
         // set dataset first/last to null
-        Iterable<DatasetEntity> datasets = datasetRepository.findAll(dQS.matchFeatures(Long.toString(featureId)));
+        Iterable<DatasetEntity> datasets = datasetRepository.findAll(dQS.matchFeatures(featureId));
         // update datasets
         datasets.forEach(d -> {
             d.setFirstObservation(null);
@@ -299,9 +288,9 @@ public class FeatureOfInterestService
             d.setLastValueAt(null);
             datasetRepository.saveAndFlush(d);
             // delete observations
-            dataRepository.deleteAll(dataRepository.findAll(oQS.withDataset(d.getId())));
+            dataRepository.deleteAll(dataRepository.findAll(oQS.withDataset(d.getIdentifier())));
             getRepository().flush();
-            datastreamRepository.findAll(dsQS.withDataset(d.getId())).forEach(ds -> {
+            datastreamRepository.findAll(dsQS.withDatasetIdentifier(d.getIdentifier())).forEach(ds -> {
                 ds.getDatasets().remove(d);
                 datastreamRepository.saveAndFlush(ds);
 
@@ -343,10 +332,10 @@ public class FeatureOfInterestService
      * @see org.n52.sta.mapping.AbstractMapper#getRelatedCollections(java.lang.Object)
      */
     @Override
-    public Map<String, Set<Long>> getRelatedCollections(Object rawObject) {
-        Map<String, Set<Long>> collections = new HashMap<>();
+    public Map<String, Set<String>> getRelatedCollections(Object rawObject) {
+        Map<String, Set<String>> collections = new HashMap<>();
 
-        AbstractFeatureEntity<?> entity = (AbstractFeatureEntity<?>) rawObject;
+//        AbstractFeatureEntity<?> entity = (AbstractFeatureEntity<?>) rawObject;
 
 //        Iterable<DataEntity<?>> observations = dataRepository.findAll(d.withId(entity.getId()));
 //        Set<Long> observationIds = new HashSet<>();

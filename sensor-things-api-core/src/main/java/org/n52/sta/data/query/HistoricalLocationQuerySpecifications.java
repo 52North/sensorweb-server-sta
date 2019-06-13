@@ -69,7 +69,7 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
     }
 
     @Override
-    public Specification<Long> getIdSubqueryWithFilter(Specification filter) {
+    public Specification<String> getIdSubqueryWithFilter(Specification filter) {
         return this.toSubquery(HistoricalLocationEntity.class, HistoricalLocationEntity.PROPERTY_IDENTIFIER, filter);
     }
 

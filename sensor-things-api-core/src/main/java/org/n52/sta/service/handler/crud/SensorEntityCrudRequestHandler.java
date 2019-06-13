@@ -65,13 +65,18 @@ public class SensorEntityCrudRequestHandler extends AbstractEntityCrudRequestHan
     }
 
     @Override
-    protected void handleDeleteEntityRequest(Long id) throws ODataApplicationException {
+    protected void handleDeleteEntityRequest(String id) throws ODataApplicationException {
             getEntityService().delete(id);
     }
 
     @Override
     protected AbstractMapper<ProcedureEntity> getMapper() {
         return mapper;
+    }
+
+    @Override
+    public EntityTypes getType() {
+        return EntityTypes.Sensor;
     }
 
     private AbstractSensorThingsEntityService<?, SensorEntity> getEntityService() {

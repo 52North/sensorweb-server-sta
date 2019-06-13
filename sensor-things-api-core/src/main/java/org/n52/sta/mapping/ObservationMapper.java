@@ -100,7 +100,7 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
     public Entity createEntity(DataEntity<?> observation) {
         Entity entity = new Entity();
 
-        entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, observation.getId()));
+        entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, observation.getIdentifier()));
 
         //TODO: urlencode whitespaces to allow for copy pasting into filter expression
         entity.addProperty(new Property(null, PROP_RESULT, ValueType.PRIMITIVE, this.getResult(observation).getBytes()));
@@ -226,7 +226,7 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
         addResult(observation, entity);
         return observation;
     }
-    
+
     protected void addPhenomenonTime(HasPhenomenonTime phenomenonTime, Entity entity) {
         if (checkProperty(entity, PROP_PHENOMENON_TIME)) {
            super.addPhenomenonTime(phenomenonTime, entity);

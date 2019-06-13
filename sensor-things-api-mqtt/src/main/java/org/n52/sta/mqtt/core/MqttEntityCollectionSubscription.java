@@ -49,21 +49,18 @@ public class MqttEntityCollectionSubscription extends AbstractMqttSubscription {
 
     private EdmEntityType sourceEntityType;
 
-    private Long sourceId;
-
-    private EdmEntitySet targetEntitySet;
+    private String sourceId;
 
     public MqttEntityCollectionSubscription(String topic, QueryOptions queryOption,
-            EdmEntityType sourceEntityType, Long sourceId, EdmEntitySet targetEntitySet,
+            EdmEntityType sourceEntityType, String sourceId, EdmEntitySet targetEntitySet,
             EdmEntityType entityType) {
         super(topic, queryOption, entityType, targetEntitySet);
         this.sourceEntityType = sourceEntityType;
         this.sourceId = sourceId;
-        this.targetEntitySet = targetEntitySet;
     }
 
     @Override
-    public boolean matches(Entity entity, Map<String, Set<Long>> collections, Set<String> differenceMap) {
+    public boolean matches(Entity entity, Map<String, Set<String>> collections, Set<String> differenceMap) {
         // Check type and fail-fast on type mismatch
         if (!(entity.getType().equals(entityTypeName))) {
             return false;
@@ -77,9 +74,9 @@ public class MqttEntityCollectionSubscription extends AbstractMqttSubscription {
 
         // Check if Entity belongs to collection of this Subscription
         if (collections != null) {
-            for (Entry<String, Set<Long>> collection : collections.entrySet()) {
+            for (Entry<String, Set<String>> collection : collections.entrySet()) {
                 if (collection.getKey().equals(sourceEntityType.getName())) {
-                    for (Long id : collection.getValue()) {
+                    for (String id : collection.getValue()) {
                         if (id.equals(sourceId)) {
                             return true;
                         }

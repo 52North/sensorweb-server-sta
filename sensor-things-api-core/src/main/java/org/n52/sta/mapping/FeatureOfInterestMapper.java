@@ -63,7 +63,7 @@ public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper<Abst
     @Override
     public Entity createEntity(AbstractFeatureEntity<?> feature) {
         Entity entity = new Entity();
-        entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, feature.getId()));
+        entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, feature.getIdentifier()));
         addNameDescriptionProperties(entity, feature);
         addGeometry(entity, feature);
         entity.setType(ET_FEATURE_OF_INTEREST_FQN.getFullQualifiedNameAsString());

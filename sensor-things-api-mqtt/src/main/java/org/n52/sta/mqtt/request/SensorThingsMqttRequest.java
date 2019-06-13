@@ -46,10 +46,6 @@ public class SensorThingsMqttRequest extends SensorThingsRequest {
 
     private String topic;
 
-    public SensorThingsMqttRequest() {
-        super();
-    }
-
     /**
      * @param topic the topic
      * @param resourcePaths list of {@link UriResource}
