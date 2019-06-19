@@ -86,6 +86,12 @@ public class MqttBroker {
     @Value("${mqtt.broker.persistence.enabled}")
     private Boolean MOQUETTE_PERSISTENCE_ENABLED;
 
+    @Value("${mqtt.broker.websocket.enabled}")
+    private Boolean MOQUETTE_WEBSOCKET_ENABLED;
+
+    @Value("${mqtt.broker.websocket.port:8080}")
+    private String MOQUETTE_WEBSOCKET_PORT;
+
     @Autowired
     private MqttMessageHandler handler;
 
@@ -218,6 +224,11 @@ public class MqttBroker {
             // In-Memory Subscription Store
             props.put(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, "");
         }
+
+        if (MOQUETTE_WEBSOCKET_ENABLED) {
+            props.put(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME, MOQUETTE_WEBSOCKET_PORT);
+        }
+
         props.put(BrokerConstants.ALLOW_ANONYMOUS_PROPERTY_NAME, Boolean.TRUE.toString());
         return new MemoryConfig(props);
     }

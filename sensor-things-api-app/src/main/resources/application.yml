@@ -4,7 +4,7 @@ debug: false
 trace: false
 
 server:
-  port: 8081
+  port: 8080
 #TODO: Check if this is needed. 
 database:
   jpa:
@@ -42,6 +42,9 @@ spring:
 # MQTT Configuration
 mqtt:
   broker:
+    websocket:
+      enabled: true
+      port: 8081
     persistence:
       enabled: true
       path: "" # Empty for default path (java "user.dir")
