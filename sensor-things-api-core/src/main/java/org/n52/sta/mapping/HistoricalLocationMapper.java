@@ -28,6 +28,26 @@
  */
 package org.n52.sta.mapping;
 
+import org.apache.olingo.commons.api.data.Entity;
+import org.apache.olingo.commons.api.data.Property;
+import org.apache.olingo.commons.api.data.ValueType;
+import org.apache.olingo.server.api.ODataApplicationException;
+import org.n52.series.db.beans.sta.HistoricalLocationEntity;
+import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.shetland.ogc.gml.time.Time;
+import org.n52.shetland.ogc.gml.time.TimeInstant;
+import org.n52.shetland.ogc.gml.time.TimePeriod;
+import org.n52.sta.utils.EntityCreationHelper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.UUID;
+
 import static org.n52.sta.edm.provider.SensorThingsEdmConstants.ID;
 import static org.n52.sta.edm.provider.SensorThingsEdmConstants.ID_ANNOTATION;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
@@ -37,30 +57,13 @@ import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider
 import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ES_LOCATIONS_NAME;
 import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
 
-import java.util.*;
-
-import org.apache.olingo.commons.api.data.Entity;
-import org.apache.olingo.commons.api.data.Property;
-import org.apache.olingo.commons.api.data.ValueType;
-import org.apache.olingo.server.api.ODataApplicationException;
-import org.n52.series.db.beans.DescribableEntity;
-import org.n52.series.db.beans.sta.HistoricalLocationEntity;
-import org.n52.series.db.beans.sta.LocationEntity;
-import org.n52.shetland.ogc.gml.time.Time;
-import org.n52.shetland.ogc.gml.time.TimeInstant;
-import org.n52.shetland.ogc.gml.time.TimePeriod;
-import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATION_NAME;
 //import org.n52.sta.utils.EntityAnnotator;
-import org.n52.sta.utils.EntityCreationHelper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- *
  */
 @Component
-public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationEntity>{
+public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationEntity> {
 
     @Autowired
     private EntityCreationHelper entityCreationHelper;
@@ -107,12 +110,19 @@ public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationE
     }
 
     protected void setId(HistoricalLocationEntity idEntity, Entity entity) {
+        String rawId;
         if (checkProperty(entity, ID)) {
-            idEntity.setIdentifier(getPropertyValue(entity, ID).toString());
+            rawId = getPropertyValue(entity, ID).toString();
         } else if (checkProperty(entity, ID_ANNOTATION)) {
-            idEntity.setIdentifier(getPropertyValue(entity, ID_ANNOTATION).toString());
+            rawId = getPropertyValue(entity, ID_ANNOTATION).toString();
         } else {
-            idEntity.setIdentifier(UUID.randomUUID().toString());
+            rawId = UUID.randomUUID().toString();
+        }
+
+        // URLEncode identifier.
+        try {
+            idEntity.setIdentifier(URLEncoder.encode(rawId, "utf-8"));
+        } catch (UnsupportedEncodingException e) {
         }
     }
 

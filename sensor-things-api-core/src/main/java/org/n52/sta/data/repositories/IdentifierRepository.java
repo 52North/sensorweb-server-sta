@@ -8,8 +8,6 @@ public interface IdentifierRepository<T> {
 
     Optional<T> findByIdentifier(String identifier);
 
-//    T getOneByIdentifier(String identifier);
-
     void deleteByIdentifier(String identifier);
 
     T getOneByIdentifier(String identifier);

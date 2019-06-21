@@ -28,20 +28,15 @@
  */
 package org.n52.sta.data.query;
 
-import java.util.Date;
-
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
-
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.joda.time.DateTime;
 import org.n52.series.db.beans.*;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.springframework.data.jpa.domain.Specification;
+
+import javax.persistence.criteria.*;
+import java.util.Date;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -66,7 +61,7 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
             Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
             Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
             Join<DatastreamEntity, DatasetEntity> join = datastream.join(DatastreamEntity.PROPERTY_DATASETS);
-            sq.select(join.get(DatasetEntity.PROPERTY_IDENTIFIER)).where(builder.equal(datastream.get(DatastreamEntity.PROPERTY_IDENTIFIER), datastreamIdentifier));
+            sq.select(join.get(DatasetEntity.PROPERTY_ID)).where(builder.equal(datastream.get(DatastreamEntity.PROPERTY_IDENTIFIER), datastreamIdentifier));
             return builder.in(root.get(DataEntity.PROPERTY_DATASET)).value(sq);
         };
     }

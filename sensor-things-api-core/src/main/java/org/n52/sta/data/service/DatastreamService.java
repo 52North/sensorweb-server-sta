@@ -257,7 +257,11 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
             datastream.setObservableProperty(getObservedPropertyService().create(datastream.getObservableProperty()));
             datastream.setProcedure(getSensorService().create(datastream.getProcedure()));
             datastream.setThing(getThingService().create(datastream.getThing()));
-            datastream.setIdentifier(UUID.randomUUID().toString());
+            if (datastream.getIdentifier() != null) {
+                datastream.setIdentifier(datastream.getIdentifier());
+            } else {
+                datastream.setIdentifier(UUID.randomUUID().toString());
+            }
             datastream = getRepository().save(datastream);
             processObservation(datastream, datastream.getObservations());
             datastream = getRepository().save(datastream);

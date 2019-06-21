@@ -32,7 +32,9 @@ import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
+import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
+import org.apache.olingo.commons.core.edm.primitivetype.EdmAny;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -49,6 +51,8 @@ import org.n52.shetland.ogc.gml.time.TimePeriod;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -67,7 +71,7 @@ public abstract class AbstractMapper<T> {
 
     public abstract Entity createEntity(T t);
 
-    protected abstract T createEntity(Entity entity);
+    protected abstract T createEntity(Entity entity) throws EdmPrimitiveTypeException;
 
     public abstract T merge(T existing, T toMerge) throws ODataApplicationException;
 
@@ -152,13 +156,23 @@ public abstract class AbstractMapper<T> {
     }
 
     protected void setId(DescribableEntity idEntity, Entity entity) {
+        String rawId;
         if (checkProperty(entity, ID)) {
-            idEntity.setIdentifier(getPropertyValue(entity, ID).toString());
+            try {
+                rawId = EdmAny.getInstance().valueToString(getPropertyValue(entity, ID), false, 0, 0, 0,false);
+            } catch (EdmPrimitiveTypeException e) {
+                rawId = UUID.randomUUID().toString();
+            }
         } else if (checkProperty(entity, ID_ANNOTATION)) {
-            idEntity.setIdentifier(getPropertyValue(entity, ID_ANNOTATION).toString());
+            rawId = getPropertyValue(entity, ID_ANNOTATION).toString();
         } else {
-            idEntity.setIdentifier(UUID.randomUUID().toString());
+            rawId = UUID.randomUUID().toString();
         }
+
+        // URLEncode identifier.
+        try {
+            idEntity.setIdentifier(URLEncoder.encode(rawId, "utf-8"));
+        } catch (UnsupportedEncodingException e) {}
     }
 
     protected void setNameDescription(DescribableEntity thing, Entity entity) {
@@ -167,12 +181,23 @@ public abstract class AbstractMapper<T> {
     }
 
     protected void setIdentifier(DescribableEntity describableEntity, Entity entity) {
-        if (checkProperty(entity, PROP_DEFINITION)) {
-            describableEntity.setIdentifier(getPropertyValue(entity, PROP_DEFINITION).toString());
-        } else if (checkProperty(entity, PROP_NAME)) {
-            describableEntity.setIdentifier(getPropertyValue(entity, PROP_NAME).toString());
+        String rawIdentifier = "";
+        if (checkProperty(entity, PROP_ID)) {
+            try {
+                rawIdentifier = EdmAny.getInstance().valueToString(getPropertyValue(entity, PROP_ID), false, 0, 0, 0,false);
+            } catch (EdmPrimitiveTypeException e) {
+                // This should never happen. Value was checked already
+            }
+        } else if (checkProperty(entity, PROP_DEFINITION)) {
+            rawIdentifier = getPropertyValue(entity, PROP_DEFINITION).toString();
+        } else {
+            rawIdentifier = UUID.randomUUID().toString();
         }
 
+        // URLEncode identifier.
+        try {
+            describableEntity.setIdentifier(URLEncoder.encode(rawIdentifier, "utf-8"));
+        } catch (UnsupportedEncodingException e) {}
     }
 
     protected void setName(HasName describableEntity, Entity entity) {

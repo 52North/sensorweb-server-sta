@@ -196,8 +196,8 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
 
     @Override
     public PhenomenonEntity create(PhenomenonEntity observableProperty) {
-        if (observableProperty.getId() != null && !observableProperty.isSetName()) {
-            return getRepository().findById(observableProperty.getId()).get();
+        if (observableProperty.getIdentifier() != null && !observableProperty.isSetName()) {
+            return getRepository().findByIdentifier(observableProperty.getIdentifier()).get();
         }
         if (getRepository().existsByIdentifier(observableProperty.getIdentifier())) {
             Optional<PhenomenonEntity> optional

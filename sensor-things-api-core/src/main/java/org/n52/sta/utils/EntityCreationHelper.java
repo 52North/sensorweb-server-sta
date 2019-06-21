@@ -33,15 +33,15 @@
  */
 package org.n52.sta.utils;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * Helper class for Entity creation
@@ -68,9 +68,9 @@ public class EntityCreationHelper {
 
     private URI createId(Entity entity, String entitySetName, String idPropertyName, String navigationName) {
         try {
-            StringBuilder sb = new StringBuilder(entitySetName).append("(");
+            StringBuilder sb = new StringBuilder(entitySetName).append("('");
             final Property property = entity.getProperty(idPropertyName);
-            sb.append(property.asPrimitive()).append(")");
+            sb.append(property.asPrimitive().toString()).append("')");
             if (navigationName != null) {
                 sb.append("/").append(navigationName);
             }

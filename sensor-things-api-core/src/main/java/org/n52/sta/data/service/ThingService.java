@@ -193,8 +193,8 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     @Override
     public PlatformEntity create(PlatformEntity thing) throws ODataApplicationException {
         if (!thing.isProcesssed()) {
-            if (thing.getId() != null && !thing.isSetName()) {
-                return getRepository().findById(thing.getId()).get();
+            if (thing.getIdentifier() != null && !thing.isSetName()) {
+                return getRepository().findByIdentifier(thing.getIdentifier()).get();
             }
             if (getRepository().existsByName(thing.getName())) {
                 Optional<PlatformEntity> optional = getRepository().findByName(thing.getName());

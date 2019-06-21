@@ -219,7 +219,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     @Override
     public LocationEntity create(LocationEntity location) throws ODataApplicationException {
         if (!location.isProcesssed()) {
-            if (location.getId() != null && !location.isSetName()) {
+            if (location.getIdentifier() != null && !location.isSetName()) {
                 return getRepository().findByIdentifier(location.getIdentifier()).get();
             }
             if (getRepository().existsByName(location.getName())) {

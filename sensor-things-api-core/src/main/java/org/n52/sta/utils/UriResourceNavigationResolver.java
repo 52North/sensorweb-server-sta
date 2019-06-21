@@ -49,6 +49,8 @@ import org.n52.sta.data.service.EntityServiceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -241,7 +243,17 @@ public class UriResourceNavigationResolver {
     }
 
     public String getEntityIdFromKeyParams(List<UriParameter> keyParams) {
-        return keyParams.get(0).getText();
+        String id = keyParams.get(0).getText();
+        if (id.charAt(0) == '\'') {
+            // Remove single quotes used to mark start and end of string in url
+            try {
+                return URLEncoder.encode(id.substring(1, id.length()-1), "utf-8");
+            } catch (UnsupportedEncodingException e) {
+                return id;
+            }
+        } else {
+            return id;
+        }
     }
 
     private AbstractSensorThingsEntityService<?, ?> getEntityService(UriResourceEntitySet uriResourceEntitySet) {

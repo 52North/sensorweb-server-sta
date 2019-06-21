@@ -28,28 +28,28 @@
  */
 package org.n52.sta.mapping;
 
-import java.util.*;
-
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DEFINITION;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
-import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ES_OBSERVED_PROPERTIES_NAME;
-import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_FQN;
-
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
+import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
+import org.apache.olingo.commons.core.edm.primitivetype.EdmAny;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.sta.ObservablePropertyEntity;
-import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_NAME;
-import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME;
-import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATION_NAME;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.UUID;
+
 import static org.n52.sta.edm.provider.SensorThingsEdmConstants.ID;
 import static org.n52.sta.edm.provider.SensorThingsEdmConstants.ID_ANNOTATION;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DEFINITION;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
+import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ES_OBSERVED_PROPERTIES_NAME;
+import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_FQN;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  *
@@ -89,12 +89,23 @@ public class ObservedPropertyMapper extends AbstractMapper<PhenomenonEntity> {
     }
 
     protected void setStaIdentifier(PhenomenonEntity idEntity, Entity entity) {
+        String rawIdentifier = "";
         if (checkProperty(entity, ID)) {
-            idEntity.setStaIdentifier(getPropertyValue(entity, ID).toString());
+            try {
+                rawIdentifier = EdmAny.getInstance().valueToString(getPropertyValue(entity, PROP_ID), false, 0, 0, 0,false);
+            } catch (EdmPrimitiveTypeException e) {
+                // This should never happen. Value was checked already
+            }
         } else if (checkProperty(entity, ID_ANNOTATION)) {
-            idEntity.setStaIdentifier(getPropertyValue(entity, ID_ANNOTATION).toString());
+            rawIdentifier = getPropertyValue(entity, ID_ANNOTATION).toString();
         } else {
-            idEntity.setStaIdentifier(UUID.randomUUID().toString());
+            rawIdentifier = UUID.randomUUID().toString();
+        }
+        // URLEncode identifier.
+        try {
+            idEntity.setStaIdentifier(URLEncoder.encode(rawIdentifier, "utf-8"));
+        } catch (UnsupportedEncodingException e) {
+            // e.printStackTrace();
         }
     }
 

@@ -28,19 +28,13 @@
  */
 package org.n52.sta.data.query;
 
-import java.util.Date;
-
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
-
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.n52.series.db.beans.DescribableEntity;
 import org.springframework.data.jpa.domain.Specification;
+
+import javax.persistence.criteria.*;
+import java.util.Date;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -91,11 +85,11 @@ public abstract class EntityQuerySpecifications<T> {
         };
     }
 
-//    public Specification<T> withId(final Long id) {
-//        return (root, query, builder) -> {
-//            return builder.equal(root.get(DescribableEntity.PROPERTY_IDENTIFIER), id);
-//        };
-//    }
+    public Specification<T> withId(final Long id) {
+        return (root, query, builder) -> {
+            return builder.equal(root.get(DescribableEntity.PROPERTY_ID), id);
+        };
+    }
 
     protected Specification<String> toSubquery(Class<?> clazz, String propert, Specification filter) {
         return (root, query, builder) -> {

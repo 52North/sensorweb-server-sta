@@ -35,6 +35,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
 @EnableJpaRepositories(basePackages = { "org.n52.series.db", "org.n52.sta.data.repositories"},
@@ -44,6 +45,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
                                  @Filter(type = FilterType.REGEX, pattern = "org\\.n52\\.series\\.srv\\..*"),
                                  @Filter(type = FilterType.REGEX, pattern = "org\\.n52\\.series\\.db\\.assembler\\..*")})
 @EnableConfigurationProperties
+@EnableTransactionManagement
 public class Application {
 
     public static void main(String[] args) {

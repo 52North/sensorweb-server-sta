@@ -4,7 +4,7 @@ debug: false
 trace: false
 
 server:
-  port: 8080
+  port: 8081
 #TODO: Check if this is needed. 
 database:
   jpa:
@@ -43,10 +43,10 @@ spring:
 mqtt:
   broker:
     websocket:
-      enabled: true
+      enabled: false
       port: 8081
     persistence:
-      enabled: true
+      enabled: false
       path: "" # Empty for default path (java "user.dir")
       filename: "52N-STA-MQTTBroker.h2"
       autosave_interval: "30"
@@ -57,8 +57,9 @@ logging:
     # root: TRACE
 #    org.opengis.cite: TRACE
 #    org.apache.coyote.http11.Http11InputBuffer: TRACE
-    org.hibernate: INFO
-    org.hibernate.type: INFO
-#    org.hibernate.SQL: DEBUG
-    io.moquette: TRACE
+#    org.hibernate: INFO
+#    org.hibernate.type: INFO
+    org.hibernate: TRACE
+#    io.moquette: TRACE
     org.n52: TRACE
+    org.springframework.orm.jpa: TRACE

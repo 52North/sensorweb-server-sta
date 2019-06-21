@@ -203,8 +203,8 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
 
     @Override
     public ProcedureEntity create(ProcedureEntity sensor) {
-        if (sensor.getId() != null && !sensor.isSetName()) {
-            return getRepository().findById(sensor.getId()).get();
+        if (sensor.getIdentifier() != null && !sensor.isSetName()) {
+            return getRepository().findByIdentifier(sensor.getIdentifier()).get();
         }
         if (getRepository().existsByIdentifier(sensor.getIdentifier())
                 || getRepository().existsByName(sensor.getName())) {
