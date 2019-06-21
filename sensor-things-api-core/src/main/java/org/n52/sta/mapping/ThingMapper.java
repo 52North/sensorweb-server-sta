@@ -28,28 +28,11 @@
  */
 package org.n52.sta.mapping;
 
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PROPERTIES;
-import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ES_DATASTREAMS_NAME;
-import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ES_LOCATIONS_NAME;
-import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ES_THINGS_NAME;
-import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_FQN;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-
+import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
-import org.apache.olingo.commons.api.edm.EdmPrimitiveType;
-import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
-import org.apache.olingo.commons.core.edm.primitivetype.EdmAny;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
@@ -61,10 +44,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_NAME;
-import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME;
-import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATION_NAME;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PROPERTIES;
+import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ES_DATASTREAMS_NAME;
+import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ES_LOCATIONS_NAME;
+import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ES_THINGS_NAME;
+import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_FQN;
 
 /**
  *
@@ -105,7 +95,6 @@ public class ThingMapper extends AbstractMapper<PlatformEntity> {
     @Override
     public PlatformEntity createEntity(Entity entity) {
         PlatformEntity thing = new PlatformEntity();
-        setId(thing, entity);
         setIdentifier(thing, entity);
         setName(thing, entity);
         setDescription(thing, entity);

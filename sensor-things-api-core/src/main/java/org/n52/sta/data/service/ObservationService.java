@@ -45,7 +45,6 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.shetland.ogc.om.OmConstants;
 import org.n52.sta.data.query.DatasetQuerySpecifications;
-import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
 import org.n52.sta.data.repositories.*;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
@@ -264,20 +263,6 @@ public class ObservationService extends
                 observation.setProcesssed(true);
                 check(observation);
                 DatastreamEntity datastream = checkDatastream(observation);
-//                DatastreamEntity datastream = getDatastreamService().create(observation.getDatastream());
-//                observation.setDatastream(datastream);
-
-            // DatastreamEntity datastream = datastreamRepository.findByIdentifier(observation.getDatastream().getIdentifier()).get();
-
-                DatastreamQuerySpecifications testQS = new DatastreamQuerySpecifications();
-
-                DatastreamEntity datastream2 = datastreamRepository.findOne(testQS.withIdentifier(observation.getDatastream().getIdentifier())).get();
-
-                DatastreamEntity datastream3 = datastreamRepository.findOne(testQS.withId(1L)).get();
-
-                PlatformEntity thing = datastream.getThing();
-                // feature
-
 
                 AbstractFeatureEntity<?> feature = checkFeature(observation, datastream);
                 // category (obdProp)
@@ -458,7 +443,6 @@ public class ObservationService extends
         DatasetEntity dataset = getDatasetEntity(datastream.getObservationType().getFormat());
         dataset.setProcedure(datastream.getProcedure());
         dataset.setPhenomenon(datastream.getObservableProperty());
-        dataset.setIdentifier(datastream.getIdentifier());
         dataset.setCategory(category);
         dataset.setFeature(feature);
         dataset.setOffering(offering);

@@ -74,11 +74,6 @@ public class DatastreamEntityCrudRequestHandler extends AbstractEntityCrudReques
         return mapper;
     }
 
-    @Override
-    public EntityTypes getType() {
-        return EntityTypes.Datastream;
-    }
-
     private AbstractSensorThingsEntityService<?, DatastreamEntity> getEntityService() {
         return (AbstractSensorThingsEntityService<?, DatastreamEntity>) getEntityService(EntityTypes.Datastream);
     }

@@ -28,39 +28,76 @@
  */
 package org.n52.sta.service.handler.crud;
 
-import org.n52.sta.data.service.EntityServiceRepository;
 import org.springframework.stereotype.Component;
-import org.springframework.util.Assert;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 @Component
 public class EntityCrudRequestHandlerRepository {
 
-    private Map<EntityServiceRepository.EntityTypes, AbstractEntityCrudRequestHandler<?>> requestHandlers = new LinkedHashMap<>();
+    private ThingEntityCrudRequestHandler thingEntityCrudRequestHandler;
 
-    public void addCrudHandler (AbstractEntityCrudRequestHandler<?> handler) {
-        requestHandlers.put(handler.getType(), handler);
+    private LocationEntityCrudRequestHandler locationEntityCrudRequestHandler;
+
+    private HistoricalLocationEntityCrudRequestHandler historicalLocationEntityCrudRequestHandler;
+
+    private SensorEntityCrudRequestHandler sensorEntityCrudRequestHandler;
+
+    private DatastreamEntityCrudRequestHandler datastreamEntityCrudRequestHandler;
+
+    private ObservationEntityCrudRequestHandler observationEntityCrudRequestHandler;
+
+    private ObservedPropertyEntityCrudRequestHandler observedPropertyEntityCrudRequestHandler;
+
+    private FeatureOfInterestEntityCrudRequestHandler featureOfInterestEntityCrudRequestHandler;
+
+    public EntityCrudRequestHandlerRepository(ThingEntityCrudRequestHandler thingEntityCrudRequestHandler,
+                                              LocationEntityCrudRequestHandler locationEntityCrudRequestHandler,
+                                              HistoricalLocationEntityCrudRequestHandler historicalLocationEntityCrudRequestHandler,
+                                              SensorEntityCrudRequestHandler sensorEntityCrudRequestHandler,
+                                              DatastreamEntityCrudRequestHandler datastreamEntityCrudRequestHandler,
+                                              ObservationEntityCrudRequestHandler observationEntityCrudRequestHandler,
+                                              ObservedPropertyEntityCrudRequestHandler observedPropertyEntityCrudRequestHandler,
+                                              FeatureOfInterestEntityCrudRequestHandler featureOfInterestEntityCrudRequestHandler) {
+        this.thingEntityCrudRequestHandler = thingEntityCrudRequestHandler;
+        this.locationEntityCrudRequestHandler = locationEntityCrudRequestHandler;
+        this.historicalLocationEntityCrudRequestHandler = historicalLocationEntityCrudRequestHandler;
+        this.sensorEntityCrudRequestHandler = sensorEntityCrudRequestHandler;
+        this.datastreamEntityCrudRequestHandler = datastreamEntityCrudRequestHandler;
+        this.observationEntityCrudRequestHandler = observationEntityCrudRequestHandler;
+        this.observedPropertyEntityCrudRequestHandler = observedPropertyEntityCrudRequestHandler;
+        this.featureOfInterestEntityCrudRequestHandler = featureOfInterestEntityCrudRequestHandler;
     }
 
-    /**
-     * Provides an entity data service for a entity type
-     *
-     * @param handlerTypeName the type name of the requested handler
-     * @return the requested entity data service
-     */
-    public AbstractEntityCrudRequestHandler<?> getHandler(String handlerTypeName) {
-        return getHandler(EntityServiceRepository.EntityTypes.valueOf(handlerTypeName));
-    }
+    public AbstractEntityCrudRequestHandler getEntityCrudRequestHandler(String type) {
 
-    /**
-     * Provides an entity data service for a entity type
-     *
-     * @param handlerTypeName the type name of the requested entity service
-     * @return the requested entity data service
-     */
-    public AbstractEntityCrudRequestHandler<?> getHandler(EntityServiceRepository.EntityTypes handlerTypeName) {
-        return requestHandlers.get(handlerTypeName);
+        switch (type) {
+            case "Thing": {
+                return thingEntityCrudRequestHandler;
+            }
+            case "Location": {
+                return locationEntityCrudRequestHandler;
+            }
+            case "HistoricalLocation": {
+                return historicalLocationEntityCrudRequestHandler;
+            }
+            case "Sensor": {
+                return sensorEntityCrudRequestHandler;
+            }
+            case "Datastream": {
+                return datastreamEntityCrudRequestHandler;
+            }
+            case "Observation": {
+                return observationEntityCrudRequestHandler;
+            }
+            case "ObservedProperty": {
+                return observedPropertyEntityCrudRequestHandler;
+            }
+            case "FeatureOfInterest": {
+                return featureOfInterestEntityCrudRequestHandler;
+            }
+            default: {
+                return null;
+            }
+        }
     }
 }
+

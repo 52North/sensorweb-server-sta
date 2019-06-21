@@ -73,11 +73,6 @@ public class LocationEntityCrudRequestHandler extends AbstractEntityCrudRequestH
         return mapper;
     }
 
-    @Override
-    public EntityTypes getType() {
-        return EntityTypes.Location;
-    }
-
     private AbstractSensorThingsEntityService<?, LocationEntity> getEntityService() {
         return (AbstractSensorThingsEntityService<?, LocationEntity>) getEntityService(EntityTypes.Location);
     }

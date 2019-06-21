@@ -114,7 +114,7 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
 
     public DatastreamEntity createEntity(Entity entity) {
         DatastreamEntity datastream = new DatastreamEntity();
-        setId(datastream, entity);
+        setIdentifier(datastream, entity);
         setName(datastream, entity);
         setDescription(datastream, entity);
         addFormat(datastream, entity);

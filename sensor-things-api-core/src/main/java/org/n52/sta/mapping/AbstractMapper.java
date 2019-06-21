@@ -57,7 +57,6 @@ import java.sql.Timestamp;
 import java.util.*;
 
 import static org.n52.sta.edm.provider.SensorThingsEdmConstants.ID;
-import static org.n52.sta.edm.provider.SensorThingsEdmConstants.ID_ANNOTATION;
 import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.*;
 import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ES_DATASTREAMS_NAME;
 
@@ -155,26 +154,6 @@ public abstract class AbstractMapper<T> {
         entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, description));
     }
 
-    protected void setId(DescribableEntity idEntity, Entity entity) {
-        String rawId;
-        if (checkProperty(entity, ID)) {
-            try {
-                rawId = EdmAny.getInstance().valueToString(getPropertyValue(entity, ID), false, 0, 0, 0,false);
-            } catch (EdmPrimitiveTypeException e) {
-                rawId = UUID.randomUUID().toString();
-            }
-        } else if (checkProperty(entity, ID_ANNOTATION)) {
-            rawId = getPropertyValue(entity, ID_ANNOTATION).toString();
-        } else {
-            rawId = UUID.randomUUID().toString();
-        }
-
-        // URLEncode identifier.
-        try {
-            idEntity.setIdentifier(URLEncoder.encode(rawId, "utf-8"));
-        } catch (UnsupportedEncodingException e) {}
-    }
-
     protected void setNameDescription(DescribableEntity thing, Entity entity) {
         setName(thing, entity);
         setDescription(thing, entity);
@@ -184,7 +163,7 @@ public abstract class AbstractMapper<T> {
         String rawIdentifier = "";
         if (checkProperty(entity, PROP_ID)) {
             try {
-                rawIdentifier = EdmAny.getInstance().valueToString(getPropertyValue(entity, PROP_ID), false, 0, 0, 0,false);
+                rawIdentifier = EdmAny.getInstance().valueToString(getPropertyValue(entity, PROP_ID), false, 0, 0, 0, false);
             } catch (EdmPrimitiveTypeException e) {
                 // This should never happen. Value was checked already
             }
@@ -197,7 +176,8 @@ public abstract class AbstractMapper<T> {
         // URLEncode identifier.
         try {
             describableEntity.setIdentifier(URLEncoder.encode(rawIdentifier, "utf-8"));
-        } catch (UnsupportedEncodingException e) {}
+        } catch (UnsupportedEncodingException e) {
+        }
     }
 
     protected void setName(HasName describableEntity, Entity entity) {

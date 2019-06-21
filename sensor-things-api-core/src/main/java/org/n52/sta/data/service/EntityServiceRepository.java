@@ -73,6 +73,7 @@ public class EntityServiceRepository {
      * @return the requested entity data service
      */
     public AbstractSensorThingsEntityService<?, ?> getEntityService(EntityTypes entityTypeName) {
+
         return entityServices.get(entityTypeName);
     }
 

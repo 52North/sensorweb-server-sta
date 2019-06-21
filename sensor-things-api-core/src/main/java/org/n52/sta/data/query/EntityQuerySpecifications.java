@@ -85,12 +85,6 @@ public abstract class EntityQuerySpecifications<T> {
         };
     }
 
-    public Specification<T> withId(final Long id) {
-        return (root, query, builder) -> {
-            return builder.equal(root.get(DescribableEntity.PROPERTY_ID), id);
-        };
-    }
-
     protected Specification<String> toSubquery(Class<?> clazz, String propert, Specification filter) {
         return (root, query, builder) -> {
             Subquery<?> sq = query.subquery(clazz);

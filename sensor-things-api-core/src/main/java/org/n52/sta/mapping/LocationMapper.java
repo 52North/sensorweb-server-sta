@@ -74,7 +74,6 @@ public class LocationMapper extends AbstractLocationGeometryMapper<LocationEntit
     @Override
     public LocationEntity createEntity(Entity entity) {
         LocationEntity location = new LocationEntity();
-        setId(location, entity);
         setIdentifier(location, entity);
         setName(location, entity);
         setDescription(location, entity);

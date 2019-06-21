@@ -49,7 +49,6 @@ import org.n52.sta.utils.UriResourceNavigationResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Locale;
 
@@ -63,17 +62,7 @@ public abstract class AbstractEntityCrudRequestHandler<T extends IdEntity> {
     @Autowired
     private UriResourceNavigationResolver navigationResolver;
 
-    @Autowired
-    private EntityCrudRequestHandlerRepository handlerRepository;
-
     protected abstract AbstractMapper<T> getMapper();
-
-    @PostConstruct
-    public void init() {
-        handlerRepository.addCrudHandler(this);
-    }
-
-    public abstract EntityTypes getType();
 
     @Transactional(rollbackFor=Exception.class)
     public EntityResponse handleCreateEntityRequest(Entity entity, List<UriResource> resourcePaths) throws ODataApplicationException {

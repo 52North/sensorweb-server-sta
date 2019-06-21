@@ -73,11 +73,6 @@ public class FeatureOfInterestEntityCrudRequestHandler extends AbstractEntityCru
         return mapper;
     }
 
-    @Override
-    public EntityTypes getType() {
-        return EntityTypes.FeatureOfInterest;
-    }
-
     private AbstractSensorThingsEntityService<?, AbstractFeatureEntity<?>> getEntityService() {
         return (AbstractSensorThingsEntityService<?, AbstractFeatureEntity<?>>) getEntityService(EntityTypes.FeatureOfInterest);
     }

@@ -75,11 +75,6 @@ public class ThingEntityCrudRequestHandler extends AbstractEntityCrudRequestHand
         return mapper;
     }
 
-    @Override
-    public EntityTypes getType() {
-        return EntityTypes.Thing;
-    }
-
     private AbstractSensorThingsEntityService<?, PlatformEntity> getEntityService() {
         return (AbstractSensorThingsEntityService<?, PlatformEntity>) getEntityService(EntityTypes.Thing);
     }

@@ -76,11 +76,6 @@ public class ObservationEntityCrudRequestHandler extends AbstractEntityCrudReque
         return mapper;
     }
 
-    @Override
-    public EntityTypes getType() {
-        return EntityTypes.Observation;
-    }
-
     private AbstractSensorThingsEntityService<?, DataEntity<?>> getEntityService() {
         return (AbstractSensorThingsEntityService<?, DataEntity<?>>) getEntityService(EntityTypes.Observation);
     }

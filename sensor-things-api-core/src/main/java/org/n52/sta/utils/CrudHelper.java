@@ -114,7 +114,7 @@ public class CrudHelper implements InitializingBean {
     }
 
     public AbstractEntityCrudRequestHandler getUriResourceEntitySet(String type) {
-        return crudRequestHandlerRepository.getHandler(type);
+        return crudRequestHandlerRepository.getEntityCrudRequestHandler(type);
     }
 
     @Override

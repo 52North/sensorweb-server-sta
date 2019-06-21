@@ -73,11 +73,6 @@ public class HistoricalLocationEntityCrudRequestHandler extends AbstractEntityCr
         return mapper;
     }
 
-    @Override
-    public EntityTypes getType() {
-        return EntityTypes.HistoricalLocation;
-    }
-
     private AbstractSensorThingsEntityService<?, HistoricalLocationEntity> getEntityService() {
         return (AbstractSensorThingsEntityService<?, HistoricalLocationEntity>) getEntityService(EntityTypes.HistoricalLocation);
     }

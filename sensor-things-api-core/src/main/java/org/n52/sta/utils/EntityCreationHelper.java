@@ -34,7 +34,6 @@
 package org.n52.sta.utils;
 
 import org.apache.olingo.commons.api.data.Entity;
-import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -68,9 +67,14 @@ public class EntityCreationHelper {
 
     private URI createId(Entity entity, String entitySetName, String idPropertyName, String navigationName) {
         try {
-            StringBuilder sb = new StringBuilder(entitySetName).append("('");
-            final Property property = entity.getProperty(idPropertyName);
-            sb.append(property.asPrimitive().toString()).append("')");
+            Object primitive = entity.getProperty(idPropertyName).asPrimitive();
+            StringBuilder sb = new StringBuilder(entitySetName)
+                    .append("(");
+            if (primitive instanceof String) sb.append('\'');
+            sb.append(primitive.toString());
+            if (primitive instanceof String) sb.append('\'');
+            sb.append(")");
+
             if (navigationName != null) {
                 sb.append("/").append(navigationName);
             }
