@@ -28,22 +28,19 @@
  */
 package org.n52.sta;
 
+import org.hibernate.EmptyInterceptor;
+import org.hibernate.type.Type;
+import org.n52.series.db.beans.PlatformEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.hibernate.EmptyInterceptor;
-import org.hibernate.type.Type;
-import org.n52.series.db.beans.PlatformEntity;
-import org.n52.sta.data.STAEventHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- *
  */
 @SuppressWarnings("serial")
 @Component
@@ -51,22 +48,22 @@ public class HibernateMessageInterceptor extends EmptyInterceptor {
 
     private final Logger LOGGER = LoggerFactory.getLogger(HibernateMessageInterceptor.class);
 
-    @Autowired
-    private STAEventHandler mqttclient;
+//    @Autowired
+//    private STAEventHandler mqttclient;
 
     /**
      * Handle new Create Events
      */
     @Override
     public boolean onSave(
-                          Object entity,
-                          Serializable id,
-                          Object[] state,
-                          String[] propertyNames,
-                          Type[] types) {
-        LOGGER.debug("Parsed Entity to MQTTHandler: " + entity.toString());
+            Object entity,
+            Serializable id,
+            Object[] state,
+            String[] propertyNames,
+            Type[] types) {
+//        LOGGER.debug("Parsed Entity to MQTTHandler: " + entity.toString());
         boolean result = super.onSave(entity, id, state, propertyNames, types);
-        mqttclient.handleEvent(entity, null);
+//        mqttclient.handleEvent(entity, null);
         return result;
     }
 
@@ -75,27 +72,31 @@ public class HibernateMessageInterceptor extends EmptyInterceptor {
      */
     @Override
     public boolean onFlushDirty(
-                                Object entity,
-                                Serializable id,
-                                Object[] currentState,
-                                Object[] previousState,
-                                String[] propertyNames,
-                                Type[] types) {
-        LOGGER.debug("Parsed Entity to MQTTHandler: " + entity.toString());
+            Object entity,
+            Serializable id,
+            Object[] currentState,
+            Object[] previousState,
+            String[] propertyNames,
+            Type[] types) {
+//        LOGGER.debug("Parsed Entity to MQTTHandler: " + entity.toString());
         boolean result = super.onFlushDirty(entity, id, currentState, previousState, propertyNames, types);
-        mqttclient.handleEvent(entity, findDifferences(currentState, previousState, propertyNames));
+//        mqttclient.handleEvent(entity, findDifferences(currentState, previousState, propertyNames));
         return result;
     }
 
     private Set<String> findDifferences(Object[] current, Object[] previous, String[] propertyNames) {
         Set<String> differenceMap = new HashSet<>();
-        for (int i = 0; i < current.length; i++) {
-            if (current[i] != null
-            && !(current[i] instanceof PlatformEntity)
-            && !current[i].equals(previous[i])) {
-                differenceMap.add(propertyNames[i]);
+        if (previous == null) {
+            return differenceMap;
+        } else {
+            for (int i = 0; i < current.length; i++) {
+                if (current[i] != null
+                        && !(current[i] instanceof PlatformEntity)
+                        && !current[i].equals(previous[i])) {
+                    differenceMap.add(propertyNames[i]);
+                }
             }
+            return differenceMap;
         }
-        return differenceMap;
     }
 }
