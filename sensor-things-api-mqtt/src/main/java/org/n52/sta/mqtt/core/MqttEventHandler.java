@@ -77,6 +77,10 @@ public class MqttEventHandler implements STAEventHandler, InitializingBean {
     private Map<AbstractMqttSubscription, HashSet<String>> subscriptions = new HashMap<AbstractMqttSubscription, HashSet<String>>();
     private ServiceMetadata edm;
 
+    public Set<String> getWatchedEntityTypes() {
+        return watchedEntityTypes;
+    }
+
     /*
      * List of all Entity Types that are currently subscribed to. Used for fail-fast.
      */
