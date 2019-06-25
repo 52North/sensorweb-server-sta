@@ -214,7 +214,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
         }
         checkFormat(sensor);
         ProcedureEntity procedure = getAsProcedureEntity(sensor);
-        checkProcedureHistory(getRepository().save(getRepository().save(procedure)));
+        checkProcedureHistory(getRepository().save(procedure));
         return procedure;
     }
 
@@ -222,7 +222,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     public ProcedureEntity update(ProcedureEntity entity, HttpMethod method) throws ODataApplicationException {
         checkUpdate(entity);
         if (HttpMethod.PATCH.equals(method)) {
-            Optional<ProcedureEntity> existing = getRepository().findById(entity.getId());
+            Optional<ProcedureEntity> existing = getRepository().findByIdentifier(entity.getIdentifier());
             if (existing.isPresent()) {
                 ProcedureEntity merged = mapper.merge(existing.get(), entity);
                 if (entity instanceof SensorEntity) {
@@ -306,6 +306,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
         if (sensor.hasProcedureHistory()) {
             if (procedureHistoryRepository != null) {
                 for (ProcedureHistoryEntity procedureHistory : sensor.getProcedureHistory()) {
+                    procedureHistory.setProcedure(sensor);
                     sensor.getProcedureHistory().add(procedureHistoryRepository.save(procedureHistory));
                 }
             } else {

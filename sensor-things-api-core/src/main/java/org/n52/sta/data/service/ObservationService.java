@@ -45,6 +45,7 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.shetland.ogc.om.OmConstants;
 import org.n52.sta.data.query.DatasetQuerySpecifications;
+import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
 import org.n52.sta.data.repositories.*;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
@@ -89,6 +90,8 @@ public class ObservationService extends
     private ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
 
     private DatasetQuerySpecifications dQS = new DatasetQuerySpecifications();
+
+    private DatastreamQuerySpecifications dsQS = new DatastreamQuerySpecifications();
 
     public ObservationService(DataRepository<DataEntity<?>> repository, ObservationMapper mapper) {
         super(repository);
@@ -333,7 +336,7 @@ public class ObservationService extends
 
     @Override
     public void delete(DataEntity<?> entity) {
-        getRepository().deleteById(entity.getId());
+        getRepository().deleteByIdentifier(entity.getIdentifier());
     }
 
     @Override
@@ -348,12 +351,12 @@ public class ObservationService extends
         // TODO get the next first/last observation and set it
         DatasetEntity dataset = observation.getDataset();
         if (dataset.getFirstObservation() != null
-                && dataset.getFirstObservation().getId().equals(observation.getId())) {
+                && dataset.getFirstObservation().getIdentifier().equals(observation.getIdentifier())) {
             dataset.setFirstObservation(null);
             dataset.setFirstQuantityValue(null);
             dataset.setFirstValueAt(null);
         }
-        if (dataset.getLastObservation() != null && dataset.getLastObservation().getId().equals(observation.getId())) {
+        if (dataset.getLastObservation() != null && dataset.getLastObservation().getIdentifier().equals(observation.getIdentifier())) {
             dataset.setLastObservation(null);
             dataset.setLastQuantityValue(null);
             dataset.setLastValueAt(null);
@@ -602,13 +605,13 @@ public class ObservationService extends
                     Collections.singleton(entity.getDataset().getFeature().getIdentifier()));
         } catch (NullPointerException e) {
         }
-        Optional<DatastreamEntity> datastreamEntity = datastreamRepository
-                .findByIdentifier(entity.getIdentifier());
+
+        Optional<DatastreamEntity> datastreamEntity =
+                datastreamRepository.findOne(dsQS.withObservationIdentifier(entity.getIdentifier()));
         if (datastreamEntity.isPresent()) {
             collections.put(ET_DATASTREAM_NAME,
                     Collections.singleton(datastreamEntity.get().getIdentifier()));
         }
-
         return collections;
     }
 

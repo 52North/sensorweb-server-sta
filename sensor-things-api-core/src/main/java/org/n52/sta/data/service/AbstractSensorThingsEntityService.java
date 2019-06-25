@@ -307,14 +307,14 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
 //    }
 
     protected void checkInlineDatastream(DatastreamEntity datastream) throws ODataApplicationException {
-        if (datastream.getId() == null || datastream.isSetName() || datastream.isSetDescription() || datastream.isSetUnit()) {
+        if (datastream.getIdentifier() == null || datastream.isSetName() || datastream.isSetDescription() || datastream.isSetUnit()) {
             throw new ODataApplicationException("Inlined datastream entities are not allowed for updates!",
                     HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
         }
     }
 
     protected void checkInlineLocation(LocationEntity location) throws ODataApplicationException {
-        if (location.getId() == null || location.isSetName() || location.isSetDescription()) {
+        if (location.getIdentifier() == null || location.isSetName() || location.isSetDescription()) {
             throw new ODataApplicationException("Inlined location entities are not allowed for updates!",
                     HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
         }

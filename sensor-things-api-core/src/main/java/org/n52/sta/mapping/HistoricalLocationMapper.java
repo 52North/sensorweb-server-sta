@@ -94,7 +94,7 @@ public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationE
     @Override
     public HistoricalLocationEntity createEntity(Entity entity) {
         HistoricalLocationEntity historicalLocation = new HistoricalLocationEntity();
-        setId(historicalLocation, entity);
+        setIdentifier(historicalLocation, entity);
         addTime(historicalLocation, entity);
         addThing(historicalLocation, entity);
         addLocations(historicalLocation, entity);
@@ -109,7 +109,7 @@ public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationE
         return existing;
     }
 
-    protected void setId(HistoricalLocationEntity idEntity, Entity entity) {
+    protected void setIdentifier(HistoricalLocationEntity idEntity, Entity entity) {
         String rawId;
         if (checkProperty(entity, ID)) {
             rawId = getPropertyValue(entity, ID).toString();

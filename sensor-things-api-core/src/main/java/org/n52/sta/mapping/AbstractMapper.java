@@ -175,8 +175,9 @@ public abstract class AbstractMapper<T> {
 
         // URLEncode identifier.
         try {
-            describableEntity.setIdentifier(URLEncoder.encode(rawIdentifier, "utf-8"));
+            describableEntity.setIdentifier(URLEncoder.encode(rawIdentifier.replace("\'", ""), "utf-8"));
         } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
         }
     }
 

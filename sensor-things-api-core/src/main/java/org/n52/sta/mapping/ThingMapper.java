@@ -148,7 +148,7 @@ public class ThingMapper extends AbstractMapper<PlatformEntity> {
         try {
             node = jsonHelper.readJsonString(thing.getProperties());
         } catch (IOException ex) {
-            LOG.warn("Could not parse properties for PlatformEntity: {}", thing.getId(), ex.getMessage());
+            LOG.warn("Could not parse properties for PlatformEntity: {}", thing.getIdentifier(), ex.getMessage());
             LOG.debug(ex.getMessage(), ex);
         } finally {
             if (node == null) {

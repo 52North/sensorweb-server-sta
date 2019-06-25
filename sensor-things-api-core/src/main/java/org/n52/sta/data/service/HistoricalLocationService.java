@@ -238,7 +238,7 @@ public class HistoricalLocationService extends AbstractSensorThingsEntityService
     private void processLocations(HistoricalLocationEntity historicalLocation) throws ODataApplicationException {
         Set<LocationEntity> locations = new LinkedHashSet<>();
         for (LocationEntity l : historicalLocation.getLocations()) {
-            LocationEntity location = locationRepository.getOne(l.getId());
+            LocationEntity location = locationRepository.getOneByIdentifier(l.getIdentifier());
             location.addHistoricalLocation(historicalLocation);
             locations.add(getLocationService().createOrUpdate(location));
         }
@@ -248,7 +248,7 @@ public class HistoricalLocationService extends AbstractSensorThingsEntityService
     @Override
     public HistoricalLocationEntity update(HistoricalLocationEntity entity, HttpMethod method) throws ODataApplicationException {
         if (HttpMethod.PATCH.equals(method)) {
-            Optional<HistoricalLocationEntity> existing = getRepository().findById(entity.getId());
+            Optional<HistoricalLocationEntity> existing = getRepository().findByIdentifier(entity.getIdentifier());
             if (existing.isPresent()) {
                 HistoricalLocationEntity merged = mapper.merge(existing.get(), entity);
                 return getRepository().save(merged);
@@ -294,7 +294,7 @@ public class HistoricalLocationService extends AbstractSensorThingsEntityService
             }
         });
         getRepository().saveAndFlush(entity);
-        getRepository().deleteById(entity.getId());
+        getRepository().deleteByIdentifier(entity.getIdentifier());
     }
 
     @Override

@@ -342,6 +342,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
 
     private LocationEntity createReferencedLocation(LocationEntity location) {
         LocationEntity referenced = new LocationEntity();
+        referenced.setIdentifier(location.getIdentifier());
         referenced.setId(location.getId());
         return referenced;
     }

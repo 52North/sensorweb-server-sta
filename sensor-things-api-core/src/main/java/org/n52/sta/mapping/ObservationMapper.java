@@ -307,7 +307,7 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
             ((CategoryDataEntity) existing).setValue(toMerge.getValue().toString());
         } else {
             throw new ODataApplicationException(
-                    String.format("The observation value for @iot.id %i can not be updated!", existing.getId()),
+                    String.format("The observation value for @iot.id %i can not be updated!", existing.getIdentifier()),
                     HttpStatusCode.CONFLICT.getStatusCode(), Locale.getDefault());
         }
     }

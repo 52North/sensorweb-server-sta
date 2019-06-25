@@ -271,17 +271,17 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
 
     private Specification<DatastreamEntity> createQuery(DatastreamEntity datastream) {
         Specification<DatastreamEntity> expression;
-        if (datastream.getThing().getId() != null && !datastream.getThing().isSetName()) {
+        if (datastream.getThing().getIdentifier() != null && !datastream.getThing().isSetName()) {
             expression = dQS.withThingIdentifier(datastream.getThing().getIdentifier());
         } else {
             expression = dQS.withThingName(datastream.getThing().getName());
         }
-        if (datastream.getProcedure().getId() != null && !datastream.getProcedure().isSetName()) {
+        if (datastream.getProcedure().getIdentifier() != null && !datastream.getProcedure().isSetName()) {
             expression = expression.and(dQS.withSensorIdentifier(datastream.getProcedure().getIdentifier()));
         } else {
             expression = expression.and(dQS.withSensorName(datastream.getProcedure().getName()));
         }
-        if (datastream.getObservableProperty().getId() != null && !datastream.getObservableProperty().isSetName()) {
+        if (datastream.getObservableProperty().getIdentifier() != null && !datastream.getObservableProperty().isSetName()) {
             expression = expression.and(dQS.withObservedPropertyIdentifier(datastream.getObservableProperty().getIdentifier()));
         } else {
             expression = expression.and(dQS.withObservedPropertyName(datastream.getObservableProperty().getName()));
@@ -331,7 +331,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     }
 
     private void checkUpdate(DatastreamEntity entity) throws ODataApplicationException {
-        if (entity.getObservableProperty() != null && (entity.getObservableProperty().getId() == null
+        if (entity.getObservableProperty() != null && (entity.getObservableProperty().getIdentifier() == null
                 || entity.getObservableProperty().isSetName() || entity.getObservableProperty().isSetDescription())) {
             throw new ODataApplicationException("Inlined entities are not allowed for updates!",
                     HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());

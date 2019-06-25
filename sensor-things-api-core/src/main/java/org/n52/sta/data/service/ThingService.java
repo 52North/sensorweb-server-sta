@@ -215,7 +215,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     public PlatformEntity update(PlatformEntity entity, HttpMethod method) throws ODataApplicationException {
         checkUpdate(entity);
         if (HttpMethod.PATCH.equals(method)) {
-            Optional<PlatformEntity> existing = getRepository().findById(entity.getId());
+            Optional<PlatformEntity> existing = getRepository().findByIdentifier(entity.getIdentifier());
             if (existing.isPresent()) {
                 PlatformEntity merged = mapper.merge(existing.get(), entity);
                 if (entity.hasLocationEntities()) {
@@ -285,7 +285,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
 
     @Override
     public void delete(PlatformEntity entity) {
-        getRepository().deleteById(entity.getId());
+        getRepository().deleteByIdentifier(entity.getIdentifier());
     }
 
     @Override

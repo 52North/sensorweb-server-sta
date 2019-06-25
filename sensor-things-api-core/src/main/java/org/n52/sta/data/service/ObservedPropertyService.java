@@ -211,7 +211,7 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
     public PhenomenonEntity update(PhenomenonEntity entity, HttpMethod method) throws ODataApplicationException {
         checkUpdate(entity);
         if (HttpMethod.PATCH.equals(method)) {
-            Optional<PhenomenonEntity> existing = getRepository().findById(entity.getId());
+            Optional<PhenomenonEntity> existing = getRepository().findByIdentifier(entity.getIdentifier());
             if (existing.isPresent()) {
                 PhenomenonEntity merged = mapper.merge(existing.get(), entity);
                 return getRepository().save(getAsPhenomenonEntity(merged));
@@ -263,7 +263,7 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
 
     @Override
     protected void delete(PhenomenonEntity entity) {
-        getRepository().deleteById(entity.getId());
+        getRepository().deleteByIdentifier(entity.getIdentifier());
     }
 
     @Override
