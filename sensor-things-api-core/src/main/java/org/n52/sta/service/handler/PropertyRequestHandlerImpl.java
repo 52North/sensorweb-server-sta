@@ -90,7 +90,7 @@ public class PropertyRequestHandlerImpl extends AbstractPropertyRequestHandler<S
     private PropertyResponse resolveSimplePropertyRequest(List<UriResource> resourcePaths) throws ODataApplicationException {
         // determine the response EntitySet
         UriResourceEntitySet uriResourceEntitySet = navigationResolver.resolveRootUriResource(resourcePaths.get(0));
-        Entity targetEntity = navigationResolver.resolveSimpleEntityRequest(uriResourceEntitySet);
+        Entity targetEntity = navigationResolver.getEntityWithSimpleEntityRequest(uriResourceEntitySet);
         List<UriResource> propertyResourcePaths = resourcePaths.subList(1, resourcePaths.size());
 
         PropertyResponse response = resolveProperty(targetEntity, propertyResourcePaths, uriResourceEntitySet.getEntitySet());
@@ -108,7 +108,7 @@ public class PropertyRequestHandlerImpl extends AbstractPropertyRequestHandler<S
         }
         // determine the target query parameters and fetch Entity for it
         EntityQueryParams queryParams = navigationResolver.resolveUriResourceNavigationPaths(resourcePaths.subList(0, i));
-        Entity targetEntity = navigationResolver.resolveComplexEntityRequest(lastEntitySegment, queryParams);
+        Entity targetEntity = navigationResolver.getEntityWithComplexEntityRequest(lastEntitySegment, queryParams);
 
         PropertyResponse response = null;
 

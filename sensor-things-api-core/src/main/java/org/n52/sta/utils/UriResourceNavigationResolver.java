@@ -195,7 +195,7 @@ public class UriResourceNavigationResolver {
      * @return the requested Entity
      * @throws ODataApplicationException if an error occurs
      */
-    public Entity resolveSimpleEntityRequest(UriResourceEntitySet uriResourceEntitySet) throws ODataApplicationException {
+    public Entity getEntityWithSimpleEntityRequest(UriResourceEntitySet uriResourceEntitySet) throws ODataApplicationException {
         // fetch the data from backend for this requested Entity and deliver as Entity
         List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
         AbstractSensorThingsEntityService<?, ?> responseService = getEntityService(uriResourceEntitySet);
@@ -208,6 +208,22 @@ public class UriResourceNavigationResolver {
         return responseEntity;
     }
 
+
+    /**
+     * Checks whether an entity exists where the root UriResource contains the Entity request information (e.g. ./Thing(1))
+     *
+     * @param uriResourceEntitySet the root UriResource that contains EntitySet
+     *                             information about the requested Entity
+     * @return Id of the Entity if it exists. null otherwise
+     */
+    public String getEntityIdWithSimpleEntityRequest(UriResourceEntitySet uriResourceEntitySet) {
+        // fetch the data from backend for this requested Entity and deliver as Entity
+        List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
+        AbstractSensorThingsEntityService<?, ?> responseService = getEntityService(uriResourceEntitySet);
+        String entityId = getEntityIdFromKeyParams(keyPredicates);
+        return responseService.existsEntity(entityId) ? entityId : null;
+    }
+
     /**
      * Resolves a complex entity request that conatins one or more navigation
      * paths (e.g. ./Thing(1)/Datastreams(1)/Observations(1)
@@ -217,7 +233,7 @@ public class UriResourceNavigationResolver {
      * @return the requested Entity
      * @throws ODataApplicationException if an error occurs
      */
-    public Entity resolveComplexEntityRequest(UriResource lastSegment, EntityQueryParams requestParams) throws ODataApplicationException {
+    public Entity getEntityWithComplexEntityRequest(UriResource lastSegment, EntityQueryParams requestParams) throws ODataApplicationException {
 
         Entity responseEntity = null;
 
@@ -240,6 +256,30 @@ public class UriResourceNavigationResolver {
             }
         }
         return responseEntity;
+    }
+
+    /**
+     * Resolves a complex entity request that conatins one or more navigation
+     * paths (e.g. ./Thing(1)/Datastreams(1)/Observations(1)
+     *
+     * @param lastSegment   the last segment
+     * @param requestParams parameters for the Entity request
+     * @return Id of the Entity if it exists
+     */
+    public String getEntityIdWithComplexEntityRequest(UriResource lastSegment, EntityQueryParams requestParams) {
+        if (lastSegment instanceof UriResourceNavigation) {
+            List<UriParameter> navKeyPredicates = ((UriResourceNavigation) lastSegment).getKeyPredicates();
+            // e.g. /Things(1)/Location
+            if (navKeyPredicates.isEmpty()) {
+                return serviceRepository.getEntityService(requestParams.getTargetEntitySet().getEntityType().getName())
+                        .getIdForRelatedEntity(requestParams.getSourceId(), requestParams.getSourceEntityType()).orElse(null);
+
+            } else { // e.g. /Things(1)/Locations(1)
+                return serviceRepository.getEntityService(requestParams.getTargetEntitySet().getEntityType().getName())
+                        .getIdForRelatedEntity(requestParams.getSourceId(), requestParams.getSourceEntityType(), getEntityIdFromKeyParams(navKeyPredicates)).orElse(null);
+            }
+        }
+        return null;
     }
 
     public String getEntityIdFromKeyParams(List<UriParameter> keyParams) {

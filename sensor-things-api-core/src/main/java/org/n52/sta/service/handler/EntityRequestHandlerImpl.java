@@ -104,7 +104,7 @@ public class EntityRequestHandlerImpl extends AbstractEntityRequestHandler<Senso
     private EntityResponse createResponseForEntity(List<UriResource> resourcePaths) throws ODataApplicationException {
 
         UriResourceEntitySet uriResourceEntitySet = navigationResolver.resolveRootUriResource(resourcePaths.get(0));
-        Entity responseEntity = navigationResolver.resolveSimpleEntityRequest(uriResourceEntitySet);
+        Entity responseEntity = navigationResolver.getEntityWithSimpleEntityRequest(uriResourceEntitySet);
 
         // set Entity response information
         EntityResponse response = new EntityResponse();
@@ -118,7 +118,7 @@ public class EntityRequestHandlerImpl extends AbstractEntityRequestHandler<Senso
         // determine the target query parameters and fetch Entity for it
         EntityQueryParams requestParams = navigationResolver.resolveUriResourceNavigationPaths(resourcePaths);
         UriResource lastSegment = resourcePaths.get(resourcePaths.size() - 1);
-        Entity responseEntity = navigationResolver.resolveComplexEntityRequest(lastSegment, requestParams);
+        Entity responseEntity = navigationResolver.getEntityWithComplexEntityRequest(lastSegment, requestParams);
 
         // set EntityCollection response information
         EntityResponse response = new EntityResponse();
