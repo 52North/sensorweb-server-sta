@@ -76,15 +76,14 @@ public class MqttEventHandler implements STAEventHandler, InitializingBean {
     private EntityServiceRepository serviceRepository;
     private Map<AbstractMqttSubscription, HashSet<String>> subscriptions = new HashMap<AbstractMqttSubscription, HashSet<String>>();
     private ServiceMetadata edm;
-
-    public Set<String> getWatchedEntityTypes() {
-        return watchedEntityTypes;
-    }
-
     /*
      * List of all Entity Types that are currently subscribed to. Used for fail-fast.
      */
     private Set<String> watchedEntityTypes = new HashSet<String>();
+
+    public Set<String> getWatchedEntityTypes() {
+        return watchedEntityTypes;
+    }
 
     @SuppressWarnings({"unchecked"})
     @Override
@@ -93,18 +92,13 @@ public class MqttEventHandler implements STAEventHandler, InitializingBean {
         Map<String, Set<String>> collections;
 
         //Map beans Object into Olingo Entity
-        //Fail-fast if nobody is subscribed to this Type
-        if (!watchedEntityTypes.contains(rawObject.getClass().getName())) {
-            return;
-        } else {
-            entity = config.getMapper(rawObject.getClass().getName()).createEntity(rawObject);
-            AbstractSensorThingsEntityService<?, ?> responseService
-                    = serviceRepository.getEntityService(
-                    MqttUtil.getEntityTypes()
-                            .get(rawObject.getClass().getName()));
+        String entityClass = rawObject.getClass().getName();
+        entity = config.getMapper(entityClass).createEntity(rawObject);
+        AbstractSensorThingsEntityService<?, ?> responseService
+                = serviceRepository.getEntityService(
+                MqttUtil.typeMap.get(entityClass));
 
-            collections = responseService.getRelatedCollections(rawObject);
-        }
+        collections = responseService.getRelatedCollections(rawObject);
 
         // Check all subscriptions for a match
         ByteBuf serializedEntity = null;
@@ -135,7 +129,7 @@ public class MqttEventHandler implements STAEventHandler, InitializingBean {
         if (clients == null) {
             clients = new HashSet<String>();
         }
-        watchedEntityTypes.add(MqttUtil.getBeanTypes().get(subscription.getEdmEntityType().getName()));
+        watchedEntityTypes.add(MqttUtil.typeMap.get(subscription.getEdmEntityType().getName()));
         clients.add(clientId);
         subscriptions.put(subscription, clients);
     }
@@ -145,7 +139,7 @@ public class MqttEventHandler implements STAEventHandler, InitializingBean {
         if (clients != null) {
             if (clients.size() == 1) {
                 subscriptions.remove(subscription);
-                watchedEntityTypes.remove(MqttUtil.getBeanTypes().get(subscription.getEdmEntityType().getName()));
+                watchedEntityTypes.remove(MqttUtil.typeMap.get(subscription.getEdmEntityType().getName()));
             } else {
                 clients.remove(clientId);
                 subscriptions.put(subscription, clients);
