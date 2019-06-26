@@ -151,7 +151,8 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
         }
         // observationType
         if (existing.getDatasets() == null || existing.getDatasets().isEmpty() && toMerge.isSetObservationType()) {
-            if (!existing.getObservationType().getFormat().equals(toMerge.getObservationType().getFormat())) {
+            if (!existing.getObservationType().getFormat().equals(toMerge.getObservationType().getFormat())
+            && !toMerge.getObservationType().getFormat().equalsIgnoreCase("unknown")) {
                 existing.setObservationType(toMerge.getObservationType());
             }
         }
