@@ -213,7 +213,7 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
                 // Autogenerate Identifier
                 observableProperty.setStaIdentifier(UUID.randomUUID().toString());
             }
-        } else if (getRepository().existsByIdentifier(observableProperty.getIdentifier())) {
+        } else if (getRepository().existsByStaIdentifier(observableProperty.getStaIdentifier())) {
             throw new ODataApplicationException("Identifier already exists!",
                     HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
         }
