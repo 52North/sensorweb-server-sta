@@ -258,7 +258,12 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
             datastream.setProcedure(getSensorService().create(datastream.getProcedure()));
             datastream.setThing(getThingService().create(datastream.getThing()));
             if (datastream.getIdentifier() != null) {
-                datastream.setIdentifier(datastream.getIdentifier());
+                if (getRepository().existsByIdentifier(datastream.getIdentifier())) {
+                    throw new ODataApplicationException("Identifier already exists!",
+                            HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+                } else {
+                    datastream.setIdentifier(datastream.getIdentifier());
+                }
             } else {
                 datastream.setIdentifier(UUID.randomUUID().toString());
             }

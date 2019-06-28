@@ -196,13 +196,21 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
             if (thing.getIdentifier() != null && !thing.isSetName()) {
                 return getRepository().findByIdentifier(thing.getIdentifier()).get();
             }
-            if (getRepository().existsByName(thing.getName())) {
-                Optional<PlatformEntity> optional = getRepository().findByName(thing.getName());
-                return optional.isPresent() ? optional.get() : null;
+            if (thing.getIdentifier() == null) {
+                if (getRepository().existsByName(thing.getName())) {
+                    Optional<PlatformEntity> optional = getRepository().findByName(thing.getName());
+                    return optional.orElse(null);
+                } else {
+                    // Autogenerate Identifier
+                    thing.setIdentifier(UUID.randomUUID().toString());
+                }
+            } else if (getRepository().existsByIdentifier(thing.getIdentifier())) {
+                throw new ODataApplicationException("Identifier already exists!",
+                        HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
             }
             thing.setProcesssed(true);
             processLocations(thing);
-            thing = getRepository().save(thing);
+            thing = getRepository().intermediateSave(thing);
             processHistoricalLocations(thing);
             processDatastreams(thing);
             thing = getRepository().save(thing);

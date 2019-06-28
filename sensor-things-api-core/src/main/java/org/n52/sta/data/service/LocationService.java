@@ -222,9 +222,17 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
             if (location.getIdentifier() != null && !location.isSetName()) {
                 return getRepository().findByIdentifier(location.getIdentifier()).get();
             }
-            if (getRepository().existsByName(location.getName())) {
-                Optional<LocationEntity> optional = getRepository().findByName(location.getName());
-                return optional.isPresent() ? optional.get() : null;
+            if (location.getIdentifier() == null) {
+                if (getRepository().existsByName(location.getName())) {
+                    Optional<LocationEntity> optional = getRepository().findByName(location.getName());
+                    return optional.orElse(null);
+                } else {
+                    // Autogenerate Identifier
+                    location.setIdentifier(UUID.randomUUID().toString());
+                }
+            } else if (getRepository().existsByIdentifier(location.getIdentifier())) {
+                throw new ODataApplicationException("Identifier already exists!",
+                        HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
             }
             location.setProcesssed(true);
             checkLocationEncoding(location);

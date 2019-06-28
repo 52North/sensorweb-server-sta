@@ -199,16 +199,27 @@ public class FeatureOfInterestService
     }
 
     @Override
-    public AbstractFeatureEntity<?> create(AbstractFeatureEntity<?> feature) {
+    public AbstractFeatureEntity<?> create(AbstractFeatureEntity<?> feature) throws ODataApplicationException {
         if (feature.getIdentifier() != null && !feature.isSetName()) {
             return getRepository().findByIdentifier(feature.getIdentifier()).get();
         }
-        if (getRepository().existsByName(feature.getName())) {
-            Iterable<AbstractFeatureEntity<?>> features = getRepository().findAll(foiQS.withName(feature.getName()));
-            AbstractFeatureEntity<?> f = alreadyExistsFeature(features, feature);
-            if (f != null) {
-                return f;
+        if (feature.getIdentifier() == null) {
+            if (getRepository().existsByName(feature.getName())) {
+                Iterable<AbstractFeatureEntity<?>> features = getRepository().findAll(foiQS.withName(feature.getName()));
+                AbstractFeatureEntity<?> f = alreadyExistsFeature(features, feature);
+                if (f != null) {
+                    return f;
+                } else {
+                    // Autogenerate Identifier
+                    feature.setIdentifier(UUID.randomUUID().toString());
+                }
+            } else {
+                // Autogenerate Identifier
+                feature.setIdentifier(UUID.randomUUID().toString());
             }
+        } else if (getRepository().existsByIdentifier(feature.getIdentifier())) {
+            throw new ODataApplicationException("Identifier already exists!",
+                    HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
         }
         checkFeatureType(feature);
         return getRepository().save(feature);

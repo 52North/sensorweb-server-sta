@@ -160,7 +160,7 @@ public abstract class AbstractMapper<T> {
     }
 
     protected void setIdentifier(DescribableEntity describableEntity, Entity entity) {
-        String rawIdentifier = "";
+        String rawIdentifier = null;
         if (checkProperty(entity, PROP_ID)) {
             try {
                 rawIdentifier = EdmAny.getInstance().valueToString(getPropertyValue(entity, PROP_ID), false, 0, 0, 0, false);
@@ -169,15 +169,15 @@ public abstract class AbstractMapper<T> {
             }
         } else if (checkProperty(entity, PROP_DEFINITION)) {
             rawIdentifier = getPropertyValue(entity, PROP_DEFINITION).toString();
-        } else {
-            rawIdentifier = UUID.randomUUID().toString();
         }
 
         // URLEncode identifier.
-        try {
-            describableEntity.setIdentifier(URLEncoder.encode(rawIdentifier.replace("\'", ""), "utf-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+        if (rawIdentifier != null) {
+            try {
+                describableEntity.setIdentifier(URLEncoder.encode(rawIdentifier.replace("\'", ""), "utf-8"));
+            } catch (UnsupportedEncodingException e) {
+                // This should never happen.
+            }
         }
     }
 

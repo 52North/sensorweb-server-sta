@@ -464,7 +464,7 @@ public class ObservationService extends
         }
     }
 
-    private DataEntity<?> checkData(StaDataEntity observation, DatasetEntity dataset) {
+    private DataEntity<?> checkData(StaDataEntity observation, DatasetEntity dataset) throws ODataApplicationException {
         DataEntity<?> data = getDataEntity(observation, dataset);
         if (data != null) {
             return getRepository().save(data);
@@ -527,7 +527,7 @@ public class ObservationService extends
         }
     }
 
-    private DataEntity<?> getDataEntity(StaDataEntity observation, DatasetEntity dataset) {
+    private DataEntity<?> getDataEntity(StaDataEntity observation, DatasetEntity dataset) throws ODataApplicationException {
         DataEntity<?> data = null;
         switch (dataset.getOmObservationType().getFormat()) {
             case OmConstants.OBS_TYPE_MEASUREMENT:
@@ -575,7 +575,16 @@ public class ObservationService extends
         }
         if (data != null) {
             data.setDataset(dataset);
-            data.setIdentifier(observation.getIdentifier());
+            if (observation.getIdentifier() != null) {
+                if (getRepository().existsByIdentifier(observation.getIdentifier())) {
+                    throw new ODataApplicationException("Identifier already exists!",
+                            HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+                } else {
+                    data.setIdentifier(observation.getIdentifier());
+                }
+            } else {
+                data.setIdentifier(UUID.randomUUID().toString());
+            }
             data.setSamplingTimeStart(observation.getSamplingTimeStart());
             data.setSamplingTimeEnd(observation.getSamplingTimeEnd());
             if (observation.getResultTime() != null) {

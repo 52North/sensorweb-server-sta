@@ -202,15 +202,22 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     }
 
     @Override
-    public ProcedureEntity create(ProcedureEntity sensor) {
+    public ProcedureEntity create(ProcedureEntity sensor) throws ODataApplicationException {
         if (sensor.getIdentifier() != null && !sensor.isSetName()) {
             return getRepository().findByIdentifier(sensor.getIdentifier()).get();
         }
-        if (getRepository().existsByIdentifier(sensor.getIdentifier())
-                || getRepository().existsByName(sensor.getName())) {
-            Optional<ProcedureEntity> optional = getRepository()
-                    .findOne(sQS.withIdentifier(sensor.getIdentifier()).or(sQS.withName(sensor.getName())));
-            return optional.isPresent() ? optional.get() : null;
+        if (sensor.getIdentifier() == null) {
+            if (getRepository().existsByName(sensor.getName())) {
+                Optional<ProcedureEntity> optional = getRepository()
+                        .findOne(sQS.withIdentifier(sensor.getIdentifier()).or(sQS.withName(sensor.getName())));
+                return optional.isPresent() ? optional.get() : null;
+            } else {
+                // Autogenerate Identifier
+                sensor.setIdentifier(UUID.randomUUID().toString());
+            }
+        } else if (getRepository().existsByIdentifier(sensor.getIdentifier())) {
+            throw new ODataApplicationException("Identifier already exists!",
+                    HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
         }
         checkFormat(sensor);
         ProcedureEntity procedure = getAsProcedureEntity(sensor);
