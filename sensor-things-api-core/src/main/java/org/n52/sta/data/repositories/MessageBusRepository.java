@@ -39,7 +39,6 @@ public class MessageBusRepository<T, ID extends Serializable>
     @Transactional
     @Override
     public <S extends T> S save(S newEntity) {
-        // Todo check if getname is the correct method
         boolean intercept = mqttHandler.getWatchedEntityTypes().contains(entityInformation.getJavaType().getName());
 
         if (entityInformation.isNew(newEntity)) {
@@ -60,6 +59,24 @@ public class MessageBusRepository<T, ID extends Serializable>
         }
 
         return newEntity;
+    }
+
+
+    /**
+     * Saves an entity to the Datastore without intercepting for mqtt subscription checking.
+     * Used when Entity is saved multiple times during creation
+     * @param entity Entity to be saved
+     * @param <S> raw entity type
+     * @return saved entity.
+     */
+    @Transactional
+    public <S extends T> S intermediateSave(S entity) {
+        if (entityInformation.isNew(entity)) {
+            em.persist(entity);
+            return entity;
+        } else {
+            return em.merge(entity);
+        }
     }
 
     private Set<String> computeDifferenceMap(Object oldE, Object newE) {
