@@ -267,7 +267,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
             } else {
                 datastream.setIdentifier(UUID.randomUUID().toString());
             }
-            datastream = getRepository().save(datastream);
+            datastream = getRepository().intermediateSave(datastream);
             processObservation(datastream, datastream.getObservations());
             datastream = getRepository().save(datastream);
         }

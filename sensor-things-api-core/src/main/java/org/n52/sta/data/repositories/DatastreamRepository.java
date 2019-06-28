@@ -38,4 +38,5 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public interface DatastreamRepository extends NameRepository<DatastreamEntity> {
 
+    <S extends DatastreamEntity> S intermediateSave(S entity);
 }
