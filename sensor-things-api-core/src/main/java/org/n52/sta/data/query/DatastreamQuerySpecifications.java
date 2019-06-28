@@ -49,7 +49,7 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
         return (root, query, builder) -> {
             final Join<DatastreamEntity, PhenomenonEntity> join =
                     root.join(DatastreamEntity.PROPERTY_OBSERVABLE_PROPERTY, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), observablePropertyIdentifier);
+            return builder.equal(join.get("staIdentifier"), observablePropertyIdentifier);
         };
     }
 
