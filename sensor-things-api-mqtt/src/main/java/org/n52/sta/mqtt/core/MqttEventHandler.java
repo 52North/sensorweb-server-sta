@@ -40,7 +40,7 @@ import org.apache.olingo.server.api.serializer.SerializerException;
 import org.n52.sta.data.STAEventHandler;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
-import org.n52.sta.service.serializer.PayloadSerializer;
+import org.n52.sta.mqtt.handler.PayloadSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
