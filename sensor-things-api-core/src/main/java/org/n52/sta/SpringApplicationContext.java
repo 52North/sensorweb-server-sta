@@ -1,3 +1,31 @@
+/*
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Software GmbH
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation.
+ *
+ * If the program is linked with libraries which are licensed under one of
+ * the following licenses, the combination of the program with the linked
+ * library is not considered a "derivative work" of the program:
+ *
+ *     - Apache License, version 2.0
+ *     - Apache Software License, version 1.0
+ *     - GNU Lesser General Public License, version 3
+ *     - Mozilla Public License, versions 1.0, 1.1 and 2.0
+ *     - Common Development and Distribution License (CDDL), version 1.0
+ *
+ * Therefore the distribution of the program linked with libraries licensed
+ * under the aforementioned licenses, is permitted by the copyright holders
+ * if the distribution is compliant with both the GNU General Public
+ * License version 2 and the aforementioned licenses.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details.
+ */
 package org.n52.sta;
 
 import org.springframework.beans.BeansException;
@@ -7,36 +35,16 @@ import org.springframework.stereotype.Component;
 
 /**
  * Wrapper to always return a reference to the Spring Application Context from
- * within non-Spring enabled beans. Unlike Spring MVC's WebApplicationContextUtils
- * we do not need a reference to the Servlet context for this. All we need is
- * for this bean to be initialized during application startup.
- */
+ **/
 @Component
 public class SpringApplicationContext implements ApplicationContextAware {
 
     private static ApplicationContext CONTEXT;
 
-    /**
-     * This is about the same as context.getBean("beanName"), except it has its
-     * own static handle to the Spring context, so calling this method statically
-     * will give access to the beans by name in the Spring application context.
-     * As in the context.getBean("beanName") call, the caller must cast to the
-     * appropriate target class. If the bean does not exist, then a Runtime error
-     * will be thrown.
-     *
-     * @param beanName the name of the bean to get.
-     * @return an Object reference to the named bean.
-     */
     public static Object getBean(String beanName) {
         return CONTEXT.getBean(beanName);
     }
 
-    /**
-     * This method is called from within the ApplicationContext once it is
-     * done starting up, it will stick a reference to itself into this bean.
-     *
-     * @param context a reference to the ApplicationContext.
-     */
     public void setApplicationContext(ApplicationContext context) throws BeansException {
         CONTEXT = context;
     }
