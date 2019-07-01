@@ -324,15 +324,16 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
         return serviceRepository.getEntityService(type);
     }
 
+
     /**
      * Create {@link PageRequest}
      *
      * @param queryOptions {@link QueryOptions} to create {@link PageRequest}
      * @return {@link PageRequest} of type {@link OffsetLimitBasedPageRequest}
      */
-    protected OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions) {
+    protected OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions, String defaultSortingProperty) {
         int offset = queryOptions.hasSkipOption() ? queryOptions.getSkipOption().getValue() : 0;
-        Sort sort = Sort.by(Direction.ASC, "id");
+        Sort sort = Sort.by(Direction.ASC, defaultSortingProperty);
         if (queryOptions.hasOrderByOption()) {
             boolean first = true;
             try {
@@ -351,6 +352,10 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
             }
         }
         return new OffsetLimitBasedPageRequest(offset, queryOptions.getTopOption().getValue(), sort);
+    }
+
+    protected OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions) {
+        return this.createPageableRequest(queryOptions, "identifier");
     }
 
     /**

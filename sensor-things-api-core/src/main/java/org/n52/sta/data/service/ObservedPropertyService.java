@@ -67,6 +67,8 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
 
     private final static ObservedPropertyQuerySpecifications oQS = new ObservedPropertyQuerySpecifications();
 
+    private final static String IDENTIFIER = "staIdentifier";
+
     @Autowired
     private DatastreamRepository datastreamRepository;
 
@@ -86,7 +88,7 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
     public EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException {
         EntityCollection retEntitySet = new EntityCollection();
         Specification<PhenomenonEntity> filter = getFilterPredicate(PhenomenonEntity.class, queryOptions);
-        getRepository().findAll(filter, createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        getRepository().findAll(filter, createPageableRequest(queryOptions, IDENTIFIER)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
 
