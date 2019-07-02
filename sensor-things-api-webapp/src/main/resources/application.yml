@@ -50,8 +50,11 @@ spring:
 # MQTT Configuration
 mqtt:
   broker:
+    websocket:
+      enabled: false
+      port: 8081
     persistence:
-      enabled: true
+      enabled: false
       path: "" # Empty for default path (java "user.dir")
       filename: "52N-STA-MQTTBroker.h2"
       autosave_interval: "30"

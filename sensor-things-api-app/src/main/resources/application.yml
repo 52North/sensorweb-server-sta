@@ -16,7 +16,7 @@ spring:
     platform: postgres
     username: postgres
     password: postgres
-    url: jdbc:postgresql://localhost:5432/sta_test
+    url: jdbc:postgresql://localhost:5432/sta
     initialization-mode: always
   jpa:
     properties:
@@ -44,7 +44,7 @@ mqtt:
   broker:
     websocket:
       enabled: false
-      port: 8081
+      port: 8883
     persistence:
       enabled: false
       path: "" # Empty for default path (java "user.dir")
