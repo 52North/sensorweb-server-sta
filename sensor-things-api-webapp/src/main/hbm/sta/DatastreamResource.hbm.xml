@@ -16,6 +16,11 @@
         <property name="description" type="text">
             <column name="description" not-null="true"/>
         </property>
+        <property name="identifier" type="string" index="idx_datastream_identifier">
+            <column name="identifier" not-null="true" unique-key="un_datastream_identifier">
+                <comment>Unique identifier of the datastream. Should be a URI, UUID. E.g. http://www.example.org/123, 123-321.</comment>
+            </column>
+        </property>
         <component class="org.n52.series.db.beans.GeometryEntity" name="geometryEntity">
             <property name="geometry" type="jts_geometry">
                 <column name="observed_area" not-null="false"/>

@@ -16,6 +16,11 @@
         <property name="description" type="text">
             <column name="description" not-null="true"/>
         </property>
+        <property name="identifier" type="string" index="idx_location_identifier">
+            <column name="identifier" not-null="true" unique-key="un_location_identifier">
+                <comment>Unique identifier of the location. Should be a URI, UUID. E.g. http://www.example.org/123, 123-321.</comment>
+            </column>
+        </property>
         <property name="location" type="text">
             <column name="location" not-null="false"/>
         </property>
@@ -64,6 +69,11 @@
                 <param name="sequence_name">historical_location_seq</param>
             </generator>
         </id>
+        <property name="identifier" type="string" index="idx_historicallocation_identifier">
+            <column name="identifier" not-null="true" unique-key="un_historicallocation_identifier">
+                <comment>Unique identifier of the HistoricalLocation. Should be a URI, UUID. E.g. http://www.example.org/123, 123-321.</comment>
+            </column>
+        </property>
         <many-to-one name="thing" class="org.n52.series.db.beans.PlatformEntity" foreign-key="fk_thing_historical_location">
             <column name="fk_thing_id" not-null="true"/>
         </many-to-one>
