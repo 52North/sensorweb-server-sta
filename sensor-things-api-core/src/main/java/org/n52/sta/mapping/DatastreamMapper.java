@@ -28,32 +28,10 @@
  */
 package org.n52.sta.mapping;
 
-import java.util.Collections;
-import java.util.HashMap;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_OBSERVATION_TYPE;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_OBSERVED_AREA;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PHENOMENON_TIME;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_RESULT_TIME;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_UOM;
-import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ES_DATASTREAMS_NAME;
-import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_FQN;
-import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ES_OBSERVATIONS_NAME;
-import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_NAME;
-import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ET_SENSOR_NAME;
-import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
-
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
-import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.geo.Geospatial;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
@@ -68,6 +46,19 @@ import org.n52.shetland.util.DateTimeHelper;
 import org.n52.sta.edm.provider.complextypes.UnitOfMeasurementComplexType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Locale;
+import java.util.Set;
+
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.*;
+import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ES_DATASTREAMS_NAME;
+import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_FQN;
+import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ES_OBSERVATIONS_NAME;
+import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_NAME;
+import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ET_SENSOR_NAME;
+import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
 
 /**
  *
@@ -90,7 +81,7 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
 
     public Entity createEntity(DatastreamEntity datastream) {
         Entity entity = new Entity();
-        entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, datastream.getId()));
+        entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, datastream.getIdentifier()));
         addDescription(entity, datastream);
         addName(entity, datastream);
         entity.addProperty(new Property(null,
@@ -123,7 +114,7 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
 
     public DatastreamEntity createEntity(Entity entity) {
         DatastreamEntity datastream = new DatastreamEntity();
-        setId(datastream, entity);
+        setIdentifier(datastream, entity);
         setName(datastream, entity);
         setDescription(datastream, entity);
         addFormat(datastream, entity);
@@ -160,7 +151,8 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
         }
         // observationType
         if (existing.getDatasets() == null || existing.getDatasets().isEmpty() && toMerge.isSetObservationType()) {
-            if (!existing.getObservationType().getFormat().equals(toMerge.getObservationType().getFormat())) {
+            if (!existing.getObservationType().getFormat().equals(toMerge.getObservationType().getFormat())
+            && !toMerge.getObservationType().getFormat().equalsIgnoreCase("unknown")) {
                 existing.setObservationType(toMerge.getObservationType());
             }
         }

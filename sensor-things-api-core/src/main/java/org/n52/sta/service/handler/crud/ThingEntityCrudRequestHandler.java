@@ -66,8 +66,8 @@ public class ThingEntityCrudRequestHandler extends AbstractEntityCrudRequestHand
 
 
     @Override
-    protected void handleDeleteEntityRequest(Long id) throws ODataApplicationException {
-        getEntityService().delete(id);
+    protected void handleDeleteEntityRequest(String id) throws ODataApplicationException {
+        getEntityService().delete(id.replace("\'", ""));
     }
 
     @Override

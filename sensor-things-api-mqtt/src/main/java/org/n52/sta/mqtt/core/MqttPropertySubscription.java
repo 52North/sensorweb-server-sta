@@ -33,44 +33,40 @@
  */
 package org.n52.sta.mqtt.core;
 
-import java.util.Map;
-import java.util.Set;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmProperty;
 import org.n52.sta.service.query.QueryOptions;
 
+import java.util.Map;
+import java.util.Set;
+
 /**
- *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 public class MqttPropertySubscription extends AbstractMqttSubscription {
 
     private EdmEntitySet entitySet;
 
-    private Long entityId;
+    private String entityId;
 
-    private EdmProperty watchedEdmProperty;
-
-    private Set<String> watchedProperties;
+    private String watchedEdmProperty;
 
     public MqttPropertySubscription(EdmEntitySet targetEntitySet,
                                     EdmEntityType entityType,
-                                    Long targetId,
+                                    String targetId,
                                     EdmProperty watchedProperty,
                                     String topic,
-                                    QueryOptions queryOptions,
-                                    Set<String> watchedProperties) {
+                                    QueryOptions queryOptions) {
         super(topic, queryOptions, entityType, targetEntitySet);
         this.entitySet = targetEntitySet;
         this.entityId = targetId;
-        this.watchedEdmProperty = watchedProperty;
-        this.watchedProperties = watchedProperties;
+        this.watchedEdmProperty = watchedProperty.getName();
     }
 
     @Override
-    public boolean matches(Entity entity, Map<String, Set<Long>> collections, Set<String> differenceMap) {
+    public boolean matches(Entity entity, Map<String, Set<String>> collections, Set<String> differenceMap) {
 
         // Check type and fail-fast on type mismatch
         if (!(entity.getType().equals(getEdmEntityType().getName()))) {
@@ -82,17 +78,12 @@ public class MqttPropertySubscription extends AbstractMqttSubscription {
             return false;
         }
 
-        // Check for property changes
-        if (differenceMap == null) {
+        // Check if property changed
+        if (differenceMap == null || differenceMap.contains(watchedEdmProperty)) {
             return true;
-        } else {
-            for (String changedProperty : differenceMap) {
-                if (watchedProperties.contains(changedProperty)) {
-                    return true;
-                }
-            }
-            return false;
         }
+        // Subscription is not applicable
+        return false;
     }
 
 }

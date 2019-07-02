@@ -33,11 +33,7 @@
  */
 package org.n52.sta.utils;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.OptionalLong;
 import org.apache.olingo.commons.api.data.Entity;
-
 import org.apache.olingo.commons.api.edm.EdmBindingTarget;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
@@ -53,6 +49,12 @@ import org.n52.sta.data.service.EntityServiceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+
 /**
  * Helper class to resolve URI resources
  *
@@ -63,6 +65,38 @@ public class UriResourceNavigationResolver {
 
     @Autowired
     private EntityServiceRepository serviceRepository;
+
+    /**
+     * Determines the target EntitySet for a navigation property
+     *
+     * @param startEdmEntitySet     the EntitySet to start with
+     * @param edmNavigationProperty the navigation property from one entity type
+     *                              to another
+     * @return the target EntitySet for the navigation property
+     * @throws ODataApplicationException if an error occurs
+     */
+    public static EdmEntitySet getNavigationTargetEntitySet(EdmEntitySet startEdmEntitySet,
+                                                            EdmNavigationProperty edmNavigationProperty)
+            throws ODataApplicationException {
+
+        EdmEntitySet navigationTargetEntitySet = null;
+
+        String navPropName = edmNavigationProperty.getName();
+        EdmBindingTarget edmBindingTarget = startEdmEntitySet.getRelatedBindingTarget(navPropName);
+        if (edmBindingTarget == null) {
+            throw new ODataApplicationException("Not supported.",
+                    HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
+        }
+
+        if (edmBindingTarget instanceof EdmEntitySet) {
+            navigationTargetEntitySet = (EdmEntitySet) edmBindingTarget;
+        } else {
+            throw new ODataApplicationException("Not supported.",
+                    HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
+        }
+
+        return navigationTargetEntitySet;
+    }
 
     /**
      * Resolves the root URI resource as UriResourceEntitySet
@@ -97,7 +131,7 @@ public class UriResourceNavigationResolver {
         List<UriParameter> sourceKeyPredicates = uriResourceEntitySet.getKeyPredicates();
         EdmEntityType sourceEntityType = uriResourceEntitySet.getEntityType();
 
-        Long sourceEntityId = getEntityIdFromKeyParams(sourceKeyPredicates);
+        String sourceEntityId = getEntityIdFromKeyParams(sourceKeyPredicates);
         boolean entityExists = serviceRepository.getEntityService(uriResourceEntitySet.getEntityType().getName())
                 .existsEntity(sourceEntityId);
 
@@ -117,7 +151,7 @@ public class UriResourceNavigationResolver {
                 targetEntityType = edmNavigationProperty.getType();
 
                 List<UriParameter> navKeyPredicates = uriResourceNavigation.getKeyPredicates();
-                OptionalLong targetIdOpt = OptionalLong.empty();
+                Optional<String> targetIdOpt;
 
                 // e.g. /Things(1)/Location
                 if (navKeyPredicates.isEmpty()) {
@@ -135,8 +169,7 @@ public class UriResourceNavigationResolver {
                 }
 
                 sourceEntityType = targetEntityType;
-                sourceEntityId = targetIdOpt.getAsLong();
-
+                sourceEntityId = targetIdOpt.get();
                 targetEntitySet = getNavigationTargetEntitySet(targetEntitySet, edmNavigationProperty);
             }
         }
@@ -154,47 +187,15 @@ public class UriResourceNavigationResolver {
     }
 
     /**
-     * Determines the target EntitySet for a navigation property
-     *
-     * @param startEdmEntitySet the EntitySet to start with
-     * @param edmNavigationProperty the navigation property from one entity type
-     * to another
-     * @return the target EntitySet for the navigation property
-     * @throws ODataApplicationException if an error occurs
-     */
-    public static EdmEntitySet getNavigationTargetEntitySet(EdmEntitySet startEdmEntitySet,
-            EdmNavigationProperty edmNavigationProperty)
-            throws ODataApplicationException {
-
-        EdmEntitySet navigationTargetEntitySet = null;
-
-        String navPropName = edmNavigationProperty.getName();
-        EdmBindingTarget edmBindingTarget = startEdmEntitySet.getRelatedBindingTarget(navPropName);
-        if (edmBindingTarget == null) {
-            throw new ODataApplicationException("Not supported.",
-                    HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
-        }
-
-        if (edmBindingTarget instanceof EdmEntitySet) {
-            navigationTargetEntitySet = (EdmEntitySet) edmBindingTarget;
-        } else {
-            throw new ODataApplicationException("Not supported.",
-                    HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
-        }
-
-        return navigationTargetEntitySet;
-    }
-
-    /**
      * Resolves a simple entity request where the root UriResource contains the
      * Entity request information (e.g. ./Thing(1)
      *
      * @param uriResourceEntitySet the root UriResource that contains EntitySet
-     * information about the requested Entity
+     *                             information about the requested Entity
      * @return the requested Entity
      * @throws ODataApplicationException if an error occurs
      */
-    public Entity resolveSimpleEntityRequest(UriResourceEntitySet uriResourceEntitySet) throws ODataApplicationException {
+    public Entity getEntityWithSimpleEntityRequest(UriResourceEntitySet uriResourceEntitySet) throws ODataApplicationException {
         // fetch the data from backend for this requested Entity and deliver as Entity
         List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
         AbstractSensorThingsEntityService<?, ?> responseService = getEntityService(uriResourceEntitySet);
@@ -207,16 +208,32 @@ public class UriResourceNavigationResolver {
         return responseEntity;
     }
 
+
+    /**
+     * Checks whether an entity exists where the root UriResource contains the Entity request information (e.g. ./Thing(1))
+     *
+     * @param uriResourceEntitySet the root UriResource that contains EntitySet
+     *                             information about the requested Entity
+     * @return Id of the Entity if it exists. null otherwise
+     */
+    public String getEntityIdWithSimpleEntityRequest(UriResourceEntitySet uriResourceEntitySet) {
+        // fetch the data from backend for this requested Entity and deliver as Entity
+        List<UriParameter> keyPredicates = uriResourceEntitySet.getKeyPredicates();
+        AbstractSensorThingsEntityService<?, ?> responseService = getEntityService(uriResourceEntitySet);
+        String entityId = getEntityIdFromKeyParams(keyPredicates);
+        return responseService.existsEntity(entityId) ? entityId : null;
+    }
+
     /**
      * Resolves a complex entity request that conatins one or more navigation
      * paths (e.g. ./Thing(1)/Datastreams(1)/Observations(1)
      *
-     * @param lastSegment the last segment
+     * @param lastSegment   the last segment
      * @param requestParams parameters for the Entity request
      * @return the requested Entity
      * @throws ODataApplicationException if an error occurs
      */
-    public Entity resolveComplexEntityRequest(UriResource lastSegment, EntityQueryParams requestParams) throws ODataApplicationException {
+    public Entity getEntityWithComplexEntityRequest(UriResource lastSegment, EntityQueryParams requestParams) throws ODataApplicationException {
 
         Entity responseEntity = null;
 
@@ -241,8 +258,42 @@ public class UriResourceNavigationResolver {
         return responseEntity;
     }
 
-    public Long getEntityIdFromKeyParams(List<UriParameter> keyParams) {
-        return Long.parseLong(keyParams.get(0).getText());
+    /**
+     * Resolves a complex entity request that conatins one or more navigation
+     * paths (e.g. ./Thing(1)/Datastreams(1)/Observations(1)
+     *
+     * @param lastSegment   the last segment
+     * @param requestParams parameters for the Entity request
+     * @return Id of the Entity if it exists
+     */
+    public String getEntityIdWithComplexEntityRequest(UriResource lastSegment, EntityQueryParams requestParams) {
+        if (lastSegment instanceof UriResourceNavigation) {
+            List<UriParameter> navKeyPredicates = ((UriResourceNavigation) lastSegment).getKeyPredicates();
+            // e.g. /Things(1)/Location
+            if (navKeyPredicates.isEmpty()) {
+                return serviceRepository.getEntityService(requestParams.getTargetEntitySet().getEntityType().getName())
+                        .getIdForRelatedEntity(requestParams.getSourceId(), requestParams.getSourceEntityType()).orElse(null);
+
+            } else { // e.g. /Things(1)/Locations(1)
+                return serviceRepository.getEntityService(requestParams.getTargetEntitySet().getEntityType().getName())
+                        .getIdForRelatedEntity(requestParams.getSourceId(), requestParams.getSourceEntityType(), getEntityIdFromKeyParams(navKeyPredicates)).orElse(null);
+            }
+        }
+        return null;
+    }
+
+    public String getEntityIdFromKeyParams(List<UriParameter> keyParams) {
+        String id = keyParams.get(0).getText();
+        if (id.charAt(0) == '\'') {
+            // Remove single quotes used to mark start and end of string in url
+            try {
+                return URLEncoder.encode(id.substring(1, id.length()-1), "utf-8");
+            } catch (UnsupportedEncodingException e) {
+                return id;
+            }
+        } else {
+            return id;
+        }
     }
 
     private AbstractSensorThingsEntityService<?, ?> getEntityService(UriResourceEntitySet uriResourceEntitySet) {

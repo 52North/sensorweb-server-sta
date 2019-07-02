@@ -32,7 +32,14 @@ package org.n52.sta.data.repositories;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Transactional
 public interface PhenomenonRepository extends ParameterDataRepository<PhenomenonEntity> {
 
+    Optional<PhenomenonEntity> findByStaIdentifier(String identifier);
+
+    void deleteByStaIdentifier(String identifier);
+
+    boolean existsByStaIdentifier(String id);
 }

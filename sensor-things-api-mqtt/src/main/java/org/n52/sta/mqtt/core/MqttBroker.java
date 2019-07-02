@@ -28,12 +28,14 @@
  */
 package org.n52.sta.mqtt.core;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.Properties;
-
+import io.moquette.BrokerConstants;
+import io.moquette.broker.Server;
+import io.moquette.broker.config.IConfig;
+import io.moquette.broker.config.MemoryConfig;
+import io.moquette.broker.subscriptions.Subscription;
+import io.moquette.interception.AbstractInterceptHandler;
+import io.moquette.interception.InterceptHandler;
+import io.moquette.interception.messages.*;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.deserializer.DeserializerException;
 import org.apache.olingo.server.core.uri.parser.UriParserException;
@@ -51,19 +53,11 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import io.moquette.BrokerConstants;
-import io.moquette.broker.Server;
-import io.moquette.broker.config.IConfig;
-import io.moquette.broker.config.MemoryConfig;
-import io.moquette.broker.subscriptions.Subscription;
-import io.moquette.interception.AbstractInterceptHandler;
-import io.moquette.interception.InterceptHandler;
-import io.moquette.interception.messages.InterceptConnectMessage;
-import io.moquette.interception.messages.InterceptConnectionLostMessage;
-import io.moquette.interception.messages.InterceptDisconnectMessage;
-import io.moquette.interception.messages.InterceptPublishMessage;
-import io.moquette.interception.messages.InterceptSubscribeMessage;
-import io.moquette.interception.messages.InterceptUnsubscribeMessage;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.Properties;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -85,6 +79,12 @@ public class MqttBroker {
 
     @Value("${mqtt.broker.persistence.enabled}")
     private Boolean MOQUETTE_PERSISTENCE_ENABLED;
+
+    @Value("${mqtt.broker.websocket.enabled}")
+    private Boolean MOQUETTE_WEBSOCKET_ENABLED;
+
+    @Value("${mqtt.broker.websocket.port:8080}")
+    private String MOQUETTE_WEBSOCKET_PORT;
 
     @Autowired
     private MqttMessageHandler handler;
@@ -166,7 +166,7 @@ public class MqttBroker {
                     } catch (UriParserException | UriValidationException
                             | ODataApplicationException | DeserializerException ex) {
                         LOGGER.error("Error while processing MQTT message");
-                        LOGGER.debug("Error while processing MQTT message", ex);
+                        LOGGER.debug("Error while processing MQTT message", ex.getMessage());
                     }
                 }
             }
@@ -179,7 +179,7 @@ public class MqttBroker {
                     handler.processSubscribeMessage(msg);
                 } catch (Exception e) {
                     LOGGER.error("Error while processing MQTT subscription");
-                    LOGGER.debug("Error while processing MQTT subscription", e);
+                    LOGGER.debug("Error while processing MQTT subscription", e.getMessage());
                 }
             }
 
@@ -218,6 +218,11 @@ public class MqttBroker {
             // In-Memory Subscription Store
             props.put(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, "");
         }
+
+        if (MOQUETTE_WEBSOCKET_ENABLED) {
+            props.put(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME, MOQUETTE_WEBSOCKET_PORT);
+        }
+
         props.put(BrokerConstants.ALLOW_ANONYMOUS_PROPERTY_NAME, Boolean.TRUE.toString());
         return new MemoryConfig(props);
     }

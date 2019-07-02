@@ -28,21 +28,6 @@
  */
 package org.n52.sta.mapping;
 
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_TIME;
-import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ES_HISTORICAL_LOCATIONS_NAME;
-import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_FQN;
-import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ES_LOCATIONS_NAME;
-import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
@@ -52,18 +37,33 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
-import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATION_NAME;
-//import org.n52.sta.utils.EntityAnnotator;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.UUID;
+
+import static org.n52.sta.edm.provider.SensorThingsEdmConstants.ID;
+import static org.n52.sta.edm.provider.SensorThingsEdmConstants.ID_ANNOTATION;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_TIME;
+import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ES_HISTORICAL_LOCATIONS_NAME;
+import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_FQN;
+import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ES_LOCATIONS_NAME;
+import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
+
+//import org.n52.sta.utils.EntityAnnotator;
+
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- *
  */
 @Component
-public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationEntity>{
+public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationEntity> {
 
     @Autowired
     private EntityCreationHelper entityCreationHelper;
@@ -77,7 +77,7 @@ public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationE
     public Entity createEntity(HistoricalLocationEntity location) {
         Entity entity = new Entity();
 
-        entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, location.getId()));
+        entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, location.getIdentifier()));
         entity.addProperty(new Property(null, PROP_TIME, ValueType.PRIMITIVE, location.getTime().getTime()));
 
         entity.setType(ET_HISTORICAL_LOCATION_FQN.getFullQualifiedNameAsString());
@@ -94,7 +94,7 @@ public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationE
     @Override
     public HistoricalLocationEntity createEntity(Entity entity) {
         HistoricalLocationEntity historicalLocation = new HistoricalLocationEntity();
-        setId(historicalLocation, entity);
+        setIdentifier(historicalLocation, entity);
         addTime(historicalLocation, entity);
         addThing(historicalLocation, entity);
         addLocations(historicalLocation, entity);
@@ -107,6 +107,23 @@ public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationE
             existing.setTime(toMerge.getTime());
         }
         return existing;
+    }
+
+    protected void setIdentifier(HistoricalLocationEntity idEntity, Entity entity) {
+        String rawId;
+        if (checkProperty(entity, ID)) {
+            rawId = getPropertyValue(entity, ID).toString();
+        } else if (checkProperty(entity, ID_ANNOTATION)) {
+            rawId = getPropertyValue(entity, ID_ANNOTATION).toString();
+        } else {
+            rawId = UUID.randomUUID().toString();
+        }
+
+        // URLEncode identifier.
+        try {
+            idEntity.setIdentifier(URLEncoder.encode(rawId, "utf-8"));
+        } catch (UnsupportedEncodingException e) {
+        }
     }
 
     private void addTime(HistoricalLocationEntity historicalLocation, Entity entity) {

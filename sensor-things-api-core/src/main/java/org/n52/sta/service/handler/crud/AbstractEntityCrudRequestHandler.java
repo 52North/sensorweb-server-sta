@@ -28,11 +28,6 @@
  */
 package org.n52.sta.service.handler.crud;
 
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
-
-import java.util.List;
-import java.util.Locale;
-
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
@@ -53,6 +48,11 @@ import org.n52.sta.service.response.EntityResponse;
 import org.n52.sta.utils.UriResourceNavigationResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Locale;
+
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 
 public abstract class AbstractEntityCrudRequestHandler<T extends IdEntity> {
 
@@ -100,14 +100,14 @@ public abstract class AbstractEntityCrudRequestHandler<T extends IdEntity> {
     public EntityResponse handleDeleteEntityRequest(List<UriResource> resourcePaths) throws ODataApplicationException {
         UriResourceEntitySet uriResourceEntitySet = getUriResourceEntitySet(resourcePaths);
         EdmEntitySet responseEntitySet = uriResourceEntitySet.getEntitySet();
-        handleDeleteEntityRequest(getId(uriResourceEntitySet));
+        handleDeleteEntityRequest(getIdentifier(uriResourceEntitySet));
         EntityResponse response = new EntityResponse();
         response.setEntitySet(responseEntitySet);
 //        response.setEntity(responseEntity);
         return response;
     }
 
-    protected abstract void handleDeleteEntityRequest(Long id) throws ODataApplicationException;
+    protected abstract void handleDeleteEntityRequest(String id) throws ODataApplicationException;
 
     protected UriResourceEntitySet getUriResourceEntitySet(List<UriResource> resourcePaths) throws ODataApplicationException {
         return navigationResolver.resolveRootUriResource(resourcePaths.get(0));
@@ -130,15 +130,15 @@ public abstract class AbstractEntityCrudRequestHandler<T extends IdEntity> {
     }
 
     private Entity checkId(Entity entity, UriResourceEntitySet uriResourceEntitySet) throws ODataApplicationException {
-        return entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, getId(uriResourceEntitySet)));
+        return entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, getIdentifier(uriResourceEntitySet)));
     }
 
-    private Long getId(UriResourceEntitySet uriResourceEntitySet) throws ODataApplicationException {
+    private String getIdentifier(UriResourceEntitySet uriResourceEntitySet) throws ODataApplicationException {
         if (!uriResourceEntitySet.getKeyPredicates().isEmpty()) {
             for (UriParameter uriParameter : uriResourceEntitySet.getKeyPredicates()) {
                 if (uriParameter.getName() != null && uriParameter.getName().equals(SensorThingsEdmConstants.ID)
                         && uriParameter.getText() != null && !uriParameter.getText().isEmpty()) {
-                    return Long.parseLong(uriParameter.getText());
+                    return uriParameter.getText();
                 }
             }
         }

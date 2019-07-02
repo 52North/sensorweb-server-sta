@@ -46,7 +46,7 @@ public class EntityQueryParams {
 
     private EdmEntityType sourceEntityType;
 
-    private Long sourceId;
+    private String sourceId;
 
     private EdmEntitySet targetEntitySet;
 
@@ -58,11 +58,11 @@ public class EntityQueryParams {
         this.sourceEntityType = sourceEntityType;
     }
 
-    public Long getSourceId() {
+    public String getSourceId() {
         return sourceId;
     }
 
-    public void setSourceKeyPredicates(Long sourceId) {
+    public void setSourceKeyPredicates(String sourceId) {
         this.sourceId = sourceId;
     }
 

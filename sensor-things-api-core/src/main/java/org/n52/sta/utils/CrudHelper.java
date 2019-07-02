@@ -33,7 +33,6 @@
  */
 package org.n52.sta.utils;
 
-import java.io.InputStream;
 import org.apache.olingo.commons.api.Constants;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Link;
@@ -46,7 +45,6 @@ import org.apache.olingo.server.api.deserializer.DeserializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.n52.sta.edm.provider.SensorThingsEdmConstants;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 import org.n52.sta.service.deserializer.SensorThingsDeserializer;
 import org.n52.sta.service.handler.crud.AbstractEntityCrudRequestHandler;
 import org.n52.sta.service.handler.crud.EntityCrudRequestHandlerRepository;
@@ -54,15 +52,18 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.InputStream;
+
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
+
 /**
- *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
 public class CrudHelper implements InitializingBean {
 
     @Autowired
-    private EntityCrudRequestHandlerRepository crudRequestHandlerReportitory;
+    private EntityCrudRequestHandlerRepository crudRequestHandlerRepository;
 
     @Autowired
     private UriResourceNavigationResolver navigationResolver;
@@ -96,7 +97,7 @@ public class CrudHelper implements InitializingBean {
         return entity;
     }
 
-    public Entity addId(Entity entity, Long id) {
+    public Entity addId(Entity entity, String id) {
         return entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, id));
     }
 
@@ -113,7 +114,7 @@ public class CrudHelper implements InitializingBean {
     }
 
     public AbstractEntityCrudRequestHandler getUriResourceEntitySet(String type) {
-        return crudRequestHandlerReportitory.getEntityCrudRequestHandler(type);
+        return crudRequestHandlerRepository.getEntityCrudRequestHandler(type);
     }
 
     @Override

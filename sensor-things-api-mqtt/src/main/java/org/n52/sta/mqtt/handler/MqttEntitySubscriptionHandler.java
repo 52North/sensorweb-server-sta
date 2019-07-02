@@ -33,12 +33,10 @@
  */
 package org.n52.sta.mqtt.handler;
 
-import java.util.List;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 import org.n52.sta.mqtt.core.MqttEntitySubscription;
 import org.n52.sta.mqtt.request.SensorThingsMqttRequest;
 import org.n52.sta.service.handler.AbstractEntityRequestHandler;
@@ -47,6 +45,10 @@ import org.n52.sta.utils.EntityQueryParams;
 import org.n52.sta.utils.UriResourceNavigationResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 
 /**
  *
@@ -76,19 +78,19 @@ public class MqttEntitySubscriptionHandler extends AbstractEntityRequestHandler<
 
     private MqttEntitySubscription createResponseForEntity(String topic, List<UriResource> resourcePaths, QueryOptions queryOptions) throws ODataApplicationException {
         UriResourceEntitySet uriResourceEntitySet = navigationResolver.resolveRootUriResource(resourcePaths.get(0));
-        Entity responseEntity = navigationResolver.resolveSimpleEntityRequest(uriResourceEntitySet);
+        Entity responseEntity = navigationResolver.getEntityWithSimpleEntityRequest(uriResourceEntitySet);
 
         //TODO ensure Long typecasting
-        return new MqttEntitySubscription((Long) responseEntity.getProperty(PROP_ID).getValue(),
+        return new MqttEntitySubscription(responseEntity.getProperty(PROP_ID).getValue().toString(),
                 uriResourceEntitySet.getEntitySet(), uriResourceEntitySet.getEntityType(), topic, queryOptions);
     }
 
     private MqttEntitySubscription createResponseForNavigation(String topic, List<UriResource> resourcePaths, QueryOptions queryOptions) throws ODataApplicationException {
         EntityQueryParams requestParams = navigationResolver.resolveUriResourceNavigationPaths(resourcePaths);
         UriResource lastSegment = resourcePaths.get(resourcePaths.size() - 1);
-        Entity responseEntity = navigationResolver.resolveComplexEntityRequest(lastSegment, requestParams);
+        Entity responseEntity = navigationResolver.getEntityWithComplexEntityRequest(lastSegment, requestParams);
 
-        return new MqttEntitySubscription((Long) responseEntity.getProperty(PROP_ID).getValue(),
+        return new MqttEntitySubscription(responseEntity.getProperty(PROP_ID).getValue().toString(),
                 requestParams.getTargetEntitySet(), requestParams.getTargetEntitySet().getEntityType(), topic, queryOptions);
     }
 

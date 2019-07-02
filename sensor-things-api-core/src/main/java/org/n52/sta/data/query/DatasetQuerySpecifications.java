@@ -54,7 +54,7 @@ public class DatasetQuerySpecifications {
         return (root, query, builder) -> {
             final Join<DatasetEntity, OfferingEntity> join =
                     root.join(DatasetEntity.PROPERTY_OFFERING, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), id);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), id);
         };
     }
 
@@ -69,7 +69,7 @@ public class DatasetQuerySpecifications {
         return (root, query, builder) -> {
             final Join<DatasetEntity, FeatureEntity> join =
                     root.join(DatasetEntity.PROPERTY_FEATURE, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), id);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), id);
         };
     }
 
@@ -84,7 +84,7 @@ public class DatasetQuerySpecifications {
         return (root, query, builder) -> {
             final Join<DatasetEntity, ProcedureEntity> join =
                     root.join(DatasetEntity.PROPERTY_PROCEDURE, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), id);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), id);
         };
     }
 
@@ -99,7 +99,7 @@ public class DatasetQuerySpecifications {
         return (root, query, builder) -> {
             final Join<DatasetEntity, PhenomenonEntity> join =
                     root.join(DatasetEntity.PROPERTY_PHENOMENON, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), id);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), id);
         };
     }
 
@@ -114,7 +114,7 @@ public class DatasetQuerySpecifications {
         return (root, query, builder) -> {
             final Join<DatasetEntity, PlatformEntity> join =
                     root.join(DatasetEntity.PROPERTY_PLATFORM, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), id);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), id);
         };
     }
 
@@ -129,7 +129,7 @@ public class DatasetQuerySpecifications {
         return (root, query, builder) -> {
             final Join<DatasetEntity, CategoryEntity> join =
                     root.join(DatasetEntity.PROPERTY_CATEGORY, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), id);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), id);
         };
     }
 }

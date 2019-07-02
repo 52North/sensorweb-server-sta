@@ -115,8 +115,8 @@ public class ThingEntityProvider extends AbstractSensorThingsEntityProvider {
     private List<CsdlProperty> createCsdlProperties() {
         //create EntityType primitive properties
         CsdlProperty id = new CsdlProperty().setName(PROP_ID)
-                .setType(EdmPrimitiveTypeKind.Int64.getFullQualifiedName())
-                .setNullable(false);
+                .setType(EdmPrimitiveTypeKind.Any.getFullQualifiedName())
+                .setNullable(true);
         CsdlProperty name = new CsdlProperty().setName(PROP_NAME)
                 .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
                 .setNullable(false);

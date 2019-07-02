@@ -38,6 +38,7 @@ import org.n52.sta.mapping.AbstractMapper;
 import org.n52.sta.mapping.ObservationMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class ObservationEntityCrudRequestHandler extends AbstractEntityCrudRequestHandler<DataEntity<?>> {
@@ -46,6 +47,7 @@ public class ObservationEntityCrudRequestHandler extends AbstractEntityCrudReque
     private ObservationMapper mapper;
 
     @Override
+    @Transactional
     protected Entity handleCreateEntityRequest(Entity entity) throws ODataApplicationException {
         if (entity != null) {
             DataEntity<?> observation = getEntityService().create(mapper.createEntity(getMapper().checkEntity(entity)));
@@ -65,7 +67,7 @@ public class ObservationEntityCrudRequestHandler extends AbstractEntityCrudReque
     }
 
     @Override
-    protected void handleDeleteEntityRequest(Long id) throws ODataApplicationException {
+    protected void handleDeleteEntityRequest(String id) throws ODataApplicationException {
             getEntityService().delete(id);
     }
 

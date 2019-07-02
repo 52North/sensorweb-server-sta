@@ -28,21 +28,7 @@
  */
 package org.n52.sta.mapping;
 
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PROPERTIES;
-import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ES_DATASTREAMS_NAME;
-import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ES_LOCATIONS_NAME;
-import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ES_THINGS_NAME;
-import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_FQN;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-
+import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
@@ -58,10 +44,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_NAME;
-import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME;
-import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATION_NAME;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PROPERTIES;
+import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ES_DATASTREAMS_NAME;
+import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ES_LOCATIONS_NAME;
+import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ES_THINGS_NAME;
+import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_FQN;
 
 /**
  *
@@ -87,7 +80,7 @@ public class ThingMapper extends AbstractMapper<PlatformEntity> {
     @Override
     public Entity createEntity(PlatformEntity thing) {
         Entity entity = new Entity();
-        entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, thing.getId()));
+        entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, thing.getIdentifier()));
         addDescription(entity, thing);
         addName(entity, thing);
 
@@ -102,7 +95,6 @@ public class ThingMapper extends AbstractMapper<PlatformEntity> {
     @Override
     public PlatformEntity createEntity(Entity entity) {
         PlatformEntity thing = new PlatformEntity();
-        setId(thing, entity);
         setIdentifier(thing, entity);
         setName(thing, entity);
         setDescription(thing, entity);
@@ -156,7 +148,7 @@ public class ThingMapper extends AbstractMapper<PlatformEntity> {
         try {
             node = jsonHelper.readJsonString(thing.getProperties());
         } catch (IOException ex) {
-            LOG.warn("Could not parse properties for PlatformEntity: {}", thing.getId(), ex.getMessage());
+            LOG.warn("Could not parse properties for PlatformEntity: {}", thing.getIdentifier(), ex.getMessage());
             LOG.debug(ex.getMessage(), ex);
         } finally {
             if (node == null) {

@@ -28,15 +28,15 @@
  */
 package org.n52.sta.data.repositories;
 
-import org.n52.series.db.beans.PlatformEntity;
-import org.springframework.transaction.annotation.Transactional;
+import java.util.Optional;
 
-/**
- * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- *
- */
-@Transactional
-public interface ThingRepository extends NameRepository<PlatformEntity> {
+public interface IdentifierRepository<T> {
 
-    <S extends PlatformEntity> S intermediateSave(S entity);
+    boolean existsByIdentifier(String identifier);
+
+    Optional<T> findByIdentifier(String identifier);
+
+    void deleteByIdentifier(String identifier);
+
+    T getOneByIdentifier(String identifier);
 }

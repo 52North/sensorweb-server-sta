@@ -28,28 +28,13 @@
  */
 package org.n52.sta.mapping;
 
-import static org.n52.sta.edm.provider.SensorThingsEdmConstants.ID;
-import static org.n52.sta.edm.provider.SensorThingsEdmConstants.ID_ANNOTATION;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DEFINITION;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DESCRIPTION;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_NAME;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PHENOMENON_TIME;
-import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ES_DATASTREAMS_NAME;
-
-import java.sql.Timestamp;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
 import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
+import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
+import org.apache.olingo.commons.core.edm.primitivetype.EdmAny;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -58,7 +43,6 @@ import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.HibernateRelations.HasDescription;
 import org.n52.series.db.beans.HibernateRelations.HasName;
 import org.n52.series.db.beans.HibernateRelations.HasPhenomenonTime;
-import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.StaRelations;
 import org.n52.shetland.ogc.gml.time.Time;
@@ -66,6 +50,15 @@ import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.sql.Timestamp;
+import java.util.*;
+
+import static org.n52.sta.edm.provider.SensorThingsEdmConstants.ID;
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.*;
+import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ES_DATASTREAMS_NAME;
 
 public abstract class AbstractMapper<T> {
 
@@ -77,7 +70,7 @@ public abstract class AbstractMapper<T> {
 
     public abstract Entity createEntity(T t);
 
-    protected abstract T createEntity(Entity entity);
+    protected abstract T createEntity(Entity entity) throws EdmPrimitiveTypeException;
 
     public abstract T merge(T existing, T toMerge) throws ODataApplicationException;
 
@@ -161,26 +154,31 @@ public abstract class AbstractMapper<T> {
         entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, description));
     }
 
-    protected void setId(IdEntity idEntity, Entity entity) {
-        if (checkProperty(entity, ID)) {
-            idEntity.setId(Long.parseLong(getPropertyValue(entity, ID).toString()));
-        } else if (checkProperty(entity, ID_ANNOTATION)) {
-            idEntity.setId(Long.parseLong(getPropertyValue(entity, ID_ANNOTATION).toString()));
-        }
-    }
-
     protected void setNameDescription(DescribableEntity thing, Entity entity) {
         setName(thing, entity);
         setDescription(thing, entity);
     }
 
     protected void setIdentifier(DescribableEntity describableEntity, Entity entity) {
-        if (checkProperty(entity, PROP_DEFINITION)) {
-            describableEntity.setIdentifier(getPropertyValue(entity, PROP_DEFINITION).toString());
-        } else if (checkProperty(entity, PROP_NAME)) {
-            describableEntity.setIdentifier(getPropertyValue(entity, PROP_NAME).toString());
+        String rawIdentifier = null;
+        if (checkProperty(entity, PROP_ID)) {
+            try {
+                rawIdentifier = EdmAny.getInstance().valueToString(getPropertyValue(entity, PROP_ID), false, 0, 0, 0, false);
+            } catch (EdmPrimitiveTypeException e) {
+                // This should never happen. Value was checked already
+            }
+        } else if (checkProperty(entity, PROP_DEFINITION)) {
+            rawIdentifier = getPropertyValue(entity, PROP_DEFINITION).toString();
         }
 
+        // URLEncode identifier.
+        if (rawIdentifier != null) {
+            try {
+                describableEntity.setIdentifier(URLEncoder.encode(rawIdentifier.replace("\'", ""), "utf-8"));
+            } catch (UnsupportedEncodingException e) {
+                // This should never happen.
+            }
+        }
     }
 
     protected void setName(HasName describableEntity, Entity entity) {
@@ -284,7 +282,7 @@ public abstract class AbstractMapper<T> {
      * Create {@link Time} from {@link DateTime}s
      *
      * @param start Start {@link DateTime}
-     * @param end End {@link DateTime}
+     * @param end   End {@link DateTime}
      * @return Resulting {@link Time}
      */
     protected Time createTime(DateTime start, DateTime end) {

@@ -80,7 +80,7 @@ public class MqttMessageHandler {
     private Parser parser;
 
     @Autowired
-    AbstractEntityCollectionRequestHandler<SensorThingsMqttRequest, MqttEntityCollectionSubscription> entityCollcetionRequestHandler;
+    AbstractEntityCollectionRequestHandler<SensorThingsMqttRequest, MqttEntityCollectionSubscription> entityCollectionRequestHandler;
 
     @Autowired
     AbstractEntityRequestHandler<SensorThingsMqttRequest, MqttEntitySubscription> mqttEntitySubscHandler;
@@ -150,7 +150,7 @@ public class MqttMessageHandler {
                 case entitySet:
                 case navigationProperty:
                     if (((UriResourcePartTyped) lastPathSegment).isCollection()) {
-                        subscription = entityCollcetionRequestHandler
+                        subscription = entityCollectionRequestHandler
                                 .handleEntityCollectionRequest(new SensorThingsMqttRequest(topic,
                                         uriInfo.getUriResourceParts(),
                                         new URIQueryOptions(uriInfo, BASE_URL)));

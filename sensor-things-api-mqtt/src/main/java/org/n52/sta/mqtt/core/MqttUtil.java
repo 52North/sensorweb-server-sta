@@ -28,58 +28,75 @@
  */
 package org.n52.sta.mqtt.core;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
 import org.apache.olingo.commons.api.edmx.EdmxReference;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.core.uri.parser.Parser;
-import org.n52.sta.mapping.AbstractMapper;
-import org.n52.sta.mapping.DatastreamMapper;
-import org.n52.sta.mapping.FeatureOfInterestMapper;
-import org.n52.sta.mapping.HistoricalLocationMapper;
-import org.n52.sta.mapping.LocationMapper;
-import org.n52.sta.mapping.ObservationMapper;
-import org.n52.sta.mapping.ObservedPropertyMapper;
-import org.n52.sta.mapping.SensorMapper;
-import org.n52.sta.mapping.ThingMapper;
+import org.n52.sta.mapping.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
+import java.util.*;
+
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- *
  */
 @Component
 public class MqttUtil {
 
+    public static final String OBSERVATION_ENTITY = "org.n52.series.db.beans.QuantityDataEntity";
+    public static final String DATASTREAM_ENTITY = "org.n52.series.db.beans.sta.DatastreamEntity";
+    public static final String FEATURE_ENTITY = "org.n52.series.db.beans.AbstractFeatureEntity";
+    public static final String HISTORICAL_LOCATION_ENTITY = "org.n52.series.db.beans.sta.HistoricalLocationEntity";
+    public static final String LOCATION_ENTITY = "org.n52.series.db.beans.sta.LocationEntity";
+    public static final String OBSERVED_PROPERTY_ENTITY = "org.n52.series.db.beans.PhenomenonEntity";
+    public static final String SENSOR_ENTITY = "org.n52.series.db.beans.ProcedureEntity";
+    public static final String THING_ENTITY = "org.n52.series.db.beans.PlatformEntity";
+
+    public static final Map<String, String> typeMap;
+
+    /**
+     * Maps olingo Types to Database types vice-versa..
+     * @return Translation map from olingo Entities to raw Data Entities and vice-versa
+     */
+    static {
+        HashMap<String, String> map = new HashMap<>();
+        map.put("Observation", OBSERVATION_ENTITY);
+        map.put("Datastream", DATASTREAM_ENTITY);
+        map.put("FeatureOfInterest", FEATURE_ENTITY);
+        map.put("HistoricalLocation", HISTORICAL_LOCATION_ENTITY);
+        map.put("Location", LOCATION_ENTITY);
+        map.put("ObservedProperty", OBSERVED_PROPERTY_ENTITY);
+        map.put("Sensor", SENSOR_ENTITY);
+        map.put("Thing", THING_ENTITY);
+
+        map.put(OBSERVATION_ENTITY, "Observation");
+        map.put(DATASTREAM_ENTITY, "Datastream");
+        map.put(FEATURE_ENTITY, "FeatureOfInterest");
+        map.put(HISTORICAL_LOCATION_ENTITY, "HistoricalLocation");
+        map.put(LOCATION_ENTITY, "Location");
+        map.put(OBSERVED_PROPERTY_ENTITY, "ObservedProperty");
+        map.put(SENSOR_ENTITY, "Sensor");
+        map.put(THING_ENTITY, "Thing");
+        typeMap = Collections.unmodifiableMap(map);
+    }
+
     @Autowired
     private ObservationMapper obsMapper;
-
     @Autowired
     private DatastreamMapper dsMapper;
-
     @Autowired
     private FeatureOfInterestMapper foiMapper;
-
     @Autowired
     private HistoricalLocationMapper hlocMapper;
-
     @Autowired
     private LocationMapper locMapper;
-
     @Autowired
     private ObservedPropertyMapper obspropMapper;
-
     @Autowired
     private SensorMapper sensorMapper;
-
     @Autowired
     private ThingMapper thingMapper;
 
@@ -92,150 +109,31 @@ public class MqttUtil {
 
     /**
      * Multiplexes to the different Mappers for transforming Beans into olingo Entities
+     *
      * @param className Name of the base class
      * @return Mapper appropiate for this class
      */
     public AbstractMapper getMapper(String className) {
-        switch(className) {
-        case "org.n52.series.db.beans.QuantityDataEntity":
-            return obsMapper;
-        case "org.n52.series.db.beans.sta.DatastreamEntity":
-            return dsMapper;
-        case "org.n52.series.db.beans.AbstractFeatureEntity":
-            return foiMapper;
-        case "org.n52.series.db.beans.sta.HistoricalLocationEntity":
-            return hlocMapper;
-        case "org.n52.series.db.beans.sta.LocationEntity":
-            return locMapper;
-        case "org.n52.series.db.beans.PhenomenonEntity":
-            return obspropMapper;
-        case "org.n52.series.db.beans.ProcedureEntity":
-            return sensorMapper;
-        case "org.n52.series.db.beans.sta.ThingEntity":
-            return thingMapper;
-        default: return null;
+        switch (className) {
+            case OBSERVATION_ENTITY:
+                return obsMapper;
+            case DATASTREAM_ENTITY:
+                return dsMapper;
+            case FEATURE_ENTITY:
+                return foiMapper;
+            case HISTORICAL_LOCATION_ENTITY:
+                return hlocMapper;
+            case LOCATION_ENTITY:
+                return locMapper;
+            case OBSERVED_PROPERTY_ENTITY:
+                return obspropMapper;
+            case SENSOR_ENTITY:
+                return sensorMapper;
+            case THING_ENTITY:
+                return thingMapper;
+            default:
+                return null;
         }
-    }
-
-    /**
-     * Maps olingo Types to Base types. Needed for fail-fast.
-     * @return Translation map from olingo Entities to raw Data Entities
-     */
-    public static Map<String, String> getBeanTypes() {
-        HashMap<String,String> map = new HashMap<>();
-        map.put("Observation", "org.n52.series.db.beans.QuantityDataEntity");
-        map.put("Datastream", "org.n52.series.db.beans.sta.DatastreamEntity");
-        map.put("FeatureOfInterest", "org.n52.series.db.beans.AbstractFeatureEntity");
-        map.put("HistoricalLocation", "org.n52.series.db.beans.sta.HistoricalLocationEntity");
-        map.put("Location", "org.n52.series.db.beans.sta.LocationEntity");
-        map.put("ObservedProperty", "org.n52.series.db.beans.PhenomenonEntity");
-        map.put("Sensor", "org.n52.series.db.beans.ProcedureEntity");
-        map.put("Thing", "org.n52.series.db.beans.sta.ThingEntity");
-        return map;
-    }
-
-     /**
-     * Maps olingo Base types to Olingo types. Needed for retrieving
-     * the corresponding EntityServices.
-     * @return Translation map from olingo Entities to raw Data Entities
-     */
-    public static Map<String, String> getEntityTypes() {
-        HashMap<String,String> map = new HashMap<>();
-        map.put("org.n52.series.db.beans.QuantityDataEntity", "Observation");
-        map.put("org.n52.series.db.beans.sta.DatastreamEntity", "Datastream");
-        map.put("org.n52.series.db.beans.AbstractFeatureEntity", "FeatureOfInterest");
-        map.put("org.n52.series.db.beans.sta.HistoricalLocationEntity", "HistoricalLocation");
-        map.put("org.n52.series.db.beans.sta.LocationEntity", "Location");
-        map.put("org.n52.series.db.beans.PhenomenonEntity", "ObservedProperty");
-        map.put("org.n52.series.db.beans.ProcedureEntity", "Sensor");
-        map.put("org.n52.series.db.beans.sta.ThingEntity", "Thing");
-        return map;
-    }
-
-    /**
-     * Translates Olingo Property into Database Property to check property changes against Event emitted by Database
-     * @param staProperty STA property of STA entity
-     * @return Set of all Database field storing property information
-     */
-    public static Set<String> translateSTAtoToDbProperty(String staProperty) {
-        Set<String> returnSet = new HashSet<>();
-        switch(staProperty) {
-        case "iot.Thing.name":
-        case "iot.Location.name":
-        case "iot.ObservedProperty.name":
-        case "iot.FeatureOfInterest.name":
-        case "iot.Datastream.name":
-            returnSet.add("name");
-            break;
-        case "iot.Thing.description":
-        case "iot.Location.description":
-        case "iot.Sensor.description":
-        case "iot.ObservedProperty.description":
-        case "iot.FeatureOfInterest.description":
-        case "iot.Datastream.description":
-            returnSet.add("description");
-            break;
-        case "iot.Thing.properties":
-            returnSet.add("properties");
-            break;
-        case "iot.Location.encodingType":
-            returnSet.add("locationEncoding");
-            break;
-        case "iot.Location.location":
-            returnSet.add("location");
-            break;
-        case "iot.HistoricalLocation.time":
-            returnSet.add("time");
-            break;
-        case "iot.Sensor.name":
-        case "iot.ObservedProperty.definition":
-            returnSet.add("identifier");
-            break;
-        case "iot.Sensor.encodingType":
-            returnSet.add("format");
-            break;
-        case "iot.Sensor.metadata":
-            returnSet.add("descriptionFile");
-            break;
-        case "iot.FeatureOfInterest.encodingType":
-            returnSet.add("featureType");
-            break;
-        case "iot.FeatureOfInterest.feature":
-            returnSet.add("geometryEntity");
-            break;
-        case "iot.Observation.phenomenonTime":
-        case "iot.Datastream.phenomenonTime":
-            returnSet.add("samplingTimeStart");
-            returnSet.add("samplingTimeEnd");
-            break;
-        case "iot.Observation.resultTime":
-            returnSet.add("resultTime");
-            break;
-        case "iot.Observation.result":
-            returnSet.add("value");
-            break;
-        case "iot.Observation.validTime":
-            returnSet.add("validTimeStart");
-            returnSet.add("validTimeEnd");
-            break;
-        case "iot.Observation.parameters":
-            returnSet.add("parameters");
-            break;
-        case "iot.Datastream.observationType":
-            returnSet.add("observationType");
-            break;
-        case "iot.Datastream.unitOfMeasurement":
-            returnSet.add("unitOfMeasurement");
-            break;
-        case "iot.Datastream.observedArea":
-            returnSet.add("geometryEntity");
-            break;
-        case "iot.Datastream.resultTime":
-            returnSet.add("resultTimeStart");
-            returnSet.add("resultTimeEnd");
-            break;
-        }
-        return returnSet;
     }
 
 }

@@ -36,14 +36,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.NoRepositoryBean;
 
 @NoRepositoryBean
-public interface ParameterDataRepository<T extends DescribableEntity> extends JpaRepository<T, Long>, JpaSpecificationExecutor<T> {
-
-    boolean existsByIdentifier(String identifier);
+public interface ParameterDataRepository<T extends DescribableEntity> extends IdentifierRepository<T>, JpaRepository<T, Long>, JpaSpecificationExecutor<T> {
 
     boolean existsByName(String name);
-
-    Optional<T> findByIdentifier(String identifier);
-
-    T getOneByIdentifier(String identifier);
 
 }

@@ -28,19 +28,6 @@
  */
 package org.n52.sta.mapping;
 
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ENCODINGTYPE;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_METADATA;
-import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ES_SENSORS_NAME;
-import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ET_SENSOR_FQN;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
@@ -50,10 +37,17 @@ import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
-import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_NAME;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.LinkedHashSet;
+import java.util.Optional;
+import java.util.Set;
+
+import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.*;
+import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ES_SENSORS_NAME;
+import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ET_SENSOR_FQN;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -71,7 +65,7 @@ public class SensorMapper extends AbstractMapper<ProcedureEntity> {
 
     public Entity createEntity(ProcedureEntity sensor) {
         Entity entity = new Entity();
-        entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, sensor.getId()));
+        entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, sensor.getIdentifier()));
         addNameDescriptionProperties(entity, sensor);
         entity.addProperty(new Property(null, PROP_ENCODINGTYPE, ValueType.PRIMITIVE, checkQueryEncodingType(sensor.getFormat().getFormat())));
         String metadata = "metadata";
@@ -102,7 +96,6 @@ public class SensorMapper extends AbstractMapper<ProcedureEntity> {
 
     public SensorEntity createEntity(Entity entity) {
         SensorEntity sensor = new SensorEntity();
-        setId(sensor, entity);
         setIdentifier(sensor, entity);
         setName(sensor, entity);
         setDescription(sensor, entity);

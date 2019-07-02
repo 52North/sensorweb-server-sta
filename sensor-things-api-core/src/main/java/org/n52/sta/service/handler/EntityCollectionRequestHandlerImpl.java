@@ -101,7 +101,7 @@ public class EntityCollectionRequestHandlerImpl extends AbstractEntityCollection
                 queryOptionsHandler.handleExpandOption(
                         entity,
                         request.getQueryOptions().getExpandOption(),
-                        Long.parseLong(entity.getProperty(PROP_ID).getValue().toString()),
+                        entity.getProperty(PROP_ID).getValue().toString(),
                         sourceEdmEntitySet.getEntityType(),
                         request.getQueryOptions().getBaseURI());
                 entity.getBaseURI();

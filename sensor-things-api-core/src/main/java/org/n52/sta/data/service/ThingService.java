@@ -28,19 +28,6 @@
  */
 package org.n52.sta.data.service;
 
-import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_NAME;
-import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME;
-import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATION_NAME;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.OptionalLong;
-import java.util.Set;
-
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
@@ -60,16 +47,21 @@ import org.n52.sta.service.query.QueryOptions;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
+import java.util.*;
+
+import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_NAME;
+import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME;
+import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATION_NAME;
+
 /**
- *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
 public class ThingService extends AbstractSensorThingsEntityService<ThingRepository, PlatformEntity> {
 
-    private ThingMapper mapper;
-
     private final static ThingQuerySpecifications tQS = new ThingQuerySpecifications();
+
+    private ThingMapper mapper;
 
     public ThingService(ThingRepository repository, ThingMapper mapper) {
         super(repository);
@@ -90,14 +82,14 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     }
 
     @Override
-    public Entity getEntity(Long id) {
-        Optional<PlatformEntity> entity = getRepository().findById(id);
+    public Entity getEntity(String identifier) {
+        Optional<PlatformEntity> entity = getRepository().findByIdentifier(identifier);
         return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
     }
 
     @Override
-    public EntityCollection getRelatedEntityCollection(Long sourceId, EdmEntityType sourceEntityType, QueryOptions queryOptions) throws ODataApplicationException {
-        Specification<PlatformEntity> filter = tQS.withRelatedLocation(sourceId);
+    public EntityCollection getRelatedEntityCollection(String sourceIdentifier, EdmEntityType sourceEntityType, QueryOptions queryOptions) throws ODataApplicationException {
+        Specification<PlatformEntity> filter = tQS.withRelatedLocationIdentifier(sourceIdentifier);
 
         filter = filter.and(getFilterPredicate(PlatformEntity.class, queryOptions));
         Iterable<PlatformEntity> things = getRepository().findAll(filter, createPageableRequest(queryOptions));
@@ -108,93 +100,87 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     }
 
     @Override
-    public long getRelatedEntityCollectionCount(Long sourceId, EdmEntityType sourceEntityType) {
-        return getRepository().count(tQS.withRelatedLocation(sourceId));
+    public long getRelatedEntityCollectionCount(String sourceIdentifier, EdmEntityType sourceEntityType) {
+        return getRepository().count(tQS.withRelatedLocationIdentifier(sourceIdentifier));
     }
 
     @Override
-    public boolean existsEntity(Long id) {
-        return getRepository().existsById(id);
+    public boolean existsEntity(String identifier) {
+        return getRepository().existsByIdentifier(identifier);
     }
 
     @Override
-    public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
+    public boolean existsRelatedEntity(String sourceId, EdmEntityType sourceEntityType) {
         return this.existsRelatedEntity(sourceId, sourceEntityType, null);
     }
 
     @Override
-    public boolean existsRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
-        switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-        case "iot.Location": {
-            Specification<PlatformEntity> filter = tQS.withRelatedLocation(sourceId);
-            if (targetId != null) {
-                filter = filter.and(tQS.withId(targetId));
+    public boolean existsRelatedEntity(String sourceIdentifier, EdmEntityType sourceEntityType, String targetIdentifier) {
+        switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
+            case "iot.Location": {
+                Specification<PlatformEntity> filter = tQS.withRelatedLocationIdentifier(sourceIdentifier);
+                if (targetIdentifier != null) {
+                    filter = filter.and(tQS.withIdentifier(targetIdentifier));
+                }
+                return getRepository().count(filter) > 0;
             }
-            return getRepository().count(filter) > 0;
-        }
-        default: return false;
+            default:
+                return false;
         }
     }
 
     @Override
-    public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
+    public Optional<String> getIdForRelatedEntity(String sourceId, EdmEntityType sourceEntityType) {
         return this.getIdForRelatedEntity(sourceId, sourceEntityType, null);
     }
 
     @Override
-    public OptionalLong getIdForRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+    public Optional<String> getIdForRelatedEntity(String sourceId, EdmEntityType sourceEntityType, String targetId) {
         Optional<PlatformEntity> thing = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
-        if (thing.isPresent()) {
-            return OptionalLong.of(thing.get().getId());
-        } else {
-            return OptionalLong.empty();
-        }
+        return thing.map(platformEntity -> Optional.of(platformEntity.getIdentifier())).orElseGet(Optional::empty);
     }
 
     @Override
-    public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType) {
+    public Entity getRelatedEntity(String sourceId, EdmEntityType sourceEntityType) {
         return this.getRelatedEntity(sourceId, sourceEntityType, null);
     }
 
     @Override
-    public Entity getRelatedEntity(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+    public Entity getRelatedEntity(String sourceId, EdmEntityType sourceEntityType, String targetId) {
         Optional<PlatformEntity> thing = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
-        if (thing.isPresent()) {
-            return mapper.createEntity(thing.get());
-        } else {
-            return null;
-        }
+        return thing.map(platformEntity -> mapper.createEntity(platformEntity)).orElse(null);
     }
 
     /**
      * Retrieves Thing Entity with Relation to sourceEntity from Database.
      * Returns empty if Thing is not found or Entities are not related.
      *
-     * @param sourceId Id of the Source Entity
+     * @param sourceIdentifier Id of the Source Entity
      * @param sourceEntityType Type of the Source Entity
-     * @param targetId Id of the Thing to be retrieved
+     * @param targetIdentifier Id of the Thing to be retrieved
      * @return Optional<PlatformEntity> Requested Entity
      */
-    private Optional<PlatformEntity> getRelatedEntityRaw(Long sourceId, EdmEntityType sourceEntityType, Long targetId) {
+    private Optional<PlatformEntity> getRelatedEntityRaw(String sourceIdentifier, EdmEntityType sourceEntityType, String targetIdentifier) {
         Specification<PlatformEntity> filter;
-        switch(sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-        case "iot.HistoricalLocation": {
-            filter = tQS.withRelatedHistoricalLocation(sourceId);
-            break;
-        }
-        case "iot.Datastream": {
-            filter = tQS.withRelatedDatastream(sourceId);
-            break;
-        }
-        case "iot.Location": {
-            filter = tQS.withRelatedLocation(sourceId);
-            break;
-        }
-        default: return Optional.empty();
+        switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
+            case "iot.HistoricalLocation": {
+                filter = tQS.withRelatedHistoricalLocationIdentifier(sourceIdentifier);
+                break;
+            }
+            case "iot.Datastream": {
+                filter = tQS.withRelatedDatastreamIdentifier(sourceIdentifier);
+                break;
+            }
+            case "iot.Location": {
+                filter = tQS.withRelatedLocationIdentifier(sourceIdentifier);
+                break;
+            }
+            default:
+                return Optional.empty();
         }
 
-        if (targetId != null) {
-            filter = filter.and(tQS.withId(targetId));
+        if (targetIdentifier != null) {
+            filter = filter.and(tQS.withIdentifier(targetIdentifier));
         }
         return getRepository().findOne(filter);
     }
@@ -207,16 +193,24 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     @Override
     public PlatformEntity create(PlatformEntity thing) throws ODataApplicationException {
         if (!thing.isProcesssed()) {
-            if (thing.getId() != null && !thing.isSetName()) {
-                return getRepository().findById(thing.getId()).get();
+            if (thing.getIdentifier() != null && !thing.isSetName()) {
+                return getRepository().findByIdentifier(thing.getIdentifier()).get();
             }
-            if (getRepository().existsByName(thing.getName())) {
-                Optional<PlatformEntity> optional = getRepository().findByName(thing.getName());
-                return optional.isPresent() ? optional.get() : null;
+            if (thing.getIdentifier() == null) {
+                if (getRepository().existsByName(thing.getName())) {
+                    Optional<PlatformEntity> optional = getRepository().findByName(thing.getName());
+                    return optional.orElse(null);
+                } else {
+                    // Autogenerate Identifier
+                    thing.setIdentifier(UUID.randomUUID().toString());
+                }
+            } else if (getRepository().existsByIdentifier(thing.getIdentifier())) {
+                throw new ODataApplicationException("Identifier already exists!",
+                        HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
             }
             thing.setProcesssed(true);
             processLocations(thing);
-            thing = getRepository().save(thing);
+            thing = getRepository().intermediateSave(thing);
             processHistoricalLocations(thing);
             processDatastreams(thing);
             thing = getRepository().save(thing);
@@ -229,7 +223,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     public PlatformEntity update(PlatformEntity entity, HttpMethod method) throws ODataApplicationException {
         checkUpdate(entity);
         if (HttpMethod.PATCH.equals(method)) {
-            Optional<PlatformEntity> existing = getRepository().findById(entity.getId());
+            Optional<PlatformEntity> existing = getRepository().findByIdentifier(entity.getIdentifier());
             if (existing.isPresent()) {
                 PlatformEntity merged = mapper.merge(existing.get(), entity);
                 if (entity.hasLocationEntities()) {
@@ -264,18 +258,18 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     }
 
     @Override
-    public PlatformEntity update(PlatformEntity entity) throws ODataApplicationException {
+    public PlatformEntity update(PlatformEntity entity) {
         return getRepository().save(entity);
     }
 
     @Override
-    public void delete(Long id) throws ODataApplicationException {
-        if (getRepository().existsById(id)) {
-            PlatformEntity thing = getRepository().getOne(id);
+    public void delete(String identifier) throws ODataApplicationException {
+        if (getRepository().existsByIdentifier(identifier)) {
+            PlatformEntity thing = getRepository().getOneByIdentifier(identifier);
             // delete datastreams
             thing.getDatastreams().forEach(d -> {
                 try {
-                    getDatastreamService().delete(d.getId());
+                    getDatastreamService().delete(d.getIdentifier());
                 } catch (ODataApplicationException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -290,28 +284,36 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
                     e.printStackTrace();
                 }
             });
-            getRepository().deleteById(id);
+            getRepository().deleteByIdentifier(identifier);
         } else {
-        throw new ODataApplicationException("Entity not found.",
-                HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
+            throw new ODataApplicationException("Entity not found.",
+                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
         }
     }
 
     @Override
-    public void delete(PlatformEntity entity) throws ODataApplicationException {
-        getRepository().deleteById(entity.getId());
+    public void delete(PlatformEntity entity) {
+        getRepository().deleteByIdentifier(entity.getIdentifier());
+    }
+
+    @Override
+    protected PlatformEntity createOrUpdate(PlatformEntity entity) throws ODataApplicationException {
+        if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
+            return update(entity, HttpMethod.PATCH);
+        }
+        return create(entity);
     }
 
     private void processDatastreams(PlatformEntity thing) throws ODataApplicationException {
-       if (thing.hasDatastreams()) {
-           Set<DatastreamEntity> datastreams = new LinkedHashSet<>();
-           for (DatastreamEntity datastream : thing.getDatastreams()) {
-               datastream.setThing(thing);
-               DatastreamEntity optionalDatastream = getDatastreamService().create(datastream);
-               datastreams.add(optionalDatastream != null ? optionalDatastream : datastream);
-           }
-           thing.setDatastreams(datastreams);
-       }
+        if (thing.hasDatastreams()) {
+            Set<DatastreamEntity> datastreams = new LinkedHashSet<>();
+            for (DatastreamEntity datastream : thing.getDatastreams()) {
+                datastream.setThing(thing);
+                DatastreamEntity optionalDatastream = getDatastreamService().create(datastream);
+                datastreams.add(optionalDatastream != null ? optionalDatastream : datastream);
+            }
+            thing.setDatastreams(datastreams);
+        }
     }
 
     private void processLocations(PlatformEntity thing) throws ODataApplicationException {
@@ -331,6 +333,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
                     ? new LinkedHashSet<>(thing.getHistoricalLocations())
                     : new LinkedHashSet<>();
             HistoricalLocationEntity historicalLocation = new HistoricalLocationEntity();
+            historicalLocation.setIdentifier(UUID.randomUUID().toString());
             historicalLocation.setThing(thing);
             historicalLocation.setTime(DateTime.now().toDate());
             historicalLocation.setProcesssed(true);
@@ -362,31 +365,34 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     }
 
     @Override
-    public Map<String, Set<Long>> getRelatedCollections(Object rawObject) {
-        Map<String, Set<Long>> collections = new HashMap<> ();
-        Set<Long> set = new HashSet<>();
+    public Map<String, Set<String>> getRelatedCollections(Object rawObject) {
+        Map<String, Set<String>> collections = new HashMap<>();
+        Set<String> set = new HashSet<>();
         PlatformEntity entity = (PlatformEntity) rawObject;
 
         try {
-            entity.getLocations().forEach((en)-> {
-                set.add(en.getId());
+            entity.getLocations().forEach((en) -> {
+                set.add(en.getIdentifier());
             });
             collections.put(ET_LOCATION_NAME, new HashSet(set));
-        } catch(NullPointerException e) {}
+        } catch (NullPointerException e) {
+        }
         set.clear();
         try {
             entity.getHistoricalLocations().forEach((en) -> {
-                set.add(en.getId());
+                set.add(en.getIdentifier());
             });
-            collections.put(ET_HISTORICAL_LOCATION_NAME,  new HashSet(set));
-        } catch(NullPointerException e) {}
+            collections.put(ET_HISTORICAL_LOCATION_NAME, new HashSet(set));
+        } catch (NullPointerException e) {
+        }
         set.clear();
         try {
             entity.getDatastreams().forEach((en) -> {
-                set.add(en.getId());
+                set.add(en.getIdentifier());
             });
-            collections.put(ET_DATASTREAM_NAME,  new HashSet(set));
-        } catch(NullPointerException e) {}
+            collections.put(ET_DATASTREAM_NAME, new HashSet(set));
+        } catch (NullPointerException e) {
+        }
         return collections;
     }
 

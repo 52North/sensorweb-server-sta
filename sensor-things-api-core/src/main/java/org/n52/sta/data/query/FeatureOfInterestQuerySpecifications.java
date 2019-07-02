@@ -48,29 +48,27 @@ import org.springframework.data.jpa.domain.Specification;
  */
 public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecifications<AbstractFeatureEntity< ? >> {
 
-    public Specification<AbstractFeatureEntity<?>> withObservation(Long observationId) {
+    public Specification<AbstractFeatureEntity<?>> withObservationIdentifier(final String observationIdentifier) {
         return (root, query, builder) -> {
             Subquery<Long> sqFeature = query.subquery(Long.class);
             Root<DatasetEntity> dataset = sqFeature.from(DatasetEntity.class);
             Subquery<DatasetEntity> sqDataset = query.subquery(DatasetEntity.class);
             Root<DataEntity> data = sqDataset.from(DataEntity.class);
             sqDataset.select(data.get(DataEntity.PROPERTY_DATASET))
-                    .where(builder.equal(data.get(DescribableEntity.PROPERTY_ID), observationId));
+                    .where(builder.equal(data.get(DescribableEntity.PROPERTY_IDENTIFIER), observationIdentifier));
             sqFeature.select(dataset.get(DatasetEntity.PROPERTY_FEATURE)).where(builder.in(dataset).value(sqDataset));
-            return builder.in(root.get(AbstractFeatureEntity.PROPERTY_ID)).value(sqFeature);
+            return builder.in(root.get(AbstractFeatureEntity.PROPERTY_IDENTIFIER)).value(sqFeature);
         };
     }
 
     @Override
     public Specification<AbstractFeatureEntity<?>> withIdentifier(final String identifier) {
-        return (root, query, builder) -> {
-            return builder.equal(root.get(DescribableEntity.PROPERTY_ID), identifier);
-        };
+        return (root, query, builder) -> builder.equal(root.get(DescribableEntity.PROPERTY_IDENTIFIER), identifier);
     }
 
     @Override
-    public Specification<Long> getIdSubqueryWithFilter(Specification filter) {
-        return this.toSubquery(AbstractFeatureEntity.class, AbstractFeatureEntity.PROPERTY_ID, filter);
+    public Specification<String> getIdSubqueryWithFilter(Specification filter) {
+        return this.toSubquery(AbstractFeatureEntity.class, AbstractFeatureEntity.PROPERTY_IDENTIFIER, filter);
     }
 
     @Override
@@ -84,8 +82,8 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
         } else if (propertyName.equals("id")) {
             return (root, query, builder) -> {
                 try {
-                    return handleDirectNumberPropertyFilter(root.<Long> get(AbstractFeatureEntity.PROPERTY_ID),
-                            Long.getLong(propertyValue.toString()), operator, builder);
+                    return handleDirectStringPropertyFilter(root.get(AbstractFeatureEntity.PROPERTY_IDENTIFIER),
+                            propertyValue.toString(), operator, builder, false);
                 } catch (ExpressionVisitException e) {
                     throw new RuntimeException(e);
                 }
@@ -107,9 +105,9 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
             Subquery<DatasetEntity> sqDataset = query.subquery(DatasetEntity.class);
             Root<DataEntity> data = sqDataset.from(DataEntity.class);
             sqDataset.select(data.get(DataEntity.PROPERTY_DATASET))
-                    .where(builder.equal(data.get(DescribableEntity.PROPERTY_ID), propertyValue));
+                    .where(builder.equal(data.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue));
             sqFeature.select(dataset.get(DatasetEntity.PROPERTY_FEATURE)).where(builder.in(dataset).value(sqDataset));
-            return builder.in(root.get(AbstractFeatureEntity.PROPERTY_ID)).value(sqFeature);
+            return builder.in(root.get(AbstractFeatureEntity.PROPERTY_IDENTIFIER)).value(sqFeature);
         };
     }
 
@@ -130,9 +128,9 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
                     case "encodingType":
                     case "featureType":
                         if (operator.equals(BinaryOperatorKind.EQ) && ("application/vnd.geo+json".equals(propertyValue) || "application/vnd.geo json".equals(propertyValue))) {
-                            return builder.isNotNull(root.get(DescribableEntity.PROPERTY_ID));
+                            return builder.isNotNull(root.get(DescribableEntity.PROPERTY_IDENTIFIER));
                         }
-                        return builder.isNull(root.get(DescribableEntity.PROPERTY_ID));
+                        return builder.isNull(root.get(DescribableEntity.PROPERTY_IDENTIFIER));
                     default:
                         throw new RuntimeException("Error getting filter for Property: \"" + propertyName
                                 + "\". No such property in Entity.");

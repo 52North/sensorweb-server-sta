@@ -42,5 +42,7 @@ public interface STAEventHandler {
      * @param event base entity
      * @param differenceMap names of properties that changed. null if all properties changed (e.g. new entity)
      */
-    public void handleEvent(Object event, Set<String> differenceMap);
+    void handleEvent(Object event, Set<String> differenceMap);
+
+    Set<String> getWatchedEntityTypes();
 }

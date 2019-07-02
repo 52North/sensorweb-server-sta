@@ -835,7 +835,7 @@ public class SensorThingsDeserializer implements ODataDeserializer {
      * if present.
      *
      * @param mapping
-     * @param edmPrimitiveType
+     * @param type
      * @return the java class to be used during deserialization
      */
     private Class<?> getJavaClassForPrimitiveType(final EdmMapping mapping, final EdmPrimitiveType type) {
@@ -919,8 +919,12 @@ public class SensorThingsDeserializer implements ODataDeserializer {
                 throw new DeserializerException("Unknown Primitive Type: " + name, e,
                         DeserializerException.MessageKeys.UNKNOWN_PRIMITIVE_TYPE, name, propertyName);
             }
-            valid = propertyName.equals("result") || matchTextualCase(jsonNode, primKind) || matchNumberCase(jsonNode, primKind)
-                    || matchBooleanCase(jsonNode, primKind) || matchIEEENumberCase(jsonNode, primKind)
+            valid = propertyName.equals("result")
+                    || propertyName.equals("id")
+                    || matchTextualCase(jsonNode, primKind)
+                    || matchNumberCase(jsonNode, primKind)
+                    || matchBooleanCase(jsonNode, primKind)
+                    || matchIEEENumberCase(jsonNode, primKind)
                     || jsonNode.isObject() && name.startsWith("Geo");
         }
         if (!valid) {

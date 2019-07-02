@@ -26,17 +26,26 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data.repositories;
+package org.n52.sta;
 
-import org.n52.series.db.beans.PlatformEntity;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
 
 /**
- * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- *
- */
-@Transactional
-public interface ThingRepository extends NameRepository<PlatformEntity> {
+ * Wrapper to always return a reference to the Spring Application Context from
+ **/
+@Component
+public class SpringApplicationContext implements ApplicationContextAware {
 
-    <S extends PlatformEntity> S intermediateSave(S entity);
+    private static ApplicationContext CONTEXT;
+
+    public static Object getBean(String beanName) {
+        return CONTEXT.getBean(beanName);
+    }
+
+    public void setApplicationContext(ApplicationContext context) throws BeansException {
+        CONTEXT = context;
+    }
 }
