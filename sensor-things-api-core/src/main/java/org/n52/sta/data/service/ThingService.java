@@ -44,6 +44,7 @@ import org.n52.sta.data.repositories.ThingRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.ThingMapper;
 import org.n52.sta.service.query.QueryOptions;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
@@ -57,6 +58,7 @@ import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATI
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
+@DependsOn({"springApplicationContext"})
 public class ThingService extends AbstractSensorThingsEntityService<ThingRepository, PlatformEntity> {
 
     private final static ThingQuerySpecifications tQS = new ThingQuerySpecifications();

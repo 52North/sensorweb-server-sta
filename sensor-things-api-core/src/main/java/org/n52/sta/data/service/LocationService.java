@@ -46,6 +46,7 @@ import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.LocationMapper;
 import org.n52.sta.service.query.QueryOptions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers;
@@ -61,6 +62,7 @@ import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAM
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Component
+@DependsOn({"springApplicationContext"})
 public class LocationService extends AbstractSensorThingsEntityService<LocationRepository, LocationEntity> {
 
     private final static LocationQuerySpecifications lQS = new LocationQuerySpecifications();

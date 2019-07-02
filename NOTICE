@@ -4,11 +4,11 @@ Licensed under GNU General Public License, Version 2.0
 
 This project includes: 
 
+  'Bugsnag' under MIT
   52°North Faroe Annotations under The Apache Software License, Version 2.0
   52°North Jan Mayen under The Apache Software License, Version 2.0
   52°North Sensor Things API under The Apache Software License, Version 2.0
   52°North Shetland under The Apache Software License, Version 2.0
-  aalto-xml under The Apache Software License, Version 2.0
   Animal Sniffer Annotations under MIT license
   AntLR Parser Generator under BSD License
   Apache Commons Codec under Apache License, Version 2.0
@@ -19,7 +19,6 @@ This project includes:
   AspectJ runtime under Eclipse Public License - v 1.0
   AspectJ weaver under Eclipse Public License - v 1.0
   Bean Validation API under Apache License 2.0
-  bugsnag under MIT license
   Byte Buddy (without dependencies) under The Apache Software License, Version 2.0
   Checker Qual under The MIT License
   ClassMate under The Apache Software License, Version 2.0
@@ -69,7 +68,6 @@ This project includes:
   Logback Core Module under Eclipse Public License - v 1.0 or GNU Lesser General Public License
   Metrics Core under Apache License 2.0
   Metrics Librato Support under Apache License 2.0
-  Netty/All-in-One under Apache License, Version 2.0
   Netty/Buffer under Apache License, Version 2.0
   Netty/Codec under Apache License, Version 2.0
   Netty/Codec/HTTP under Apache License, Version 2.0
@@ -127,7 +125,6 @@ This project includes:
   Spring Transaction under Apache License, Version 2.0
   Spring Web under Apache License, Version 2.0
   Spring Web MVC under Apache License, Version 2.0
-  Stax2 API under The BSD License
   tomcat-embed-core under Apache License, Version 2.0
   tomcat-embed-el under Apache License, Version 2.0
   tomcat-embed-websocket under Apache License, Version 2.0
