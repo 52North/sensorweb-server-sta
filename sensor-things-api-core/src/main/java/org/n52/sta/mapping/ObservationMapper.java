@@ -210,6 +210,7 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
         return observation;
     }
 
+    @Override
     protected void addPhenomenonTime(HasPhenomenonTime phenomenonTime, Entity entity) {
         if (checkProperty(entity, PROP_PHENOMENON_TIME)) {
            super.addPhenomenonTime(phenomenonTime, entity);
@@ -234,8 +235,8 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
     }
 
     private void addValidTime(StaDataEntity observation, Entity entity) {
-        if (checkProperty(entity, PROP_RESULT_TIME)) {
-            Time time = parseTime(getPropertyValue(entity, PROP_RESULT_TIME));
+        if (checkProperty(entity, PROP_VALID_TIME)) {
+            Time time = parseTime(getPropertyValue(entity, PROP_VALID_TIME));
             if (time instanceof TimeInstant) {
                 observation.setValidTimeStart(((TimeInstant) time).getValue().toDate());
                 observation.setValidTimeEnd(((TimeInstant) time).getValue().toDate());
@@ -314,9 +315,7 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
 
     @Override
     public Entity checkEntity(Entity entity) throws ODataApplicationException {
-        checkPropertyValidity(PROP_PHENOMENON_TIME, entity);
         checkPropertyValidity(PROP_RESULT, entity);
-//        checkPropertyValidity(PROP_RESULT_TIME, entity);
         if (checkNavigationLink(entity, ET_FEATURE_OF_INTEREST_NAME)) {
             featureMapper
                     .checkNavigationLink(entity.getNavigationLink(ET_FEATURE_OF_INTEREST_NAME).getInlineEntity());
