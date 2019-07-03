@@ -57,7 +57,7 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
             sqDataset.select(data.get(DataEntity.PROPERTY_DATASET))
                     .where(builder.equal(data.get(DescribableEntity.PROPERTY_IDENTIFIER), observationIdentifier));
             sqFeature.select(dataset.get(DatasetEntity.PROPERTY_FEATURE)).where(builder.in(dataset).value(sqDataset));
-            return builder.in(root.get(AbstractFeatureEntity.PROPERTY_IDENTIFIER)).value(sqFeature);
+            return builder.in(root.get(AbstractFeatureEntity.PROPERTY_ID)).value(sqFeature);
         };
     }
 

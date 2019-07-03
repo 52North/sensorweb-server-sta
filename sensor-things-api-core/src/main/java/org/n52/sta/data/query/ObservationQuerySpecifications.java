@@ -51,7 +51,7 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
             Subquery<FeatureEntity> subquery = query.subquery(FeatureEntity.class);
             Root<FeatureEntity> feature = subquery.from(FeatureEntity.class);
             subquery.select(feature.get(FeatureEntity.PROPERTY_ID)).where(builder.equal(feature.get(FeatureEntity.IDENTIFIER), featureIdentifier));
-            sq.select(dataset.get(DatasetEntity.PROPERTY_IDENTIFIER)).where(builder.equal(dataset.get(DatasetEntity.PROPERTY_FEATURE), subquery));
+            sq.select(dataset.get(DatasetEntity.PROPERTY_ID)).where(builder.equal(dataset.get(DatasetEntity.PROPERTY_FEATURE), subquery));
             return builder.in(root.get(DataEntity.PROPERTY_DATASET)).value(sq);
         };
     }

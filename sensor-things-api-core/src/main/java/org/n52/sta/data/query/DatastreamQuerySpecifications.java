@@ -115,7 +115,7 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
             Root<DataEntity> data = sq.from(DataEntity.class);
             sq.select(data.get(DataEntity.PROPERTY_DATASET)).where(builder.equal(data.get(DescribableEntity.PROPERTY_IDENTIFIER), observationIdentifier));
             Join<DatastreamEntity, DatasetEntity> join = root.join(DatastreamEntity.PROPERTY_DATASETS);
-            return builder.in(join.get(DatasetEntity.PROPERTY_IDENTIFIER)).value(sq);
+            return builder.in(join.get(DatasetEntity.PROPERTY_ID)).value(sq);
         };
     }
 
