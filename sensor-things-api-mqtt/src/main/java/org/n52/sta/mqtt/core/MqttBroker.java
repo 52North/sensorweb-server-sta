@@ -86,6 +86,12 @@ public class MqttBroker {
     @Value("${mqtt.broker.websocket.port:8080}")
     private String MOQUETTE_WEBSOCKET_PORT;
 
+    @Value("${mqtt.broker.plain_tcp.enabled}")
+    private Boolean MOQUETTE_PLAINTCP_ENABLED;
+
+    @Value("${mqtt.broker.plain_tcp.port:1883}")
+    private String MOQUETTE_PLAINTCP_PORT;
+
     @Autowired
     private MqttMessageHandler handler;
 
@@ -219,9 +225,8 @@ public class MqttBroker {
             props.put(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, "");
         }
 
-        if (MOQUETTE_WEBSOCKET_ENABLED) {
-            props.put(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME, MOQUETTE_WEBSOCKET_PORT);
-        }
+        props.put(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME, (MOQUETTE_WEBSOCKET_ENABLED)? MOQUETTE_WEBSOCKET_PORT: BrokerConstants.DISABLED_PORT_BIND);
+        props.put(BrokerConstants.PORT_PROPERTY_NAME, (MOQUETTE_PLAINTCP_ENABLED)? MOQUETTE_PLAINTCP_PORT: BrokerConstants.DISABLED_PORT_BIND);
 
         props.put(BrokerConstants.ALLOW_ANONYMOUS_PROPERTY_NAME, Boolean.TRUE.toString());
         return new MemoryConfig(props);

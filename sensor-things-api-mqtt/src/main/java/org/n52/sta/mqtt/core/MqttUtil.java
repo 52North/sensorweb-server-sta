@@ -46,7 +46,7 @@ import java.util.*;
 @Component
 public class MqttUtil {
 
-    public static final String OBSERVATION_ENTITY = "org.n52.series.db.beans.QuantityDataEntity";
+    public static final String OBSERVATION_ENTITY = "org.n52.series.db.beans.DataEntity";
     public static final String DATASTREAM_ENTITY = "org.n52.series.db.beans.sta.DatastreamEntity";
     public static final String FEATURE_ENTITY = "org.n52.series.db.beans.AbstractFeatureEntity";
     public static final String HISTORICAL_LOCATION_ENTITY = "org.n52.series.db.beans.sta.HistoricalLocationEntity";

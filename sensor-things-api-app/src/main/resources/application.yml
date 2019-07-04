@@ -42,6 +42,9 @@ spring:
 # MQTT Configuration
 mqtt:
   broker:
+    plain_tcp:
+      enabled: false
+      port: 1883
     websocket:
       enabled: false
       port: 8883
