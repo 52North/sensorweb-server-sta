@@ -114,10 +114,10 @@ public class MqttEventHandler implements STAEventHandler, InitializingBean {
                             new MqttPublishVariableHeader(topic, 52),
                             serializedEntity);
                     mqttBroker.internalPublish(msg, internalClientId);
-                    LOGGER.debug("Posted Message to Topic: " + topic);
+                    LOGGER.debug("Posted Message to Topic: {}", topic);
                 } catch (IOException | SerializerException ex) {
-                    LOGGER.error(ex.getMessage());
-                    LOGGER.debug("Error while serializing payload.", ex);
+                    LOGGER.error("Error while serializing payload: {}", ex.getMessage());
+                    LOGGER.debug("Error while serializing payload: {} {}", ex.getClass().getName(), ex.getMessage());
                 }
             }
         }

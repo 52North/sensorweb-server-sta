@@ -102,7 +102,7 @@ public class MqttMessageHandler {
         if (deserializeRequestBody.getEntity() != null) {
             entityResponse = crudHelper.getCrudEntityHanlder(uriInfo)
                     .handleCreateEntityRequest(deserializeRequestBody.getEntity(), uriInfo.getUriResourceParts());
-            LOGGER.info("Creation of Entity {} was succesful", entityResponse.getEntity());
+            LOGGER.debug("Creation of Entity {} was successful", entityResponse.getEntity());
         }
     }
 

@@ -36,10 +36,6 @@ import io.moquette.broker.subscriptions.Subscription;
 import io.moquette.interception.AbstractInterceptHandler;
 import io.moquette.interception.InterceptHandler;
 import io.moquette.interception.messages.*;
-import org.apache.olingo.server.api.ODataApplicationException;
-import org.apache.olingo.server.api.deserializer.DeserializerException;
-import org.apache.olingo.server.core.uri.parser.UriParserException;
-import org.apache.olingo.server.core.uri.validator.UriValidationException;
 import org.h2.mvstore.Cursor;
 import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
@@ -120,11 +116,11 @@ public class MqttBroker {
                     subscriptionsCursor.next();
                     Subscription sub = (Subscription) subscriptionsCursor.getValue();
                     handler.processSubscribeMessage(new InterceptSubscribeMessage(sub, sub.getClientId()));
-                    LOGGER.info("Restored Subscription of client:'" + sub.getClientId() + "' to topic: '" + sub.getTopicFilter().toString() + "'");
+                    LOGGER.info("Restored Subscription of client: {} to topic {}.", sub.getClientId(), sub.getTopicFilter().toString());
                 } catch (Exception e) {
                     subscriptions.remove(subscriptionsCursor.getKey());
-                    LOGGER.error("Error while restoring MQTT subscription. Invalid Subscription: " + subscriptionsCursor.getValue() + " was removed from storage.");
-                    LOGGER.debug("Error while restoring MQTT subscription", e);
+                    LOGGER.error("Error while restoring MQTT subscription. Invalid Subscription: {} was removed from storage.", subscriptionsCursor.getValue());
+                    LOGGER.debug("Error while restoring MQTT subscription: {}", e);
                 }
             }
             mvStore.close();
@@ -134,8 +130,7 @@ public class MqttBroker {
             mqttServer.startServer(brokerConfig, Arrays.asList(initMessageHandler()));
             Runtime.getRuntime().addShutdownHook(new Thread(mqttServer::stopServer));
         } catch (IOException e) {
-            LOGGER.error("Error starting/stopping MQTT Broker. Exception: " + e.getMessage());
-            LOGGER.debug("Error starting/stopping MQTT Broker.", e);
+            LOGGER.error("Error starting/stopping MQTT Broker: {}", e.getMessage());
         }
     }
 
@@ -149,55 +144,51 @@ public class MqttBroker {
 
             @Override
             public void onConnect(InterceptConnectMessage msg) {
-                LOGGER.debug("Client with ID: " + msg.getClientID() + "has connected");
+                LOGGER.debug("Client with ID: {} has connected", msg.getClientID());
             }
 
             @Override
             public void onDisconnect(InterceptDisconnectMessage msg) {
-                LOGGER.debug("Client with ID: " + msg.getClientID() + "has disconnected");
+                LOGGER.debug("Client with ID: {} has disconnected" + msg.getClientID());
             }
 
             @Override
             public void onConnectionLost(InterceptConnectionLostMessage msg) {
-                LOGGER.debug("Client with ID: " + msg.getClientID() + "has lost connection");
+                LOGGER.debug("Client with ID: {} has lost connection" + msg.getClientID());
             }
 
             @Override
             public void onPublish(InterceptPublishMessage msg) {
                 if (!msg.getClientID().equals(MqttEventHandler.internalClientId)) {
-                    LOGGER.debug(msg.getTopicName());
-                    LOGGER.debug(msg.getPayload().toString(Charset.forName("UTF-8")));
+                    LOGGER.debug("Received publication for topic: {}", msg.getTopicName());
+                    LOGGER.debug("with publication message content: {}", msg.getPayload().toString(Charset.forName("UTF-8")));
                     try {
                         handler.processPublishMessage(msg);
-                    } catch (UriParserException | UriValidationException
-                            | ODataApplicationException | DeserializerException ex) {
-                        LOGGER.error("Error while processing MQTT message");
-                        LOGGER.debug("Error while processing MQTT message", ex.getMessage());
+                    } catch (Exception e) {
+                        LOGGER.error("Error while processing MQTT message: {} {}", e.getClass().getName(), e.getMessage());
                     }
                 }
             }
 
             @Override
             public void onSubscribe(InterceptSubscribeMessage msg) {
-                LOGGER.debug("Client with ID: " + msg.getClientID() + "has subscribed");
+                LOGGER.debug("Client with ID: {} is trying to subscribe", msg.getClientID());
                 try {
-                    LOGGER.debug("Adding new MQTT subscription");
                     handler.processSubscribeMessage(msg);
+                    LOGGER.debug("Client successfully subscribed");
                 } catch (Exception e) {
-                    LOGGER.error("Error while processing MQTT subscription");
-                    LOGGER.debug("Error while processing MQTT subscription", e.getMessage());
+                    LOGGER.error("Error while processing MQTT subscription: {} {}", e.getClass().getName(), e.getMessage());
                 }
             }
 
             @Override
             public void onUnsubscribe(InterceptUnsubscribeMessage msg) {
-                LOGGER.debug("Client with ID: " + msg.getClientID() + "has UNsubscribed");
+                LOGGER.debug("Client with ID: {} has unsubscribed ", msg.getClientID());
                 try {
-                    LOGGER.debug("Adding new MQTT subscription");
                     handler.processUnsubscribeMessage(msg);
+                    LOGGER.debug("Removed MQTT subscription");
                 } catch (Exception e) {
-                    LOGGER.error("Error while processing MQTT subscription");
-                    LOGGER.debug("Error while processing MQTT subscription", e);
+                    LOGGER.error("Error while processing MQTT subscription: {} {}", e.getClass().getName(), e.getMessage());
                 }
             }
 
@@ -213,12 +204,12 @@ public class MqttBroker {
             if (MOQUETTE_STORE_PATH.equals("")) {
                 MOQUETTE_STORE_PATH = System.getProperty("user.dir") + File.separator + MOQUETTE_STORE_FILENAME;
             }
-            LOGGER.info("Initialized MQTT Broker Persistence with Path: " + MOQUETTE_STORE_PATH);
-            LOGGER.info("Initialized MQTT Broker Persistence with Filename: " + MOQUETTE_STORE_FILENAME);
+            LOGGER.info("Initialized MQTT Broker Persistence with Path: {}", MOQUETTE_STORE_PATH);
+            LOGGER.info("Initialized MQTT Broker Persistence with Filename: {}", MOQUETTE_STORE_FILENAME);
             props.put(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, MOQUETTE_STORE_PATH);
             props.put(BrokerConstants.DEFAULT_MOQUETTE_STORE_H2_DB_FILENAME, MOQUETTE_STORE_FILENAME);
 
-            LOGGER.info("Initialized MQTT Broker Persistence with Autosave Interval: " + AUTOSAVE_INTERVAL_PROPERTY);
+            LOGGER.info("Initialized MQTT Broker Persistence with Autosave Interval: {}", AUTOSAVE_INTERVAL_PROPERTY);
             props.put(BrokerConstants.AUTOSAVE_INTERVAL_PROPERTY_NAME, AUTOSAVE_INTERVAL_PROPERTY);
         } else {
             // In-Memory Subscription Store
