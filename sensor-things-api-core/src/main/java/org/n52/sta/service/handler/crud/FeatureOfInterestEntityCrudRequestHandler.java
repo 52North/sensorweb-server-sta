@@ -65,7 +65,7 @@ public class FeatureOfInterestEntityCrudRequestHandler extends AbstractEntityCru
 
     @Override
     protected void handleDeleteEntityRequest(String id) throws ODataApplicationException {
-        getEntityService().delete(id);
+        getEntityService().delete(id.replace("\'", ""));
     }
 
     @Override
