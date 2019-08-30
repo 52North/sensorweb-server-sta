@@ -24,4 +24,4 @@ services:
       - POSTGRES_MULTIPLE_EXTENSIONS=postgis
     # For debug/show purposes!
     ports:
-      - 5000:5000
+      - 5000:5432

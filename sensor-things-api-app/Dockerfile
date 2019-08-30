@@ -29,7 +29,7 @@ RUN cd sensor-things \
     && sed -i 's/4.6.0-STA-alpha.2/4.6.0-STA-SNAPSHOT/g' pom.xml \
     && mvn package
 
-FROM openjdk:8-jdk-alpine as runstage
+FROM openjdk:8-jre-alpine as runstage
 COPY --from=buildstage /app/sensor-things/sensor-things-api-app/target /target
 
 ARG DEPENDENCY=target/unpacked
