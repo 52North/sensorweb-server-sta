@@ -65,7 +65,7 @@ public class HistoricalLocationEntityCrudRequestHandler extends AbstractEntityCr
 
     @Override
     protected void handleDeleteEntityRequest(String id) throws ODataApplicationException {
-        getEntityService().delete(id);
+        getEntityService().delete(id.replace("\'", ""));
     }
 
     @Override
