@@ -89,21 +89,24 @@ public class MqttEventHandler implements STAEventHandler, InitializingBean {
     @Override
     public void handleEvent(Object rawObject, Set<String> differenceMap) {
         Entity entity;
-        Map<String, Set<String>> collections;
+        Map<String, Set<String>> collections = null;
 
         //Map beans Object into Olingo Entity
         String entityClass = rawObject.getClass().getName();
         entity = config.getMapper(entityClass).createEntity(rawObject);
-        AbstractSensorThingsEntityService<?, ?> responseService
-                = serviceRepository.getEntityService(
-                MqttUtil.typeMap.get(entityClass));
-
-        collections = responseService.getRelatedCollections(rawObject);
 
         // Check all subscriptions for a match
         ByteBuf serializedEntity = null;
         for (AbstractMqttSubscription subscrip : subscriptions.keySet()) {
+            if (subscrip instanceof MqttEntityCollectionSubscription) {
+                AbstractSensorThingsEntityService<?, ?> responseService
+                        = serviceRepository.getEntityService(
+                        MqttUtil.typeMap.get(entityClass));
+
+                collections = responseService.getRelatedCollections(rawObject);
+            }
             String topic = subscrip.checkSubscription(entity, collections, differenceMap);
+
             if (topic != null) {
                 try {
                     // Cache Entity for other matching Topics
