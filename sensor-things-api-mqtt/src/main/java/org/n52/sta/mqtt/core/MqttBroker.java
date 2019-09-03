@@ -82,7 +82,7 @@ public class MqttBroker {
     @Value("${mqtt.broker.websocket.port:8080}")
     private String MOQUETTE_WEBSOCKET_PORT;
 
-    @Value("${mqtt.broker.plain_tcp.enabled}")
+    @Value("${mqtt.broker.plaintcp.enabled}")
     private Boolean MOQUETTE_PLAINTCP_ENABLED;
 
     @Value("${mqtt.broker.plain_tcp.port:1883}")
