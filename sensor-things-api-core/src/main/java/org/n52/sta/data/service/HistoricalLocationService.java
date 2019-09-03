@@ -43,6 +43,8 @@ import org.n52.sta.data.repositories.LocationRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.HistoricalLocationMapper;
 import org.n52.sta.service.query.QueryOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
@@ -59,6 +61,8 @@ import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAM
 @Component
 @DependsOn({"springApplicationContext"})
 public class HistoricalLocationService extends AbstractSensorThingsEntityService<HistoricalLocationRepository, HistoricalLocationEntity> {
+
+    private final static Logger logger = LoggerFactory.getLogger(HistoricalLocationService.class);
 
     private HistoricalLocationMapper mapper;
 
@@ -338,12 +342,17 @@ public class HistoricalLocationService extends AbstractSensorThingsEntityService
             collections.put(ET_THING_NAME,
                     Collections.singleton(entity.getThing().getIdentifier()));
         } catch (NullPointerException e) {
+            logger.debug("No Thing associated with this Entity {}", entity.getIdentifier());
         }
         Set<String> set = new HashSet<>();
-        entity.getLocations().forEach((en) -> {
-            set.add(en.getIdentifier());
-        });
-        collections.put(ET_LOCATION_NAME, set);
+        try {
+            entity.getLocations().forEach((en) -> {
+                set.add(en.getIdentifier());
+            });
+            collections.put(ET_LOCATION_NAME, set);
+        } catch (NullPointerException e) {
+            logger.debug("No Location associated with this Entity {}", entity.getIdentifier());
+        }
         return collections;
     }
 }

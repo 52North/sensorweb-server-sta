@@ -51,6 +51,8 @@ import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.FeatureOfInterestMapper;
 import org.n52.sta.mapping.ObservationMapper;
 import org.n52.sta.service.query.QueryOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
@@ -70,6 +72,7 @@ import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.
 public class ObservationService extends
         AbstractSensorThingsEntityService<DataRepository<DataEntity<?>>, DataEntity<?>> {
 
+    private final static Logger logger = LoggerFactory.getLogger(ObservationService.class);
 
     @Autowired
     private FeatureOfInterestMapper featureMapper;
@@ -607,13 +610,13 @@ public class ObservationService extends
     @Override
     public Map<String, Set<String>> getRelatedCollections(Object rawObject) {
         Map<String, Set<String>> collections = new HashMap<>();
-
         DataEntity<?> entity = (DataEntity<?>) rawObject;
 
         try {
             collections.put(ET_FEATURE_OF_INTEREST_NAME,
                     Collections.singleton(entity.getDataset().getFeature().getIdentifier()));
         } catch (NullPointerException e) {
+            logger.debug("No FeaturesOfInterest associated with this Entity {}", entity.getIdentifier());
         }
 
         Optional<DatastreamEntity> datastreamEntity =
@@ -621,6 +624,8 @@ public class ObservationService extends
         if (datastreamEntity.isPresent()) {
             collections.put(ET_DATASTREAM_NAME,
                     Collections.singleton(datastreamEntity.get().getIdentifier()));
+        } else {
+            logger.debug("No Datastream associated with this Entity {}", entity.getIdentifier());
         }
         return collections;
     }

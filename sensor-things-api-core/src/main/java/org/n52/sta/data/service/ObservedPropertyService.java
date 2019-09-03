@@ -46,6 +46,8 @@ import org.n52.sta.data.repositories.PhenomenonRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.ObservedPropertyMapper;
 import org.n52.sta.service.query.QueryOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
@@ -64,6 +66,8 @@ import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATA
 @Component
 @DependsOn({"springApplicationContext"})
 public class ObservedPropertyService extends AbstractSensorThingsEntityService<PhenomenonRepository, PhenomenonEntity> {
+
+    private final static Logger logger = LoggerFactory.getLogger(ObservedPropertyService.class);
 
     private final static DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
 
@@ -313,8 +317,12 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
 
         Iterable<DatastreamEntity> observations = datastreamRepository
                 .findAll(dQS.withObservedPropertyIdentifier(entity.getStaIdentifier()));
-        observations.forEach((o) -> datastreamIds.add(o.getIdentifier()));
-        collections.put(ET_DATASTREAM_NAME, datastreamIds);
+        try {
+            observations.forEach((o) -> datastreamIds.add(o.getIdentifier()));
+            collections.put(ET_DATASTREAM_NAME, datastreamIds);
+        } catch (NullPointerException e) {
+            logger.debug("No Datastreams associated with this Entity {}", entity.getIdentifier());
+        }
         return collections;
     }
 }

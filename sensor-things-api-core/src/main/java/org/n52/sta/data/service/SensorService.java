@@ -48,6 +48,8 @@ import org.n52.sta.data.repositories.ProcedureRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.SensorMapper;
 import org.n52.sta.service.query.QueryOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
@@ -63,6 +65,8 @@ import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATA
 @Component
 @DependsOn({"springApplicationContext"})
 public class SensorService extends AbstractSensorThingsEntityService<ProcedureRepository, ProcedureEntity> {
+
+    private final static Logger logger = LoggerFactory.getLogger(SensorService.class);
 
     private final static SensorQuerySpecifications sQS = new SensorQuerySpecifications();
     private final static DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
@@ -350,6 +354,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
             });
             collections.put(ET_DATASTREAM_NAME, new HashSet(set));
         } catch (NullPointerException e) {
+            logger.debug("No Datastreams associated with this Entity {}", entity.getIdentifier());
         }
         return collections;
     }

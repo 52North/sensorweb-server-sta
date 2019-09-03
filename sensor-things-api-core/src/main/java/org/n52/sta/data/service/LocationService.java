@@ -45,6 +45,8 @@ import org.n52.sta.data.repositories.LocationRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.LocationMapper;
 import org.n52.sta.service.query.QueryOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.domain.Example;
@@ -64,6 +66,8 @@ import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAM
 @Component
 @DependsOn({"springApplicationContext"})
 public class LocationService extends AbstractSensorThingsEntityService<LocationRepository, LocationEntity> {
+
+    private final static Logger logger = LoggerFactory.getLogger(LocationService.class);
 
     private final static LocationQuerySpecifications lQS = new LocationQuerySpecifications();
 
@@ -374,17 +378,22 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
         LocationEntity entity = (LocationEntity) rawObject;
         Set<String> set = new HashSet<>();
 
-        entity.getHistoricalLocations().forEach((en) -> {
-            set.add(en.getIdentifier());
-        });
-        collections.put(ET_HISTORICAL_LOCATION_NAME, set);
-        set.clear();
-
-        entity.getThings().forEach((en) -> {
-            set.add(en.getIdentifier());
-        });
-        collections.put(ET_THING_NAME, set);
-
+        try {
+            entity.getHistoricalLocations().forEach((en) -> {
+                set.add(en.getIdentifier());
+            });
+            collections.put(ET_HISTORICAL_LOCATION_NAME, set);
+            set.clear();
+        } catch (NullPointerException e) {
+            logger.debug("No HistoricalLocations associated with this Entity {}", entity.getIdentifier());
+        }
+        try {
+            entity.getThings().forEach((en) -> {
+                set.add(en.getIdentifier());
+            });
+            collections.put(ET_THING_NAME, set);
+        } catch (NullPointerException e) {
+            logger.debug("No Things associated with this Entity {}", entity.getIdentifier());}
         return collections;
     }
 

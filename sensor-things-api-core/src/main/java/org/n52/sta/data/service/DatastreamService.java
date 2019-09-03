@@ -43,6 +43,8 @@ import org.n52.sta.data.repositories.*;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.DatastreamMapper;
 import org.n52.sta.service.query.QueryOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
@@ -60,6 +62,8 @@ import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAM
 @Component
 @DependsOn({"springApplicationContext"})
 public class DatastreamService extends AbstractSensorThingsEntityService<DatastreamRepository, DatastreamEntity> {
+
+    private final static Logger logger = LoggerFactory.getLogger(DatastreamService.class);
 
     private final static DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
 
@@ -488,14 +492,17 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
         try {
             collections.put(ET_THING_NAME, Collections.singleton(entity.getThing().getIdentifier()));
         } catch (NullPointerException e) {
+            logger.debug("No Thing associated with this Entity {}", entity.getIdentifier());
         }
         try {
             collections.put(ET_SENSOR_NAME, Collections.singleton(entity.getProcedure().getIdentifier()));
         } catch (NullPointerException e) {
+            logger.debug("No Sensor associated with this Entity {}", entity.getIdentifier());
         }
         try {
             collections.put(ET_OBSERVED_PROPERTY_NAME, Collections.singleton(entity.getObservableProperty().getIdentifier()));
         } catch (NullPointerException e) {
+            logger.debug("No ObservedProperty associated with this Entity {}", entity.getIdentifier());
         }
 
 //        Iterable<DataEntity<?>> observations = dataRepository.findAll(dQS.withId(entity.getId()));

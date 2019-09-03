@@ -44,6 +44,8 @@ import org.n52.sta.data.repositories.ThingRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.ThingMapper;
 import org.n52.sta.service.query.QueryOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
@@ -60,6 +62,8 @@ import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATI
 @Component
 @DependsOn({"springApplicationContext"})
 public class ThingService extends AbstractSensorThingsEntityService<ThingRepository, PlatformEntity> {
+
+    private final static Logger logger = LoggerFactory.getLogger(ThingService.class);
 
     private final static ThingQuerySpecifications tQS = new ThingQuerySpecifications();
 
@@ -378,6 +382,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
             });
             collections.put(ET_LOCATION_NAME, new HashSet(set));
         } catch (NullPointerException e) {
+            logger.debug("No Locations associated with this Entity {}", entity.getIdentifier());
         }
         set.clear();
         try {
@@ -386,6 +391,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
             });
             collections.put(ET_HISTORICAL_LOCATION_NAME, new HashSet(set));
         } catch (NullPointerException e) {
+            logger.debug("No HistoricalLocations associated with this Entity {}", entity.getIdentifier());
         }
         set.clear();
         try {
@@ -394,6 +400,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
             });
             collections.put(ET_DATASTREAM_NAME, new HashSet(set));
         } catch (NullPointerException e) {
+            logger.debug("No Datastreams associated with this Entity {}", entity.getIdentifier());
         }
         return collections;
     }
