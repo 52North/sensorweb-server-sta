@@ -62,7 +62,7 @@ import java.util.Properties;
 @Component
 public class MqttBroker {
 
-    final Logger LOGGER = LoggerFactory.getLogger(MqttBroker.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MqttBroker.class);
 
     @Value("${mqtt.broker.persistence.path:}")
     private String MOQUETTE_STORE_PATH;
@@ -89,7 +89,10 @@ public class MqttBroker {
     private String MOQUETTE_PLAINTCP_PORT;
 
     @Autowired
-    private MqttMessageHandler handler;
+    private MqttEventHandler handler;
+
+    @Autowired
+    private MqttMessageHandler publishHandler;
 
     private IConfig brokerConfig;
 
@@ -99,6 +102,7 @@ public class MqttBroker {
     public Server initMQTTBroker() {
         mqttServer = new Server();
         brokerConfig = parseConfig();
+        handler.setMqttBroker(mqttServer);
         return mqttServer;
     }
 
@@ -163,7 +167,7 @@ public class MqttBroker {
                     LOGGER.debug("Received publication for topic: {}", msg.getTopicName());
                     LOGGER.debug("with publication message content: {}", msg.getPayload().toString(Charset.forName("UTF-8")));
                     try {
-                        handler.processPublishMessage(msg);
+                        publishHandler.processPublishMessage(msg);
                     } catch (Exception e) {
                         LOGGER.error("Error while processing MQTT message: {} {}", e.getClass().getName(), e.getMessage());
                     }

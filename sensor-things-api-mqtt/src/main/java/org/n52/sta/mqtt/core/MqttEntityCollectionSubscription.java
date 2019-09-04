@@ -51,10 +51,12 @@ public class MqttEntityCollectionSubscription extends AbstractMqttSubscription {
 
     private String sourceId;
 
-    public MqttEntityCollectionSubscription(String topic, QueryOptions queryOption,
-            EdmEntityType sourceEntityType, String sourceId, EdmEntitySet targetEntitySet,
-            EdmEntityType entityType) {
-        super(topic, queryOption, entityType, targetEntitySet);
+    public MqttEntityCollectionSubscription(String topic,
+                                            EdmEntityType sourceEntityType,
+                                            String sourceId,
+                                            EdmEntitySet targetEntitySet,
+                                            EdmEntityType entityType) {
+        super(topic, entityType, targetEntitySet);
         this.sourceEntityType = sourceEntityType;
         this.sourceId = sourceId;
     }

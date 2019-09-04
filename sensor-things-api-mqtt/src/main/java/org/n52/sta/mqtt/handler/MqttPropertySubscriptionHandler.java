@@ -105,7 +105,7 @@ public class MqttPropertySubscriptionHandler extends AbstractPropertyRequestHand
                 entityId,
                 edmProperty,
                 topic,
-                queryOptions);
+                queryOptions.getSelectOption());
         return subscription;
     }
 
@@ -124,7 +124,7 @@ public class MqttPropertySubscriptionHandler extends AbstractPropertyRequestHand
                 entityId,
                 edmProperty,
                 topic,
-                queryOptions);
+                queryOptions.getSelectOption());
         return subscription;
     }
 

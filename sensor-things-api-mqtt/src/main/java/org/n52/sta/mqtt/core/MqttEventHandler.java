@@ -29,18 +29,33 @@
 package org.n52.sta.mqtt.core;
 
 import io.moquette.broker.Server;
+import io.moquette.interception.messages.InterceptSubscribeMessage;
+import io.moquette.interception.messages.InterceptUnsubscribeMessage;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.mqtt.*;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
 import org.apache.olingo.commons.api.edmx.EdmxReference;
 import org.apache.olingo.server.api.OData;
+import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.api.serializer.SerializerException;
+import org.apache.olingo.server.api.uri.UriInfo;
+import org.apache.olingo.server.api.uri.UriResource;
+import org.apache.olingo.server.api.uri.UriResourcePartTyped;
+import org.apache.olingo.server.core.uri.parser.Parser;
+import org.apache.olingo.server.core.uri.parser.UriParserException;
+import org.apache.olingo.server.core.uri.validator.UriValidationException;
 import org.n52.sta.data.STAEventHandler;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
+import org.n52.sta.mqtt.MqttHandlerException;
 import org.n52.sta.mqtt.handler.PayloadSerializer;
+import org.n52.sta.mqtt.request.SensorThingsMqttRequest;
+import org.n52.sta.service.handler.AbstractEntityCollectionRequestHandler;
+import org.n52.sta.service.handler.AbstractEntityRequestHandler;
+import org.n52.sta.service.handler.AbstractPropertyRequestHandler;
+import org.n52.sta.service.query.URIQueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -57,29 +72,52 @@ import java.util.*;
 public class MqttEventHandler implements STAEventHandler, InitializingBean {
 
     static final String internalClientId = "POC";
+    private static final String BASE_URL = "";
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttEventHandler.class);
     private final MqttFixedHeader mqttFixedHeader = new MqttFixedHeader(MqttMessageType.PUBLISH, false, MqttQoS.AT_LEAST_ONCE, false, 0);
 
-    @Autowired
-    private MqttUtil config;
-
-    @Autowired
+    private final MqttUtil config;
+    private final Parser parser;
     private Server mqttBroker;
+    private final PayloadSerializer serializer;
+    private final CsdlAbstractEdmProvider provider;
 
-    @Autowired
-    private PayloadSerializer serializer;
+    private final AbstractEntityCollectionRequestHandler<SensorThingsMqttRequest, MqttEntityCollectionSubscription> entityCollectionRequestHandler;
+    private final AbstractEntityRequestHandler<SensorThingsMqttRequest, MqttEntitySubscription> mqttEntitySubscHandler;
+    private final AbstractPropertyRequestHandler<SensorThingsMqttRequest, MqttPropertySubscription> mqttPropertySubscHandler;
 
-    @Autowired
-    private CsdlAbstractEdmProvider provider;
-
-    @Autowired
-    private EntityServiceRepository serviceRepository;
+    private final EntityServiceRepository serviceRepository;
     private Map<AbstractMqttSubscription, HashSet<String>> subscriptions = new HashMap<AbstractMqttSubscription, HashSet<String>>();
     private ServiceMetadata edm;
     /*
      * List of all Entity Types that are currently subscribed to. Used for fail-fast.
      */
     private Set<String> watchedEntityTypes = new HashSet<String>();
+
+    public MqttEventHandler(MqttUtil config,
+                            Parser parser,
+                            PayloadSerializer serializer,
+                            CsdlAbstractEdmProvider provider,
+                            EntityServiceRepository serviceRepository,
+                            AbstractEntityCollectionRequestHandler<SensorThingsMqttRequest, MqttEntityCollectionSubscription> entityCollectionRequestHandler,
+                            AbstractEntityRequestHandler<SensorThingsMqttRequest, MqttEntitySubscription> mqttEntitySubscHandler,
+                            AbstractPropertyRequestHandler<SensorThingsMqttRequest, MqttPropertySubscription> mqttPropertySubscHandler) {
+        this.config = config;
+        this.parser = parser;
+        this.serializer = serializer;
+        this.provider = provider;
+        this.serviceRepository = serviceRepository;
+        this.entityCollectionRequestHandler = entityCollectionRequestHandler;
+        this.mqttEntitySubscHandler = mqttEntitySubscHandler;
+        this.mqttPropertySubscHandler = mqttPropertySubscHandler;
+    }
+
+
+    @Override
+    public void afterPropertiesSet() {
+        OData odata = OData.newInstance();
+        edm = odata.createServiceMetadata(provider, new ArrayList<>());
+    }
 
     public Set<String> getWatchedEntityTypes() {
         return watchedEntityTypes;
@@ -151,13 +189,84 @@ public class MqttEventHandler implements STAEventHandler, InitializingBean {
     }
 
     private ByteBuf encodeEntity(AbstractMqttSubscription subsc, Entity entity) throws IOException, SerializerException {
-        return serializer.encodeEntity(edm, entity, subsc.getEdmEntityType(), subsc.getEdmEntitySet(), subsc.getQueryOptions(), watchedEntityTypes);
+        return serializer.encodeEntity(entity, subsc.getEdmEntityType(), subsc.getEdmEntitySet(), subsc.getSelectOption());
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        OData odata = OData.newInstance();
-        edm = odata.createServiceMetadata(provider, new ArrayList<EdmxReference>());
+
+    public void processSubscribeMessage(InterceptSubscribeMessage msg) throws MqttHandlerException {
+        addSubscription(createMqttSubscription(msg.getTopicFilter()), msg.getClientID());
     }
 
+    public void processUnsubscribeMessage(InterceptUnsubscribeMessage msg) throws MqttHandlerException {
+        removeSubscription(createMqttSubscription(msg.getTopicFilter()), msg.getClientID());
+    }
+
+    private AbstractMqttSubscription createMqttSubscription(String topic) throws MqttHandlerException {
+        AbstractMqttSubscription subscription = validateTopicPattern(topic, "");
+        return subscription;
+    }
+
+    private AbstractMqttSubscription validateTopicPattern(String topic, String baseUri) throws MqttHandlerException {
+        try {
+            // Validate that Topic is valid URI
+            UriInfo uriInfo = parser.parseUri(topic, null, null, baseUri);
+            AbstractMqttSubscription subscription = null;
+            switch (uriInfo.getKind()) {
+                case resource:
+                case entityId:
+                    subscription = validateResource(topic, uriInfo);
+                    break;
+                default:
+                    throw new MqttHandlerException("Unsupported MQTT topic pattern.");
+            }
+            return subscription;
+        } catch (UriParserException | UriValidationException ex) {
+            throw new MqttHandlerException("Error while parsing MQTT topic.", ex);
+        }
+
+    }
+
+    private AbstractMqttSubscription validateResource(String topic, UriInfo uriInfo) throws MqttHandlerException {
+        try {
+            final int lastPathSegmentIndex = uriInfo.getUriResourceParts().size() - 1;
+            final UriResource lastPathSegment = uriInfo.getUriResourceParts().get(lastPathSegmentIndex);
+            AbstractMqttSubscription subscription = null;
+
+            switch (lastPathSegment.getKind()) {
+
+                case entitySet:
+                case navigationProperty:
+                    if (((UriResourcePartTyped) lastPathSegment).isCollection()) {
+                        subscription = entityCollectionRequestHandler
+                                .handleEntityCollectionRequest(new SensorThingsMqttRequest(topic,
+                                        uriInfo.getUriResourceParts(),
+                                        new URIQueryOptions(uriInfo, BASE_URL)));
+                    } else {
+                        subscription = mqttEntitySubscHandler
+                                .handleEntityRequest(new SensorThingsMqttRequest(topic,
+                                        uriInfo.getUriResourceParts(),
+                                        new URIQueryOptions(uriInfo, BASE_URL)));
+                    }
+                    break;
+
+                case primitiveProperty:
+                case complexProperty:
+                    subscription = mqttPropertySubscHandler
+                            .handlePropertyRequest(new SensorThingsMqttRequest(topic,
+                                    uriInfo.getUriResourceParts(),
+                                    new URIQueryOptions(uriInfo, BASE_URL)));
+                    break;
+
+                default:
+                    throw new MqttHandlerException("Unsupported MQTT topic pattern.");
+            }
+            return subscription;
+        } catch (ODataApplicationException ex) {
+            throw new MqttHandlerException("Error while resolving MQTT subscription topic.", ex);
+        }
+    }
+
+    public void setMqttBroker(Server mqttBroker) {
+        this.mqttBroker = mqttBroker;
+    }
 }

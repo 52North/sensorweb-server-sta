@@ -45,11 +45,16 @@ import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.api.serializer.EntitySerializerOptions;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerResult;
+import org.apache.olingo.server.api.uri.UriHelper;
+import org.apache.olingo.server.api.uri.queryoption.ExpandOption;
+import org.apache.olingo.server.api.uri.queryoption.SelectOption;
+import org.apache.olingo.server.core.uri.queryoption.ExpandOptionImpl;
 import org.n52.sta.service.query.QueryOptions;
 import org.n52.sta.service.query.QueryOptionsHandler;
 import org.n52.sta.service.serializer.SensorThingsSerializer;
 import org.n52.sta.utils.EntityAnnotator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -67,43 +72,47 @@ public class PayloadSerializer {
     @Autowired
     private QueryOptionsHandler queryOptionsHandler;
 
-    @Autowired
-    EntityAnnotator annotator;
+    private final EntityAnnotator annotator;
+    private final String rootUrl;
 
-    private ServiceMetadata edm;
+    public PayloadSerializer(//QueryOptionsHandler queryOptionsHandler,
+                             EntityAnnotator annotator,
+                             @Value("${server.rootUrl}") String rootUrl) {
+        //this.queryOptionsHandler = queryOptionsHandler;
+        this.annotator = annotator;
+        this.rootUrl = rootUrl;
+    }
 
-    public ByteBuf encodeEntity(ServiceMetadata serviceMetadata, Entity entity, EdmEntityType entityType, EdmEntitySet entitySet, QueryOptions queryOptions, Set<String> watchedProperties) throws SerializerException, IOException {
-        //TODO: Actually serialize Object to JSON
-        InputStream payload = createResponseContent(edm, entity, entityType, entitySet, queryOptions);
-
-//        if (watchedProperties != null) {
-//            // Only return updated property
-//        return UnpooledcopiedBuffer(entity.toString().getBytes());
-//        } else {
-//            // Return normally serialized object with this.fields selectItems
-//            return Unpooled.copiedBuffer(entity.toString().getBytes());
-//        }
+    public ByteBuf encodeEntity(Entity entity,
+                                EdmEntityType entityType,
+                                EdmEntitySet entitySet,
+                                SelectOption selectOption)
+            throws SerializerException, IOException {
+        InputStream payload = createResponseContent(entity, entityType, entitySet, rootUrl, selectOption);
         return Unpooled.copiedBuffer(ByteStreams.toByteArray(payload));
     }
 
-    private InputStream createResponseContent(ServiceMetadata serviceMetadata, Entity entity, EdmEntityType entityType, EdmEntitySet entitySet, QueryOptions queryOptions) throws SerializerException {
+    private InputStream createResponseContent(Entity entity,
+                                              EdmEntityType entityType,
+                                              EdmEntitySet entitySet,
+                                              String baseUrl,
+                                              SelectOption selectOption) throws SerializerException {
         SensorThingsSerializer serializer = new SensorThingsSerializer(ContentType.JSON_NO_METADATA);
-        entity = annotator.annotateEntity(entity, entityType, queryOptions.getBaseURI(), queryOptions.getSelectOption());
+        entity = annotator.annotateEntity(entity, entityType, baseUrl, selectOption);
 
         ContextURL.Builder contextUrlBuilder = ContextURL.with()
                 .entitySet(entitySet)
                 .suffix(ContextURL.Suffix.ENTITY);
         contextUrlBuilder.selectList(queryOptionsHandler.getSelectListFromSelectOption(
-                entityType, queryOptions.getExpandOption(), queryOptions.getSelectOption()));
+                entityType, new ExpandOptionImpl(), selectOption));
         ContextURL contextUrl = contextUrlBuilder.build();
 
         EntitySerializerOptions opts = EntitySerializerOptions.with()
                 .contextURL(contextUrl)
-                .select(queryOptions.getSelectOption())
-                .expand(queryOptions.getExpandOption())
+                .select(selectOption)
                 .build();
 
-        SerializerResult serializerResult = serializer.entity(serviceMetadata, entityType, entity, opts);
+        SerializerResult serializerResult = serializer.entity(null, entityType, entity, opts);
         InputStream serializedContent = serializerResult.getContent();
 
         return serializedContent;

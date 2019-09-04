@@ -72,27 +72,15 @@ import org.n52.sta.service.handler.AbstractPropertyRequestHandler;
 @Component
 public class MqttMessageHandler {
 
-    final Logger LOGGER = LoggerFactory.getLogger(MqttMessageHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MqttMessageHandler.class);
 
-    private static final String BASE_URL = "";
+    private final Parser parser;
+    private final CrudHelper crudHelper;
 
-    @Autowired
-    private Parser parser;
-
-    @Autowired
-    AbstractEntityCollectionRequestHandler<SensorThingsMqttRequest, MqttEntityCollectionSubscription> entityCollectionRequestHandler;
-
-    @Autowired
-    AbstractEntityRequestHandler<SensorThingsMqttRequest, MqttEntitySubscription> mqttEntitySubscHandler;
-
-    @Autowired
-    AbstractPropertyRequestHandler<SensorThingsMqttRequest, MqttPropertySubscription> mqttPropertySubscHandler;
-
-    @Autowired
-    private CrudHelper crudHelper;
-
-    @Autowired
-    private MqttEventHandler localClient;
+    public MqttMessageHandler(Parser parser, CrudHelper crudHelper) {
+        this.parser = parser;
+        this.crudHelper = crudHelper;
+    }
 
     @SuppressWarnings("unchecked")
     public void processPublishMessage(InterceptPublishMessage msg) throws UriParserException, UriValidationException, ODataApplicationException, DeserializerException {
@@ -103,79 +91,6 @@ public class MqttMessageHandler {
             entityResponse = crudHelper.getCrudEntityHanlder(uriInfo)
                     .handleCreateEntityRequest(deserializeRequestBody.getEntity(), uriInfo.getUriResourceParts());
             LOGGER.debug("Creation of Entity {} was successful", entityResponse.getEntity());
-        }
-    }
-
-    public void processSubscribeMessage(InterceptSubscribeMessage msg) throws MqttHandlerException {
-        localClient.addSubscription(createMqttSubscription(msg.getTopicFilter()), msg.getClientID());
-    }
-
-    public void processUnsubscribeMessage(InterceptUnsubscribeMessage msg) throws MqttHandlerException {
-        localClient.removeSubscription(createMqttSubscription(msg.getTopicFilter()), msg.getClientID());
-    }
-
-    private AbstractMqttSubscription createMqttSubscription(String topic) throws MqttHandlerException {
-        AbstractMqttSubscription subscription = validateTopicPattern(topic, "");
-        return subscription;
-    }
-
-    private AbstractMqttSubscription validateTopicPattern(String topic, String baseUri) throws MqttHandlerException {
-        try {
-            // Validate that Topic is valid URI
-            UriInfo uriInfo = parser.parseUri(topic, null, null, baseUri);
-            AbstractMqttSubscription subscription = null;
-            switch (uriInfo.getKind()) {
-                case resource:
-                case entityId:
-                    subscription = validateResource(topic, uriInfo);
-                    break;
-                default:
-                    throw new MqttHandlerException("Unsupported MQTT topic pattern.");
-            }
-            return subscription;
-        } catch (UriParserException | UriValidationException ex) {
-            throw new MqttHandlerException("Error while parsing MQTT topic.", ex);
-        }
-
-    }
-
-    private AbstractMqttSubscription validateResource(String topic, UriInfo uriInfo) throws MqttHandlerException {
-        try {
-            final int lastPathSegmentIndex = uriInfo.getUriResourceParts().size() - 1;
-            final UriResource lastPathSegment = uriInfo.getUriResourceParts().get(lastPathSegmentIndex);
-            AbstractMqttSubscription subscription = null;
-
-            switch (lastPathSegment.getKind()) {
-
-                case entitySet:
-                case navigationProperty:
-                    if (((UriResourcePartTyped) lastPathSegment).isCollection()) {
-                        subscription = entityCollectionRequestHandler
-                                .handleEntityCollectionRequest(new SensorThingsMqttRequest(topic,
-                                        uriInfo.getUriResourceParts(),
-                                        new URIQueryOptions(uriInfo, BASE_URL)));
-                    } else {
-                        subscription = mqttEntitySubscHandler
-                                .handleEntityRequest(new SensorThingsMqttRequest(topic,
-                                        uriInfo.getUriResourceParts(),
-                                        new URIQueryOptions(uriInfo, BASE_URL)));
-                    }
-                    break;
-
-                case primitiveProperty:
-                case complexProperty:
-                    subscription = mqttPropertySubscHandler
-                            .handlePropertyRequest(new SensorThingsMqttRequest(topic,
-                                    uriInfo.getUriResourceParts(),
-                                    new URIQueryOptions(uriInfo, BASE_URL)));
-                    break;
-
-                default:
-                    throw new MqttHandlerException("Unsupported MQTT topic pattern.");
-            }
-            return subscription;
-        } catch (ODataApplicationException ex) {
-            throw new MqttHandlerException("Error while resolving MQTT subscription topic.", ex);
         }
     }
 }

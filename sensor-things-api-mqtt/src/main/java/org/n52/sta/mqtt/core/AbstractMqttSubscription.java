@@ -40,6 +40,7 @@ import java.util.Set;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 import org.n52.sta.service.query.QueryOptions;
 
 /**
@@ -48,22 +49,16 @@ import org.n52.sta.service.query.QueryOptions;
  */
 public abstract class AbstractMqttSubscription {
 
-    private String topic;
-
-    private QueryOptions queryOptions;
-
-    private EdmEntityType entityType;
-
-    private EdmEntitySet entitySet;
+    private final String topic;
+    private final EdmEntityType entityType;
+    private final EdmEntitySet entitySet;
 
     protected String entityTypeName;
 
     public AbstractMqttSubscription(String topic,
-                                    QueryOptions queryOptions,
                                     EdmEntityType entityType,
                                     EdmEntitySet entitySet) {
         this.topic = topic;
-        this.queryOptions = queryOptions;
         this.entityType = entityType;
         this.entitySet = entitySet;
         this.entityTypeName = "iot." + getEdmEntityType().getName();
@@ -91,10 +86,6 @@ public abstract class AbstractMqttSubscription {
         return topic;
     }
 
-    public QueryOptions getQueryOptions() {
-        return queryOptions;
-    }
-
     public EdmEntityType getEdmEntityType() {
         return entityType;
     }
@@ -113,4 +104,11 @@ public abstract class AbstractMqttSubscription {
         return (other instanceof AbstractMqttSubscription && ((AbstractMqttSubscription) other).getTopic().equals(this.topic));
     }
 
+    /**
+     * Returns the selectOption extracted from the Topic.
+     * @return SelectOption if present, else null
+     */
+    public SelectOption getSelectOption() {
+        return null;
+    }
 }

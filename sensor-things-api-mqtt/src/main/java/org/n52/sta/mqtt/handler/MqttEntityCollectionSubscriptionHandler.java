@@ -77,14 +77,24 @@ public class MqttEntityCollectionSubscriptionHandler extends AbstractEntityColle
         // determine the response EntitySet
         UriResourceEntitySet uriResourceEntitySet = navigationResolver.resolveRootUriResource(resourcePaths.get(0));
         EdmEntitySet responseEntitySet = uriResourceEntitySet.getEntitySet();
-        MqttEntityCollectionSubscription subscription = new MqttEntityCollectionSubscription(topic, queryOptions, null, null, responseEntitySet, responseEntitySet.getEntityType());
+        MqttEntityCollectionSubscription subscription = new MqttEntityCollectionSubscription(
+                topic,
+                null,
+                null,
+                responseEntitySet,
+                responseEntitySet.getEntityType());
         return subscription;
     }
 
     private MqttEntityCollectionSubscription createResponseForNavigation(String topic, List<UriResource> resourcePaths, QueryOptions queryOptions) throws ODataApplicationException {
         // determine the target query parameters
         EntityQueryParams queryParams = navigationResolver.resolveUriResourceNavigationPaths(resourcePaths);
-        MqttEntityCollectionSubscription subscription = new MqttEntityCollectionSubscription(topic, queryOptions, queryParams.getSourceEntityType(), queryParams.getSourceId(), queryParams.getTargetEntitySet(), queryParams.getTargetEntitySet().getEntityType());
+        MqttEntityCollectionSubscription subscription = new MqttEntityCollectionSubscription(
+                topic,
+                queryParams.getSourceEntityType(),
+                queryParams.getSourceId(),
+                queryParams.getTargetEntitySet(),
+                queryParams.getTargetEntitySet().getEntityType());
         return subscription;
     }
 
