@@ -1,7 +1,9 @@
-
 # Log Bean initiation process
 debug: false
 trace: false
+
+server:
+  rootUrl: example.xyz:80
 
 database:
   jpa:
@@ -44,13 +46,13 @@ spring:
         temp.use_jdbc_metadata_defaults: false
   jmx:
     enabled: false
- 
-        
-        
+
+
+
 # MQTT Configuration
 mqtt:
   broker:
-    plain_tcp:
+    plaintcp:
       enabled: true
       port: 1883
     websocket:
