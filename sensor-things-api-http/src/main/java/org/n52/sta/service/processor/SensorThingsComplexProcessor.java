@@ -68,12 +68,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class SensorThingsComplexProcessor implements ComplexProcessor {
 
-    @Autowired
-    AbstractPropertyRequestHandler<SensorThingsRequest, PropertyResponse> requestHandler;
-
-    private OData odata;
+    private final AbstractPropertyRequestHandler<SensorThingsRequest, PropertyResponse> requestHandler;
+    private final ODataSerializer serializer;
     private ServiceMetadata serviceMetadata;
-    private ODataSerializer serializer;
+
+    public SensorThingsComplexProcessor(AbstractPropertyRequestHandler<SensorThingsRequest, PropertyResponse> requestHandler) {
+        this.requestHandler = requestHandler;
+        this.serializer = new SensorThingsSerializer(ContentType.JSON_NO_METADATA);
+    }
+
+    @Override
+    public void init(OData odata, ServiceMetadata serviceMetadata) {
+        this.serviceMetadata = serviceMetadata;
+    }
 
     @Override
     public void readComplex(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
@@ -118,13 +125,6 @@ public class SensorThingsComplexProcessor implements ComplexProcessor {
     @Override
     public void deleteComplex(ODataRequest request, ODataResponse response, UriInfo uriInfo) throws ODataApplicationException, ODataLibraryException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void init(OData odata, ServiceMetadata serviceMetadata) {
-        this.odata = odata;
-        this.serviceMetadata = serviceMetadata;
-        this.serializer = new SensorThingsSerializer(ContentType.JSON_NO_METADATA);
     }
 
 }

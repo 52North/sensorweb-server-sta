@@ -76,13 +76,22 @@ import org.n52.sta.service.request.SensorThingsRequest;
 @Component
 public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcessor {
 
-    @Autowired
-    AbstractPropertyRequestHandler<SensorThingsRequest, PropertyResponse> requestHandler;
+    private final AbstractPropertyRequestHandler<SensorThingsRequest, PropertyResponse> requestHandler;
+    private final SensorThingsSerializer serializer;
 
-    private OData odata;
-    private ServiceMetadata serviceMetadata;
-    private SensorThingsSerializer serializer;
     private FixedFormatSerializer fixedFormatSerializer;
+    private ServiceMetadata serviceMetadata;
+
+    public SensorThingsPropertyValueProcessor(AbstractPropertyRequestHandler<SensorThingsRequest, PropertyResponse> requestHandler) {
+        this.requestHandler = requestHandler;
+        this.serializer = new SensorThingsSerializer(ContentType.JSON_NO_METADATA);
+    }
+
+    @Override
+    public void init(OData odata, ServiceMetadata serviceMetadata) {
+        this.fixedFormatSerializer = odata.createFixedFormatSerializer();
+        this.serviceMetadata = serviceMetadata;
+    }
 
     @Override
     public void readPrimitiveValue(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
@@ -188,14 +197,6 @@ public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcess
     @Override
     public void deletePrimitive(ODataRequest request, ODataResponse response, UriInfo uriInfo) throws ODataApplicationException, ODataLibraryException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void init(OData odata, ServiceMetadata serviceMetadata) {
-        this.odata = odata;
-        this.serviceMetadata = serviceMetadata;
-        this.serializer = new SensorThingsSerializer(ContentType.JSON_NO_METADATA);
-        fixedFormatSerializer = odata.createFixedFormatSerializer();
     }
 
     private InputStream createReponseContent(Property property, EdmPrimitiveType edmPropertyType, EdmEntitySet responseEdmEntitySet) throws SerializerException {

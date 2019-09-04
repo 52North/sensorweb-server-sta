@@ -55,6 +55,7 @@ import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
+import org.apache.olingo.server.core.uri.UriHelperImpl;
 import org.n52.sta.service.deserializer.SensorThingsDeserializer;
 import org.n52.sta.service.handler.AbstractEntityRequestHandler;
 import org.n52.sta.service.query.QueryOptions;
@@ -66,6 +67,7 @@ import org.n52.sta.service.serializer.SensorThingsSerializer;
 import org.n52.sta.utils.CrudHelper;
 import org.n52.sta.utils.EntityAnnotator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -75,26 +77,38 @@ import org.springframework.stereotype.Component;
 @Component
 public class SensorThingsEntityProcessor implements EntityProcessor {
 
-    @Autowired
-    private AbstractEntityRequestHandler<SensorThingsRequest, EntityResponse> requestHandler;
+    private final AbstractEntityRequestHandler<SensorThingsRequest, EntityResponse> requestHandler;
+    private final QueryOptionsHandler queryOptionsHandler;
+    private final EntityAnnotator entityAnnotator;
+    private final CrudHelper crudHelper;
+    private final String rootUrl;
+    private final ODataSerializer serializer;
 
-    @Autowired
-    private QueryOptionsHandler queryOptionsHandler;
-
-    @Autowired
-    private EntityAnnotator entityAnnotator;
-
-    @Autowired
-    private CrudHelper crudHelper;
-
-    private OData odata;
     private ServiceMetadata serviceMetadata;
-    private ODataSerializer serializer;
-    private SensorThingsDeserializer deserializer;
+
+    public SensorThingsEntityProcessor(AbstractEntityRequestHandler<SensorThingsRequest,
+                                       EntityResponse> requestHandler,
+                                       QueryOptionsHandler queryOptionsHandler,
+                                       EntityAnnotator entityAnnotator,
+                                       CrudHelper crudHelper,
+                                       @Value("${server.rootUrl}") String rootUrl) {
+        this.requestHandler = requestHandler;
+        this.queryOptionsHandler = queryOptionsHandler;
+        this.entityAnnotator = entityAnnotator;
+        this.crudHelper = crudHelper;
+        this.rootUrl = rootUrl;
+        this.serializer = new SensorThingsSerializer(ContentType.JSON_NO_METADATA);
+        this.queryOptionsHandler.setUriHelper(new UriHelperImpl());
+    }
+
+    @Override
+    public void init(OData odata, ServiceMetadata sm) {
+        this.serviceMetadata = sm;
+    }
 
     @Override
     public void readEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-        QueryOptions queryOptions = new URIQueryOptions(uriInfo, request.getRawBaseUri());
+        QueryOptions queryOptions = new URIQueryOptions(uriInfo, rootUrl);
         EntityResponse entityResponse = requestHandler.handleEntityRequest(new SensorThingsRequest(uriInfo.getUriResourceParts(), queryOptions));
 
         InputStream serializedContent = createResponseContent(serviceMetadata, entityResponse, queryOptions);
@@ -108,8 +122,8 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
     @Override
     public void createEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType requestFormat,
             ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-        QueryOptions queryOptions = new URIQueryOptions(uriInfo, request.getRawBaseUri());
-        EntityResponse entityResponse = new EntityResponse();
+        QueryOptions queryOptions = new URIQueryOptions(uriInfo, rootUrl);
+        EntityResponse entityResponse;
         DeserializerResult deserializeRequestBody = crudHelper.deserializeRequestBody(request.getBody(), uriInfo);
         if (deserializeRequestBody.getEntity() != null) {
             entityResponse = crudHelper.getCrudEntityHanlder(uriInfo)
@@ -136,8 +150,8 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
             throw new ODataApplicationException("Http PUT is not yet supported!",
                     HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.getDefault());
         }
-        QueryOptions queryOptions = new URIQueryOptions(uriInfo, request.getRawBaseUri());
-        EntityResponse entityResponse = new EntityResponse();
+        QueryOptions queryOptions = new URIQueryOptions(uriInfo, rootUrl);
+        EntityResponse entityResponse;
         DeserializerResult deserializeRequestBody = crudHelper.deserializeRequestBody(request.getBody(), uriInfo);
         if (deserializeRequestBody.getEntity() != null) {
             entityResponse = crudHelper.getCrudEntityHanlder(uriInfo).handleUpdateEntityRequest(
@@ -156,13 +170,12 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
         } else {
             response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.JSON_NO_METADATA.toContentTypeString());
         }
-//        throw new ODataApplicationException("Not supported.", HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
     }
 
     @Override
     public void deleteEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo)
             throws ODataApplicationException, ODataLibraryException {
-        QueryOptions queryOptions = new URIQueryOptions(uriInfo, request.getRawBaseUri());
+        QueryOptions queryOptions = new URIQueryOptions(uriInfo, rootUrl);
         EntityResponse entityResponse = new EntityResponse();
         entityResponse = crudHelper.getCrudEntityHanlder(uriInfo)
                 .handleDeleteEntityRequest(uriInfo.getUriResourceParts());
@@ -175,17 +188,6 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
 //        response.setContent(serializedContent);
         response.setStatusCode(HttpStatusCode.OK.getStatusCode());
         response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.JSON_NO_METADATA.toContentTypeString());
-
-//        throw new ODataApplicationException("Not supported.", HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.ROOT);
-    }
-
-    @Override
-    public void init(OData odata, ServiceMetadata sm) {
-        this.odata = odata;
-        this.serviceMetadata = serviceMetadata;
-        this.serializer = new SensorThingsSerializer(ContentType.JSON_NO_METADATA);
-        this.deserializer = new SensorThingsDeserializer(ContentType.JSON_NO_METADATA);
-        this.queryOptionsHandler.setUriHelper(odata.createUriHelper());
     }
 
     private InputStream createResponseContent(ServiceMetadata serviceMetadata, EntityResponse response, QueryOptions queryOptions) throws SerializerException {

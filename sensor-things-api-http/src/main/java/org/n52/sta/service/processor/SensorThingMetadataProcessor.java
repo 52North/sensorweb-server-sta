@@ -61,6 +61,12 @@ public class SensorThingMetadataProcessor implements MetadataProcessor {
     private ServiceMetadata serviceMetadata;
 
     @Override
+    public void init(OData odata, ServiceMetadata sm) {
+        this.odata = odata;
+        this.serviceMetadata = sm;
+    }
+
+    @Override
     public void readMetadata(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType ct) throws ODataApplicationException, ODataLibraryException {
 
         ODataSerializer serializer = odata.createSerializer(ct);
@@ -71,12 +77,6 @@ public class SensorThingMetadataProcessor implements MetadataProcessor {
         response.setContent(serializedContent);
         response.setStatusCode(HttpStatusCode.OK.getStatusCode());
         response.setHeader(HttpHeader.CONTENT_TYPE, ct.toContentTypeString());
-    }
-
-    @Override
-    public void init(OData odata, ServiceMetadata sm) {
-        this.odata = odata;
-        this.serviceMetadata = sm;
     }
 
 }

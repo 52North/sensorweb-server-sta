@@ -60,9 +60,15 @@ public class SensorThingsErrorProcessor implements ErrorProcessor {
 
     private static final Logger LOG = LoggerFactory.getLogger(SensorThingsErrorProcessor.class);
 
-    private OData odata;
-    private ServiceMetadata serviceMetadata;
-    private ODataSerializer serializer;
+    private final ODataSerializer serializer;
+
+    public SensorThingsErrorProcessor() {
+        this.serializer = new SensorThingsSerializer(ContentType.JSON_NO_METADATA);
+    }
+
+    @Override
+    public void init(OData odata, ServiceMetadata serviceMetadata) {
+    }
 
     @Override
     public void processError(ODataRequest request, ODataResponse response, ODataServerError error, ContentType contentType) {
@@ -81,12 +87,4 @@ public class SensorThingsErrorProcessor implements ErrorProcessor {
             LOG.debug("Error while serializing ODataServerError", ex);
         }
     }
-
-    @Override
-    public void init(OData odata, ServiceMetadata metadata) {
-        this.odata = odata;
-        this.serviceMetadata = metadata;
-        this.serializer = new SensorThingsSerializer(ContentType.JSON_NO_METADATA);
-    }
-
 }

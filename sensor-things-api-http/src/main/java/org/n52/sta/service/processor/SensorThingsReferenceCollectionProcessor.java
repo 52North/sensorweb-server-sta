@@ -63,6 +63,7 @@ import org.n52.sta.service.response.EntityCollectionResponse;
 import org.n52.sta.service.serializer.SensorThingsSerializer;
 import org.n52.sta.utils.EntityAnnotator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -72,19 +73,32 @@ import org.springframework.stereotype.Component;
 @Component
 public class SensorThingsReferenceCollectionProcessor implements ReferenceCollectionProcessor {
 
-    @Autowired
-    AbstractEntityCollectionRequestHandler<SensorThingsRequest, EntityCollectionResponse> requestHandler;
-
-    @Autowired
-    EntityAnnotator entityAnnotator;
+    private final AbstractEntityCollectionRequestHandler<SensorThingsRequest, EntityCollectionResponse> requestHandler;
+    private final EntityAnnotator entityAnnotator;
+    private final String rootUrl;
 
     private OData odata;
     private ServiceMetadata serviceMetadata;
     private ODataSerializer serializer;
 
+    public SensorThingsReferenceCollectionProcessor(
+            AbstractEntityCollectionRequestHandler<SensorThingsRequest,EntityCollectionResponse> requestHandler,
+            EntityAnnotator entityAnnotator,
+            @Value("${server.rootUrl}") String rootUrl) {
+        this.requestHandler = requestHandler;
+        this.entityAnnotator = entityAnnotator;
+        this.rootUrl = rootUrl;
+        this.serializer = new SensorThingsSerializer(ContentType.JSON_NO_METADATA);
+    }
+
+    @Override
+    public void init(OData odata, ServiceMetadata serviceMetadata) {
+        this.serviceMetadata = serviceMetadata;
+    }
+
     @Override
     public void readReferenceCollection(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-        QueryOptions queryOptions = new URIQueryOptions(uriInfo, request.getRawBaseUri());
+        QueryOptions queryOptions = new URIQueryOptions(uriInfo, rootUrl);
         List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
         EntityCollectionResponse entityCollectionResponse
                 = requestHandler.handleEntityCollectionRequest(
@@ -120,13 +134,6 @@ public class SensorThingsReferenceCollectionProcessor implements ReferenceCollec
         SerializerResult serializerResult = serializer.referenceCollection(serviceMetadata, response.getEntitySet(), response.getEntityCollection(), opts);
         InputStream serializedContent = serializerResult.getContent();
         return serializedContent;
-    }
-
-    @Override
-    public void init(OData odata, ServiceMetadata serviceMetadata) {
-        this.odata = odata;
-        this.serviceMetadata = serviceMetadata;
-        this.serializer = new SensorThingsSerializer(ContentType.JSON_NO_METADATA);
     }
 
 }
