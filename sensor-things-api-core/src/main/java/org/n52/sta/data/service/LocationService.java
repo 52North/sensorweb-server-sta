@@ -28,7 +28,6 @@
  */
 package org.n52.sta.data.service;
 
-import com.google.common.collect.Sets;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
@@ -370,7 +369,9 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
         if (location.hasThings()) {
             Set<PlatformEntity> things = new LinkedHashSet<>();
             for (PlatformEntity thing : location.getThings()) {
-                thing.setLocations(Sets.newHashSet(createReferencedLocation(location)));
+                HashSet<LocationEntity> set = new HashSet<>();
+                set.add(createReferencedLocation(location));
+                thing.setLocations(set);
                 PlatformEntity optionalThing = getThingService().createOrUpdate(thing);
                 things.add(optionalThing != null ? optionalThing : thing);
             }

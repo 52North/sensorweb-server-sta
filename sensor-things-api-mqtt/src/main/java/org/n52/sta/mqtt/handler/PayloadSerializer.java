@@ -33,7 +33,6 @@
  */
 package org.n52.sta.mqtt.handler;
 
-import com.google.common.io.ByteStreams;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.apache.olingo.commons.api.data.ContextURL;
@@ -53,6 +52,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -83,7 +83,14 @@ public class PayloadSerializer {
                                 SelectOption selectOption)
             throws SerializerException, IOException {
         InputStream payload = createResponseContent(entity, entityType, entitySet, rootUrl, selectOption);
-        return Unpooled.copiedBuffer(ByteStreams.toByteArray(payload));
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        int index;
+        byte[] data = new byte[1024];
+        while ((index = payload.read(data, 0, data.length)) != -1) {
+            buffer.write(data, 0, index);
+        }
+        buffer.flush();
+        return Unpooled.copiedBuffer(buffer.toByteArray());
     }
 
     private InputStream createResponseContent(Entity original,

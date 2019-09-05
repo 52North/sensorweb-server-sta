@@ -28,7 +28,6 @@
  */
 package org.n52.sta.data.service;
 
-import com.google.common.collect.Sets;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
@@ -42,6 +41,7 @@ import org.n52.series.db.beans.CategoryEntity;
 import org.n52.series.db.beans.CountDataEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
+import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.OfferingEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.ProcedureEntity;
@@ -78,6 +78,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -474,7 +475,9 @@ public class ObservationService extends
         if (datastream.isSetGeometry()) {
             offering.setGeometryEntity(datastream.getGeometryEntity());
         }
-        offering.setObservationTypes(Sets.newHashSet(datastream.getObservationType()));
+        HashSet<FormatEntity> set = new HashSet<>();
+        set.add(datastream.getObservationType());
+        offering.setObservationTypes(set);
 
         if (!offeringRepository.existsByIdentifier(offering.getIdentifier())) {
             return offeringRepository.save(offering);
