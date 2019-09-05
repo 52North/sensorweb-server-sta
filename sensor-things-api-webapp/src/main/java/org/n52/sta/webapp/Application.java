@@ -35,8 +35,8 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.ComponentScan.Filter;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -50,15 +50,16 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
                 @Filter(type = FilterType.REGEX, pattern = "org\\.n52\\.series\\.db\\.assembler\\..*")})
 @EnableConfigurationProperties
 @EnableTransactionManagement
-public class Application  extends SpringBootServletInitializer {
+@SuppressWarnings("uncommentedmain")
+public class Application extends SpringBootServletInitializer {
+
+    public static void main(String[] args) throws Exception {
+        SpringApplication.run(Application.class, args);
+    }
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
         return application.sources(Application.class);
-    }
-
-    public static void main(String[] args) throws Exception {
-        SpringApplication.run(Application.class, args);
     }
 
 }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.n52.sta</groupId>
@@ -10,9 +11,9 @@
     <packaging>war</packaging>
     <dependencies>
         <dependency>
-           <groupId>org.springframework.boot</groupId>
-           <artifactId>spring-boot-starter-tomcat</artifactId>
-           <scope>provided</scope>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -26,10 +27,10 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>sensor-things-api-core</artifactId>
             <exclusions>
-              <exclusion>
-                  <groupId>org.n52.series.db</groupId>
-                  <artifactId>mappings</artifactId>
-              </exclusion>
+                <exclusion>
+                    <groupId>org.n52.series.db</groupId>
+                    <artifactId>mappings</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -40,17 +41,17 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>sensor-things-api-mqtt</artifactId>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>org.geolatte</groupId>
             <artifactId>geolatte-geom</artifactId>
         </dependency>
         <dependency>
-           <groupId>org.hibernate</groupId>
-           <artifactId>hibernate-core</artifactId>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
         </dependency>
         <dependency>
-           <groupId>org.hibernate</groupId>
-           <artifactId>hibernate-spatial</artifactId>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-spatial</artifactId>
         </dependency>
     </dependencies>
     <build>
