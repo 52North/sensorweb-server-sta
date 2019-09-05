@@ -169,7 +169,7 @@ public class MqttBroker {
 
             @Override
             public void onPublish(InterceptPublishMessage msg) {
-                if (!msg.getClientID().equals(MqttEventHandler.internalClientId)) {
+                if (!msg.getClientID().equals(MqttEventHandler.INTERNAL_CLIENT_ID)) {
                     LOGGER.debug("Received publication for topic: {}", msg.getTopicName());
                     LOGGER.debug("with publication message content: {}",
                             msg.getPayload().toString(Charset.forName("UTF-8")));

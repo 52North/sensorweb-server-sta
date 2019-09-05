@@ -77,9 +77,10 @@ import java.util.Set;
 @Component
 public class MqttEventHandler implements STAEventHandler, InitializingBean {
 
+    public static final String INTERNAL_CLIENT_ID = "POC";
+
     private static final String BASE_URL = "";
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttEventHandler.class);
-    private final String internalClientId = "POC";
     private final MqttFixedHeader mqttFixedHeader = new MqttFixedHeader(
             MqttMessageType.PUBLISH,
             false,
@@ -170,7 +171,7 @@ public class MqttEventHandler implements STAEventHandler, InitializingBean {
                     MqttPublishMessage msg = new MqttPublishMessage(mqttFixedHeader,
                             new MqttPublishVariableHeader(topic, 52),
                             serializedEntity);
-                    mqttBroker.internalPublish(msg, internalClientId);
+                    mqttBroker.internalPublish(msg, INTERNAL_CLIENT_ID);
                     LOGGER.debug("Posted Message to Topic: {}", topic);
                 } catch (IOException | SerializerException ex) {
                     LOGGER.error("Error while serializing payload: {}", ex.getMessage());
