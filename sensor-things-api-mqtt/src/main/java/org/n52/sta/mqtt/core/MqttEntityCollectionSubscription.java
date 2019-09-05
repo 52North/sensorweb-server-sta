@@ -33,16 +33,15 @@
  */
 package org.n52.sta.mqtt.core;
 
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
-import org.n52.sta.service.query.QueryOptions;
+
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
- *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 public class MqttEntityCollectionSubscription extends AbstractMqttSubscription {

@@ -35,7 +35,12 @@ import io.moquette.broker.config.MemoryConfig;
 import io.moquette.broker.subscriptions.Subscription;
 import io.moquette.interception.AbstractInterceptHandler;
 import io.moquette.interception.InterceptHandler;
-import io.moquette.interception.messages.*;
+import io.moquette.interception.messages.InterceptConnectMessage;
+import io.moquette.interception.messages.InterceptConnectionLostMessage;
+import io.moquette.interception.messages.InterceptDisconnectMessage;
+import io.moquette.interception.messages.InterceptPublishMessage;
+import io.moquette.interception.messages.InterceptSubscribeMessage;
+import io.moquette.interception.messages.InterceptUnsubscribeMessage;
 import org.h2.mvstore.Cursor;
 import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
@@ -57,7 +62,6 @@ import java.util.Properties;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- *
  */
 @Component
 public class MqttBroker {
@@ -120,10 +124,12 @@ public class MqttBroker {
                     subscriptionsCursor.next();
                     Subscription sub = (Subscription) subscriptionsCursor.getValue();
                     handler.processSubscribeMessage(new InterceptSubscribeMessage(sub, sub.getClientId()));
-                    LOGGER.info("Restored Subscription of client: {} to topic {}.", sub.getClientId(), sub.getTopicFilter().toString());
+                    LOGGER.info("Restored Subscription of client: {} to topic {}.",
+                                sub.getClientId(), sub.getTopicFilter().toString());
                 } catch (Exception e) {
                     subscriptions.remove(subscriptionsCursor.getKey());
-                    LOGGER.error("Error while restoring MQTT subscription. Invalid Subscription: {} was removed from storage.", subscriptionsCursor.getValue());
+                    LOGGER.error("Error while restoring MQTT subscription. " +
+                            "Invalid Subscription: {} was removed from storage.", subscriptionsCursor.getValue());
                     LOGGER.debug("Error while restoring MQTT subscription: {}", e);
                 }
             }
@@ -165,11 +171,13 @@ public class MqttBroker {
             public void onPublish(InterceptPublishMessage msg) {
                 if (!msg.getClientID().equals(MqttEventHandler.internalClientId)) {
                     LOGGER.debug("Received publication for topic: {}", msg.getTopicName());
-                    LOGGER.debug("with publication message content: {}", msg.getPayload().toString(Charset.forName("UTF-8")));
+                    LOGGER.debug("with publication message content: {}",
+                            msg.getPayload().toString(Charset.forName("UTF-8")));
                     try {
                         publishHandler.processPublishMessage(msg);
                     } catch (Exception e) {
-                        LOGGER.error("Error while processing MQTT message: {} {}", e.getClass().getName(), e.getMessage());
+                        LOGGER.error("Error while processing MQTT message: {} {}",
+                                e.getClass().getName(), e.getMessage());
                     }
                 }
             }
@@ -181,7 +189,8 @@ public class MqttBroker {
                     handler.processSubscribeMessage(msg);
                     LOGGER.debug("Client successfully subscribed");
                 } catch (Exception e) {
-                    LOGGER.error("Error while processing MQTT subscription: {} {}", e.getClass().getName(), e.getMessage());
+                    LOGGER.error("Error while processing MQTT subscription: {} {}",
+                            e.getClass().getName(), e.getMessage());
                 }
             }
 
@@ -192,7 +201,8 @@ public class MqttBroker {
                     handler.processUnsubscribeMessage(msg);
                     LOGGER.debug("Removed MQTT subscription");
                 } catch (Exception e) {
-                    LOGGER.error("Error while processing MQTT subscription: {} {}", e.getClass().getName(), e.getMessage());
+                    LOGGER.error("Error while processing MQTT unsubscription: {} {}",
+                            e.getClass().getName(), e.getMessage());
                 }
             }
 
@@ -220,8 +230,10 @@ public class MqttBroker {
             props.put(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, "");
         }
 
-        props.put(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME, (MOQUETTE_WEBSOCKET_ENABLED)? MOQUETTE_WEBSOCKET_PORT: BrokerConstants.DISABLED_PORT_BIND);
-        props.put(BrokerConstants.PORT_PROPERTY_NAME, (MOQUETTE_PLAINTCP_ENABLED)? MOQUETTE_PLAINTCP_PORT: BrokerConstants.DISABLED_PORT_BIND);
+        props.put(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME,
+                MOQUETTE_WEBSOCKET_ENABLED ? MOQUETTE_WEBSOCKET_PORT : BrokerConstants.DISABLED_PORT_BIND);
+        props.put(BrokerConstants.PORT_PROPERTY_NAME,
+                MOQUETTE_PLAINTCP_ENABLED ? MOQUETTE_PLAINTCP_PORT : BrokerConstants.DISABLED_PORT_BIND);
 
         props.put(BrokerConstants.ALLOW_ANONYMOUS_PROPERTY_NAME, Boolean.TRUE.toString());
         return new MemoryConfig(props);

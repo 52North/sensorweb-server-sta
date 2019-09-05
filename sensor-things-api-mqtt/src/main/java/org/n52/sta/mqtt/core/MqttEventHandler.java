@@ -32,10 +32,13 @@ import io.moquette.broker.Server;
 import io.moquette.interception.messages.InterceptSubscribeMessage;
 import io.moquette.interception.messages.InterceptUnsubscribeMessage;
 import io.netty.buffer.ByteBuf;
-import io.netty.handler.codec.mqtt.*;
+import io.netty.handler.codec.mqtt.MqttFixedHeader;
+import io.netty.handler.codec.mqtt.MqttMessageType;
+import io.netty.handler.codec.mqtt.MqttPublishMessage;
+import io.netty.handler.codec.mqtt.MqttPublishVariableHeader;
+import io.netty.handler.codec.mqtt.MqttQoS;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
-import org.apache.olingo.commons.api.edmx.EdmxReference;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.ServiceMetadata;
@@ -59,11 +62,14 @@ import org.n52.sta.service.query.URIQueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -71,37 +77,47 @@ import java.util.*;
 @Component
 public class MqttEventHandler implements STAEventHandler, InitializingBean {
 
-    static final String internalClientId = "POC";
     private static final String BASE_URL = "";
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttEventHandler.class);
-    private final MqttFixedHeader mqttFixedHeader = new MqttFixedHeader(MqttMessageType.PUBLISH, false, MqttQoS.AT_LEAST_ONCE, false, 0);
+    private final String internalClientId = "POC";
+    private final MqttFixedHeader mqttFixedHeader = new MqttFixedHeader(
+            MqttMessageType.PUBLISH,
+            false,
+            MqttQoS.AT_LEAST_ONCE,
+            false,
+            0);
 
     private final MqttUtil config;
     private final Parser parser;
-    private Server mqttBroker;
     private final PayloadSerializer serializer;
     private final CsdlAbstractEdmProvider provider;
-
-    private final AbstractEntityCollectionRequestHandler<SensorThingsMqttRequest, MqttEntityCollectionSubscription> entityCollectionRequestHandler;
-    private final AbstractEntityRequestHandler<SensorThingsMqttRequest, MqttEntitySubscription> mqttEntitySubscHandler;
-    private final AbstractPropertyRequestHandler<SensorThingsMqttRequest, MqttPropertySubscription> mqttPropertySubscHandler;
-
+    private final AbstractEntityCollectionRequestHandler<SensorThingsMqttRequest, MqttEntityCollectionSubscription>
+            entityCollectionRequestHandler;
+    private final AbstractEntityRequestHandler<SensorThingsMqttRequest, MqttEntitySubscription>
+            mqttEntitySubscHandler;
+    private final AbstractPropertyRequestHandler<SensorThingsMqttRequest, MqttPropertySubscription>
+            mqttPropertySubscHandler;
     private final EntityServiceRepository serviceRepository;
-    private Map<AbstractMqttSubscription, HashSet<String>> subscriptions = new HashMap<AbstractMqttSubscription, HashSet<String>>();
+    private Server mqttBroker;
+    private Map<AbstractMqttSubscription, HashSet<String>> subscriptions = new HashMap<>();
     private ServiceMetadata edm;
     /*
      * List of all Entity Types that are currently subscribed to. Used for fail-fast.
      */
     private Set<String> watchedEntityTypes = new HashSet<String>();
 
-    public MqttEventHandler(MqttUtil config,
-                            Parser parser,
-                            PayloadSerializer serializer,
-                            CsdlAbstractEdmProvider provider,
-                            EntityServiceRepository serviceRepository,
-                            AbstractEntityCollectionRequestHandler<SensorThingsMqttRequest, MqttEntityCollectionSubscription> entityCollectionRequestHandler,
-                            AbstractEntityRequestHandler<SensorThingsMqttRequest, MqttEntitySubscription> mqttEntitySubscHandler,
-                            AbstractPropertyRequestHandler<SensorThingsMqttRequest, MqttPropertySubscription> mqttPropertySubscHandler) {
+    public MqttEventHandler(
+            MqttUtil config,
+            Parser parser,
+            PayloadSerializer serializer,
+            CsdlAbstractEdmProvider provider,
+            EntityServiceRepository serviceRepository,
+            AbstractEntityCollectionRequestHandler<SensorThingsMqttRequest, MqttEntityCollectionSubscription>
+                    entityCollectionRequestHandler,
+            AbstractEntityRequestHandler<SensorThingsMqttRequest, MqttEntitySubscription>
+                    mqttEntitySubscHandler,
+            AbstractPropertyRequestHandler<SensorThingsMqttRequest, MqttPropertySubscription>
+                    mqttPropertySubscHandler) {
         this.config = config;
         this.parser = parser;
         this.serializer = serializer;
@@ -139,7 +155,7 @@ public class MqttEventHandler implements STAEventHandler, InitializingBean {
             if (subscrip instanceof MqttEntityCollectionSubscription) {
                 AbstractSensorThingsEntityService<?, ?> responseService
                         = serviceRepository.getEntityService(
-                        MqttUtil.typeMap.get(entityClass));
+                        MqttUtil.TYPEMAP.get(entityClass));
 
                 collections = responseService.getRelatedCollections(rawObject);
             }
@@ -162,7 +178,6 @@ public class MqttEventHandler implements STAEventHandler, InitializingBean {
                 }
             }
         }
-        ;
     }
 
     public void addSubscription(AbstractMqttSubscription subscription, String clientId) {
@@ -170,7 +185,7 @@ public class MqttEventHandler implements STAEventHandler, InitializingBean {
         if (clients == null) {
             clients = new HashSet<String>();
         }
-        watchedEntityTypes.add(MqttUtil.typeMap.get(subscription.getEdmEntityType().getName()));
+        watchedEntityTypes.add(MqttUtil.TYPEMAP.get(subscription.getEdmEntityType().getName()));
         clients.add(clientId);
         subscriptions.put(subscription, clients);
     }
@@ -180,7 +195,7 @@ public class MqttEventHandler implements STAEventHandler, InitializingBean {
         if (clients != null) {
             if (clients.size() == 1) {
                 subscriptions.remove(subscription);
-                watchedEntityTypes.remove(MqttUtil.typeMap.get(subscription.getEdmEntityType().getName()));
+                watchedEntityTypes.remove(MqttUtil.TYPEMAP.get(subscription.getEdmEntityType().getName()));
             } else {
                 clients.remove(clientId);
                 subscriptions.put(subscription, clients);
@@ -188,8 +203,13 @@ public class MqttEventHandler implements STAEventHandler, InitializingBean {
         }
     }
 
-    private ByteBuf encodeEntity(AbstractMqttSubscription subsc, Entity entity) throws IOException, SerializerException {
-        return serializer.encodeEntity(entity, subsc.getEdmEntityType(), subsc.getEdmEntitySet(), subsc.getSelectOption());
+    private ByteBuf encodeEntity(AbstractMqttSubscription subsc,
+                                 Entity entity) throws IOException, SerializerException {
+        return serializer.encodeEntity(
+                entity,
+                subsc.getEdmEntityType(),
+                subsc.getEdmEntitySet(),
+                subsc.getSelectOption());
     }
 
 
@@ -217,7 +237,7 @@ public class MqttEventHandler implements STAEventHandler, InitializingBean {
                     subscription = validateResource(topic, uriInfo);
                     break;
                 default:
-                    throw new MqttHandlerException("Unsupported MQTT topic pattern.");
+                    throw new MqttHandlerException("Unsupported MQTT topic.");
             }
             return subscription;
         } catch (UriParserException | UriValidationException ex) {

@@ -33,7 +33,6 @@
  */
 package org.n52.sta.mqtt.handler;
 
-import java.util.List;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriResource;
@@ -47,33 +46,45 @@ import org.n52.sta.utils.UriResourceNavigationResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
- *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
-public class MqttEntityCollectionSubscriptionHandler extends AbstractEntityCollectionRequestHandler<SensorThingsMqttRequest, MqttEntityCollectionSubscription> {
+public class MqttEntityCollectionSubscriptionHandler
+        extends AbstractEntityCollectionRequestHandler<SensorThingsMqttRequest, MqttEntityCollectionSubscription> {
 
     @Autowired
     private UriResourceNavigationResolver navigationResolver;
 
     @Override
-    public MqttEntityCollectionSubscription handleEntityCollectionRequest(SensorThingsMqttRequest request) throws ODataApplicationException {
+    public MqttEntityCollectionSubscription handleEntityCollectionRequest(SensorThingsMqttRequest request)
+            throws ODataApplicationException {
         MqttEntityCollectionSubscription subscription = null;
 
         // handle request depending on the number of UriResource paths
         // e.g the case: sta/Things
         if (request.getResourcePaths().size() == 1) {
-            subscription = createResponseForEntitySet(request.getTopic(), request.getResourcePaths(), request.getQueryOptions());
+            subscription = createResponseForEntitySet(
+                    request.getTopic(),
+                    request.getResourcePaths(),
+                    request.getQueryOptions());
 
             // e.g. the case: sta/Things(id)/Locations
         } else {
-            subscription = createResponseForNavigation(request.getTopic(), request.getResourcePaths(), request.getQueryOptions());
+            subscription = createResponseForNavigation(
+                    request.getTopic(),
+                    request.getResourcePaths(),
+                    request.getQueryOptions());
         }
         return subscription;
     }
 
-    private MqttEntityCollectionSubscription createResponseForEntitySet(String topic, List<UriResource> resourcePaths, QueryOptions queryOptions) throws ODataApplicationException {
+    private MqttEntityCollectionSubscription createResponseForEntitySet(String topic,
+                                                                        List<UriResource> resourcePaths,
+                                                                        QueryOptions queryOptions)
+            throws ODataApplicationException {
         // determine the response EntitySet
         UriResourceEntitySet uriResourceEntitySet = navigationResolver.resolveRootUriResource(resourcePaths.get(0));
         EdmEntitySet responseEntitySet = uriResourceEntitySet.getEntitySet();
@@ -86,7 +97,10 @@ public class MqttEntityCollectionSubscriptionHandler extends AbstractEntityColle
         return subscription;
     }
 
-    private MqttEntityCollectionSubscription createResponseForNavigation(String topic, List<UriResource> resourcePaths, QueryOptions queryOptions) throws ODataApplicationException {
+    private MqttEntityCollectionSubscription createResponseForNavigation(String topic,
+                                                                         List<UriResource> resourcePaths,
+                                                                         QueryOptions queryOptions)
+            throws ODataApplicationException {
         // determine the target query parameters
         EntityQueryParams queryParams = navigationResolver.resolveUriResourceNavigationPaths(resourcePaths);
         MqttEntityCollectionSubscription subscription = new MqttEntityCollectionSubscription(

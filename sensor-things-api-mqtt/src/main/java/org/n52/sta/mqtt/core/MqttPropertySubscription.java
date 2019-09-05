@@ -38,7 +38,6 @@ import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmProperty;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
-import org.n52.sta.service.query.QueryOptions;
 
 import java.util.Map;
 import java.util.Set;
@@ -48,10 +47,10 @@ import java.util.Set;
  */
 public class MqttPropertySubscription extends AbstractMqttSubscription {
 
+    private final SelectOption selectOption;
     private EdmEntitySet entitySet;
     private String entityId;
     private String watchedEdmProperty;
-    private final SelectOption selectOption;
 
     public MqttPropertySubscription(EdmEntitySet targetEntitySet,
                                     EdmEntityType entityType,
