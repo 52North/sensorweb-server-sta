@@ -33,14 +33,6 @@
  */
 package org.n52.sta.service;
 
-import static org.n52.sta.service.SensorThingsController.URI;
-
-import java.util.ArrayList;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
 import org.apache.olingo.commons.api.edmx.EdmxReference;
 import org.apache.olingo.server.api.OData;
@@ -58,12 +50,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
+import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+
 /**
- *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @RestController
-@RequestMapping(value = "/" + URI)
+@RequestMapping(value = "/" + SensorThingsController.URI)
 public class SensorThingsController {
 
     public static final String URI = "sta";

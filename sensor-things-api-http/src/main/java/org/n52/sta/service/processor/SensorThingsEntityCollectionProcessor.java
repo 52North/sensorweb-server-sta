@@ -33,8 +33,6 @@
  */
 package org.n52.sta.service.processor;
 
-import java.io.InputStream;
-
 import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.format.ContentType;
@@ -60,13 +58,12 @@ import org.n52.sta.service.query.URIQueryOptions;
 import org.n52.sta.service.request.SensorThingsRequest;
 import org.n52.sta.service.response.EntityCollectionResponse;
 import org.n52.sta.service.serializer.SensorThingsSerializer;
-import org.n52.sta.utils.EntityAnnotator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.io.InputStream;
+
 /**
- *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
@@ -80,7 +77,7 @@ public class SensorThingsEntityCollectionProcessor implements EntityCollectionPr
     private ServiceMetadata serviceMetadata;
 
     public SensorThingsEntityCollectionProcessor(
-            AbstractEntityCollectionRequestHandler<SensorThingsRequest,EntityCollectionResponse> requestHandler,
+            AbstractEntityCollectionRequestHandler<SensorThingsRequest, EntityCollectionResponse> requestHandler,
             QueryOptionsHandler queryOptionsHandler,
             @Value("${server.rootUrl}") String rootUrl) {
         this.requestHandler = requestHandler;
@@ -97,7 +94,7 @@ public class SensorThingsEntityCollectionProcessor implements EntityCollectionPr
 
     @Override
     public void readEntityCollection(ODataRequest request, ODataResponse response, UriInfo uriInfo,
-            ContentType contentType) throws ODataApplicationException, ODataLibraryException {
+                                     ContentType contentType) throws ODataApplicationException, ODataLibraryException {
         QueryOptions queryOptions = new URIQueryOptions(uriInfo, rootUrl);
 
         EntityCollectionResponse entityCollectionResponse = requestHandler
@@ -111,7 +108,9 @@ public class SensorThingsEntityCollectionProcessor implements EntityCollectionPr
         response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.JSON_NO_METADATA.toContentTypeString());
     }
 
-    public InputStream createResponseContent(ServiceMetadata serviceMetadata, EntityCollectionResponse response, QueryOptions queryOptions) throws SerializerException {
+    public InputStream createResponseContent(ServiceMetadata serviceMetadata,
+                                             EntityCollectionResponse response,
+                                             QueryOptions queryOptions) throws SerializerException {
         EdmEntityType edmEntityType = response.getEntitySet().getEntityType();
 
         ContextURL.Builder contextUrlBuilder = ContextURL.with().entitySet(response.getEntitySet());
@@ -123,14 +122,17 @@ public class SensorThingsEntityCollectionProcessor implements EntityCollectionPr
 
         EntityCollectionSerializerOptions opts
                 = EntityCollectionSerializerOptions
-                        .with()
-                        .id(id)
-                        .contextURL(contextUrl)
-                        .select(queryOptions.getSelectOption())
-                        .expand(queryOptions.getExpandOption())
-                        .count(queryOptions.getCountOption())
-                        .build();
-        SerializerResult serializerResult = serializer.entityCollection(serviceMetadata, edmEntityType, response.getEntityCollection(), opts);
+                .with()
+                .id(id)
+                .contextURL(contextUrl)
+                .select(queryOptions.getSelectOption())
+                .expand(queryOptions.getExpandOption())
+                .count(queryOptions.getCountOption())
+                .build();
+        SerializerResult serializerResult = serializer.entityCollection(serviceMetadata,
+                edmEntityType,
+                response.getEntityCollection(),
+                opts);
         InputStream serializedContent = serializerResult.getContent();
 
         return serializedContent;

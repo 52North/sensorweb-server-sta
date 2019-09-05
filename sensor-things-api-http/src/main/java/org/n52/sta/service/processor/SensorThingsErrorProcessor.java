@@ -33,8 +33,6 @@
  */
 package org.n52.sta.service.processor;
 
-import java.io.InputStream;
-
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
 import org.apache.olingo.server.api.OData;
@@ -51,8 +49,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.io.InputStream;
+
 /**
- *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
@@ -71,7 +70,10 @@ public class SensorThingsErrorProcessor implements ErrorProcessor {
     }
 
     @Override
-    public void processError(ODataRequest request, ODataResponse response, ODataServerError error, ContentType contentType) {
+    public void processError(ODataRequest request,
+                             ODataResponse response,
+                             ODataServerError error,
+                             ContentType contentType) {
         try {
             LOG.debug("Error occurred.", error.getException());
 

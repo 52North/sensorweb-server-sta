@@ -33,8 +33,6 @@
  */
 package org.n52.sta.service.processor;
 
-import java.io.InputStream;
-
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
@@ -50,8 +48,9 @@ import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
 import org.springframework.stereotype.Component;
 
+import java.io.InputStream;
+
 /**
- *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
@@ -67,7 +66,10 @@ public class SensorThingMetadataProcessor implements MetadataProcessor {
     }
 
     @Override
-    public void readMetadata(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType ct) throws ODataApplicationException, ODataLibraryException {
+    public void readMetadata(ODataRequest request,
+                             ODataResponse response,
+                             UriInfo uriInfo,
+                             ContentType ct) throws ODataApplicationException, ODataLibraryException {
 
         ODataSerializer serializer = odata.createSerializer(ct);
 

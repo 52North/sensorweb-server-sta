@@ -33,9 +33,6 @@
  */
 package org.n52.sta.service.processor;
 
-import java.io.InputStream;
-import java.util.List;
-
 import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
@@ -60,24 +57,26 @@ import org.n52.sta.service.request.SensorThingsRequest;
 import org.n52.sta.service.response.EntityResponse;
 import org.n52.sta.service.serializer.SensorThingsSerializer;
 import org.n52.sta.utils.EntityAnnotator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.io.InputStream;
+import java.util.List;
+
 /**
- *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
 public class SensorThingsReferenceProcessor implements ReferenceProcessor {
 
-    private OData odata;
-    private ServiceMetadata serviceMetadata;
-    private ODataSerializer serializer;
-
     private final AbstractEntityRequestHandler<SensorThingsRequest, EntityResponse> requestHandler;
     private final EntityAnnotator entityAnnotator;
     private final String rootUrl;
+    private final String NOT_SUPPORTED = "Not supported yet.";
+
+    private OData odata;
+    private ServiceMetadata serviceMetadata;
+    private ODataSerializer serializer;
 
     public SensorThingsReferenceProcessor(
             AbstractEntityRequestHandler<SensorThingsRequest, EntityResponse> requestHandler,
@@ -95,10 +94,15 @@ public class SensorThingsReferenceProcessor implements ReferenceProcessor {
     }
 
     @Override
-    public void readReference(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
+    public void readReference(ODataRequest request,
+                              ODataResponse response,
+                              UriInfo uriInfo,
+                              ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
         QueryOptions options = new URIQueryOptions(uriInfo, rootUrl);
         List<UriResource> resourcePaths = uriInfo.getUriResourceParts();
-        EntityResponse entityResponse = requestHandler.handleEntityRequest(new SensorThingsRequest(resourcePaths.subList(0, resourcePaths.size() - 1), options));
+        EntityResponse entityResponse =
+                requestHandler.handleEntityRequest(
+                        new SensorThingsRequest(resourcePaths.subList(0, resourcePaths.size() - 1), options));
 
         InputStream serializedContent = createResponseContent(entityResponse, request.getRawBaseUri(), options);
 
@@ -109,21 +113,29 @@ public class SensorThingsReferenceProcessor implements ReferenceProcessor {
     }
 
     @Override
-    public void createReference(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType requestFormat) throws ODataApplicationException, ODataLibraryException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void createReference(ODataRequest request,
+                                ODataResponse response,
+                                UriInfo uriInfo,
+                                ContentType requestFormat) {
+        throw new UnsupportedOperationException(NOT_SUPPORTED);
     }
 
     @Override
-    public void updateReference(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType requestFormat) throws ODataApplicationException, ODataLibraryException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void updateReference(ODataRequest request,
+                                ODataResponse response,
+                                UriInfo uriInfo,
+                                ContentType requestFormat) {
+        throw new UnsupportedOperationException(NOT_SUPPORTED);
     }
 
     @Override
-    public void deleteReference(ODataRequest request, ODataResponse response, UriInfo uriInfo) throws ODataApplicationException, ODataLibraryException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void deleteReference(ODataRequest request, ODataResponse response, UriInfo uriInfo) {
+        throw new UnsupportedOperationException(NOT_SUPPORTED);
     }
 
-    private InputStream createResponseContent(EntityResponse response, String rawBaseUri, QueryOptions options) throws SerializerException {
+    private InputStream createResponseContent(EntityResponse response,
+                                              String rawBaseUri,
+                                              QueryOptions options) throws SerializerException {
 
         // annotate the entity
         entityAnnotator.annotateEntity(response.getEntity(),
@@ -139,7 +151,8 @@ public class SensorThingsReferenceProcessor implements ReferenceProcessor {
                 .contextURL(contextUrl)
                 .build();
 
-        SerializerResult serializerResult = serializer.reference(serviceMetadata, response.getEntitySet(), response.getEntity(), opts);
+        SerializerResult serializerResult =
+                serializer.reference(serviceMetadata, response.getEntitySet(), response.getEntity(), opts);
         InputStream serializedContent = serializerResult.getContent();
 
         return serializedContent;
