@@ -54,7 +54,7 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications<Procedu
             Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
             Join<DatastreamEntity, ProcedureEntity> join = datastream.join(DatastreamEntity.PROPERTY_SENSOR);
             sq.select(join)
-              .where(builder.equal(datastream.get(DescribableEntity.PROPERTY_IDENTIFIER), datastreamIdentifier));
+                .where(builder.equal(datastream.get(DescribableEntity.PROPERTY_IDENTIFIER), datastreamIdentifier));
             return builder.in(root).value(sq);
         };
     }

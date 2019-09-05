@@ -261,15 +261,15 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
         return Specification.where(filter);
     }
 
-//    /**
-//     * Constructs SQL Expression to request Entity by ID.
-//     *
-//     * @param id id of the requested entity
-//     * @return BooleanExpression evaluating to true if Entity is found and valid
-//     */
-//    private BooleanExpression byId(Long id) {
-//        return dQS.withId(id);
-//    }
+    ///**
+    // * Constructs SQL Expression to request Entity by ID.
+    // *
+    // * @param id id of the requested entity
+    // * @return BooleanExpression evaluating to true if Entity is found and valid
+    // */
+    //private BooleanExpression byId(Long id) {
+    //    return dQS.withId(id);
+    //}
 
     @Override
     public DatastreamEntity create(DatastreamEntity datastream) throws ODataApplicationException {
@@ -279,12 +279,12 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
                 return getRepository().findOne(dQS.withIdentifier(datastream.getIdentifier())).get();
             }
             check(datastream);
-//            Specification<DatastreamEntity> predicate = createQuery(datastream);
-//            if (getRepository().count() > 0) {
-//                DatastreamEntity optional = getRepository().findOne(predicate).get();
-//                return processObservation((DatastreamEntity) optional.setProcesssed(true),
-//                datastream.getObservations());
-//            }
+            //Specification<DatastreamEntity> predicate = createQuery(datastream);
+            //if (getRepository().count() > 0) {
+            //    DatastreamEntity optional = getRepository().findOne(predicate).get();
+            //    return processObservation((DatastreamEntity) optional.setProcesssed(true),
+            //    datastream.getObservations());
+            //}
             datastream.setProcesssed(true);
             checkObservationType(datastream);
             checkUnit(datastream);
@@ -545,12 +545,12 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
             logger.debug("No ObservedProperty associated with this Entity {}", entity.getIdentifier());
         }
 
-//        Iterable<DataEntity<?>> observations = dataRepository.findAll(dQS.withId(entity.getId()));
-//        Set<Long> observationIds = new HashSet<>();
-//        observations.forEach((o) -> {
-//            observationIds.add(o.getId());
-//        });
-//        collections.put(ET_OBSERVATION_NAME, observationIds);
+        //Iterable<DataEntity<?>> observations = dataRepository.findAll(dQS.withId(entity.getId()));
+        //Set<Long> observationIds = new HashSet<>();
+        //observations.forEach((o) -> {
+        //    observationIds.add(o.getId());
+        //});
+        //collections.put(ET_OBSERVATION_NAME, observationIds);
 
         return collections;
     }

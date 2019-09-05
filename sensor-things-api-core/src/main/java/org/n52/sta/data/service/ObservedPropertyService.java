@@ -134,10 +134,10 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
     public boolean existsRelatedEntity(String sourceId, EdmEntityType sourceEntityType, String targetId) {
         switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
             case IOT_DATASTREAM: {
-//                BooleanExpression filter = oQS.withDatastream(sourceId);
-//                if (targetId != null) {
-//                    filter = filter.and(oQS.withId(targetId));
-//                }
+                //BooleanExpression filter = oQS.withDatastream(sourceId);
+                //if (targetId != null) {
+                //    filter = filter.and(oQS.withId(targetId));
+                //}
                 return getRepository().findOne(relatedEntitySpecification(sourceId, targetId)).isPresent();
             }
             default:

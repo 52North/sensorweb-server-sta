@@ -119,9 +119,9 @@ public class LocationEntityProvider extends AbstractSensorThingsEntityProvider {
                 .setNullable(false);
 
         //create EntityType complex properties
-//        CsdlProperty location = new CsdlProperty().setName(PROP_LOCATION)
-//                .setType(FeatureComplexType.CT_FEATURE_FQN)
-//                .setNullable(false);
+        //CsdlProperty location = new CsdlProperty().setName(PROP_LOCATION)
+        //        .setType(FeatureComplexType.CT_FEATURE_FQN)
+        //        .setNullable(false);
         CsdlProperty location = new CsdlProperty().setName(PROP_LOCATION)
                 .setType(EdmPrimitiveTypeKind.Geometry.getFullQualifiedName())
                 .setNullable(false);

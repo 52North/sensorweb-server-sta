@@ -199,12 +199,12 @@
                         <failBuild>false</failBuild>
                     </configuration>
                 </plugin>
-                <!-- FIXME remove this once all problems are resolved -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
                     <configuration>
                         <failOnViolation>true</failOnViolation>
+                        <failsOnError>true</failsOnError>
                     </configuration>
                 </plugin>
                 <!-- FIXME remove this once all problems are resolved -->

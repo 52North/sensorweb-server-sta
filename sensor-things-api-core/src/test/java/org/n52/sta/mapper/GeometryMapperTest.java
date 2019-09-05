@@ -119,7 +119,7 @@ public class GeometryMapperTest {
     private Geospatial check(ComplexValue geom) {
         Property p = getGeospatialProperty(geom);
         assertThat(p.asGeospatial() != null, is(true));
-//        assertThat(p.asGeospatial().getSrid().toString().equals("4326"), is(true));
+        //assertThat(p.asGeospatial().getSrid().toString().equals("4326"), is(true));
         return p.asGeospatial();
     }
 

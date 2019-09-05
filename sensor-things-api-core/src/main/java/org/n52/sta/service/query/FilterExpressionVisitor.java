@@ -170,14 +170,14 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
         if (operator == UnaryOperatorKind.NOT && operand instanceof Expression) {
             // 1.) boolean negation
             return criteriaBuilder.not((javax.persistence.criteria.Expression<Boolean>) operand);
-//            return ((BooleanExpression) operand).not();
+            //return ((BooleanExpression) operand).not();
         } else if (operator == UnaryOperatorKind.MINUS && operand instanceof Number) {
             // 2.) arithmetic minus
             return -(Double) operand;
         } else if (operator == UnaryOperatorKind.MINUS && operand instanceof Expression) {
             // 2.) arithmetic minus
             return criteriaBuilder.neg((javax.persistence.criteria.Expression<Number>) operand);
-//            return ((NumberExpression) operand).negate();
+            //return ((NumberExpression) operand).negate();
         }
 
         // Operation not processed, throw an exception
@@ -192,7 +192,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
         javax.persistence.criteria.Expression<? extends Comparable<?>> leftExpr = convertToArithmeticExpression(left);
         javax.persistence.criteria.Expression<? extends Comparable<?>> rightExpr = convertToArithmeticExpression(right);
 
-//        return rootQS.handleNumberFilter(leftExpr, rightExpr, operator, criteriaBuilder, false);
+        //return rootQS.handleNumberFilter(leftExpr, rightExpr, operator, criteriaBuilder, false);
         return null;
     }
 
@@ -232,7 +232,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
                         leftExpr = convertToArithmeticExpression(left);
                 javax.persistence.criteria.Expression<? extends Comparable<?>>
                         rightExpr = convertToArithmeticExpression(right);
-//                return rootQS.handleNumberFilter(leftExpr, rightExpr, operator, criteriaBuilder, false);
+                //return rootQS.handleNumberFilter(leftExpr, rightExpr, operator, criteriaBuilder, false);
                 return null;
             } catch (ODataApplicationException e) {
                 logger.trace("could not evaluate filter expression as arithmetic expression");
@@ -344,13 +344,13 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
             throws ODataApplicationException {
         javax.persistence.criteria.Expression<Date>[] result = new javax.persistence.criteria.Expression[2];
 
-//        if (expr instanceof Date[]) {
-//            // Literal
-//            final Constructor<?> c = Expression.class.getConstructor(Date.class);
-//            result[0] = c.newInstance(((Date[])expr)[0]);
-//            result[1] = c.newInstance(((Date[])expr)[0]);
-//            return result;
-//        } else
+        //if (expr instanceof Date[]) {
+        //    //Literal
+        //final Constructor<?> c = Expression.class.getConstructor(Date.class);
+        //result[0] = c.newInstance(((Date[])expr)[0]);
+        //result[1] = c.newInstance(((Date[])expr)[0]);
+        //return result;
+        //} else
         throw new ODataApplicationException(
                 String.format(ERROR_TEMPLATE, expr.toString(), "TimespanExpression"),
                 HttpStatusCode.BAD_REQUEST.getStatusCode(),
@@ -435,17 +435,17 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
      */
     private javax.persistence.criteria.Expression<? extends Comparable<?>> convertToArithmeticExpression(Object expr)
             throws ODataApplicationException {
-//        if (expr instanceof Number) {
-//            // Raw Number
-////            return Expressions.asNumber((double) expr);
-//            final Class<?> defaultType = type.getDefaultType();
-//            final Constructor<?> c = Double.class.getConstructor(Double.class);
-//            return c.newInstance((Number) expr);
-//            criteriaBuilder.p
-//        } else if (expr instanceof javax.persistence.criteria.Expression< ? >) {
-//            // SubExpression
-//            return (javax.persistence.criteria.Expression< ? >) expr;
-//        }
+        //if (expr instanceof Number) {
+        //     Raw Number
+        //    return Expressions.asNumber((double) expr);
+        //    final Class<?> defaultType = type.getDefaultType();
+        //    final Constructor<?> c = Double.class.getConstructor(Double.class);
+        //    return c.newInstance((Number) expr);
+        //    criteriaBuilder.p
+        //} else if (expr instanceof javax.persistence.criteria.Expression< ? >) {
+        //     SubExpression
+        //    return (javax.persistence.criteria.Expression< ? >) expr;
+        //}
         throw new ODataApplicationException(
                 String.format(ERROR_TEMPLATE, expr.toString(), "NumberExpression"),
                 HttpStatusCode.BAD_REQUEST.getStatusCode(),
@@ -494,11 +494,11 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
                         "CONTAINS", Boolean.class,
                         root.<String>get((String) arg1),
                         criteriaBuilder.parameter(String.class, (String) arg2));
-//            return criteriaBuilder.function(name, type, args)(x)convertToStringExpression(arg1)
-//            .contains(convertToStringExpression(arg2));
+            //return criteriaBuilder.function(name, type, args)(x)convertToStringExpression(arg1)
+            //.contains(convertToStringExpression(arg2));
             case ENDSWITH:
                 return criteriaBuilder.like(convertToStringExpression(arg1), "%" + arg2);
-//            return convertToStringExpression(arg1).endsWith(convertToStringExpression(arg2));
+            //return convertToStringExpression(arg1).endsWith(convertToStringExpression(arg2));
             case STARTSWITH:
                 return criteriaBuilder.like(convertToStringExpression(arg1), arg2 + "%");
             case LENGTH:
@@ -522,40 +522,40 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
                 return criteriaBuilder.function(
                         "ROOUD", Boolean.class,
                         root.<String>get((String) arg1));
-//            return convertToArithmeticExpression(arg1).round();
+            //return convertToArithmeticExpression(arg1).round();
             case FLOOR:
                 return criteriaBuilder.function(
                         "FLOOR", Boolean.class,
                         root.<String>get((String) arg1));
-//            return convertToArithmeticExpression(arg1).floor();
+            //return convertToArithmeticExpression(arg1).floor();
             case CEILING:
                 return criteriaBuilder.function(
                         "CEIL", Boolean.class,
                         root.<String>get((String) arg1));
-//            return convertToArithmeticExpression(arg1).ceil();
+            //return convertToArithmeticExpression(arg1).ceil();
 
             // Date Functions
-//        case YEAR:
-//            return convertToDateTimeExpression(arg1).year();
-//        case MONTH:
-//            return convertToDateTimeExpression(arg1).month();
-//        case DAY:
-//            return convertToDateTimeExpression(arg1).dayOfMonth();
-//        case HOUR:
-//            return convertToDateTimeExpression(arg1).hour();
-//        case MINUTE:
-//            return convertToDateTimeExpression(arg1).minute();
-//        case SECOND:
-//            return convertToDateTimeExpression(arg1).second();
-//        case FRACTIONALSECONDS:
-//            cri
-//            return convertToDateTimeExpression(arg1).milliSecond();
-//        case NOW:
-//            return criteriaBuilder.currentTimestamp();
-//        case MINDATETIME:
-//            return Expressions.asDate(Date.from(Instant.MIN));
-//        case MAXDATETIME:
-//            return Expressions.asDate(Date.from(Instant.MAX));
+            //case YEAR:
+            //    return convertToDateTimeExpression(arg1).year();
+            //case MONTH:
+            //    return convertToDateTimeExpression(arg1).month();
+            //case DAY:
+            //    return convertToDateTimeExpression(arg1).dayOfMonth();
+            //case HOUR:
+            //    return convertToDateTimeExpression(arg1).hour();
+            //case MINUTE:
+            //    return convertToDateTimeExpression(arg1).minute();
+            //case SECOND:
+            //    return convertToDateTimeExpression(arg1).second();
+            //case FRACTIONALSECONDS:
+            //    cri
+            //    return convertToDateTimeExpression(arg1).milliSecond();
+            //case NOW:
+            //    return criteriaBuilder.currentTimestamp();
+            //case MINDATETIME:
+            //    return Expressions.asDate(Date.from(Instant.MIN));
+            //case MAXDATETIME:
+            //    return Expressions.asDate(Date.from(Instant.MAX));
             case DATE:
                 // TODO: Implement
                 break;
@@ -591,8 +591,8 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
                 return SpatialRestrictions.overlaps((String) arg1, JTS.to((Geometry) arg2));
             case ST_RELATE:
                 break;
-//            return convertToGeometryExpression(arg1).(convertToGeometryExpression(arg2),
-//                                                            parameters.get(2).toString());
+            //return convertToGeometryExpression(arg1).(convertToGeometryExpression(arg2),
+            //                                                parameters.get(2).toString());
             case ST_TOUCHES:
                 return SpatialRestrictions.touches((String) arg1, JTS.to((Geometry) arg2));
             case ST_WITHIN:

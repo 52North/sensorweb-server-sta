@@ -104,7 +104,7 @@ public abstract class AbstractEntityCrudRequestHandler<T extends IdEntity> {
         handleDeleteEntityRequest(getIdentifier(uriResourceEntitySet));
         EntityResponse response = new EntityResponse();
         response.setEntitySet(responseEntitySet);
-//        response.setEntity(responseEntity);
+        //response.setEntity(responseEntity);
         return response;
     }
 

@@ -269,9 +269,9 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
     public Specification<S> getFilterPredicate(Class entityClass, QueryOptions queryOptions) {
         return (root, query, builder) -> {
             try {
-//                if (queryOptions.hasOrderByOption()) {
-//                    // TODO: add orderby option for observation.result here?
-//                }
+                //if (queryOptions.hasOrderByOption()) {
+                //    TODO: add orderby option for observation.result here?
+                //}
                 if (!queryOptions.hasFilterOption()) {
                     return null;
                 } else {
@@ -318,13 +318,12 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      * @throws ODataApplicationException if an error occurred
      */
     protected abstract S createOrUpdate(S entity) throws ODataApplicationException;
-//    protected S createOrUpdate(S entity) throws ODataApplicationException {
-//        if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
-//            return update(entity, HttpMethod.PATCH);
-//        }
-//        return create(entity);
-
-//    }
+    //protected S createOrUpdate(S entity) throws ODataApplicationException {
+    //    if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
+    //        return update(entity, HttpMethod.PATCH);
+    //    }
+    //    return create(entity);
+    //}
 
     protected void checkInlineDatastream(DatastreamEntity datastream) throws ODataApplicationException {
         if (datastream.getIdentifier() == null

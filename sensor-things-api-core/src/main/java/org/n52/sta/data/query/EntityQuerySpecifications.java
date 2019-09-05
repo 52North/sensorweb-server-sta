@@ -193,16 +193,16 @@ public abstract class EntityQuerySpecifications<T> {
                 return builder.greaterThan(left, right);
             case GE:
                 return builder.greaterThanOrEqualTo(left, right);
-//        case ADD:
-//            return builder.sum(leftExpr, rightExpr);
-//        case DIV:
-//            return builder.quot(leftExpr, rightExpr);
-//        case MOD:
-//            return builder.mod(leftExpr.as(Integer.class), rightExpr.as(Integer.class));
-//        case MUL:
-//            return builder.prod(leftExpr, rightExpr);
-//        case SUB:
-//            return builder.diff(leftExpr, rightExpr);
+            // case ADD:
+            //    return builder.sum(leftExpr, rightExpr);
+            // case DIV:
+            //    return builder.quot(leftExpr, rightExpr);
+            // case MOD:
+            //    return builder.mod(leftExpr.as(Integer.class), rightExpr.as(Integer.class));
+            // case MUL:
+            //    return builder.prod(leftExpr, rightExpr);
+            // case SUB:
+            //    return builder.diff(leftExpr, rightExpr);
             default:
                 throw new ExpressionVisitException(
                         String.format(ERROR_TEMPLATE, operator.toString()));

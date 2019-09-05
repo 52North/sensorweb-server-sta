@@ -53,7 +53,7 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
             Join<HistoricalLocationEntity, LocationEntity> joinFeature =
                     dataset.join(HistoricalLocationEntity.PROPERTY_LOCATIONS);
             sq.select(joinFeature)
-              .where(builder.equal(dataset.get(DescribableEntity.PROPERTY_IDENTIFIER), historicalLocationIdentifier));
+                .where(builder.equal(dataset.get(DescribableEntity.PROPERTY_IDENTIFIER), historicalLocationIdentifier));
             return builder.in(root).value(sq);
         };
     }
@@ -64,7 +64,7 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
             Root<PlatformEntity> dataset = sq.from(PlatformEntity.class);
             Join<PlatformEntity, LocationEntity> joinFeature = dataset.join(PlatformEntity.PROPERTY_LOCATIONS);
             sq.select(joinFeature)
-              .where(builder.equal(dataset.get(DescribableEntity.PROPERTY_IDENTIFIER), thingIdentifier));
+                .where(builder.equal(dataset.get(DescribableEntity.PROPERTY_IDENTIFIER), thingIdentifier));
             return builder.in(root).value(sq);
         };
     }
@@ -104,7 +104,7 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
                 Root<PlatformEntity> dataset = sq.from(PlatformEntity.class);
                 Join<PlatformEntity, LocationEntity> joinFeature = dataset.join(PlatformEntity.PROPERTY_LOCATIONS);
                 sq.select(joinFeature)
-                  .where(builder.equal(dataset.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue));
+                    .where(builder.equal(dataset.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue));
                 return builder.in(root).value(sq);
             } else {
                 Subquery<LocationEntity> sq = query.subquery(LocationEntity.class);
@@ -112,7 +112,7 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
                 Join<HistoricalLocationEntity, LocationEntity> joinFeature =
                         dataset.join(HistoricalLocationEntity.PROPERTY_LOCATIONS);
                 sq.select(joinFeature)
-                  .where(builder.equal(dataset.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue));
+                    .where(builder.equal(dataset.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue));
                 return builder.in(root).value(sq);
             }
         };

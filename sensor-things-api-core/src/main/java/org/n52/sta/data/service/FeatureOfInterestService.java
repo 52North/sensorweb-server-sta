@@ -376,14 +376,13 @@ public class FeatureOfInterestService
     public Map<String, Set<String>> getRelatedCollections(Object rawObject) {
         Map<String, Set<String>> collections = new HashMap<>();
 
-//        AbstractFeatureEntity<?> entity = (AbstractFeatureEntity<?>) rawObject;
-
-//        Iterable<DataEntity<?>> observations = dataRepository.findAll(d.withId(entity.getId()));
-//        Set<Long> observationIds = new HashSet<>();
-//        observations.forEach((o) -> {
-//            observationIds.add(o.getId());
-//        });
-//        collections.put(ET_FEATURE_OF_INTEREST_NAME, observationIds);
+        //AbstractFeatureEntity<?> entity = (AbstractFeatureEntity<?>) rawObject;
+        //Iterable<DataEntity<?>> observations = dataRepository.findAll(d.withId(entity.getId()));
+        //Set<Long> observationIds = new HashSet<>();
+        //observations.forEach((o) -> {
+        //    observationIds.add(o.getId());
+        //});
+        //collections.put(ET_FEATURE_OF_INTEREST_NAME, observationIds);
 
         return collections;
     }

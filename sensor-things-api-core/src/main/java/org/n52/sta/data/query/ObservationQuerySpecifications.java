@@ -60,7 +60,7 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
             subquery.select(feature.get(FeatureEntity.PROPERTY_ID))
                     .where(builder.equal(feature.get(FeatureEntity.IDENTIFIER), featureIdentifier));
             sq.select(dataset.get(DatasetEntity.PROPERTY_ID))
-              .where(builder.equal(dataset.get(DatasetEntity.PROPERTY_FEATURE), subquery));
+                .where(builder.equal(dataset.get(DatasetEntity.PROPERTY_FEATURE), subquery));
             return builder.in(root.get(DataEntity.PROPERTY_DATASET)).value(sq);
         };
     }
@@ -71,7 +71,7 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
             Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
             Join<DatastreamEntity, DatasetEntity> join = datastream.join(DatastreamEntity.PROPERTY_DATASETS);
             sq.select(join.get(DatasetEntity.PROPERTY_ID))
-              .where(builder.equal(datastream.get(DatastreamEntity.PROPERTY_IDENTIFIER), datastreamIdentifier));
+                .where(builder.equal(datastream.get(DatastreamEntity.PROPERTY_IDENTIFIER), datastreamIdentifier));
             return builder.in(root.get(DataEntity.PROPERTY_DATASET)).value(sq);
         };
     }
@@ -157,12 +157,12 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
                                 Double.valueOf(propertyValue.toString()), operator, builder);
                         sq.select(dataset.get(QuantityDataEntity.PROPERTY_IDENTIFIER)).where(predicate);
                         return builder.in(root.get(DataEntity.PROPERTY_IDENTIFIER)).value(sq);
-//                    return handleDirectNumberPropertyFilter(
-//                            dataset.<Number> get(propertyName),
-//                            propertyValue,
-//                            operator,
-//                            builder,
-//                            switched);
+                    //return handleDirectNumberPropertyFilter(
+                    //        dataset.<Number> get(propertyName),
+                    //        propertyValue,
+                    //        operator,
+                    //        builder,
+                    //        switched);
                     case "samplingTimeEnd":
                         switch (operator) {
                             case LT:

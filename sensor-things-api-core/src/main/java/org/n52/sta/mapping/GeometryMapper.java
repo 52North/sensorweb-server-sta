@@ -203,9 +203,9 @@ public class GeometryMapper {
 
     private SRID getSRID(Geometry geometry) {
         // Olingo checks for default by checking if value is null
-//        if (geometry.getSRID() > 0) {
-//            return SRID.valueOf(Integer.toString(geometry.getSRID()));
-//        }
+        //if (geometry.getSRID() > 0) {
+        //    return SRID.valueOf(Integer.toString(geometry.getSRID()));
+        //}
         return null;
     }
 

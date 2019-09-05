@@ -151,9 +151,9 @@ public class DatastreamEntityProvider extends AbstractSensorThingsEntityProvider
                 .setNullable(true);
 
         //create EntityType navigation links
-//        CsdlProperty selfLink = new CsdlProperty().setName(SELF_LINK_ANNOTATION)
-//                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
-//                .setNullable(false);
+        //CsdlProperty selfLink = new CsdlProperty().setName(SELF_LINK_ANNOTATION)
+        //        .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+        //        .setNullable(false);
 
         return Arrays.asList(
                 id,
