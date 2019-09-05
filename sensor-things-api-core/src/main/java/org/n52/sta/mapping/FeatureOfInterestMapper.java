@@ -39,34 +39,41 @@ import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.ogc.om.features.SfConstants;
+import org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider;
+import org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_FEATURE;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
-import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ES_FEATURES_OF_INTEREST_NAME;
-import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ET_FEATURE_OF_INTEREST_FQN;
-
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
- *
  */
 @Component
 public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper<AbstractFeatureEntity<?>> {
 
+    private final EntityCreationHelper entityCreationHelper;
+
     @Autowired
-    private EntityCreationHelper entityCreationHelper;
+    public FeatureOfInterestMapper(EntityCreationHelper entityCreationHelper) {
+        this.entityCreationHelper = entityCreationHelper;
+    }
 
     @Override
     public Entity createEntity(AbstractFeatureEntity<?> feature) {
         Entity entity = new Entity();
-        entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, feature.getIdentifier()));
+        entity.addProperty(new Property(
+                null,
+                AbstractSensorThingsEntityProvider.PROP_ID,
+                ValueType.PRIMITIVE,
+                feature.getIdentifier()));
         addNameDescriptionProperties(entity, feature);
         addGeometry(entity, feature);
-        entity.setType(ET_FEATURE_OF_INTEREST_FQN.getFullQualifiedNameAsString());
-        entity.setId(entityCreationHelper.createId(entity, ES_FEATURES_OF_INTEREST_NAME, PROP_ID));
+        entity.setType(FeatureOfInterestEntityProvider.ET_FEATURE_OF_INTEREST_FQN.getFullQualifiedNameAsString());
+        entity.setId(entityCreationHelper.createId(
+                entity,
+                FeatureOfInterestEntityProvider.ES_FEATURES_OF_INTEREST_NAME,
+                AbstractSensorThingsEntityProvider.PROP_ID));
         return entity;
     }
 
@@ -77,9 +84,10 @@ public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper<Abst
         featureOfInterest.setIdentifier(featureOfInterest.getIdentifier());
         setName(featureOfInterest, entity);
         setDescription(featureOfInterest, entity);
-        if (checkProperty(entity, PROP_FEATURE)) {
-            Property featureProperty = entity.getProperty(PROP_FEATURE);
-            if (featureProperty.getValueType().equals(ValueType.PRIMITIVE) && featureProperty.getValue() instanceof Geospatial) {
+        if (checkProperty(entity, AbstractSensorThingsEntityProvider.PROP_FEATURE)) {
+            Property featureProperty = entity.getProperty(AbstractSensorThingsEntityProvider.PROP_FEATURE);
+            if (featureProperty.getValueType().equals(ValueType.PRIMITIVE)
+                    && featureProperty.getValue() instanceof Geospatial) {
                 featureOfInterest.setGeometryEntity(parseGeometry((Geospatial) featureProperty.getValue()));
             }
         }
@@ -139,7 +147,7 @@ public class FeatureOfInterestMapper extends AbstractLocationGeometryMapper<Abst
     @Override
     public Entity checkEntity(Entity entity) throws ODataApplicationException {
         checkNameAndDescription(entity);
-        checkPropertyValidity(PROP_FEATURE, entity);
+        checkPropertyValidity(AbstractSensorThingsEntityProvider.PROP_FEATURE, entity);
         checkEncodingType(entity);
         return entity;
     }

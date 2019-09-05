@@ -28,15 +28,6 @@
  */
 package org.n52.sta.edm.provider.entities;
 
-import static org.n52.sta.edm.provider.SensorThingsEdmConstants.NAMESPACE;
-import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ES_DATASTREAMS_NAME;
-import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_FQN;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
@@ -45,18 +36,24 @@ import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
+import org.n52.sta.edm.provider.SensorThingsEdmConstants;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- *
  */
 @Component
 public class SensorEntityProvider extends AbstractSensorThingsEntityProvider {
 
     // Entity Type Name
     public static final String ET_SENSOR_NAME = "Sensor";
-    public static final FullQualifiedName ET_SENSOR_FQN = new FullQualifiedName(NAMESPACE, ET_SENSOR_NAME);
+    public static final FullQualifiedName ET_SENSOR_FQN =
+            new FullQualifiedName(SensorThingsEdmConstants.NAMESPACE, ET_SENSOR_NAME);
 
     // Entity Set Name
     public static final String ES_SENSORS_NAME = "Sensors";
@@ -88,8 +85,8 @@ public class SensorEntityProvider extends AbstractSensorThingsEntityProvider {
         entitySet.setType(ET_SENSOR_FQN);
 
         CsdlNavigationPropertyBinding navPropDatastreamBinding = new CsdlNavigationPropertyBinding();
-        navPropDatastreamBinding.setPath(ES_DATASTREAMS_NAME);
-        navPropDatastreamBinding.setTarget(ES_DATASTREAMS_NAME);
+        navPropDatastreamBinding.setPath(DatastreamEntityProvider.ES_DATASTREAMS_NAME);
+        navPropDatastreamBinding.setTarget(DatastreamEntityProvider.ES_DATASTREAMS_NAME);
 
         List<CsdlNavigationPropertyBinding> navPropBindingList = new ArrayList<CsdlNavigationPropertyBinding>();
         navPropBindingList.add(navPropDatastreamBinding);
@@ -132,8 +129,8 @@ public class SensorEntityProvider extends AbstractSensorThingsEntityProvider {
     private List<CsdlNavigationProperty> createCsdlNavigationProperties() {
         // navigation property: one mandatory to many optional
         CsdlNavigationProperty navPropDatastreams = new CsdlNavigationProperty()
-                .setName(ES_DATASTREAMS_NAME)
-                .setType(ET_DATASTREAM_FQN)
+                .setName(DatastreamEntityProvider.ES_DATASTREAMS_NAME)
+                .setType(DatastreamEntityProvider.ET_DATASTREAM_FQN)
                 .setCollection(true)
                 .setPartner(ET_SENSOR_NAME);
 

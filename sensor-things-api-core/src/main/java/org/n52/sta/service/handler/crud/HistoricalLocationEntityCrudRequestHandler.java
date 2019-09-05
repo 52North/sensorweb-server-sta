@@ -40,7 +40,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class HistoricalLocationEntityCrudRequestHandler extends AbstractEntityCrudRequestHandler<HistoricalLocationEntity> {
+public class HistoricalLocationEntityCrudRequestHandler
+        extends AbstractEntityCrudRequestHandler<HistoricalLocationEntity> {
 
     @Autowired
     private HistoricalLocationMapper mapper;
@@ -48,7 +49,8 @@ public class HistoricalLocationEntityCrudRequestHandler extends AbstractEntityCr
     @Override
     protected Entity handleCreateEntityRequest(Entity entity) throws ODataApplicationException {
         if (entity != null) {
-            HistoricalLocationEntity historicalLocation = getEntityService().create(mapper.createEntity(getMapper().checkEntity(entity)));
+            HistoricalLocationEntity historicalLocation =
+                    getEntityService().create(mapper.createEntity(getMapper().checkEntity(entity)));
             return mapToEntity(historicalLocation);
         }
         return null;
@@ -57,7 +59,8 @@ public class HistoricalLocationEntityCrudRequestHandler extends AbstractEntityCr
     @Override
     protected Entity handleUpdateEntityRequest(Entity entity, HttpMethod method) throws ODataApplicationException {
         if (entity != null) {
-            HistoricalLocationEntity historicalLocation = getEntityService().update(mapper.createEntity(entity), method);
+            HistoricalLocationEntity historicalLocation =
+                    getEntityService().update(mapper.createEntity(entity), method);
             return mapToEntity(historicalLocation);
         }
         return null;
@@ -73,8 +76,10 @@ public class HistoricalLocationEntityCrudRequestHandler extends AbstractEntityCr
         return mapper;
     }
 
+    @SuppressWarnings("unchecked")
     private AbstractSensorThingsEntityService<?, HistoricalLocationEntity> getEntityService() {
-        return (AbstractSensorThingsEntityService<?, HistoricalLocationEntity>) getEntityService(EntityTypes.HistoricalLocation);
+        return (AbstractSensorThingsEntityService<?, HistoricalLocationEntity>)
+                getEntityService(EntityTypes.HistoricalLocation);
     }
 
 }

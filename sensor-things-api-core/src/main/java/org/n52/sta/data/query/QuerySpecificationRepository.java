@@ -28,64 +28,63 @@
  */
 package org.n52.sta.data.query;
 
-import java.util.Locale;
-
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
 
+import java.util.Locale;
+
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- *
  */
 public class QuerySpecificationRepository {
 
     public static EntityQuerySpecifications getSpecification(String name) throws ODataApplicationException {
         switch (name) {
-        case "PlatformEntity":
-        case "Thing":
-        case "Things": {
-            return new ThingQuerySpecifications();
-        }
-        case "LocationEntity":
-        case "Location":
-        case "Locations": {
-            return new LocationQuerySpecifications();
-        }
-        case "HistoricalLocationEntity":
-        case "HistoricalLocation":
-        case "HistoricalLocations": {
-            return new HistoricalLocationQuerySpecifications();
-        }
-        case "DatastreamEntity":
-        case "Datastream":
-        case "Datastreams": {
-            return new DatastreamQuerySpecifications();
-        }
-        case "ProcedureEntity":
-        case "Sensor":
-        case "Sensors": {
-            return new SensorQuerySpecifications();
-        }
-        case "DataEntity":
-        case "Observation":
-        case "Observations": {
-            return new ObservationQuerySpecifications();
-        }
-        case "FeatureEntity":
-        case "AbstractFeatureEntity":
-        case "FeatureOfInterest":
-        case "FeaturesOfInterest": {
-            return new FeatureOfInterestQuerySpecifications();
-        }
-        case "PhenomenonEntity":
-        case "ObservedProperty":
-        case "ObservedProperties": {
-            return new ObservedPropertyQuerySpecifications();
-        }
-        default:
-            throw new ODataApplicationException("Could not find QuerySpecifications for Type\"" + name + "\"",
-                                                HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(),
-                                                Locale.ENGLISH);
+            case "PlatformEntity":
+            case "Thing":
+            case "Things": {
+                return new ThingQuerySpecifications();
+            }
+            case "LocationEntity":
+            case "Location":
+            case "Locations": {
+                return new LocationQuerySpecifications();
+            }
+            case "HistoricalLocationEntity":
+            case "HistoricalLocation":
+            case "HistoricalLocations": {
+                return new HistoricalLocationQuerySpecifications();
+            }
+            case "DatastreamEntity":
+            case "Datastream":
+            case "Datastreams": {
+                return new DatastreamQuerySpecifications();
+            }
+            case "ProcedureEntity":
+            case "Sensor":
+            case "Sensors": {
+                return new SensorQuerySpecifications();
+            }
+            case "DataEntity":
+            case "Observation":
+            case "Observations": {
+                return new ObservationQuerySpecifications();
+            }
+            case "FeatureEntity":
+            case "AbstractFeatureEntity":
+            case "FeatureOfInterest":
+            case "FeaturesOfInterest": {
+                return new FeatureOfInterestQuerySpecifications();
+            }
+            case "PhenomenonEntity":
+            case "ObservedProperty":
+            case "ObservedProperties": {
+                return new ObservedPropertyQuerySpecifications();
+            }
+            default:
+                throw new ODataApplicationException("Could not find QuerySpecifications for Type\"" + name + "\"",
+                        HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(),
+                        Locale.ENGLISH);
         }
     }
 

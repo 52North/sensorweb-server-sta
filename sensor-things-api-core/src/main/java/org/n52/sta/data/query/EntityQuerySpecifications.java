@@ -33,20 +33,36 @@ import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitEx
 import org.n52.series.db.beans.DescribableEntity;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import java.util.Date;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- *
  */
 public abstract class EntityQuerySpecifications<T> {
+
+    protected final String SENSOR = "Sensor";
+    protected final String OBSERVED_PROPERTY = "ObservedProperty";
+    protected final String THING = "Thing";
+    protected final String THINGS = "Things";
+    protected final String DATASTREAM = "Datastream";
+    protected final String DATASTREAMS = "Datastreams";
+    protected final String FEATUREOFINTEREST = "FeatureOfInterest";
+    protected final String LOCATIONS = "Locations";
+    protected final String HISTORICAL_LOCATIONS = "HistoricalLocations";
+    protected final String OBSERVATIONS = "Observations";
+
+    private final String ERROR_TEMPLATE = "Operator \"%s\" is not supported for given arguments.";
 
     /**
      * Gets Subquery returning the IDs of the Entities
      *
-     * @param filter
-     *        BooleanExpression filtering the Entites whose IDs are returned
+     * @param filter BooleanExpression filtering the Entites whose IDs are returned
      * @return Specification Subquery
      */
     public abstract Specification<String> getIdSubqueryWithFilter(Specification filter);
@@ -55,22 +71,18 @@ public abstract class EntityQuerySpecifications<T> {
      * Gets Entity-specific Filter for property with given name. Filters may not accept all BinaryOperators,
      * as they may not be defined for the datatype of the property.
      *
-     * @param propertyName
-     *        Name of the property to be filtered on
-     * @param propertyValue
-     *        supposed Value of the property
-     * @param operator
-     *        Operator to be used for comparing propertyValue and actual Value
-     * @param switched
-     *        true if Expression adheres to template: value, operator, name. False otherwise (Template
-     *        name, operator, value)
+     * @param propertyName  Name of the property to be filtered on
+     * @param propertyValue supposed Value of the property
+     * @param operator      Operator to be used for comparing propertyValue and actual Value
+     * @param switched      true if Expression adheres to template: value, operator, name. False otherwise (Template
+     *                      name, operator, value)
      * @return Specification evaluating to true if Entity is not to be filtered out
      * @throws ExpressionVisitException if an error occurs
      */
     public abstract Specification<T> getFilterForProperty(String propertyName,
-                                                Object propertyValue,
-                                                BinaryOperatorKind operator,
-                                                boolean switched)
+                                                          Object propertyValue,
+                                                          BinaryOperatorKind operator,
+                                                          boolean switched)
             throws ExpressionVisitException;
 
     public Specification<T> withName(final String name) {
@@ -96,91 +108,91 @@ public abstract class EntityQuerySpecifications<T> {
 
     // Wrapper
     protected Predicate handleDirectStringPropertyFilter(Path<String> stringPath,
-                                                      String propertyValue,
-                                                      BinaryOperatorKind operator,
-                                                      CriteriaBuilder builder,
-                                                      boolean switched)
+                                                         String propertyValue,
+                                                         BinaryOperatorKind operator,
+                                                         CriteriaBuilder builder,
+                                                         boolean switched)
             throws ExpressionVisitException {
         return this.handleStringFilter(stringPath, propertyValue, operator, builder, switched);
     }
 
     protected Predicate handleDirectNumberPropertyFilter(Path<Double> numberPath,
-                                                      Double propertyValue,
-                                                      BinaryOperatorKind operator,
-                                                      CriteriaBuilder builder)
+                                                         Double propertyValue,
+                                                         BinaryOperatorKind operator,
+                                                         CriteriaBuilder builder)
             throws ExpressionVisitException {
         return this.handleNumberFilter(numberPath, propertyValue, operator, builder);
     }
 
     protected Predicate handleDirectNumberPropertyFilter(Path<Long> numberPath,
-                                                        Long propertyValue,
-                                                        BinaryOperatorKind operator,
-                                                        CriteriaBuilder builder)
-    throws ExpressionVisitException {
-    return this.handleNumberFilter(numberPath, propertyValue, operator, builder);
+                                                         Long propertyValue,
+                                                         BinaryOperatorKind operator,
+                                                         CriteriaBuilder builder)
+            throws ExpressionVisitException {
+        return this.handleNumberFilter(numberPath, propertyValue, operator, builder);
     }
 
     protected Predicate handleDirectNumberPropertyFilter(Path<Integer> numberPath,
-                                                        Integer propertyValue,
-                                                        BinaryOperatorKind operator,
-                                                        CriteriaBuilder builder)
-    throws ExpressionVisitException {
-    return this.handleNumberFilter(numberPath, propertyValue, operator, builder);
+                                                         Integer propertyValue,
+                                                         BinaryOperatorKind operator,
+                                                         CriteriaBuilder builder)
+            throws ExpressionVisitException {
+        return this.handleNumberFilter(numberPath, propertyValue, operator, builder);
     }
 
     protected Predicate handleDirectDateTimePropertyFilter(Path<Date> time,
-                                                        Date propertyValue,
-                                                        BinaryOperatorKind operator,
-                                                        CriteriaBuilder builder)
+                                                           Date propertyValue,
+                                                           BinaryOperatorKind operator,
+                                                           CriteriaBuilder builder)
             throws ExpressionVisitException {
         return this.handleDateFilter(time, propertyValue, operator, builder);
     }
 
     public Predicate handleStringFilter(Path<String> left,
-                                     String right,
-                                     BinaryOperatorKind operator,
-                                     CriteriaBuilder builder,
-                                     boolean switched)
+                                        String right,
+                                        BinaryOperatorKind operatorKind,
+                                        CriteriaBuilder builder,
+                                        boolean switched)
             throws ExpressionVisitException {
-        operator = (switched) ? reverseOperator(operator) : operator;
+        BinaryOperatorKind operator = switched ? reverseOperator(operatorKind) : operatorKind;
 
         switch (operator) {
-        case EQ:
-            return builder.equal(left, right);
-        case NE:
-            return builder.notEqual(left, right);
-        case LT:
-            return builder.lessThan(left, right);
-        case LE:
-            return builder.lessThanOrEqualTo(left, right);
-        case GT:
-            return builder.greaterThan(left, right);
-        case GE:
-            return builder.greaterThanOrEqualTo(left, right);
-        default:
-            throw new ExpressionVisitException("Error getting filter. Invalid Operator");
+            case EQ:
+                return builder.equal(left, right);
+            case NE:
+                return builder.notEqual(left, right);
+            case LT:
+                return builder.lessThan(left, right);
+            case LE:
+                return builder.lessThanOrEqualTo(left, right);
+            case GT:
+                return builder.greaterThan(left, right);
+            case GE:
+                return builder.greaterThanOrEqualTo(left, right);
+            default:
+                throw new ExpressionVisitException("Error getting filter. Invalid Operator");
         }
     }
 
     public Predicate handleNumberFilter(Expression<Double> left,
-                                     Double right,
-                                     BinaryOperatorKind operator,
-                                     CriteriaBuilder builder)
+                                        Double right,
+                                        BinaryOperatorKind operator,
+                                        CriteriaBuilder builder)
             throws ExpressionVisitException {
 
         switch (operator) {
-        case EQ:
-            return builder.equal(left, right);
-        case NE:
-            return builder.notEqual(left, right);
-        case LT:
-            return builder.lessThan(left, right);
-        case LE:
-            return builder.lessThanOrEqualTo(left, right);
-        case GT:
-            return builder.greaterThan(left, right);
-        case GE:
-            return builder.greaterThanOrEqualTo(left, right);
+            case EQ:
+                return builder.equal(left, right);
+            case NE:
+                return builder.notEqual(left, right);
+            case LT:
+                return builder.lessThan(left, right);
+            case LE:
+                return builder.lessThanOrEqualTo(left, right);
+            case GT:
+                return builder.greaterThan(left, right);
+            case GE:
+                return builder.greaterThanOrEqualTo(left, right);
 //        case ADD:
 //            return builder.sum(leftExpr, rightExpr);
 //        case DIV:
@@ -191,128 +203,127 @@ public abstract class EntityQuerySpecifications<T> {
 //            return builder.prod(leftExpr, rightExpr);
 //        case SUB:
 //            return builder.diff(leftExpr, rightExpr);
-        default:
-            throw new ExpressionVisitException("Operator \"" + operator.toString()
-                    + "\" is not supported for given arguments.");
+            default:
+                throw new ExpressionVisitException(
+                        String.format(ERROR_TEMPLATE, operator.toString()));
         }
     }
 
     public Predicate handleNumberFilter(Expression<Long> left,
-            Long right,
-            BinaryOperatorKind operator,
-            CriteriaBuilder builder)
+                                        Long right,
+                                        BinaryOperatorKind operator,
+                                        CriteriaBuilder builder)
             throws ExpressionVisitException {
 
         switch (operator) {
-        case EQ:
-            return builder.equal(left, right);
-        case NE:
-            return builder.notEqual(left, right);
-        case LT:
-            return builder.lessThan(left, right);
-        case LE:
-            return builder.lessThanOrEqualTo(left, right);
-        case GT:
-            return builder.greaterThan(left, right);
-        case GE:
-            return builder.greaterThanOrEqualTo(left, right);
-        // case ADD:
-        // return builder.sum(leftExpr, rightExpr);
-        // case DIV:
-        // return builder.quot(leftExpr, rightExpr);
-        // case MOD:
-        // return builder.mod(leftExpr.as(Integer.class),
-        // rightExpr.as(Integer.class));
-        // case MUL:
-        // return builder.prod(leftExpr, rightExpr);
-        // case SUB:
-        // return builder.diff(leftExpr, rightExpr);
-        default:
-            throw new ExpressionVisitException(
-                    "Operator \"" + operator.toString() + "\" is not supported for given arguments.");
+            case EQ:
+                return builder.equal(left, right);
+            case NE:
+                return builder.notEqual(left, right);
+            case LT:
+                return builder.lessThan(left, right);
+            case LE:
+                return builder.lessThanOrEqualTo(left, right);
+            case GT:
+                return builder.greaterThan(left, right);
+            case GE:
+                return builder.greaterThanOrEqualTo(left, right);
+            // case ADD:
+            // return builder.sum(leftExpr, rightExpr);
+            // case DIV:
+            // return builder.quot(leftExpr, rightExpr);
+            // case MOD:
+            // return builder.mod(leftExpr.as(Integer.class),
+            // rightExpr.as(Integer.class));
+            // case MUL:
+            // return builder.prod(leftExpr, rightExpr);
+            // case SUB:
+            // return builder.diff(leftExpr, rightExpr);
+            default:
+                throw new ExpressionVisitException(
+                        String.format(ERROR_TEMPLATE, operator.toString()));
         }
     }
 
     public Predicate handleNumberFilter(Expression<Integer> left,
-            Integer right,
-            BinaryOperatorKind operator,
-            CriteriaBuilder builder)
+                                        Integer right,
+                                        BinaryOperatorKind operator,
+                                        CriteriaBuilder builder)
             throws ExpressionVisitException {
 
         switch (operator) {
-        case EQ:
-            return builder.equal(left, right);
-        case NE:
-            return builder.notEqual(left, right);
-        case LT:
-            return builder.lessThan(left, right);
-        case LE:
-            return builder.lessThanOrEqualTo(left, right);
-        case GT:
-            return builder.greaterThan(left, right);
-        case GE:
-            return builder.greaterThanOrEqualTo(left, right);
-        // case ADD:
-        // return builder.sum(leftExpr, rightExpr);
-        // case DIV:
-        // return builder.quot(leftExpr, rightExpr);
-        // case MOD:
-        // return builder.mod(leftExpr.as(Integer.class),
-        // rightExpr.as(Integer.class));
-        // case MUL:
-        // return builder.prod(leftExpr, rightExpr);
-        // case SUB:
-        // return builder.diff(leftExpr, rightExpr);
-        default:
-            throw new ExpressionVisitException(
-                    "Operator \"" + operator.toString() + "\" is not supported for given arguments.");
+            case EQ:
+                return builder.equal(left, right);
+            case NE:
+                return builder.notEqual(left, right);
+            case LT:
+                return builder.lessThan(left, right);
+            case LE:
+                return builder.lessThanOrEqualTo(left, right);
+            case GT:
+                return builder.greaterThan(left, right);
+            case GE:
+                return builder.greaterThanOrEqualTo(left, right);
+            // case ADD:
+            // return builder.sum(leftExpr, rightExpr);
+            // case DIV:
+            // return builder.quot(leftExpr, rightExpr);
+            // case MOD:
+            // return builder.mod(leftExpr.as(Integer.class),
+            // rightExpr.as(Integer.class));
+            // case MUL:
+            // return builder.prod(leftExpr, rightExpr);
+            // case SUB:
+            // return builder.diff(leftExpr, rightExpr);
+            default:
+                throw new ExpressionVisitException(
+                        String.format(ERROR_TEMPLATE, operator.toString()));
         }
     }
 
     public Predicate handleDateFilter(Expression<Date> left,
-                                   Date right,
-                                   BinaryOperatorKind operator,
-                                   CriteriaBuilder builder)
+                                      Date right,
+                                      BinaryOperatorKind operator,
+                                      CriteriaBuilder builder)
             throws ExpressionVisitException {
 
         switch (operator) {
-        case EQ:
-            return builder.equal(left, right);
-        case NE:
-            return builder.notEqual(left, right);
-        case LT:
-            return builder.lessThan(left, right);
-        case LE:
-            return builder.lessThanOrEqualTo(left, right);
-        case GT:
-            return builder.greaterThan(left, right);
-        case GE:
-            return builder.greaterThanOrEqualTo(left, right);
-        default:
-            throw new ExpressionVisitException("Operator \"" + operator.toString()
-                    + "\" is not supported for DateTimeExpression");
+            case EQ:
+                return builder.equal(left, right);
+            case NE:
+                return builder.notEqual(left, right);
+            case LT:
+                return builder.lessThan(left, right);
+            case LE:
+                return builder.lessThanOrEqualTo(left, right);
+            case GT:
+                return builder.greaterThan(left, right);
+            case GE:
+                return builder.greaterThanOrEqualTo(left, right);
+            default:
+                throw new ExpressionVisitException(
+                        String.format(ERROR_TEMPLATE, operator.toString()));
         }
     }
 
     /**
      * Reverses an operator if this operator is easily revertible.
      *
-     * @param operator
-     *        to be reversed
+     * @param operator to be reversed
      * @return String representation of reversed Operator
      */
     private BinaryOperatorKind reverseOperator(BinaryOperatorKind operator) {
         switch (operator) {
-        case LT:
-            return BinaryOperatorKind.GE;
-        case LE:
-            return BinaryOperatorKind.GT;
-        case GT:
-            return BinaryOperatorKind.LE;
-        case GE:
-            return BinaryOperatorKind.LT;
-        default:
-            return operator;
+            case LT:
+                return BinaryOperatorKind.GE;
+            case LE:
+                return BinaryOperatorKind.GT;
+            case GT:
+                return BinaryOperatorKind.LE;
+            case GE:
+                return BinaryOperatorKind.LT;
+            default:
+                return operator;
         }
     }
 }

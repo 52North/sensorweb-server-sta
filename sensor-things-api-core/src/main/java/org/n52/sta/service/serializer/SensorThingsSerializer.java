@@ -32,17 +32,55 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.olingo.commons.api.Constants;
-import org.apache.olingo.commons.api.data.*;
-import org.apache.olingo.commons.api.edm.*;
+import org.apache.olingo.commons.api.data.AbstractEntityCollection;
+import org.apache.olingo.commons.api.data.ComplexValue;
+import org.apache.olingo.commons.api.data.ContextURL;
+import org.apache.olingo.commons.api.data.Entity;
+import org.apache.olingo.commons.api.data.EntityIterator;
+import org.apache.olingo.commons.api.data.Link;
+import org.apache.olingo.commons.api.data.Linked;
+import org.apache.olingo.commons.api.data.Operation;
+import org.apache.olingo.commons.api.data.Property;
+import org.apache.olingo.commons.api.edm.EdmComplexType;
+import org.apache.olingo.commons.api.edm.EdmEntitySet;
+import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
+import org.apache.olingo.commons.api.edm.EdmPrimitiveType;
+import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
+import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
+import org.apache.olingo.commons.api.edm.EdmProperty;
+import org.apache.olingo.commons.api.edm.EdmStructuredType;
+import org.apache.olingo.commons.api.edm.EdmType;
+import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.constants.EdmTypeKind;
-import org.apache.olingo.commons.api.edm.geo.*;
+import org.apache.olingo.commons.api.edm.geo.ComposedGeospatial;
+import org.apache.olingo.commons.api.edm.geo.Geospatial;
+import org.apache.olingo.commons.api.edm.geo.GeospatialCollection;
+import org.apache.olingo.commons.api.edm.geo.LineString;
+import org.apache.olingo.commons.api.edm.geo.MultiLineString;
+import org.apache.olingo.commons.api.edm.geo.MultiPoint;
+import org.apache.olingo.commons.api.edm.geo.MultiPolygon;
+import org.apache.olingo.commons.api.edm.geo.Point;
+import org.apache.olingo.commons.api.edm.geo.Polygon;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmPrimitiveTypeFactory;
 import org.apache.olingo.server.api.ODataServerError;
 import org.apache.olingo.server.api.ServiceMetadata;
-import org.apache.olingo.server.api.serializer.*;
+import org.apache.olingo.server.api.serializer.ComplexSerializerOptions;
+import org.apache.olingo.server.api.serializer.EntityCollectionSerializerOptions;
+import org.apache.olingo.server.api.serializer.EntitySerializerOptions;
+import org.apache.olingo.server.api.serializer.PrimitiveSerializerOptions;
+import org.apache.olingo.server.api.serializer.ReferenceCollectionSerializerOptions;
+import org.apache.olingo.server.api.serializer.ReferenceSerializerOptions;
+import org.apache.olingo.server.api.serializer.SerializerException;
+import org.apache.olingo.server.api.serializer.SerializerResult;
+import org.apache.olingo.server.api.serializer.SerializerStreamResult;
 import org.apache.olingo.server.api.uri.UriHelper;
-import org.apache.olingo.server.api.uri.queryoption.*;
+import org.apache.olingo.server.api.uri.queryoption.CountOption;
+import org.apache.olingo.server.api.uri.queryoption.ExpandItem;
+import org.apache.olingo.server.api.uri.queryoption.ExpandOption;
+import org.apache.olingo.server.api.uri.queryoption.LevelsExpandOption;
+import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 import org.apache.olingo.server.core.ODataWritableContent;
 import org.apache.olingo.server.core.serializer.AbstractODataSerializer;
 import org.apache.olingo.server.core.serializer.SerializerResultImpl;
@@ -58,8 +96,15 @@ import org.n52.sta.edm.provider.SensorThingsEdmConstants;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
-import java.util.*;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+
+//CHECKSTYLE:OFF
 public class SensorThingsSerializer extends AbstractODataSerializer {
 
     private static final Map<Geospatial.Type, String> geoValueTypeToJsonName;
@@ -140,8 +185,8 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
 
     @Override
     public SerializerResult entityCollection(final ServiceMetadata metadata,
-            final EdmEntityType entityType, final AbstractEntityCollection entitySet,
-            final EntityCollectionSerializerOptions options) throws SerializerException {
+                                             final EdmEntityType entityType, final AbstractEntityCollection entitySet,
+                                             final EntityCollectionSerializerOptions options) throws SerializerException {
         OutputStream outputStream = null;
         SerializerException cachedException = null;
         boolean pagination = false;
@@ -185,14 +230,14 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
 
     @Override
     public SerializerStreamResult entityCollectionStreamed(ServiceMetadata metadata, EdmEntityType entityType,
-            EntityIterator entities, EntityCollectionSerializerOptions options) throws SerializerException {
+                                                           EntityIterator entities, EntityCollectionSerializerOptions options) throws SerializerException {
 
         return ODataWritableContent.with(entities, entityType, this, metadata, options).build();
     }
 
     public void entityCollectionIntoStream(final ServiceMetadata metadata,
-            final EdmEntityType entityType, final EntityIterator entitySet,
-            final EntityCollectionSerializerOptions options, final OutputStream outputStream)
+                                           final EdmEntityType entityType, final EntityIterator entitySet,
+                                           final EntityCollectionSerializerOptions options, final OutputStream outputStream)
             throws SerializerException {
 
         SerializerException cachedException;
@@ -230,7 +275,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
 
     @Override
     public SerializerResult entity(final ServiceMetadata metadata, final EdmEntityType entityType,
-            final Entity entity, final EntitySerializerOptions options) throws SerializerException {
+                                   final Entity entity, final EntitySerializerOptions options) throws SerializerException {
         OutputStream outputStream = null;
         SerializerException cachedException = null;
         try {
@@ -269,8 +314,8 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
     }
 
     protected void writeEntitySet(final ServiceMetadata metadata, final EdmEntityType entityType,
-            final AbstractEntityCollection entitySet, final ExpandOption expand, Integer toDepth, final SelectOption select,
-            final boolean onlyReference, final Set<String> ancestors, String name, final JsonGenerator json)
+                                  final AbstractEntityCollection entitySet, final ExpandOption expand, Integer toDepth, final SelectOption select,
+                                  final boolean onlyReference, final Set<String> ancestors, String name, final JsonGenerator json)
             throws IOException, SerializerException {
         json.writeStartArray();
         for (final Entity entity : entitySet) {
@@ -289,7 +334,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
      * Get the ascii representation of the entity id or thrown an
      * {@link SerializerException} if id is <code>null</code>.
      *
-     * @param entity the entity
+     * @param entity     the entity
      * @param entityType
      * @param name
      * @return ascii representation of the entity id
@@ -321,9 +366,9 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
     }
 
     protected void writeEntity(final ServiceMetadata metadata, final EdmEntityType entityType, final Entity entity,
-            final ContextURL contextURL, final ExpandOption expand, Integer toDepth,
-            final SelectOption select, final boolean onlyReference, Set<String> ancestors,
-            String name, final JsonGenerator json)
+                               final ContextURL contextURL, final ExpandOption expand, Integer toDepth,
+                               final SelectOption select, final boolean onlyReference, Set<String> ancestors,
+                               String name, final JsonGenerator json)
             throws IOException, SerializerException {
         boolean cycle = false;
         if (expand != null) {
@@ -413,7 +458,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
     }
 
     protected EdmEntityType resolveEntityType(final ServiceMetadata metadata, final EdmEntityType baseType,
-            final String derivedTypeName) throws SerializerException {
+                                              final String derivedTypeName) throws SerializerException {
         if (derivedTypeName == null
                 || baseType.getFullQualifiedName().getFullQualifiedNameAsString().equals(derivedTypeName)) {
             return baseType;
@@ -436,7 +481,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
     }
 
     protected EdmComplexType resolveComplexType(final ServiceMetadata metadata, final EdmComplexType baseType,
-            final String derivedTypeName) throws SerializerException {
+                                                final String derivedTypeName) throws SerializerException {
 
         String fullQualifiedName = baseType.getFullQualifiedName().getFullQualifiedNameAsString();
         if (derivedTypeName == null
@@ -461,8 +506,8 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
     }
 
     protected void writeProperties(final ServiceMetadata metadata, final EdmStructuredType type,
-            final List<Property> properties,
-            final SelectOption select, final JsonGenerator json)
+                                   final List<Property> properties,
+                                   final SelectOption select, final JsonGenerator json)
             throws IOException, SerializerException {
         final boolean all = ExpandSelectHelper.isAll(select);
         final Set<String> selected = all ? new HashSet<>()
@@ -484,8 +529,8 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
     }
 
     protected void writeNavigationProperties(final ServiceMetadata metadata,
-            final EdmStructuredType type, final Linked linked, final ExpandOption expand, final Integer toDepth,
-            final Set<String> ancestors, final String name, final JsonGenerator json)
+                                             final EdmStructuredType type, final Linked linked, final ExpandOption expand, final Integer toDepth,
+                                             final Set<String> ancestors, final String name, final JsonGenerator json)
             throws SerializerException, IOException {
         for (final String propertyName : type.getNavigationPropertyNames()) {
             final Link navigationLink = linked.getNavigationLink(propertyName);
@@ -586,8 +631,8 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
     }
 
     protected void writeProperty(final ServiceMetadata metadata,
-            final EdmProperty edmProperty, final Property property,
-            final Set<List<String>> selectedPaths, final JsonGenerator json)
+                                 final EdmProperty edmProperty, final Property property,
+                                 final Set<List<String>> selectedPaths, final JsonGenerator json)
             throws IOException, SerializerException {
         boolean isStreamProperty = isStreamProperty(edmProperty);
         writePropertyType(edmProperty, json);
@@ -651,7 +696,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
     }
 
     private void writePropertyValue(final ServiceMetadata metadata, final EdmProperty edmProperty,
-            final Property property, final Set<List<String>> selectedPaths, final JsonGenerator json)
+                                    final Property property, final Set<List<String>> selectedPaths, final JsonGenerator json)
             throws IOException, SerializerException {
         final EdmType type = edmProperty.getType();
         try {
@@ -688,7 +733,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
     }
 
     private void writeComplex(final ServiceMetadata metadata, final EdmComplexType type,
-            final Property property, final Set<List<String>> selectedPaths, final JsonGenerator json)
+                              final Property property, final Set<List<String>> selectedPaths, final JsonGenerator json)
             throws IOException, SerializerException {
         json.writeStartObject();
         String derivedName = property.getType();
@@ -697,7 +742,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
                 equals(derivedName)) {
             if (type.getBaseType() != null
                     && type.getBaseType().getFullQualifiedName().getFullQualifiedNameAsString().
-                            equals(derivedName)) {
+                    equals(derivedName)) {
                 resolvedType = resolveComplexType(metadata, type.getBaseType(),
                         type.getFullQualifiedName().getFullQualifiedNameAsString());
             } else {
@@ -722,7 +767,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
                 equals(derivedName)) {
             if (type.getBaseType() != null
                     && type.getBaseType().getFullQualifiedName().getFullQualifiedNameAsString().
-                            equals(derivedName)) {
+                    equals(derivedName)) {
                 resolvedType = resolveComplexType(metadata, type.getBaseType(),
                         type.getFullQualifiedName().getFullQualifiedNameAsString());
             } else {
@@ -749,8 +794,8 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
     }
 
     private void writePrimitiveCollection(final EdmPrimitiveType type, final Property property,
-            final Boolean isNullable, final Integer maxLength, final Integer precision, final Integer scale,
-            final Boolean isUnicode, final JsonGenerator json)
+                                          final Boolean isNullable, final Integer maxLength, final Integer precision, final Integer scale,
+                                          final Boolean isUnicode, final JsonGenerator json)
             throws IOException, SerializerException {
         json.writeStartArray();
         for (Object value : property.asCollection()) {
@@ -776,8 +821,8 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
     }
 
     private void writeComplexCollection(final ServiceMetadata metadata, final EdmComplexType type,
-            final Property property,
-            final Set<List<String>> selectedPaths, final JsonGenerator json)
+                                        final Property property,
+                                        final Set<List<String>> selectedPaths, final JsonGenerator json)
             throws IOException, SerializerException {
         json.writeStartArray();
         EdmComplexType derivedType = type;
@@ -813,8 +858,8 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
     }
 
     private void writePrimitive(final EdmPrimitiveType type, final Property property,
-            final Boolean isNullable, final Integer maxLength, final Integer precision, final Integer scale,
-            final Boolean isUnicode, final JsonGenerator json)
+                                final Boolean isNullable, final Integer maxLength, final Integer precision, final Integer scale,
+                                final Boolean isUnicode, final JsonGenerator json)
             throws EdmPrimitiveTypeException, IOException, SerializerException {
         if (property.isPrimitive()) {
             writePrimitiveValue(property.getName(), type, property.asPrimitive(),
@@ -831,8 +876,8 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
     }
 
     protected void writePrimitiveValue(final String name, final EdmPrimitiveType type, final Object primitiveValue,
-            final Boolean isNullable, final Integer maxLength, final Integer precision, final Integer scale,
-            final Boolean isUnicode, final JsonGenerator json) throws EdmPrimitiveTypeException, IOException {
+                                       final Boolean isNullable, final Integer maxLength, final Integer precision, final Integer scale,
+                                       final Boolean isUnicode, final JsonGenerator json) throws EdmPrimitiveTypeException, IOException {
         final String value = type.valueToString(primitiveValue,
                 isNullable, maxLength, precision, scale, isUnicode);
         if (value == null) {
@@ -877,17 +922,18 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
     /**
      * Writes a geospatial value following the GeoJSON specification defined in
      * RFC 7946.
-     * @param name The name
-     * @param type The type
-     * @param geoValue The geo value
+     *
+     * @param name       The name
+     * @param type       The type
+     * @param geoValue   The geo value
      * @param isNullable Flag if it is nullable
-     * @param json The json representation
+     * @param json       The json representation
      * @throws EdmPrimitiveTypeException if an error occurs
-     * @throws IOException if an error occurs
-     * @throws SerializerException if an error occurs
+     * @throws IOException               if an error occurs
+     * @throws SerializerException       if an error occurs
      */
     protected void writeGeoValue(final String name, final EdmPrimitiveType type, final Geospatial geoValue,
-            final Boolean isNullable, JsonGenerator json)
+                                 final Boolean isNullable, JsonGenerator json)
             throws EdmPrimitiveTypeException, IOException, SerializerException {
         if (geoValue == null) {
             if (isNullable == null || isNullable) {
@@ -979,8 +1025,8 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
     }
 
     protected void writeComplexValue(final ServiceMetadata metadata,
-            final EdmComplexType type, final List<Property> properties,
-            final Set<List<String>> selectedPaths, final JsonGenerator json)
+                                     final EdmComplexType type, final List<Property> properties,
+                                     final Set<List<String>> selectedPaths, final JsonGenerator json)
             throws IOException, SerializerException {
 
         for (final String propertyName : type.getPropertyNames()) {
@@ -1004,7 +1050,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
 
 
     public SerializerResult geospatialPrimitive(final ServiceMetadata metadata, final EdmPrimitiveType type,
-            final Property property, final PrimitiveSerializerOptions options) throws SerializerException {
+                                                final Property property, final PrimitiveSerializerOptions options) throws SerializerException {
         OutputStream outputStream = null;
         SerializerException cachedException = null;
         try {
@@ -1038,7 +1084,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
 
     @Override
     public SerializerResult primitive(final ServiceMetadata metadata, final EdmPrimitiveType type,
-            final Property property, final PrimitiveSerializerOptions options) throws SerializerException {
+                                      final Property property, final PrimitiveSerializerOptions options) throws SerializerException {
         OutputStream outputStream = null;
         SerializerException cachedException = null;
         try {
@@ -1077,7 +1123,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
     }
 
     public SerializerResult complexValue(final ServiceMetadata metadata, final EdmComplexType type,
-            final Property property, final ComplexSerializerOptions options) throws SerializerException {
+                                         final Property property, final ComplexSerializerOptions options) throws SerializerException {
         OutputStream outputStream = null;
         SerializerException cachedException = null;
         try {
@@ -1104,7 +1150,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
                         equals(property.getType())) {
                     if (type.getBaseType() != null
                             && type.getBaseType().getFullQualifiedName().getFullQualifiedNameAsString().
-                                    equals(property.getType())) {
+                            equals(property.getType())) {
                         resolvedType = resolveComplexType(metadata, type.getBaseType(),
                                 type.getFullQualifiedName().getFullQualifiedNameAsString());
                     } else {
@@ -1142,7 +1188,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
 
     @Override
     public SerializerResult complex(final ServiceMetadata metadata, final EdmComplexType type,
-            final Property property, final ComplexSerializerOptions options) throws SerializerException {
+                                    final Property property, final ComplexSerializerOptions options) throws SerializerException {
         OutputStream outputStream = null;
         SerializerException cachedException = null;
         try {
@@ -1171,7 +1217,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
                         equals(property.getType())) {
                     if (type.getBaseType() != null
                             && type.getBaseType().getFullQualifiedName().getFullQualifiedNameAsString().
-                                    equals(property.getType())) {
+                            equals(property.getType())) {
                         resolvedType = resolveComplexType(metadata, type.getBaseType(),
                                 type.getFullQualifiedName().getFullQualifiedNameAsString());
                     } else {
@@ -1211,7 +1257,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
 
     @Override
     public SerializerResult primitiveCollection(final ServiceMetadata metadata, final EdmPrimitiveType type,
-            final Property property, final PrimitiveSerializerOptions options) throws SerializerException {
+                                                final Property property, final PrimitiveSerializerOptions options) throws SerializerException {
         OutputStream outputStream = null;
         SerializerException cachedException = null;
         try {
@@ -1249,7 +1295,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
 
     @Override
     public SerializerResult complexCollection(final ServiceMetadata metadata, final EdmComplexType type,
-            final Property property, final ComplexSerializerOptions options) throws SerializerException {
+                                              final Property property, final ComplexSerializerOptions options) throws SerializerException {
         OutputStream outputStream = null;
         SerializerException cachedException = null;
         try {
@@ -1283,7 +1329,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
 
     @Override
     public SerializerResult reference(final ServiceMetadata metadata, final EdmEntitySet edmEntitySet,
-            final Entity entity, final ReferenceSerializerOptions options) throws SerializerException {
+                                      final Entity entity, final ReferenceSerializerOptions options) throws SerializerException {
         OutputStream outputStream = null;
         SerializerException cachedException = null;
 
@@ -1314,7 +1360,7 @@ public class SensorThingsSerializer extends AbstractODataSerializer {
 
     @Override
     public SerializerResult referenceCollection(final ServiceMetadata metadata, final EdmEntitySet edmEntitySet,
-            final AbstractEntityCollection entityCollection, final ReferenceCollectionSerializerOptions options)
+                                                final AbstractEntityCollection entityCollection, final ReferenceCollectionSerializerOptions options)
             throws SerializerException {
         OutputStream outputStream = null;
         SerializerException cachedException = null;

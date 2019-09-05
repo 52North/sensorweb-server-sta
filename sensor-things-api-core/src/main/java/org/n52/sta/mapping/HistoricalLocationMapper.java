@@ -37,6 +37,11 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
+import org.n52.sta.edm.provider.SensorThingsEdmConstants;
+import org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider;
+import org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider;
+import org.n52.sta.edm.provider.entities.LocationEntityProvider;
+import org.n52.sta.edm.provider.entities.ThingEntityProvider;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -48,15 +53,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.n52.sta.edm.provider.SensorThingsEdmConstants.ID;
-import static org.n52.sta.edm.provider.SensorThingsEdmConstants.ID_ANNOTATION;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_TIME;
-import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ES_HISTORICAL_LOCATIONS_NAME;
-import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_FQN;
-import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ES_LOCATIONS_NAME;
-import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
-
 //import org.n52.sta.utils.EntityAnnotator;
 
 /**
@@ -65,30 +61,41 @@ import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAM
 @Component
 public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationEntity> {
 
-    @Autowired
-    private EntityCreationHelper entityCreationHelper;
+    private final EntityCreationHelper entityCreationHelper;
+    private final LocationMapper locationMapper;
+    private final ThingMapper thingMapper;
 
     @Autowired
-    private LocationMapper locationMapper;
-
-    @Autowired
-    private ThingMapper thingMapper;
+    public HistoricalLocationMapper(EntityCreationHelper entityCreationHelper,
+                                    LocationMapper locationMapper,
+                                    ThingMapper thingMapper) {
+        this.entityCreationHelper = entityCreationHelper;
+        this.locationMapper = locationMapper;
+        this.thingMapper = thingMapper;
+    }
 
     public Entity createEntity(HistoricalLocationEntity location) {
         Entity entity = new Entity();
 
-        entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, location.getIdentifier()));
-        entity.addProperty(new Property(null, PROP_TIME, ValueType.PRIMITIVE, location.getTime().getTime()));
+        entity.addProperty(new Property(
+                null,
+                AbstractSensorThingsEntityProvider.PROP_ID,
+                ValueType.PRIMITIVE,
+                location.getIdentifier()));
+        entity.addProperty(new Property(
+                null,
+                AbstractSensorThingsEntityProvider.PROP_TIME,
+                ValueType.PRIMITIVE,
+                location.getTime().getTime()));
 
-        entity.setType(ET_HISTORICAL_LOCATION_FQN.getFullQualifiedNameAsString());
-        entity.setId(entityCreationHelper.createId(entity, ES_HISTORICAL_LOCATIONS_NAME, PROP_ID));
+        entity.setType(HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_FQN.getFullQualifiedNameAsString());
+        entity.setId(entityCreationHelper.createId(
+                entity,
+                HistoricalLocationEntityProvider.ES_HISTORICAL_LOCATIONS_NAME,
+                AbstractSensorThingsEntityProvider.PROP_ID));
 
         return entity;
 
-    }
-
-    private Time createTime(HistoricalLocationEntity location) {
-        return createTime(createDateTime(location.getTime()));
     }
 
     @Override
@@ -101,6 +108,10 @@ public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationE
         return historicalLocation;
     }
 
+    private Time createTime(HistoricalLocationEntity location) {
+        return createTime(createDateTime(location.getTime()));
+    }
+
     @Override
     public HistoricalLocationEntity merge(HistoricalLocationEntity existing, HistoricalLocationEntity toMerge) {
         if (toMerge.getTime() != null) {
@@ -111,10 +122,10 @@ public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationE
 
     protected void setIdentifier(HistoricalLocationEntity idEntity, Entity entity) {
         String rawId;
-        if (checkProperty(entity, ID)) {
-            rawId = getPropertyValue(entity, ID).toString();
-        } else if (checkProperty(entity, ID_ANNOTATION)) {
-            rawId = getPropertyValue(entity, ID_ANNOTATION).toString();
+        if (checkProperty(entity, SensorThingsEdmConstants.ID)) {
+            rawId = getPropertyValue(entity, SensorThingsEdmConstants.ID).toString();
+        } else if (checkProperty(entity, SensorThingsEdmConstants.ID_ANNOTATION)) {
+            rawId = getPropertyValue(entity, SensorThingsEdmConstants.ID_ANNOTATION).toString();
         } else {
             rawId = UUID.randomUUID().toString();
         }
@@ -123,12 +134,13 @@ public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationE
         try {
             idEntity.setIdentifier(URLEncoder.encode(rawId, "utf-8"));
         } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
         }
     }
 
     private void addTime(HistoricalLocationEntity historicalLocation, Entity entity) {
-        if (checkProperty(entity, PROP_TIME)) {
-            Time time = parseTime(getPropertyValue(entity, PROP_TIME));
+        if (checkProperty(entity, AbstractSensorThingsEntityProvider.PROP_TIME)) {
+            Time time = parseTime(getPropertyValue(entity, AbstractSensorThingsEntityProvider.PROP_TIME));
             if (time instanceof TimeInstant) {
                 historicalLocation.setTime(((TimeInstant) time).getValue().toDate());
             } else if (time instanceof TimePeriod) {
@@ -138,15 +150,18 @@ public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationE
     }
 
     private void addThing(HistoricalLocationEntity historicalLocation, Entity entity) {
-        if (checkNavigationLink(entity, ET_THING_NAME)) {
-            historicalLocation.setThing(thingMapper.createEntity(entity.getNavigationLink(ET_THING_NAME).getInlineEntity()));
+        if (checkNavigationLink(entity, ThingEntityProvider.ET_THING_NAME)) {
+            historicalLocation.setThing(
+                    thingMapper.createEntity(entity.getNavigationLink(ThingEntityProvider.ET_THING_NAME)
+                                                   .getInlineEntity()));
         }
     }
 
     private void addLocations(HistoricalLocationEntity historicalLocation, Entity entity) {
-        if (checkNavigationLink(entity, ES_LOCATIONS_NAME)) {
+        if (checkNavigationLink(entity, LocationEntityProvider.ES_LOCATIONS_NAME)) {
             Set<LocationEntity> locations = new LinkedHashSet<>();
-            Iterator<Entity> iterator = entity.getNavigationLink(ES_LOCATIONS_NAME).getInlineEntitySet().iterator();
+            Iterator<Entity> iterator = entity.getNavigationLink(LocationEntityProvider.ES_LOCATIONS_NAME)
+                                              .getInlineEntitySet().iterator();
             while (iterator.hasNext()) {
                 locations.add(locationMapper.createEntity((Entity) iterator.next()));
             }
@@ -156,7 +171,7 @@ public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationE
 
     @Override
     public Entity checkEntity(Entity entity) throws ODataApplicationException {
-        checkPropertyValidity(PROP_TIME, entity);
+        checkPropertyValidity(AbstractSensorThingsEntityProvider.PROP_TIME, entity);
         return entity;
     }
 }

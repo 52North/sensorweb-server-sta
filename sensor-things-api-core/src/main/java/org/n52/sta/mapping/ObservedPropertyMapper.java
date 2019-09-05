@@ -36,6 +36,9 @@ import org.apache.olingo.commons.core.edm.primitivetype.EdmAny;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.sta.ObservablePropertyEntity;
+import org.n52.sta.edm.provider.SensorThingsEdmConstants;
+import org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider;
+import org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -44,31 +47,37 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.UUID;
 
-import static org.n52.sta.edm.provider.SensorThingsEdmConstants.ID;
-import static org.n52.sta.edm.provider.SensorThingsEdmConstants.ID_ANNOTATION;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_DEFINITION;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
-import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ES_OBSERVED_PROPERTIES_NAME;
-import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_FQN;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- *
  */
 @Component
 public class ObservedPropertyMapper extends AbstractMapper<PhenomenonEntity> {
 
+    private final EntityCreationHelper entityCreationHelper;
+
     @Autowired
-    EntityCreationHelper entityCreationHelper;
+    public ObservedPropertyMapper(EntityCreationHelper entityCreationHelper) {
+        this.entityCreationHelper = entityCreationHelper;
+    }
 
     @Override
     public Entity createEntity(PhenomenonEntity observedProperty) {
         Entity entity = new Entity();
-        entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, observedProperty.getStaIdentifier()));
+        entity.addProperty(new Property(null,
+                AbstractSensorThingsEntityProvider.PROP_ID,
+                ValueType.PRIMITIVE,
+                observedProperty.getStaIdentifier()));
         addNameDescriptionProperties(entity, observedProperty);
-        entity.addProperty(new Property(null, PROP_DEFINITION, ValueType.PRIMITIVE, observedProperty.getIdentifier()));
+        entity.addProperty(new Property(null,
+                AbstractSensorThingsEntityProvider.PROP_DEFINITION,
+                ValueType.PRIMITIVE,
+                observedProperty.getIdentifier()));
 
-        entity.setType(ET_OBSERVED_PROPERTY_FQN.getFullQualifiedNameAsString());
-        entity.setId(entityCreationHelper.createId(entity, ES_OBSERVED_PROPERTIES_NAME, PROP_ID));
+        entity.setType(ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_FQN.getFullQualifiedNameAsString());
+        entity.setId(entityCreationHelper.createId(
+                entity,
+                ObservedPropertyEntityProvider.ES_OBSERVED_PROPERTIES_NAME,
+                AbstractSensorThingsEntityProvider.PROP_ID));
 
         return entity;
     }
@@ -90,14 +99,20 @@ public class ObservedPropertyMapper extends AbstractMapper<PhenomenonEntity> {
 
     protected void setStaIdentifier(PhenomenonEntity idEntity, Entity entity) {
         String rawIdentifier = "";
-        if (checkProperty(entity, ID)) {
+        if (checkProperty(entity, SensorThingsEdmConstants.ID)) {
             try {
-                rawIdentifier = EdmAny.getInstance().valueToString(getPropertyValue(entity, PROP_ID), false, 0, 0, 0,false);
+                rawIdentifier = EdmAny.getInstance().valueToString(
+                        getPropertyValue(entity, AbstractSensorThingsEntityProvider.PROP_ID),
+                        false,
+                        0,
+                        0,
+                        0,
+                        false);
             } catch (EdmPrimitiveTypeException e) {
                 // This should never happen. Value was checked already
             }
-        } else if (checkProperty(entity, ID_ANNOTATION)) {
-            rawIdentifier = getPropertyValue(entity, ID_ANNOTATION).toString();
+        } else if (checkProperty(entity, SensorThingsEdmConstants.ID_ANNOTATION)) {
+            rawIdentifier = getPropertyValue(entity, SensorThingsEdmConstants.ID_ANNOTATION).toString();
         } else {
             rawIdentifier = UUID.randomUUID().toString();
         }
@@ -105,6 +120,7 @@ public class ObservedPropertyMapper extends AbstractMapper<PhenomenonEntity> {
         try {
             idEntity.setStaIdentifier(URLEncoder.encode(rawIdentifier, "utf-8"));
         } catch (UnsupportedEncodingException e) {
+
             // e.printStackTrace();
         }
     }
@@ -115,19 +131,18 @@ public class ObservedPropertyMapper extends AbstractMapper<PhenomenonEntity> {
         return existing;
     }
 
-    public ObservablePropertyEntity mergeObservablePropertyEntity(ObservablePropertyEntity existing, ObservablePropertyEntity toMerge) {
+    public ObservablePropertyEntity mergeObservablePropertyEntity(ObservablePropertyEntity existing,
+                                                                  ObservablePropertyEntity toMerge) {
         if (toMerge.hasDatastreams()) {
-            toMerge.getDatastreams().forEach(d -> {
-                existing.addDatastream(d);
-            });
+            toMerge.getDatastreams().forEach(d -> existing.addDatastream(d));
         }
         return (ObservablePropertyEntity) merge(existing, toMerge);
     }
 
     @Override
-    public Entity  checkEntity(Entity entity) throws ODataApplicationException {
+    public Entity checkEntity(Entity entity) throws ODataApplicationException {
         checkNameAndDescription(entity);
-        checkPropertyValidity(PROP_DEFINITION, entity);
+        checkPropertyValidity(AbstractSensorThingsEntityProvider.PROP_DEFINITION, entity);
         return entity;
     }
 

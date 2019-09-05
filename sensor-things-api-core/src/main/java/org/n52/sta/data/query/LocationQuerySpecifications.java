@@ -28,13 +28,6 @@
  */
 package org.n52.sta.data.query;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
-
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.n52.series.db.beans.DescribableEntity;
@@ -44,18 +37,23 @@ import org.n52.series.db.beans.sta.LocationEncodingEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.springframework.data.jpa.domain.Specification;
 
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
+
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- *
  */
 public class LocationQuerySpecifications extends EntityQuerySpecifications<LocationEntity> {
 
-    public Specification<LocationEntity> withRelatedHistoricalLocationIdentifier(final String historicalLocationIdentifier) {
+    public Specification<LocationEntity> withRelatedHistoricalLocationIdentifier(String historicalLocationIdentifier) {
         return (root, query, builder) -> {
             Subquery<LocationEntity> sq = query.subquery(LocationEntity.class);
             Root<HistoricalLocationEntity> dataset = sq.from(HistoricalLocationEntity.class);
-            Join<HistoricalLocationEntity, LocationEntity> joinFeature = dataset.join(HistoricalLocationEntity.PROPERTY_LOCATIONS);
-            sq.select(joinFeature).where(builder.equal(dataset.get(DescribableEntity.PROPERTY_IDENTIFIER), historicalLocationIdentifier));
+            Join<HistoricalLocationEntity, LocationEntity> joinFeature =
+                    dataset.join(HistoricalLocationEntity.PROPERTY_LOCATIONS);
+            sq.select(joinFeature)
+              .where(builder.equal(dataset.get(DescribableEntity.PROPERTY_IDENTIFIER), historicalLocationIdentifier));
             return builder.in(root).value(sq);
         };
     }
@@ -65,7 +63,8 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
             Subquery<LocationEntity> sq = query.subquery(LocationEntity.class);
             Root<PlatformEntity> dataset = sq.from(PlatformEntity.class);
             Join<PlatformEntity, LocationEntity> joinFeature = dataset.join(PlatformEntity.PROPERTY_LOCATIONS);
-            sq.select(joinFeature).where(builder.equal(dataset.get(DescribableEntity.PROPERTY_IDENTIFIER), thingIdentifier));
+            sq.select(joinFeature)
+              .where(builder.equal(dataset.get(DescribableEntity.PROPERTY_IDENTIFIER), thingIdentifier));
             return builder.in(root).value(sq);
         };
     }
@@ -77,11 +76,10 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
 
     @Override
     public Specification<LocationEntity> getFilterForProperty(String propertyName,
-                                       Object propertyValue,
-                                       BinaryOperatorKind operator,
-                                       boolean switched)
-            throws ExpressionVisitException {
-        if (propertyName.equals("Things") || propertyName.equals("HistoricalLocations")) {
+                                                              Object propertyValue,
+                                                              BinaryOperatorKind operator,
+                                                              boolean switched) {
+        if (propertyName.equals(THINGS) || propertyName.equals(HISTORICAL_LOCATIONS)) {
             return handleRelatedPropertyFilter(propertyName, (Specification<String>) propertyValue);
         } else if (propertyName.equals("id")) {
             return (root, query, builder) -> {
@@ -99,46 +97,48 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
     }
 
     private Specification<LocationEntity> handleRelatedPropertyFilter(String propertyName,
-            Specification<String> propertyValue) {
+                                                                      Specification<String> propertyValue) {
         return (root, query, builder) -> {
-            if (propertyName.equals("Things")) {
+            if (propertyName.equals(THINGS)) {
                 Subquery<LocationEntity> sq = query.subquery(LocationEntity.class);
                 Root<PlatformEntity> dataset = sq.from(PlatformEntity.class);
                 Join<PlatformEntity, LocationEntity> joinFeature = dataset.join(PlatformEntity.PROPERTY_LOCATIONS);
-                sq.select(joinFeature).where(builder.equal(dataset.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue));
+                sq.select(joinFeature)
+                  .where(builder.equal(dataset.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue));
                 return builder.in(root).value(sq);
             } else {
                 Subquery<LocationEntity> sq = query.subquery(LocationEntity.class);
                 Root<HistoricalLocationEntity> dataset = sq.from(HistoricalLocationEntity.class);
                 Join<HistoricalLocationEntity, LocationEntity> joinFeature =
                         dataset.join(HistoricalLocationEntity.PROPERTY_LOCATIONS);
-                sq.select(joinFeature).where(builder.equal(dataset.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue));
+                sq.select(joinFeature)
+                  .where(builder.equal(dataset.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue));
                 return builder.in(root).value(sq);
             }
         };
     }
 
     private Specification<LocationEntity> handleDirectPropertyFilter(String propertyName, Object propertyValue,
-            BinaryOperatorKind operator, boolean switched) {
+                                                                     BinaryOperatorKind operator, boolean switched) {
         return (Specification<LocationEntity>) (root, query, builder) -> {
             try {
                 switch (propertyName) {
-                case "name":
-                    return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
-                            propertyValue.toString(), operator, builder, switched);
-                case "description":
-                    return handleDirectStringPropertyFilter(
-                            root.get(DescribableEntity.PROPERTY_DESCRIPTION), propertyValue.toString(),
-                            operator, builder, switched);
-                case "encodingType":
-                    Join<LocationEntity, LocationEncodingEntity> join =
-                            root.join(LocationEntity.PROPERTY_LOCATION_ENCODINT);
-                    return handleDirectStringPropertyFilter(
-                            join.get(LocationEncodingEntity.PROPERTY_ENCODING_TYPE),
-                            propertyValue.toString(), operator, builder, switched);
-                default:
-                    throw new RuntimeException("Error getting filter for Property: \"" + propertyName
-                            + "\". No such property in Entity.");
+                    case "name":
+                        return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
+                                propertyValue.toString(), operator, builder, switched);
+                    case "description":
+                        return handleDirectStringPropertyFilter(
+                                root.get(DescribableEntity.PROPERTY_DESCRIPTION), propertyValue.toString(),
+                                operator, builder, switched);
+                    case "encodingType":
+                        Join<LocationEntity, LocationEncodingEntity> join =
+                                root.join(LocationEntity.PROPERTY_LOCATION_ENCODINT);
+                        return handleDirectStringPropertyFilter(
+                                join.get(LocationEncodingEntity.PROPERTY_ENCODING_TYPE),
+                                propertyValue.toString(), operator, builder, switched);
+                    default:
+                        throw new RuntimeException("Error getting filter for Property: \"" + propertyName
+                                + "\". No such property in Entity.");
                 }
             } catch (ExpressionVisitException e) {
                 throw new RuntimeException(e);

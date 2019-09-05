@@ -38,12 +38,11 @@ import org.apache.olingo.commons.api.data.Link;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
+import org.n52.sta.edm.provider.SensorThingsEdmConstants;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.n52.sta.edm.provider.SensorThingsEdmConstants.SELF_LINK_ANNOTATION;
 
 /**
  * Helper class to annotate Entities
@@ -56,9 +55,9 @@ public class EntityAnnotator {
     /**
      * Annotates an entity with it's self link and navigation links
      *
-     * @param entity the Entity to annotate
-     * @param entityType the type of the entity to annotate
-     * @param baseUri the baseUri for the service deployed
+     * @param entity       the Entity to annotate
+     * @param entityType   the type of the entity to annotate
+     * @param baseUri      the baseUri for the service deployed
      * @param selectOption select options
      * @return the annotated Entity
      */
@@ -73,14 +72,14 @@ public class EntityAnnotator {
         boolean hasSelectOption = selectOption != null;
         if (hasSelectOption) {
             selectOption.getSelectItems().forEach(
-                    elem -> selector.add(elem.getResourcePath().getUriResourceParts().get(0).getSegmentValue())
+                elem -> selector.add(elem.getResourcePath().getUriResourceParts().get(0).getSegmentValue())
             );
         }
 
         if (!hasSelectOption) {
             String selfLinkValue = String.join("/", baseUri, entity.getId().getRawPath());
             Link selfLink = new Link();
-            selfLink.setTitle(SELF_LINK_ANNOTATION);
+            selfLink.setTitle(SensorThingsEdmConstants.SELF_LINK_ANNOTATION);
             selfLink.setHref(selfLinkValue);
             entity.setSelfLink(selfLink);
         }
@@ -89,7 +88,11 @@ public class EntityAnnotator {
             if (!hasSelectOption || selector.contains(np)) {
                 EdmNavigationProperty navProp = entityType.getNavigationProperty(np);
 
-                String navigationAnnotationValue = String.join("/", baseUri, entity.getId().getRawPath(), navProp.getName());
+                String navigationAnnotationValue = String.join(
+                        "/",
+                        baseUri,
+                        entity.getId().getRawPath(),
+                        navProp.getName());
 
                 Link link = new Link();
                 link.setTitle(np);

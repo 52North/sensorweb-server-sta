@@ -28,13 +28,6 @@
  */
 package org.n52.sta.mapping;
 
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ENCODINGTYPE;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_FEATURE;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_LOCATION;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_OBSERVED_AREA;
-
-import java.util.Locale;
-
 import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
@@ -44,7 +37,10 @@ import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.beans.GeometryEntity;
 import org.n52.series.db.beans.HibernateRelations.HasGeometry;
+import org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Locale;
 
 public abstract class AbstractLocationGeometryMapper<T> extends AbstractMapper<T> {
 
@@ -54,29 +50,36 @@ public abstract class AbstractLocationGeometryMapper<T> extends AbstractMapper<T
     private GeometryMapper geometryMapper;
 
     protected void checkEncodingType(Entity entity) throws ODataApplicationException {
-        checkPropertyValidity(PROP_ENCODINGTYPE, entity);
-        if (!getPropertyValue(entity, PROP_ENCODINGTYPE).equals(ENCODINGTYPE_GEOJSON)) {
-            throw new ODataApplicationException(String.format("The parameter '%s' is invalid for in entity '%s'!",
-                    PROP_ENCODINGTYPE, entity.getType().replace("iot.", "")), HttpStatusCode.BAD_REQUEST.getStatusCode(),
+        checkPropertyValidity(AbstractSensorThingsEntityProvider.PROP_ENCODINGTYPE, entity);
+        if (!getPropertyValue(entity, AbstractSensorThingsEntityProvider.PROP_ENCODINGTYPE)
+                .equals(ENCODINGTYPE_GEOJSON)) {
+            throw new ODataApplicationException(
+                    String.format("The parameter '%s' is invalid for in entity '%s'!",
+                    AbstractSensorThingsEntityProvider.PROP_ENCODINGTYPE,
+                    entity.getType().replace("iot.", "")),
+                    HttpStatusCode.BAD_REQUEST.getStatusCode(),
                     Locale.getDefault());
         }
     }
 
     protected void addGeometry(Entity entity, HasGeometry<?> geometryEntity) {
-        addWithEncoding(entity, geometryEntity, PROP_FEATURE);
+        addWithEncoding(entity, geometryEntity, AbstractSensorThingsEntityProvider.PROP_FEATURE);
     }
 
     protected void addLocation(Entity entity, HasGeometry<?> locationEntity) {
-        addWithEncoding(entity, locationEntity, PROP_LOCATION);
+        addWithEncoding(entity, locationEntity, AbstractSensorThingsEntityProvider.PROP_LOCATION);
     }
 
     protected void addObservedArea(Entity entity, HasGeometry<?> geometryEntity) {
-        add(entity, geometryEntity, PROP_OBSERVED_AREA);
+        add(entity, geometryEntity, AbstractSensorThingsEntityProvider.PROP_OBSERVED_AREA);
     }
 
     protected void addWithEncoding(Entity entity, HasGeometry<?> geometryLocationEntity, String property) {
         if (geometryLocationEntity.isSetGeometry()) {
-            entity.addProperty(new Property(null, PROP_ENCODINGTYPE, ValueType.PRIMITIVE, ENCODINGTYPE_GEOJSON));
+            entity.addProperty(new Property(
+                    null,
+                    AbstractSensorThingsEntityProvider.PROP_ENCODINGTYPE,
+                    ValueType.PRIMITIVE, ENCODINGTYPE_GEOJSON));
             add(entity, geometryLocationEntity, property);
         }
     }
@@ -86,7 +89,7 @@ public abstract class AbstractLocationGeometryMapper<T> extends AbstractMapper<T
             entity.addProperty(new Property(null, property, ValueType.GEOSPATIAL,
                     geometryMapper.resolveGeometry(geometryLocationEntity.getGeometryEntity())));
         } else {
-            entity.addProperty(new Property(null, property, ValueType.GEOSPATIAL,null));
+            entity.addProperty(new Property(null, property, ValueType.GEOSPATIAL, null));
         }
 
     }

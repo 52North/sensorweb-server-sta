@@ -33,9 +33,10 @@
  */
 package org.n52.sta.service.request;
 
-import java.util.List;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.n52.sta.service.query.QueryOptions;
+
+import java.util.List;
 
 /**
  * Encapsulates parameters for an OData complient Sensor Things API request that
@@ -53,9 +54,8 @@ public class SensorThingsRequest {
     }
 
     /**
-     *
      * @param resourcePaths list of {@link UriResource}
-     * @param queryOptions {@link QueryOptions} for the request
+     * @param queryOptions  {@link QueryOptions} for the request
      */
     public SensorThingsRequest(List<UriResource> resourcePaths, QueryOptions queryOptions) {
         this.resourcePaths = resourcePaths;

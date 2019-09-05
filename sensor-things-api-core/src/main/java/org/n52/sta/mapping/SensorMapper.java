@@ -37,6 +37,8 @@ import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
+import org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider;
+import org.n52.sta.edm.provider.entities.SensorEntityProvider;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -45,13 +47,8 @@ import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.*;
-import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ES_SENSORS_NAME;
-import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ET_SENSOR_FQN;
-
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- *
  */
 @Component
 public class SensorMapper extends AbstractMapper<ProcedureEntity> {
@@ -60,14 +57,25 @@ public class SensorMapper extends AbstractMapper<ProcedureEntity> {
 
     private static final String SENSORML_2 = "http://www.opengis.net/sensorml/2.0";
 
+    private final EntityCreationHelper entityCreationHelper;
+
     @Autowired
-    EntityCreationHelper entityCreationHelper;
+    public SensorMapper(EntityCreationHelper entityCreationHelper) {
+        this.entityCreationHelper = entityCreationHelper;
+    }
 
     public Entity createEntity(ProcedureEntity sensor) {
         Entity entity = new Entity();
-        entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, sensor.getIdentifier()));
+        entity.addProperty(new Property(
+                null,
+                AbstractSensorThingsEntityProvider.PROP_ID,
+                ValueType.PRIMITIVE,
+                sensor.getIdentifier()));
         addNameDescriptionProperties(entity, sensor);
-        entity.addProperty(new Property(null, PROP_ENCODINGTYPE, ValueType.PRIMITIVE, checkQueryEncodingType(sensor.getFormat().getFormat())));
+        entity.addProperty(new Property(null,
+                AbstractSensorThingsEntityProvider.PROP_ENCODINGTYPE,
+                ValueType.PRIMITIVE,
+                checkQueryEncodingType(sensor.getFormat().getFormat())));
         String metadata = "metadata";
         if (sensor.getDescriptionFile() != null && !sensor.getDescriptionFile().isEmpty()) {
             metadata = sensor.getDescriptionFile();
@@ -75,23 +83,25 @@ public class SensorMapper extends AbstractMapper<ProcedureEntity> {
             Optional<ProcedureHistoryEntity> history =
                     sensor.getProcedureHistory().stream().filter(h -> h.getEndTime() == null).findFirst();
             if (history.isPresent()) {
-                metadata =  history.get().getXml();
+                metadata = history.get().getXml();
             }
         }
-        entity.addProperty(new Property(null, PROP_METADATA, ValueType.PRIMITIVE, metadata));
-        entity.setType(ET_SENSOR_FQN.getFullQualifiedNameAsString());
-        entity.setId(entityCreationHelper.createId(entity, ES_SENSORS_NAME, PROP_ID));
+        entity.addProperty(new Property(
+                null,
+                AbstractSensorThingsEntityProvider.PROP_METADATA,
+                ValueType.PRIMITIVE,
+                metadata));
+        entity.setType(SensorEntityProvider.ET_SENSOR_FQN.getFullQualifiedNameAsString());
+        entity.setId(entityCreationHelper.createId(
+                entity,
+                SensorEntityProvider.ES_SENSORS_NAME,
+                AbstractSensorThingsEntityProvider.PROP_ID));
 
         return entity;
     }
 
     public Entity createEntity(SensorEntity sensor) {
         return createEntity(sensor);
-    }
-
-    public SensorEntity createAndCheckEntity(Entity entity) throws ODataApplicationException {
-        checkEntity(entity);
-        return createEntity(entity);
     }
 
     public SensorEntity createEntity(Entity entity) {
@@ -103,10 +113,16 @@ public class SensorMapper extends AbstractMapper<ProcedureEntity> {
         if (sensor.getFormat().getFormat().equalsIgnoreCase(SENSORML_2)) {
             sensor.setProcedureHistory(createProcedureHistory(sensor, entity));
         } else {
-            sensor.setDescriptionFile(getPropertyValue(entity, PROP_METADATA).toString());
+            sensor.setDescriptionFile(
+                    getPropertyValue(entity, AbstractSensorThingsEntityProvider.PROP_METADATA).toString());
         }
         setDatastreams(sensor, entity);
         return sensor;
+    }
+
+    public SensorEntity createAndCheckEntity(Entity entity) throws ODataApplicationException {
+        checkEntity(entity);
+        return createEntity(entity);
     }
 
     @Override
@@ -119,17 +135,19 @@ public class SensorMapper extends AbstractMapper<ProcedureEntity> {
     }
 
     public SensorEntity mergeSensorEntity(SensorEntity existing, SensorEntity toMerge) {
-       if (toMerge.hasDatastreams()) {
-           toMerge.getDatastreams().forEach(d -> {
-               existing.addDatastream(d);
-           });
-       }
-       return (SensorEntity) merge(existing, toMerge);
+        if (toMerge.hasDatastreams()) {
+            toMerge.getDatastreams().forEach(d -> {
+                existing.addDatastream(d);
+            });
+        }
+        return (SensorEntity) merge(existing, toMerge);
     }
 
     private FormatEntity createFormat(Entity entity) {
-        if (checkProperty(entity, PROP_ENCODINGTYPE)) {
-            return new FormatEntity().setFormat(checkInsertEncodingType(getPropertyValue(entity, PROP_ENCODINGTYPE).toString()));
+        if (checkProperty(entity, AbstractSensorThingsEntityProvider.PROP_ENCODINGTYPE)) {
+            return new FormatEntity()
+                    .setFormat(checkInsertEncodingType(
+                            getPropertyValue(entity, AbstractSensorThingsEntityProvider.PROP_ENCODINGTYPE).toString()));
         }
         return new FormatEntity().setFormat("unknown");
     }
@@ -139,7 +157,8 @@ public class SensorMapper extends AbstractMapper<ProcedureEntity> {
         procedureHistoryEntity.setProcedure(sensor);
         procedureHistoryEntity.setFormat(sensor.getFormat());
         procedureHistoryEntity.setStartTime(DateTime.now().toDate());
-        procedureHistoryEntity.setXml(getPropertyValue(entity, PROP_METADATA).toString());
+        procedureHistoryEntity.setXml(
+                getPropertyValue(entity, AbstractSensorThingsEntityProvider.PROP_METADATA).toString());
         Set<ProcedureHistoryEntity> set = new LinkedHashSet<>();
         set.add(procedureHistoryEntity);
         return set;
@@ -160,10 +179,10 @@ public class SensorMapper extends AbstractMapper<ProcedureEntity> {
     }
 
     @Override
-    public Entity  checkEntity(Entity entity) throws ODataApplicationException {
+    public Entity checkEntity(Entity entity) throws ODataApplicationException {
         checkNameAndDescription(entity);
-        checkPropertyValidity(PROP_ENCODINGTYPE, entity);
-        checkPropertyValidity(PROP_METADATA, entity);
+        checkPropertyValidity(AbstractSensorThingsEntityProvider.PROP_ENCODINGTYPE, entity);
+        checkPropertyValidity(AbstractSensorThingsEntityProvider.PROP_METADATA, entity);
         return entity;
     }
 

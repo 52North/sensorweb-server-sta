@@ -28,15 +28,6 @@
  */
 package org.n52.sta.edm.provider.entities;
 
-import static org.n52.sta.edm.provider.SensorThingsEdmConstants.NAMESPACE;
-import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ES_OBSERVATIONS_NAME;
-import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ET_OBSERVATION_FQN;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
@@ -45,18 +36,24 @@ import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
+import org.n52.sta.edm.provider.SensorThingsEdmConstants;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- *
  */
 @Component
 public class FeatureOfInterestEntityProvider extends AbstractSensorThingsEntityProvider {
 
     // Entity Type Name
     public static final String ET_FEATURE_OF_INTEREST_NAME = "FeatureOfInterest";
-    public static final FullQualifiedName ET_FEATURE_OF_INTEREST_FQN = new FullQualifiedName(NAMESPACE, ET_FEATURE_OF_INTEREST_NAME);
+    public static final FullQualifiedName ET_FEATURE_OF_INTEREST_FQN =
+            new FullQualifiedName(SensorThingsEdmConstants.NAMESPACE, ET_FEATURE_OF_INTEREST_NAME);
 
     // Entity Set Name
     public static final String ES_FEATURES_OF_INTEREST_NAME = "FeaturesOfInterest";
@@ -87,8 +84,8 @@ public class FeatureOfInterestEntityProvider extends AbstractSensorThingsEntityP
         entitySet.setType(ET_FEATURE_OF_INTEREST_FQN);
 
         CsdlNavigationPropertyBinding navPropFeatureOfInterestBinding = new CsdlNavigationPropertyBinding();
-        navPropFeatureOfInterestBinding.setPath(ES_OBSERVATIONS_NAME);
-        navPropFeatureOfInterestBinding.setTarget(ES_OBSERVATIONS_NAME);
+        navPropFeatureOfInterestBinding.setPath(ObservationEntityProvider.ES_OBSERVATIONS_NAME);
+        navPropFeatureOfInterestBinding.setTarget(ObservationEntityProvider.ES_OBSERVATIONS_NAME);
 
         List<CsdlNavigationPropertyBinding> navPropBindingList = new ArrayList<CsdlNavigationPropertyBinding>();
         navPropBindingList.add(navPropFeatureOfInterestBinding);
@@ -137,8 +134,8 @@ public class FeatureOfInterestEntityProvider extends AbstractSensorThingsEntityP
 
         // navigation property: one mandatory to many optional
         CsdlNavigationProperty navPropFeatureOfInterest = new CsdlNavigationProperty()
-                .setName(ES_OBSERVATIONS_NAME)
-                .setType(ET_OBSERVATION_FQN)
+                .setName(ObservationEntityProvider.ES_OBSERVATIONS_NAME)
+                .setType(ObservationEntityProvider.ET_OBSERVATION_FQN)
                 .setCollection(true)
                 .setPartner(ET_FEATURE_OF_INTEREST_NAME);
 

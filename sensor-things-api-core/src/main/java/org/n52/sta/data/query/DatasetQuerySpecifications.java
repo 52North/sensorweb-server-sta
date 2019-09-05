@@ -28,9 +28,6 @@
  */
 package org.n52.sta.data.query;
 
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-
 import org.n52.series.db.beans.CategoryEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
@@ -41,13 +38,15 @@ import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.springframework.data.jpa.domain.Specification;
 
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+
 public class DatasetQuerySpecifications {
 
     /**
      * Matches datasets having offering with given ids.
      *
-     * @param id
-     *            the id to match
+     * @param id the id to match
      * @return a specification
      */
     public Specification<DatasetEntity> matchOfferings(final String id) {
@@ -61,8 +60,7 @@ public class DatasetQuerySpecifications {
     /**
      * Matches datasets having feature with given id.
      *
-     * @param id
-     *            the id to match
+     * @param id the id to match
      * @return a specification
      */
     public Specification<DatasetEntity> matchFeatures(final String id) {
@@ -76,8 +74,7 @@ public class DatasetQuerySpecifications {
     /**
      * Matches datasets having procedures with given id.
      *
-     * @param id
-     *            the id to match
+     * @param id the id to match
      * @return a specification
      */
     public Specification<DatasetEntity> matchProcedures(final String id) {
@@ -91,8 +88,7 @@ public class DatasetQuerySpecifications {
     /**
      * Matches datasets having phenomena with given id.
      *
-     * @param id
-     *            the id to match
+     * @param id the id to match
      * @return a specification
      */
     public Specification<DatasetEntity> matchPhenomena(final String id) {
@@ -106,8 +102,7 @@ public class DatasetQuerySpecifications {
     /**
      * Matches datasets having platform with given id.
      *
-     * @param id
-     *            the id to match
+     * @param id the id to match
      * @return a specification
      */
     public Specification<DatasetEntity> matchPlatform(final String id) {
@@ -121,8 +116,7 @@ public class DatasetQuerySpecifications {
     /**
      * Matches datasets having catefory with given id.
      *
-     * @param id
-     *            the id to match
+     * @param id the id to match
      * @return a specification
      */
     public Specification<DatasetEntity> matchCategory(final String id) {

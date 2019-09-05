@@ -46,7 +46,6 @@ import org.n52.sta.data.service.AbstractSensorThingsEntityService;
  *
  * @author <a href="mailto:c.hollmann@52north.org">Carsten Hollmann</a>
  * @since 1.0.0
- *
  */
 public class URIQueryOptions implements QueryOptions {
 

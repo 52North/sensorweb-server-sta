@@ -28,18 +28,6 @@
  */
 package org.n52.sta.edm.provider.entities;
 
-import static org.n52.sta.edm.provider.SensorThingsEdmConstants.NAMESPACE;
-import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ES_LOCATIONS_NAME;
-import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATION_FQN;
-import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ES_THINGS_NAME;
-import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_FQN;
-import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
@@ -48,10 +36,15 @@ import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
+import org.n52.sta.edm.provider.SensorThingsEdmConstants;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 /**
- *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
@@ -59,7 +52,8 @@ public class HistoricalLocationEntityProvider extends AbstractSensorThingsEntity
 
     // Entity Type Name
     public static final String ET_HISTORICAL_LOCATION_NAME = "HistoricalLocation";
-    public static final FullQualifiedName ET_HISTORICAL_LOCATION_FQN = new FullQualifiedName(NAMESPACE, ET_HISTORICAL_LOCATION_NAME);
+    public static final FullQualifiedName ET_HISTORICAL_LOCATION_FQN =
+            new FullQualifiedName(SensorThingsEdmConstants.NAMESPACE, ET_HISTORICAL_LOCATION_NAME);
 
     //Entity Set Name
     public static final String ES_HISTORICAL_LOCATIONS_NAME = "HistoricalLocations";
@@ -92,12 +86,14 @@ public class HistoricalLocationEntityProvider extends AbstractSensorThingsEntity
         entitySet.setType(ET_HISTORICAL_LOCATION_FQN);
 
         CsdlNavigationPropertyBinding navPropLocationBinding = new CsdlNavigationPropertyBinding();
-        navPropLocationBinding.setPath(ES_LOCATIONS_NAME);
-        navPropLocationBinding.setTarget(ES_LOCATIONS_NAME);
+        navPropLocationBinding.setPath(LocationEntityProvider.ES_LOCATIONS_NAME);
+        navPropLocationBinding.setTarget(LocationEntityProvider.ES_LOCATIONS_NAME);
 
         CsdlNavigationPropertyBinding navPropThingBinding = new CsdlNavigationPropertyBinding();
-        navPropThingBinding.setPath(ET_THING_NAME); // the path from entity type to navigation property
-        navPropThingBinding.setTarget(ES_THINGS_NAME); //target entitySet, where the nav prop points to
+        // the path from entity type to navigation property
+        navPropThingBinding.setPath(ThingEntityProvider.ET_THING_NAME);
+        //target entitySet, where the nav prop points to
+        navPropThingBinding.setTarget(ThingEntityProvider.ES_THINGS_NAME);
 
         List<CsdlNavigationPropertyBinding> navPropBindingList = new ArrayList<CsdlNavigationPropertyBinding>();
         navPropBindingList.addAll(Arrays.asList(navPropLocationBinding, navPropThingBinding));
@@ -129,15 +125,15 @@ public class HistoricalLocationEntityProvider extends AbstractSensorThingsEntity
     private List<CsdlNavigationProperty> createCsdlNavigationProperties() {
         // navigation property: many optional to many mandatory
         CsdlNavigationProperty navPropLocations = new CsdlNavigationProperty()
-                .setName(ES_LOCATIONS_NAME)
-                .setType(ET_LOCATION_FQN)
+                .setName(LocationEntityProvider.ES_LOCATIONS_NAME)
+                .setType(LocationEntityProvider.ET_LOCATION_FQN)
                 .setCollection(true)
                 .setPartner(ES_HISTORICAL_LOCATIONS_NAME);
 
         // navigation property: many optional to one mandatory
         CsdlNavigationProperty navPropThings = new CsdlNavigationProperty()
-                .setName(ET_THING_NAME)
-                .setType(ET_THING_FQN)
+                .setName(ThingEntityProvider.ET_THING_NAME)
+                .setType(ThingEntityProvider.ET_THING_FQN)
                 .setNullable(false)
                 .setPartner(ES_HISTORICAL_LOCATIONS_NAME);
 

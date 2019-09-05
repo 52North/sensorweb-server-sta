@@ -34,6 +34,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
-public interface LocationEncodingRepository extends JpaRepository<LocationEncodingEntity, Long>, JpaSpecificationExecutor<LocationEncodingEntity> {
+public interface LocationEncodingRepository
+        extends JpaRepository<LocationEncodingEntity, Long>, JpaSpecificationExecutor<LocationEncodingEntity> {
 
 }

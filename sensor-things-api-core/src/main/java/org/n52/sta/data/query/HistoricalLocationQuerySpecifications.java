@@ -28,15 +28,6 @@
  */
 package org.n52.sta.data.query;
 
-import java.util.Date;
-
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.joda.time.DateTime;
@@ -46,9 +37,15 @@ import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.springframework.data.jpa.domain.Specification;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- *
  */
 public class HistoricalLocationQuerySpecifications extends EntityQuerySpecifications<HistoricalLocationEntity> {
 
@@ -75,11 +72,11 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
 
     @Override
     public Specification<HistoricalLocationEntity> getFilterForProperty(String propertyName,
-                                       Object propertyValue,
-                                       BinaryOperatorKind operator,
-                                       boolean switched)
+                                                                        Object propertyValue,
+                                                                        BinaryOperatorKind operator,
+                                                                        boolean switched)
             throws ExpressionVisitException {
-        if (propertyName.equals("Thing") || propertyName.equals("Locations")) {
+        if (propertyName.equals(THING) || propertyName.equals(LOCATIONS)) {
             return handleRelatedPropertyFilter(propertyName, (Specification<Long>) propertyValue, switched);
         } else if (propertyName.equals("id")) {
             return (root, query, builder) -> {
@@ -97,9 +94,10 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
     }
 
     private Specification<HistoricalLocationEntity> handleRelatedPropertyFilter(String propertyName,
-            Specification<Long> propertyValue, boolean switched) throws ExpressionVisitException {
+                                                                                Specification<Long> propertyValue,
+                                                                                boolean switched) {
         return (root, query, builder) -> {
-            if (propertyName.equals("Thing")) {
+            if (propertyName.equals(THING)) {
                 final Join<HistoricalLocationEntity, PlatformEntity> join =
                         root.join(HistoricalLocationEntity.PROPERTY_THING, JoinType.INNER);
                 return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue);
@@ -111,20 +109,26 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
         };
     }
 
-    private Specification<HistoricalLocationEntity> handleDirectPropertyFilter(String propertyName, Object propertyValue,
-            BinaryOperatorKind operator, boolean switched) {
+    private Specification<HistoricalLocationEntity> handleDirectPropertyFilter(String propertyName,
+                                                                               Object propertyValue,
+                                                                               BinaryOperatorKind operator,
+                                                                               boolean switched) {
         return new Specification<HistoricalLocationEntity>() {
             @Override
-            public Predicate toPredicate(Root<HistoricalLocationEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
+            public Predicate toPredicate(Root<HistoricalLocationEntity> root,
+                                         CriteriaQuery<?> query,
+                                         CriteriaBuilder builder) {
                 try {
                     switch (propertyName) {
-                    case "time":
-                        return handleDirectDateTimePropertyFilter(
-                                root.<Date> get(HistoricalLocationEntity.PROPERTY_TIME), new DateTime(propertyValue).toDate(), operator,
-                                builder);
-                    default:
-                        throw new RuntimeException("Error getting filter for Property: \"" + propertyName
-                                + "\". No such property in Entity.");
+                        case "time":
+                            return handleDirectDateTimePropertyFilter(
+                                    root.get(HistoricalLocationEntity.PROPERTY_TIME),
+                                    new DateTime(propertyValue).toDate(),
+                                    operator,
+                                    builder);
+                        default:
+                            throw new RuntimeException("Error getting filter for Property: \"" + propertyName
+                                    + "\". No such property in Entity.");
                     }
                 } catch (ExpressionVisitException e) {
                     throw new RuntimeException(e);

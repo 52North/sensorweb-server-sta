@@ -28,7 +28,11 @@
  */
 package org.n52.sta.data.repositories;
 
-import org.n52.series.db.beans.*;
+import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.FeatureEntity;
+import org.n52.series.db.beans.PhenomenonEntity;
+import org.n52.series.db.beans.PlatformEntity;
+import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
@@ -46,15 +50,21 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-public class MessageBusRepository<T, ID extends Serializable>
-        extends SimpleJpaRepository<T, ID> {
+public class MessageBusRepository<T, I extends Serializable>
+        extends SimpleJpaRepository<T, I> {
 
     private static final Logger logger = LoggerFactory.getLogger(MessageBusRepository.class);
 
+    private final String DESCRIPTION = "description";
+    private final String NAME = "name";
+    private final String ENCODINGTYPE = "encodingType";
+    private final String LOCATION = "location";
+    private final String PHENOMENONTIME = "phenomenonTime";
+    private final String RESULTTIME = "resultTime";
+    private final String VALIDTIME = "validTime";
+
     private JpaEntityInformation entityInformation;
-
     private STAEventHandler mqttHandler;
-
     private EntityManager em;
 
     MessageBusRepository(JpaEntityInformation entityInformation,
@@ -81,13 +91,13 @@ public class MessageBusRepository<T, ID extends Serializable>
         } else {
             if (intercept) {
                 S oldEntity = (S) em.find(newEntity.getClass(), entityInformation.getId(newEntity));
-                newEntity = em.merge(newEntity);
+                S entity = em.merge(newEntity);
                 em.flush();
                 // Entity was saved multiple times without changes. As reference is the same
-                if (oldEntity == newEntity) {
-                    return newEntity;
+                if (oldEntity == entity) {
+                    return entity;
                 }
-                this.mqttHandler.handleEvent(newEntity, computeDifferenceMap(oldEntity, newEntity));
+                this.mqttHandler.handleEvent(entity, computeDifferenceMap(oldEntity, entity));
             } else {
                 return em.merge(newEntity);
             }
@@ -100,8 +110,9 @@ public class MessageBusRepository<T, ID extends Serializable>
     /**
      * Saves an entity to the Datastore without intercepting for mqtt subscription checking.
      * Used when Entity is saved multiple times during creation
+     *
      * @param entity Entity to be saved
-     * @param <S> raw entity type
+     * @param <S>    raw entity type
      * @return saved entity.
      */
     @Transactional
@@ -122,72 +133,62 @@ public class MessageBusRepository<T, ID extends Serializable>
                     ProcedureEntity oldProcedure = (ProcedureEntity) oldE;
                     ProcedureEntity newProcedure = (ProcedureEntity) newE;
                     if (oldProcedure.getDescription() != null &&
-                            !oldProcedure.getDescription().equals(
-                             newProcedure.getDescription())) {
-                        map.add("description");
+                            !oldProcedure.getDescription().equals(newProcedure.getDescription())) {
+                        map.add(DESCRIPTION);
                     }
                     if (oldProcedure.getName() != null &&
-                        !oldProcedure.getName().equals(
-                         newProcedure.getName())) {
-                        map.add("name");
+                            !oldProcedure.getName().equals(newProcedure.getName())) {
+                        map.add(NAME);
                     }
                     if (oldProcedure.getDescriptionFile() != null &&
-                            !oldProcedure.getDescriptionFile().equals(
-                             newProcedure.getDescriptionFile())) {
+                            !oldProcedure.getDescriptionFile().equals(newProcedure.getDescriptionFile())) {
                         map.add("metadata");
                     }
                     if (oldProcedure.getFormat() != null &&
-                            !oldProcedure.getFormat().getFormat().equals(
-                             newProcedure.getFormat().getFormat())) {
-                        map.add("encodingType");
+                            !oldProcedure.getFormat().getFormat().equals(newProcedure.getFormat().getFormat())) {
+                        map.add(ENCODINGTYPE);
                     }
                     return map;
                 case "LocationEntity":
                     LocationEntity oldLocation = (LocationEntity) oldE;
                     LocationEntity newLocation = (LocationEntity) newE;
                     if (oldLocation.getDescription() != null &&
-                            !oldLocation.getDescription().equals(
-                             newLocation.getDescription())) {
-                        map.add("description");
+                            !oldLocation.getDescription().equals(newLocation.getDescription())) {
+                        map.add(DESCRIPTION);
                     }
                     if (oldLocation.getName() != null &&
-                            !oldLocation.getName().equals(
-                             newLocation.getName())) {
-                        map.add("name");
+                            !oldLocation.getName().equals(newLocation.getName())) {
+                        map.add(NAME);
                     }
 
-                    if (oldLocation.getGeometryEntity() != null &&
-                            !oldLocation.getGeometryEntity().getGeometry().equals(
-                             newLocation.getGeometryEntity().getGeometry())) {
-                        map.add("location");
+                    if (oldLocation.getGeometryEntity() != null
+                        && !oldLocation.getGeometryEntity().getGeometry()
+                            .equals(newLocation.getGeometryEntity().getGeometry())) {
+                        map.add(LOCATION);
                     }
                     if (oldLocation.getLocation() != null &&
-                            !oldLocation.getLocation().equals(
-                             newLocation.getLocation())) {
-                        map.add("location");
+                            !oldLocation.getLocation().equals(newLocation.getLocation())) {
+                        map.add(LOCATION);
                     }
                     if (oldLocation.getLocationEncoding() != null &&
                             !oldLocation.getLocationEncoding().getEncodingType().equals(
-                             newLocation.getLocationEncoding().getEncodingType())) {
-                        map.add("encodingType");
+                                    newLocation.getLocationEncoding().getEncodingType())) {
+                        map.add(ENCODINGTYPE);
                     }
                     return map;
                 case "PlatformEntity":
                     PlatformEntity oldThing = (PlatformEntity) oldE;
                     PlatformEntity newThing = (PlatformEntity) newE;
                     if (oldThing.getDescription() != null &&
-                            !oldThing.getDescription().equals(
-                             newThing.getDescription())) {
-                        map.add("description");
+                            !oldThing.getDescription().equals(newThing.getDescription())) {
+                        map.add(DESCRIPTION);
                     }
                     if (oldThing.getName() != null &&
-                            !oldThing.getName().equals(
-                             newThing.getName())) {
-                        map.add("name");
+                            !oldThing.getName().equals(newThing.getName())) {
+                        map.add(NAME);
                     }
                     if (oldThing.getProperties() != null &&
-                            !oldThing.getProperties().equals(
-                             newThing.getProperties())) {
+                            !oldThing.getProperties().equals(newThing.getProperties())) {
                         map.add("properties");
                     }
                     return map;
@@ -196,48 +197,42 @@ public class MessageBusRepository<T, ID extends Serializable>
                     DatastreamEntity newDatastream = (DatastreamEntity) newE;
                     if (oldDatastream.getDescription() != null &&
                             !oldDatastream.getDescription().equals(
-                             newDatastream.getDescription())) {
-                        map.add("description");
+                                    newDatastream.getDescription())) {
+                        map.add(DESCRIPTION);
                     }
                     if (oldDatastream.getName() != null &&
-                            !oldDatastream.getName().equals(
-                             newDatastream.getName())) {
-                        map.add("name");
+                            !oldDatastream.getName().equals(newDatastream.getName())) {
+                        map.add(NAME);
                     }
                     if (oldDatastream.getObservationType() != null &&
                             !oldDatastream.getObservationType().getFormat().equals(
-                             newDatastream.getObservationType().getFormat())) {
+                                    newDatastream.getObservationType().getFormat())) {
                         map.add("observationType");
                     }
                     if (oldDatastream.getUnitOfMeasurement() != null &&
-                            !oldDatastream.getUnitOfMeasurement().equals(
-                             newDatastream.getUnitOfMeasurement())) {
+                            !oldDatastream.getUnitOfMeasurement().equals(newDatastream.getUnitOfMeasurement())) {
                         map.add("unitOfMeasurement");
                     }
                     if (oldDatastream.getGeometryEntity() != null &&
-                            !oldDatastream.getGeometryEntity().getGeometry().equals(
-                             newDatastream.getGeometryEntity().getGeometry())) {
+                            !oldDatastream.getGeometryEntity().getGeometry()
+                                    .equals(newDatastream.getGeometryEntity().getGeometry())) {
                         map.add("observedArea");
                     }
                     if (oldDatastream.getSamplingTimeStart() != null &&
-                            !oldDatastream.getSamplingTimeStart().equals(
-                             newDatastream.getSamplingTimeStart())) {
-                        map.add("phenomenonTime");
+                            !oldDatastream.getSamplingTimeStart().equals(newDatastream.getSamplingTimeStart())) {
+                        map.add(PHENOMENONTIME);
                     }
                     if (oldDatastream.getSamplingTimeEnd() != null &&
-                            !oldDatastream.getSamplingTimeEnd().equals(
-                             newDatastream.getSamplingTimeEnd())) {
-                        map.add("phenomenonTime");
+                            !oldDatastream.getSamplingTimeEnd().equals(newDatastream.getSamplingTimeEnd())) {
+                        map.add(PHENOMENONTIME);
                     }
                     if (oldDatastream.getResultTimeStart() != null &&
-                            !oldDatastream.getResultTimeStart().equals(
-                             newDatastream.getResultTimeStart())) {
-                        map.add("resultTime");
+                            !oldDatastream.getResultTimeStart().equals(newDatastream.getResultTimeStart())) {
+                        map.add(RESULTTIME);
                     }
                     if (oldDatastream.getResultTimeEnd() != null &&
-                            !oldDatastream.getResultTimeEnd().equals(
-                                    newDatastream.getResultTimeEnd())) {
-                        map.add("resultTime");
+                            !oldDatastream.getResultTimeEnd().equals(newDatastream.getResultTimeEnd())) {
+                        map.add(RESULTTIME);
                     }
                     return map;
                 case "HistoricalLocationEntity":
@@ -245,7 +240,7 @@ public class MessageBusRepository<T, ID extends Serializable>
                     HistoricalLocationEntity newHLocation = (HistoricalLocationEntity) newE;
                     if (oldHLocation.getTime() != null &&
                             !oldHLocation.getTime().equals(
-                             newHLocation.getTime())) {
+                                    newHLocation.getTime())) {
                         map.add("time");
                     }
                     return map;
@@ -253,48 +248,40 @@ public class MessageBusRepository<T, ID extends Serializable>
                     DataEntity<?> oldData = (DataEntity<?>) oldE;
                     DataEntity<?> newData = (DataEntity<?>) newE;
                     if (oldData.getSamplingTimeStart() != null &&
-                            !oldData.getSamplingTimeStart().equals(
-                            newData.getSamplingTimeStart())) {
-                        map.add("phenomenonTime");
+                            !oldData.getSamplingTimeStart().equals(newData.getSamplingTimeStart())) {
+                        map.add(PHENOMENONTIME);
                     }
                     if (oldData.getSamplingTimeEnd() != null &&
-                            !oldData.getSamplingTimeEnd().equals(
-                             newData.getSamplingTimeEnd())) {
-                        map.add("phenomenonTime");
+                            !oldData.getSamplingTimeEnd().equals(newData.getSamplingTimeEnd())) {
+                        map.add(PHENOMENONTIME);
                     }
                     if (oldData.getResultTime() != null &&
-                            !oldData.getResultTime().equals(
-                             newData.getResultTime())) {
-                        map.add("resultTime");
+                            !oldData.getResultTime().equals(newData.getResultTime())) {
+                        map.add(RESULTTIME);
                     }
                     if (oldData.getValidTimeStart() != null &&
-                            !oldData.getValidTimeStart().equals(
-                             newData.getValidTimeStart())) {
-                        map.add("validTime");
+                            !oldData.getValidTimeStart().equals(newData.getValidTimeStart())) {
+                        map.add(VALIDTIME);
                     }
                     if (oldData.getValidTimeEnd() != null &&
-                            !oldData.getValidTimeEnd().equals(
-                             newData.getValidTimeEnd())) {
-                        map.add("validTime");
+                            !oldData.getValidTimeEnd().equals(newData.getValidTimeEnd())) {
+                        map.add(VALIDTIME);
                     }
                     //TODO: implement difference map for ::getParameters and ::getResult and "resultQuality"
                     return map;
                 case "FeatureEntity":
                     FeatureEntity oldFeature = (FeatureEntity) oldE;
                     FeatureEntity newFeature = (FeatureEntity) newE;
-                    if (oldFeature.getName() != null &&
-                            !oldFeature.getName().equals(
-                             newFeature.getName())) {
-                        map.add("name");
+                    if (oldFeature.getName() != null
+                        && !oldFeature.getName().equals(newFeature.getName())) {
+                        map.add(NAME);
                     }
-                    if (oldFeature.getDescription() != null &&
-                            !oldFeature.getDescription().equals(
-                             newFeature.getDescription())) {
-                        map.add("description");
+                    if (oldFeature.getDescription() != null
+                        && !oldFeature.getDescription().equals(newFeature.getDescription())) {
+                        map.add(DESCRIPTION);
                     }
-                    if (oldFeature.getGeometry() != null &&
-                            !oldFeature.getGeometry().equals(
-                             newFeature.getGeometry())) {
+                    if (oldFeature.getGeometry() != null
+                        && !oldFeature.getGeometry().equals(newFeature.getGeometry())) {
                         map.add("feature");
                     }
                     // There is only a single allowed encoding type so it cannot change
@@ -302,19 +289,16 @@ public class MessageBusRepository<T, ID extends Serializable>
                 case "PhenomenonEntity":
                     PhenomenonEntity oldPhenom = (PhenomenonEntity) oldE;
                     PhenomenonEntity newPhenom = (PhenomenonEntity) newE;
-                    if (oldPhenom.getName() != null &&
-                            !oldPhenom.getName().equals(
-                             newPhenom.getName())) {
-                        map.add("name");
+                    if (oldPhenom.getName() != null
+                        && !oldPhenom.getName().equals(newPhenom.getName())) {
+                        map.add(NAME);
                     }
-                    if (oldPhenom.getDescription() != null &&
-                            !oldPhenom.getDescription().equals(
-                             newPhenom.getDescription())) {
-                        map.add("description");
+                    if (oldPhenom.getDescription() != null
+                        && !oldPhenom.getDescription().equals(newPhenom.getDescription())) {
+                        map.add(DESCRIPTION);
                     }
-                    if (oldPhenom.getIdentifier() != null &&
-                            oldPhenom.getIdentifier().equals(
-                            newPhenom.getIdentifier())) {
+                    if (oldPhenom.getIdentifier() != null
+                        && oldPhenom.getIdentifier().equals(newPhenom.getIdentifier())) {
                         map.add("definition");
                     }
                     return map;

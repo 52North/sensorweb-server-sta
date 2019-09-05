@@ -45,9 +45,8 @@ import org.n52.sta.data.service.AbstractSensorThingsEntityService;
  * Class that holds an {@link ExpandItem} to get {@link SystemQueryOption}s to
  * use them in the {@link AbstractSensorThingsEntityService}s.
  *
- * @see org.n52.sta.service.query.QueryOptions
- *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
+ * @see org.n52.sta.service.query.QueryOptions
  * @since 1.0.0
  */
 public class ExpandItemQueryOptions implements QueryOptions {

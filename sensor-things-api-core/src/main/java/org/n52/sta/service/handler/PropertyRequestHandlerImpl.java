@@ -33,10 +33,6 @@
  */
 package org.n52.sta.service.handler;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-
 import org.apache.olingo.commons.api.data.ComplexValue;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.Property;
@@ -57,8 +53,12 @@ import org.n52.sta.utils.UriResourceNavigationResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+
 /**
- ** Implementation for handling property requests
+ * * Implementation for handling property requests
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
@@ -87,18 +87,22 @@ public class PropertyRequestHandlerImpl extends AbstractPropertyRequestHandler<S
         return response;
     }
 
-    private PropertyResponse resolveSimplePropertyRequest(List<UriResource> resourcePaths) throws ODataApplicationException {
+    private PropertyResponse resolveSimplePropertyRequest(List<UriResource> resourcePaths)
+            throws ODataApplicationException {
         // determine the response EntitySet
         UriResourceEntitySet uriResourceEntitySet = navigationResolver.resolveRootUriResource(resourcePaths.get(0));
         Entity targetEntity = navigationResolver.getEntityWithSimpleEntityRequest(uriResourceEntitySet);
         List<UriResource> propertyResourcePaths = resourcePaths.subList(1, resourcePaths.size());
 
-        PropertyResponse response = resolveProperty(targetEntity, propertyResourcePaths, uriResourceEntitySet.getEntitySet());
+        PropertyResponse response = resolveProperty(targetEntity,
+                propertyResourcePaths,
+                uriResourceEntitySet.getEntitySet());
 
         return response;
     }
 
-    private PropertyResponse resolvePropertyForNavigation(List<UriResource> resourcePaths) throws ODataApplicationException {
+    private PropertyResponse resolvePropertyForNavigation(List<UriResource> resourcePaths)
+            throws ODataApplicationException {
         int i = 0;
         UriResource lastEntitySegment = resourcePaths.get(i);
         // note that the last value for i at the end of the loop is the index
@@ -107,16 +111,22 @@ public class PropertyRequestHandlerImpl extends AbstractPropertyRequestHandler<S
             lastEntitySegment = resourcePaths.get(i);
         }
         // determine the target query parameters and fetch Entity for it
-        EntityQueryParams queryParams = navigationResolver.resolveUriResourceNavigationPaths(resourcePaths.subList(0, i));
+        EntityQueryParams queryParams =
+                navigationResolver.resolveUriResourceNavigationPaths(resourcePaths.subList(0, i));
         Entity targetEntity = navigationResolver.getEntityWithComplexEntityRequest(lastEntitySegment, queryParams);
 
         PropertyResponse response = null;
 
-        response = resolveProperty(targetEntity, resourcePaths.subList(i, resourcePaths.size()), queryParams.getTargetEntitySet());
+        response = resolveProperty(
+                targetEntity,
+                resourcePaths.subList(i, resourcePaths.size()),
+                queryParams.getTargetEntitySet());
         return response;
     }
 
-    private PropertyResponse resolveProperty(Entity targetEntity, List<UriResource> resourcePaths, EdmEntitySet targetEntitySet) throws ODataApplicationException {
+    private PropertyResponse resolveProperty(Entity targetEntity,
+                                             List<UriResource> resourcePaths,
+                                             EdmEntitySet targetEntitySet) throws ODataApplicationException {
         int i = 0;
         EdmProperty edmProperty = ((UriResourceProperty) resourcePaths.get(i)).getProperty();
 

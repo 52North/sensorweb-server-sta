@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.n52</groupId>
@@ -73,7 +74,7 @@
                 <artifactId>sensor-things-api-webapp</artifactId>
                 <version>${project.version}</version>
             </dependency>
-             <dependency>
+            <dependency>
                 <!-- Import dependency management from Spring Boot -->
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
@@ -118,20 +119,20 @@
                 <artifactId>geolatte-geom</artifactId>
                 <version>${geolatte-geom.version}</version>
                 <exclusions>
-                  <exclusion>
-                      <groupId>org.locationtech.jts</groupId>
-                      <artifactId>jts-core</artifactId>
-                  </exclusion>
+                    <exclusion>
+                        <groupId>org.locationtech.jts</groupId>
+                        <artifactId>jts-core</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
-            
+
             <dependency>
-               <groupId>org.hibernate</groupId>
+                <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-core</artifactId>
                 <version>${hibernate.version}</version>
             </dependency>
             <dependency>
-               <groupId>org.hibernate</groupId>
+                <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-spatial</artifactId>
                 <version>${hibernate.version}</version>
             </dependency>
@@ -168,10 +169,10 @@
                 <artifactId>shetland</artifactId>
                 <version>${arctic-sea.version}</version>
                 <exclusions>
-                  <exclusion>
-                      <groupId>org.locationtech.jts</groupId>
-                      <artifactId>jts-core</artifactId>
-                  </exclusion>
+                    <exclusion>
+                        <groupId>org.locationtech.jts</groupId>
+                        <artifactId>jts-core</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
         </dependencies>
@@ -180,15 +181,15 @@
     <build>
         <pluginManagement>
             <plugins>
-                 <!-- FIXME remove this once all problems are resolved -->
+                <!-- FIXME remove this once all problems are resolved -->
                 <plugin>
                     <groupId>com.github.spotbugs</groupId>
                     <artifactId>spotbugs-maven-plugin</artifactId>
                     <configuration>
-                        <failOnError>false</failOnError>
+                        <failOnError>true</failOnError>
                     </configuration>
                 </plugin>
-                 <!-- FIXME remove this once all problems are resolved -->
+                <!-- FIXME remove this once all problems are resolved -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
@@ -203,7 +204,7 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
                     <configuration>
-                        <failOnViolation>false</failOnViolation>
+                        <failOnViolation>true</failOnViolation>
                     </configuration>
                 </plugin>
                 <!-- FIXME remove this once all problems are resolved -->
@@ -214,7 +215,7 @@
                         <testFailureIgnore>true</testFailureIgnore>
                     </configuration>
                 </plugin>
-                 <plugin>
+                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
                     <configuration>
@@ -223,7 +224,10 @@
                                 <banRepositories>false</banRepositories>
                                 <allowSnapshotRepositories>true</allowSnapshotRepositories>
                                 <allowedRepositories>
-                                    <id>sonatype-nexus-snapshots,edu-repo,n52-releases,n52-snapshots,refractions,hibernate-spatial,unidata-releases, bintray</id>
+                                    <id>
+                                        sonatype-nexus-snapshots,edu-repo,n52-releases,n52-snapshots,refractions,hibernate-spatial,unidata-releases,
+                                        bintray
+                                    </id>
                                 </allowedRepositories>
                             </requireNoRepositories>
                         </rules>
@@ -248,7 +252,7 @@
                             </goals>
                         </execution>
                     </executions>
-              </plugin>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -274,27 +278,26 @@
                         </configuration>
                     </execution>
                 </executions>
-              </plugin>
-               <plugin>
-                    <!-- license headers -->
-                    <groupId>com.mycila</groupId>
-                    <artifactId>license-maven-plugin</artifactId>
-                    <configuration>
-                        <header>etc/52N_GPLv2_License.xt</header>
-                        <properties>
-                            <year>${project.inceptionYear}-${currentYearDynamic}</year>
-                        </properties>
-                        <includes>
-                            <include>**/src/**/*.java</include>
-                        </includes>
-                        <excludes>
-                            <exclude>**/logback.xml</exclude>
-                            <exclude>**/logback-test.xml</exclude>
-                            <exclude>etc/**</exclude>
-                        </excludes>
-                        <strictCheck>true</strictCheck>
-                    </configuration>
-                </plugin>
+            </plugin>
+            <plugin>
+                <!-- license headers -->
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <configuration>
+                    <header>etc/52N_GPLv2_License.xt</header>
+                    <properties>
+                    </properties>
+                    <includes>
+                        <include>**/src/**/*.java</include>
+                    </includes>
+                    <excludes>
+                        <exclude>**/logback.xml</exclude>
+                        <exclude>**/logback-test.xml</exclude>
+                        <exclude>etc/**</exclude>
+                    </excludes>
+                    <strictCheck>true</strictCheck>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>

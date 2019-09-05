@@ -28,6 +28,7 @@
  */
 package org.n52.sta.service.handler.crud;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -49,14 +50,16 @@ public class EntityCrudRequestHandlerRepository {
 
     private FeatureOfInterestEntityCrudRequestHandler featureOfInterestEntityCrudRequestHandler;
 
-    public EntityCrudRequestHandlerRepository(ThingEntityCrudRequestHandler thingEntityCrudRequestHandler,
-                                              LocationEntityCrudRequestHandler locationEntityCrudRequestHandler,
-                                              HistoricalLocationEntityCrudRequestHandler historicalLocationEntityCrudRequestHandler,
-                                              SensorEntityCrudRequestHandler sensorEntityCrudRequestHandler,
-                                              DatastreamEntityCrudRequestHandler datastreamEntityCrudRequestHandler,
-                                              ObservationEntityCrudRequestHandler observationEntityCrudRequestHandler,
-                                              ObservedPropertyEntityCrudRequestHandler observedPropertyEntityCrudRequestHandler,
-                                              FeatureOfInterestEntityCrudRequestHandler featureOfInterestEntityCrudRequestHandler) {
+    @Autowired
+    public EntityCrudRequestHandlerRepository(
+            ThingEntityCrudRequestHandler thingEntityCrudRequestHandler,
+            LocationEntityCrudRequestHandler locationEntityCrudRequestHandler,
+            HistoricalLocationEntityCrudRequestHandler historicalLocationEntityCrudRequestHandler,
+            SensorEntityCrudRequestHandler sensorEntityCrudRequestHandler,
+            DatastreamEntityCrudRequestHandler datastreamEntityCrudRequestHandler,
+            ObservationEntityCrudRequestHandler observationEntityCrudRequestHandler,
+            ObservedPropertyEntityCrudRequestHandler observedPropertyEntityCrudRequestHandler,
+            FeatureOfInterestEntityCrudRequestHandler featureOfInterestEntityCrudRequestHandler) {
         this.thingEntityCrudRequestHandler = thingEntityCrudRequestHandler;
         this.locationEntityCrudRequestHandler = locationEntityCrudRequestHandler;
         this.historicalLocationEntityCrudRequestHandler = historicalLocationEntityCrudRequestHandler;

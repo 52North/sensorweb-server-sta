@@ -43,7 +43,11 @@ import org.n52.sta.data.query.DatasetQuerySpecifications;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.FeatureOfInterestQuerySpecifications;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
-import org.n52.sta.data.repositories.*;
+import org.n52.sta.data.repositories.DataRepository;
+import org.n52.sta.data.repositories.DatasetRepository;
+import org.n52.sta.data.repositories.DatastreamRepository;
+import org.n52.sta.data.repositories.FeatureOfInterestRepository;
+import org.n52.sta.data.repositories.FormatRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.mapping.FeatureOfInterestMapper;
 import org.n52.sta.service.query.QueryOptions;
@@ -54,7 +58,12 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -64,33 +73,34 @@ import java.util.*;
 public class FeatureOfInterestService
         extends AbstractSensorThingsEntityService<FeatureOfInterestRepository, AbstractFeatureEntity<?>> {
 
-    private final static Logger logger = LoggerFactory.getLogger(FeatureOfInterestService.class);
+    private static final Logger logger = LoggerFactory.getLogger(FeatureOfInterestService.class);
 
-    private final static FeatureOfInterestQuerySpecifications foiQS = new FeatureOfInterestQuerySpecifications();
+    private static final ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
+    private static final FeatureOfInterestQuerySpecifications foiQS = new FeatureOfInterestQuerySpecifications();
+    private static final DatasetQuerySpecifications dQS = new DatasetQuerySpecifications();
+    private static final DatastreamQuerySpecifications dsQS = new DatastreamQuerySpecifications();
 
-    @Autowired
-    private FormatRepository formatRepository;
-
-    @Autowired
-    private DataRepository dataRepository;
-
-    @Autowired
-    private DatasetRepository datasetRepository;
-
-    @Autowired
-    private DatastreamRepository datastreamRepository;
+    private final FormatRepository formatRepository;
+    private final DataRepository dataRepository;
+    private final DatasetRepository datasetRepository;
+    private final DatastreamRepository datastreamRepository;
 
     private FeatureOfInterestMapper mapper;
+    private final String IOT_OBSERVATION = "iot.Observation";
 
-    private ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
-
-    private DatasetQuerySpecifications dQS = new DatasetQuerySpecifications();
-
-    private DatastreamQuerySpecifications dsQS = new DatastreamQuerySpecifications();
-
-    public FeatureOfInterestService(FeatureOfInterestRepository repository, FeatureOfInterestMapper mapper) {
+    @Autowired
+    public FeatureOfInterestService(FeatureOfInterestRepository repository,
+                                    FeatureOfInterestMapper mapper,
+                                    FormatRepository formatRepository,
+                                    DataRepository dataRepository,
+                                    DatasetRepository datasetRepository,
+                                    DatastreamRepository datastreamRepository) {
         super(repository);
         this.mapper = mapper;
+        this.formatRepository = formatRepository;
+        this.dataRepository = dataRepository;
+        this.datasetRepository = datasetRepository;
+        this.datastreamRepository = datastreamRepository;
     }
 
     @Override
@@ -127,7 +137,7 @@ public class FeatureOfInterestService
     @Override
     public boolean existsRelatedEntity(String sourceId, EdmEntityType sourceEntityType, String targetId) {
         switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-            case "iot.Observation": {
+            case IOT_OBSERVATION: {
                 Specification<AbstractFeatureEntity<?>> filter = foiQS.withObservationIdentifier(sourceId);
                 if (targetId != null) {
                     filter = filter.and(foiQS.withIdentifier(targetId));
@@ -147,7 +157,8 @@ public class FeatureOfInterestService
     @Override
     public Optional<String> getIdForRelatedEntity(String sourceId, EdmEntityType sourceEntityType, String targetId) {
         Optional<AbstractFeatureEntity<?>> foi = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
-        return foi.map(abstractFeatureEntity -> Optional.of(abstractFeatureEntity.getIdentifier())).orElseGet(Optional::empty);
+        return foi.map(abstractFeatureEntity -> Optional.of(abstractFeatureEntity.getIdentifier()))
+                                                        .orElseGet(Optional::empty);
     }
 
     @Override
@@ -169,13 +180,13 @@ public class FeatureOfInterestService
      * @param sourceId         Id of the Source Entity
      * @param sourceEntityType Type of the Source Entity
      * @param targetId         Id of the Entity to be retrieved
-     * @return Optional<FeatureEntity> Requested Entity
+     * @return Optional&lt;FeatureEntity&gt; Requested Entity
      */
     private Optional<AbstractFeatureEntity<?>> getRelatedEntityRaw(String sourceId, EdmEntityType sourceEntityType,
                                                                    String targetId) {
         Specification<AbstractFeatureEntity<?>> filter;
         switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-            case "iot.Observation": {
+            case IOT_OBSERVATION: {
                 filter = foiQS.withObservationIdentifier(sourceId);
                 break;
             }
@@ -211,7 +222,8 @@ public class FeatureOfInterestService
         }
         if (feature.getIdentifier() == null) {
             if (getRepository().existsByName(feature.getName())) {
-                Iterable<AbstractFeatureEntity<?>> features = getRepository().findAll(foiQS.withName(feature.getName()));
+                Iterable<AbstractFeatureEntity<?>> features =
+                        getRepository().findAll(foiQS.withName(feature.getName()));
                 AbstractFeatureEntity<?> f = alreadyExistsFeature(features, feature);
                 if (f != null) {
                     return f;
@@ -258,7 +270,9 @@ public class FeatureOfInterestService
                 AbstractFeatureEntity<?> merged = mapper.merge(existing.get(), entity);
                 return getRepository().save(merged);
             }
-            throw new ODataApplicationException("Entity not found.", HttpStatusCode.NOT_FOUND.getStatusCode(),
+            throw new ODataApplicationException(
+                    "Unable to update. Entity not found.",
+                    HttpStatusCode.NOT_FOUND.getStatusCode(),
                     Locale.ROOT);
         } else if (HttpMethod.PUT.equals(method)) {
             throw new ODataApplicationException("Http PUT is not yet supported!",
@@ -280,7 +294,9 @@ public class FeatureOfInterestService
             deleteRelatedObservationsAndUpdateDatasets(id);
             getRepository().deleteByIdentifier(id);
         } else {
-            throw new ODataApplicationException("Entity not found.", HttpStatusCode.NOT_FOUND.getStatusCode(),
+            throw new ODataApplicationException(
+                    "Unable to delete. Entity not found.",
+                    HttpStatusCode.NOT_FOUND.getStatusCode(),
                     Locale.ROOT);
         }
     }
@@ -291,7 +307,8 @@ public class FeatureOfInterestService
     }
 
     @Override
-    protected AbstractFeatureEntity<?> createOrUpdate(AbstractFeatureEntity<?> entity) throws ODataApplicationException {
+    protected AbstractFeatureEntity<?> createOrUpdate(AbstractFeatureEntity<?> entity)
+            throws ODataApplicationException {
         if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
             return update(entity, HttpMethod.PATCH);
         }
