@@ -46,6 +46,7 @@ import org.n52.sta.utils.JsonHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -68,8 +69,8 @@ public class ThingMapper extends AbstractMapper<PlatformEntity> {
     @Autowired
     public ThingMapper(EntityCreationHelper entityCreationHelper,
                        JsonHelper jsonHelper,
-                       LocationMapper locationMapper,
-                       DatastreamMapper datastreamMapper) {
+                       @Lazy LocationMapper locationMapper,
+                       @Lazy DatastreamMapper datastreamMapper) {
         this.jsonHelper = jsonHelper;
         this.locationMapper = locationMapper;
         this.datastreamMapper = datastreamMapper;

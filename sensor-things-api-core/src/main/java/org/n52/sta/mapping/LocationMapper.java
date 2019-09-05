@@ -40,6 +40,7 @@ import org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider;
 import org.n52.sta.edm.provider.entities.LocationEntityProvider;
 import org.n52.sta.edm.provider.entities.ThingEntityProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.Iterator;
@@ -55,7 +56,7 @@ public class LocationMapper extends AbstractLocationGeometryMapper<LocationEntit
     private final ThingMapper thingMapper;
 
     @Autowired
-    public LocationMapper(ThingMapper thingMapper) {
+    public LocationMapper(@Lazy ThingMapper thingMapper) {
         this.thingMapper = thingMapper;
     }
 

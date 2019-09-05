@@ -51,6 +51,7 @@ import org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider;
 import org.n52.sta.edm.provider.entities.SensorEntityProvider;
 import org.n52.sta.edm.provider.entities.ThingEntityProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.Iterator;
@@ -71,10 +72,10 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
     private final String UNKNOWN = "unknown";
 
     @Autowired
-    public DatastreamMapper(ThingMapper thingMapper,
-                            ObservedPropertyMapper observedPropertyMapper,
-                            SensorMapper sensorMapper,
-                            ObservationMapper observationMapper) {
+    public DatastreamMapper(@Lazy ThingMapper thingMapper,
+                            @Lazy ObservedPropertyMapper observedPropertyMapper,
+                            @Lazy SensorMapper sensorMapper,
+                            @Lazy ObservationMapper observationMapper) {
         this.thingMapper = thingMapper;
         this.observedPropertyMapper = observedPropertyMapper;
         this.sensorMapper = sensorMapper;

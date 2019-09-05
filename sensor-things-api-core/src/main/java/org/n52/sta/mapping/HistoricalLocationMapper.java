@@ -44,6 +44,7 @@ import org.n52.sta.edm.provider.entities.LocationEntityProvider;
 import org.n52.sta.edm.provider.entities.ThingEntityProvider;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
@@ -67,8 +68,8 @@ public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationE
 
     @Autowired
     public HistoricalLocationMapper(EntityCreationHelper entityCreationHelper,
-                                    LocationMapper locationMapper,
-                                    ThingMapper thingMapper) {
+                                    @Lazy LocationMapper locationMapper,
+                                    @Lazy ThingMapper thingMapper) {
         this.entityCreationHelper = entityCreationHelper;
         this.locationMapper = locationMapper;
         this.thingMapper = thingMapper;

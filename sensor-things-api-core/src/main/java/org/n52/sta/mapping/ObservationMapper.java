@@ -62,6 +62,7 @@ import org.n52.sta.edm.provider.entities.DatastreamEntityProvider;
 import org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider;
 import org.n52.sta.edm.provider.entities.ObservationEntityProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -83,7 +84,7 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
     private final FeatureOfInterestMapper featureMapper;
 
     @Autowired
-    public ObservationMapper(DatastreamMapper datastreamMapper, FeatureOfInterestMapper featureMapper) {
+    public ObservationMapper(@Lazy DatastreamMapper datastreamMapper, @Lazy FeatureOfInterestMapper featureMapper) {
         this.datastreamMapper = datastreamMapper;
         this.featureMapper = featureMapper;
     }
