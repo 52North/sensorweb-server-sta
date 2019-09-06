@@ -219,22 +219,17 @@
                         <failOnError>true</failOnError>
                     </configuration>
                 </plugin>
-                <!-- FIXME remove this once all problems are resolved -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
                     <configuration>
                         <ignoreNonCompile>false</ignoreNonCompile>
-                        <failOnWarning>true</failOnWarning>
-                        <failBuild>true</failBuild>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-checkstyle-plugin</artifactId>
-                    <configuration>
-                        <failOnViolation>true</failOnViolation>
-                        <failsOnError>true</failsOnError>
+                        <failOnWarning>false</failOnWarning>
+                        <ignoredDependencies>
+                            <ignoredDependency>io.netty:netty-codec-mqtt:*</ignoredDependency>
+                            <ignoredDependency>io.netty:netty-buffer:*</ignoredDependency>
+                            <ignoredDependency>io.netty:netty-all:*</ignoredDependency>
+                        </ignoredDependencies>
                     </configuration>
                 </plugin>
                 <!-- FIXME remove this once all problems are resolved -->
@@ -290,6 +285,31 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot.version}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>validate</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>analyze</id>
+                        <goals>
+                            <goal>analyze-only</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
