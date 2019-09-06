@@ -49,6 +49,7 @@ import org.apache.olingo.server.api.uri.UriResourcePartTyped;
 import org.apache.olingo.server.core.uri.parser.Parser;
 import org.apache.olingo.server.core.uri.parser.UriParserException;
 import org.apache.olingo.server.core.uri.validator.UriValidationException;
+import org.n52.series.db.beans.DataEntity;
 import org.n52.sta.data.STAEventHandler;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
@@ -147,7 +148,12 @@ public class MqttEventHandler implements STAEventHandler, InitializingBean {
         Map<String, Set<String>> collections = null;
 
         //Map beans Object into Olingo Entity
-        String entityClass = rawObject.getClass().getName();
+        String entityClass;
+        if (rawObject instanceof DataEntity) {
+            entityClass = MqttUtil.OBSERVATION_ENTITY;
+        } else {
+            entityClass = rawObject.getClass().getName();
+        }
         entity = config.getMapper(entityClass).createEntity(rawObject);
 
         // Check all subscriptions for a match
