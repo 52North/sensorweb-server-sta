@@ -64,6 +64,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -406,15 +407,19 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
         LocationEntity entity = (LocationEntity) rawObject;
 
         if (entity.hasHistoricalLocations()) {
-            Set<String> set = new HashSet<>();
-            entity.getHistoricalLocations().forEach(en -> set.add(en.getIdentifier()));
-            collections.put(HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME, set);
+            collections.put(HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME,
+                    entity.getHistoricalLocations()
+                            .stream()
+                            .map(HistoricalLocationEntity::getIdentifier)
+                            .collect(Collectors.toSet()));
         }
 
         if (entity.hasThings()) {
-            Set<String> set = new HashSet<>();
-            entity.getThings().forEach(en -> set.add(en.getIdentifier()));
-            collections.put(ThingEntityProvider.ET_THING_NAME, set);
+            collections.put(ThingEntityProvider.ET_THING_NAME,
+                    entity.getThings()
+                            .stream()
+                            .map(PlatformEntity::getIdentifier)
+                            .collect(Collectors.toSet()));
         }
         return collections;
     }

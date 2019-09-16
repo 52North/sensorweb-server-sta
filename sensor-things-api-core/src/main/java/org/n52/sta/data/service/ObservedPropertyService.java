@@ -58,12 +58,13 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -334,12 +335,15 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
         Map<String, Set<String>> collections = new HashMap<>();
         PhenomenonEntity entity = (PhenomenonEntity) rawObject;
 
-        Iterable<DatastreamEntity> observations = datastreamRepository
+        List<DatastreamEntity> observations = datastreamRepository
                 .findAll(dQS.withObservedPropertyIdentifier(entity.getStaIdentifier()));
         if (observations != null) {
-            Set<String> datastreamIds = new HashSet<>();
-            observations.forEach(o -> datastreamIds.add(o.getIdentifier()));
-            collections.put(DatastreamEntityProvider.ET_DATASTREAM_NAME, datastreamIds);
+            collections.put(
+                    DatastreamEntityProvider.ET_DATASTREAM_NAME,
+                    observations
+                            .stream()
+                            .map(DatastreamEntity::getIdentifier)
+                            .collect(Collectors.toSet()));
         }
         return collections;
     }

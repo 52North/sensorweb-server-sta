@@ -54,12 +54,12 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -378,9 +378,11 @@ public class HistoricalLocationService
         }
 
         if (entity.hasLocationEntities()) {
-            Set<String> set = new HashSet<>();
-            entity.getLocations().forEach(en -> set.add(en.getIdentifier()));
-            collections.put(LocationEntityProvider.ET_LOCATION_NAME, set);
+            collections.put(LocationEntityProvider.ET_LOCATION_NAME,
+                    entity.getLocations()
+                            .stream()
+                            .map(LocationEntity::getIdentifier)
+                            .collect(Collectors.toSet()));
         }
         return collections;
     }

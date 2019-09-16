@@ -54,13 +54,13 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
@@ -398,21 +398,29 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
         PlatformEntity entity = (PlatformEntity) rawObject;
 
         if (entity.hasLocationEntities()) {
-            Set<String> set = new HashSet<>();
-            entity.getLocations().forEach(en -> set.add(en.getIdentifier()));
-            collections.put(LocationEntityProvider.ET_LOCATION_NAME, set);
+            collections.put(
+                    LocationEntityProvider.ET_LOCATION_NAME,
+                    entity.getLocations()
+                            .stream()
+                            .map(LocationEntity::getIdentifier)
+                            .collect(Collectors.toSet()));
         }
 
         if (entity.hasHistoricalLocations()) {
-            Set<String> set = new HashSet<>();
-            entity.getHistoricalLocations().forEach(en -> set.add(en.getIdentifier()));
-            collections.put(HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME, set);
+            collections.put(
+                    HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME,
+                    entity.getHistoricalLocations()
+                            .stream()
+                            .map(HistoricalLocationEntity::getIdentifier)
+                            .collect(Collectors.toSet()));
         }
 
         if (entity.hasDatastreams()) {
-            Set<String> set = new HashSet<>();
-            entity.getDatastreams().forEach(en -> set.add(en.getIdentifier()));
-            collections.put(DatastreamEntityProvider.ET_DATASTREAM_NAME, set);
+            collections.put(DatastreamEntityProvider.ET_DATASTREAM_NAME,
+                    entity.getDatastreams()
+                            .stream()
+                            .map(DatastreamEntity::getIdentifier)
+                            .collect(Collectors.toSet()));
         }
         return collections;
     }

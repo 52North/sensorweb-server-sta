@@ -57,12 +57,12 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -363,9 +363,11 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
         SensorEntity entity = (SensorEntity) rawObject;
 
         if (entity.hasDatastreams()) {
-            Set<String> set = new HashSet<>();
-            entity.getDatastreams().forEach(en -> set.add(en.getIdentifier()));
-            collections.put(DatastreamEntityProvider.ET_DATASTREAM_NAME, set);
+            collections.put(DatastreamEntityProvider.ET_DATASTREAM_NAME,
+                    entity.getDatastreams()
+                            .stream()
+                            .map(DatastreamEntity::getIdentifier)
+                            .collect(Collectors.toSet()));
         }
         return collections;
     }
