@@ -395,28 +395,24 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     @Override
     public Map<String, Set<String>> getRelatedCollections(Object rawObject) {
         Map<String, Set<String>> collections = new HashMap<>();
-        Set<String> set = new HashSet<>();
         PlatformEntity entity = (PlatformEntity) rawObject;
 
-        try {
+        if (entity.hasLocationEntities()) {
+            Set<String> set = new HashSet<>();
             entity.getLocations().forEach(en -> set.add(en.getIdentifier()));
-            collections.put(LocationEntityProvider.ET_LOCATION_NAME, new HashSet(set));
-        } catch (NullPointerException e) {
-            logger.debug("No Locations associated with this Entity {}", entity.getIdentifier());
+            collections.put(LocationEntityProvider.ET_LOCATION_NAME, set);
         }
-        set.clear();
-        try {
+
+        if (entity.hasHistoricalLocations()) {
+            Set<String> set = new HashSet<>();
             entity.getHistoricalLocations().forEach(en -> set.add(en.getIdentifier()));
-            collections.put(HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME, new HashSet(set));
-        } catch (NullPointerException e) {
-            logger.debug("No HistoricalLocations associated with this Entity {}", entity.getIdentifier());
+            collections.put(HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME, set);
         }
-        set.clear();
-        try {
+
+        if (entity.hasDatastreams()) {
+            Set<String> set = new HashSet<>();
             entity.getDatastreams().forEach(en -> set.add(en.getIdentifier()));
-            collections.put(DatastreamEntityProvider.ET_DATASTREAM_NAME, new HashSet(set));
-        } catch (NullPointerException e) {
-            logger.debug("No Datastreams associated with this Entity {}", entity.getIdentifier());
+            collections.put(DatastreamEntityProvider.ET_DATASTREAM_NAME, set);
         }
         return collections;
     }

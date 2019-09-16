@@ -647,11 +647,9 @@ public class ObservationService extends
         Map<String, Set<String>> collections = new HashMap<>();
         DataEntity<?> entity = (DataEntity<?>) rawObject;
 
-        try {
+        if (entity.getDataset() != null && entity.getDataset().getFeature() != null) {
             collections.put(FeatureOfInterestEntityProvider.ET_FEATURE_OF_INTEREST_NAME,
                     Collections.singleton(entity.getDataset().getFeature().getIdentifier()));
-        } catch (NullPointerException e) {
-            logger.debug("No FeaturesOfInterest associated with this Entity {}", entity.getIdentifier());
         }
 
         Optional<DatastreamEntity> datastreamEntity =

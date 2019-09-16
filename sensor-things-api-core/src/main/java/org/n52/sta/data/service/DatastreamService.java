@@ -526,23 +526,20 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     public Map<String, Set<String>> getRelatedCollections(Object rawObject) {
         Map<String, Set<String>> collections = new HashMap<>();
         DatastreamEntity entity = (DatastreamEntity) rawObject;
-        try {
+
+        if (entity.hasThing()) {
             collections.put(ThingEntityProvider.ET_THING_NAME,
                     Collections.singleton(entity.getThing().getIdentifier()));
-        } catch (NullPointerException e) {
-            logger.debug("No Thing associated with this Entity {}", entity.getIdentifier());
         }
-        try {
+
+        if (entity.hasProcedure()) {
             collections.put(SensorEntityProvider.ET_SENSOR_NAME,
                     Collections.singleton(entity.getProcedure().getIdentifier()));
-        } catch (NullPointerException e) {
-            logger.debug("No Sensor associated with this Entity {}", entity.getIdentifier());
         }
-        try {
+
+        if (entity.hasObservableProperty()) {
             collections.put(ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_NAME,
                     Collections.singleton(entity.getObservableProperty().getIdentifier()));
-        } catch (NullPointerException e) {
-            logger.debug("No ObservedProperty associated with this Entity {}", entity.getIdentifier());
         }
 
         //Iterable<DataEntity<?>> observations = dataRepository.findAll(dQS.withId(entity.getId()));

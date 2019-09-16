@@ -332,16 +332,14 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
     @Override
     public Map<String, Set<String>> getRelatedCollections(Object rawObject) {
         Map<String, Set<String>> collections = new HashMap<>();
-        Set<String> datastreamIds = new HashSet<>();
         PhenomenonEntity entity = (PhenomenonEntity) rawObject;
 
         Iterable<DatastreamEntity> observations = datastreamRepository
                 .findAll(dQS.withObservedPropertyIdentifier(entity.getStaIdentifier()));
-        try {
+        if (observations != null) {
+            Set<String> datastreamIds = new HashSet<>();
             observations.forEach(o -> datastreamIds.add(o.getIdentifier()));
             collections.put(DatastreamEntityProvider.ET_DATASTREAM_NAME, datastreamIds);
-        } catch (NullPointerException e) {
-            logger.debug("No Datastreams associated with this Entity {}", entity.getIdentifier());
         }
         return collections;
     }

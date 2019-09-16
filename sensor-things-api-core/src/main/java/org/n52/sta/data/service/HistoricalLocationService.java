@@ -372,18 +372,15 @@ public class HistoricalLocationService
         Map<String, Set<String>> collections = new HashMap<>();
         HistoricalLocationEntity entity = (HistoricalLocationEntity) rawObject;
 
-        try {
+        if (entity.hasThing()) {
             collections.put(ThingEntityProvider.ET_THING_NAME,
                     Collections.singleton(entity.getThing().getIdentifier()));
-        } catch (NullPointerException e) {
-            logger.debug("No Thing associated with this Entity {}", entity.getIdentifier());
         }
-        Set<String> set = new HashSet<>();
-        try {
+
+        if (entity.hasLocationEntities()) {
+            Set<String> set = new HashSet<>();
             entity.getLocations().forEach(en -> set.add(en.getIdentifier()));
             collections.put(LocationEntityProvider.ET_LOCATION_NAME, set);
-        } catch (NullPointerException e) {
-            logger.debug("No Location associated with this Entity {}", entity.getIdentifier());
         }
         return collections;
     }

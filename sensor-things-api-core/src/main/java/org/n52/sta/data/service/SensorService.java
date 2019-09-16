@@ -360,14 +360,12 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     @Override
     public Map<String, Set<String>> getRelatedCollections(Object rawObject) {
         Map<String, Set<String>> collections = new HashMap<>();
-        Set<String> set = new HashSet<>();
         SensorEntity entity = (SensorEntity) rawObject;
 
-        try {
+        if (entity.hasDatastreams()) {
+            Set<String> set = new HashSet<>();
             entity.getDatastreams().forEach(en -> set.add(en.getIdentifier()));
-            collections.put(DatastreamEntityProvider.ET_DATASTREAM_NAME, new HashSet(set));
-        } catch (NullPointerException e) {
-            logger.debug("No Datastreams associated with this Entity {}", entity.getIdentifier());
+            collections.put(DatastreamEntityProvider.ET_DATASTREAM_NAME, set);
         }
         return collections;
     }

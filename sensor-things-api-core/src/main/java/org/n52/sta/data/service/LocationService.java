@@ -404,20 +404,17 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     public Map<String, Set<String>> getRelatedCollections(Object rawObject) {
         Map<String, Set<String>> collections = new HashMap<>();
         LocationEntity entity = (LocationEntity) rawObject;
-        Set<String> set = new HashSet<>();
 
-        try {
+        if (entity.hasHistoricalLocations()) {
+            Set<String> set = new HashSet<>();
             entity.getHistoricalLocations().forEach(en -> set.add(en.getIdentifier()));
             collections.put(HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME, set);
-            set.clear();
-        } catch (NullPointerException e) {
-            logger.debug("No HistoricalLocations associated with this Entity {}", entity.getIdentifier());
         }
-        try {
+
+        if (entity.hasThings()) {
+            Set<String> set = new HashSet<>();
             entity.getThings().forEach(en -> set.add(en.getIdentifier()));
             collections.put(ThingEntityProvider.ET_THING_NAME, set);
-        } catch (NullPointerException e) {
-            logger.debug("No Things associated with this Entity {}", entity.getIdentifier());
         }
         return collections;
     }
