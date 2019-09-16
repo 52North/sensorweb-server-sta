@@ -40,7 +40,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <odata.version>4.6.0-STA-SNAPSHOT</odata.version>
-        <series-hbm.version>2.0.0-alpha.2</series-hbm.version>
+        <series-hbm.version>2.0.0-alpha.3</series-hbm.version>
         <arctic-sea.version>6.0.0</arctic-sea.version>
         <spring-boot.version>2.1.4.RELEASE</spring-boot.version>
         <geolatte-geom.version>1.4.0</geolatte-geom.version>

@@ -171,8 +171,8 @@ public class MessageBusRepository<T, I extends Serializable>
                         map.add(LOCATION);
                     }
                     if (oldLocation.getLocationEncoding() != null &&
-                            !oldLocation.getLocationEncoding().getEncodingType().equals(
-                                    newLocation.getLocationEncoding().getEncodingType())) {
+                            !oldLocation.getLocationEncoding().getFormat().equals(
+                                    newLocation.getLocationEncoding().getFormat())) {
                         map.add(ENCODINGTYPE);
                     }
                     return map;

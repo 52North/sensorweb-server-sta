@@ -34,9 +34,9 @@ import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
+import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
-import org.n52.series.db.beans.sta.LocationEncodingEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.data.query.LocationQuerySpecifications;
 import org.n52.sta.data.repositories.LocationEncodingRepository;
@@ -341,12 +341,12 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
 
     private void checkLocationEncoding(LocationEntity location) {
         if (location.getLocationEncoding() != null) {
-            LocationEncodingEntity optionalLocationEncoding = createLocationEncoding(location.getLocationEncoding());
+            FormatEntity optionalLocationEncoding = createLocationEncoding(location.getLocationEncoding());
             location.setLocationEncoding(optionalLocationEncoding);
         }
     }
 
-    private LocationEncodingEntity createLocationEncoding(LocationEncodingEntity locationEncoding) {
+    private FormatEntity createLocationEncoding(FormatEntity locationEncoding) {
         ExampleMatcher createEncodingTypeMatcher = createEncodingTypeMatcher();
         if (!locationEncodingRepository.exists(
                 createEncodingTypeExample(locationEncoding, createEncodingTypeMatcher))) {
@@ -356,9 +356,9 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
                 createEncodingTypeExample(locationEncoding, createEncodingTypeMatcher)).get();
     }
 
-    private Example<LocationEncodingEntity> createEncodingTypeExample(LocationEncodingEntity locationEncoding,
+    private Example<FormatEntity> createEncodingTypeExample(FormatEntity locationEncoding,
                                                                       ExampleMatcher matcher) {
-        return Example.<LocationEncodingEntity>of(locationEncoding, matcher);
+        return Example.<FormatEntity>of(locationEncoding, matcher);
     }
 
     private ExampleMatcher createEncodingTypeMatcher() {

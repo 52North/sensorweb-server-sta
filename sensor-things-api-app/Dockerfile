@@ -13,7 +13,7 @@ RUN git clone https://github.com/52North/sensor-things \
 
 RUN git clone https://github.com/52North/series-hibernate \
     && cd series-hibernate \
-    && git checkout -q 572cede2a6e0e95aac5fc9e5602c8b26e1561720
+    && git checkout v2.0.0-alpha.3
 
 FROM maven:3.6.1-jdk-8-slim as buildstage
 WORKDIR /app

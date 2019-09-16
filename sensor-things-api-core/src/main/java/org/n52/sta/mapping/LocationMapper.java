@@ -33,8 +33,8 @@ import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.edm.geo.Geospatial;
 import org.apache.olingo.server.api.ODataApplicationException;
+import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PlatformEntity;
-import org.n52.series.db.beans.sta.LocationEncodingEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider;
 import org.n52.sta.edm.provider.entities.LocationEntityProvider;
@@ -103,9 +103,9 @@ public class LocationMapper extends AbstractLocationGeometryMapper<LocationEntit
         return location;
     }
 
-    private LocationEncodingEntity createLocationEncodingEntity(Property property) {
-        LocationEncodingEntity locationEncodingEntity = new LocationEncodingEntity();
-        locationEncodingEntity.setEncodingType(property.getValue().toString());
+    private FormatEntity createLocationEncodingEntity(Property property) {
+        FormatEntity locationEncodingEntity = new FormatEntity();
+        locationEncodingEntity.setFormat(property.getValue().toString());
         return locationEncodingEntity;
     }
 

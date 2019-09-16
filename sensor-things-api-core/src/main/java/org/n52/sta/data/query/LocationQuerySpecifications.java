@@ -31,9 +31,9 @@ package org.n52.sta.data.query;
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.n52.series.db.beans.DescribableEntity;
+import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
-import org.n52.series.db.beans.sta.LocationEncodingEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -131,10 +131,10 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
                                 root.get(DescribableEntity.PROPERTY_DESCRIPTION), propertyValue.toString(),
                                 operator, builder, switched);
                     case "encodingType":
-                        Join<LocationEntity, LocationEncodingEntity> join =
+                        Join<LocationEntity, FormatEntity> join =
                                 root.join(LocationEntity.PROPERTY_LOCATION_ENCODINT);
                         return handleDirectStringPropertyFilter(
-                                join.get(LocationEncodingEntity.PROPERTY_ENCODING_TYPE),
+                                join.get(FormatEntity.FORMAT),
                                 propertyValue.toString(), operator, builder, switched);
                     default:
                         throw new RuntimeException("Error getting filter for Property: \"" + propertyName
