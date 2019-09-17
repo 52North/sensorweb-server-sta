@@ -49,7 +49,6 @@ import java.util.Map;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- *
  */
 @Configuration
 public class DaoConfig {
@@ -76,7 +75,7 @@ public class DaoConfig {
     }
 
     private TypeContributorList createTypeContributorsList() {
-        return (TypeContributorList) () -> Arrays.asList(toTypeContributor(SmallBooleanType.INSTANCE, "small_boolean"));
+        return () -> Arrays.asList(toTypeContributor(SmallBooleanType.INSTANCE, "small_boolean"));
     }
 
     private <T extends BasicType> TypeContributor toTypeContributor(T type, String... keys) {

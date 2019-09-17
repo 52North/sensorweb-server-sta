@@ -33,8 +33,6 @@
  */
 package org.n52.sta.service.processor;
 
-import java.io.InputStream;
-
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
 import org.apache.olingo.server.api.OData;
@@ -51,8 +49,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.io.InputStream;
+
 /**
- *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
@@ -60,12 +59,21 @@ public class SensorThingsErrorProcessor implements ErrorProcessor {
 
     private static final Logger LOG = LoggerFactory.getLogger(SensorThingsErrorProcessor.class);
 
-    private OData odata;
-    private ServiceMetadata serviceMetadata;
-    private ODataSerializer serializer;
+    private final ODataSerializer serializer;
+
+    public SensorThingsErrorProcessor() {
+        this.serializer = new SensorThingsSerializer(ContentType.JSON_NO_METADATA);
+    }
 
     @Override
-    public void processError(ODataRequest request, ODataResponse response, ODataServerError error, ContentType contentType) {
+    public void init(OData odata, ServiceMetadata serviceMetadata) {
+    }
+
+    @Override
+    public void processError(ODataRequest request,
+                             ODataResponse response,
+                             ODataServerError error,
+                             ContentType contentType) {
         try {
             LOG.debug("Error occurred.", error.getException());
 
@@ -81,12 +89,4 @@ public class SensorThingsErrorProcessor implements ErrorProcessor {
             LOG.debug("Error while serializing ODataServerError", ex);
         }
     }
-
-    @Override
-    public void init(OData odata, ServiceMetadata metadata) {
-        this.odata = odata;
-        this.serviceMetadata = metadata;
-        this.serializer = new SensorThingsSerializer(ContentType.JSON_NO_METADATA);
-    }
-
 }

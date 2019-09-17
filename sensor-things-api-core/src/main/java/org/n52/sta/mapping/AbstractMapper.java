@@ -48,17 +48,21 @@ import org.n52.series.db.beans.sta.StaRelations;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
+import org.n52.sta.edm.provider.SensorThingsEdmConstants;
+import org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider;
+import org.n52.sta.edm.provider.entities.DatastreamEntityProvider;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
-import java.util.*;
-
-import static org.n52.sta.edm.provider.SensorThingsEdmConstants.ID;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.*;
-import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ES_DATASTREAMS_NAME;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.Set;
 
 public abstract class AbstractMapper<T> {
 
@@ -78,20 +82,31 @@ public abstract class AbstractMapper<T> {
 
     protected void checkNavigationLink(Entity entity) throws ODataApplicationException {
         if (entity.getProperties().size() == 1) {
-            checkPropertyValidity(ID, entity);
+            checkPropertyValidity(SensorThingsEdmConstants.ID, entity);
         } else {
             checkEntity(entity);
         }
     }
 
+    protected boolean checkNavigationLink(Entity entity, String name) {
+        return entity.getNavigationLink(name) != null;
+    }
+
     protected void checkNameAndDescription(Entity entity) throws ODataApplicationException {
-        checkPropertyValidity(PROP_NAME, entity);
-        checkPropertyValidity(PROP_DESCRIPTION, entity);
+        checkPropertyValidity(AbstractSensorThingsEntityProvider.PROP_NAME, entity);
+        checkPropertyValidity(AbstractSensorThingsEntityProvider.PROP_DESCRIPTION, entity);
     }
 
     protected void checkPropertyValidity(String propName, Entity entity) throws ODataApplicationException {
         if (!checkProperty(entity, propName)) {
             throw new ODataApplicationException(getMissingPropertyExceptionString(propName, entity),
+                    HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+        }
+    }
+
+    private void checkPropertyValidity(ComplexValue complexValue, String propName) throws ODataApplicationException {
+        if (!checkProperty(complexValue, propName)) {
+            throw new ODataApplicationException(getMissingPropertyExceptionString(propName, complexValue),
                     HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
         }
     }
@@ -106,13 +121,6 @@ public abstract class AbstractMapper<T> {
 
     private String getMissingPropertyExceptionString(String propName, String entity) {
         return String.format("The parameter '%s' is missing for in entity '%s'!", propName, entity);
-    }
-
-    private void checkPropertyValidity(ComplexValue complexValue, String propName) throws ODataApplicationException {
-        if (!checkProperty(complexValue, propName)) {
-            throw new ODataApplicationException(getMissingPropertyExceptionString(propName, complexValue),
-                    HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
-        }
     }
 
     protected void addNameDescriptionProperties(Entity entity, DescribableEntity describableEntity) {
@@ -134,8 +142,8 @@ public abstract class AbstractMapper<T> {
         return entity.getProperty(name) != null;
     }
 
-    protected boolean checkNavigationLink(Entity entity, String name) {
-        return entity.getNavigationLink(name) != null;
+    protected boolean checkProperty(ComplexValue complexValue, String name) {
+        return getProperty(complexValue, name) != null;
     }
 
     protected void addName(Entity entity, HasName describableEntity) {
@@ -143,7 +151,10 @@ public abstract class AbstractMapper<T> {
     }
 
     protected void addName(Entity entity, String name) {
-        entity.addProperty(new Property(null, PROP_NAME, ValueType.PRIMITIVE, name));
+        entity.addProperty(new Property(
+                null,
+                AbstractSensorThingsEntityProvider.PROP_NAME,
+                ValueType.PRIMITIVE, name));
     }
 
     protected void addDescription(Entity entity, HasDescription describableEntity) {
@@ -151,7 +162,10 @@ public abstract class AbstractMapper<T> {
     }
 
     protected void addDescription(Entity entity, String description) {
-        entity.addProperty(new Property(null, PROP_DESCRIPTION, ValueType.PRIMITIVE, description));
+        entity.addProperty(new Property(
+                null,
+                AbstractSensorThingsEntityProvider.PROP_DESCRIPTION,
+                ValueType.PRIMITIVE, description));
     }
 
     protected void setNameDescription(DescribableEntity thing, Entity entity) {
@@ -161,20 +175,27 @@ public abstract class AbstractMapper<T> {
 
     protected void setIdentifier(DescribableEntity describableEntity, Entity entity) {
         String rawIdentifier = null;
-        if (checkProperty(entity, PROP_ID)) {
+        if (checkProperty(entity, AbstractSensorThingsEntityProvider.PROP_ID)) {
             try {
-                rawIdentifier = EdmAny.getInstance().valueToString(getPropertyValue(entity, PROP_ID), false, 0, 0, 0, false);
+                rawIdentifier = EdmAny.getInstance().valueToString(
+                        getPropertyValue(entity, AbstractSensorThingsEntityProvider.PROP_ID),
+                        false,
+                        0,
+                        0,
+                        0,
+                        false);
             } catch (EdmPrimitiveTypeException e) {
                 // This should never happen. Value was checked already
             }
-        } else if (checkProperty(entity, PROP_DEFINITION)) {
-            rawIdentifier = getPropertyValue(entity, PROP_DEFINITION).toString();
+        } else if (checkProperty(entity, AbstractSensorThingsEntityProvider.PROP_DEFINITION)) {
+            rawIdentifier = getPropertyValue(entity, AbstractSensorThingsEntityProvider.PROP_DEFINITION).toString();
         }
 
         // URLEncode identifier.
         if (rawIdentifier != null) {
             try {
-                describableEntity.setIdentifier(URLEncoder.encode(rawIdentifier.replace("\'", ""), "utf-8"));
+                describableEntity.setIdentifier(
+                        URLEncoder.encode(rawIdentifier.replace("\'", ""), "utf-8"));
             } catch (UnsupportedEncodingException e) {
                 // This should never happen.
             }
@@ -182,21 +203,26 @@ public abstract class AbstractMapper<T> {
     }
 
     protected void setName(HasName describableEntity, Entity entity) {
-        if (checkProperty(entity, PROP_NAME)) {
-            describableEntity.setName(getPropertyValue(entity, PROP_NAME).toString());
+        if (checkProperty(entity, AbstractSensorThingsEntityProvider.PROP_NAME)) {
+            describableEntity.setName(
+                    getPropertyValue(entity, AbstractSensorThingsEntityProvider.PROP_NAME).toString());
         }
     }
 
     protected void setDescription(HasDescription describableEntity, Entity entity) {
-        if (checkProperty(entity, PROP_DESCRIPTION)) {
-            describableEntity.setDescription(getPropertyValue(entity, PROP_DESCRIPTION).toString());
+        if (checkProperty(entity, AbstractSensorThingsEntityProvider.PROP_DESCRIPTION)) {
+            describableEntity.setDescription(getPropertyValue(entity,
+                    AbstractSensorThingsEntityProvider.PROP_DESCRIPTION).toString());
         }
     }
 
     protected void setDatastreams(StaRelations.Datastreams<?> datastreams, Entity entity) {
-        if (checkNavigationLink(entity, ES_DATASTREAMS_NAME)) {
+        if (checkNavigationLink(entity, DatastreamEntityProvider.ES_DATASTREAMS_NAME)) {
             Set<DatastreamEntity> ds = new LinkedHashSet<>();
-            Iterator<Entity> iterator = entity.getNavigationLink(ES_DATASTREAMS_NAME).getInlineEntitySet().iterator();
+            Iterator<Entity> iterator = entity
+                    .getNavigationLink(DatastreamEntityProvider.ES_DATASTREAMS_NAME)
+                    .getInlineEntitySet()
+                    .iterator();
             while (iterator.hasNext()) {
                 ds.add(datastreamMapper.createEntity((Entity) iterator.next()));
             }
@@ -212,8 +238,9 @@ public abstract class AbstractMapper<T> {
         return "";
     }
 
-    protected boolean checkProperty(ComplexValue complexValue, String name) {
-        return getProperty(complexValue, name) != null;
+    protected Object getPropertyValue(ComplexValue complexValue, String name) {
+        Property property = getProperty(complexValue, name);
+        return property != null ? property.getValue() : "";
     }
 
     protected Property getProperty(ComplexValue complexValue, String name) {
@@ -221,14 +248,10 @@ public abstract class AbstractMapper<T> {
         return property.isPresent() ? property.get() : null;
     }
 
-    protected Object getPropertyValue(ComplexValue complexValue, String name) {
-        Property property = getProperty(complexValue, name);
-        return property != null ? property.getValue() : "";
-    }
-
     protected void addPhenomenonTime(HasPhenomenonTime phenomenonTime, Entity entity) {
-        if (checkProperty(entity, PROP_PHENOMENON_TIME)) {
-            Time time = parseTime(getPropertyValue(entity, PROP_PHENOMENON_TIME).toString());
+        if (checkProperty(entity, AbstractSensorThingsEntityProvider.PROP_PHENOMENON_TIME)) {
+            Time time = parseTime(getPropertyValue(entity,
+                    AbstractSensorThingsEntityProvider.PROP_PHENOMENON_TIME).toString());
             if (time instanceof TimeInstant) {
                 phenomenonTime.setSamplingTimeStart(((TimeInstant) time).getValue().toDate());
                 phenomenonTime.setSamplingTimeEnd(((TimeInstant) time).getValue().toDate());

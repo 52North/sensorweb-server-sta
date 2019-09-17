@@ -51,13 +51,13 @@ import java.net.URISyntaxException;
 public class EntityCreationHelper {
 
     @Autowired
-    ApplicationContext ctx;
+    private ApplicationContext ctx;
 
     /**
      * Creates an ID for an entity
      *
-     * @param entity the Entity to create the ID for
-     * @param entitySetName the name of the EntitySet the Entity belongs to
+     * @param entity         the Entity to create the ID for
+     * @param entitySetName  the name of the EntitySet the Entity belongs to
      * @param idPropertyName name of the ID property
      * @return the ID as URI
      */
@@ -70,9 +70,13 @@ public class EntityCreationHelper {
             Object primitive = entity.getProperty(idPropertyName).asPrimitive();
             StringBuilder sb = new StringBuilder(entitySetName)
                     .append("(");
-            if (primitive instanceof String) sb.append('\'');
+            if (primitive instanceof String) {
+                sb.append('\'');
+            }
             sb.append(primitive.toString());
-            if (primitive instanceof String) sb.append('\'');
+            if (primitive instanceof String) {
+                sb.append('\'');
+            }
             sb.append(")");
 
             if (navigationName != null) {

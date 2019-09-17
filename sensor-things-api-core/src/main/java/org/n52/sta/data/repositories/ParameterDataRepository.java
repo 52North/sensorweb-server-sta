@@ -28,15 +28,14 @@
  */
 package org.n52.sta.data.repositories;
 
-import java.util.Optional;
-
 import org.n52.series.db.beans.DescribableEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.NoRepositoryBean;
 
 @NoRepositoryBean
-public interface ParameterDataRepository<T extends DescribableEntity> extends IdentifierRepository<T>, JpaRepository<T, Long>, JpaSpecificationExecutor<T> {
+public interface ParameterDataRepository<T extends DescribableEntity>
+        extends IdentifierRepository<T>, JpaRepository<T, Long>, JpaSpecificationExecutor<T> {
 
     boolean existsByName(String name);
 

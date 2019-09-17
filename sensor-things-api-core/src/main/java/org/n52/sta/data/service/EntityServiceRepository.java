@@ -78,7 +78,7 @@ public class EntityServiceRepository {
     }
 
     public enum EntityTypes {
-        Thing, Location, HistoricalLocation, Sensor, Datastream, Observation, ObservedProperty, FeatureOfInterest;
+        Thing, Location, HistoricalLocation, Sensor, Datastream, Observation, ObservedProperty, FeatureOfInterest
     }
 
 }

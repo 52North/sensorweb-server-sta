@@ -33,14 +33,13 @@
  */
 package org.n52.sta.edm.provider.complextypes;
 
-import java.util.List;
-
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
- *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
@@ -51,7 +50,9 @@ public class ComplexTypeRepository {
 
     public AbstractComplexType getComplexType(FullQualifiedName complexTypeFullQualifiedName) {
         AbstractComplexType provider = complexTypes.stream()
-                .filter(p -> p.getFullQualifiedTypeName().getFullQualifiedNameAsString().equals(complexTypeFullQualifiedName.getFullQualifiedNameAsString()))
+                .filter(p -> p.getFullQualifiedTypeName()
+                              .getFullQualifiedNameAsString()
+                              .equals(complexTypeFullQualifiedName.getFullQualifiedNameAsString()))
                 .findAny()
                 .orElse(null);
         return provider;

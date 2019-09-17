@@ -39,7 +39,8 @@ public interface STAEventHandler {
 
     /**
      * Handles a Create/Update Event emitted by the Database.
-     * @param event base entity
+     *
+     * @param event         base entity
      * @param differenceMap names of properties that changed. null if all properties changed (e.g. new entity)
      */
     void handleEvent(Object event, Set<String> differenceMap);

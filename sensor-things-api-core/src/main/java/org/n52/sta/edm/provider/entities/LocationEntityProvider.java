@@ -28,17 +28,6 @@
  */
 package org.n52.sta.edm.provider.entities;
 
-import static org.n52.sta.edm.provider.SensorThingsEdmConstants.NAMESPACE;
-import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ES_HISTORICAL_LOCATIONS_NAME;
-import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_FQN;
-import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ES_THINGS_NAME;
-import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_FQN;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
@@ -47,10 +36,15 @@ import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
+import org.n52.sta.edm.provider.SensorThingsEdmConstants;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 /**
- *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
@@ -58,7 +52,8 @@ public class LocationEntityProvider extends AbstractSensorThingsEntityProvider {
 
     // Entity Type Name
     public static final String ET_LOCATION_NAME = "Location";
-    public static final FullQualifiedName ET_LOCATION_FQN = new FullQualifiedName(NAMESPACE, ET_LOCATION_NAME);
+    public static final FullQualifiedName ET_LOCATION_FQN =
+            new FullQualifiedName(SensorThingsEdmConstants.NAMESPACE, ET_LOCATION_NAME);
 
     // Entity Set Name
     public static final String ES_LOCATIONS_NAME = "Locations";
@@ -89,12 +84,12 @@ public class LocationEntityProvider extends AbstractSensorThingsEntityProvider {
         entitySet.setType(ET_LOCATION_FQN);
 
         CsdlNavigationPropertyBinding navPropThingBinding = new CsdlNavigationPropertyBinding();
-        navPropThingBinding.setPath(ES_THINGS_NAME);
-        navPropThingBinding.setTarget(ES_THINGS_NAME);
+        navPropThingBinding.setPath(ThingEntityProvider.ES_THINGS_NAME);
+        navPropThingBinding.setTarget(ThingEntityProvider.ES_THINGS_NAME);
 
         CsdlNavigationPropertyBinding navPropHistoricalLocationBinding = new CsdlNavigationPropertyBinding();
-        navPropHistoricalLocationBinding.setPath(ES_HISTORICAL_LOCATIONS_NAME);
-        navPropHistoricalLocationBinding.setTarget(ES_HISTORICAL_LOCATIONS_NAME);
+        navPropHistoricalLocationBinding.setPath(HistoricalLocationEntityProvider.ES_HISTORICAL_LOCATIONS_NAME);
+        navPropHistoricalLocationBinding.setTarget(HistoricalLocationEntityProvider.ES_HISTORICAL_LOCATIONS_NAME);
 
         List<CsdlNavigationPropertyBinding> navPropBindingList = new ArrayList<CsdlNavigationPropertyBinding>();
         navPropBindingList.addAll(Arrays.asList(navPropThingBinding, navPropHistoricalLocationBinding));
@@ -124,9 +119,9 @@ public class LocationEntityProvider extends AbstractSensorThingsEntityProvider {
                 .setNullable(false);
 
         //create EntityType complex properties
-//        CsdlProperty location = new CsdlProperty().setName(PROP_LOCATION)
-//                .setType(FeatureComplexType.CT_FEATURE_FQN)
-//                .setNullable(false);
+        //CsdlProperty location = new CsdlProperty().setName(PROP_LOCATION)
+        //        .setType(FeatureComplexType.CT_FEATURE_FQN)
+        //        .setNullable(false);
         CsdlProperty location = new CsdlProperty().setName(PROP_LOCATION)
                 .setType(EdmPrimitiveTypeKind.Geometry.getFullQualifiedName())
                 .setNullable(false);
@@ -142,15 +137,15 @@ public class LocationEntityProvider extends AbstractSensorThingsEntityProvider {
     private List<CsdlNavigationProperty> createCsdlNavigationProperties() {
         // navigation property: Many optional to many optional
         CsdlNavigationProperty navPropThings = new CsdlNavigationProperty()
-                .setName(ES_THINGS_NAME)
-                .setType(ET_THING_FQN)
+                .setName(ThingEntityProvider.ES_THINGS_NAME)
+                .setType(ThingEntityProvider.ET_THING_FQN)
                 .setCollection(true)
                 .setPartner(ES_LOCATIONS_NAME);
 
         // navigation property: Many mandatory to many optional
         CsdlNavigationProperty navPropHistoricalLocations = new CsdlNavigationProperty()
-                .setName(ES_HISTORICAL_LOCATIONS_NAME)
-                .setType(ET_HISTORICAL_LOCATION_FQN)
+                .setName(HistoricalLocationEntityProvider.ES_HISTORICAL_LOCATIONS_NAME)
+                .setType(HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_FQN)
                 .setCollection(true)
                 .setPartner(ES_LOCATIONS_NAME);
 

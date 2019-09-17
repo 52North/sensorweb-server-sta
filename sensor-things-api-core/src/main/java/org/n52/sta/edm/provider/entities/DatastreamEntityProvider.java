@@ -28,24 +28,6 @@
  */
 package org.n52.sta.edm.provider.entities;
 
-import static org.n52.sta.edm.provider.SensorThingsEdmConstants.NAMESPACE;
-import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ES_OBSERVATIONS_NAME;
-import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ET_OBSERVATION_FQN;
-import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ES_OBSERVED_PROPERTIES_NAME;
-import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_FQN;
-import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_NAME;
-import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ES_SENSORS_NAME;
-import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ET_SENSOR_FQN;
-import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ET_SENSOR_NAME;
-import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ES_THINGS_NAME;
-import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_FQN;
-import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
@@ -54,11 +36,16 @@ import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
+import org.n52.sta.edm.provider.SensorThingsEdmConstants;
 import org.n52.sta.edm.provider.complextypes.UnitOfMeasurementComplexType;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 /**
- *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
@@ -67,7 +54,8 @@ public class DatastreamEntityProvider extends AbstractSensorThingsEntityProvider
 
     // Entity Type Name
     public static final String ET_DATASTREAM_NAME = "Datastream";
-    public static final FullQualifiedName ET_DATASTREAM_FQN = new FullQualifiedName(NAMESPACE, ET_DATASTREAM_NAME);
+    public static final FullQualifiedName ET_DATASTREAM_FQN =
+            new FullQualifiedName(SensorThingsEdmConstants.NAMESPACE, ET_DATASTREAM_NAME);
 
     // Entity Set Name
     public static final String ES_DATASTREAMS_NAME = "Datastreams";
@@ -99,20 +87,22 @@ public class DatastreamEntityProvider extends AbstractSensorThingsEntityProvider
         entitySet.setType(ET_DATASTREAM_FQN);
 
         CsdlNavigationPropertyBinding navPropThingBinding = new CsdlNavigationPropertyBinding();
-        navPropThingBinding.setPath(ET_THING_NAME); // the path from entity type to navigation property
-        navPropThingBinding.setTarget(ES_THINGS_NAME); //target entitySet, where the nav prop points to
+        // the path from entity type to navigation property
+        navPropThingBinding.setPath(ThingEntityProvider.ET_THING_NAME);
+        // target entitySet, where the nav prop points to
+        navPropThingBinding.setTarget(ThingEntityProvider.ES_THINGS_NAME);
 
         CsdlNavigationPropertyBinding navPropSensorBinding = new CsdlNavigationPropertyBinding();
-        navPropSensorBinding.setPath(ET_SENSOR_NAME);
-        navPropSensorBinding.setTarget(ES_SENSORS_NAME);
+        navPropSensorBinding.setPath(SensorEntityProvider.ET_SENSOR_NAME);
+        navPropSensorBinding.setTarget(SensorEntityProvider.ES_SENSORS_NAME);
 
         CsdlNavigationPropertyBinding navPropObservedPropertyBinding = new CsdlNavigationPropertyBinding();
-        navPropObservedPropertyBinding.setPath(ET_OBSERVED_PROPERTY_NAME);
-        navPropObservedPropertyBinding.setTarget(ES_OBSERVED_PROPERTIES_NAME);
+        navPropObservedPropertyBinding.setPath(ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_NAME);
+        navPropObservedPropertyBinding.setTarget(ObservedPropertyEntityProvider.ES_OBSERVED_PROPERTIES_NAME);
 
         CsdlNavigationPropertyBinding navPropObservationBinding = new CsdlNavigationPropertyBinding();
-        navPropObservationBinding.setPath(ES_OBSERVATIONS_NAME);
-        navPropObservationBinding.setTarget(ES_OBSERVATIONS_NAME);
+        navPropObservationBinding.setPath(ObservationEntityProvider.ES_OBSERVATIONS_NAME);
+        navPropObservationBinding.setTarget(ObservationEntityProvider.ES_OBSERVATIONS_NAME);
 
         List<CsdlNavigationPropertyBinding> navPropBindingList = new ArrayList<CsdlNavigationPropertyBinding>();
         navPropBindingList.addAll(Arrays.asList(
@@ -161,9 +151,9 @@ public class DatastreamEntityProvider extends AbstractSensorThingsEntityProvider
                 .setNullable(true);
 
         //create EntityType navigation links
-//        CsdlProperty selfLink = new CsdlProperty().setName(SELF_LINK_ANNOTATION)
-//                .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
-//                .setNullable(false);
+        //CsdlProperty selfLink = new CsdlProperty().setName(SELF_LINK_ANNOTATION)
+        //        .setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
+        //        .setNullable(false);
 
         return Arrays.asList(
                 id,
@@ -179,29 +169,29 @@ public class DatastreamEntityProvider extends AbstractSensorThingsEntityProvider
     private List<CsdlNavigationProperty> createCsdlNavigationProperties() {
         // navigation property: Many optional to one mandatory
         CsdlNavigationProperty navPropThings = new CsdlNavigationProperty()
-                .setName(ET_THING_NAME)
-                .setType(ET_THING_FQN)
+                .setName(ThingEntityProvider.ET_THING_NAME)
+                .setType(ThingEntityProvider.ET_THING_FQN)
                 .setNullable(false)
                 .setPartner(ES_DATASTREAMS_NAME);
 
         // navigation property: Many optional to one mandatory
         CsdlNavigationProperty navPropSensor = new CsdlNavigationProperty()
-                .setName(ET_SENSOR_NAME)
-                .setType(ET_SENSOR_FQN)
+                .setName(SensorEntityProvider.ET_SENSOR_NAME)
+                .setType(SensorEntityProvider.ET_SENSOR_FQN)
                 .setNullable(false)
                 .setPartner(ES_DATASTREAMS_NAME);
 
         // navigation property: Many optional to one mandatory
         CsdlNavigationProperty navPropObservedProperty = new CsdlNavigationProperty()
-                .setName(ET_OBSERVED_PROPERTY_NAME)
-                .setType(ET_OBSERVED_PROPERTY_FQN)
+                .setName(ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_NAME)
+                .setType(ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_FQN)
                 .setNullable(false)
                 .setPartner(ES_DATASTREAMS_NAME);
 
         // navigation property: One mandatory to many optional
         CsdlNavigationProperty navPropObservation = new CsdlNavigationProperty()
-                .setName(ES_OBSERVATIONS_NAME)
-                .setType(ET_OBSERVATION_FQN)
+                .setName(ObservationEntityProvider.ES_OBSERVATIONS_NAME)
+                .setType(ObservationEntityProvider.ET_OBSERVATION_FQN)
                 .setCollection(true)
                 .setPartner(ET_DATASTREAM_NAME);
 

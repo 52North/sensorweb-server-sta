@@ -56,13 +56,17 @@ import java.util.Locale;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
-public class MqttPropertySubscriptionHandler extends AbstractPropertyRequestHandler<SensorThingsMqttRequest, MqttPropertySubscription> {
+public class MqttPropertySubscriptionHandler
+        extends AbstractPropertyRequestHandler<SensorThingsMqttRequest, MqttPropertySubscription> {
+
+    private final String ENTITY_NOT_FOUND = "Entity not found.";
 
     @Autowired
     private UriResourceNavigationResolver navigationResolver;
 
     @Override
-    public MqttPropertySubscription handlePropertyRequest(SensorThingsMqttRequest request) throws ODataApplicationException {
+    public MqttPropertySubscription handlePropertyRequest(SensorThingsMqttRequest request)
+            throws ODataApplicationException {
         MqttPropertySubscription subscription = null;
 
         List<UriResource> resourcePaths = request.getResourcePaths();
@@ -70,17 +74,26 @@ public class MqttPropertySubscriptionHandler extends AbstractPropertyRequestHand
         // handle request depending on the number of UriResource paths
         // e.g. the case: sta/Things(id)/Locations(id)/name
         if (resourcePaths.get(1) instanceof UriResourceNavigation) {
-            subscription = resolvePropertyForNavigation(request.getTopic(), request.getResourcePaths(), request.getQueryOptions());
+            subscription = resolvePropertyForNavigation(
+                    request.getTopic(),
+                    request.getResourcePaths(),
+                    request.getQueryOptions());
 
             // e.g the case: sta/Things(id)/description
         } else {
-            subscription = resolvePropertyForEntity(request.getTopic(), request.getResourcePaths(), request.getQueryOptions());
+            subscription = resolvePropertyForEntity(
+                    request.getTopic(),
+                    request.getResourcePaths(),
+                    request.getQueryOptions());
 
         }
         return subscription;
     }
 
-    private MqttPropertySubscription resolvePropertyForNavigation(String topic, List<UriResource> resourcePaths, QueryOptions queryOptions) throws ODataApplicationException {
+    private MqttPropertySubscription resolvePropertyForNavigation(String topic,
+                                                                  List<UriResource> resourcePaths,
+                                                                  QueryOptions queryOptions)
+            throws ODataApplicationException {
         int i = 0;
         UriResource lastEntitySegment = resourcePaths.get(i);
         // note that the last value for i at the end of the loop is the index
@@ -89,15 +102,19 @@ public class MqttPropertySubscriptionHandler extends AbstractPropertyRequestHand
             lastEntitySegment = resourcePaths.get(i);
         }
         // determine the target query parameters and fetch Entity for it
-        EntityQueryParams queryParams = navigationResolver.resolveUriResourceNavigationPaths(resourcePaths.subList(0, i));
+        EntityQueryParams queryParams =
+                navigationResolver.resolveUriResourceNavigationPaths(resourcePaths.subList(0, i));
         String entityId = navigationResolver.getEntityIdWithComplexEntityRequest(lastEntitySegment, queryParams);
         if (entityId == null) {
-            throw new ODataApplicationException("Entity not found.",
-                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
+            throw new ODataApplicationException(
+                    ENTITY_NOT_FOUND,
+                    HttpStatusCode.NOT_FOUND.getStatusCode(),
+                    Locale.ROOT);
         }
 
         List<UriResource> propertyResourcePaths = resourcePaths.subList(i, resourcePaths.size());
-        EdmProperty edmProperty = ((UriResourceProperty) propertyResourcePaths.get(resourcePaths.size()-1)).getProperty();
+        EdmProperty edmProperty =
+                ((UriResourceProperty) propertyResourcePaths.get(resourcePaths.size() - 1)).getProperty();
 
         MqttPropertySubscription subscription = new MqttPropertySubscription(
                 queryParams.getTargetEntitySet(),
@@ -105,18 +122,23 @@ public class MqttPropertySubscriptionHandler extends AbstractPropertyRequestHand
                 entityId,
                 edmProperty,
                 topic,
-                queryOptions);
+                queryOptions.getSelectOption());
         return subscription;
     }
 
-    private MqttPropertySubscription resolvePropertyForEntity(String topic, List<UriResource> resourcePaths, QueryOptions queryOptions) throws ODataApplicationException {
+    private MqttPropertySubscription resolvePropertyForEntity(String topic,
+                                                              List<UriResource> resourcePaths,
+                                                              QueryOptions queryOptions)
+            throws ODataApplicationException {
         UriResourceEntitySet uriResourceEntitySet = navigationResolver.resolveRootUriResource(resourcePaths.get(0));
         String entityId = navigationResolver.getEntityIdWithSimpleEntityRequest(uriResourceEntitySet);
         if (entityId == null) {
-            throw new ODataApplicationException("Entity not found.",
-                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
+            throw new ODataApplicationException(
+                    ENTITY_NOT_FOUND,
+                    HttpStatusCode.NOT_FOUND.getStatusCode(),
+                    Locale.ROOT);
         }
-        EdmProperty edmProperty = ((UriResourceProperty) resourcePaths.get(resourcePaths.size()-1)).getProperty();
+        EdmProperty edmProperty = ((UriResourceProperty) resourcePaths.get(resourcePaths.size() - 1)).getProperty();
 
         MqttPropertySubscription subscription = new MqttPropertySubscription(
                 uriResourceEntitySet.getEntitySet(),
@@ -124,7 +146,7 @@ public class MqttPropertySubscriptionHandler extends AbstractPropertyRequestHand
                 entityId,
                 edmProperty,
                 topic,
-                queryOptions);
+                queryOptions.getSelectOption());
         return subscription;
     }
 

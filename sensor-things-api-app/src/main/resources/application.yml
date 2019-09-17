@@ -5,7 +5,8 @@ trace: false
 
 server:
   port: 8081
-#TODO: Check if this is needed. 
+  rootUrl: example.xyz:80
+
 database:
   jpa:
     persistence-location: classpath:META-INF/persistence.xml
@@ -42,7 +43,7 @@ spring:
 # MQTT Configuration
 mqtt:
   broker:
-    plain_tcp:
+    plaintcp:
       enabled: false
       port: 1883
     websocket:

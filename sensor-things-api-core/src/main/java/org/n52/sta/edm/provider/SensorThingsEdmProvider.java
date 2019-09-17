@@ -33,11 +33,6 @@
  */
 package org.n52.sta.edm.provider;
 
-import static org.n52.sta.edm.provider.SensorThingsEdmConstants.NAMESPACE;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
 import org.apache.olingo.commons.api.edm.provider.CsdlComplexType;
@@ -52,22 +47,23 @@ import org.n52.sta.edm.provider.entities.SensorThingsEntityProviderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
 public class SensorThingsEdmProvider extends CsdlAbstractEdmProvider {
 
-    @Autowired
-    private SensorThingsEntityProviderRepository entityProviderRepository;
-
-    @Autowired
-    private SensorThingsComplexTypeProvider complexTypeProvider;
-
     // EDM Container
     public static final String CONTAINER_NAME = "sensorThingsEntitySets";
-    public static final FullQualifiedName CONTAINER = new FullQualifiedName(NAMESPACE, CONTAINER_NAME);
+    public static final FullQualifiedName CONTAINER =
+            new FullQualifiedName(SensorThingsEdmConstants.NAMESPACE, CONTAINER_NAME);
+    @Autowired
+    private SensorThingsEntityProviderRepository entityProviderRepository;
+    @Autowired
+    private SensorThingsComplexTypeProvider complexTypeProvider;
 
     @Override
     public CsdlEntityContainer getEntityContainer() throws ODataException {
@@ -88,7 +84,7 @@ public class SensorThingsEdmProvider extends CsdlAbstractEdmProvider {
     public List<CsdlSchema> getSchemas() throws ODataException {
         // create Schema
         CsdlSchema schema = new CsdlSchema();
-        schema.setNamespace(NAMESPACE);
+        schema.setNamespace(SensorThingsEdmConstants.NAMESPACE);
 
         // add EntityTypes
         List<CsdlEntityType> entityTypes = new ArrayList<CsdlEntityType>();
@@ -110,7 +106,8 @@ public class SensorThingsEdmProvider extends CsdlAbstractEdmProvider {
 
     @Override
     public CsdlEntityContainerInfo getEntityContainerInfo(FullQualifiedName entityContainerName) throws ODataException {
-        // This method is invoked when displaying the Service Document at e.g. http://localhost:8080/DemoService/DemoService.svc
+        // This method is invoked when displaying the Service Document
+        // at e.g. http://localhost:8080/DemoService/DemoService.svc
         if (entityContainerName == null || entityContainerName.equals(CONTAINER)) {
             CsdlEntityContainerInfo entityContainerInfo = new CsdlEntityContainerInfo();
             entityContainerInfo.setContainerName(CONTAINER);

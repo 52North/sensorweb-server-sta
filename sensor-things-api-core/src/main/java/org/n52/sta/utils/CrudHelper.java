@@ -45,6 +45,7 @@ import org.apache.olingo.server.api.deserializer.DeserializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.n52.sta.edm.provider.SensorThingsEdmConstants;
+import org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider;
 import org.n52.sta.service.deserializer.SensorThingsDeserializer;
 import org.n52.sta.service.handler.crud.AbstractEntityCrudRequestHandler;
 import org.n52.sta.service.handler.crud.EntityCrudRequestHandlerRepository;
@@ -53,8 +54,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
-
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 
 /**
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
@@ -73,8 +72,10 @@ public class CrudHelper implements InitializingBean {
     public DeserializerResult deserializeRequestBody(InputStream requestBody, UriInfo uriInfo)
             throws DeserializerException, ODataApplicationException {
         if (uriInfo.getUriResourceParts().size() > 1) {
-            EntityQueryParams navigationPaths = navigationResolver.resolveUriResourceNavigationPaths(uriInfo.getUriResourceParts());
-            DeserializerResult target = deserializer.entity(requestBody, navigationPaths.getTargetEntitySet().getEntityType());
+            EntityQueryParams navigationPaths =
+                    navigationResolver.resolveUriResourceNavigationPaths(uriInfo.getUriResourceParts());
+            DeserializerResult target = deserializer.entity(requestBody, navigationPaths.getTargetEntitySet()
+                                                                                        .getEntityType());
             return addNavigationLink(target, getSourceEntity(navigationPaths));
         }
         return deserializer.entity(requestBody, navigationResolver
@@ -98,13 +99,20 @@ public class CrudHelper implements InitializingBean {
     }
 
     public Entity addId(Entity entity, String id) {
-        return entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, id));
+        return entity.addProperty(new Property(
+                null,
+                AbstractSensorThingsEntityProvider.PROP_ID,
+                ValueType.PRIMITIVE,
+                id));
     }
 
     public AbstractEntityCrudRequestHandler getCrudEntityHanlder(UriInfo uriInfo) throws ODataApplicationException {
         if (uriInfo.getUriResourceParts().size() > 1) {
             return getUriResourceEntitySet(navigationResolver
-                    .resolveUriResourceNavigationPaths(uriInfo.getUriResourceParts()).getTargetEntitySet().getEntityType().getName());
+                    .resolveUriResourceNavigationPaths(uriInfo.getUriResourceParts())
+                    .getTargetEntitySet()
+                    .getEntityType()
+                    .getName());
         }
         return getCrudEntityHanlder(navigationResolver.resolveRootUriResource(uriInfo.getUriResourceParts().get(0)));
     }

@@ -13,22 +13,21 @@ Implementation of the [OGC SensorThings API Part I: Sensing](https://github.com/
 | MultiDatastream Extension             | A.5       | No          |   0 / ?    |
 | DataArray Extension                   | A.6       | No          |   0 / ?    |
 | Observation Creation via MQTT         | A.7       | Yes         |   0 / 1    |
-| Receiving Updates via MQTT            | A.8       | No          |   0 / 5    |
+| Receiving Updates via MQTT            | A.8       | Yes          |   0 / 5    |
 
+## Docker 
+A dockerfile for building the App is provided in the `sensor-things-app` subdirectory.
+A complete demo setup is provided via a [docker-compose file](https://github.com/52North/sensor-things/docker-compose.yml)
 
-## DONE Features:
- - Conformance Levels 1-3
- - Conformance Level 7 (Publish Observations via MQTT)
+## Testing
+A [Postman ](https://www.getpostman.com/) Collection with a multitude of demo requests is provided in the `etc` subdirectory.
 
-## TODO Features
+## Conformance Test Suite Status:
 
-#### Conformance Level 4 (Batch Requests)
- -  May not be supported by olingo Framework as it internally uses Tomcat 7 for Request body parsing.
-#### Conformance Level 5 (MultiDatastream Extension)
-#### Conformance Level 6 (DataArray Extension)
-#### Conformance Level 8 (Receiving Updates via MQTT)
--  Tracked in branch [feature/subscribe](https://github.com/52North/sensor-things/tree/feature/mqtt-subscribe)
+| Conformance Class                     | Reference | Implemented |Test Status |
 
 ## Notes:
 #### MQTT Extension
  - Subscription is only possible on Topics (aka REST-Endpoints) that exist. This is checked on Subscription creation. SUBACK Message is send regardless.
+#### Conformance Level 4 (Batch Requests)
+ -  May not be supported by olingo Framework as it internally uses Tomcat 7 for Request body parsing.

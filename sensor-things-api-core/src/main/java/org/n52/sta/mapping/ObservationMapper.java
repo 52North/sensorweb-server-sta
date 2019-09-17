@@ -37,8 +37,19 @@ import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.joda.time.DateTime;
 import org.n52.janmayen.Json;
-import org.n52.series.db.beans.*;
+import org.n52.series.db.beans.BlobDataEntity;
+import org.n52.series.db.beans.BooleanDataEntity;
+import org.n52.series.db.beans.CategoryDataEntity;
+import org.n52.series.db.beans.ComplexDataEntity;
+import org.n52.series.db.beans.CountDataEntity;
+import org.n52.series.db.beans.DataArrayDataEntity;
+import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.GeometryDataEntity;
 import org.n52.series.db.beans.HibernateRelations.HasPhenomenonTime;
+import org.n52.series.db.beans.ProfileDataEntity;
+import org.n52.series.db.beans.QuantityDataEntity;
+import org.n52.series.db.beans.ReferencedDataEntity;
+import org.n52.series.db.beans.TextDataEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.shetland.ogc.gml.time.Time;
@@ -46,7 +57,12 @@ import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
 import org.n52.shetland.util.DateTimeHelper;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
+import org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider;
+import org.n52.sta.edm.provider.entities.DatastreamEntityProvider;
+import org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider;
+import org.n52.sta.edm.provider.entities.ObservationEntityProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -56,48 +72,59 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.*;
-import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_NAME;
-import static org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider.ET_FEATURE_OF_INTEREST_NAME;
-import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ES_OBSERVATIONS_NAME;
-import static org.n52.sta.edm.provider.entities.ObservationEntityProvider.ET_OBSERVATION_FQN;
-
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- *
  */
 @Component
 public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
 
-    @Autowired
-    private DatastreamMapper datastreamMapper;
+    private static final DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
+
+    private final DatastreamMapper datastreamMapper;
+    private final FeatureOfInterestMapper featureMapper;
 
     @Autowired
-    private FeatureOfInterestMapper featureMapper;
-
-//    @Autowired
-//    private ObservationService observationService;
-    private final static DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
+    public ObservationMapper(@Lazy DatastreamMapper datastreamMapper, @Lazy FeatureOfInterestMapper featureMapper) {
+        this.datastreamMapper = datastreamMapper;
+        this.featureMapper = featureMapper;
+    }
 
     @Override
     public Entity createEntity(DataEntity<?> observation) {
         Entity entity = new Entity();
 
-        entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, observation.getIdentifier()));
+        entity.addProperty(new Property(
+                null,
+                AbstractSensorThingsEntityProvider.PROP_ID,
+                ValueType.PRIMITIVE,
+                observation.getIdentifier()));
 
         //TODO: urlencode whitespaces to allow for copy pasting into filter expression
-        entity.addProperty(new Property(null, PROP_RESULT, ValueType.PRIMITIVE, this.getResult(observation).getBytes()));
+        entity.addProperty(new Property(
+                null,
+                AbstractSensorThingsEntityProvider.PROP_RESULT,
+                ValueType.PRIMITIVE,
+                this.getResult(observation).getBytes()));
 
         Date resultTime = observation.getResultTime();
         Date samplingTime = observation.getSamplingTimeEnd();
-        entity.addProperty(new Property(null, PROP_RESULT_TIME, ValueType.PRIMITIVE, (resultTime.equals(samplingTime)) ? null : resultTime.getTime()));
+        entity.addProperty(new Property(null,
+                AbstractSensorThingsEntityProvider.PROP_RESULT_TIME,
+                ValueType.PRIMITIVE,
+                (resultTime.equals(samplingTime)) ? null : resultTime.getTime()));
 
         String phenomenonTime = DateTimeHelper.format(createPhenomenonTime(observation));
-        entity.addProperty(new Property(null, PROP_PHENOMENON_TIME, ValueType.PRIMITIVE, phenomenonTime));
+        entity.addProperty(new Property(
+                null,
+                AbstractSensorThingsEntityProvider.PROP_PHENOMENON_TIME,
+                ValueType.PRIMITIVE,
+                phenomenonTime));
 
-        entity.addProperty(new Property(null, PROP_VALID_TIME, ValueType.PRIMITIVE, (observation.isSetValidTime())
-                ? DateTimeHelper.format(createValidTime(observation))
-                : null));
+        entity.addProperty(new Property(
+                null,
+                AbstractSensorThingsEntityProvider.PROP_VALID_TIME,
+                ValueType.PRIMITIVE,
+                (observation.isSetValidTime()) ? DateTimeHelper.format(createValidTime(observation)) : null));
 
         // TODO: check for quality property
         // entity.addProperty(new Property(null, PROP_RESULT_QUALITY,
@@ -105,20 +132,47 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
         // List<JsonNode> parameters = observation.getParameters().stream()
         // .map(p -> createParameterProperty(p))
         // .collect(Collectors.toList());
-        List<ComplexValue> parameters = observation.hasParameters() ? observation.getParameters().stream().map(p -> createParameterComplexValue(p))
-                .collect(Collectors.toList()) : Collections.emptyList();
+        List<ComplexValue> parameters = observation.hasParameters() ?
+                observation.getParameters()
+                        .stream()
+                        .map(p -> createParameterComplexValue(p))
+                        .collect(Collectors.toList()) : Collections.emptyList();
 
-        entity.addProperty(new Property(null, PROP_PARAMETERS, ValueType.COLLECTION_COMPLEX, parameters));
+        entity.addProperty(new Property(
+                null,
+                AbstractSensorThingsEntityProvider.PROP_PARAMETERS,
+                ValueType.COLLECTION_COMPLEX,
+                parameters));
 
-        entity.setType(ET_OBSERVATION_FQN.getFullQualifiedNameAsString());
-        entity.setId(entityCreationHelper.createId(entity, ES_OBSERVATIONS_NAME, PROP_ID));
+        entity.setType(ObservationEntityProvider.ET_OBSERVATION_FQN.getFullQualifiedNameAsString());
+        entity.setId(entityCreationHelper.createId(
+                entity,
+                ObservationEntityProvider.ES_OBSERVATIONS_NAME,
+                AbstractSensorThingsEntityProvider.PROP_ID));
 
         return entity;
     }
 
+    @Override
+    public StaDataEntity createEntity(Entity entity) {
+        StaDataEntity observation = new StaDataEntity();
+        setIdentifier(observation, entity);
+        setName(observation, entity);
+        setDescription(observation, entity);
+        addPhenomenonTime(observation, entity);
+        addResultTime(observation, entity);
+        addValidTime(observation, entity);
+        addParameter(observation, entity);
+        addFeatureOfInterest(observation, entity);
+        addDatastream(observation, entity);
+        addResult(observation, entity);
+        return observation;
+    }
+
     private String getResult(DataEntity o) {
         if (o instanceof QuantityDataEntity) {
-            if ((((QuantityDataEntity) o).getValue().doubleValue() - ((QuantityDataEntity) o).getValue().intValue()) == 0.0) {
+            if ((((QuantityDataEntity) o).getValue().doubleValue() - ((QuantityDataEntity) o).getValue()
+                                                                                             .intValue()) == 0.0) {
                 return Integer.toString(((QuantityDataEntity) o).getValue().intValue());
             }
             return ((QuantityDataEntity) o).getValue().toString();
@@ -195,25 +249,9 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
     }
 
     @Override
-    public StaDataEntity createEntity(Entity entity) {
-        StaDataEntity observation = new StaDataEntity();
-        setIdentifier(observation, entity);
-        setName(observation, entity);
-        setDescription(observation, entity);
-        addPhenomenonTime(observation, entity);
-        addResultTime(observation, entity);
-        addValidTime(observation, entity);
-        addParameter(observation, entity);
-        addFeatureOfInterest(observation, entity);
-        addDatastream(observation, entity);
-        addResult(observation, entity);
-        return observation;
-    }
-
-    @Override
     protected void addPhenomenonTime(HasPhenomenonTime phenomenonTime, Entity entity) {
-        if (checkProperty(entity, PROP_PHENOMENON_TIME)) {
-           super.addPhenomenonTime(phenomenonTime, entity);
+        if (checkProperty(entity, AbstractSensorThingsEntityProvider.PROP_PHENOMENON_TIME)) {
+            super.addPhenomenonTime(phenomenonTime, entity);
         } else {
             Date date = DateTime.now().toDate();
             phenomenonTime.setSamplingTimeStart(date);
@@ -222,21 +260,22 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
     }
 
     private void addResult(StaDataEntity observation, Entity entity) {
-        if (checkProperty(entity, PROP_RESULT)) {
-            observation.setValue(new String((byte[]) getPropertyValue(entity, PROP_RESULT)));
+        if (checkProperty(entity, AbstractSensorThingsEntityProvider.PROP_RESULT)) {
+            observation.setValue(
+                    new String((byte[]) getPropertyValue(entity, AbstractSensorThingsEntityProvider.PROP_RESULT)));
         }
     }
 
     private void addResultTime(StaDataEntity observation, Entity entity) {
-        if (checkProperty(entity, PROP_RESULT_TIME)) {
-            Time time = parseTime(getPropertyValue(entity, PROP_RESULT_TIME));
+        if (checkProperty(entity, AbstractSensorThingsEntityProvider.PROP_RESULT_TIME)) {
+            Time time = parseTime(getPropertyValue(entity, AbstractSensorThingsEntityProvider.PROP_RESULT_TIME));
             observation.setResultTime(((TimeInstant) time).getValue().toDate());
         }
     }
 
     private void addValidTime(StaDataEntity observation, Entity entity) {
-        if (checkProperty(entity, PROP_VALID_TIME)) {
-            Time time = parseTime(getPropertyValue(entity, PROP_VALID_TIME));
+        if (checkProperty(entity, AbstractSensorThingsEntityProvider.PROP_VALID_TIME)) {
+            Time time = parseTime(getPropertyValue(entity, AbstractSensorThingsEntityProvider.PROP_VALID_TIME));
             if (time instanceof TimeInstant) {
                 observation.setValidTimeStart(((TimeInstant) time).getValue().toDate());
                 observation.setValidTimeEnd(((TimeInstant) time).getValue().toDate());
@@ -253,16 +292,18 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
     }
 
     private void addFeatureOfInterest(StaDataEntity observation, Entity entity) {
-        if (checkNavigationLink(entity, ET_FEATURE_OF_INTEREST_NAME)) {
+        if (checkNavigationLink(entity, FeatureOfInterestEntityProvider.ET_FEATURE_OF_INTEREST_NAME)) {
             observation.setFeatureOfInterest(featureMapper
-                    .createEntity(entity.getNavigationLink(ET_FEATURE_OF_INTEREST_NAME).getInlineEntity()));
+                    .createEntity(entity.getNavigationLink(FeatureOfInterestEntityProvider.ET_FEATURE_OF_INTEREST_NAME)
+                                        .getInlineEntity()));
         }
     }
 
     private void addDatastream(StaDataEntity observation, Entity entity) {
-        if (checkNavigationLink(entity, ET_DATASTREAM_NAME)) {
+        if (checkNavigationLink(entity, DatastreamEntityProvider.ET_DATASTREAM_NAME)) {
             observation.setDatastream(datastreamMapper
-                    .createEntity(entity.getNavigationLink(ET_DATASTREAM_NAME).getInlineEntity()));
+                    .createEntity(entity.getNavigationLink(DatastreamEntityProvider.ET_DATASTREAM_NAME)
+                                        .getInlineEntity()));
         }
     }
 
@@ -308,21 +349,24 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
             ((CategoryDataEntity) existing).setValue(toMerge.getValue().toString());
         } else {
             throw new ODataApplicationException(
-                    String.format("The observation value for @iot.id %i can not be updated!", existing.getIdentifier()),
+                    String.format("The observation value for @iot.id %s can not be updated!", existing.getIdentifier()),
                     HttpStatusCode.CONFLICT.getStatusCode(), Locale.getDefault());
         }
     }
 
     @Override
     public Entity checkEntity(Entity entity) throws ODataApplicationException {
-        checkPropertyValidity(PROP_RESULT, entity);
-        if (checkNavigationLink(entity, ET_FEATURE_OF_INTEREST_NAME)) {
+        checkPropertyValidity(AbstractSensorThingsEntityProvider.PROP_RESULT, entity);
+        if (checkNavigationLink(entity, FeatureOfInterestEntityProvider.ET_FEATURE_OF_INTEREST_NAME)) {
             featureMapper
-                    .checkNavigationLink(entity.getNavigationLink(ET_FEATURE_OF_INTEREST_NAME).getInlineEntity());
+                    .checkNavigationLink(
+                            entity.getNavigationLink(FeatureOfInterestEntityProvider.ET_FEATURE_OF_INTEREST_NAME)
+                                  .getInlineEntity());
         }
-        if (checkNavigationLink(entity, ET_DATASTREAM_NAME)) {
+        if (checkNavigationLink(entity, DatastreamEntityProvider.ET_DATASTREAM_NAME)) {
             datastreamMapper
-                    .checkNavigationLink(entity.getNavigationLink(ET_DATASTREAM_NAME).getInlineEntity());
+                    .checkNavigationLink(entity.getNavigationLink(DatastreamEntityProvider.ET_DATASTREAM_NAME)
+                    .getInlineEntity());
         }
         return entity;
     }

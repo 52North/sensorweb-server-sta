@@ -33,8 +33,6 @@
  */
 package org.n52.sta.service.processor;
 
-import java.io.InputStream;
-
 import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.format.ContentType;
@@ -52,6 +50,7 @@ import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
+import org.apache.olingo.server.core.uri.UriHelperImpl;
 import org.n52.sta.service.handler.AbstractEntityCollectionRequestHandler;
 import org.n52.sta.service.query.QueryOptions;
 import org.n52.sta.service.query.QueryOptionsHandler;
@@ -59,34 +58,44 @@ import org.n52.sta.service.query.URIQueryOptions;
 import org.n52.sta.service.request.SensorThingsRequest;
 import org.n52.sta.service.response.EntityCollectionResponse;
 import org.n52.sta.service.serializer.SensorThingsSerializer;
-import org.n52.sta.utils.EntityAnnotator;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.io.InputStream;
+
 /**
- *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
 public class SensorThingsEntityCollectionProcessor implements EntityCollectionProcessor {
 
-    @Autowired
-    AbstractEntityCollectionRequestHandler<SensorThingsRequest, EntityCollectionResponse> requestHandler;
+    private final AbstractEntityCollectionRequestHandler<SensorThingsRequest, EntityCollectionResponse> requestHandler;
+    private final QueryOptionsHandler queryOptionsHandler;
+    private final String rootUrl;
+    private final ODataSerializer serializer;
 
-    @Autowired
-    QueryOptionsHandler queryOptionsHandler;
-
-    @Autowired
-    EntityAnnotator entityAnnotator;
-
-    private OData odata;
     private ServiceMetadata serviceMetadata;
-    private ODataSerializer serializer;
+
+    public SensorThingsEntityCollectionProcessor(
+            AbstractEntityCollectionRequestHandler<SensorThingsRequest, EntityCollectionResponse> requestHandler,
+            QueryOptionsHandler queryOptionsHandler,
+            @Value("${server.rootUrl}") String rootUrl) {
+        this.requestHandler = requestHandler;
+        this.queryOptionsHandler = queryOptionsHandler;
+        this.rootUrl = rootUrl;
+        this.serializer = new SensorThingsSerializer(ContentType.JSON_NO_METADATA);
+        this.queryOptionsHandler.setUriHelper(new UriHelperImpl());
+    }
+
+    @Override
+    public void init(OData odata, ServiceMetadata serviceMetadata) {
+        this.serviceMetadata = serviceMetadata;
+    }
 
     @Override
     public void readEntityCollection(ODataRequest request, ODataResponse response, UriInfo uriInfo,
-            ContentType contentType) throws ODataApplicationException, ODataLibraryException {
-        QueryOptions queryOptions = new URIQueryOptions(uriInfo, request.getRawBaseUri());
+                                     ContentType contentType) throws ODataApplicationException, ODataLibraryException {
+        QueryOptions queryOptions = new URIQueryOptions(uriInfo, rootUrl);
 
         EntityCollectionResponse entityCollectionResponse = requestHandler
                 .handleEntityCollectionRequest(new SensorThingsRequest(uriInfo.getUriResourceParts(), queryOptions));
@@ -99,16 +108,9 @@ public class SensorThingsEntityCollectionProcessor implements EntityCollectionPr
         response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.JSON_NO_METADATA.toContentTypeString());
     }
 
-    @Override
-    public void init(OData odata, ServiceMetadata serviceMetadata) {
-        this.odata = odata;
-        this.serviceMetadata = serviceMetadata;
-        this.serializer = new SensorThingsSerializer(ContentType.JSON_NO_METADATA);
-        this.queryOptionsHandler.setUriHelper(odata.createUriHelper());
-
-    }
-
-    public InputStream createResponseContent(ServiceMetadata serviceMetadata, EntityCollectionResponse response, QueryOptions queryOptions) throws SerializerException {
+    public InputStream createResponseContent(ServiceMetadata serviceMetadata,
+                                             EntityCollectionResponse response,
+                                             QueryOptions queryOptions) throws SerializerException {
         EdmEntityType edmEntityType = response.getEntitySet().getEntityType();
 
         ContextURL.Builder contextUrlBuilder = ContextURL.with().entitySet(response.getEntitySet());
@@ -120,14 +122,17 @@ public class SensorThingsEntityCollectionProcessor implements EntityCollectionPr
 
         EntityCollectionSerializerOptions opts
                 = EntityCollectionSerializerOptions
-                        .with()
-                        .id(id)
-                        .contextURL(contextUrl)
-                        .select(queryOptions.getSelectOption())
-                        .expand(queryOptions.getExpandOption())
-                        .count(queryOptions.getCountOption())
-                        .build();
-        SerializerResult serializerResult = serializer.entityCollection(serviceMetadata, edmEntityType, response.getEntityCollection(), opts);
+                .with()
+                .id(id)
+                .contextURL(contextUrl)
+                .select(queryOptions.getSelectOption())
+                .expand(queryOptions.getExpandOption())
+                .count(queryOptions.getCountOption())
+                .build();
+        SerializerResult serializerResult = serializer.entityCollection(serviceMetadata,
+                edmEntityType,
+                response.getEntityCollection(),
+                opts);
         InputStream serializedContent = serializerResult.getContent();
 
         return serializedContent;

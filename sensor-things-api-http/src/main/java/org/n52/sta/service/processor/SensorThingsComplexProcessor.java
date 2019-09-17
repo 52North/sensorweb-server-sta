@@ -33,8 +33,6 @@
  */
 package org.n52.sta.service.processor;
 
-import java.io.InputStream;
-
 import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.edm.EdmComplexType;
@@ -58,26 +56,40 @@ import org.n52.sta.service.handler.AbstractPropertyRequestHandler;
 import org.n52.sta.service.request.SensorThingsRequest;
 import org.n52.sta.service.response.PropertyResponse;
 import org.n52.sta.service.serializer.SensorThingsSerializer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.InputStream;
+
 /**
- *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
 public class SensorThingsComplexProcessor implements ComplexProcessor {
 
-    @Autowired
-    AbstractPropertyRequestHandler<SensorThingsRequest, PropertyResponse> requestHandler;
+    private final AbstractPropertyRequestHandler<SensorThingsRequest, PropertyResponse> requestHandler;
+    private final ODataSerializer serializer;
+    private final String NOT_SUPPORTED = "Not supported yet.";
 
-    private OData odata;
     private ServiceMetadata serviceMetadata;
-    private ODataSerializer serializer;
+
+    public SensorThingsComplexProcessor(
+            AbstractPropertyRequestHandler<SensorThingsRequest, PropertyResponse> requestHandler) {
+        this.requestHandler = requestHandler;
+        this.serializer = new SensorThingsSerializer(ContentType.JSON_NO_METADATA);
+    }
 
     @Override
-    public void readComplex(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-        PropertyResponse complexResponse = requestHandler.handlePropertyRequest(new SensorThingsRequest(uriInfo.getUriResourceParts(), null));
+    public void init(OData odata, ServiceMetadata serviceMetadata) {
+        this.serviceMetadata = serviceMetadata;
+    }
+
+    @Override
+    public void readComplex(ODataRequest request,
+                            ODataResponse response,
+                            UriInfo uriInfo,
+                            ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
+        PropertyResponse complexResponse =
+                requestHandler.handlePropertyRequest(new SensorThingsRequest(uriInfo.getUriResourceParts(), null));
 
         // serialize
         Object value = complexResponse.getProperty().getValue();
@@ -96,9 +108,13 @@ public class SensorThingsComplexProcessor implements ComplexProcessor {
         }
     }
 
-    private InputStream createReponseContent(Property property, EdmComplexType edmPropertyType, EdmEntitySet responseEdmEntitySet) throws SerializerException {
+    private InputStream createReponseContent(Property property,
+                                             EdmComplexType edmPropertyType,
+                                             EdmEntitySet responseEdmEntitySet) throws SerializerException {
 
-        ContextURL contextUrl = ContextURL.with().entitySet(responseEdmEntitySet).navOrPropertyPath(property.getName()).build();
+        ContextURL contextUrl = ContextURL.with()
+                .entitySet(responseEdmEntitySet)
+                .navOrPropertyPath(property.getName()).build();
         ComplexSerializerOptions options = ComplexSerializerOptions.with()
                 .contextURL(contextUrl)
                 .build();
@@ -107,24 +123,18 @@ public class SensorThingsComplexProcessor implements ComplexProcessor {
         SerializerResult serializerResult = serializer.complex(serviceMetadata, edmPropertyType, property, options);
         InputStream propertyStream = serializerResult.getContent();
         return propertyStream;
-
     }
 
     @Override
-    public void updateComplex(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType requestFormat, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void updateComplex(ODataRequest request, ODataResponse response,
+                              UriInfo uriInfo, ContentType requestFormat,
+                              ContentType responseFormat) {
+        throw new UnsupportedOperationException(NOT_SUPPORTED);
     }
 
     @Override
-    public void deleteComplex(ODataRequest request, ODataResponse response, UriInfo uriInfo) throws ODataApplicationException, ODataLibraryException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void init(OData odata, ServiceMetadata serviceMetadata) {
-        this.odata = odata;
-        this.serviceMetadata = serviceMetadata;
-        this.serializer = new SensorThingsSerializer(ContentType.JSON_NO_METADATA);
+    public void deleteComplex(ODataRequest request, ODataResponse response, UriInfo uriInfo) {
+        throw new UnsupportedOperationException(NOT_SUPPORTED);
     }
 
 }

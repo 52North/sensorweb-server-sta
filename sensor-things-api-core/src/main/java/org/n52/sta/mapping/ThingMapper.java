@@ -37,11 +37,16 @@ import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider;
+import org.n52.sta.edm.provider.entities.DatastreamEntityProvider;
+import org.n52.sta.edm.provider.entities.LocationEntityProvider;
+import org.n52.sta.edm.provider.entities.ThingEntityProvider;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.n52.sta.utils.JsonHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -49,15 +54,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_PROPERTIES;
-import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ES_DATASTREAMS_NAME;
-import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ES_LOCATIONS_NAME;
-import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ES_THINGS_NAME;
-import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_FQN;
-
 /**
- *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
@@ -65,29 +62,42 @@ public class ThingMapper extends AbstractMapper<PlatformEntity> {
 
     private static final Logger LOG = LoggerFactory.getLogger(ThingMapper.class);
 
-    @Autowired
-    private EntityCreationHelper entityCreationHelper;
+    private final JsonHelper jsonHelper;
+    private final LocationMapper locationMapper;
+    private final DatastreamMapper datastreamMapper;
 
     @Autowired
-    private JsonHelper jsonHelper;
-
-    @Autowired
-    private LocationMapper locationMapper;
-
-    @Autowired
-    private DatastreamMapper datastreamMapper;
+    public ThingMapper(EntityCreationHelper entityCreationHelper,
+                       JsonHelper jsonHelper,
+                       @Lazy LocationMapper locationMapper,
+                       @Lazy DatastreamMapper datastreamMapper) {
+        this.jsonHelper = jsonHelper;
+        this.locationMapper = locationMapper;
+        this.datastreamMapper = datastreamMapper;
+    }
 
     @Override
     public Entity createEntity(PlatformEntity thing) {
         Entity entity = new Entity();
-        entity.addProperty(new Property(null, PROP_ID, ValueType.PRIMITIVE, thing.getIdentifier()));
+        entity.addProperty(new Property(
+                null,
+                AbstractSensorThingsEntityProvider.PROP_ID,
+                ValueType.PRIMITIVE,
+                thing.getIdentifier()));
         addDescription(entity, thing);
         addName(entity, thing);
 
-        entity.addProperty(new Property(null, PROP_PROPERTIES, ValueType.COMPLEX, createJsonProperty(thing)));
+        entity.addProperty(new Property(
+                null,
+                AbstractSensorThingsEntityProvider.PROP_PROPERTIES,
+                ValueType.COMPLEX,
+                createJsonProperty(thing)));
 
-        entity.setType(ET_THING_FQN.getFullQualifiedNameAsString());
-        entity.setId(entityCreationHelper.createId(entity, ES_THINGS_NAME, PROP_ID));
+        entity.setType(ThingEntityProvider.ET_THING_FQN.getFullQualifiedNameAsString());
+        entity.setId(entityCreationHelper.createId(
+                entity,
+                ThingEntityProvider.ES_THINGS_NAME,
+                AbstractSensorThingsEntityProvider.PROP_ID));
 
         return entity;
     }
@@ -98,11 +108,17 @@ public class ThingMapper extends AbstractMapper<PlatformEntity> {
         setIdentifier(thing, entity);
         setName(thing, entity);
         setDescription(thing, entity);
-        if (entity.getProperty(PROP_PROPERTIES) != null) {
-            if (entity.getProperty(PROP_PROPERTIES).getValue() instanceof ComplexValue) {
-                thing.setProperties(getPropertyValue((ComplexValue) entity.getProperty(PROP_PROPERTIES).getValue(), PROP_PROPERTIES).toString());
+        if (entity.getProperty(AbstractSensorThingsEntityProvider.PROP_PROPERTIES) != null) {
+            if (entity.getProperty(AbstractSensorThingsEntityProvider.PROP_PROPERTIES).getValue()
+                    instanceof ComplexValue) {
+                thing.setProperties(
+                        getPropertyValue((ComplexValue) entity
+                                .getProperty(AbstractSensorThingsEntityProvider.PROP_PROPERTIES)
+                                .getValue(), AbstractSensorThingsEntityProvider.PROP_PROPERTIES).toString());
             } else {
-                thing.setProperties(entity.getProperty(PROP_PROPERTIES).getValue().toString());
+                thing.setProperties(entity.getProperty(AbstractSensorThingsEntityProvider.PROP_PROPERTIES)
+                                          .getValue()
+                                          .toString());
             }
         }
         addLocations(thing, entity);
@@ -121,9 +137,10 @@ public class ThingMapper extends AbstractMapper<PlatformEntity> {
     }
 
     private void addLocations(PlatformEntity thing, Entity entity) {
-        if (checkNavigationLink(entity, ES_LOCATIONS_NAME)) {
+        if (checkNavigationLink(entity, LocationEntityProvider.ES_LOCATIONS_NAME)) {
             Set<LocationEntity> locations = new LinkedHashSet<>();
-            Iterator<Entity> iterator = entity.getNavigationLink(ES_LOCATIONS_NAME).getInlineEntitySet().iterator();
+            Iterator<Entity> iterator = entity.getNavigationLink(
+                    LocationEntityProvider.ES_LOCATIONS_NAME).getInlineEntitySet().iterator();
             while (iterator.hasNext()) {
                 locations.add(locationMapper.createEntity(iterator.next()));
             }
@@ -132,9 +149,10 @@ public class ThingMapper extends AbstractMapper<PlatformEntity> {
     }
 
     private void addDatastreams(PlatformEntity thing, Entity entity) {
-        if (checkNavigationLink(entity, ES_DATASTREAMS_NAME)) {
+        if (checkNavigationLink(entity, DatastreamEntityProvider.ES_DATASTREAMS_NAME)) {
             Set<DatastreamEntity> datastreams = new LinkedHashSet<>();
-            Iterator<Entity> iterator = entity.getNavigationLink(ES_DATASTREAMS_NAME).getInlineEntitySet().iterator();
+            Iterator<Entity> iterator = entity.getNavigationLink(
+                    DatastreamEntityProvider.ES_DATASTREAMS_NAME).getInlineEntitySet().iterator();
             while (iterator.hasNext()) {
                 datastreams.add(datastreamMapper.createEntity(iterator.next()));
             }
@@ -162,14 +180,16 @@ public class ThingMapper extends AbstractMapper<PlatformEntity> {
     @Override
     public Entity checkEntity(Entity entity) throws ODataApplicationException {
         checkNameAndDescription(entity);
-        if (checkNavigationLink(entity, ES_LOCATIONS_NAME)) {
-            Iterator<Entity> iterator = entity.getNavigationLink(ES_LOCATIONS_NAME).getInlineEntitySet().iterator();
+        if (checkNavigationLink(entity, LocationEntityProvider.ES_LOCATIONS_NAME)) {
+            Iterator<Entity> iterator = entity.getNavigationLink(
+                    LocationEntityProvider.ES_LOCATIONS_NAME).getInlineEntitySet().iterator();
             while (iterator.hasNext()) {
                 locationMapper.checkNavigationLink(iterator.next());
             }
         }
-        if (checkNavigationLink(entity, ES_DATASTREAMS_NAME)) {
-            Iterator<Entity> iterator = entity.getNavigationLink(ES_DATASTREAMS_NAME).getInlineEntitySet().iterator();
+        if (checkNavigationLink(entity, DatastreamEntityProvider.ES_DATASTREAMS_NAME)) {
+            Iterator<Entity> iterator = entity.getNavigationLink(
+                    DatastreamEntityProvider.ES_DATASTREAMS_NAME).getInlineEntitySet().iterator();
             while (iterator.hasNext()) {
                 datastreamMapper.checkNavigationLink(iterator.next());
             }

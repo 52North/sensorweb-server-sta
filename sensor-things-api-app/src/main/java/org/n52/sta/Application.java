@@ -48,6 +48,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
                 @Filter(type = FilterType.REGEX, pattern = "org\\.n52\\.series\\.db\\.assembler\\..*")})
 @EnableConfigurationProperties
 @EnableTransactionManagement
+@SuppressWarnings("uncommentedmain")
 public class Application {
 
     public static void main(String[] args) {

@@ -33,12 +33,23 @@ import org.apache.olingo.commons.api.edmx.EdmxReference;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.core.uri.parser.Parser;
-import org.n52.sta.mapping.*;
+import org.n52.sta.mapping.AbstractMapper;
+import org.n52.sta.mapping.DatastreamMapper;
+import org.n52.sta.mapping.FeatureOfInterestMapper;
+import org.n52.sta.mapping.HistoricalLocationMapper;
+import org.n52.sta.mapping.LocationMapper;
+import org.n52.sta.mapping.ObservationMapper;
+import org.n52.sta.mapping.ObservedPropertyMapper;
+import org.n52.sta.mapping.SensorMapper;
+import org.n52.sta.mapping.ThingMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -55,7 +66,16 @@ public class MqttUtil {
     public static final String SENSOR_ENTITY = "org.n52.series.db.beans.ProcedureEntity";
     public static final String THING_ENTITY = "org.n52.series.db.beans.PlatformEntity";
 
-    public static final Map<String, String> typeMap;
+    public static final String OBSERVATION = "Observation";
+    public static final String DATASTREAM = "Datastream";
+    public static final String FEATURE = "FeatureOfInterest";
+    public static final String HISTORICAL_LOCATION = "HistoricalLocation";
+    public static final String LOCATION = "Location";
+    public static final String OBSERVED_PROPERTY = "ObservedProperty";
+    public static final String SENSOR = "Sensor";
+    public static final String THING = "Thing";
+
+    public static final Map<String, String> TYPEMAP;
 
     /**
      * Maps olingo Types to Database types vice-versa..
@@ -63,42 +83,53 @@ public class MqttUtil {
      */
     static {
         HashMap<String, String> map = new HashMap<>();
-        map.put("Observation", OBSERVATION_ENTITY);
-        map.put("Datastream", DATASTREAM_ENTITY);
-        map.put("FeatureOfInterest", FEATURE_ENTITY);
-        map.put("HistoricalLocation", HISTORICAL_LOCATION_ENTITY);
-        map.put("Location", LOCATION_ENTITY);
-        map.put("ObservedProperty", OBSERVED_PROPERTY_ENTITY);
-        map.put("Sensor", SENSOR_ENTITY);
-        map.put("Thing", THING_ENTITY);
+        map.put(OBSERVATION, OBSERVATION_ENTITY);
+        map.put(DATASTREAM, DATASTREAM_ENTITY);
+        map.put(FEATURE, FEATURE_ENTITY);
+        map.put(HISTORICAL_LOCATION, HISTORICAL_LOCATION_ENTITY);
+        map.put(LOCATION, LOCATION_ENTITY);
+        map.put(OBSERVED_PROPERTY, OBSERVED_PROPERTY_ENTITY);
+        map.put(SENSOR, SENSOR_ENTITY);
+        map.put(THING, THING_ENTITY);
 
-        map.put(OBSERVATION_ENTITY, "Observation");
-        map.put(DATASTREAM_ENTITY, "Datastream");
-        map.put(FEATURE_ENTITY, "FeatureOfInterest");
-        map.put(HISTORICAL_LOCATION_ENTITY, "HistoricalLocation");
-        map.put(LOCATION_ENTITY, "Location");
-        map.put(OBSERVED_PROPERTY_ENTITY, "ObservedProperty");
-        map.put(SENSOR_ENTITY, "Sensor");
-        map.put(THING_ENTITY, "Thing");
-        typeMap = Collections.unmodifiableMap(map);
+        map.put(OBSERVATION_ENTITY, OBSERVATION);
+        map.put(DATASTREAM_ENTITY, DATASTREAM);
+        map.put(FEATURE_ENTITY, FEATURE);
+        map.put(HISTORICAL_LOCATION_ENTITY, HISTORICAL_LOCATION);
+        map.put(LOCATION_ENTITY, LOCATION);
+        map.put(OBSERVED_PROPERTY_ENTITY, OBSERVED_PROPERTY);
+        map.put(SENSOR_ENTITY, SENSOR);
+        map.put(THING_ENTITY, THING);
+        TYPEMAP = Collections.unmodifiableMap(map);
     }
 
+    private final ObservationMapper obsMapper;
+    private final DatastreamMapper dsMapper;
+    private final FeatureOfInterestMapper foiMapper;
+    private final HistoricalLocationMapper hlocMapper;
+    private final LocationMapper locMapper;
+    private final ObservedPropertyMapper obspropMapper;
+    private final SensorMapper sensorMapper;
+    private final ThingMapper thingMapper;
+
     @Autowired
-    private ObservationMapper obsMapper;
-    @Autowired
-    private DatastreamMapper dsMapper;
-    @Autowired
-    private FeatureOfInterestMapper foiMapper;
-    @Autowired
-    private HistoricalLocationMapper hlocMapper;
-    @Autowired
-    private LocationMapper locMapper;
-    @Autowired
-    private ObservedPropertyMapper obspropMapper;
-    @Autowired
-    private SensorMapper sensorMapper;
-    @Autowired
-    private ThingMapper thingMapper;
+    public MqttUtil(ObservationMapper obsMapper,
+                    DatastreamMapper dsMapper,
+                    FeatureOfInterestMapper foiMapper,
+                    HistoricalLocationMapper hlocMapper,
+                    LocationMapper locMapper,
+                    ObservedPropertyMapper obspropMapper,
+                    SensorMapper sensorMapper,
+                    ThingMapper thingMapper) {
+        this.obsMapper = obsMapper;
+        this.dsMapper = dsMapper;
+        this.foiMapper = foiMapper;
+        this.hlocMapper = hlocMapper;
+        this.locMapper = locMapper;
+        this.obspropMapper = obspropMapper;
+        this.sensorMapper = sensorMapper;
+        this.thingMapper = thingMapper;
+    }
 
     @Bean
     public Parser uriParser(CsdlAbstractEdmProvider provider) {

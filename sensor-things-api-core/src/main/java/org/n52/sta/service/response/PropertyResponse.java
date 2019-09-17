@@ -38,7 +38,6 @@ import org.apache.olingo.commons.api.edm.EdmEntitySet;
 import org.apache.olingo.commons.api.edm.EdmType;
 
 /**
- *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 public class PropertyResponse {
@@ -46,6 +45,7 @@ public class PropertyResponse {
     private Property property;
 
     private EdmType edmPropertyType;
+    private EdmEntitySet responseEdmEntitySet;
 
     public Property getProperty() {
         return property;
@@ -70,7 +70,5 @@ public class PropertyResponse {
     public void setResponseEdmEntitySet(EdmEntitySet responseEdmEntitySet) {
         this.responseEdmEntitySet = responseEdmEntitySet;
     }
-
-    private EdmEntitySet responseEdmEntitySet;
 
 }

@@ -49,14 +49,13 @@ import org.apache.olingo.server.api.uri.queryoption.ExpandOption;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
+import org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider;
 import org.n52.sta.utils.EntityAnnotator;
 import org.n52.sta.utils.EntityCreationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
 
 /**
  * Class to handle query options
@@ -145,6 +144,7 @@ public class QueryOptionsHandler {
                             targetEdmEntityType,
                             new ExpandItemQueryOptions(expandItem, baseURI)));
                 } catch (ODataApplicationException e) {
+                    e.printStackTrace();
                 }
 
             } else {
@@ -160,7 +160,8 @@ public class QueryOptionsHandler {
                                    EdmEntityType sourceType,
                                    EdmEntityType targetType,
                                    QueryOptions queryOptions) {
-        AbstractSensorThingsEntityService<?, ?> responseService = serviceRepository.getEntityService(targetType.getName());
+        AbstractSensorThingsEntityService<?, ?> responseService =
+                serviceRepository.getEntityService(targetType.getName());
         Entity entity = responseService.getRelatedEntity(sourceId, sourceType);
 
         if (queryOptions.hasExpandOption()) {
@@ -168,7 +169,7 @@ public class QueryOptionsHandler {
                     targetType,
                     queryOptions.getBaseURI(),
                     queryOptions.getSelectOption());
-            String id = entity.getProperty(PROP_ID).getValue().toString();
+            String id = entity.getProperty(AbstractSensorThingsEntityProvider.PROP_ID).getValue().toString();
             handleExpandOption(entity,
                     queryOptions.getExpandOption(),
                     id,
@@ -189,7 +190,8 @@ public class QueryOptionsHandler {
                                                        EdmEntityType targetType,
                                                        QueryOptions queryOptions)
             throws ODataApplicationException {
-        AbstractSensorThingsEntityService<?, ?> responseService = serviceRepository.getEntityService(targetType.getName());
+        AbstractSensorThingsEntityService<?, ?> responseService =
+                serviceRepository.getEntityService(targetType.getName());
         EntityCollection entityCollection = responseService.getRelatedEntityCollection(sourceId,
                 sourceType,
                 queryOptions);
@@ -205,7 +207,7 @@ public class QueryOptionsHandler {
                         targetType,
                         queryOptions.getBaseURI(),
                         queryOptions.getSelectOption());
-                String id = entity.getProperty(PROP_ID).getValue().toString();
+                String id = entity.getProperty(AbstractSensorThingsEntityProvider.PROP_ID).getValue().toString();
                 handleExpandOption(entity,
                         queryOptions.getExpandOption(),
                         id,

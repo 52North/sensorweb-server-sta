@@ -42,17 +42,25 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.data.query.ThingQuerySpecifications;
 import org.n52.sta.data.repositories.ThingRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
+import org.n52.sta.edm.provider.entities.DatastreamEntityProvider;
+import org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider;
+import org.n52.sta.edm.provider.entities.LocationEntityProvider;
 import org.n52.sta.mapping.ThingMapper;
 import org.n52.sta.service.query.QueryOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
-
-import static org.n52.sta.edm.provider.entities.DatastreamEntityProvider.ET_DATASTREAM_NAME;
-import static org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME;
-import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATION_NAME;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
@@ -61,7 +69,10 @@ import static org.n52.sta.edm.provider.entities.LocationEntityProvider.ET_LOCATI
 @DependsOn({"springApplicationContext"})
 public class ThingService extends AbstractSensorThingsEntityService<ThingRepository, PlatformEntity> {
 
-    private final static ThingQuerySpecifications tQS = new ThingQuerySpecifications();
+    private static final Logger logger = LoggerFactory.getLogger(ThingService.class);
+    private static final ThingQuerySpecifications tQS = new ThingQuerySpecifications();
+
+    private final String IOT_LOCATION = "iot.Location";
 
     private ThingMapper mapper;
 
@@ -79,7 +90,8 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     public EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException {
         EntityCollection retEntitySet = new EntityCollection();
         Specification<PlatformEntity> filter = getFilterPredicate(PlatformEntity.class, queryOptions);
-        getRepository().findAll(filter, createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        getRepository().findAll(filter, createPageableRequest(queryOptions))
+                       .forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
         return retEntitySet;
     }
 
@@ -90,7 +102,9 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     }
 
     @Override
-    public EntityCollection getRelatedEntityCollection(String sourceIdentifier, EdmEntityType sourceEntityType, QueryOptions queryOptions) throws ODataApplicationException {
+    public EntityCollection getRelatedEntityCollection(String sourceIdentifier,
+                                                       EdmEntityType sourceEntityType,
+                                                       QueryOptions queryOptions) {
         Specification<PlatformEntity> filter = tQS.withRelatedLocationIdentifier(sourceIdentifier);
 
         filter = filter.and(getFilterPredicate(PlatformEntity.class, queryOptions));
@@ -117,9 +131,11 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     }
 
     @Override
-    public boolean existsRelatedEntity(String sourceIdentifier, EdmEntityType sourceEntityType, String targetIdentifier) {
+    public boolean existsRelatedEntity(String sourceIdentifier,
+                                       EdmEntityType sourceEntityType,
+                                       String targetIdentifier) {
         switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-            case "iot.Location": {
+            case IOT_LOCATION: {
                 Specification<PlatformEntity> filter = tQS.withRelatedLocationIdentifier(sourceIdentifier);
                 if (targetIdentifier != null) {
                     filter = filter.and(tQS.withIdentifier(targetIdentifier));
@@ -160,9 +176,11 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
      * @param sourceIdentifier Id of the Source Entity
      * @param sourceEntityType Type of the Source Entity
      * @param targetIdentifier Id of the Thing to be retrieved
-     * @return Optional<PlatformEntity> Requested Entity
+     * @return Optional&lt;PlatformEntity&gt; Requested Entity
      */
-    private Optional<PlatformEntity> getRelatedEntityRaw(String sourceIdentifier, EdmEntityType sourceEntityType, String targetIdentifier) {
+    private Optional<PlatformEntity> getRelatedEntityRaw(String sourceIdentifier,
+                                                         EdmEntityType sourceEntityType,
+                                                         String targetIdentifier) {
         Specification<PlatformEntity> filter;
         switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
             case "iot.HistoricalLocation": {
@@ -173,7 +191,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
                 filter = tQS.withRelatedDatastreamIdentifier(sourceIdentifier);
                 break;
             }
-            case "iot.Location": {
+            case IOT_LOCATION: {
                 filter = tQS.withRelatedLocationIdentifier(sourceIdentifier);
                 break;
             }
@@ -193,7 +211,8 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     }
 
     @Override
-    public PlatformEntity create(PlatformEntity thing) throws ODataApplicationException {
+    public PlatformEntity create(PlatformEntity newThing) throws ODataApplicationException {
+        PlatformEntity thing = newThing;
         if (!thing.isProcesssed()) {
             if (thing.getIdentifier() != null && !thing.isSetName()) {
                 return getRepository().findByIdentifier(thing.getIdentifier()).get();
@@ -236,14 +255,21 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
                 }
                 return getRepository().save(merged);
             }
-            throw new ODataApplicationException("Entity not found.",
-                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
+            throw new ODataApplicationException(
+                    "Unable to update. Entity not found.",
+                    HttpStatusCode.NOT_FOUND.getStatusCode(),
+                    Locale.ROOT);
         } else if (HttpMethod.PUT.equals(method)) {
             throw new ODataApplicationException("Http PUT is not yet supported!",
                     HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.getDefault());
         }
         throw new ODataApplicationException("Invalid http method for updating entity!",
                 HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+    }
+
+    @Override
+    public PlatformEntity update(PlatformEntity entity) {
+        return getRepository().save(entity);
     }
 
     private void checkUpdate(PlatformEntity thing) throws ODataApplicationException {
@@ -257,11 +283,6 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
                 checkInlineDatastream(datastream);
             }
         }
-    }
-
-    @Override
-    public PlatformEntity update(PlatformEntity entity) {
-        return getRepository().save(entity);
     }
 
     @Override
@@ -288,8 +309,10 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
             });
             getRepository().deleteByIdentifier(identifier);
         } else {
-            throw new ODataApplicationException("Entity not found.",
-                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
+            throw new ODataApplicationException(
+                    "Unable to delete. Entity not found.",
+                    HttpStatusCode.NOT_FOUND.getStatusCode(),
+                    Locale.ROOT);
         }
     }
 
@@ -352,15 +375,18 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
         }
     }
 
+    @SuppressWarnings("unchecked")
     private AbstractSensorThingsEntityService<?, LocationEntity> getLocationService() {
         return (AbstractSensorThingsEntityService<?, LocationEntity>) getEntityService(EntityTypes.Location);
     }
 
+    @SuppressWarnings("unchecked")
     private AbstractSensorThingsEntityService<?, HistoricalLocationEntity> getHistoricalLocationService() {
         return (AbstractSensorThingsEntityService<?, HistoricalLocationEntity>) getEntityService(
                 EntityTypes.HistoricalLocation);
     }
 
+    @SuppressWarnings("unchecked")
     private AbstractSensorThingsEntityService<?, DatastreamEntity> getDatastreamService() {
         return (AbstractSensorThingsEntityService<?, DatastreamEntity>) getEntityService(
                 EntityTypes.Datastream);
@@ -369,31 +395,32 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     @Override
     public Map<String, Set<String>> getRelatedCollections(Object rawObject) {
         Map<String, Set<String>> collections = new HashMap<>();
-        Set<String> set = new HashSet<>();
         PlatformEntity entity = (PlatformEntity) rawObject;
 
-        try {
-            entity.getLocations().forEach((en) -> {
-                set.add(en.getIdentifier());
-            });
-            collections.put(ET_LOCATION_NAME, new HashSet(set));
-        } catch (NullPointerException e) {
+        if (entity.hasLocationEntities()) {
+            collections.put(
+                    LocationEntityProvider.ET_LOCATION_NAME,
+                    entity.getLocations()
+                            .stream()
+                            .map(LocationEntity::getIdentifier)
+                            .collect(Collectors.toSet()));
         }
-        set.clear();
-        try {
-            entity.getHistoricalLocations().forEach((en) -> {
-                set.add(en.getIdentifier());
-            });
-            collections.put(ET_HISTORICAL_LOCATION_NAME, new HashSet(set));
-        } catch (NullPointerException e) {
+
+        if (entity.hasHistoricalLocations()) {
+            collections.put(
+                    HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME,
+                    entity.getHistoricalLocations()
+                            .stream()
+                            .map(HistoricalLocationEntity::getIdentifier)
+                            .collect(Collectors.toSet()));
         }
-        set.clear();
-        try {
-            entity.getDatastreams().forEach((en) -> {
-                set.add(en.getIdentifier());
-            });
-            collections.put(ET_DATASTREAM_NAME, new HashSet(set));
-        } catch (NullPointerException e) {
+
+        if (entity.hasDatastreams()) {
+            collections.put(DatastreamEntityProvider.ET_DATASTREAM_NAME,
+                    entity.getDatastreams()
+                            .stream()
+                            .map(DatastreamEntity::getIdentifier)
+                            .collect(Collectors.toSet()));
         }
         return collections;
     }

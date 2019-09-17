@@ -34,25 +34,44 @@ import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
-import org.n52.series.db.beans.*;
+import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.DatasetEntity;
+import org.n52.series.db.beans.FormatEntity;
+import org.n52.series.db.beans.PhenomenonEntity;
+import org.n52.series.db.beans.PlatformEntity;
+import org.n52.series.db.beans.ProcedureEntity;
+import org.n52.series.db.beans.UnitEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
-import org.n52.sta.data.repositories.*;
+import org.n52.sta.data.repositories.DataRepository;
+import org.n52.sta.data.repositories.DatasetRepository;
+import org.n52.sta.data.repositories.DatastreamRepository;
+import org.n52.sta.data.repositories.FormatRepository;
+import org.n52.sta.data.repositories.UnitRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
+import org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider;
+import org.n52.sta.edm.provider.entities.SensorEntityProvider;
+import org.n52.sta.edm.provider.entities.ThingEntityProvider;
 import org.n52.sta.mapping.DatastreamMapper;
 import org.n52.sta.service.query.QueryOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
-
-import static org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_NAME;
-import static org.n52.sta.edm.provider.entities.SensorEntityProvider.ET_SENSOR_NAME;
-import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAME;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -61,26 +80,30 @@ import static org.n52.sta.edm.provider.entities.ThingEntityProvider.ET_THING_NAM
 @DependsOn({"springApplicationContext"})
 public class DatastreamService extends AbstractSensorThingsEntityService<DatastreamRepository, DatastreamEntity> {
 
-    private final static DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
+    private static final Logger logger = LoggerFactory.getLogger(DatastreamService.class);
+    private static final DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
+    private static final ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
 
-    @Autowired
-    private UnitRepository unitRepository;
-
-    @Autowired
-    private FormatRepository formatRepository;
-
-    @Autowired
-    private DataRepository dataRepository;
-
-    @Autowired
-    private DatasetRepository datasetRepository;
+    private final UnitRepository unitRepository;
+    private final FormatRepository formatRepository;
+    private final DataRepository dataRepository;
+    private final DatasetRepository datasetRepository;
 
     private DatastreamMapper mapper;
-    private ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
 
-    public DatastreamService(DatastreamRepository repository, DatastreamMapper mapper) {
+    @Autowired
+    public DatastreamService(DatastreamRepository repository,
+                             DatastreamMapper mapper,
+                             UnitRepository unitRepository,
+                             FormatRepository formatRepository,
+                             DataRepository dataRepository,
+                             DatasetRepository datasetRepository) {
         super(repository);
         this.mapper = mapper;
+        this.unitRepository = unitRepository;
+        this.formatRepository = formatRepository;
+        this.dataRepository = dataRepository;
+        this.datasetRepository = datasetRepository;
     }
 
     @Override
@@ -93,7 +116,9 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
         EntityCollection retEntitySet = new EntityCollection();
         Specification<DatastreamEntity> filter = getFilterPredicate(DatastreamEntity.class, queryOptions);
 
-        getRepository().findAll(filter, createPageableRequest(queryOptions)).forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
+        getRepository().findAll(filter, createPageableRequest(queryOptions))
+                       .forEach(t -> retEntitySet.getEntities()
+                       .add(mapper.createEntity(t)));
         return retEntitySet;
     }
 
@@ -104,8 +129,11 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     }
 
     @Override
-    public EntityCollection getRelatedEntityCollection(String sourceId, EdmEntityType sourceEntityType, QueryOptions queryOptions) throws ODataApplicationException {
-        Specification<DatastreamEntity> filter = getFilter(sourceId, sourceEntityType).and(getFilterPredicate(DatastreamEntity.class, queryOptions));
+    public EntityCollection getRelatedEntityCollection(String sourceId,
+                                                       EdmEntityType sourceEntityType,
+                                                       QueryOptions queryOptions) {
+        Specification<DatastreamEntity> filter = getFilter(sourceId, sourceEntityType)
+                .and(getFilterPredicate(DatastreamEntity.class, queryOptions));
         Iterable<DatastreamEntity> datastreams = getRepository().findAll(filter, createPageableRequest(queryOptions));
         EntityCollection retEntitySet = new EntityCollection();
         datastreams.forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
@@ -185,9 +213,11 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
      * @param sourceId         Id of the Source Entity
      * @param sourceEntityType Type of the Source Entity
      * @param targetId         Id of the Entity to be retrieved
-     * @return Optional<DatastreamEntity> Requested Entity
+     * @return Optional&lt;DatastreamEntity&gt; Requested Entity
      */
-    private Optional<DatastreamEntity> getRelatedEntityRaw(String sourceId, EdmEntityType sourceEntityType, String targetId) {
+    private Optional<DatastreamEntity> getRelatedEntityRaw(String sourceId,
+                                                           EdmEntityType sourceEntityType,
+                                                           String targetId) {
         Specification<DatastreamEntity> filter = getFilter(sourceId, sourceEntityType);
         if (filter == null) {
             return Optional.empty();
@@ -231,28 +261,30 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
         return Specification.where(filter);
     }
 
-//    /**
-//     * Constructs SQL Expression to request Entity by ID.
-//     *
-//     * @param id id of the requested entity
-//     * @return BooleanExpression evaluating to true if Entity is found and valid
-//     */
-//    private BooleanExpression byId(Long id) {
-//        return dQS.withId(id);
-//    }
+    ///**
+    // * Constructs SQL Expression to request Entity by ID.
+    // *
+    // * @param id id of the requested entity
+    // * @return BooleanExpression evaluating to true if Entity is found and valid
+    // */
+    //private BooleanExpression byId(Long id) {
+    //    return dQS.withId(id);
+    //}
 
     @Override
     public DatastreamEntity create(DatastreamEntity datastream) throws ODataApplicationException {
+        DatastreamEntity entity = datastream;
         if (!datastream.isProcesssed()) {
             if (datastream.getIdentifier() != null && !datastream.isSetName()) {
                 return getRepository().findOne(dQS.withIdentifier(datastream.getIdentifier())).get();
             }
             check(datastream);
-//            Specification<DatastreamEntity> predicate = createQuery(datastream);
-//            if (getRepository().count() > 0) {
-//                DatastreamEntity optional = getRepository().findOne(predicate).get();
-//                return processObservation((DatastreamEntity) optional.setProcesssed(true), datastream.getObservations());
-//            }
+            //Specification<DatastreamEntity> predicate = createQuery(datastream);
+            //if (getRepository().count() > 0) {
+            //    DatastreamEntity optional = getRepository().findOne(predicate).get();
+            //    return processObservation((DatastreamEntity) optional.setProcesssed(true),
+            //    datastream.getObservations());
+            //}
             datastream.setProcesssed(true);
             checkObservationType(datastream);
             checkUnit(datastream);
@@ -269,11 +301,11 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
             } else {
                 datastream.setIdentifier(UUID.randomUUID().toString());
             }
-            datastream = getRepository().intermediateSave(datastream);
-            processObservation(datastream, datastream.getObservations());
-            datastream = getRepository().save(datastream);
+            entity = getRepository().intermediateSave(datastream);
+            processObservation(entity, entity.getObservations());
+            entity = getRepository().save(entity);
         }
-        return datastream;
+        return entity;
     }
 
     private Specification<DatastreamEntity> createQuery(DatastreamEntity datastream) {
@@ -288,8 +320,10 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
         } else {
             expression = expression.and(dQS.withSensorName(datastream.getProcedure().getName()));
         }
-        if (datastream.getObservableProperty().getIdentifier() != null && !datastream.getObservableProperty().isSetName()) {
-            expression = expression.and(dQS.withObservedPropertyIdentifier(datastream.getObservableProperty().getIdentifier()));
+        if (datastream.getObservableProperty().getIdentifier() != null && !datastream.getObservableProperty()
+                                                                                     .isSetName()) {
+            expression = expression.and(dQS.withObservedPropertyIdentifier(datastream.getObservableProperty()
+                                                                                     .getIdentifier()));
         } else {
             expression = expression.and(dQS.withObservedPropertyName(datastream.getObservableProperty().getName()));
         }
@@ -302,6 +336,11 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
             throw new ODataApplicationException("The datastream to create is invalid",
                     HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
         }
+    }
+
+    @Override
+    protected DatastreamEntity update(DatastreamEntity entity) {
+        return getRepository().save(entity);
     }
 
     @Override
@@ -320,7 +359,8 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
                 }
                 return getRepository().save(merged);
             }
-            throw new ODataApplicationException("Entity not found.",
+            throw new ODataApplicationException(
+                    "Unable to update. Entity not found.",
                     HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
         } else if (HttpMethod.PUT.equals(method)) {
             throw new ODataApplicationException("Http PUT is not yet supported!",
@@ -330,40 +370,31 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
                 HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
     }
 
-    private void checkUnit(DatastreamEntity merged, DatastreamEntity toMerge) {
-        if (toMerge.isSetUnit()) {
-            checkUnit(toMerge);
-            merged.setUnit(toMerge.getUnit());
-        }
-    }
-
     private void checkUpdate(DatastreamEntity entity) throws ODataApplicationException {
+        String ERROR_MSG = "Inlined entities are not allowed for updates!";
         if (entity.getObservableProperty() != null && (entity.getObservableProperty().getIdentifier() == null
                 || entity.getObservableProperty().isSetName() || entity.getObservableProperty().isSetDescription())) {
-            throw new ODataApplicationException("Inlined entities are not allowed for updates!",
+            throw new ODataApplicationException(ERROR_MSG,
                     HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
         }
 
-        if (entity.getProcedure() != null && (entity.getProcedure().getIdentifier() == null || entity.getProcedure().isSetName()
-                || entity.getProcedure().isSetDescription())) {
-            throw new ODataApplicationException("Inlined entities are not allowed for updates!",
+        if (entity.getProcedure() != null
+                && (entity.getProcedure().getIdentifier() == null
+                    || entity.getProcedure().isSetName()
+                    || entity.getProcedure().isSetDescription())) {
+            throw new ODataApplicationException(ERROR_MSG,
                     HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
         }
 
         if (entity.getThing() != null && (entity.getThing().getIdentifier() == null || entity.getThing().isSetName()
                 || entity.getThing().isSetDescription())) {
-            throw new ODataApplicationException("Inlined entities are not allowed for updates!",
+            throw new ODataApplicationException(ERROR_MSG,
                     HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
         }
         if (entity.getObservations() != null) {
-            throw new ODataApplicationException("Inlined entities are not allowed for updates!",
+            throw new ODataApplicationException(ERROR_MSG,
                     HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
         }
-    }
-
-    @Override
-    protected DatastreamEntity update(DatastreamEntity entity) {
-        return getRepository().save(entity);
     }
 
     @Override
@@ -375,7 +406,9 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
             // check observations
             getRepository().deleteByIdentifier(id);
         } else {
-            throw new ODataApplicationException("Entity not found.", HttpStatusCode.NOT_FOUND.getStatusCode(),
+            throw new ODataApplicationException(
+                    "Unable to delete. Entity not found.",
+                    HttpStatusCode.NOT_FOUND.getStatusCode(),
                     Locale.ROOT);
         }
     }
@@ -435,6 +468,13 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
         }
     }
 
+    private void checkUnit(DatastreamEntity merged, DatastreamEntity toMerge) {
+        if (toMerge.isSetUnit()) {
+            checkUnit(toMerge);
+            merged.setUnit(toMerge.getUnit());
+        }
+    }
+
     private void checkObservationType(DatastreamEntity datastream) {
         FormatEntity format;
         if (!formatRepository.existsByFormat(datastream.getObservationType().getFormat())) {
@@ -445,7 +485,8 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
         datastream.setObservationType(format);
     }
 
-    private DatastreamEntity processObservation(DatastreamEntity datastream, Set<StaDataEntity> observations) throws ODataApplicationException {
+    private DatastreamEntity processObservation(DatastreamEntity datastream,
+                                                Set<StaDataEntity> observations) throws ODataApplicationException {
         if (observations != null && !observations.isEmpty()) {
             Set<DatasetEntity> datasets = new LinkedHashSet<>();
             if (datastream.getDatasets() != null) {
@@ -485,25 +526,28 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     public Map<String, Set<String>> getRelatedCollections(Object rawObject) {
         Map<String, Set<String>> collections = new HashMap<>();
         DatastreamEntity entity = (DatastreamEntity) rawObject;
-        try {
-            collections.put(ET_THING_NAME, Collections.singleton(entity.getThing().getIdentifier()));
-        } catch (NullPointerException e) {
-        }
-        try {
-            collections.put(ET_SENSOR_NAME, Collections.singleton(entity.getProcedure().getIdentifier()));
-        } catch (NullPointerException e) {
-        }
-        try {
-            collections.put(ET_OBSERVED_PROPERTY_NAME, Collections.singleton(entity.getObservableProperty().getIdentifier()));
-        } catch (NullPointerException e) {
+
+        if (entity.hasThing()) {
+            collections.put(ThingEntityProvider.ET_THING_NAME,
+                    Collections.singleton(entity.getThing().getIdentifier()));
         }
 
-//        Iterable<DataEntity<?>> observations = dataRepository.findAll(dQS.withId(entity.getId()));
-//        Set<Long> observationIds = new HashSet<>();
-//        observations.forEach((o) -> {
-//            observationIds.add(o.getId());
-//        });
-//        collections.put(ET_OBSERVATION_NAME, observationIds);
+        if (entity.hasProcedure()) {
+            collections.put(SensorEntityProvider.ET_SENSOR_NAME,
+                    Collections.singleton(entity.getProcedure().getIdentifier()));
+        }
+
+        if (entity.hasObservableProperty()) {
+            collections.put(ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_NAME,
+                    Collections.singleton(entity.getObservableProperty().getIdentifier()));
+        }
+
+        //Iterable<DataEntity<?>> observations = dataRepository.findAll(dQS.withId(entity.getId()));
+        //Set<Long> observationIds = new HashSet<>();
+        //observations.forEach((o) -> {
+        //    observationIds.add(o.getId());
+        //});
+        //collections.put(ET_OBSERVATION_NAME, observationIds);
 
         return collections;
     }

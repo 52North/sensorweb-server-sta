@@ -49,7 +49,8 @@ public class ObservedPropertyEntityCrudRequestHandler extends AbstractEntityCrud
     @Override
     protected Entity handleCreateEntityRequest(Entity entity) throws ODataApplicationException {
         if (entity != null) {
-            PhenomenonEntity observableProperty = getEntityService().create(mapper.createEntity(getMapper().checkEntity(entity)));
+            PhenomenonEntity observableProperty =
+                    getEntityService().create(mapper.createEntity(getMapper().checkEntity(entity)));
             return mapToEntity(observableProperty);
         }
         return null;
@@ -74,7 +75,9 @@ public class ObservedPropertyEntityCrudRequestHandler extends AbstractEntityCrud
         return mapper;
     }
 
+    @SuppressWarnings("unchecked")
     private AbstractSensorThingsEntityService<?, ObservablePropertyEntity> getEntityService() {
-        return (AbstractSensorThingsEntityService<?, ObservablePropertyEntity>) getEntityService(EntityTypes.ObservedProperty);
+        return (AbstractSensorThingsEntityService<?, ObservablePropertyEntity>)
+                getEntityService(EntityTypes.ObservedProperty);
     }
 }

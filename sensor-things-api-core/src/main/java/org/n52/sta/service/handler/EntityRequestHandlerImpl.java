@@ -37,6 +37,7 @@ import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
+import org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider;
 import org.n52.sta.service.query.QueryOptionsHandler;
 import org.n52.sta.service.request.SensorThingsRequest;
 import org.n52.sta.service.response.EntityResponse;
@@ -48,8 +49,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvider.PROP_ID;
-
 /**
  * Implementation for handling Entity requests
  *
@@ -59,9 +58,11 @@ import static org.n52.sta.edm.provider.entities.AbstractSensorThingsEntityProvid
 public class EntityRequestHandlerImpl extends AbstractEntityRequestHandler<SensorThingsRequest, EntityResponse> {
 
     @Autowired
-    EntityAnnotator entityAnnotator;
+    private EntityAnnotator entityAnnotator;
+
     @Autowired
     private UriResourceNavigationResolver navigationResolver;
+
     @Autowired
     private QueryOptionsHandler queryOptionsHandler;
 
@@ -88,7 +89,7 @@ public class EntityRequestHandlerImpl extends AbstractEntityRequestHandler<Senso
             queryOptionsHandler.handleExpandOption(
                     response.getEntity(),
                     request.getQueryOptions().getExpandOption(),
-                    response.getEntity().getProperty(PROP_ID).getValue().toString(),
+                    response.getEntity().getProperty(AbstractSensorThingsEntityProvider.PROP_ID).getValue().toString(),
                     response.getEntitySet().getEntityType(),
                     request.getQueryOptions().getBaseURI());
         } else {
@@ -101,7 +102,8 @@ public class EntityRequestHandlerImpl extends AbstractEntityRequestHandler<Senso
         return response;
     }
 
-    private EntityResponse createResponseForEntity(List<UriResource> resourcePaths) throws ODataApplicationException {
+    private EntityResponse createResponseForEntity(List<UriResource> resourcePaths)
+            throws ODataApplicationException {
 
         UriResourceEntitySet uriResourceEntitySet = navigationResolver.resolveRootUriResource(resourcePaths.get(0));
         Entity responseEntity = navigationResolver.getEntityWithSimpleEntityRequest(uriResourceEntitySet);
@@ -114,7 +116,8 @@ public class EntityRequestHandlerImpl extends AbstractEntityRequestHandler<Senso
         return response;
     }
 
-    private EntityResponse createResponseForNavigation(List<UriResource> resourcePaths) throws ODataApplicationException {
+    private EntityResponse createResponseForNavigation(List<UriResource> resourcePaths)
+            throws ODataApplicationException {
         // determine the target query parameters and fetch Entity for it
         EntityQueryParams requestParams = navigationResolver.resolveUriResourceNavigationPaths(resourcePaths);
         UriResource lastSegment = resourcePaths.get(resourcePaths.size() - 1);
@@ -127,7 +130,8 @@ public class EntityRequestHandlerImpl extends AbstractEntityRequestHandler<Senso
         return response;
     }
 
-    private UriResourceEntitySet getUriResourceEntitySet(List<UriResource> resourcePaths) throws ODataApplicationException {
+    private UriResourceEntitySet getUriResourceEntitySet(List<UriResource> resourcePaths)
+            throws ODataApplicationException {
         return navigationResolver.resolveRootUriResource(resourcePaths.get(0));
     }
 

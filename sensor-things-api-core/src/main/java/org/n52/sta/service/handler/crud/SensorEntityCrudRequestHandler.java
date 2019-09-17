@@ -74,6 +74,7 @@ public class SensorEntityCrudRequestHandler extends AbstractEntityCrudRequestHan
         return mapper;
     }
 
+    @SuppressWarnings("unchecked")
     private AbstractSensorThingsEntityService<?, SensorEntity> getEntityService() {
         return (AbstractSensorThingsEntityService<?, SensorEntity>) getEntityService(EntityTypes.Sensor);
     }

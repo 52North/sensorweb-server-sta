@@ -33,9 +33,6 @@
  */
 package org.n52.sta.edm.provider.complextypes;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.provider.CsdlComplexType;
@@ -43,15 +40,18 @@ import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.n52.sta.edm.provider.SensorThingsEdmConstants;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
 public class FeatureComplexType implements AbstractComplexType {
 
     public static final String CT_FEATURE_NAME = "Feature";
-    public static final FullQualifiedName CT_FEATURE_FQN = new FullQualifiedName(SensorThingsEdmConstants.NAMESPACE, CT_FEATURE_NAME);
+    public static final FullQualifiedName CT_FEATURE_FQN =
+            new FullQualifiedName(SensorThingsEdmConstants.NAMESPACE, CT_FEATURE_NAME);
     public static final String PROP_TYPE = "type";
     public static final String PROP_GEOMETRY = "geometry";
 

@@ -33,13 +33,13 @@
  */
 package org.n52.sta.mqtt.request;
 
-import java.util.List;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.n52.sta.service.query.QueryOptions;
 import org.n52.sta.service.request.SensorThingsRequest;
 
+import java.util.List;
+
 /**
- *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 public class SensorThingsMqttRequest extends SensorThingsRequest {
@@ -47,9 +47,9 @@ public class SensorThingsMqttRequest extends SensorThingsRequest {
     private String topic;
 
     /**
-     * @param topic the topic
+     * @param topic         the topic
      * @param resourcePaths list of {@link UriResource}
-     * @param queryOptions {@link QueryOptions} for the request
+     * @param queryOptions  {@link QueryOptions} for the request
      */
     public SensorThingsMqttRequest(String topic, List<UriResource> resourcePaths, QueryOptions queryOptions) {
         super(resourcePaths, queryOptions);

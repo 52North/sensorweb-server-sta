@@ -28,12 +28,6 @@
  */
 package org.n52.sta.data.query;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
-
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.n52.series.db.beans.AbstractFeatureEntity;
@@ -42,11 +36,16 @@ import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
 import org.springframework.data.jpa.domain.Specification;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
+
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- *
  */
-public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecifications<AbstractFeatureEntity< ? >> {
+public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecifications<AbstractFeatureEntity<?>> {
 
     public Specification<AbstractFeatureEntity<?>> withObservationIdentifier(final String observationIdentifier) {
         return (root, query, builder) -> {
@@ -73,11 +72,11 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
 
     @Override
     public Specification<AbstractFeatureEntity<?>> getFilterForProperty(String propertyName,
-                                       Object propertyValue,
-                                       BinaryOperatorKind operator,
-                                       boolean switched)
+                                                                        Object propertyValue,
+                                                                        BinaryOperatorKind operator,
+                                                                        boolean switched)
             throws ExpressionVisitException {
-        if (propertyName.equals("Observations")) {
+        if (propertyName.equals(OBSERVATIONS)) {
             return handleRelatedPropertyFilter(propertyName, (Subquery<Long>) propertyValue, switched);
         } else if (propertyName.equals("id")) {
             return (root, query, builder) -> {
@@ -95,8 +94,8 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
     }
 
     private Specification<AbstractFeatureEntity<?>> handleRelatedPropertyFilter(String propertyName,
-                                                          Subquery<Long> propertyValue,
-                                                          boolean switched)
+                                                                                Subquery<Long> propertyValue,
+                                                                                boolean switched)
             throws ExpressionVisitException {
         return (root, query, builder) -> {
             // TODO ???
@@ -111,29 +110,38 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
         };
     }
 
-    private Specification<AbstractFeatureEntity<?>> handleDirectPropertyFilter(String propertyName, Object propertyValue,
-            BinaryOperatorKind operator, boolean switched) {
+    private Specification<AbstractFeatureEntity<?>> handleDirectPropertyFilter(String propertyName,
+                                                                               Object propertyValue,
+                                                                               BinaryOperatorKind operator,
+                                                                               boolean switched) {
         return new Specification<AbstractFeatureEntity<?>>() {
             @Override
-            public Predicate toPredicate(Root<AbstractFeatureEntity<?>> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
+            public Predicate toPredicate(Root<AbstractFeatureEntity<?>> root,
+                                         CriteriaQuery<?> query,
+                                         CriteriaBuilder builder) {
                 try {
                     switch (propertyName) {
-                    case "name":
-                        return handleDirectStringPropertyFilter(root.<String> get(DescribableEntity.PROPERTY_NAME),
-                                propertyValue.toString(), operator, builder, switched);
-                    case "description":
-                        return handleDirectStringPropertyFilter(
-                                root.<String> get(DescribableEntity.PROPERTY_DESCRIPTION), propertyValue.toString(), operator,
-                                builder, switched);
-                    case "encodingType":
-                    case "featureType":
-                        if (operator.equals(BinaryOperatorKind.EQ) && ("application/vnd.geo+json".equals(propertyValue) || "application/vnd.geo json".equals(propertyValue))) {
-                            return builder.isNotNull(root.get(DescribableEntity.PROPERTY_IDENTIFIER));
-                        }
-                        return builder.isNull(root.get(DescribableEntity.PROPERTY_IDENTIFIER));
-                    default:
-                        throw new RuntimeException("Error getting filter for Property: \"" + propertyName
-                                + "\". No such property in Entity.");
+                        case "name":
+                            return handleDirectStringPropertyFilter(root.<String>get(DescribableEntity.PROPERTY_NAME),
+                                    propertyValue.toString(), operator, builder, switched);
+                        case "description":
+                            return handleDirectStringPropertyFilter(
+                                    root.<String>get(DescribableEntity.PROPERTY_DESCRIPTION),
+                                    propertyValue.toString(),
+                                    operator,
+                                    builder,
+                                    switched);
+                        case "encodingType":
+                        case "featureType":
+                            if (operator.equals(BinaryOperatorKind.EQ)
+                                    && ("application/vnd.geo+json".equals(propertyValue)
+                                        || "application/vnd.geo json".equals(propertyValue))) {
+                                return builder.isNotNull(root.get(DescribableEntity.PROPERTY_IDENTIFIER));
+                            }
+                            return builder.isNull(root.get(DescribableEntity.PROPERTY_IDENTIFIER));
+                        default:
+                            throw new RuntimeException("Error getting filter for Property: \"" + propertyName
+                                    + "\". No such property in Entity.");
                     }
                 } catch (ExpressionVisitException e) {
                     throw new RuntimeException(e);

@@ -48,7 +48,8 @@ public class DatastreamEntityCrudRequestHandler extends AbstractEntityCrudReques
     @Override
     protected Entity handleCreateEntityRequest(Entity entity) throws ODataApplicationException {
         if (entity != null) {
-            DatastreamEntity datastream = getEntityService().create(mapper.createEntity(getMapper().checkEntity(entity)));
+            DatastreamEntity datastream =
+                    getEntityService().create(mapper.createEntity(getMapper().checkEntity(entity)));
             mapper.checkEntity(entity);
             return mapToEntity(datastream);
         }
@@ -74,6 +75,7 @@ public class DatastreamEntityCrudRequestHandler extends AbstractEntityCrudReques
         return mapper;
     }
 
+    @SuppressWarnings("unchecked")
     private AbstractSensorThingsEntityService<?, DatastreamEntity> getEntityService() {
         return (AbstractSensorThingsEntityService<?, DatastreamEntity>) getEntityService(EntityTypes.Datastream);
     }

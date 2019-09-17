@@ -38,7 +38,6 @@ import org.apache.olingo.commons.api.edm.provider.CsdlComplexType;
 import org.springframework.stereotype.Component;
 
 /**
- *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component

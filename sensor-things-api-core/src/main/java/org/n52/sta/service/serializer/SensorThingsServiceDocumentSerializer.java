@@ -28,8 +28,7 @@
  */
 package org.n52.sta.service.serializer;
 
-import java.io.IOException;
-
+import com.fasterxml.jackson.core.JsonGenerator;
 import org.apache.olingo.commons.api.Constants;
 import org.apache.olingo.commons.api.edm.EdmEntityContainer;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
@@ -38,7 +37,7 @@ import org.apache.olingo.commons.api.edm.EdmSingleton;
 import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.api.serializer.SerializerException;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import java.io.IOException;
 
 public class SensorThingsServiceDocumentSerializer {
 
@@ -53,7 +52,7 @@ public class SensorThingsServiceDocumentSerializer {
     private final boolean isODataMetadataNone;
 
     public SensorThingsServiceDocumentSerializer(final ServiceMetadata metadata, final String serviceRoot,
-            final boolean isODataMetadataNone) throws SerializerException {
+                                                 final boolean isODataMetadataNone) throws SerializerException {
         if (metadata == null || metadata.getEdm() == null) {
             throw new SerializerException("Service Metadata and EDM must not be null for a service.",
                     SerializerException.MessageKeys.NULL_METADATA_OR_EDM);
@@ -67,10 +66,10 @@ public class SensorThingsServiceDocumentSerializer {
         gen.writeStartObject();
 
         if (!isODataMetadataNone) {
-      final String metadataUri =
-          (serviceRoot == null ? "" :
-              serviceRoot.endsWith("/") ? serviceRoot : (serviceRoot + "/"))
-                    + Constants.METADATA;
+            final String metadataUri =
+                    (serviceRoot == null ? "" :
+                            serviceRoot.endsWith("/") ? serviceRoot : (serviceRoot + "/"))
+                            + Constants.METADATA;
             gen.writeObjectField(Constants.JSON_CONTEXT, metadataUri);
 
             if (metadata != null
@@ -116,7 +115,7 @@ public class SensorThingsServiceDocumentSerializer {
     }
 
     private void writeElement(final JsonGenerator gen, final String kind, final String reference, final String name,
-            final String title)
+                              final String title)
             throws IOException {
         gen.writeStartObject();
         gen.writeObjectField(Constants.JSON_NAME, name);

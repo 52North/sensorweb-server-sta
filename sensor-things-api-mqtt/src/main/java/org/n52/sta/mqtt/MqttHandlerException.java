@@ -29,7 +29,6 @@
 package org.n52.sta.mqtt;
 
 /**
- *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 public class MqttHandlerException extends Exception {

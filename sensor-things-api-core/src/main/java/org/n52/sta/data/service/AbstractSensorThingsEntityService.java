@@ -45,7 +45,14 @@ import org.apache.olingo.server.api.uri.UriInfoResource;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.queryoption.OrderByItem;
 import org.apache.olingo.server.api.uri.queryoption.OrderByOption;
-import org.apache.olingo.server.api.uri.queryoption.expression.*;
+import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
+import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
+import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
+import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitor;
+import org.apache.olingo.server.api.uri.queryoption.expression.Literal;
+import org.apache.olingo.server.api.uri.queryoption.expression.Member;
+import org.apache.olingo.server.api.uri.queryoption.expression.MethodKind;
+import org.apache.olingo.server.api.uri.queryoption.expression.UnaryOperatorKind;
 import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
@@ -63,7 +70,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
-import java.util.*;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -108,8 +119,10 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      * @return the EntityCollection that is related to the given Entity
      * @throws ODataApplicationException if the queryOptions are invalid
      */
-    public abstract EntityCollection getRelatedEntityCollection(String sourceId, EdmEntityType sourceEntityType,
-                                                                QueryOptions queryOptions) throws ODataApplicationException;
+    public abstract EntityCollection getRelatedEntityCollection(String sourceId,
+                                                                EdmEntityType sourceEntityType,
+                                                                QueryOptions queryOptions)
+            throws ODataApplicationException;
 
     /**
      * Request the count for the EntityCollection that is related to a single
@@ -152,7 +165,9 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      * @return the Entity that is related to the given Entity and is conform to
      * the given ID
      */
-    public abstract Optional<String> getIdForRelatedEntity(String sourceId, EdmEntityType sourceEntityType, String targetId);
+    public abstract Optional<String> getIdForRelatedEntity(String sourceId,
+                                                           EdmEntityType sourceEntityType,
+                                                           String targetId);
 
     /**
      * Checks if an Entity exists in accordance to a given list of key
@@ -250,24 +265,29 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      * @param entityClass  Class of the requested Entity
      * @param queryOptions QueryOptions Object
      * @return Predicate based on FilterOption from queryOptions
-     * @throws ODataApplicationException if the queryOptions are invalid
      */
-    public Specification<S> getFilterPredicate(Class entityClass, QueryOptions queryOptions) throws ODataApplicationException {
+    public Specification<S> getFilterPredicate(Class entityClass, QueryOptions queryOptions) {
         return (root, query, builder) -> {
             try {
-                if (queryOptions.hasOrderByOption()) {
-                    // TODO: add orderby option for observation.result here?
-                }
+                //if (queryOptions.hasOrderByOption()) {
+                //    TODO: add orderby option for observation.result here?
+                //}
                 if (!queryOptions.hasFilterOption()) {
                     return null;
                 } else {
                     Expression filterExpression = queryOptions.getFilterOption().getExpression();
 
-                    FilterExpressionVisitor visitor = new FilterExpressionVisitor(entityClass, this, builder, root);
+                    FilterExpressionVisitor visitor = new FilterExpressionVisitor(
+                            entityClass,
+                            this,
+                            builder, root);
                     try {
                         return ((Specification<S>) filterExpression.accept(visitor)).toPredicate(root, query, builder);
                     } catch (ExpressionVisitException e) {
-                        throw new ODataApplicationException(e.getMessage(), HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ENGLISH);
+                        throw new ODataApplicationException(
+                                e.getMessage(),
+                                HttpStatusCode.BAD_REQUEST.getStatusCode(),
+                                Locale.ENGLISH);
                     }
                 }
             } catch (ODataApplicationException e) {
@@ -298,16 +318,18 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      * @throws ODataApplicationException if an error occurred
      */
     protected abstract S createOrUpdate(S entity) throws ODataApplicationException;
-//    protected S createOrUpdate(S entity) throws ODataApplicationException {
-//        if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
-//            return update(entity, HttpMethod.PATCH);
-//        }
-//        return create(entity);
-
-//    }
+    //protected S createOrUpdate(S entity) throws ODataApplicationException {
+    //    if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
+    //        return update(entity, HttpMethod.PATCH);
+    //    }
+    //    return create(entity);
+    //}
 
     protected void checkInlineDatastream(DatastreamEntity datastream) throws ODataApplicationException {
-        if (datastream.getIdentifier() == null || datastream.isSetName() || datastream.isSetDescription() || datastream.isSetUnit()) {
+        if (datastream.getIdentifier() == null
+                || datastream.isSetName()
+                || datastream.isSetDescription()
+                || datastream.isSetUnit()) {
             throw new ODataApplicationException("Inlined datastream entities are not allowed for updates!",
                     HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
         }
@@ -331,7 +353,8 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      * @param queryOptions {@link QueryOptions} to create {@link PageRequest}
      * @return {@link PageRequest} of type {@link OffsetLimitBasedPageRequest}
      */
-    protected OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions, String defaultSortingProperty) {
+    protected OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions,
+                                                                String defaultSortingProperty) {
         int offset = queryOptions.hasSkipOption() ? queryOptions.getSkipOption().getValue() : 0;
         Sort sort = Sort.by(Direction.ASC, defaultSortingProperty);
         if (queryOptions.hasOrderByOption()) {
@@ -375,13 +398,13 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
 
         private AbstractSensorThingsEntityService<?, ?> service;
 
-        public ExpressionGenerator(AbstractSensorThingsEntityService<?, ?> service) {
+        ExpressionGenerator(AbstractSensorThingsEntityService<?, ?> service) {
             this.service = service;
         }
 
         @Override
         public String visitLiteral(Literal literal) throws ExpressionVisitException {
-            throw new ExpressionVisitException("Lambda expressions are not supported");
+            throw new ExpressionVisitException("Literal expressions are not supported");
         }
 
         @Override

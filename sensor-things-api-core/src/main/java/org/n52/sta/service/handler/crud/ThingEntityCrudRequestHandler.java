@@ -75,6 +75,7 @@ public class ThingEntityCrudRequestHandler extends AbstractEntityCrudRequestHand
         return mapper;
     }
 
+    @SuppressWarnings("unchecked")
     private AbstractSensorThingsEntityService<?, PlatformEntity> getEntityService() {
         return (AbstractSensorThingsEntityService<?, PlatformEntity>) getEntityService(EntityTypes.Thing);
     }

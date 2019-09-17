@@ -73,6 +73,7 @@ public class LocationEntityCrudRequestHandler extends AbstractEntityCrudRequestH
         return mapper;
     }
 
+    @SuppressWarnings("unchecked")
     private AbstractSensorThingsEntityService<?, LocationEntity> getEntityService() {
         return (AbstractSensorThingsEntityService<?, LocationEntity>) getEntityService(EntityTypes.Location);
     }

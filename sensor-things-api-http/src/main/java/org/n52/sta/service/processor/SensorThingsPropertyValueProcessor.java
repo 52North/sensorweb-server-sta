@@ -33,9 +33,6 @@
  */
 package org.n52.sta.service.processor;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-
 import org.apache.olingo.commons.api.data.ContextURL;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.edm.EdmComplexType;
@@ -62,35 +59,52 @@ import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
 import org.n52.sta.service.handler.AbstractPropertyRequestHandler;
+import org.n52.sta.service.request.SensorThingsRequest;
 import org.n52.sta.service.response.PropertyResponse;
 import org.n52.sta.service.serializer.SensorThingsSerializer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import org.n52.sta.service.request.SensorThingsRequest;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
 /**
- *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
 public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcessor {
 
-    @Autowired
-    AbstractPropertyRequestHandler<SensorThingsRequest, PropertyResponse> requestHandler;
+    private final AbstractPropertyRequestHandler<SensorThingsRequest, PropertyResponse> requestHandler;
+    private final SensorThingsSerializer serializer;
+    private final String NOT_SUPPORTED = "Not supported yet.";
+    private final String NULL = "null";
 
-    private OData odata;
-    private ServiceMetadata serviceMetadata;
-    private SensorThingsSerializer serializer;
     private FixedFormatSerializer fixedFormatSerializer;
+    private ServiceMetadata serviceMetadata;
+
+    public SensorThingsPropertyValueProcessor(
+            AbstractPropertyRequestHandler<SensorThingsRequest, PropertyResponse> requestHandler) {
+        this.requestHandler = requestHandler;
+        this.serializer = new SensorThingsSerializer(ContentType.JSON_NO_METADATA);
+    }
 
     @Override
-    public void readPrimitiveValue(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-        PropertyResponse propertyValueReponse = requestHandler.handlePropertyRequest(new SensorThingsRequest(uriInfo.getUriResourceParts(), null));
+    public void init(OData odata, ServiceMetadata serviceMetadata) {
+        this.fixedFormatSerializer = odata.createFixedFormatSerializer();
+        this.serviceMetadata = serviceMetadata;
+    }
+
+    @Override
+    public void readPrimitiveValue(ODataRequest request,
+                                   ODataResponse response,
+                                   UriInfo uriInfo,
+                                   ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
+        PropertyResponse propertyValueReponse =
+
+                requestHandler.handlePropertyRequest(new SensorThingsRequest(uriInfo.getUriResourceParts(), null));
 
         // serialize
         Object propertyValue = propertyValueReponse.getProperty().getValue();
-//        if (propertyValue != null) {
+        //        if (propertyValue != null) {
         //TODO: check for other than primitive types for the property
 
         if (propertyValueReponse.getEdmPropertyType() instanceof EdmComplexType) {
@@ -101,18 +115,25 @@ public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcess
             createPrimitiveValueResponse(response, propertyValueReponse);
         }
 
-//        } else {
-//            // in case there's no value for the property, we can skip the serialization
-//            response.setStatusCode(HttpStatusCode.NO_CONTENT.getStatusCode());
-//        }
+        //        } else {
+        //            // in case there's no value for the property, we can skip the serialization
+        //            response.setStatusCode(HttpStatusCode.NO_CONTENT.getStatusCode());
+        //        }
     }
 
-    private void createComplexValueResponse(ODataResponse response, PropertyResponse complexResponse) throws SerializerException {
-        ContextURL contextUrl = ContextURL.with().entitySet(complexResponse.getResponseEdmEntitySet()).navOrPropertyPath(complexResponse.getProperty().getName()).build();
+    private void createComplexValueResponse(ODataResponse response,
+                                            PropertyResponse complexResponse) throws SerializerException {
+        ContextURL contextUrl = ContextURL.with()
+                .entitySet(complexResponse.getResponseEdmEntitySet())
+                .navOrPropertyPath(complexResponse.getProperty().getName()).build();
         ComplexSerializerOptions options = ComplexSerializerOptions.with().contextURL(contextUrl).build();
 
         // serialize
-        SerializerResult serializerResult = serializer.complexValue(serviceMetadata, (EdmComplexType) complexResponse.getEdmPropertyType(), complexResponse.getProperty(), options);
+        SerializerResult serializerResult = serializer.complexValue(
+                serviceMetadata,
+                (EdmComplexType) complexResponse.getEdmPropertyType(),
+                complexResponse.getProperty(),
+                options);
         InputStream serializedContent = serializerResult.getContent();
 
         response.setContent(serializedContent);
@@ -120,17 +141,27 @@ public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcess
         response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.JSON_NO_METADATA.toContentTypeString());
     }
 
-    private void createPrimitiveValueResponse(ODataResponse response, PropertyResponse primitiveResponse) throws SerializerException {
+    private void createPrimitiveValueResponse(ODataResponse response, PropertyResponse primitiveResponse)
+            throws SerializerException {
         PrimitiveValueSerializerOptions options = PrimitiveValueSerializerOptions.with().build();
         InputStream serializedContent = null;
         if (primitiveResponse.getProperty().getValue() != null) {
-            serializedContent = fixedFormatSerializer.primitiveValue((EdmPrimitiveType) primitiveResponse.getEdmPropertyType(), primitiveResponse.getProperty().getValue(), options);
+            serializedContent = fixedFormatSerializer.primitiveValue(
+                    (EdmPrimitiveType) primitiveResponse.getEdmPropertyType(),
+                    primitiveResponse.getProperty().getValue(),
+                    options);
         } else {
             if (primitiveResponse.getEdmPropertyType() instanceof EdmDateTimeOffset) {
                 // Work around facet constraint not allowing null values
-                serializedContent = fixedFormatSerializer.primitiveValue(EdmString.getInstance(), "null", options);
+                serializedContent = fixedFormatSerializer.primitiveValue(
+                        EdmString.getInstance(),
+                        NULL,
+                        options);
             } else {
-                serializedContent = fixedFormatSerializer.primitiveValue((EdmPrimitiveType) primitiveResponse.getEdmPropertyType(), "null", options);
+                serializedContent = fixedFormatSerializer.primitiveValue(
+                        (EdmPrimitiveType) primitiveResponse.getEdmPropertyType(),
+                        NULL,
+                        options);
             }
         }
         response.setContent(serializedContent);
@@ -138,14 +169,18 @@ public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcess
         response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.TEXT_PLAIN.toContentTypeString());
     }
 
-    private void createGeospatialValueResponse(ODataResponse response, PropertyResponse primitiveResponse) throws SerializerException {
+    private void createGeospatialValueResponse(ODataResponse response, PropertyResponse primitiveResponse)
+            throws SerializerException {
         Property property = primitiveResponse.getProperty();
         EdmPrimitiveType edmPropertyType = (EdmPrimitiveType) primitiveResponse.getEdmPropertyType();
 
-        ContextURL contextUrl = ContextURL.with().entitySet(primitiveResponse.getResponseEdmEntitySet()).navOrPropertyPath(property.getName()).build();
+        ContextURL contextUrl = ContextURL.with()
+                .entitySet(primitiveResponse.getResponseEdmEntitySet())
+                .navOrPropertyPath(property.getName()).build();
         PrimitiveSerializerOptions options = PrimitiveSerializerOptions.with().contextURL(contextUrl).build();
         // serialize
-        SerializerResult serializerResult = serializer.geospatialPrimitive(serviceMetadata, edmPropertyType, property, options);
+        SerializerResult serializerResult =
+                serializer.geospatialPrimitive(serviceMetadata, edmPropertyType, property, options);
 
         response.setContent(serializerResult.getContent());
         response.setStatusCode(HttpStatusCode.OK.getStatusCode());
@@ -153,24 +188,32 @@ public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcess
     }
 
     @Override
-    public void updatePrimitiveValue(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType requestFormat, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void updatePrimitiveValue(ODataRequest request, ODataResponse response,
+                                     UriInfo uriInfo,
+                                     ContentType requestFormat,
+                                     ContentType responseFormat) {
+        throw new UnsupportedOperationException(NOT_SUPPORTED);
     }
 
     @Override
-    public void deletePrimitiveValue(ODataRequest request, ODataResponse response, UriInfo uriInfo) throws ODataApplicationException, ODataLibraryException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void deletePrimitiveValue(ODataRequest request, ODataResponse response, UriInfo uriInfo) {
+        throw new UnsupportedOperationException(NOT_SUPPORTED);
     }
 
     @Override
-    public void readPrimitive(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-        PropertyResponse primitiveResponse = requestHandler.handlePropertyRequest(new SensorThingsRequest(uriInfo.getUriResourceParts(), null));
+    public void readPrimitive(ODataRequest request,
+                              ODataResponse response,
+                              UriInfo uriInfo,
+                              ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
+        PropertyResponse primitiveResponse =
+                requestHandler.handlePropertyRequest(new SensorThingsRequest(uriInfo.getUriResourceParts(), null));
         InputStream serializedContent;
         if (primitiveResponse.getProperty().getValue() == null) {
-            serializedContent = new ByteArrayInputStream(("{\"" + primitiveResponse.getProperty().getName() + "\":null}").getBytes());
+            serializedContent = new ByteArrayInputStream(
+                    ("{\"" + primitiveResponse.getProperty().getName() + "\":null}").getBytes());
         } else {
             //TODO: check for other than primitive types for the property
-            serializedContent = createReponseContent(primitiveResponse.getProperty(),
+            serializedContent = createResponseContent(primitiveResponse.getProperty(),
                     (EdmPrimitiveType) primitiveResponse.getEdmPropertyType(),
                     primitiveResponse.getResponseEdmEntitySet());
         }
@@ -181,32 +224,30 @@ public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcess
     }
 
     @Override
-    public void updatePrimitive(ODataRequest request, ODataResponse response, UriInfo uriInfo, ContentType requestFormat, ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void updatePrimitive(ODataRequest request, ODataResponse response,
+                                UriInfo uriInfo,
+                                ContentType requestFormat,
+                                ContentType responseFormat) {
+        throw new UnsupportedOperationException(NOT_SUPPORTED);
     }
 
     @Override
-    public void deletePrimitive(ODataRequest request, ODataResponse response, UriInfo uriInfo) throws ODataApplicationException, ODataLibraryException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void deletePrimitive(ODataRequest request, ODataResponse response, UriInfo uriInfo) {
+        throw new UnsupportedOperationException(NOT_SUPPORTED);
     }
 
-    @Override
-    public void init(OData odata, ServiceMetadata serviceMetadata) {
-        this.odata = odata;
-        this.serviceMetadata = serviceMetadata;
-        this.serializer = new SensorThingsSerializer(ContentType.JSON_NO_METADATA);
-        fixedFormatSerializer = odata.createFixedFormatSerializer();
-    }
-
-    private InputStream createReponseContent(Property property, EdmPrimitiveType edmPropertyType, EdmEntitySet responseEdmEntitySet) throws SerializerException {
-        ContextURL contextUrl = ContextURL.with().entitySet(responseEdmEntitySet).navOrPropertyPath(property.getName()).build();
+    private InputStream createResponseContent(Property property,
+                                              EdmPrimitiveType edmPropertyType,
+                                              EdmEntitySet responseEdmEntitySet) throws SerializerException {
+        ContextURL contextUrl = ContextURL.with()
+                .entitySet(responseEdmEntitySet)
+                .navOrPropertyPath(property.getName()).build();
         PrimitiveSerializerOptions options = PrimitiveSerializerOptions.with().contextURL(contextUrl).build();
 
         // serialize
         SerializerResult serializerResult = serializer.primitive(serviceMetadata, edmPropertyType, property, options);
         InputStream propertyStream = serializerResult.getContent();
         return propertyStream;
-
     }
 
 }

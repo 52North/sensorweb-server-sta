@@ -40,7 +40,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FeatureOfInterestEntityCrudRequestHandler extends AbstractEntityCrudRequestHandler<AbstractFeatureEntity<?>> {
+public class FeatureOfInterestEntityCrudRequestHandler
+        extends AbstractEntityCrudRequestHandler<AbstractFeatureEntity<?>> {
 
     @Autowired
     private FeatureOfInterestMapper mapper;
@@ -48,7 +49,8 @@ public class FeatureOfInterestEntityCrudRequestHandler extends AbstractEntityCru
     @Override
     protected Entity handleCreateEntityRequest(Entity entity) throws ODataApplicationException {
         if (entity != null) {
-            AbstractFeatureEntity<?> feature = getEntityService().create(mapper.createEntity(getMapper().checkEntity(entity)));
+            AbstractFeatureEntity<?> feature =
+                    getEntityService().create(mapper.createEntity(getMapper().checkEntity(entity)));
             return mapToEntity(feature);
         }
         return null;
@@ -73,7 +75,9 @@ public class FeatureOfInterestEntityCrudRequestHandler extends AbstractEntityCru
         return mapper;
     }
 
+    @SuppressWarnings("unchecked")
     private AbstractSensorThingsEntityService<?, AbstractFeatureEntity<?>> getEntityService() {
-        return (AbstractSensorThingsEntityService<?, AbstractFeatureEntity<?>>) getEntityService(EntityTypes.FeatureOfInterest);
+        return (AbstractSensorThingsEntityService<?, AbstractFeatureEntity<?>>)
+                getEntityService(EntityTypes.FeatureOfInterest);
     }
 }
