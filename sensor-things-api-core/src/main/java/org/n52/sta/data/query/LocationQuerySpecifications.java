@@ -53,7 +53,8 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
             Join<HistoricalLocationEntity, LocationEntity> joinFeature =
                     historicalLoc.join(HistoricalLocationEntity.PROPERTY_LOCATIONS);
             sq.select(joinFeature)
-                .where(builder.equal(historicalLoc.get(DescribableEntity.PROPERTY_IDENTIFIER), historicalLocationIdentifier));
+                .where(builder.equal(historicalLoc.get(DescribableEntity.PROPERTY_IDENTIFIER),
+                                     historicalLocationIdentifier));
             return builder.in(root).value(sq);
         };
     }
