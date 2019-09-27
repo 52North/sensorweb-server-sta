@@ -30,10 +30,9 @@ RUN cd sensor-things \
     && mvn package
 
 FROM openjdk:8-jre-alpine as runstage
-COPY --from=buildstage /app/sensor-things/sensor-things-api-app/target /target
 
-ARG DEPENDENCY=target/unpacked
-COPY ${DEPENDENCY}/BOOT-INF/lib /app/lib
-COPY ${DEPENDENCY}/META-INF /app/META-INF
-COPY ${DEPENDENCY}/BOOT-INF/classes /app
+ARG DEPENDENCY=/app/sensor-things/sensor-things-api-app/target/unpacked
+COPY --from=buildstage ${DEPENDENCY}/BOOT-INF/lib /app/lib
+COPY --from=buildstage ${DEPENDENCY}/META-INF /app/META-INF
+COPY --from=buildstage ${DEPENDENCY}/BOOT-INF/classes /app
 ENTRYPOINT ["java","-cp","app:app/lib/*","org.n52.sta.Application"]
