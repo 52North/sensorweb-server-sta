@@ -54,6 +54,12 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>sensor-things-api-http</artifactId>
             <scope>runtime</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax</groupId>
+                    <artifactId>javaee-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
     </dependencies>

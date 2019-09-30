@@ -49,11 +49,12 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
     public Specification<LocationEntity> withRelatedHistoricalLocationIdentifier(String historicalLocationIdentifier) {
         return (root, query, builder) -> {
             Subquery<LocationEntity> sq = query.subquery(LocationEntity.class);
-            Root<HistoricalLocationEntity> dataset = sq.from(HistoricalLocationEntity.class);
+            Root<HistoricalLocationEntity> historicalLoc = sq.from(HistoricalLocationEntity.class);
             Join<HistoricalLocationEntity, LocationEntity> joinFeature =
-                    dataset.join(HistoricalLocationEntity.PROPERTY_LOCATIONS);
+                    historicalLoc.join(HistoricalLocationEntity.PROPERTY_LOCATIONS);
             sq.select(joinFeature)
-                .where(builder.equal(dataset.get(DescribableEntity.PROPERTY_IDENTIFIER), historicalLocationIdentifier));
+                .where(builder.equal(historicalLoc.get(DescribableEntity.PROPERTY_IDENTIFIER),
+                                     historicalLocationIdentifier));
             return builder.in(root).value(sq);
         };
     }
@@ -61,10 +62,10 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
     public Specification<LocationEntity> withRelatedThingIdentifier(final String thingIdentifier) {
         return (root, query, builder) -> {
             Subquery<LocationEntity> sq = query.subquery(LocationEntity.class);
-            Root<PlatformEntity> dataset = sq.from(PlatformEntity.class);
-            Join<PlatformEntity, LocationEntity> joinFeature = dataset.join(PlatformEntity.PROPERTY_LOCATIONS);
+            Root<PlatformEntity> platform = sq.from(PlatformEntity.class);
+            Join<PlatformEntity, LocationEntity> joinFeature = platform.join(PlatformEntity.PROPERTY_LOCATIONS);
             sq.select(joinFeature)
-                .where(builder.equal(dataset.get(DescribableEntity.PROPERTY_IDENTIFIER), thingIdentifier));
+                .where(builder.equal(platform.get(DescribableEntity.PROPERTY_IDENTIFIER), thingIdentifier));
             return builder.in(root).value(sq);
         };
     }

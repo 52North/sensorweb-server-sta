@@ -97,11 +97,11 @@ public abstract class EntityQuerySpecifications<T> {
         };
     }
 
-    protected Specification<String> toSubquery(Class<?> clazz, String propert, Specification filter) {
+    protected Specification<String> toSubquery(Class<?> clazz, String property, Specification filter) {
         return (root, query, builder) -> {
             Subquery<?> sq = query.subquery(clazz);
             Root<?> from = sq.from(clazz);
-            sq.select(from.get(propert)).where(filter.toPredicate(root, query, builder));
+            sq.select(from.get(property)).where(filter.toPredicate(root, query, builder));
             return builder.in(root.get(DescribableEntity.PROPERTY_IDENTIFIER)).value(sq);
         };
     }
