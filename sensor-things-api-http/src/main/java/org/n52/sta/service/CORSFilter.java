@@ -24,7 +24,11 @@ public class CORSFilter implements Filter {
     @Value("${http.cors.maxAge:3600}")
     private String CORSMaxAge;
 
-    @Value("${http.cors.allowHeaders:Access-Control-Allow-Headers, Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With}")
+    @Value("${http.cors.allowHeaders:" +
+            "Access-Control-Allow-Headers," +
+            "Content-Type, Access-Control-Allow-Headers," +
+            "Authorization," +
+            "X-Requested-With}")
     private String CORSHeaders;
 
     @Override
