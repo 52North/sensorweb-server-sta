@@ -1,6 +1,6 @@
 package org.n52.sta.service;
 
-
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.Filter;
@@ -15,6 +15,18 @@ import java.io.IOException;
 @Component
 public class CORSFilter implements Filter {
 
+    @Value("${http.cors.allowOrigin:*}")
+    private String CORSOrigin;
+
+    @Value("${http.cors.allowMethods:POST, PUT, GET, OPTIONS, DELETE, PATCH}")
+    private String CORSMethods;
+
+    @Value("${http.cors.maxAge:3600}")
+    private String CORSMaxAge;
+
+    @Value("${http.cors.allowHeaders:Access-Control-Allow-Headers, Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With}")
+    private String CORSHeaders;
+
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
 
@@ -25,10 +37,10 @@ public class CORSFilter implements Filter {
             throws IOException, ServletException {
         HttpServletResponse res = (HttpServletResponse) response;
 
-        res.setHeader("Access-Control-Allow-Origin", "*");
-        //res.setHeader("Access-Control-Allow-Credentials", "true");
-        res.setHeader("Access-Control-Allow-Methods", "POST, PUT, GET, OPTIONS, DELETE");
-        res.setHeader("Access-Control-Max-Age", "3600");
+        res.setHeader("Access-Control-Allow-Origin", CORSOrigin);
+        res.setHeader("Access-Control-Allow-Methods", CORSMethods);
+        res.setHeader("Access-Control-Max-Age", CORSMaxAge);
+        res.setHeader("Access-Control-Allow-Headers", CORSHeaders);
 
         chain.doFilter(request, res);
     }
