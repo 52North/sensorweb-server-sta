@@ -189,8 +189,10 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
     private Object evaluateArithmeticOperation(BinaryOperatorKind operator, Object left, Object right)
             throws ExpressionVisitException,
             ODataApplicationException {
-        javax.persistence.criteria.Expression<? extends Comparable<?>> leftExpr = convertToArithmeticExpression(left);
-        javax.persistence.criteria.Expression<? extends Comparable<?>> rightExpr = convertToArithmeticExpression(right);
+        //javax.persistence.criteria.Expression<? extends Comparable<?>> leftExpr =
+        //          convertToArithmeticExpression(left);
+        //javax.persistence.criteria.Expression<? extends Comparable<?>> rightExpr =
+        //          convertToArithmeticExpression(right);
 
         //return rootQS.handleNumberFilter(leftExpr, rightExpr, operator, criteriaBuilder, false);
         return null;
@@ -342,7 +344,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
 
     private javax.persistence.criteria.Expression<Date>[] convertToTimespanExpression(Object expr)
             throws ODataApplicationException {
-        javax.persistence.criteria.Expression<Date>[] result = new javax.persistence.criteria.Expression[2];
+        // javax.persistence.criteria.Expression<Date>[] result = new javax.persistence.criteria.Expression[2];
 
         //if (expr instanceof Date[]) {
         //    //Literal

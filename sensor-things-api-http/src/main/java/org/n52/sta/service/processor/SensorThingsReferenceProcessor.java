@@ -69,12 +69,11 @@ import java.util.List;
 @Component
 public class SensorThingsReferenceProcessor implements ReferenceProcessor {
 
+    private static final String NOT_SUPPORTED = "Not supported yet.";
     private final AbstractEntityRequestHandler<SensorThingsRequest, EntityResponse> requestHandler;
     private final EntityAnnotator entityAnnotator;
     private final String rootUrl;
-    private final String NOT_SUPPORTED = "Not supported yet.";
 
-    private OData odata;
     private ServiceMetadata serviceMetadata;
     private ODataSerializer serializer;
 

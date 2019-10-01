@@ -104,13 +104,6 @@ public abstract class AbstractMapper<T> {
         }
     }
 
-    private void checkPropertyValidity(ComplexValue complexValue, String propName) throws ODataApplicationException {
-        if (!checkProperty(complexValue, propName)) {
-            throw new ODataApplicationException(getMissingPropertyExceptionString(propName, complexValue),
-                    HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
-        }
-    }
-
     protected String getMissingPropertyExceptionString(String propName, Entity entity) {
         return getMissingPropertyExceptionString(propName, entity.getType().replace("iot.", ""));
     }

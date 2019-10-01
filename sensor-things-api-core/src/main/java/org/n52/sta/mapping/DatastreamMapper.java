@@ -65,11 +65,12 @@ import java.util.Set;
 @Component
 public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamEntity> {
 
+    private static final String UNKNOWN = "unknown";
+
     private final ThingMapper thingMapper;
     private final ObservedPropertyMapper observedPropertyMapper;
     private final SensorMapper sensorMapper;
     private final ObservationMapper observationMapper;
-    private final String UNKNOWN = "unknown";
 
     @Autowired
     public DatastreamMapper(@Lazy ThingMapper thingMapper,

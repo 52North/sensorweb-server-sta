@@ -66,9 +66,9 @@ import java.io.InputStream;
 @Component
 public class SensorThingsComplexProcessor implements ComplexProcessor {
 
+    private static final String NOT_SUPPORTED = "Not supported yet.";
     private final AbstractPropertyRequestHandler<SensorThingsRequest, PropertyResponse> requestHandler;
     private final ODataSerializer serializer;
-    private final String NOT_SUPPORTED = "Not supported yet.";
 
     private ServiceMetadata serviceMetadata;
 

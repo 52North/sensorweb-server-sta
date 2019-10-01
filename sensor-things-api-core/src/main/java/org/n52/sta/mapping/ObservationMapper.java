@@ -66,6 +66,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -104,7 +105,7 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
                 null,
                 AbstractSensorThingsEntityProvider.PROP_RESULT,
                 ValueType.PRIMITIVE,
-                this.getResult(observation).getBytes()));
+                this.getResult(observation).getBytes(Charset.defaultCharset())));
 
         Date resultTime = observation.getResultTime();
         Date samplingTime = observation.getSamplingTimeEnd();
@@ -262,7 +263,8 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
     private void addResult(StaDataEntity observation, Entity entity) {
         if (checkProperty(entity, AbstractSensorThingsEntityProvider.PROP_RESULT)) {
             observation.setValue(
-                    new String((byte[]) getPropertyValue(entity, AbstractSensorThingsEntityProvider.PROP_RESULT)));
+                    new String((byte[]) getPropertyValue(entity, AbstractSensorThingsEntityProvider.PROP_RESULT),
+                            Charset.defaultCharset()));
         }
     }
 
