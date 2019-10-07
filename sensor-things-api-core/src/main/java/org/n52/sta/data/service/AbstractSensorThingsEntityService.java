@@ -70,6 +70,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.criteria.Predicate;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -282,7 +283,17 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
                             this,
                             builder, root);
                     try {
-                        return ((Specification<S>) filterExpression.accept(visitor)).toPredicate(root, query, builder);
+                        Object accept = filterExpression.accept(visitor);
+                        if (accept instanceof Specification) {
+                            return ((Specification<S>) accept).toPredicate(root, query, builder);
+                        } else if (accept instanceof Predicate) {
+                            return (Predicate) accept;
+                        } else {
+                            throw new ODataApplicationException(
+                                    "Received invalid FilterExpression.",
+                                    HttpStatusCode.INTERNAL_SERVER_ERROR.getStatusCode(),
+                                    Locale.ENGLISH);
+                        }
                     } catch (ExpressionVisitException e) {
                         throw new ODataApplicationException(
                                 e.getMessage(),
