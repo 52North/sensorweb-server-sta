@@ -575,7 +575,8 @@ public class ObservationService extends
         return datasetRepository.save(dataset);
     }
 
-    private void updateDatastream(DatastreamEntity datastream, DatasetEntity dataset, DataEntity<?> data) throws ODataApplicationException {
+    private void updateDatastream(DatastreamEntity datastream, DatasetEntity dataset, DataEntity<?> data)
+            throws ODataApplicationException {
         if (datastream.getDatasets() != null) {
             if (!datastream.getDatasets().contains(dataset)) {
                 datastream.addDataset(dataset);

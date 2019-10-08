@@ -151,7 +151,7 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
         if (toMerge.isSetUnit() && existing.getUnit().getSymbol().equals(toMerge.getUnit().getSymbol())) {
             existing.setUnit(toMerge.getUnit());
         }
-        
+
         // resultTime
         if (toMerge.hasResultTimeStart() && toMerge.hasResultTimeEnd()) {
             existing.setResultTimeStart(toMerge.getResultTimeStart());
