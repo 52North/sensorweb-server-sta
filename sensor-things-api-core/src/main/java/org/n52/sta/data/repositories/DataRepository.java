@@ -35,4 +35,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 public interface DataRepository<T extends DataEntity<?>>
         extends IdentifierRepository<T>, JpaRepository<T, Long>, JpaSpecificationExecutor<T> {
 
+    DataEntity<?> findFirstByOrderBySamplingTimeStartAsc();
+
+    DataEntity<?> findFirstByOrderBySamplingTimeEndDesc();
 }

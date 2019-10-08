@@ -241,6 +241,7 @@ public abstract class AbstractMapper<T> {
         return property.isPresent() ? property.get() : null;
     }
 
+    /*
     protected void addPhenomenonTime(HasPhenomenonTime phenomenonTime, Entity entity) {
         if (checkProperty(entity, AbstractSensorThingsEntityProvider.PROP_PHENOMENON_TIME)) {
             Time time = parseTime(getPropertyValue(entity,
@@ -254,6 +255,7 @@ public abstract class AbstractMapper<T> {
             }
         }
     }
+    */
 
     protected void mergeIdentifierNameDescription(DescribableEntity existing, DescribableEntity toMerge) {
         if (toMerge.isSetIdentifier()) {

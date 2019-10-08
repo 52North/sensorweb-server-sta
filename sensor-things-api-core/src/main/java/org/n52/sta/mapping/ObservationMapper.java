@@ -249,10 +249,17 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
         return createTime(start, end);
     }
 
-    @Override
     protected void addPhenomenonTime(HasPhenomenonTime phenomenonTime, Entity entity) {
         if (checkProperty(entity, AbstractSensorThingsEntityProvider.PROP_PHENOMENON_TIME)) {
-            super.addPhenomenonTime(phenomenonTime, entity);
+            Time time = parseTime(getPropertyValue(entity,
+                    AbstractSensorThingsEntityProvider.PROP_PHENOMENON_TIME).toString());
+            if (time instanceof TimeInstant) {
+                phenomenonTime.setSamplingTimeStart(((TimeInstant) time).getValue().toDate());
+                phenomenonTime.setSamplingTimeEnd(((TimeInstant) time).getValue().toDate());
+            } else if (time instanceof TimePeriod) {
+                phenomenonTime.setSamplingTimeStart(((TimePeriod) time).getStart().toDate());
+                phenomenonTime.setSamplingTimeEnd(((TimePeriod) time).getEnd().toDate());
+            }
         } else {
             Date date = DateTime.now().toDate();
             phenomenonTime.setSamplingTimeStart(date);

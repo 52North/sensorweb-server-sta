@@ -131,7 +131,6 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
         addFormat(datastream, entity);
         addObservedArea(datastream, entity);
         addUnitOfMeasurement(datastream, entity);
-        addPhenomenonTime(datastream, entity);
         addResultTime(datastream, entity);
         addSensor(datastream, entity);
         addObservedProperty(datastream, entity);
@@ -152,9 +151,7 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
         if (toMerge.isSetUnit() && existing.getUnit().getSymbol().equals(toMerge.getUnit().getSymbol())) {
             existing.setUnit(toMerge.getUnit());
         }
-        // phenTime
-        mergeSamplingTime(existing, toMerge);
-
+        
         // resultTime
         if (toMerge.hasResultTimeStart() && toMerge.hasResultTimeEnd()) {
             existing.setResultTimeStart(toMerge.getResultTimeStart());

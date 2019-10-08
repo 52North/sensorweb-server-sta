@@ -77,6 +77,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
@@ -307,7 +308,7 @@ public class ObservationService extends
                 DataEntity<?> data = checkData(observation, dataset);
                 if (data != null) {
                     updateDataset(dataset, data);
-                    updateDatastream(datastream, dataset);
+                    updateDatastream(datastream, dataset, data);
                 }
                 return data;
             }
@@ -324,13 +325,53 @@ public class ObservationService extends
         }
     }
 
+    /**
+     * Handles updating the phenomenonTime field of the associated Datastream when Observation phenomenonTime is
+     * updated or deleted
+     */
+    private void updateDatastreamPhenomenonTimeOnObservationUpdate(
+            DatastreamEntity datastreamEntity, DataEntity<?> observation) {
+            if (observation.getPhenomenonTimeStart().compareTo(datastreamEntity.getPhenomenonTimeStart()) != 1
+                    || observation.getPhenomenonTimeEnd().compareTo(datastreamEntity.getPhenomenonTimeEnd()) != -1
+            ) {
+                // Setting new phenomenonTimeStart
+                Date newPhenomenonStart = getRepository()
+                        .findFirstByOrderBySamplingTimeStartAsc()
+                        .getPhenomenonTimeStart();
+                if (newPhenomenonStart != null) {
+                    datastreamEntity.setPhenomenonTimeStart(newPhenomenonStart);
+                } else {
+                    datastreamEntity.setPhenomenonTimeStart(null);
+                    datastreamEntity.setPhenomenonTimeEnd(null);
+                }
+                // Setting new phenomenonTimeEnd
+                Date newPhenomenonEnd = getRepository()
+                        .findFirstByOrderBySamplingTimeEndDesc()
+                        .getPhenomenonTimeStart();
+                if (newPhenomenonEnd != null) {
+                    datastreamEntity.setPhenomenonTimeEnd(newPhenomenonEnd);
+                } else {
+                    datastreamEntity.setPhenomenonTimeStart(null);
+                    datastreamEntity.setPhenomenonTimeEnd(null);
+                }
+                datastreamRepository.save(datastreamEntity);
+            }
+    }
+
     @Override
     public DataEntity<?> update(DataEntity<?> entity, HttpMethod method) throws ODataApplicationException {
         if (HttpMethod.PATCH.equals(method)) {
             Optional<DataEntity<?>> existing = getRepository().findByIdentifier(entity.getIdentifier());
             if (existing.isPresent()) {
                 DataEntity<?> merged = mapper.merge(existing.get(), entity);
-                return getRepository().save(merged);
+                DataEntity<?> saved = getRepository().save(merged);
+
+                Optional<DatastreamEntity> datastreamEntity =
+                        datastreamRepository.findOne(dsQS.withObservationIdentifier(saved.getIdentifier()));
+                if (datastreamEntity.isPresent()) {
+                    updateDatastreamPhenomenonTimeOnObservationUpdate(datastreamEntity.get(), saved);
+                }
+                return saved;
             }
             throw new ODataApplicationException(
                     "Unable to update. Entity not found.",
@@ -367,7 +408,13 @@ public class ObservationService extends
 
     @Override
     public void delete(DataEntity<?> entity) {
+        Optional<DatastreamEntity> datastreamEntity =
+                datastreamRepository.findOne(dsQS.withObservationIdentifier(entity.getIdentifier()));
+        // Important! Delete first and then update else we find ourselves again in search for new latest/earliest obs.
         getRepository().deleteByIdentifier(entity.getIdentifier());
+        if (datastreamEntity.isPresent()) {
+            updateDatastreamPhenomenonTimeOnObservationUpdate(datastreamEntity.get(), entity);
+        }
     }
 
     @Override
@@ -528,10 +575,23 @@ public class ObservationService extends
         return datasetRepository.save(dataset);
     }
 
-    private void updateDatastream(DatastreamEntity datastream, DatasetEntity dataset) throws ODataApplicationException {
-        if (datastream.getDatasets() != null && !datastream.getDatasets().contains(dataset)) {
-            datastream.addDataset(dataset);
-            getDatastreamService().update(datastream);
+    private void updateDatastream(DatastreamEntity datastream, DatasetEntity dataset, DataEntity<?> data) throws ODataApplicationException {
+        if (datastream.getDatasets() != null) {
+            if (!datastream.getDatasets().contains(dataset)) {
+                datastream.addDataset(dataset);
+                getDatastreamService().update(datastream);
+            }
+        }
+        if (datastream.getPhenomenonTimeStart() == null) {
+            datastream.setPhenomenonTimeStart(data.getPhenomenonTimeStart());
+            datastream.setPhenomenonTimeEnd(data.getPhenomenonTimeEnd());
+        } else {
+            if (datastream.getPhenomenonTimeStart().after(data.getPhenomenonTimeStart())) {
+                datastream.setPhenomenonTimeStart(data.getPhenomenonTimeStart());
+            }
+            if (datastream.getPhenomenonTimeEnd().before(data.getPhenomenonTimeEnd())) {
+                datastream.setPhenomenonTimeEnd(data.getPhenomenonTimeEnd());
+            }
         }
     }
 
