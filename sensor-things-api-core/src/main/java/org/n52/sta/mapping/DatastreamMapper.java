@@ -100,8 +100,11 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
         entity.addProperty(new Property(null,
                 AbstractSensorThingsEntityProvider.PROP_PHENOMENON_TIME,
                 ValueType.PRIMITIVE,
-                DateTimeHelper.format(createTime(createDateTime(datastream.getSamplingTimeStart()),
-                        createDateTime(datastream.getSamplingTimeEnd())))));
+                (datastream.getSamplingTimeStart() != null) ?
+                        DateTimeHelper.format(createTime(createDateTime(datastream.getSamplingTimeStart()),
+                        createDateTime(datastream.getSamplingTimeEnd())))
+                : null));
+
         entity.addProperty(new Property(null,
                 AbstractSensorThingsEntityProvider.PROP_RESULT_TIME,
                 ValueType.PRIMITIVE,

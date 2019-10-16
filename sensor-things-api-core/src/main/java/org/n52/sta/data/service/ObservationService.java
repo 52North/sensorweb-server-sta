@@ -80,11 +80,13 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -330,32 +332,42 @@ public class ObservationService extends
      * updated or deleted
      */
     private void updateDatastreamPhenomenonTimeOnObservationUpdate(
-            DatastreamEntity datastreamEntity, DataEntity<?> observation) {
+            List<DatastreamEntity> datastreams, DataEntity<?> observation) {
+        for (DatastreamEntity datastreamEntity : datastreams) {
             if (observation.getPhenomenonTimeStart().compareTo(datastreamEntity.getPhenomenonTimeStart()) != 1
                     || observation.getPhenomenonTimeEnd().compareTo(datastreamEntity.getPhenomenonTimeEnd()) != -1
             ) {
+                List<Long> datasetIds = datastreamEntity
+                        .getDatasets()
+                        .stream()
+                        .map(datasetEntity -> datasetEntity.getId())
+                        .collect(Collectors.toList());
                 // Setting new phenomenonTimeStart
-                Date newPhenomenonStart = getRepository()
-                        .findFirstByOrderBySamplingTimeStartAsc()
-                        .getPhenomenonTimeStart();
-                if (newPhenomenonStart != null) {
+                DataEntity<?> firstObservation = getRepository()
+                        .findFirstByDataset_idInOrderBySamplingTimeStartAsc(datasetIds);
+                Date newPhenomenonStart = (firstObservation == null) ? null : firstObservation.getPhenomenonTimeStart();
+
+                // Set Start and End to null if there is no observation.
+                if (newPhenomenonStart == null) {
+                    datastreamEntity.setPhenomenonTimeStart(null);
+                    datastreamEntity.setPhenomenonTimeEnd(null);
+                } else {
                     datastreamEntity.setPhenomenonTimeStart(newPhenomenonStart);
-                } else {
-                    datastreamEntity.setPhenomenonTimeStart(null);
-                    datastreamEntity.setPhenomenonTimeEnd(null);
-                }
-                // Setting new phenomenonTimeEnd
-                Date newPhenomenonEnd = getRepository()
-                        .findFirstByOrderBySamplingTimeEndDesc()
-                        .getPhenomenonTimeStart();
-                if (newPhenomenonEnd != null) {
-                    datastreamEntity.setPhenomenonTimeEnd(newPhenomenonEnd);
-                } else {
-                    datastreamEntity.setPhenomenonTimeStart(null);
-                    datastreamEntity.setPhenomenonTimeEnd(null);
+
+                    // Setting new phenomenonTimeEnd
+                    DataEntity<?> lastObservation = getRepository()
+                            .findFirstByDataset_idInOrderBySamplingTimeEndDesc(datasetIds);
+                    Date newPhenomenonEnd = (lastObservation == null) ? null : lastObservation.getPhenomenonTimeEnd();
+                    if (newPhenomenonEnd != null) {
+                        datastreamEntity.setPhenomenonTimeEnd(newPhenomenonEnd);
+                    } else {
+                        datastreamEntity.setPhenomenonTimeStart(null);
+                        datastreamEntity.setPhenomenonTimeEnd(null);
+                    }
                 }
                 datastreamRepository.save(datastreamEntity);
             }
+        }
     }
 
     @Override
@@ -366,10 +378,10 @@ public class ObservationService extends
                 DataEntity<?> merged = mapper.merge(existing.get(), entity);
                 DataEntity<?> saved = getRepository().save(merged);
 
-                Optional<DatastreamEntity> datastreamEntity =
-                        datastreamRepository.findOne(dsQS.withObservationIdentifier(saved.getIdentifier()));
-                if (datastreamEntity.isPresent()) {
-                    updateDatastreamPhenomenonTimeOnObservationUpdate(datastreamEntity.get(), saved);
+                List<DatastreamEntity> datastreamEntity =
+                        datastreamRepository.findAll(dsQS.withObservationIdentifier(saved.getIdentifier()));
+                if (!datastreamEntity.isEmpty()) {
+                    updateDatastreamPhenomenonTimeOnObservationUpdate(datastreamEntity, saved);
                 }
                 return saved;
             }
@@ -408,12 +420,12 @@ public class ObservationService extends
 
     @Override
     public void delete(DataEntity<?> entity) {
-        Optional<DatastreamEntity> datastreamEntity =
-                datastreamRepository.findOne(dsQS.withObservationIdentifier(entity.getIdentifier()));
+        List<DatastreamEntity> datastreamEntity =
+                datastreamRepository.findAll(dsQS.withObservationIdentifier(entity.getIdentifier()));
         // Important! Delete first and then update else we find ourselves again in search for new latest/earliest obs.
         getRepository().deleteByIdentifier(entity.getIdentifier());
-        if (datastreamEntity.isPresent()) {
-            updateDatastreamPhenomenonTimeOnObservationUpdate(datastreamEntity.get(), entity);
+        if (!datastreamEntity.isEmpty()) {
+            updateDatastreamPhenomenonTimeOnObservationUpdate(datastreamEntity, entity);
         }
     }
 
