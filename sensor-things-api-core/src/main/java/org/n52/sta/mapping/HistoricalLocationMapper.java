@@ -109,9 +109,9 @@ public class HistoricalLocationMapper extends AbstractMapper<HistoricalLocationE
         return historicalLocation;
     }
 
-    private Time createTime(HistoricalLocationEntity location) {
-        return createTime(createDateTime(location.getTime()));
-    }
+    //private Time createTime(HistoricalLocationEntity location) {
+    //    return createTime(createDateTime(location.getTime()));
+    //}
 
     @Override
     public HistoricalLocationEntity merge(HistoricalLocationEntity existing, HistoricalLocationEntity toMerge) {

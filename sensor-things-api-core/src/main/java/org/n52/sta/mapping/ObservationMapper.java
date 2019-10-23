@@ -66,6 +66,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -104,7 +105,7 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
                 null,
                 AbstractSensorThingsEntityProvider.PROP_RESULT,
                 ValueType.PRIMITIVE,
-                this.getResult(observation).getBytes()));
+                this.getResult(observation).getBytes(Charset.defaultCharset())));
 
         Date resultTime = observation.getResultTime();
         Date samplingTime = observation.getSamplingTimeEnd();
@@ -248,10 +249,17 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
         return createTime(start, end);
     }
 
-    @Override
     protected void addPhenomenonTime(HasPhenomenonTime phenomenonTime, Entity entity) {
         if (checkProperty(entity, AbstractSensorThingsEntityProvider.PROP_PHENOMENON_TIME)) {
-            super.addPhenomenonTime(phenomenonTime, entity);
+            Time time = parseTime(getPropertyValue(entity,
+                    AbstractSensorThingsEntityProvider.PROP_PHENOMENON_TIME).toString());
+            if (time instanceof TimeInstant) {
+                phenomenonTime.setSamplingTimeStart(((TimeInstant) time).getValue().toDate());
+                phenomenonTime.setSamplingTimeEnd(((TimeInstant) time).getValue().toDate());
+            } else if (time instanceof TimePeriod) {
+                phenomenonTime.setSamplingTimeStart(((TimePeriod) time).getStart().toDate());
+                phenomenonTime.setSamplingTimeEnd(((TimePeriod) time).getEnd().toDate());
+            }
         } else {
             Date date = DateTime.now().toDate();
             phenomenonTime.setSamplingTimeStart(date);
@@ -262,7 +270,8 @@ public class ObservationMapper extends AbstractMapper<DataEntity<?>> {
     private void addResult(StaDataEntity observation, Entity entity) {
         if (checkProperty(entity, AbstractSensorThingsEntityProvider.PROP_RESULT)) {
             observation.setValue(
-                    new String((byte[]) getPropertyValue(entity, AbstractSensorThingsEntityProvider.PROP_RESULT)));
+                    new String((byte[]) getPropertyValue(entity, AbstractSensorThingsEntityProvider.PROP_RESULT),
+                            Charset.defaultCharset()));
         }
     }
 

@@ -32,7 +32,12 @@ import org.n52.series.db.beans.DataEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
+import java.util.List;
+
 public interface DataRepository<T extends DataEntity<?>>
         extends IdentifierRepository<T>, JpaRepository<T, Long>, JpaSpecificationExecutor<T> {
 
+    DataEntity<?> findFirstByDataset_idInOrderBySamplingTimeStartAsc(List<Long> datasetIdentifiers);
+
+    DataEntity<?> findFirstByDataset_idInOrderBySamplingTimeEndDesc(List<Long> datasetIdentifiers);
 }

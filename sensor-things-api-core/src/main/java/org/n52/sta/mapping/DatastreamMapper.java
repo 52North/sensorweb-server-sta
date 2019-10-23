@@ -65,11 +65,12 @@ import java.util.Set;
 @Component
 public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamEntity> {
 
+    private static final String UNKNOWN = "unknown";
+
     private final ThingMapper thingMapper;
     private final ObservedPropertyMapper observedPropertyMapper;
     private final SensorMapper sensorMapper;
     private final ObservationMapper observationMapper;
-    private final String UNKNOWN = "unknown";
 
     @Autowired
     public DatastreamMapper(@Lazy ThingMapper thingMapper,
@@ -99,8 +100,11 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
         entity.addProperty(new Property(null,
                 AbstractSensorThingsEntityProvider.PROP_PHENOMENON_TIME,
                 ValueType.PRIMITIVE,
-                DateTimeHelper.format(createTime(createDateTime(datastream.getSamplingTimeStart()),
-                        createDateTime(datastream.getSamplingTimeEnd())))));
+                (datastream.getSamplingTimeStart() != null) ?
+                        DateTimeHelper.format(createTime(createDateTime(datastream.getSamplingTimeStart()),
+                        createDateTime(datastream.getSamplingTimeEnd())))
+                : null));
+
         entity.addProperty(new Property(null,
                 AbstractSensorThingsEntityProvider.PROP_RESULT_TIME,
                 ValueType.PRIMITIVE,
@@ -130,7 +134,6 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
         addFormat(datastream, entity);
         addObservedArea(datastream, entity);
         addUnitOfMeasurement(datastream, entity);
-        addPhenomenonTime(datastream, entity);
         addResultTime(datastream, entity);
         addSensor(datastream, entity);
         addObservedProperty(datastream, entity);
@@ -151,8 +154,6 @@ public class DatastreamMapper extends AbstractLocationGeometryMapper<DatastreamE
         if (toMerge.isSetUnit() && existing.getUnit().getSymbol().equals(toMerge.getUnit().getSymbol())) {
             existing.setUnit(toMerge.getUnit());
         }
-        // phenTime
-        mergeSamplingTime(existing, toMerge);
 
         // resultTime
         if (toMerge.hasResultTimeStart() && toMerge.hasResultTimeEnd()) {

@@ -75,7 +75,6 @@ public class SensorThingsReferenceCollectionProcessor implements ReferenceCollec
     private final EntityAnnotator entityAnnotator;
     private final String rootUrl;
 
-    private OData odata;
     private ServiceMetadata serviceMetadata;
     private ODataSerializer serializer;
 

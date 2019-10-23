@@ -31,6 +31,7 @@ package org.n52.sta.service.serializer;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.olingo.commons.api.Constants;
 import org.apache.olingo.commons.api.data.AbstractEntityCollection;
 import org.apache.olingo.commons.api.data.ComplexValue;
@@ -105,6 +106,7 @@ import java.util.Set;
 
 
 //CHECKSTYLE:OFF
+@SuppressFBWarnings(value = "", justification = "Not implemented by 52N - Only exported from Olingo Odata v4")
 public class SensorThingsSerializer extends AbstractODataSerializer {
 
     private static final Map<Geospatial.Type, String> geoValueTypeToJsonName;

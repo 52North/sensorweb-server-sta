@@ -176,7 +176,7 @@ public class GeometryMapper {
     }
 
     // would be used for Olingo 4.6.0
-
+    /*
     private List<LineString> createLineStringList(org.locationtech.jts.geom.Polygon poly, SRID srid) {
         List<LineString> list = new LinkedList<>();
         for (int i = 0; i < poly.getNumInteriorRing(); i++) {
@@ -184,6 +184,7 @@ public class GeometryMapper {
         }
         return list;
     }
+    */
 
     private List<Polygon> createPolygonList(org.locationtech.jts.geom.MultiPolygon geom, SRID srid) {
         List<Polygon> list = new LinkedList<>();
