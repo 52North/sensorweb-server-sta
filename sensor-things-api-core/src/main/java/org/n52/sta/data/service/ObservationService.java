@@ -28,12 +28,6 @@
  */
 package org.n52.sta.data.service;
 
-import org.apache.olingo.commons.api.data.Entity;
-import org.apache.olingo.commons.api.data.EntityCollection;
-import org.apache.olingo.commons.api.edm.EdmEntityType;
-import org.apache.olingo.commons.api.http.HttpMethod;
-import org.apache.olingo.commons.api.http.HttpStatusCode;
-import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.BooleanDataEntity;
 import org.n52.series.db.beans.CategoryDataEntity;
@@ -65,14 +59,16 @@ import org.n52.sta.data.repositories.OfferingRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.edm.provider.entities.DatastreamEntityProvider;
 import org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider;
+import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.mapping.FeatureOfInterestMapper;
 import org.n52.sta.mapping.ObservationMapper;
-import org.n52.sta.service.query.QueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -106,8 +102,6 @@ public class ObservationService extends
     private final OfferingRepository offeringRepository;
     private final DatastreamRepository datastreamRepository;
     private final DatasetRepository datasetRepository;
-    private final String IOT_DATASTREAM = "iot.Datastream";
-    private final String IOT_FEATUREOFINTEREST = "iot.FeatureOfInterest";
 
     private final ObservationMapper mapper;
     private final FeatureOfInterestMapper featureMapper;
@@ -121,7 +115,7 @@ public class ObservationService extends
                               OfferingRepository offeringRepository,
                               DatastreamRepository datastreamRepository,
                               DatasetRepository datasetRepository) {
-        super(repository);
+        super(repository, DataEntity.class);
         this.mapper = mapper;
         this.featureMapper = featureMapper;
         this.categoryRepository = categoryRepository;
@@ -136,108 +130,26 @@ public class ObservationService extends
     }
 
     @Override
-    public EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException {
-        EntityCollection retEntitySet = new EntityCollection();
-        Specification<DataEntity<?>> filter = getFilterPredicate(DataEntity.class, queryOptions);
-        getRepository().findAll(filter, createPageableRequest(queryOptions))
-                .forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
-        return retEntitySet;
-    }
-
-    @Override
-    public Entity getEntity(String id) {
-        Optional<DataEntity<?>> entity = getRepository().findByIdentifier(id);
-        return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
-    }
-
-    @Override
-    public EntityCollection getRelatedEntityCollection(String sourceId,
-                                                       EdmEntityType sourceEntityType,
-                                                       QueryOptions queryOptions)
-            throws ODataApplicationException {
-        Specification<DataEntity<?>> filter = getFilter(sourceId, sourceEntityType);
-        filter = filter.and(getFilterPredicate(DataEntity.class, queryOptions));
-        // TODO: check cast
-        Iterable<DataEntity<?>> observations = getRepository().findAll(filter, createPageableRequest(queryOptions));
-        EntityCollection retEntitySet = new EntityCollection();
-        observations.forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
-        return retEntitySet;
-    }
-
-    @Override
-    public long getRelatedEntityCollectionCount(String sourceId, EdmEntityType sourceEntityType) {
-        Specification<DataEntity<?>> filter = getFilter(sourceId, sourceEntityType);
-        return getRepository().count(filter);
-    }
-
-    private Specification<DataEntity<?>> getFilter(String sourceIdentifier, EdmEntityType sourceEntityType) {
+    public Specification<DataEntity<?>> byRelatedEntityFilter(String relatedId,
+                                                              String relatedType,
+                                                              String ownId) {
         Specification<DataEntity<?>> filter;
-        switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
+        switch (relatedType) {
             case IOT_DATASTREAM: {
-                filter = oQS.withDatastreamIdentifier(sourceIdentifier);
+                filter = oQS.withDatastreamIdentifier(relatedId);
                 break;
             }
             case IOT_FEATUREOFINTEREST: {
-                filter = oQS.withFeatureOfInterestIdentifier(sourceIdentifier);
+                filter = oQS.withFeatureOfInterestIdentifier(relatedId);
                 break;
             }
             default:
                 return null;
         }
+        if (ownId != null) {
+            filter = filter.and(oQS.withIdentifier(ownId));
+        }
         return filter;
-    }
-
-    @Override
-    public boolean existsEntity(String id) {
-        return getRepository().existsByIdentifier(id);
-    }
-
-    @Override
-    public boolean existsRelatedEntity(String sourceId, EdmEntityType sourceEntityType) {
-        return this.existsRelatedEntity(sourceId, sourceEntityType, null);
-    }
-
-    @Override
-    public boolean existsRelatedEntity(String sourceId, EdmEntityType sourceEntityType, String targetId) {
-        Specification<DataEntity<?>> filter;
-        switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-            case IOT_DATASTREAM: {
-                filter = oQS.withDatastreamIdentifier(sourceId);
-                break;
-            }
-            case IOT_FEATUREOFINTEREST: {
-                filter = oQS.withFeatureOfInterestIdentifier(sourceId);
-                break;
-            }
-            default:
-                return false;
-        }
-        if (targetId != null) {
-            filter = filter.and(oQS.withIdentifier(targetId));
-        }
-        return getRepository().count(filter) > 0;
-    }
-
-    @Override
-    public Optional<String> getIdForRelatedEntity(String sourceId, EdmEntityType sourceEntityType) {
-        return this.getIdForRelatedEntity(sourceId, sourceEntityType, null);
-    }
-
-    @Override
-    public Optional<String> getIdForRelatedEntity(String sourceId, EdmEntityType sourceEntityType, String targetId) {
-        Optional<DataEntity<?>> observation = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
-        return observation.map(dataEntity -> Optional.of(dataEntity.getIdentifier())).orElseGet(Optional::empty);
-    }
-
-    @Override
-    public Entity getRelatedEntity(String sourceId, EdmEntityType sourceEntityType) {
-        return this.getRelatedEntity(sourceId, sourceEntityType, null);
-    }
-
-    @Override
-    public Entity getRelatedEntity(String sourceId, EdmEntityType sourceEntityType, String targetId) {
-        Optional<DataEntity<?>> observation = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
-        return observation.map(dataEntity -> mapper.createEntity(dataEntity)).orElse(null);
     }
 
     @Override
@@ -253,45 +165,8 @@ public class ObservationService extends
         }
     }
 
-    /**
-     * Retrieves Observation Entity with Relation to sourceEntity from Database. Returns empty if Observation
-     * is not found or Entities are not related.
-     *
-     * @param sourceId         Id of the Source Entity
-     * @param sourceEntityType Type of the Source Entity
-     * @param targetId         Id of the Thing to be retrieved
-     * @return Optional&lt;DataEntity &lt; ?&gt;&gt; Requested Entity
-     */
-    private Optional<DataEntity<?>> getRelatedEntityRaw(String sourceId,
-                                                        EdmEntityType sourceEntityType,
-                                                        String targetId) {
-        Specification<DataEntity<?>> filter;
-        switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-            case IOT_DATASTREAM: {
-                filter = oQS.withDatastreamIdentifier(sourceId);
-                break;
-            }
-            case IOT_FEATUREOFINTEREST: {
-                filter = oQS.withFeatureOfInterestIdentifier(sourceId);
-                break;
-            }
-            default:
-                return Optional.empty();
-        }
-
-        if (targetId != null) {
-            filter = filter.and(oQS.withIdentifier(targetId));
-        }
-        return getRepository().findOne(filter);
-    }
-
     @Override
-    public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
-        return getRepository().count(getFilterPredicate(DataEntity.class, queryOptions));
-    }
-
-    @Override
-    public DataEntity<?> create(DataEntity<?> entity) throws ODataApplicationException {
+    public DataEntity<?> create(DataEntity<?> entity) throws STACRUDException {
         if (entity instanceof StaDataEntity) {
             StaDataEntity observation = (StaDataEntity) entity;
             if (!observation.isProcesssed()) {
@@ -319,11 +194,10 @@ public class ObservationService extends
         return entity;
     }
 
-    private void check(StaDataEntity observation) throws ODataApplicationException {
+    private void check(StaDataEntity observation) throws STACRUDException {
         if (observation.getDatastream() == null) {
-            throw new ODataApplicationException("The observation to create is invalid. Missing datastream!",
-                    HttpStatusCode.BAD_REQUEST.getStatusCode(),
-                    Locale.getDefault());
+            throw new STACRUDException("The observation to create is invalid. Missing datastream!",
+                    HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -371,7 +245,7 @@ public class ObservationService extends
     }
 
     @Override
-    public DataEntity<?> update(DataEntity<?> entity, HttpMethod method) throws ODataApplicationException {
+    public DataEntity<?> update(DataEntity<?> entity, HttpMethod method) throws STACRUDException {
         if (HttpMethod.PATCH.equals(method)) {
             Optional<DataEntity<?>> existing = getRepository().findByIdentifier(entity.getIdentifier());
             if (existing.isPresent()) {
@@ -385,18 +259,11 @@ public class ObservationService extends
                 }
                 return saved;
             }
-            throw new ODataApplicationException(
-                    "Unable to update. Entity not found.",
-                    HttpStatusCode.NOT_FOUND.getStatusCode(),
-                    Locale.ROOT);
+            throw new STACRUDException("Unable to update. Entity not found.", HttpStatus.NOT_FOUND);
         } else if (HttpMethod.PUT.equals(method)) {
-            throw new ODataApplicationException("Http PUT is not yet supported!",
-                    HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(),
-                    Locale.getDefault());
+            throw new STACRUDException("Http PUT is not yet supported!", HttpStatus.NOT_IMPLEMENTED);
         }
-        throw new ODataApplicationException("Invalid http method for updating entity!",
-                HttpStatusCode.BAD_REQUEST.getStatusCode(),
-                Locale.getDefault());
+        throw new STACRUDException("Invalid http method for updating entity!", HttpStatus.BAD_REQUEST);
     }
 
     @Override
@@ -405,16 +272,13 @@ public class ObservationService extends
     }
 
     @Override
-    public void delete(String identifier) throws ODataApplicationException {
+    public void delete(String identifier) throws STACRUDException {
         if (getRepository().existsByIdentifier(identifier)) {
             DataEntity<?> observation = getRepository().getOneByIdentifier(identifier);
             checkDataset(observation);
             delete(observation);
         } else {
-            throw new ODataApplicationException(
-                    "Unable to delete. Entity not found.",
-                    HttpStatusCode.NOT_FOUND.getStatusCode(),
-                    Locale.ROOT);
+            throw new STACRUDException("Unable to delete. Entity not found.", HttpStatus.NOT_FOUND);
         }
     }
 
@@ -430,7 +294,7 @@ public class ObservationService extends
     }
 
     @Override
-    protected DataEntity<?> createOrUpdate(DataEntity<?> entity) throws ODataApplicationException {
+    protected DataEntity<?> createOrUpdate(DataEntity<?> entity) throws STACRUDException {
         if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
             return update(entity, HttpMethod.PATCH);
         }
@@ -447,8 +311,8 @@ public class ObservationService extends
             dataset.setFirstValueAt(null);
         }
         if (dataset.getLastObservation() != null && dataset.getLastObservation()
-                                                           .getIdentifier()
-                                                           .equals(observation.getIdentifier())) {
+                .getIdentifier()
+                .equals(observation.getIdentifier())) {
             dataset.setLastObservation(null);
             dataset.setLastQuantityValue(null);
             dataset.setLastValueAt(null);
@@ -481,14 +345,14 @@ public class ObservationService extends
         }
     }
 
-    DatastreamEntity checkDatastream(StaDataEntity observation) throws ODataApplicationException {
+    DatastreamEntity checkDatastream(StaDataEntity observation) throws STACRUDException {
         DatastreamEntity datastream = getDatastreamService().create(observation.getDatastream());
         observation.setDatastream(datastream);
         return datastream;
     }
 
     private AbstractFeatureEntity<?> checkFeature(StaDataEntity observation, DatastreamEntity datastream)
-            throws ODataApplicationException {
+            throws STACRUDException {
         if (!observation.hasFeatureOfInterest()) {
             AbstractFeatureEntity<?> feature = null;
             for (LocationEntity location : datastream.getThing().getLocations()) {
@@ -501,10 +365,8 @@ public class ObservationService extends
                 }
             }
             if (feature == null) {
-                throw new ODataApplicationException("The observation to create is invalid." +
-                        " Missing feature or thing.location!",
-                        HttpStatusCode.BAD_REQUEST.getStatusCode(),
-                        Locale.getDefault());
+                throw new STACRUDException("The observation to create is invalid." +
+                        " Missing feature or thing.location!", HttpStatus.BAD_REQUEST);
             }
             observation.setFeatureOfInterest(feature);
         }
@@ -559,7 +421,7 @@ public class ObservationService extends
         }
     }
 
-    private DataEntity<?> checkData(StaDataEntity observation, DatasetEntity dataset) throws ODataApplicationException {
+    private DataEntity<?> checkData(StaDataEntity observation, DatasetEntity dataset) throws STACRUDException {
         DataEntity<?> data = getDataEntity(observation, dataset);
         if (data != null) {
             return getRepository().save(data);
@@ -588,7 +450,7 @@ public class ObservationService extends
     }
 
     private void updateDatastream(DatastreamEntity datastream, DatasetEntity dataset, DataEntity<?> data)
-            throws ODataApplicationException {
+            throws STACRUDException {
         if (datastream.getDatasets() != null) {
             if (!datastream.getDatasets().contains(dataset)) {
                 datastream.addDataset(dataset);
@@ -639,7 +501,7 @@ public class ObservationService extends
     }
 
     private DataEntity<?> getDataEntity(StaDataEntity observation, DatasetEntity dataset)
-            throws ODataApplicationException {
+            throws STACRUDException {
         DataEntity<?> data = null;
         switch (dataset.getOmObservationType().getFormat()) {
             case OmConstants.OBS_TYPE_MEASUREMENT:
@@ -689,8 +551,7 @@ public class ObservationService extends
             data.setDataset(dataset);
             if (observation.getIdentifier() != null) {
                 if (getRepository().existsByIdentifier(observation.getIdentifier())) {
-                    throw new ODataApplicationException("Identifier already exists!",
-                            HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+                    throw new STACRUDException("Identifier already exists!", HttpStatus.BAD_REQUEST);
                 } else {
                     data.setIdentifier(observation.getIdentifier());
                 }

@@ -30,6 +30,7 @@ package org.n52.sta.data.repositories;
 
 
 import org.n52.series.db.beans.PhenomenonEntity;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
@@ -42,4 +43,6 @@ public interface PhenomenonRepository extends ParameterDataRepository<Phenomenon
     void deleteByStaIdentifier(String identifier);
 
     boolean existsByStaIdentifier(String id);
+
+    String getStaIdentifier(Specification<PhenomenonEntity> spec);
 }

@@ -28,12 +28,6 @@
  */
 package org.n52.sta.data.service;
 
-import org.apache.olingo.commons.api.data.Entity;
-import org.apache.olingo.commons.api.data.EntityCollection;
-import org.apache.olingo.commons.api.edm.EdmEntityType;
-import org.apache.olingo.commons.api.http.HttpMethod;
-import org.apache.olingo.commons.api.http.HttpStatusCode;
-import org.apache.olingo.server.api.ODataApplicationException;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
@@ -54,13 +48,15 @@ import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider;
 import org.n52.sta.edm.provider.entities.SensorEntityProvider;
 import org.n52.sta.edm.provider.entities.ThingEntityProvider;
+import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.mapping.DatastreamMapper;
-import org.n52.sta.service.query.QueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -98,7 +94,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
                              FormatRepository formatRepository,
                              DataRepository dataRepository,
                              DatasetRepository datasetRepository) {
-        super(repository);
+        super(repository, DatastreamEntity.class);
         this.mapper = mapper;
         this.unitRepository = unitRepository;
         this.formatRepository = formatRepository;
@@ -112,81 +108,35 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     }
 
     @Override
-    public EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException {
-        EntityCollection retEntitySet = new EntityCollection();
-        Specification<DatastreamEntity> filter = getFilterPredicate(DatastreamEntity.class, queryOptions);
-
-        getRepository().findAll(filter, createPageableRequest(queryOptions))
-                       .forEach(t -> retEntitySet.getEntities()
-                       .add(mapper.createEntity(t)));
-        return retEntitySet;
-    }
-
-    @Override
-    public Entity getEntity(String id) {
-        Optional<DatastreamEntity> entity = getRepository().findByIdentifier(id);
-        return entity.isPresent() ? mapper.createEntity(entity.get()) : null;
-    }
-
-    @Override
-    public EntityCollection getRelatedEntityCollection(String sourceId,
-                                                       EdmEntityType sourceEntityType,
-                                                       QueryOptions queryOptions) {
-        Specification<DatastreamEntity> filter = getFilter(sourceId, sourceEntityType)
-                .and(getFilterPredicate(DatastreamEntity.class, queryOptions));
-        Iterable<DatastreamEntity> datastreams = getRepository().findAll(filter, createPageableRequest(queryOptions));
-        EntityCollection retEntitySet = new EntityCollection();
-        datastreams.forEach(t -> retEntitySet.getEntities().add(mapper.createEntity(t)));
-        return retEntitySet;
-    }
-
-    @Override
-    public long getRelatedEntityCollectionCount(String sourceId, EdmEntityType sourceEntityType) {
-        return getRepository().count(getFilter(sourceId, sourceEntityType));
-    }
-
-    @Override
-    public boolean existsEntity(String id) {
-        return getRepository().existsByIdentifier(id);
-    }
-
-    @Override
-    public boolean existsRelatedEntity(String sourceId, EdmEntityType sourceEntityType) {
-        return this.existsRelatedEntity(sourceId, sourceEntityType, null);
-    }
-
-    @Override
-    public boolean existsRelatedEntity(String sourceId, EdmEntityType sourceEntityType, String targetId) {
-        Specification<DatastreamEntity> filter = getFilter(sourceId, sourceEntityType);
-        if (filter == null) {
-            return false;
+    protected Specification<DatastreamEntity> byRelatedEntityFilter(String relatedId,
+                                                                    String relatedType,
+                                                                    String ownId) {
+        Specification<DatastreamEntity> filter;
+        switch (relatedType) {
+            case IOT_THING: {
+                filter = dQS.withThingIdentifier(relatedId);
+                break;
+            }
+            case IOT_SENSOR: {
+                filter = dQS.withSensorIdentifier(relatedId);
+                break;
+            }
+            case IOT_OBSERVED_PROPERTY: {
+                filter = dQS.withObservedPropertyIdentifier(relatedId);
+                break;
+            }
+            case IOT_OBSERVATION: {
+                filter = dQS.withObservationIdentifier(relatedId);
+                break;
+            }
+            default:
+                return null;
         }
-        if (targetId != null) {
-            filter = filter.and(dQS.withIdentifier(targetId));
+
+        if (ownId != null) {
+            filter = filter.and(dQS.withIdentifier(ownId));
         }
-        return getRepository().count(filter) > 0;
-    }
-
-    @Override
-    public Optional<String> getIdForRelatedEntity(String sourceId, EdmEntityType sourceEntityType) {
-        return this.getIdForRelatedEntity(sourceId, sourceEntityType, null);
-    }
-
-    @Override
-    public Optional<String> getIdForRelatedEntity(String sourceId, EdmEntityType sourceEntityType, String targetId) {
-        Optional<DatastreamEntity> thing = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
-        return thing.map(thingEntity -> Optional.of(thingEntity.getIdentifier())).orElseGet(Optional::empty);
-    }
-
-    @Override
-    public Entity getRelatedEntity(String sourceId, EdmEntityType sourceEntityType) {
-        return this.getRelatedEntity(sourceId, sourceEntityType, null);
-    }
-
-    @Override
-    public Entity getRelatedEntity(String sourceId, EdmEntityType sourceEntityType, String targetId) {
-        Optional<DatastreamEntity> thing = this.getRelatedEntityRaw(sourceId, sourceEntityType, targetId);
-        return thing.map(datastreamEntity -> mapper.createEntity(datastreamEntity)).orElse(null);
+        return filter;
     }
 
     @Override
@@ -202,77 +152,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     }
 
     @Override
-    public long getCount(QueryOptions queryOptions) throws ODataApplicationException {
-        return getRepository().count(getFilterPredicate(DatastreamEntity.class, queryOptions));
-    }
-
-    /**
-     * Retrieves Datastream Entity with Relation to sourceEntity from Database.
-     * Returns empty if Entity is not found or Entities are not related.
-     *
-     * @param sourceId         Id of the Source Entity
-     * @param sourceEntityType Type of the Source Entity
-     * @param targetId         Id of the Entity to be retrieved
-     * @return Optional&lt;DatastreamEntity&gt; Requested Entity
-     */
-    private Optional<DatastreamEntity> getRelatedEntityRaw(String sourceId,
-                                                           EdmEntityType sourceEntityType,
-                                                           String targetId) {
-        Specification<DatastreamEntity> filter = getFilter(sourceId, sourceEntityType);
-        if (filter == null) {
-            return Optional.empty();
-        }
-
-        if (targetId != null) {
-            filter = filter.and(dQS.withIdentifier(targetId));
-        }
-        return getRepository().findOne(filter);
-    }
-
-    /**
-     * Creates BooleanExpression to Filter Queries depending on source Entity Type
-     *
-     * @param sourceId         ID of Source Entity
-     * @param sourceEntityType Type of Source Entity
-     * @return BooleanExpression Filter
-     */
-    private Specification<DatastreamEntity> getFilter(String sourceId, EdmEntityType sourceEntityType) {
-        Specification<DatastreamEntity> filter;
-        switch (sourceEntityType.getFullQualifiedName().getFullQualifiedNameAsString()) {
-            case "iot.Thing": {
-                filter = dQS.withThingIdentifier(sourceId);
-                break;
-            }
-            case "iot.Sensor": {
-                filter = dQS.withSensorIdentifier(sourceId);
-                break;
-            }
-            case "iot.ObservedProperty": {
-                filter = dQS.withObservedPropertyIdentifier(sourceId);
-                break;
-            }
-            case "iot.Observation": {
-                filter = dQS.withObservationIdentifier(sourceId);
-                break;
-            }
-            default:
-                return null;
-        }
-        return Specification.where(filter);
-    }
-
-    ///**
-    // * Constructs SQL Expression to request Entity by ID.
-    // *
-    // * @param id id of the requested entity
-    // * @return BooleanExpression evaluating to true if Entity is found and valid
-    // */
-    //private BooleanExpression byId(Long id) {
-    //    return dQS.withId(id);
-    //}
-
-    @Override
-    public DatastreamEntity create(DatastreamEntity datastream) throws ODataApplicationException {
+    public DatastreamEntity create(DatastreamEntity datastream) throws STACRUDException {
         DatastreamEntity entity = datastream;
         if (!datastream.isProcesssed()) {
             if (datastream.getIdentifier() != null && !datastream.isSetName()) {
@@ -293,8 +173,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
             datastream.setThing(getThingService().create(datastream.getThing()));
             if (datastream.getIdentifier() != null) {
                 if (getRepository().existsByIdentifier(datastream.getIdentifier())) {
-                    throw new ODataApplicationException("Identifier already exists!",
-                            HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+                    throw new STACRUDException("Identifier already exists!", HttpStatus.BAD_REQUEST);
                 } else {
                     datastream.setIdentifier(datastream.getIdentifier());
                 }
@@ -321,20 +200,19 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
             expression = expression.and(dQS.withSensorName(datastream.getProcedure().getName()));
         }
         if (datastream.getObservableProperty().getIdentifier() != null && !datastream.getObservableProperty()
-                                                                                     .isSetName()) {
+                .isSetName()) {
             expression = expression.and(dQS.withObservedPropertyIdentifier(datastream.getObservableProperty()
-                                                                                     .getIdentifier()));
+                    .getIdentifier()));
         } else {
             expression = expression.and(dQS.withObservedPropertyName(datastream.getObservableProperty().getName()));
         }
         return expression;
     }
 
-    private void check(DatastreamEntity datastream) throws ODataApplicationException {
+    private void check(DatastreamEntity datastream) throws STACRUDException {
         if (datastream.getThing() == null || datastream.getObservableProperty() == null
                 || datastream.getProcedure() == null) {
-            throw new ODataApplicationException("The datastream to create is invalid",
-                    HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+            throw new STACRUDException("The datastream to create is invalid", HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -344,7 +222,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     }
 
     @Override
-    public DatastreamEntity update(DatastreamEntity entity, HttpMethod method) throws ODataApplicationException {
+    public DatastreamEntity update(DatastreamEntity entity, HttpMethod method) throws STACRUDException {
         checkUpdate(entity);
         if (HttpMethod.PATCH.equals(method)) {
             Optional<DatastreamEntity> existing = getRepository().findOne(dQS.withIdentifier(entity.getIdentifier()));
@@ -359,46 +237,38 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
                 }
                 return getRepository().save(merged);
             }
-            throw new ODataApplicationException(
-                    "Unable to update. Entity not found.",
-                    HttpStatusCode.NOT_FOUND.getStatusCode(), Locale.ROOT);
+            throw new STACRUDException("Unable to update. Entity not found.", HttpStatus.NOT_FOUND);
         } else if (HttpMethod.PUT.equals(method)) {
-            throw new ODataApplicationException("Http PUT is not yet supported!",
-                    HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(), Locale.getDefault());
+            throw new STACRUDException("Http PUT is not yet supported!", HttpStatus.NOT_IMPLEMENTED);
         }
-        throw new ODataApplicationException("Invalid http method for updating entity!",
-                HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+        throw new STACRUDException("Invalid http method for updating entity!", HttpStatus.BAD_REQUEST);
     }
 
-    private void checkUpdate(DatastreamEntity entity) throws ODataApplicationException {
+    private void checkUpdate(DatastreamEntity entity) throws STACRUDException {
         String ERROR_MSG = "Inlined entities are not allowed for updates!";
         if (entity.getObservableProperty() != null && (entity.getObservableProperty().getIdentifier() == null
                 || entity.getObservableProperty().isSetName() || entity.getObservableProperty().isSetDescription())) {
-            throw new ODataApplicationException(ERROR_MSG,
-                    HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+            throw new STACRUDException(ERROR_MSG, HttpStatus.BAD_REQUEST);
         }
 
         if (entity.getProcedure() != null
                 && (entity.getProcedure().getIdentifier() == null
-                    || entity.getProcedure().isSetName()
-                    || entity.getProcedure().isSetDescription())) {
-            throw new ODataApplicationException(ERROR_MSG,
-                    HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+                || entity.getProcedure().isSetName()
+                || entity.getProcedure().isSetDescription())) {
+            throw new STACRUDException(ERROR_MSG, HttpStatus.BAD_REQUEST);
         }
 
         if (entity.getThing() != null && (entity.getThing().getIdentifier() == null || entity.getThing().isSetName()
                 || entity.getThing().isSetDescription())) {
-            throw new ODataApplicationException(ERROR_MSG,
-                    HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+            throw new STACRUDException(ERROR_MSG, HttpStatus.BAD_REQUEST);
         }
         if (entity.getObservations() != null) {
-            throw new ODataApplicationException(ERROR_MSG,
-                    HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+            throw new STACRUDException(ERROR_MSG, HttpStatus.BAD_REQUEST);
         }
     }
 
     @Override
-    public void delete(String id) throws ODataApplicationException {
+    public void delete(String id) throws STACRUDException {
         if (getRepository().existsByIdentifier(id)) {
             DatastreamEntity datastream = getRepository().getOneByIdentifier(id);
             // check datasets
@@ -406,10 +276,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
             // check observations
             getRepository().deleteByIdentifier(id);
         } else {
-            throw new ODataApplicationException(
-                    "Unable to delete. Entity not found.",
-                    HttpStatusCode.NOT_FOUND.getStatusCode(),
-                    Locale.ROOT);
+            throw new STACRUDException("Unable to delete. Entity not found.", HttpStatus.NOT_FOUND);
         }
     }
 
@@ -419,7 +286,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     }
 
     @Override
-    protected DatastreamEntity createOrUpdate(DatastreamEntity entity) throws ODataApplicationException {
+    protected DatastreamEntity createOrUpdate(DatastreamEntity entity) throws STACRUDException {
         if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
             return update(entity, HttpMethod.PATCH);
         }
@@ -486,7 +353,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     }
 
     private DatastreamEntity processObservation(DatastreamEntity datastream,
-                                                Set<StaDataEntity> observations) throws ODataApplicationException {
+                                                Set<StaDataEntity> observations) throws STACRUDException {
         if (observations != null && !observations.isEmpty()) {
             Set<DatasetEntity> datasets = new LinkedHashSet<>();
             if (datastream.getDatasets() != null) {
@@ -503,18 +370,22 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
         return datastream;
     }
 
+    @SuppressWarnings("unchecked")
     private AbstractSensorThingsEntityService<?, PlatformEntity> getThingService() {
         return (AbstractSensorThingsEntityService<?, PlatformEntity>) getEntityService(EntityTypes.Thing);
     }
 
+    @SuppressWarnings("unchecked")
     private AbstractSensorThingsEntityService<?, ProcedureEntity> getSensorService() {
         return (AbstractSensorThingsEntityService<?, ProcedureEntity>) getEntityService(EntityTypes.Sensor);
     }
 
+    @SuppressWarnings("unchecked")
     private AbstractSensorThingsEntityService<?, PhenomenonEntity> getObservedPropertyService() {
         return (AbstractSensorThingsEntityService<?, PhenomenonEntity>) getEntityService(EntityTypes.ObservedProperty);
     }
 
+    @SuppressWarnings("unchecked")
     private AbstractSensorThingsEntityService<?, DataEntity<?>> getObservationService() {
         return (AbstractSensorThingsEntityService<?, DataEntity<?>>) getEntityService(EntityTypes.Observation);
     }

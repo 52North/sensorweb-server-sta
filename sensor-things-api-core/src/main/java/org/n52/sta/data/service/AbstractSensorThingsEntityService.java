@@ -33,64 +33,64 @@
  */
 package org.n52.sta.data.service;
 
-import org.apache.olingo.commons.api.data.Entity;
-import org.apache.olingo.commons.api.data.EntityCollection;
-import org.apache.olingo.commons.api.edm.EdmEntityType;
-import org.apache.olingo.commons.api.edm.EdmEnumType;
-import org.apache.olingo.commons.api.edm.EdmType;
-import org.apache.olingo.commons.api.http.HttpMethod;
-import org.apache.olingo.commons.api.http.HttpStatusCode;
-import org.apache.olingo.server.api.ODataApplicationException;
-import org.apache.olingo.server.api.uri.UriInfoResource;
-import org.apache.olingo.server.api.uri.UriResource;
-import org.apache.olingo.server.api.uri.queryoption.OrderByItem;
-import org.apache.olingo.server.api.uri.queryoption.OrderByOption;
-import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
-import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
-import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
-import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitor;
-import org.apache.olingo.server.api.uri.queryoption.expression.Literal;
-import org.apache.olingo.server.api.uri.queryoption.expression.Member;
-import org.apache.olingo.server.api.uri.queryoption.expression.MethodKind;
-import org.apache.olingo.server.api.uri.queryoption.expression.UnaryOperatorKind;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.data.OffsetLimitBasedPageRequest;
 import org.n52.sta.data.repositories.IdentifierRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
-import org.n52.sta.service.query.FilterExpressionVisitor;
+import org.n52.sta.exception.STACRUDException;
+import org.n52.sta.exception.STAInvalidQueryException;
 import org.n52.sta.service.query.QueryOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.criteria.Predicate;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Interface for requesting Sensor Things entities
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
+ * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepository<S>, S extends IdEntity> {
 
     @Autowired
     private EntityServiceRepository serviceRepository;
 
+    @Autowired
+    private ObjectMapper mapper;
+
+    protected final String IOT_DATASTREAM = "iot.Datastream";
+    protected final String IOT_THING = "iot.Thing";
+    protected final String IOT_FEATUREOFINTEREST = "iot.FeatureOfInterest";
+    protected final String IOT_OBSERVATION = "iot.Observation";
+    protected final String IOT_LOCATION = "iot.Location";
+    protected final String IOT_SENSOR = "iot.Sensor";
+    protected final String IOT_OBSERVED_PROPERTY = "iot.ObservedProperty";
+    protected final String IOT_HISTORICAL_LOCATION = "iot.HistoricalLocation";
+
+    protected final String STAIDENTIFIER = "staIdentifier";
+    protected final String ENCODINGTYPE = "encodingType";
+
+    private Class entityClass;
+
     private T repository;
 
-    public AbstractSensorThingsEntityService(T repository) {
+    public AbstractSensorThingsEntityService(T repository, Class entityClass) {
+        this.entityClass = entityClass;
         this.repository = repository;
     }
 
@@ -102,132 +102,172 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
     public abstract EntityTypes getType();
 
     /**
-     * Requests the full EntityCollection
+     * Checks if an Entity with given id exists
      *
-     * @param queryOptions {@link QueryOptions}
-     * @return the full EntityCollection
-     * @throws ODataApplicationException if the queryOptions are invalid
-     */
-    public abstract EntityCollection getEntityCollection(QueryOptions queryOptions) throws ODataApplicationException;
-
-    /**
-     * Requests the EntityCollection that is related to a single Entity with the
-     * given ID and type
-     *
-     * @param sourceId         the ID of the Entity the EntityCollection is related to
-     * @param sourceEntityType EntityType of the related Entity
-     * @param queryOptions     {@link QueryOptions}
-     * @return the EntityCollection that is related to the given Entity
-     * @throws ODataApplicationException if the queryOptions are invalid
-     */
-    public abstract EntityCollection getRelatedEntityCollection(String sourceId,
-                                                                EdmEntityType sourceEntityType,
-                                                                QueryOptions queryOptions)
-            throws ODataApplicationException;
-
-    /**
-     * Request the count for the EntityCollection that is related to a single
-     * Entity with the given ID and type
-     *
-     * @param sourceId         the ID of the Entity the EntityCollection is related to
-     * @param sourceEntityType EntityType of the related Entity
-     * @return the count of related entities
-     */
-    public long getRelatedEntityCollectionCount(String sourceId, EdmEntityType sourceEntityType) {
-        return 0;
-    }
-
-    /**
-     * Requests the Entity in accordance to a given ID
-     *
-     * @param id the ID to determine the Entity for
-     * @return the Entity that is conform to the given key predicates
-     */
-    public abstract Entity getEntity(String id);
-
-    /**
-     * Requests the ID for an Entity that is related to a single Entity with the
-     * given ID
-     *
-     * @param sourceId         the ID for the Entity the requested Entity is related to
-     * @param sourceEntityType EntityType of the related Entity
-     * @return the ID for the Entity that is related to the Entity with the
-     * given Id
-     */
-    public abstract Optional<String> getIdForRelatedEntity(String sourceId, EdmEntityType sourceEntityType);
-
-    /**
-     * Requests the ID for the Entity that is related to a single Entity with a
-     * given ID and in accordance to a given ID
-     *
-     * @param sourceId         the ID for the Entity the requested Entity is related to
-     * @param sourceEntityType EntityType of the related Entity
-     * @param targetId         the ID for the requested Entity
-     * @return the Entity that is related to the given Entity and is conform to
-     * the given ID
-     */
-    public abstract Optional<String> getIdForRelatedEntity(String sourceId,
-                                                           EdmEntityType sourceEntityType,
-                                                           String targetId);
-
-    /**
-     * Checks if an Entity exists in accordance to a given list of key
-     * predicates
-     *
-     * @param id the ID to check the existence of an Entity for
-     * @return true if an Entity that is conform to the given key predicates
-     * exists
+     * @param id the id of the Entity
+     * @return true if an Entity with given id exists
      */
     public boolean existsEntity(String id) {
         return getRepository().existsByIdentifier(id);
     }
 
     /**
-     * Checks if an Entity exists that is related to a single Entity of the
-     * given EntityType
+     * Gets the Entity with given id
      *
-     * @param sourceId         ID of the related Entity
-     * @param sourceEntityType EntityType of the related Entity
-     * @return true if an Entity exists that is related to a single Entity of
-     * the given EntityType and with the given KeyPredicates
+     * @param id the id of the Entity
+     * @return
      */
-    public abstract boolean existsRelatedEntity(String sourceId, EdmEntityType sourceEntityType);
+    public String getEntity(String id) throws STACRUDException {
+        try {
+            return this.serializeEntity(getRepository().findByIdentifier(id).get());
+        } catch (RuntimeException e) {
+            throw new STACRUDException(e.getMessage());
+        }
+    }
 
     /**
-     * Checks if an Entity exists that is conform to given KeyPredicates and is
-     * related to a single Entity of the given EntityType and with the given
-     * KeyPredicates in accordance
+     * Requests the full EntityCollection
      *
-     * @param sourceId         ID of the related Entity
-     * @param sourceEntityType EntityType of the related Entity
-     * @param targetId         ID of the requested Entity
-     * @return true if an Entity exists that is conform to the given
-     * KeyPredicates and is related to a single Entity of the given
-     * EntityType and with the given KeyPredicates
+     * @param queryOptions {@link QueryOptions}
+     * @return the full EntityCollection
+     * @throws STAInvalidQueryException if the queryOptions are invalid
      */
-    public abstract boolean existsRelatedEntity(String sourceId, EdmEntityType sourceEntityType, String targetId);
+    public List<String> getEntityCollection(QueryOptions queryOptions) throws STACRUDException {
+        try {
+            Specification<S> filter = getFilterPredicate(entityClass, queryOptions);
+            return getRepository()
+                    .findAll(filter, createPageableRequest(queryOptions))
+                    .map(this::serializeEntity)
+                    .getContent();
+        } catch (RuntimeException e) {
+            throw new STACRUDException(e.getMessage());
+        }
+    }
 
     /**
-     * Requests the Entity that is related to a single Entity with a given ID
-     * and type
+     * Wraps serialization of Entities. Converts checked Exceptions into RuntimeException to allow for use in
+     * Stream Processing
      *
-     * @param sourceId         ID of the related Entity
-     * @param sourceEntityType EntityType of the related Entity
-     * @return the Entity that is related to the Entity with given ID and type
+     * @param e object to be serialized
+     * @return JSON serialization of the Object
      */
-    public abstract Entity getRelatedEntity(String sourceId, EdmEntityType sourceEntityType);
+    protected String serializeEntity(Object e) {
+        try {
+            if (e instanceof Optional && ((Optional) e).isPresent()) {
+                return mapper.writeValueAsString(((Optional) e).get());
+            } else {
+                return mapper.writeValueAsString(e);
+            }
+        } catch (NoSuchElementException | JsonProcessingException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
 
     /**
-     * Requests the Entity that is related to a single Entity with a given ID
-     * and type and that is conform to a given ID
+     * Checks if an entity with given ownId exists that relates to an entity with given relatedId and relatedType
      *
-     * @param sourceId         ID of the related Entity
-     * @param sourceEntityType EntityType of the related Entity
-     * @param targetId         ID of the requested Entity
+     * @param relatedId   ID of the related Entity
+     * @param relatedType EntityType of the related Entity
+     * @param ownId       ID of the requested Entity. Can be null.
+     * @return true if an Entity exists
+     */
+    public boolean existsEntityByRelatedEntity(String relatedId, String relatedType, String ownId) {
+        return getRepository().count(byRelatedEntityFilter(relatedId, relatedType, ownId)) > 0;
+    }
+    /**
+     * Requests the Entity with given ownId that is related to a single Entity with given relatedId and relatedType
+     *
+     * @param relatedId   ID of the related Entity
+     * @param relatedType EntityType of the related Entity
+     * @param ownId       ID of the requested Entity. Can be null.
+     * @return Entity that matches
+     */
+    public String getEntityByRelatedEntity(String relatedId, String relatedType, String ownId)
+            throws STACRUDException {
+        try {
+            return this.serializeEntity(
+                    getRepository().findOne(byRelatedEntityFilter(relatedId, relatedType, ownId)));
+        } catch (RuntimeException e) {
+            throw new STACRUDException(e.getMessage());
+        }
+    }
+
+    /**
+     * Gets the Id on an Entity that is related to a single Entity with given relatedId and relatedType.
+     * May be overwritten by classes that use a different field for storing the identifier.
+     *
+     * @param relatedId   ID of the related Entity
+     * @param relatedType EntityType of the related Entity
+     * @return Id of the Entity. Null if no entity is present
+     */
+    public String getEntityIdByRelatedEntity(String relatedId, String relatedType) {
+        return getRepository().getIdentifier(this.byRelatedEntityFilter(relatedId, relatedType,null));
+    }
+
+    /**
+     * Requests the EntityCollection that is related to a single Entity with the
+     * given ID and type
+     *
+     * @param relatedId    the ID of the Entity the EntityCollection is related to
+     * @param relatedType  EntityType of the related Entity
+     * @param queryOptions {@link QueryOptions}
+     * @return List of Entities that match
+     * @throws STAInvalidQueryException if the queryOptions are invalid
+     */
+    public List<String> getEntityCollectionByRelatedEntity(String relatedId,
+                                                           String relatedType,
+                                                           QueryOptions queryOptions) throws STACRUDException {
+        try {
+            return getRepository()
+                    .findAll(byRelatedEntityFilter(relatedId, relatedType, null),
+                            createPageableRequest(queryOptions))
+                    .map(this::serializeEntity)
+                    .getContent();
+
+        } catch (RuntimeException e) {
+            throw new STACRUDException(e.getMessage());
+        }
+    }
+
+    /**
+     * Constructs Specification for for entity with given ownId and
+     * related entity with type relatedType and id relatedId.
+     *
+     * @param relatedId   Id of the Related Entity
+     * @param relatedType Type of the Related Entity
+     * @param ownId       Id of the Entity. Can be null
+     * @return Optional&lt;ProcedureEntity&gt; Requested Entity
+     */
+    protected abstract Specification<S> byRelatedEntityFilter(String relatedId,
+                                                              String relatedType,
+                                                              String ownId);
+
+    /**
+     * Request the count for the EntityCollection that is related to a single
+     * Entity with the given ID and type
+     *
+     * @param relatedId   the ID of the Entity the EntityCollection is related to
+     * @param relatedType EntityType of the related Entity
+     * @return the count of related entities
+     */
+    public long getEntityCollectionCountByRelatedEntity(String relatedId, String relatedType) {
+        return 0;
+    }
+
+
+    /**
+     * Requests the ID for the Entity that is related to a single Entity with a
+     * given ID and in accordance to a given ID
+     *
+     * @param relatedId         the ID for the Entity the requested Entity is related to
+     * @param relatedType EntityType of the related Entity
+     * @param ownId         the ID for the requested Entity. Can be null.
      * @return the Entity that is related to the given Entity and is conform to
      * the given ID
      */
-    public abstract Entity getRelatedEntity(String sourceId, EdmEntityType sourceEntityType, String targetId);
+    //public abstract Optional<String> getIdByRelatedEntity(String relatedId,
+    //                                                     String relatedType,
+    //                                                      String ownId);
 
     /**
      * Gets a Map that holds definitions for all related Entities of the
@@ -252,13 +292,16 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
     }
 
     /**
-     * Query for the number of element.
+     * Query for the number of entities.
      *
      * @param queryOptions {@link QueryOptions}
-     * @return the existing elements
-     * @throws ODataApplicationException if the queryOptions could not be parsed.
+     * @return count of entities
+     * @throws STAInvalidQueryException if the queryOptions are invalid
      */
-    public abstract long getCount(QueryOptions queryOptions) throws ODataApplicationException;
+    public long getCount(QueryOptions queryOptions) {
+        return getRepository().count(getFilterPredicate(entityClass, queryOptions));
+    }
+
 
     /**
      * Constructs QueryDSL FilterPredicate based on given queryOptions.
@@ -269,56 +312,57 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      */
     public Specification<S> getFilterPredicate(Class entityClass, QueryOptions queryOptions) {
         return (root, query, builder) -> {
-            try {
-                //if (queryOptions.hasOrderByOption()) {
-                //    TODO: add orderby option for observation.result here?
-                //}
-                if (!queryOptions.hasFilterOption()) {
-                    return null;
-                } else {
-                    Expression filterExpression = queryOptions.getFilterOption().getExpression();
-
-                    FilterExpressionVisitor visitor = new FilterExpressionVisitor(
-                            entityClass,
-                            this,
-                            builder, root);
-                    try {
-                        Object accept = filterExpression.accept(visitor);
-                        if (accept instanceof Specification) {
-                            return ((Specification<S>) accept).toPredicate(root, query, builder);
-                        } else if (accept instanceof Predicate) {
-                            return (Predicate) accept;
-                        } else {
-                            throw new ODataApplicationException(
-                                    "Received invalid FilterExpression.",
-                                    HttpStatusCode.INTERNAL_SERVER_ERROR.getStatusCode(),
-                                    Locale.ENGLISH);
-                        }
-                    } catch (ExpressionVisitException e) {
-                        throw new ODataApplicationException(
-                                e.getMessage(),
-                                HttpStatusCode.BAD_REQUEST.getStatusCode(),
-                                Locale.ENGLISH);
-                    }
-                }
-            } catch (ODataApplicationException e) {
-                throw new RuntimeException(e);
-            }
+            return null;
+//            try {
+//                //if (queryOptions.hasOrderByOption()) {
+//                //    TODO: add orderby option for observation.result here?
+//                //}
+//                if (!queryOptions.hasFilterOption()) {
+//                    return null;
+//                } else {
+//                    Expression filterExpression = queryOptions.getFilterOption().getExpression();
+//
+//                    FilterExpressionVisitor visitor = new FilterExpressionVisitor(
+//                            entityClass,
+//                            this,
+//                            builder, root);
+//                    try {
+//                        Object accept = filterExpression.accept(visitor);
+//                        if (accept instanceof Specification) {
+//                            return ((Specification<S>) accept).toPredicate(root, query, builder);
+//                        } else if (accept instanceof Predicate) {
+//                            return (Predicate) accept;
+//                        } else {
+//                            throw new ODataApplicationException(
+//                                    "Received invalid FilterExpression.",
+//                                    HttpStatusCode.INTERNAL_SERVER_ERROR.getStatusCode(),
+//                                    Locale.ENGLISH);
+//                        }
+//                    } catch (ExpressionVisitException e) {
+//                        throw new ODataApplicationException(
+//                                e.getMessage(),
+//                                HttpStatusCode.BAD_REQUEST.getStatusCode(),
+//                                Locale.ENGLISH);
+//                    }
+//                }
+//            } catch (ODataApplicationException e) {
+//                throw new RuntimeException(e);
+//            }
         };
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public abstract S create(S entity) throws ODataApplicationException;
+    public abstract S create(S entity) throws STACRUDException;
 
     @Transactional(rollbackFor = Exception.class)
-    public abstract S update(S entity, HttpMethod method) throws ODataApplicationException;
+    public abstract S update(S entity, HttpMethod method) throws STACRUDException;
 
-    protected abstract S update(S entity) throws ODataApplicationException;
+    protected abstract S update(S entity) throws STACRUDException;
 
     @Transactional(rollbackFor = Exception.class)
-    public abstract void delete(String id) throws ODataApplicationException;
+    public abstract void delete(String id) throws STACRUDException;
 
-    protected abstract void delete(S entity) throws ODataApplicationException;
+    protected abstract void delete(S entity) throws STACRUDException;
 
     /**
      * Must be implemented by each Service individually as S is not known to have identifier here.
@@ -326,9 +370,9 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      *
      * @param entity entity to be persisted or updated
      * @return updated entity
-     * @throws ODataApplicationException if an error occurred
+     * @throws STACRUDException if an error occurred
      */
-    protected abstract S createOrUpdate(S entity) throws ODataApplicationException;
+    protected abstract S createOrUpdate(S entity) throws STACRUDException;
     //protected S createOrUpdate(S entity) throws ODataApplicationException {
     //    if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
     //        return update(entity, HttpMethod.PATCH);
@@ -336,20 +380,20 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
     //    return create(entity);
     //}
 
-    protected void checkInlineDatastream(DatastreamEntity datastream) throws ODataApplicationException {
+    protected void checkInlineDatastream(DatastreamEntity datastream) throws STACRUDException {
         if (datastream.getIdentifier() == null
                 || datastream.isSetName()
                 || datastream.isSetDescription()
                 || datastream.isSetUnit()) {
-            throw new ODataApplicationException("Inlined datastream entities are not allowed for updates!",
-                    HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+            throw new STACRUDException("Inlined datastream entities are not allowed for updates!",
+                    HttpStatus.BAD_REQUEST);
         }
     }
 
-    protected void checkInlineLocation(LocationEntity location) throws ODataApplicationException {
+    protected void checkInlineLocation(LocationEntity location) throws STACRUDException {
         if (location.getIdentifier() == null || location.isSetName() || location.isSetDescription()) {
-            throw new ODataApplicationException("Inlined location entities are not allowed for updates!",
-                    HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
+            throw new STACRUDException("Inlined location entities are not allowed for updates!",
+                    HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -366,37 +410,40 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      */
     protected OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions,
                                                                 String defaultSortingProperty) {
-        int offset = queryOptions.hasSkipOption() ? queryOptions.getSkipOption().getValue() : 0;
-        Sort sort = Sort.by(Direction.ASC, defaultSortingProperty);
-        if (queryOptions.hasOrderByOption()) {
-            boolean first = true;
-            try {
-                for (OrderByItem orderByItem : queryOptions.getOrderByOption().getOrders()) {
-                    if (first) {
-                        sort = Sort.by(orderByItem.isDescending() ? Direction.DESC : Direction.ASC,
-                                orderByItem.getExpression().accept(new ExpressionGenerator(this)));
-                        first = false;
-                    } else {
-                        sort.and(Sort.by(orderByItem.isDescending() ? Direction.DESC : Direction.ASC,
-                                orderByItem.getExpression().accept(new ExpressionGenerator(this))));
-                    }
-                }
-            } catch (ExpressionVisitException | ODataApplicationException e) {
-                // use default sort
-            }
-        }
-        return new OffsetLimitBasedPageRequest(offset, queryOptions.getTopOption().getValue(), sort);
+        //TODO(specki): implement
+//        int offset = queryOptions.hasSkipOption() ? queryOptions.getSkipOption().getValue() : 0;
+//        Sort sort = Sort.by(Direction.ASC, defaultSortingProperty);
+//        if (queryOptions.hasOrderByOption()) {
+//            boolean first = true;
+//            try {
+//                for (OrderByItem orderByItem : queryOptions.getOrderByOption().getOrders()) {
+//                    if (first) {
+//                        sort = Sort.by(orderByItem.isDescending() ? Direction.DESC : Direction.ASC,
+//                                orderByItem.getExpression().accept(new ExpressionGenerator(this)));
+//                        first = false;
+//                    } else {
+//                        sort.and(Sort.by(orderByItem.isDescending() ? Direction.DESC : Direction.ASC,
+//                                orderByItem.getExpression().accept(new ExpressionGenerator(this))));
+//                    }
+//                }
+//            } catch (ExpressionVisitException | ODataApplicationException e) {
+//                // use default sort
+//            }
+//        }
+//        return new OffsetLimitBasedPageRequest(offset, queryOptions.getTopOption().getValue(), sort);
+        return new OffsetLimitBasedPageRequest(0, 100);
     }
 
+    //TODO(specki): check if this needs to be overridden by observedproperty that uses different field
     protected OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions) {
         return this.createPageableRequest(queryOptions, "identifier");
     }
 
     /**
-     * Check property for sorting if different in database
+     * Translate STA property name to Database property name
      *
-     * @param property the sorting property to check
-     * @return the databse property name
+     * @param property name of the property in STA
+     * @return name of the property in database
      */
     public String checkPropertyName(String property) {
         return property;
@@ -405,6 +452,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
     /**
      * {@link ExpressionVisitor} to get property name from {@link OrderByOption}
      */
+    /*
     private static final class ExpressionGenerator implements ExpressionVisitor<String> {
 
         private AbstractSensorThingsEntityService<?, ?> service;
@@ -471,5 +519,5 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
             throw new ExpressionVisitException("MethodKind expressions are not supported");
         }
     }
-
+*/
 }

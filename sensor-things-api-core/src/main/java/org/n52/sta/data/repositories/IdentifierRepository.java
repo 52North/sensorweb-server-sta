@@ -28,9 +28,12 @@
  */
 package org.n52.sta.data.repositories;
 
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
 import java.util.Optional;
 
-public interface IdentifierRepository<T> {
+public interface IdentifierRepository<T> extends JpaSpecificationExecutor<T> {
 
     boolean existsByIdentifier(String identifier);
 
@@ -39,4 +42,6 @@ public interface IdentifierRepository<T> {
     void deleteByIdentifier(String identifier);
 
     T getOneByIdentifier(String identifier);
+
+    String getIdentifier(Specification<T> spec);
 }
