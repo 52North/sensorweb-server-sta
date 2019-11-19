@@ -48,7 +48,6 @@ import java.util.Set;
 public class MqttPropertySubscription extends AbstractMqttSubscription {
 
     private final SelectOption selectOption;
-    private EdmEntitySet entitySet;
     private String entityId;
     private String watchedEdmProperty;
 
@@ -59,7 +58,6 @@ public class MqttPropertySubscription extends AbstractMqttSubscription {
                                     String topic,
                                     SelectOption selectOption) {
         super(topic, entityType, targetEntitySet);
-        this.entitySet = targetEntitySet;
         this.entityId = targetId;
         this.watchedEdmProperty = watchedProperty.getName();
         this.selectOption = selectOption;

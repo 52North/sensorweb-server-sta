@@ -22,10 +22,6 @@ A complete demo setup is provided via a [docker-compose file](https://github.com
 ## Testing
 A [Postman ](https://www.getpostman.com/) Collection with a multitude of demo requests is provided in the `etc` subdirectory.
 
-## Conformance Test Suite Status:
-
-| Conformance Class                     | Reference | Implemented |Test Status |
-
 ## Notes:
 #### MQTT Extension
  - Subscription is only possible on Topics (aka REST-Endpoints) that exist. This is checked on Subscription creation. SUBACK Message is send regardless.

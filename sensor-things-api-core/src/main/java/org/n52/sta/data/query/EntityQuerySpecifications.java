@@ -44,20 +44,21 @@ import java.util.Date;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
+
 public abstract class EntityQuerySpecifications<T> {
 
-    protected final String SENSOR = "Sensor";
-    protected final String OBSERVED_PROPERTY = "ObservedProperty";
-    protected final String THING = "Thing";
-    protected final String THINGS = "Things";
-    protected final String DATASTREAM = "Datastream";
-    protected final String DATASTREAMS = "Datastreams";
-    protected final String FEATUREOFINTEREST = "FeatureOfInterest";
-    protected final String LOCATIONS = "Locations";
-    protected final String HISTORICAL_LOCATIONS = "HistoricalLocations";
-    protected final String OBSERVATIONS = "Observations";
+    protected static final String SENSOR = "Sensor";
+    protected static final String OBSERVED_PROPERTY = "ObservedProperty";
+    protected static final String THING = "Thing";
+    protected static final String THINGS = "Things";
+    protected static final String DATASTREAM = "Datastream";
+    protected static final String DATASTREAMS = "Datastreams";
+    protected static final String FEATUREOFINTEREST = "FeatureOfInterest";
+    protected static final String LOCATIONS = "Locations";
+    protected static final String HISTORICAL_LOCATIONS = "HistoricalLocations";
+    protected static final String OBSERVATIONS = "Observations";
 
-    private final String ERROR_TEMPLATE = "Operator \"%s\" is not supported for given arguments.";
+    private static final String ERROR_TEMPLATE = "Operator \"%s\" is not supported for given arguments.";
 
     /**
      * Gets Subquery returning the IDs of the Entities

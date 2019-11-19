@@ -159,8 +159,6 @@ public class ObservationEntityProvider extends AbstractSensorThingsEntityProvide
                 .setNullable(false)
                 .setPartner(ES_OBSERVATIONS_NAME);
 
-        List<CsdlNavigationProperty> navPropList = new ArrayList<CsdlNavigationProperty>();
-
         return Arrays.asList(
                 navPropDatastreams,
                 navPropFeatureOfInterest);

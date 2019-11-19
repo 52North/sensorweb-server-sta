@@ -66,6 +66,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 
 /**
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
@@ -73,10 +74,10 @@ import java.io.InputStream;
 @Component
 public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcessor {
 
+    private static final String NOT_SUPPORTED = "Not supported yet.";
+    private static final String NULL = "null";
     private final AbstractPropertyRequestHandler<SensorThingsRequest, PropertyResponse> requestHandler;
     private final SensorThingsSerializer serializer;
-    private final String NOT_SUPPORTED = "Not supported yet.";
-    private final String NULL = "null";
 
     private FixedFormatSerializer fixedFormatSerializer;
     private ServiceMetadata serviceMetadata;
@@ -103,7 +104,7 @@ public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcess
                 requestHandler.handlePropertyRequest(new SensorThingsRequest(uriInfo.getUriResourceParts(), null));
 
         // serialize
-        Object propertyValue = propertyValueReponse.getProperty().getValue();
+        // Object propertyValue = propertyValueReponse.getProperty().getValue();
         //        if (propertyValue != null) {
         //TODO: check for other than primitive types for the property
 
@@ -209,8 +210,9 @@ public class SensorThingsPropertyValueProcessor implements PrimitiveValueProcess
                 requestHandler.handlePropertyRequest(new SensorThingsRequest(uriInfo.getUriResourceParts(), null));
         InputStream serializedContent;
         if (primitiveResponse.getProperty().getValue() == null) {
-            serializedContent = new ByteArrayInputStream(
-                    ("{\"" + primitiveResponse.getProperty().getName() + "\":null}").getBytes());
+            serializedContent =
+                    new ByteArrayInputStream(("{\"" + primitiveResponse.getProperty().getName() + "\":null}")
+                            .getBytes(Charset.defaultCharset()));
         } else {
             //TODO: check for other than primitive types for the property
             serializedContent = createResponseContent(primitiveResponse.getProperty(),

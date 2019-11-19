@@ -2,14 +2,15 @@
 debug: false
 trace: false
 
+# General Server Configuration
 server:
+  port: 8081
   rootUrl: example.xyz:80
 
+# Database Configuration
 database:
   jpa:
     persistence-location: classpath:META-INF/persistence.xml
-
-# Spring 
 spring:
   datasource:
     platform: postgres
@@ -48,6 +49,13 @@ spring:
     enabled: false
 
 
+# HTTP Configuration
+http:
+  cors:
+    allowOrigin: "*"
+    allowMethods: "POST, PUT, GET, OPTIONS, DELETE, PATCH"
+    allowHeaders: "Access-Control-Allow-Headers, Content-Type, Authorization, X-Requested-With"
+    maxAge: 3600
 
 # MQTT Configuration
 mqtt:

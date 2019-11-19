@@ -176,8 +176,7 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
     public void deleteEntity(ODataRequest request, ODataResponse response, UriInfo uriInfo)
             throws ODataApplicationException, ODataLibraryException {
         QueryOptions queryOptions = new URIQueryOptions(uriInfo, rootUrl);
-        EntityResponse entityResponse = new EntityResponse();
-        entityResponse = crudHelper.getCrudEntityHanlder(uriInfo)
+        EntityResponse entityResponse = crudHelper.getCrudEntityHanlder(uriInfo)
                 .handleDeleteEntityRequest(uriInfo.getUriResourceParts());
         entityAnnotator.annotateEntity(entityResponse.getEntity(),
                 entityResponse.getEntitySet().getEntityType(),
@@ -213,8 +212,6 @@ public class SensorThingsEntityProcessor implements EntityProcessor {
                 response.getEntitySet().getEntityType(),
                 response.getEntity(),
                 opts);
-        InputStream serializedContent = serializerResult.getContent();
-
-        return serializedContent;
+        return serializerResult.getContent();
     }
 }

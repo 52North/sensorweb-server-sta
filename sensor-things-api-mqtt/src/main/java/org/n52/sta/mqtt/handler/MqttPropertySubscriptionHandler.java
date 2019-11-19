@@ -59,7 +59,7 @@ import java.util.Locale;
 public class MqttPropertySubscriptionHandler
         extends AbstractPropertyRequestHandler<SensorThingsMqttRequest, MqttPropertySubscription> {
 
-    private final String ENTITY_NOT_FOUND = "Entity not found.";
+    private static final String ENTITY_NOT_FOUND = "Entity not found.";
 
     @Autowired
     private UriResourceNavigationResolver navigationResolver;

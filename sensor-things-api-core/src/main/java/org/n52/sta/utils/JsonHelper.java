@@ -35,7 +35,6 @@ package org.n52.sta.utils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
@@ -49,12 +48,10 @@ import java.io.IOException;
 public class JsonHelper implements InitializingBean {
 
     private ObjectMapper mapper;
-    private JsonNodeFactory factory;
 
     @Override
     public void afterPropertiesSet() throws Exception {
         mapper = new ObjectMapper();
-        factory = JsonNodeFactory.instance;
     }
 
     public JsonNode readJsonString(String json) throws IOException {

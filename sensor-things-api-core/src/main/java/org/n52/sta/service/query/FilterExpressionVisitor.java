@@ -156,6 +156,20 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
         }
     }
 
+    private javax.persistence.criteria.Expression convertToBooleanExpression(Object object)
+            throws ODataApplicationException {
+        if (object instanceof Specification) {
+            return ((Specification) object).toPredicate(root, null, criteriaBuilder);
+        } else if (object instanceof javax.persistence.criteria.Expression) {
+            return (javax.persistence.criteria.Expression) object;
+        } else {
+            throw new ODataApplicationException("Error converting Object to javax Expression!",
+                    HttpStatusCode.INTERNAL_SERVER_ERROR.getStatusCode(),
+                    Locale.ENGLISH);
+        }
+
+    }
+
     /*
      * (non-Javadoc)
      *
@@ -164,19 +178,20 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
      * .olingo.server.api.uri.queryoption.expression.UnaryOperatorKind, java.lang.Object)
      */
     @Override
-    public Object visitUnaryOperator(UnaryOperatorKind operator, Object operand) throws ExpressionVisitException,
-            ODataApplicationException {
+    public Object visitUnaryOperator(UnaryOperatorKind operator, Object operand) throws ODataApplicationException {
 
         if (operator == UnaryOperatorKind.NOT && operand instanceof Expression) {
             // 1.) boolean negation
-            return criteriaBuilder.not((javax.persistence.criteria.Expression<Boolean>) operand);
+            javax.persistence.criteria.Expression<Boolean> op = convertToBooleanExpression(operand);
+            return criteriaBuilder.not(op);
             //return ((BooleanExpression) operand).not();
         } else if (operator == UnaryOperatorKind.MINUS && operand instanceof Number) {
             // 2.) arithmetic minus
             return -(Double) operand;
         } else if (operator == UnaryOperatorKind.MINUS && operand instanceof Expression) {
             // 2.) arithmetic minus
-            return criteriaBuilder.neg((javax.persistence.criteria.Expression<Number>) operand);
+            javax.persistence.criteria.Expression op = convertToBooleanExpression(operand);
+            return criteriaBuilder.neg(op);
             //return ((NumberExpression) operand).negate();
         }
 
@@ -189,8 +204,10 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
     private Object evaluateArithmeticOperation(BinaryOperatorKind operator, Object left, Object right)
             throws ExpressionVisitException,
             ODataApplicationException {
-        javax.persistence.criteria.Expression<? extends Comparable<?>> leftExpr = convertToArithmeticExpression(left);
-        javax.persistence.criteria.Expression<? extends Comparable<?>> rightExpr = convertToArithmeticExpression(right);
+        //javax.persistence.criteria.Expression<? extends Comparable<?>> leftExpr =
+        //          convertToArithmeticExpression(left);
+        //javax.persistence.criteria.Expression<? extends Comparable<?>> rightExpr =
+        //          convertToArithmeticExpression(right);
 
         //return rootQS.handleNumberFilter(leftExpr, rightExpr, operator, criteriaBuilder, false);
         return null;
@@ -227,7 +244,6 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
             // Handle Literals + Combined Expressions
             // Assume Numbers are compared
             try {
-
                 javax.persistence.criteria.Expression<? extends Comparable<?>>
                         leftExpr = convertToArithmeticExpression(left);
                 javax.persistence.criteria.Expression<? extends Comparable<?>>
@@ -309,10 +325,8 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
 
     private Object evaluateBooleanOperation(BinaryOperatorKind operator, Object left, Object right)
             throws ODataApplicationException {
-        javax.persistence.criteria.Expression<Boolean> leftExpr =
-                (javax.persistence.criteria.Expression<Boolean>) left;
-        javax.persistence.criteria.Expression<Boolean> rightExpr =
-                (javax.persistence.criteria.Expression<Boolean>) right;
+        javax.persistence.criteria.Expression leftExpr = convertToBooleanExpression(left);
+        javax.persistence.criteria.Expression rightExpr = convertToBooleanExpression(right);
 
         if (operator == BinaryOperatorKind.AND) {
             return criteriaBuilder.and(rightExpr, leftExpr);
@@ -321,7 +335,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
         } else {
             throw new ODataApplicationException(
                     String.format(ERROR_TEMPLATE, operator.toString(), "BooleanExpression"),
-                    HttpStatusCode.BAD_REQUEST.getStatusCode(),
+                    HttpStatusCode.INTERNAL_SERVER_ERROR.getStatusCode(),
                     Locale.ENGLISH);
         }
     }
@@ -342,7 +356,7 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
 
     private javax.persistence.criteria.Expression<Date>[] convertToTimespanExpression(Object expr)
             throws ODataApplicationException {
-        javax.persistence.criteria.Expression<Date>[] result = new javax.persistence.criteria.Expression[2];
+        // javax.persistence.criteria.Expression<Date>[] result = new javax.persistence.criteria.Expression[2];
 
         //if (expr instanceof Date[]) {
         //    //Literal
@@ -516,7 +530,6 @@ public class FilterExpressionVisitor implements ExpressionVisitor<Object> {
                 return criteriaBuilder.trim(convertToStringExpression(arg1));
             case CONCAT:
                 return criteriaBuilder.concat(convertToStringExpression(arg1), convertToStringExpression(arg2));
-
             // Math Functions
             case ROUND:
                 return criteriaBuilder.function(

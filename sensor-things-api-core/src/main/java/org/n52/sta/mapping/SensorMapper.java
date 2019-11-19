@@ -100,9 +100,9 @@ public class SensorMapper extends AbstractMapper<ProcedureEntity> {
         return entity;
     }
 
-    public Entity createEntity(SensorEntity sensor) {
-        return createEntity(sensor);
-    }
+    //public Entity createEntity(SensorEntity sensor) {
+    //    return createEntity(sensor);
+    //}
 
     public SensorEntity createEntity(Entity entity) {
         SensorEntity sensor = new SensorEntity();

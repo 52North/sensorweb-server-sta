@@ -1,23 +1,22 @@
-
 # Log Bean initiation process
 debug: false
 trace: false
 
+# General Server Configuration
 server:
   port: 8081
   rootUrl: example.xyz:80
 
+# Database Configuration
 database:
   jpa:
     persistence-location: classpath:META-INF/persistence.xml
-
-# Spring 
 spring:
   datasource:
     platform: postgres
     username: postgres
     password: postgres
-    url: jdbc:postgresql://localhost:5432/sta
+    url: jdbc:postgresql://localhost:5000/sta
     initialization-mode: always
   jpa:
     properties:
@@ -32,14 +31,20 @@ spring:
         format_sql: true
         default_schema: public
         dialect: org.hibernate.spatial.dialect.postgis.PostgisPG95Dialect
-
         # disable driver's feature detection
         # see https://stackoverflow.com/questions/46493500/hibernate-with-c3p0-createclob-is-not-yet-implemented
         temp.use_jdbc_metadata_defaults: false
   jmx:
     enabled: false
-        
-        
+
+# HTTP Configuration
+http:
+  cors:
+    allowOrigin: "*"
+    allowMethods: "POST, PUT, GET, OPTIONS, DELETE, PATCH"
+    allowHeaders: "Access-Control-Allow-Headers, Content-Type, Authorization, X-Requested-With"
+    maxAge: 3600
+
 # MQTT Configuration
 mqtt:
   broker:

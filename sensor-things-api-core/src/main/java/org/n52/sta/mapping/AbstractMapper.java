@@ -104,13 +104,6 @@ public abstract class AbstractMapper<T> {
         }
     }
 
-    private void checkPropertyValidity(ComplexValue complexValue, String propName) throws ODataApplicationException {
-        if (!checkProperty(complexValue, propName)) {
-            throw new ODataApplicationException(getMissingPropertyExceptionString(propName, complexValue),
-                    HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.getDefault());
-        }
-    }
-
     protected String getMissingPropertyExceptionString(String propName, Entity entity) {
         return getMissingPropertyExceptionString(propName, entity.getType().replace("iot.", ""));
     }
@@ -248,6 +241,7 @@ public abstract class AbstractMapper<T> {
         return property.isPresent() ? property.get() : null;
     }
 
+    /*
     protected void addPhenomenonTime(HasPhenomenonTime phenomenonTime, Entity entity) {
         if (checkProperty(entity, AbstractSensorThingsEntityProvider.PROP_PHENOMENON_TIME)) {
             Time time = parseTime(getPropertyValue(entity,
@@ -261,6 +255,7 @@ public abstract class AbstractMapper<T> {
             }
         }
     }
+    */
 
     protected void mergeIdentifierNameDescription(DescribableEntity existing, DescribableEntity toMerge) {
         if (toMerge.isSetIdentifier()) {
