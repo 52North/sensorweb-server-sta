@@ -46,7 +46,7 @@
         <geolatte-geom.version>1.4.0</geolatte-geom.version>
         <hibernate.version>5.4.2.Final</hibernate.version>
         <jackson.version>2.10.1</jackson.version>
-        <hamcrest.version>2.1</hamcrest.version>
+        <hamcrest.version>2.2</hamcrest.version>
         <locationtech-jts.version>1.16.1</locationtech-jts.version>
         <h2database.version>1.4.196</h2database.version>
     </properties>
