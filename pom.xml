@@ -48,7 +48,7 @@
         <jackson.version>2.10.1</jackson.version>
         <hamcrest.version>2.2</hamcrest.version>
         <locationtech-jts.version>1.16.1</locationtech-jts.version>
-        <h2database.version>1.4.196</h2database.version>
+        <h2database.version>1.4.200</h2database.version>
     </properties>
 
     <dependencyManagement>
