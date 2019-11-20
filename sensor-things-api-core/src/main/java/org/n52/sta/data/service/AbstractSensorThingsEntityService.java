@@ -370,15 +370,14 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
         return this.serializeEntity(createEntity(entity), null);
     };
 
-    @Transactional(rollbackFor = Exception.class)
-    public String update(S entity) throws STACRUDException {
-        return this.serializeEntity(updateEntity(entity), null);
-    };
-
     protected abstract S createEntity(S entity) throws STACRUDException;
 
     @Transactional(rollbackFor = Exception.class)
-    public abstract S updateEntity(S entity, HttpMethod method) throws STACRUDException;
+    public String update(String id, S entity, HttpMethod method) throws STACRUDException {
+        return this.serializeEntity(updateEntity(id, entity, method), null);
+    };
+
+    protected abstract S updateEntity(String id, S entity, HttpMethod method) throws STACRUDException;
 
     protected abstract S updateEntity(S entity) throws STACRUDException;
 

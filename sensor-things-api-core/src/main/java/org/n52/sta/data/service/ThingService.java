@@ -149,10 +149,10 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     }
 
     @Override
-    public PlatformEntity updateEntity(PlatformEntity entity, HttpMethod method) throws STACRUDException {
+    public PlatformEntity updateEntity(String id, PlatformEntity entity, HttpMethod method) throws STACRUDException {
         checkUpdate(entity);
         if (HttpMethod.PATCH.equals(method)) {
-            Optional<PlatformEntity> existing = getRepository().findByIdentifier(entity.getIdentifier());
+            Optional<PlatformEntity> existing = getRepository().findByIdentifier(id);
             if (existing.isPresent()) {
                 PlatformEntity merged = mapper.merge(existing.get(), entity);
                 if (entity.hasLocationEntities()) {
@@ -172,7 +172,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     }
 
     @Override
-    public PlatformEntity updateEntity(PlatformEntity entity) {
+    protected PlatformEntity updateEntity(PlatformEntity entity) {
         return getRepository().save(entity);
     }
 
@@ -225,7 +225,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     @Override
     protected PlatformEntity createOrUpdate(PlatformEntity entity) throws STACRUDException {
         if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
-            return updateEntity(entity, HttpMethod.PATCH);
+            return updateEntity(entity.getIdentifier(), entity, HttpMethod.PATCH);
         }
         return createEntity(entity);
     }

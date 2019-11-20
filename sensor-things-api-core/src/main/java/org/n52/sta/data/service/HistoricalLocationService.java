@@ -156,10 +156,10 @@ public class HistoricalLocationService
     }
 
     @Override
-    public HistoricalLocationEntity updateEntity(HistoricalLocationEntity entity, HttpMethod method)
+    public HistoricalLocationEntity updateEntity(String id, HistoricalLocationEntity entity, HttpMethod method)
             throws STACRUDException {
         if (HttpMethod.PATCH.equals(method)) {
-            Optional<HistoricalLocationEntity> existing = getRepository().findByIdentifier(entity.getIdentifier());
+            Optional<HistoricalLocationEntity> existing = getRepository().findByIdentifier(id);
             if (existing.isPresent()) {
                 HistoricalLocationEntity merged = mapper.merge(existing.get(), entity);
                 return getRepository().save(merged);
@@ -208,7 +208,7 @@ public class HistoricalLocationService
     protected HistoricalLocationEntity createOrUpdate(HistoricalLocationEntity entity)
             throws STACRUDException {
         if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
-            return updateEntity(entity, HttpMethod.PATCH);
+            return updateEntity(entity.getIdentifier(), entity, HttpMethod.PATCH);
         }
         return createEntity(entity);
     }

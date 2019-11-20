@@ -185,10 +185,10 @@ public class FeatureOfInterestService
     }
 
     @Override
-    public AbstractFeatureEntity<?> updateEntity(AbstractFeatureEntity<?> entity, HttpMethod method)
+    public AbstractFeatureEntity<?> updateEntity(String id, AbstractFeatureEntity<?> entity, HttpMethod method)
             throws STACRUDException {
         if (HttpMethod.PATCH.equals(method)) {
-            Optional<AbstractFeatureEntity<?>> existing = getRepository().findByIdentifier(entity.getIdentifier());
+            Optional<AbstractFeatureEntity<?>> existing = getRepository().findByIdentifier(id);
             if (existing.isPresent()) {
                 AbstractFeatureEntity<?> merged = mapper.merge(existing.get(), entity);
                 return getRepository().save(merged);
@@ -225,7 +225,7 @@ public class FeatureOfInterestService
     protected AbstractFeatureEntity<?> createOrUpdate(AbstractFeatureEntity<?> entity)
             throws STACRUDException {
         if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
-            return updateEntity(entity, HttpMethod.PATCH);
+            return updateEntity(entity.getIdentifier(), entity, HttpMethod.PATCH);
         }
         return createEntity(entity);
     }

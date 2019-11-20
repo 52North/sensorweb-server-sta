@@ -178,10 +178,10 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
     }
 
     @Override
-    public PhenomenonEntity updateEntity(PhenomenonEntity entity, HttpMethod method) throws STACRUDException {
+    public PhenomenonEntity updateEntity(String id, PhenomenonEntity entity, HttpMethod method) throws STACRUDException {
         checkUpdate(entity);
         if (HttpMethod.PATCH.equals(method)) {
-            Optional<PhenomenonEntity> existing = getRepository().findByStaIdentifier(entity.getStaIdentifier());
+            Optional<PhenomenonEntity> existing = getRepository().findByStaIdentifier(id);
             if (existing.isPresent()) {
                 PhenomenonEntity merged = mapper.merge(existing.get(), entity);
                 return getRepository().save(getAsPhenomenonEntity(merged));
@@ -236,7 +236,7 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
     @Override
     protected PhenomenonEntity createOrUpdate(PhenomenonEntity entity) throws STACRUDException {
         if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
-            return updateEntity(entity, HttpMethod.PATCH);
+            return updateEntity(entity.getStaIdentifier(), entity, HttpMethod.PATCH);
         }
         return createEntity(entity);
     }

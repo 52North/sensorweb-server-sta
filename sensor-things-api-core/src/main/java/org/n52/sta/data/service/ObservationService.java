@@ -251,9 +251,9 @@ public class ObservationService extends
     }
 
     @Override
-    public DataEntity<?> updateEntity(DataEntity<?> entity, HttpMethod method) throws STACRUDException {
+    public DataEntity<?> updateEntity(String id, DataEntity<?> entity, HttpMethod method) throws STACRUDException {
         if (HttpMethod.PATCH.equals(method)) {
-            Optional<DataEntity<?>> existing = getRepository().findByIdentifier(entity.getIdentifier());
+            Optional<DataEntity<?>> existing = getRepository().findByIdentifier(id);
             if (existing.isPresent()) {
                 DataEntity<?> merged = mapper.merge(existing.get(), entity);
                 DataEntity<?> saved = getRepository().save(merged);
@@ -302,7 +302,7 @@ public class ObservationService extends
     @Override
     protected DataEntity<?> createOrUpdate(DataEntity<?> entity) throws STACRUDException {
         if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
-            return updateEntity(entity, HttpMethod.PATCH);
+            return updateEntity(entity.getIdentifier(), entity, HttpMethod.PATCH);
         }
         return createEntity(entity);
     }

@@ -193,10 +193,10 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     }
 
     @Override
-    public ProcedureEntity updateEntity(ProcedureEntity entity, HttpMethod method) throws STACRUDException {
+    public ProcedureEntity updateEntity(String id, ProcedureEntity entity, HttpMethod method) throws STACRUDException {
         checkUpdate(entity);
         if (HttpMethod.PATCH.equals(method)) {
-            Optional<ProcedureEntity> existing = getRepository().findByIdentifier(entity.getIdentifier());
+            Optional<ProcedureEntity> existing = getRepository().findByIdentifier(id);
             if (existing.isPresent()) {
                 //TODO: FIX
                 // ProcedureEntity merged = mapper.merge(existing.get(), entity);
@@ -258,7 +258,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     @Override
     protected ProcedureEntity createOrUpdate(ProcedureEntity entity) throws STACRUDException {
         if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
-            return updateEntity(entity, HttpMethod.PATCH);
+            return updateEntity(entity.getIdentifier(), entity, HttpMethod.PATCH);
         }
         return createEntity(entity);
     }

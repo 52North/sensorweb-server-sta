@@ -147,9 +147,9 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     }
 
     @Override
-    public LocationEntity updateEntity(LocationEntity entity, HttpMethod method) throws STACRUDException {
+    public LocationEntity updateEntity(String id, LocationEntity entity, HttpMethod method) throws STACRUDException {
         if (HttpMethod.PATCH.equals(method)) {
-            Optional<LocationEntity> existing = getRepository().findByIdentifier(entity.getIdentifier());
+            Optional<LocationEntity> existing = getRepository().findByIdentifier(id);
             if (existing.isPresent()) {
                 LocationEntity merged = mapper.merge(existing.get(), entity);
                 return getRepository().save(merged);
@@ -197,7 +197,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     @Override
     protected LocationEntity createOrUpdate(LocationEntity entity) throws STACRUDException {
         if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
-            return updateEntity(entity, HttpMethod.PATCH);
+            return updateEntity(entity.getIdentifier(), entity, HttpMethod.PATCH);
         }
         return createEntity(entity);
     }

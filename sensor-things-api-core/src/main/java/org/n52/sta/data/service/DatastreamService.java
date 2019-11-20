@@ -228,10 +228,10 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     }
 
     @Override
-    public DatastreamEntity updateEntity(DatastreamEntity entity, HttpMethod method) throws STACRUDException {
+    public DatastreamEntity updateEntity(String id, DatastreamEntity entity, HttpMethod method) throws STACRUDException {
         checkUpdate(entity);
         if (HttpMethod.PATCH.equals(method)) {
-            Optional<DatastreamEntity> existing = getRepository().findOne(dQS.withIdentifier(entity.getIdentifier()));
+            Optional<DatastreamEntity> existing = getRepository().findOne(dQS.withIdentifier(id));
             if (existing.isPresent()) {
                 DatastreamEntity merged = mapper.merge(existing.get(), entity);
                 checkUnit(merged, entity);
@@ -294,7 +294,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     @Override
     protected DatastreamEntity createOrUpdate(DatastreamEntity entity) throws STACRUDException {
         if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
-            return updateEntity(entity, HttpMethod.PATCH);
+            return updateEntity(entity.getIdentifier(), entity, HttpMethod.PATCH);
         }
         return createEntity(entity);
     }
