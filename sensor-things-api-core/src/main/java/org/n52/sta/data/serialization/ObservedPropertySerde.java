@@ -4,25 +4,78 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import org.hibernate.cfg.NotYetImplementedException;
 import org.n52.series.db.beans.PhenomenonEntity;
-import org.n52.sta.data.serialization.SensorThingsSerde.JSONwithIdNameDescription;
+import org.n52.sta.data.serialization.ElementWithQueryOptions.ObservedPropertyWithQueryOptions;
+import org.n52.sta.data.serialization.STASerdesTypes.JSONwithIdNameDescription;
+import org.n52.sta.edm.provider.entities.ObservedPropertyEntityDefinition;
+import org.n52.sta.edm.provider.entities.STAEntityDefinition;
+import org.n52.sta.service.query.QueryOptions;
 
 import java.io.IOException;
+import java.util.Set;
 
 public class ObservedPropertySerde {
 
-    public class ObservedPropertySerializer extends JsonSerializer<PhenomenonEntity> {
+    public static class ObservedPropertySerializer extends AbstractSTASerializer<ObservedPropertyWithQueryOptions> {
+
+        private final String rootUrl;
+        private final String entitySetName;
+
+        public ObservedPropertySerializer(String rootUrl) {
+            super(ObservedPropertyWithQueryOptions.class);
+            this.rootUrl = rootUrl;
+            this.entitySetName = ObservedPropertyEntityDefinition.entitySetName;
+        }
 
         @Override
-        public void serialize(PhenomenonEntity value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-            throw new NotYetImplementedException();
+        public void serialize(ObservedPropertyWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers)
+                throws IOException {
+            gen.writeStartObject();
+            PhenomenonEntity obsProp = value.getEntity();
+            QueryOptions options = value .getQueryOptions();
+
+            Set<String> fieldsToSerialize = null;
+            boolean hasSelectOption = false;
+            if (options != null) {
+                hasSelectOption = options.hasSelectOption();
+                if (hasSelectOption) {
+                    fieldsToSerialize = options.getSelectOption();
+                }
+            }
+
+            // olingo @iot links
+            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
+                writeId(gen, obsProp.getStaIdentifier());
+            }
+            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_SELF_LINK)) {
+                writeSelfLink(gen, obsProp.getStaIdentifier());
+            }
+
+            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_NAME)) {
+                gen.writeStringField(STAEntityDefinition.PROP_NAME, obsProp.getName());
+            }
+            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_DESCRIPTION)) {
+                gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, obsProp.getDescription());
+            }
+            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_DEFINITION)) {
+                gen.writeObjectField(STAEntityDefinition.PROP_PROPERTIES, obsProp.getIdentifier());
+            }
+
+            // navigation properties
+            for (String navigationProperty : ObservedPropertyEntityDefinition.navigationProperties) {
+                if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
+                    writeNavigationProp(gen, navigationProperty, obsProp.getStaIdentifier());
+                }
+            }
+            //TODO: Deal with $expand
+
+            gen.writeEndObject();
         }
     }
 
-    public class ObservedPropertyDeserializer extends JsonDeserializer<PhenomenonEntity> {
+    public static class ObservedPropertyDeserializer extends JsonDeserializer<PhenomenonEntity> {
 
         @Override
         public PhenomenonEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {

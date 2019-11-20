@@ -7,9 +7,9 @@ import org.slf4j.LoggerFactory;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
-public class SensorThingsSerde {
+public class STASerdesTypes {
 
-    Logger LOGGER = LoggerFactory.getLogger(SensorThingsSerde.class);
+    Logger LOGGER = LoggerFactory.getLogger(STASerdesTypes.class);
 
     static class JSONwithId {
         @JsonProperty("@iot.id") public String identifier;
