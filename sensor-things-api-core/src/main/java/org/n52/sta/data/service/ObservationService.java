@@ -56,12 +56,14 @@ import org.n52.sta.data.repositories.DataRepository;
 import org.n52.sta.data.repositories.DatasetRepository;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.OfferingRepository;
+import org.n52.sta.data.serialization.ElementWithQueryOptions.ObservationWithQueryOptions;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.edm.provider.entities.DatastreamEntityProvider;
 import org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider;
 import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.mapping.FeatureOfInterestMapper;
 import org.n52.sta.mapping.ObservationMapper;
+import org.n52.sta.service.query.QueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +79,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -125,8 +126,13 @@ public class ObservationService extends
     }
 
     @Override
-    public EntityTypes getType() {
-        return EntityTypes.Observation;
+    public EntityTypes[] getTypes() {
+        return new EntityTypes[] {EntityTypes.Observation, EntityTypes.Observations};
+    }
+
+    @Override
+    protected Object createWrapper(Object entity, QueryOptions queryOptions) {
+        return new ObservationWithQueryOptions((DataEntity<?>) entity, queryOptions);
     }
 
     @Override
@@ -166,7 +172,7 @@ public class ObservationService extends
     }
 
     @Override
-    public DataEntity<?> create(DataEntity<?> entity) throws STACRUDException {
+    public DataEntity<?> createEntity(DataEntity<?> entity) throws STACRUDException {
         if (entity instanceof StaDataEntity) {
             StaDataEntity observation = (StaDataEntity) entity;
             if (!observation.isProcesssed()) {
@@ -245,7 +251,7 @@ public class ObservationService extends
     }
 
     @Override
-    public DataEntity<?> update(DataEntity<?> entity, HttpMethod method) throws STACRUDException {
+    public DataEntity<?> updateEntity(DataEntity<?> entity, HttpMethod method) throws STACRUDException {
         if (HttpMethod.PATCH.equals(method)) {
             Optional<DataEntity<?>> existing = getRepository().findByIdentifier(entity.getIdentifier());
             if (existing.isPresent()) {
@@ -267,7 +273,7 @@ public class ObservationService extends
     }
 
     @Override
-    public DataEntity<?> update(DataEntity<?> entity) {
+    public DataEntity<?> updateEntity(DataEntity<?> entity) {
         return getRepository().save(entity);
     }
 
@@ -296,9 +302,9 @@ public class ObservationService extends
     @Override
     protected DataEntity<?> createOrUpdate(DataEntity<?> entity) throws STACRUDException {
         if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
-            return update(entity, HttpMethod.PATCH);
+            return updateEntity(entity, HttpMethod.PATCH);
         }
-        return create(entity);
+        return createEntity(entity);
     }
 
     private void checkDataset(DataEntity<?> observation) {
@@ -346,7 +352,7 @@ public class ObservationService extends
     }
 
     DatastreamEntity checkDatastream(StaDataEntity observation) throws STACRUDException {
-        DatastreamEntity datastream = getDatastreamService().create(observation.getDatastream());
+        DatastreamEntity datastream = getDatastreamService().createEntity(observation.getDatastream());
         observation.setDatastream(datastream);
         return datastream;
     }
@@ -370,7 +376,7 @@ public class ObservationService extends
             }
             observation.setFeatureOfInterest(feature);
         }
-        AbstractFeatureEntity<?> feature = getFeatureOfInterestService().create(observation.getFeatureOfInterest());
+        AbstractFeatureEntity<?> feature = getFeatureOfInterestService().createEntity(observation.getFeatureOfInterest());
         observation.setFeatureOfInterest(feature);
         return feature;
     }
@@ -454,7 +460,7 @@ public class ObservationService extends
         if (datastream.getDatasets() != null) {
             if (!datastream.getDatasets().contains(dataset)) {
                 datastream.addDataset(dataset);
-                getDatastreamService().update(datastream);
+                getDatastreamService().updateEntity(datastream);
             }
         }
         if (datastream.getPhenomenonTimeStart() == null) {

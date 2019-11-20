@@ -35,6 +35,7 @@ import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.data.query.ThingQuerySpecifications;
 import org.n52.sta.data.repositories.ThingRepository;
+import org.n52.sta.data.serialization.ElementWithQueryOptions.ThingWithQueryOptions;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.edm.provider.entities.DatastreamEntityProvider;
 import org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider;
@@ -76,8 +77,13 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     }
 
     @Override
-    public EntityTypes getType() {
-        return EntityTypes.Thing;
+    public EntityTypes[] getTypes() {
+        return new EntityTypes[] {EntityTypes.Thing, EntityTypes.Things};
+    }
+
+    @Override
+    protected Object createWrapper(Object entity, QueryOptions queryOptions) {
+        return new ThingWithQueryOptions((PlatformEntity) entity, queryOptions);
     }
 
     @Override
@@ -86,11 +92,11 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
                                                                   String ownId) {
         Specification<PlatformEntity> filter;
         switch (relatedType) {
-            case "iot.HistoricalLocation": {
+            case IOT_HISTORICAL_LOCATION: {
                 filter = tQS.withRelatedHistoricalLocationIdentifier(relatedId);
                 break;
             }
-            case "iot.Datastream": {
+            case IOT_DATASTREAM: {
                 filter = tQS.withRelatedDatastreamIdentifier(relatedId);
                 break;
             }
@@ -114,7 +120,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     }
 
     @Override
-    public PlatformEntity create(PlatformEntity newThing) throws STACRUDException {
+    public PlatformEntity createEntity(PlatformEntity newThing) throws STACRUDException {
         PlatformEntity thing = newThing;
         if (!thing.isProcesssed()) {
             if (thing.getIdentifier() != null && !thing.isSetName()) {
@@ -143,7 +149,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     }
 
     @Override
-    public PlatformEntity update(PlatformEntity entity, HttpMethod method) throws STACRUDException {
+    public PlatformEntity updateEntity(PlatformEntity entity, HttpMethod method) throws STACRUDException {
         checkUpdate(entity);
         if (HttpMethod.PATCH.equals(method)) {
             Optional<PlatformEntity> existing = getRepository().findByIdentifier(entity.getIdentifier());
@@ -166,7 +172,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     }
 
     @Override
-    public PlatformEntity update(PlatformEntity entity) {
+    public PlatformEntity updateEntity(PlatformEntity entity) {
         return getRepository().save(entity);
     }
 
@@ -219,9 +225,9 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     @Override
     protected PlatformEntity createOrUpdate(PlatformEntity entity) throws STACRUDException {
         if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
-            return update(entity, HttpMethod.PATCH);
+            return updateEntity(entity, HttpMethod.PATCH);
         }
-        return create(entity);
+        return createEntity(entity);
     }
 
     private void processDatastreams(PlatformEntity thing) throws STACRUDException {
@@ -229,7 +235,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
             Set<DatastreamEntity> datastreams = new LinkedHashSet<>();
             for (DatastreamEntity datastream : thing.getDatastreams()) {
                 datastream.setThing(thing);
-                DatastreamEntity optionalDatastream = getDatastreamService().create(datastream);
+                DatastreamEntity optionalDatastream = getDatastreamService().createEntity(datastream);
                 datastreams.add(optionalDatastream != null ? optionalDatastream : datastream);
             }
             thing.setDatastreams(datastreams);
@@ -240,7 +246,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
         if (thing.hasLocationEntities()) {
             Set<LocationEntity> locations = new LinkedHashSet<>();
             for (LocationEntity location : thing.getLocations()) {
-                LocationEntity optionalLocation = getLocationService().create(location);
+                LocationEntity optionalLocation = getLocationService().createEntity(location);
                 locations.add(optionalLocation != null ? optionalLocation : location);
             }
             thing.setLocations(locations);

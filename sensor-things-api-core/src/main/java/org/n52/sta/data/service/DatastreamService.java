@@ -44,12 +44,14 @@ import org.n52.sta.data.repositories.DatasetRepository;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.FormatRepository;
 import org.n52.sta.data.repositories.UnitRepository;
+import org.n52.sta.data.serialization.ElementWithQueryOptions.DatastreamWithQueryOptions;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider;
 import org.n52.sta.edm.provider.entities.SensorEntityProvider;
 import org.n52.sta.edm.provider.entities.ThingEntityProvider;
 import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.mapping.DatastreamMapper;
+import org.n52.sta.service.query.QueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +65,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -103,8 +104,13 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     }
 
     @Override
-    public EntityTypes getType() {
-        return EntityTypes.Datastream;
+    public EntityTypes[] getTypes() {
+        return new EntityTypes[] {EntityTypes.Datastream, EntityTypes.Datastreams};
+    }
+
+    @Override
+    protected Object createWrapper(Object entity, QueryOptions queryOptions) {
+        return new DatastreamWithQueryOptions((DatastreamEntity) entity, queryOptions);
     }
 
     @Override
@@ -152,7 +158,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     }
 
     @Override
-    public DatastreamEntity create(DatastreamEntity datastream) throws STACRUDException {
+    public DatastreamEntity createEntity(DatastreamEntity datastream) throws STACRUDException {
         DatastreamEntity entity = datastream;
         if (!datastream.isProcesssed()) {
             if (datastream.getIdentifier() != null && !datastream.isSetName()) {
@@ -168,9 +174,9 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
             datastream.setProcesssed(true);
             checkObservationType(datastream);
             checkUnit(datastream);
-            datastream.setObservableProperty(getObservedPropertyService().create(datastream.getObservableProperty()));
-            datastream.setProcedure(getSensorService().create(datastream.getProcedure()));
-            datastream.setThing(getThingService().create(datastream.getThing()));
+            datastream.setObservableProperty(getObservedPropertyService().createEntity(datastream.getObservableProperty()));
+            datastream.setProcedure(getSensorService().createEntity(datastream.getProcedure()));
+            datastream.setThing(getThingService().createEntity(datastream.getThing()));
             if (datastream.getIdentifier() != null) {
                 if (getRepository().existsByIdentifier(datastream.getIdentifier())) {
                     throw new STACRUDException("Identifier already exists!", HttpStatus.BAD_REQUEST);
@@ -217,12 +223,12 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     }
 
     @Override
-    protected DatastreamEntity update(DatastreamEntity entity) {
+    protected DatastreamEntity updateEntity(DatastreamEntity entity) {
         return getRepository().save(entity);
     }
 
     @Override
-    public DatastreamEntity update(DatastreamEntity entity, HttpMethod method) throws STACRUDException {
+    public DatastreamEntity updateEntity(DatastreamEntity entity, HttpMethod method) throws STACRUDException {
         checkUpdate(entity);
         if (HttpMethod.PATCH.equals(method)) {
             Optional<DatastreamEntity> existing = getRepository().findOne(dQS.withIdentifier(entity.getIdentifier()));
@@ -288,9 +294,9 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     @Override
     protected DatastreamEntity createOrUpdate(DatastreamEntity entity) throws STACRUDException {
         if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
-            return update(entity, HttpMethod.PATCH);
+            return updateEntity(entity, HttpMethod.PATCH);
         }
-        return create(entity);
+        return createEntity(entity);
     }
 
     private void deleteRelatedDatasetsAndObservations(DatastreamEntity datastream) {
@@ -360,7 +366,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
                 datasets.addAll(datastream.getDatasets());
             }
             for (StaDataEntity observation : observations) {
-                DataEntity<?> data = getObservationService().create(observation);
+                DataEntity<?> data = getObservationService().createEntity(observation);
                 if (data != null) {
                     datasets.add(data.getDataset());
                 }

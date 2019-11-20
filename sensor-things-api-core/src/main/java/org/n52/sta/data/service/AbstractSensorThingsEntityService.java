@@ -99,7 +99,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
         serviceRepository.addEntityService(this);
     }
 
-    public abstract EntityTypes getType();
+    public abstract EntityTypes[] getTypes();
 
     /**
      * Checks if an Entity with given id exists
@@ -117,9 +117,9 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      * @param id the id of the Entity
      * @return
      */
-    public String getEntity(String id) throws STACRUDException {
+    public String getEntity(String id ,QueryOptions queryOptions) throws STACRUDException {
         try {
-            return this.serializeEntity(getRepository().findByIdentifier(id).get());
+            return this.serializeEntity(getRepository().findByIdentifier(id).get(), queryOptions);
         } catch (RuntimeException e) {
             throw new STACRUDException(e.getMessage());
         }
@@ -137,7 +137,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
             Specification<S> filter = getFilterPredicate(entityClass, queryOptions);
             return getRepository()
                     .findAll(filter, createPageableRequest(queryOptions))
-                    .map(this::serializeEntity)
+                    .map((S e) -> serializeEntity(e, queryOptions))
                     .getContent();
         } catch (RuntimeException e) {
             throw new STACRUDException(e.getMessage());
@@ -149,19 +149,29 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      * Stream Processing
      *
      * @param e object to be serialized
+     * @param queryOptions {@link QueryOptions} used for serialization
      * @return JSON serialization of the Object
      */
-    protected String serializeEntity(Object e) {
+    protected String serializeEntity(Object e, QueryOptions queryOptions) {
         try {
             if (e instanceof Optional && ((Optional) e).isPresent()) {
-                return mapper.writeValueAsString(((Optional) e).get());
+                Object o = ((Optional) e).get();
+                return mapper.writeValueAsString(createWrapper(o, queryOptions));
             } else {
-                return mapper.writeValueAsString(e);
+                return mapper.writeValueAsString(createWrapper(e, queryOptions));
             }
         } catch (NoSuchElementException | JsonProcessingException ex) {
             throw new RuntimeException(ex);
         }
     }
+
+    /**
+     * Wraps the raw Entity into a Wrapper object to associate with QueryOptions used for this request
+     * @param entity entity
+     * @param queryOptions query options
+     * @return instance of ElementWithQueryOptions
+     */
+    protected abstract Object createWrapper(Object entity, QueryOptions queryOptions);
 
     /**
      * Checks if an entity with given ownId exists that relates to an entity with given relatedId and relatedType
@@ -180,13 +190,15 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      * @param relatedId   ID of the related Entity
      * @param relatedType EntityType of the related Entity
      * @param ownId       ID of the requested Entity. Can be null.
+     * @param queryOptions {@link QueryOptions} used for serialization
      * @return Entity that matches
      */
-    public String getEntityByRelatedEntity(String relatedId, String relatedType, String ownId)
+    public String getEntityByRelatedEntity(String relatedId, String relatedType, String ownId, QueryOptions queryOptions)
             throws STACRUDException {
         try {
             return this.serializeEntity(
-                    getRepository().findOne(byRelatedEntityFilter(relatedId, relatedType, ownId)));
+                    getRepository().findOne(byRelatedEntityFilter(relatedId, relatedType, ownId)),
+                    queryOptions);
         } catch (RuntimeException e) {
             throw new STACRUDException(e.getMessage());
         }
@@ -201,7 +213,9 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      * @return Id of the Entity. Null if no entity is present
      */
     public String getEntityIdByRelatedEntity(String relatedId, String relatedType) {
-        return getRepository().getIdentifier(this.byRelatedEntityFilter(relatedId, relatedType,null));
+        //TODO: check if this actually works
+        return getRepository().identifier(this.byRelatedEntityFilter(relatedId, relatedType,null))
+                .getIdentifier();
     }
 
     /**
@@ -221,7 +235,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
             return getRepository()
                     .findAll(byRelatedEntityFilter(relatedId, relatedType, null),
                             createPageableRequest(queryOptions))
-                    .map(this::serializeEntity)
+                    .map((S e) -> serializeEntity(e, queryOptions))
                     .getContent();
 
         } catch (RuntimeException e) {
@@ -352,12 +366,21 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public abstract S create(S entity) throws STACRUDException;
+    public String create(S entity) throws STACRUDException {
+        return this.serializeEntity(createEntity(entity), null);
+    };
 
     @Transactional(rollbackFor = Exception.class)
-    public abstract S update(S entity, HttpMethod method) throws STACRUDException;
+    public String update(S entity) throws STACRUDException {
+        return this.serializeEntity(updateEntity(entity), null);
+    };
 
-    protected abstract S update(S entity) throws STACRUDException;
+    protected abstract S createEntity(S entity) throws STACRUDException;
+
+    @Transactional(rollbackFor = Exception.class)
+    public abstract S updateEntity(S entity, HttpMethod method) throws STACRUDException;
+
+    protected abstract S updateEntity(S entity) throws STACRUDException;
 
     @Transactional(rollbackFor = Exception.class)
     public abstract void delete(String id) throws STACRUDException;

@@ -34,11 +34,13 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.data.query.HistoricalLocationQuerySpecifications;
 import org.n52.sta.data.repositories.HistoricalLocationRepository;
 import org.n52.sta.data.repositories.LocationRepository;
+import org.n52.sta.data.serialization.ElementWithQueryOptions.HistoricalLocationWithQueryOptions;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.edm.provider.entities.LocationEntityProvider;
 import org.n52.sta.edm.provider.entities.ThingEntityProvider;
 import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.mapping.HistoricalLocationMapper;
+import org.n52.sta.service.query.QueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,8 +84,13 @@ public class HistoricalLocationService
     }
 
     @Override
-    public EntityTypes getType() {
-        return EntityTypes.HistoricalLocation;
+    public EntityTypes[] getTypes() {
+        return new EntityTypes[] {EntityTypes.HistoricalLocation, EntityTypes.HistoricalLocations};
+    }
+
+    @Override
+    protected Object createWrapper(Object entity, QueryOptions queryOptions) {
+        return new HistoricalLocationWithQueryOptions((HistoricalLocationEntity) entity, queryOptions);
     }
 
     @Override
@@ -111,7 +118,7 @@ public class HistoricalLocationService
     }
 
     @Override
-    public HistoricalLocationEntity create(HistoricalLocationEntity historicalLocation)
+    public HistoricalLocationEntity createEntity(HistoricalLocationEntity historicalLocation)
             throws STACRUDException {
         if (!historicalLocation.isProcesssed()) {
             check(historicalLocation);
@@ -134,7 +141,7 @@ public class HistoricalLocationService
         historicalLocation.setThing(thing);
         HistoricalLocationEntity created = getRepository().save(historicalLocation);
         created.setProcesssed(true);
-        getThingService().update(thing.addHistoricalLocation(created));
+        getThingService().updateEntity(thing.addHistoricalLocation(created));
         return created.setLocations(historicalLocation.getLocations());
     }
 
@@ -149,7 +156,7 @@ public class HistoricalLocationService
     }
 
     @Override
-    public HistoricalLocationEntity update(HistoricalLocationEntity entity, HttpMethod method)
+    public HistoricalLocationEntity updateEntity(HistoricalLocationEntity entity, HttpMethod method)
             throws STACRUDException {
         if (HttpMethod.PATCH.equals(method)) {
             Optional<HistoricalLocationEntity> existing = getRepository().findByIdentifier(entity.getIdentifier());
@@ -165,7 +172,7 @@ public class HistoricalLocationService
     }
 
     @Override
-    public HistoricalLocationEntity update(HistoricalLocationEntity entity) {
+    public HistoricalLocationEntity updateEntity(HistoricalLocationEntity entity) {
         return getRepository().save(entity);
     }
 
@@ -187,7 +194,7 @@ public class HistoricalLocationService
         entity.getLocations().forEach(l -> {
             try {
                 l.getHistoricalLocations().remove(entity);
-                getLocationService().update(l);
+                getLocationService().updateEntity(l);
             } catch (STACRUDException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -201,20 +208,20 @@ public class HistoricalLocationService
     protected HistoricalLocationEntity createOrUpdate(HistoricalLocationEntity entity)
             throws STACRUDException {
         if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
-            return update(entity, HttpMethod.PATCH);
+            return updateEntity(entity, HttpMethod.PATCH);
         }
-        return create(entity);
+        return createEntity(entity);
     }
 
     private void updateLocations(HistoricalLocationEntity historicalLocation) throws STACRUDException {
         for (LocationEntity location : historicalLocation.getLocations()) {
             location.getHistoricalLocations().remove(historicalLocation);
-            getLocationService().update(location);
+            getLocationService().updateEntity(location);
         }
     }
 
     private void updateThing(HistoricalLocationEntity historicalLocation) throws STACRUDException {
-        getThingService().update(historicalLocation.getThing().setHistoricalLocations(null));
+        getThingService().updateEntity(historicalLocation.getThing().setHistoricalLocations(null));
     }
 
     @SuppressWarnings("unchecked")

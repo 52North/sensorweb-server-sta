@@ -42,9 +42,11 @@ import org.n52.sta.data.repositories.DatasetRepository;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.FeatureOfInterestRepository;
 import org.n52.sta.data.repositories.FormatRepository;
+import org.n52.sta.data.serialization.ElementWithQueryOptions.FeatureOfInterestWithQueryOptions;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.mapping.FeatureOfInterestMapper;
+import org.n52.sta.service.query.QueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,8 +100,13 @@ public class FeatureOfInterestService
     }
 
     @Override
-    public EntityTypes getType() {
-        return EntityTypes.FeatureOfInterest;
+    public EntityTypes[] getTypes() {
+        return new EntityTypes[] {EntityTypes.FeatureOfInterest, EntityTypes.FeaturesOfInterest};
+    }
+
+    @Override
+    protected Object createWrapper(Object entity, QueryOptions queryOptions) {
+        return new FeatureOfInterestWithQueryOptions((AbstractFeatureEntity<?>) entity, queryOptions);
     }
 
     @Override
@@ -133,7 +140,7 @@ public class FeatureOfInterestService
     }
 
     @Override
-    public AbstractFeatureEntity<?> create(AbstractFeatureEntity<?> feature) throws STACRUDException {
+    public AbstractFeatureEntity<?> createEntity(AbstractFeatureEntity<?> feature) throws STACRUDException {
         if (feature.getIdentifier() != null && !feature.isSetName()) {
             return getRepository().findByIdentifier(feature.getIdentifier()).get();
         }
@@ -178,7 +185,7 @@ public class FeatureOfInterestService
     }
 
     @Override
-    public AbstractFeatureEntity<?> update(AbstractFeatureEntity<?> entity, HttpMethod method)
+    public AbstractFeatureEntity<?> updateEntity(AbstractFeatureEntity<?> entity, HttpMethod method)
             throws STACRUDException {
         if (HttpMethod.PATCH.equals(method)) {
             Optional<AbstractFeatureEntity<?>> existing = getRepository().findByIdentifier(entity.getIdentifier());
@@ -194,7 +201,7 @@ public class FeatureOfInterestService
     }
 
     @Override
-    protected AbstractFeatureEntity<?> update(AbstractFeatureEntity<?> entity) {
+    protected AbstractFeatureEntity<?> updateEntity(AbstractFeatureEntity<?> entity) {
         return getRepository().save(entity);
     }
 
@@ -218,9 +225,9 @@ public class FeatureOfInterestService
     protected AbstractFeatureEntity<?> createOrUpdate(AbstractFeatureEntity<?> entity)
             throws STACRUDException {
         if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
-            return update(entity, HttpMethod.PATCH);
+            return updateEntity(entity, HttpMethod.PATCH);
         }
-        return create(entity);
+        return createEntity(entity);
     }
 
     private void deleteRelatedObservationsAndUpdateDatasets(String featureId) {

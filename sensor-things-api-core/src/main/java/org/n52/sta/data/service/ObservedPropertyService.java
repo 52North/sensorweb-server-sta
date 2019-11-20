@@ -37,10 +37,12 @@ import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.ObservedPropertyQuerySpecifications;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.PhenomenonRepository;
+import org.n52.sta.data.serialization.ElementWithQueryOptions.ObservedPropertyWithQueryOptions;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.edm.provider.entities.DatastreamEntityProvider;
 import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.mapping.ObservedPropertyMapper;
+import org.n52.sta.service.query.QueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,8 +89,13 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
     }
 
     @Override
-    public EntityTypes getType() {
-        return EntityTypes.ObservedProperty;
+    public EntityTypes[] getTypes() {
+        return new EntityTypes[] {EntityTypes.ObservedProperty, EntityTypes.ObservedProperties};
+    }
+
+    @Override
+    protected Object createWrapper(Object entity, QueryOptions queryOptions) {
+        return new ObservedPropertyWithQueryOptions((PhenomenonEntity) entity, queryOptions);
     }
 
     /**
@@ -100,7 +107,7 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
      */
     @Override
     public String getEntityIdByRelatedEntity(String relatedId, String relatedType) {
-        return getRepository().getStaIdentifier(this.byRelatedEntityFilter(relatedId, relatedType, null));
+        return getRepository().staIdentifier(this.byRelatedEntityFilter(relatedId, relatedType, null)).getStaIdentifier();
     }
 
     @Override
@@ -151,7 +158,7 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
     }
 
     @Override
-    public PhenomenonEntity create(PhenomenonEntity observableProperty) throws STACRUDException {
+    public PhenomenonEntity createEntity(PhenomenonEntity observableProperty) throws STACRUDException {
         if (observableProperty.getStaIdentifier() != null && !observableProperty.isSetName()) {
             return getRepository().findByStaIdentifier(observableProperty.getStaIdentifier()).get();
         }
@@ -171,7 +178,7 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
     }
 
     @Override
-    public PhenomenonEntity update(PhenomenonEntity entity, HttpMethod method) throws STACRUDException {
+    public PhenomenonEntity updateEntity(PhenomenonEntity entity, HttpMethod method) throws STACRUDException {
         checkUpdate(entity);
         if (HttpMethod.PATCH.equals(method)) {
             Optional<PhenomenonEntity> existing = getRepository().findByStaIdentifier(entity.getStaIdentifier());
@@ -187,7 +194,7 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
     }
 
     @Override
-    protected PhenomenonEntity update(PhenomenonEntity entity) {
+    protected PhenomenonEntity updateEntity(PhenomenonEntity entity) {
         return getRepository().save(getAsPhenomenonEntity(entity));
     }
 
@@ -229,9 +236,9 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
     @Override
     protected PhenomenonEntity createOrUpdate(PhenomenonEntity entity) throws STACRUDException {
         if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
-            return update(entity, HttpMethod.PATCH);
+            return updateEntity(entity, HttpMethod.PATCH);
         }
-        return create(entity);
+        return createEntity(entity);
     }
 
     private PhenomenonEntity getAsPhenomenonEntity(PhenomenonEntity observableProperty) {

@@ -53,7 +53,9 @@ public class EntityServiceRepository {
     }
 
     public void addEntityService(AbstractSensorThingsEntityService<?, ?> entityService) {
-        entityServices.put(entityService.getType(), entityService);
+        for (EntityTypes entityType : entityService.getTypes()) {
+            entityServices.put(entityType, entityService);
+        }
     }
 
     /**
@@ -73,12 +75,12 @@ public class EntityServiceRepository {
      * @return the requested entity data service
      */
     public AbstractSensorThingsEntityService<?, ?> getEntityService(EntityTypes entityTypeName) {
-
         return entityServices.get(entityTypeName);
     }
 
     public enum EntityTypes {
-        Thing, Location, HistoricalLocation, Sensor, Datastream, Observation, ObservedProperty, FeatureOfInterest
+        Thing, Location, HistoricalLocation, Sensor, Datastream, Observation, ObservedProperty, FeatureOfInterest,
+        Things, Locations, HistoricalLocations, Sensors, Datastreams, Observations, ObservedProperties, FeaturesOfInterest
     }
 
 }

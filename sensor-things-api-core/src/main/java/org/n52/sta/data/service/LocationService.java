@@ -35,11 +35,13 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.data.query.LocationQuerySpecifications;
 import org.n52.sta.data.repositories.LocationEncodingRepository;
 import org.n52.sta.data.repositories.LocationRepository;
+import org.n52.sta.data.serialization.ElementWithQueryOptions.LocationWithQueryOptions;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider;
 import org.n52.sta.edm.provider.entities.ThingEntityProvider;
 import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.mapping.LocationMapper;
+import org.n52.sta.service.query.QueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,10 +87,14 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     }
 
     @Override
-    public EntityTypes getType() {
-        return EntityTypes.Location;
+    public EntityTypes[] getTypes() {
+        return new EntityTypes[] {EntityTypes.Location, EntityTypes.Locations};
     }
 
+    @Override
+    protected Object createWrapper(Object entity, QueryOptions queryOptions) {
+        return new LocationWithQueryOptions((LocationEntity) entity, queryOptions);
+    }
 
     @Override
     public Specification<LocationEntity> byRelatedEntityFilter(String relatedId,
@@ -115,7 +121,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     }
 
     @Override
-    public LocationEntity create(LocationEntity newLocation) throws STACRUDException {
+    public LocationEntity createEntity(LocationEntity newLocation) throws STACRUDException {
         LocationEntity location = newLocation;
         if (!location.isProcesssed()) {
             if (location.getIdentifier() != null && !location.isSetName()) {
@@ -141,7 +147,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     }
 
     @Override
-    public LocationEntity update(LocationEntity entity, HttpMethod method) throws STACRUDException {
+    public LocationEntity updateEntity(LocationEntity entity, HttpMethod method) throws STACRUDException {
         if (HttpMethod.PATCH.equals(method)) {
             Optional<LocationEntity> existing = getRepository().findByIdentifier(entity.getIdentifier());
             if (existing.isPresent()) {
@@ -156,7 +162,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     }
 
     @Override
-    public LocationEntity update(LocationEntity entity) {
+    public LocationEntity updateEntity(LocationEntity entity) {
         return getRepository().save(entity);
     }
 
@@ -175,7 +181,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
                 if (location.getHistoricalLocations() != null) {
                     thing.getHistoricalLocations().removeAll(location.getHistoricalLocations());
                 }
-                getThingService().update(thing);
+                getThingService().updateEntity(thing);
             }
             getRepository().deleteByIdentifier(id);
         } else {
@@ -191,9 +197,9 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     @Override
     protected LocationEntity createOrUpdate(LocationEntity entity) throws STACRUDException {
         if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
-            return update(entity, HttpMethod.PATCH);
+            return updateEntity(entity, HttpMethod.PATCH);
         }
-        return create(entity);
+        return createEntity(entity);
     }
 
     @Override

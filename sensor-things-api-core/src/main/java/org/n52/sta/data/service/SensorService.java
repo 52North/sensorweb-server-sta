@@ -28,7 +28,6 @@
  */
 package org.n52.sta.data.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
@@ -40,10 +39,11 @@ import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.FormatRepository;
 import org.n52.sta.data.repositories.ProcedureHistoryRepository;
 import org.n52.sta.data.repositories.ProcedureRepository;
+import org.n52.sta.data.serialization.ElementWithQueryOptions.SensorWithQueryOptions;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.edm.provider.entities.DatastreamEntityProvider;
 import org.n52.sta.exception.STACRUDException;
-import org.n52.sta.mapping.SensorMapper;
+import org.n52.sta.service.query.QueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,11 +80,9 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
 
     @Autowired
     public SensorService(ProcedureRepository repository,
-                         SensorMapper mapper,
                          FormatRepository formatRepository,
                          ProcedureHistoryRepository procedureHistoryRepository,
-                         DatastreamRepository datastreamRepository,
-                         ObjectMapper SensorSerdes) {
+                         DatastreamRepository datastreamRepository) {
         super(repository, ProcedureEntity.class);
         this.formatRepository = formatRepository;
         this.procedureHistoryRepository = procedureHistoryRepository;
@@ -97,8 +95,13 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
      * @return EntityType this Service handles
      */
     @Override
-    public EntityTypes getType() {
-        return EntityTypes.Sensor;
+    public EntityTypes[] getTypes() {
+        return new EntityTypes[] {EntityTypes.Sensor, EntityTypes.Sensors};
+    }
+
+    @Override
+    protected Object createWrapper(Object entity, QueryOptions queryOptions) {
+        return new SensorWithQueryOptions((ProcedureEntity) entity, queryOptions);
     }
 
     @Override
@@ -166,7 +169,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     }
 
     @Override
-    public ProcedureEntity create(ProcedureEntity sensor) throws STACRUDException {
+    public ProcedureEntity createEntity(ProcedureEntity sensor) throws STACRUDException {
         if (sensor.getIdentifier() != null && !sensor.isSetName()) {
             return getRepository().findByIdentifier(sensor.getIdentifier()).get();
         }
@@ -190,12 +193,14 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     }
 
     @Override
-    public ProcedureEntity update(ProcedureEntity entity, HttpMethod method) throws STACRUDException {
+    public ProcedureEntity updateEntity(ProcedureEntity entity, HttpMethod method) throws STACRUDException {
         checkUpdate(entity);
         if (HttpMethod.PATCH.equals(method)) {
             Optional<ProcedureEntity> existing = getRepository().findByIdentifier(entity.getIdentifier());
             if (existing.isPresent()) {
-                ProcedureEntity merged = mapper.merge(existing.get(), entity);
+                //TODO: FIX
+                // ProcedureEntity merged = mapper.merge(existing.get(), entity);
+                ProcedureEntity merged = null;
                 if (entity instanceof SensorEntity) {
                     // TODO insert datastream
                     logger.trace("TODO: insert datastream.");
@@ -210,7 +215,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     }
 
     @Override
-    protected ProcedureEntity update(ProcedureEntity entity) {
+    protected ProcedureEntity updateEntity(ProcedureEntity entity) {
         return getRepository().save(getAsProcedureEntity(entity));
     }
 
@@ -253,9 +258,9 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     @Override
     protected ProcedureEntity createOrUpdate(ProcedureEntity entity) throws STACRUDException {
         if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
-            return update(entity, HttpMethod.PATCH);
+            return updateEntity(entity, HttpMethod.PATCH);
         }
-        return create(entity);
+        return createEntity(entity);
     }
 
     private void checkFormat(ProcedureEntity sensor) {
