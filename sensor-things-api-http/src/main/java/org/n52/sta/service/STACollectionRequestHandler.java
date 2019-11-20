@@ -4,9 +4,9 @@ import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.exception.STAInvalidUrlException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,11 +16,13 @@ import java.util.regex.Pattern;
 
 @RequestMapping("/v2")
 @RestController
-public class STAEntityRequestHandler extends STARequestUtils {
+public class STACollectionRequestHandler extends STARequestUtils {
 
     private final EntityServiceRepository serviceRepository;
 
     private final Pattern byIdPattern = Pattern.compile(COLLECTION_REGEX);
+
+    private final String mappingPrefix = "**/";
 
     private final Pattern byDatastreamPattern = Pattern.compile(IDENTIFIED_BY_DATASTREAM_REGEX);
     private final Pattern byObservationPattern = Pattern.compile(IDENTIFIED_BY_OBSERVATION_REGEX);
@@ -31,52 +33,30 @@ public class STAEntityRequestHandler extends STARequestUtils {
     private final Pattern byObservedPropertiesPattern = Pattern.compile(IDENTIFIED_BY_OBSERVED_PROPERTY_REGEX);
     private final Pattern byFeaturesOfInterestPattern = Pattern.compile(IDENTIFIED_BY_FEATURE_OF_INTEREST_REGEX);
 
-    private final String mappingPrefix = "**/";
     private final int rootUrlLength;
 
-
-    public STAEntityRequestHandler(@Value("${server.rootUrl}") String rootUrl,
-                                   EntityServiceRepository serviceRepository) {
+    public STACollectionRequestHandler(@Value("${server.rootUrl}") String rootUrl,
+                                       EntityServiceRepository serviceRepository) {
         rootUrlLength = rootUrl.length();
         this.serviceRepository = serviceRepository;
     }
 
     /**
-     * Matches all requests on Entities referenced directly via id
-     * e.g. /Datastreams(52)
+     * Matches all requests on Collections referenced directly
+     * e.g. /Datastreams
      *
-     * @param entity  id and name of entity. Automatically set by Spring via @PathVariable
-     * @param request full request
+     * @param collectionName name of the collection. Automatically set by Spring via @PathVariable
+     * @param queryOptions   query options. Automatically set by Spring via @RequestParam
      */
-    @RequestMapping(
-            method = RequestMethod.GET,
-            value = "**/{entity:" + COLLECTION_REGEX + "}{id:" + IDENTIFIER_REGEX + "$}",
+    @GetMapping(
+            value = "/{collectionName:" + COLLECTION_REGEX + "}",
             produces = "application/json"
     )
-    public Object readEntityDirect(@PathVariable String entity,
-                                   @PathVariable String id,
-                                   @RequestParam Map<String, String> queryOptions,
-                                   HttpServletRequest request) throws STACRUDException {
-
-        // TODO(specki): check if something needs to be cut from the front like rootUrl
-        // TODO(specki): short-circuit if url is only one element as spring already validated that
-        //TODO(specki): Error serialization for nice output
-
-        String[] uriResources = request.getRequestURL().substring(rootUrlLength).split("/");
-
-        STAInvalidUrlException ex;
-        ex = validateURISyntax(uriResources);
-        if (ex != null) {
-            return ex.getMessage();
-        }
-        ex = validateURISemantic(uriResources);
-        if (ex != null) {
-            return ex.getMessage();
-        }
-
-        String entityId = id.substring(1, id.length() - 1);
-        String entityType = entity;
-        return serviceRepository.getEntityService(entityType).getEntity(entityId, createQueryOptions(queryOptions));
+    public Object readCollectionDirect(@PathVariable String collectionName,
+                                       @RequestParam Map<String, String> queryOptions) throws STACRUDException {
+        return serviceRepository
+                .getEntityService(collectionName)
+                .getEntityCollection(createQueryOptions(queryOptions));
     }
 
     /**
@@ -87,24 +67,25 @@ public class STAEntityRequestHandler extends STARequestUtils {
      * @param request full request
      * @return JSON String representing Entity
      */
-    @RequestMapping(
-            method = RequestMethod.GET,
-            value = {mappingPrefix + IDENTIFIED_BY_DATASTREAM_PATH,
-                    mappingPrefix + IDENTIFIED_BY_OBSERVATION_PATH,
-                    mappingPrefix + IDENTIFIED_BY_HISTORICAL_LOCATION_PATH
+    @GetMapping(
+            value = {mappingPrefix + IDENTIFIED_BY_THING_PATH,
+                     mappingPrefix + IDENTIFIED_BY_LOCATION_PATH,
+                     mappingPrefix + IDENTIFIED_BY_OBSERVED_PROPERTY_PATH,
+                     mappingPrefix + IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH,
+                     mappingPrefix + IDENTIFIED_BY_SENSOR_PATH
             },
             produces = "application/json"
     )
-    public Object readRelatedEntity(@PathVariable String entity,
-                                    @PathVariable String target,
-                                    @RequestParam Map<String, String> queryOptions,
-                                    HttpServletRequest request) throws STACRUDException {
+    public Object readRelatedCollection(@PathVariable String entity,
+                                        @PathVariable String target,
+                                        @RequestParam Map<String, String> queryOptions,
+                                        HttpServletRequest request) throws STACRUDException {
 
         // TODO(specki): check if something needs to be cut from the front like rootUrl
         // TODO(specki): short-circuit if url is only one element as spring already validated that when the path matched
         // TODO(specki): Error serialization for nice output
 
-        String[] uriResources = request.getRequestURL().substring(rootUrlLength).split("/");
+        String[] uriResources = request.getServletPath().split("/");
 
         STAInvalidUrlException ex;
         ex = validateURISyntax(uriResources);
@@ -120,7 +101,7 @@ public class STAEntityRequestHandler extends STARequestUtils {
         String sourceId = entity.split("\\(")[1].replace(")", "");
 
         return serviceRepository.getEntityService(target)
-                        .getEntityByRelatedEntity(sourceId, sourceType, null, createQueryOptions(queryOptions));
+                .getEntityCollectionByRelatedEntity(sourceId, sourceType, createQueryOptions(queryOptions));
     }
 
     /**
@@ -152,16 +133,12 @@ public class STAEntityRequestHandler extends STARequestUtils {
                                 || byObservationPattern.matcher(resource).matches()
                                 || bySensorsPattern.matcher(resource).matches()
                                 || byObservedPropertiesPattern.matcher(resource).matches())) {
-                            return new STAInvalidUrlException("Url is invalid. "
-                                    + uriResources[i - 1]
-                                    + "/" + uriResources[i]
-                                    + " is not a valid resource path.");
+                            return new STAInvalidUrlException("Url is invalid. " + uriResources[i - 1]
+                                    + "/" + uriResources[i] + "is not a valid resource path.");
 
                         }
                     } else {
-                        return new STAInvalidUrlException("Url is invalid. "
-                                + uriResources[i]
-                                + " is not a valid resource.");
+                        return new STAInvalidUrlException("Url is invalid. " + uriResources[i] + "is not a valid resource.");
                     }
                 }
             }
@@ -202,11 +179,8 @@ public class STAEntityRequestHandler extends STARequestUtils {
                 targetId = serviceRepository.getEntityService(sourceType)
                         .getEntityIdByRelatedEntity(sourceId, sourceType);
                 if (targetId == null) {
-                    return new STAInvalidUrlException("No Entity: "
-                            + uriResources[i]
-                            + " associated with "
-                            + uriResources[i - 1]
-                            + " found!");
+                    return new STAInvalidUrlException("No Entity: " + uriResources[i] +
+                            " associated with " + uriResources[i - 1] + "found!");
                 }
             } else {
                 // Resource is addressed by Id directly
@@ -215,11 +189,8 @@ public class STAEntityRequestHandler extends STARequestUtils {
                 targetId = targetEntity[1].replace(")", "");
                 if (!serviceRepository.getEntityService(sourceType)
                         .existsEntityByRelatedEntity(sourceId, targetType, targetId)) {
-                    return new STAInvalidUrlException("No Entity: "
-                            + uriResources[i]
-                            + " associated with "
-                            + uriResources[i - 1]
-                            + " found!");
+                    return new STAInvalidUrlException("No Entity: " + uriResources[i] +
+                            " associated with " + uriResources[i - 1] + "found!");
                 }
             }
 
