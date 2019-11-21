@@ -2,6 +2,7 @@ package org.n52.sta.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.n52.series.db.beans.IdEntity;
+import org.n52.sta.data.serialization.ElementWithQueryOptions;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.exception.STACRUDException;
@@ -39,8 +40,8 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
             value = "/{collectionName: " + COLLECTION_REGEX + "$}",
             produces = "application/json")
     @SuppressWarnings("unchecked")
-    public Object handlePost(@PathVariable String collectionName,
-                             @RequestBody String body) throws IOException, STACRUDException {
+    public ElementWithQueryOptions handlePost(@PathVariable String collectionName,
+                                              @RequestBody String body) throws IOException, STACRUDException {
 
         Class clazz = collectionNameToClass.get(collectionName);
         return ((AbstractSensorThingsEntityService<?, T>) serviceRepository.getEntityService(collectionName))

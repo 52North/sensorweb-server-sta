@@ -43,15 +43,15 @@ public class STARequestUtils {
             "FeaturesOfInterest" + IDENTIFIER_REGEX + "/Observations";
 
     final String IDENTIFIED_BY_DATASTREAM_PATH =
-            "{entity:Datastreams" + IDENTIFIER_REGEX + "}/{target:(Sensor|ObservedProperty|Thing|Observations)}";
+            "{entity:Datastreams" + IDENTIFIER_REGEX + "}/{target:Sensor|ObservedProperty|Thing|Observations}";
     final String IDENTIFIED_BY_OBSERVATION_PATH =
-            "{entity:Observations" + IDENTIFIER_REGEX + "}/{target:(Datastream|FeatureOfInterest)}";
+            "{entity:Observations" + IDENTIFIER_REGEX + "}/{target:Datastream|FeatureOfInterest}";
     final String IDENTIFIED_BY_HISTORICAL_LOCATION_PATH =
             "{entity:HistoricalLocations" + IDENTIFIER_REGEX + "}/{target:Thing}";
     final String IDENTIFIED_BY_THING_PATH =
-            "{entity:Things" + IDENTIFIER_REGEX + "}/{target:(Datastreams|HistoricalLocations|Locations)}";
+            "{entity:Things" + IDENTIFIER_REGEX + "}/{target:Datastreams|HistoricalLocations|Locations}";
     final String IDENTIFIED_BY_LOCATION_PATH =
-            "{entity:Locations" + IDENTIFIER_REGEX + "}/{target:(Things|HistoricalLocations)}";
+            "{entity:Locations" + IDENTIFIER_REGEX + "}/{target:Things|HistoricalLocations}";
     final String IDENTIFIED_BY_SENSOR_PATH =
             "{entity:Sensors" + IDENTIFIER_REGEX + "}/{target:Datastreams}";
     final String IDENTIFIED_BY_OBSERVED_PROPERTY_PATH =
@@ -74,7 +74,7 @@ public class STARequestUtils {
         collectionNameToClass = Collections.unmodifiableMap(map);
     }
 
-    final Pattern byIdPattern = Pattern.compile(COLLECTION_REGEX);
+    final Pattern byIdPattern = Pattern.compile("(" + COLLECTION_REGEX + ")" + IDENTIFIER_REGEX);
     final Pattern byDatastreamPattern = Pattern.compile(IDENTIFIED_BY_DATASTREAM_REGEX);
     final Pattern byObservationPattern = Pattern.compile(IDENTIFIED_BY_OBSERVATION_REGEX);
     final Pattern byHistoricalLocationPattern = Pattern.compile(IDENTIFIED_BY_HISTORICAL_LOCATION_REGEX);
@@ -178,7 +178,7 @@ public class STARequestUtils {
                 // Resource is addressed by related Entity
                 // e.g. /Datastreams(1)/Thing/
                 // Getting id directly as it is needed for next iteration
-                targetId = serviceRepository.getEntityService(sourceType)
+                targetId = serviceRepository.getEntityService(targetType)
                         .getEntityIdByRelatedEntity(sourceId, sourceType);
                 if (targetId == null) {
                     return new STAInvalidUrlException("No Entity: "
