@@ -147,6 +147,11 @@
                 <artifactId>jts-core</artifactId>
                 <version>${locationtech-jts.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.locationtech.jts.io</groupId>
+                <artifactId>jts-io-common</artifactId>
+                <version>${locationtech-jts.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.hibernate</groupId>
