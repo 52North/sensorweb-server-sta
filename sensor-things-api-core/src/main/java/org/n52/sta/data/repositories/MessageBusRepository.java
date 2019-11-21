@@ -47,6 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
@@ -73,6 +74,7 @@ public class MessageBusRepository<T, I extends Serializable>
     private STAEventHandler mqttHandler;
     private EntityManager em;
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     MessageBusRepository(JpaEntityInformation entityInformation,
                          EntityManager entityManager) {
         super(entityInformation, entityManager);
@@ -97,7 +99,11 @@ public class MessageBusRepository<T, I extends Serializable>
         if (columnName != null) {
             query.select(root.get(columnName));
         }
-        return Optional.of((String) em.createQuery(query).getSingleResult());
+        try {
+            return Optional.of((String) em.createQuery(query).getSingleResult());
+        } catch (NoResultException ex) {
+            return Optional.empty();
+        }
     }
 
 
