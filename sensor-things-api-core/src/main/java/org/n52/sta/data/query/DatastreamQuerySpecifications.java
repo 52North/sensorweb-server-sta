@@ -161,16 +161,16 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
             try {
                 switch (propertyName) {
                     case "name":
-                        return handleDirectStringPropertyFilter(root.<String>get(DescribableEntity.PROPERTY_NAME),
+                        return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
                                 propertyValue.toString(), operator, builder, switched);
                     case "description":
                         return handleDirectStringPropertyFilter(
-                                root.<String>get(DescribableEntity.PROPERTY_DESCRIPTION), propertyValue.toString(),
+                                root.get(DescribableEntity.PROPERTY_DESCRIPTION), propertyValue.toString(),
                                 operator, builder, switched);
                     case "observationType":
                         Join<DatastreamEntity, FormatEntity> join =
                                 root.join(DatastreamEntity.PROPERTY_OBSERVATION_TYPE);
-                        return handleDirectStringPropertyFilter(join.<String>get(FormatEntity.FORMAT),
+                        return handleDirectStringPropertyFilter(join.get(FormatEntity.FORMAT),
                                 propertyValue.toString(), operator, builder, switched);
                     default:
                         throw new RuntimeException("Error getting filter for Property: \"" + propertyName

@@ -153,7 +153,7 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
                     case "value":
                         Subquery<QuantityDataEntity> sq = query.subquery(QuantityDataEntity.class);
                         Root<QuantityDataEntity> dataset = sq.from(QuantityDataEntity.class);
-                        Predicate predicate = handleDirectNumberPropertyFilter(dataset.<Double>get(propertyName),
+                        Predicate predicate = handleDirectNumberPropertyFilter(dataset.get(propertyName),
                                 Double.valueOf(propertyValue.toString()), operator, builder);
                         sq.select(dataset.get(QuantityDataEntity.PROPERTY_IDENTIFIER)).where(predicate);
                         return builder.in(root.get(DataEntity.PROPERTY_IDENTIFIER)).value(sq);
@@ -168,37 +168,37 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
                             case LT:
                             case LE:
                                 return handleDirectDateTimePropertyFilter(
-                                        root.<Date>get(DataEntity.PROPERTY_SAMPLING_TIME_END),
+                                        root.get(DataEntity.PROPERTY_SAMPLING_TIME_END),
                                         new DateTime(propertyValue).toDate(),
                                         operator,
                                         builder);
                             case GT:
                             case GE:
                                 return handleDirectDateTimePropertyFilter(
-                                        root.<Date>get(DataEntity.PROPERTY_SAMPLING_TIME_START),
+                                        root.get(DataEntity.PROPERTY_SAMPLING_TIME_START),
                                         new DateTime(propertyValue).toDate(),
                                         operator,
                                         builder);
                             case EQ:
                                 Predicate eqStart = handleDirectDateTimePropertyFilter(
-                                        root.<Date>get(DataEntity.PROPERTY_SAMPLING_TIME_START),
+                                        root.get(DataEntity.PROPERTY_SAMPLING_TIME_START),
                                         new DateTime(propertyValue).toDate(),
                                         operator,
                                         builder);
                                 Predicate eqEnd = handleDirectDateTimePropertyFilter(
-                                        root.<Date>get(DataEntity.PROPERTY_SAMPLING_TIME_END),
+                                        root.get(DataEntity.PROPERTY_SAMPLING_TIME_END),
                                         new DateTime(propertyValue).toDate(),
                                         operator,
                                         builder);
                                 return builder.and(eqStart, eqEnd);
                             case NE:
                                 Predicate neStart = handleDirectDateTimePropertyFilter(
-                                        root.<Date>get(DataEntity.PROPERTY_SAMPLING_TIME_START),
+                                        root.get(DataEntity.PROPERTY_SAMPLING_TIME_START),
                                         new DateTime(propertyValue).toDate(),
                                         operator,
                                         builder);
                                 Predicate neEnd = handleDirectDateTimePropertyFilter(
-                                        root.<Date>get(DataEntity.PROPERTY_SAMPLING_TIME_END),
+                                        root.get(DataEntity.PROPERTY_SAMPLING_TIME_END),
                                         new DateTime(propertyValue).toDate(),
                                         operator,
                                         builder);
@@ -208,7 +208,7 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
                         }
                     case "resultTime":
                         return this.handleDirectDateTimePropertyFilter(
-                                root.<Date>get(DataEntity.PROPERTY_RESULT_TIME),
+                                root.get(DataEntity.PROPERTY_RESULT_TIME),
                                 new DateTime(propertyValue).toDate(),
                                 operator,
                                 builder);

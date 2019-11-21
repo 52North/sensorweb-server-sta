@@ -112,17 +112,17 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications<Procedu
                 try {
                     switch (propertyName) {
                         case "name":
-                            return handleDirectStringPropertyFilter(root.<String>get(DescribableEntity.PROPERTY_NAME),
+                            return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
                                     propertyValue.toString(), operator, builder, switched);
                         case "description":
                             return handleDirectStringPropertyFilter(
-                                    root.<String>get(DescribableEntity.PROPERTY_DESCRIPTION), propertyValue.toString(),
+                                    root.get(DescribableEntity.PROPERTY_DESCRIPTION), propertyValue.toString(),
                                     operator, builder, switched);
                         case "format":
                         case "encodingType":
                             Join<ProcedureEntity, FormatEntity> join =
                                     root.join(ProcedureEntity.PROPERTY_PROCEDURE_DESCRIPTION_FORMAT);
-                            return handleDirectStringPropertyFilter(join.<String>get(FormatEntity.FORMAT),
+                            return handleDirectStringPropertyFilter(join.get(FormatEntity.FORMAT),
                                     propertyValue.toString(), operator, builder, switched);
                         case "metadata":
                             return handleDirectStringPropertyFilter(

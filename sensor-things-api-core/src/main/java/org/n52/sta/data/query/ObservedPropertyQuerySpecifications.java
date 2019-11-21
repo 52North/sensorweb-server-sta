@@ -102,11 +102,11 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
                 try {
                     switch (propertyName) {
                         case "name":
-                            return handleDirectStringPropertyFilter(root.<String>get(DescribableEntity.PROPERTY_NAME),
+                            return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
                                     propertyValue.toString(), operator, builder, switched);
                         case "description":
                             return handleDirectStringPropertyFilter(
-                                    root.<String>get(DescribableEntity.PROPERTY_DESCRIPTION),
+                                    root.get(DescribableEntity.PROPERTY_DESCRIPTION),
                                     propertyValue.toString(),
                                     operator,
                                     builder,
@@ -114,7 +114,7 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
                         case "definition":
                         case "identifier":
                             return handleDirectStringPropertyFilter(
-                                    root.<String>get(DescribableEntity.PROPERTY_IDENTIFIER),
+                                    root.get(DescribableEntity.PROPERTY_IDENTIFIER),
                                     propertyValue.toString(),
                                     operator,
                                     builder,

@@ -157,11 +157,11 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
                 try {
                     switch (propertyName) {
                         case "name":
-                            return handleDirectStringPropertyFilter(root.<String>get(DescribableEntity.PROPERTY_NAME),
+                            return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
                                     propertyValue.toString(), operator, builder, switched);
                         case "description":
                             return handleDirectStringPropertyFilter(
-                                    root.<String>get(DescribableEntity.PROPERTY_DESCRIPTION),
+                                    root.get(DescribableEntity.PROPERTY_DESCRIPTION),
                                     propertyValue.toString(),
                                     operator,
                                     builder,
@@ -170,7 +170,7 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
                             // TODO
                             // qPlatform.parameters.any().name.eq("properties")
                             return handleDirectStringPropertyFilter(
-                                    root.<String>get(PlatformEntity.PROPERTY_PROPERTIES),
+                                    root.get(PlatformEntity.PROPERTY_PROPERTIES),
                                     propertyValue.toString(),
                                     operator,
                                     builder,
