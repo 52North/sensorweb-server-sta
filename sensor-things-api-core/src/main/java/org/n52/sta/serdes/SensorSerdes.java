@@ -1,18 +1,16 @@
-package org.n52.sta.data.serialization;
+package org.n52.sta.serdes;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import org.hibernate.cfg.NotYetImplementedException;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
-import org.n52.sta.data.serialization.ElementWithQueryOptions.SensorWithQueryOptions;
-import org.n52.sta.data.serialization.STASerdesTypes.JSONwithIdNameDescription;
-import org.n52.sta.edm.provider.entities.STAEntityDefinition;
-import org.n52.sta.edm.provider.entities.SensorEntityDefinition;
+import org.n52.sta.serdes.model.STAEntityDefinition;
+import org.n52.sta.serdes.model.SensorEntityDefinition;
+import org.n52.sta.serdes.ElementWithQueryOptions.SensorWithQueryOptions;
 import org.n52.sta.service.query.QueryOptions;
 
 import java.io.IOException;
@@ -61,15 +59,15 @@ public class SensorSerdes {
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_DESCRIPTION)) {
                 gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, sensor.getDescription());
             }
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_METADATA)) {
+            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ENCODINGTYPE)) {
                 String format = sensor.getFormat().getFormat();
                 if (format.equalsIgnoreCase(SENSORML_2)) {
                     format = STA_SENSORML_2;
                 }
-                gen.writeObjectField(STAEntityDefinition.PROP_METADATA, format);
+                gen.writeObjectField(STAEntityDefinition.PROP_ENCODINGTYPE, format);
             }
 
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ENCODINGTYPE)) {
+            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_METADATA)) {
                 String metadata = "metadata";
                 if (sensor.getDescriptionFile() != null && !sensor.getDescriptionFile().isEmpty()) {
                     metadata = sensor.getDescriptionFile();
@@ -80,7 +78,7 @@ public class SensorSerdes {
                         metadata = history.get().getXml();
                     }
                 }
-                gen.writeStringField(STAEntityDefinition.PROP_ENCODINGTYPE, metadata);
+                gen.writeStringField(STAEntityDefinition.PROP_METADATA, metadata);
             }
 
             // navigation properties
@@ -98,21 +96,7 @@ public class SensorSerdes {
 
         @Override
         public SensorEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            throw new NotYetImplementedException();
-
-            //TODO: chekc sensorML2
-        }
-    }
-
-    class JSONSensor extends JSONwithIdNameDescription {
-        public String properties;
-        public String encodingType;
-        public String metadata;
-
-        public SensorEntity toEntity() {
-
-
-            throw new NotYetImplementedException();
+            return p.readValueAs(STASerdesTypes.JSONSensor.class).toEntity();
         }
     }
 }

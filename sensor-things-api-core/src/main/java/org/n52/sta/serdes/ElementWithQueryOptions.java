@@ -1,4 +1,4 @@
-package org.n52.sta.data.serialization;
+package org.n52.sta.serdes;
 
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DataEntity;

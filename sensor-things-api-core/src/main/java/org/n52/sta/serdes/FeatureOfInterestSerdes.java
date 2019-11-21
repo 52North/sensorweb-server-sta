@@ -1,17 +1,15 @@
-package org.n52.sta.data.serialization;
+package org.n52.sta.serdes;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import org.hibernate.cfg.NotYetImplementedException;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.FeatureEntity;
-import org.n52.sta.data.serialization.ElementWithQueryOptions.FeatureOfInterestWithQueryOptions;
-import org.n52.sta.data.serialization.STASerdesTypes.JSONwithIdNameDescription;
-import org.n52.sta.edm.provider.entities.FeatureOfInterestEntityDefinition;
-import org.n52.sta.edm.provider.entities.STAEntityDefinition;
+import org.n52.sta.serdes.model.FeatureOfInterestEntityDefinition;
+import org.n52.sta.serdes.model.STAEntityDefinition;
+import org.n52.sta.serdes.ElementWithQueryOptions.FeatureOfInterestWithQueryOptions;
 import org.n52.sta.service.query.QueryOptions;
 
 import java.io.IOException;
@@ -86,14 +84,7 @@ public class FeatureOfInterestSerdes {
 
         @Override
         public FeatureEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            throw new NotYetImplementedException();
-        }
-    }
-
-    class JSONFeatureOfInterest extends JSONwithIdNameDescription {
-
-        public FeatureEntity toEntity() {
-            throw new NotYetImplementedException();
+            return p.readValueAs(STASerdesTypes.JSONFeatureOfInterest.class).toEntity();
         }
     }
 }

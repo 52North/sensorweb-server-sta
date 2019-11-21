@@ -1,11 +1,10 @@
-package org.n52.sta.data.serialization;
+package org.n52.sta.serdes;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import org.hibernate.cfg.NotYetImplementedException;
 import org.n52.series.db.beans.BlobDataEntity;
 import org.n52.series.db.beans.BooleanDataEntity;
 import org.n52.series.db.beans.CategoryDataEntity;
@@ -19,10 +18,9 @@ import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.ReferencedDataEntity;
 import org.n52.series.db.beans.TextDataEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
-import org.n52.sta.data.serialization.ElementWithQueryOptions.ObservationWithQueryOptions;
-import org.n52.sta.data.serialization.STASerdesTypes.JSONwithIdNameDescription;
-import org.n52.sta.edm.provider.entities.ObservationEntityDefinition;
-import org.n52.sta.edm.provider.entities.STAEntityDefinition;
+import org.n52.sta.serdes.model.ObservationEntityDefinition;
+import org.n52.sta.serdes.model.STAEntityDefinition;
+import org.n52.sta.serdes.ElementWithQueryOptions.ObservationWithQueryOptions;
 import org.n52.sta.service.query.QueryOptions;
 
 import java.io.IOException;
@@ -155,14 +153,7 @@ public class ObservationSerde {
 
         @Override
         public DataEntity<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            throw new NotYetImplementedException();
-        }
-    }
-
-    class JSONObservation extends JSONwithIdNameDescription {
-
-        public DataEntity<?> toEntity() {
-            throw new NotYetImplementedException();
+            return p.readValueAs(STASerdesTypes.JSONObservation.class).toEntity();
         }
     }
 }

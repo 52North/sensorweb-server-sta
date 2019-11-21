@@ -1,16 +1,14 @@
-package org.n52.sta.data.serialization;
+package org.n52.sta.serdes;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import org.hibernate.cfg.NotYetImplementedException;
 import org.n52.series.db.beans.sta.DatastreamEntity;
-import org.n52.sta.data.serialization.ElementWithQueryOptions.DatastreamWithQueryOptions;
-import org.n52.sta.data.serialization.STASerdesTypes.JSONwithIdNameDescription;
-import org.n52.sta.edm.provider.entities.DatastreamEntityDefinition;
-import org.n52.sta.edm.provider.entities.STAEntityDefinition;
+import org.n52.sta.serdes.model.DatastreamEntityDefinition;
+import org.n52.sta.serdes.model.STAEntityDefinition;
+import org.n52.sta.serdes.ElementWithQueryOptions.DatastreamWithQueryOptions;
 import org.n52.sta.service.query.QueryOptions;
 
 import java.io.IOException;
@@ -94,14 +92,7 @@ public class DatastreamSerdes {
 
         @Override
         public DatastreamEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            throw new NotYetImplementedException();
-        }
-    }
-
-    class JSONDatastream extends JSONwithIdNameDescription {
-
-        public DatastreamEntity toEntity() {
-            throw new NotYetImplementedException();
+            return p.readValueAs(STASerdesTypes.JSONDatastream.class).toEntity();
         }
     }
 }

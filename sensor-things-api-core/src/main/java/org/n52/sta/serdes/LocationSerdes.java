@@ -1,23 +1,18 @@
-package org.n52.sta.data.serialization;
+package org.n52.sta.serdes;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import org.hibernate.cfg.NotYetImplementedException;
 import org.n52.series.db.beans.sta.LocationEntity;
-import org.n52.sta.data.serialization.ElementWithQueryOptions.LocationWithQueryOptions;
-import org.n52.sta.data.serialization.STASerdesTypes.JSONwithIdNameDescription;
-import org.n52.sta.data.serialization.ThingSerdes.JSONThing;
-import org.n52.sta.edm.provider.entities.LocationEntityDefinition;
-import org.n52.sta.edm.provider.entities.STAEntityDefinition;
+import org.n52.sta.serdes.model.LocationEntityDefinition;
+import org.n52.sta.serdes.model.STAEntityDefinition;
+import org.n52.sta.serdes.ElementWithQueryOptions.LocationWithQueryOptions;
 import org.n52.sta.service.query.QueryOptions;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class LocationSerdes {
 
@@ -86,26 +81,7 @@ public class LocationSerdes {
 
         @Override
         public LocationEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            throw new NotYetImplementedException();
+            return p.readValueAs(STASerdesTypes.JSONLocation.class).toEntity();
         }
     }
-
-    class JSONLocation extends JSONwithIdNameDescription {
-        public String encodingType;
-        public JSONThing[] things;
-
-        public LocationEntity toEntity() {
-            LocationEntity entity = new LocationEntity();
-            entity.setIdentifier(identifier);
-            entity.setName(name);
-            entity.setDescription(description);
-            //TODO: add location aka geometry
-
-            entity.setThings(Arrays.stream(things)
-                    .map(JSONThing::toEntity)
-                    .collect(Collectors.toSet()));
-            return entity;
-        }
-    }
-
 }

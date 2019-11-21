@@ -1,4 +1,4 @@
-package org.n52.sta.data.serialization;
+package org.n52.sta.serdes;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -6,18 +6,13 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.n52.series.db.beans.PlatformEntity;
-import org.n52.sta.data.serialization.DatastreamSerdes.JSONDatastream;
-import org.n52.sta.data.serialization.ElementWithQueryOptions.ThingWithQueryOptions;
-import org.n52.sta.data.serialization.LocationSerdes.JSONLocation;
-import org.n52.sta.data.serialization.STASerdesTypes.JSONwithIdNameDescription;
-import org.n52.sta.edm.provider.entities.STAEntityDefinition;
-import org.n52.sta.edm.provider.entities.ThingEntityDefinition;
+import org.n52.sta.serdes.model.STAEntityDefinition;
+import org.n52.sta.serdes.model.ThingEntityDefinition;
+import org.n52.sta.serdes.ElementWithQueryOptions.ThingWithQueryOptions;
 import org.n52.sta.service.query.QueryOptions;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class ThingSerdes {
 
@@ -82,37 +77,8 @@ public class ThingSerdes {
         }
 
         @Override
-        public PlatformEntity deserialize(JsonParser p, DeserializationContext ctxt)
-                throws IOException {
-            JSONThing node = p.readValueAs(JSONThing.class);
-            return node.toEntity();
-        }
-    }
-
-    static class JSONThing extends JSONwithIdNameDescription {
-        public String properties;
-        public JSONLocation[] locations;
-        public JSONDatastream[] datastreams;
-
-        public JSONThing() {}
-
-        PlatformEntity toEntity() {
-            PlatformEntity entity = new PlatformEntity();
-            entity.setIdentifier(identifier);
-            entity.setName(name);
-            entity.setDescription(description);
-            if (locations != null) {
-                for (JSONLocation location : locations) {
-                    entity.addLocationEntity(location.toEntity());
-                }
-            }
-            if (datastreams != null) {
-                entity.setDatastreams(Arrays.stream(datastreams)
-                        .map(JSONDatastream::toEntity)
-                        .collect(Collectors.toSet()));
-            }
-            entity.setProperties(properties);
-            return entity;
+        public PlatformEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+            return p.readValueAs(STASerdesTypes.JSONThing.class).toEntity();
         }
     }
 
