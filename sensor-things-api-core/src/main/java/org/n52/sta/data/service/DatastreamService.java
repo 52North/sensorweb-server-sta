@@ -44,11 +44,11 @@ import org.n52.sta.data.repositories.DatasetRepository;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.FormatRepository;
 import org.n52.sta.data.repositories.UnitRepository;
-import org.n52.sta.data.serialization.ElementWithQueryOptions;
-import org.n52.sta.data.serialization.ElementWithQueryOptions.DatastreamWithQueryOptions;
+import org.n52.sta.serdes.ElementWithQueryOptions;
+import org.n52.sta.serdes.ElementWithQueryOptions.DatastreamWithQueryOptions;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider;
-import org.n52.sta.edm.provider.entities.STAEntityDefinition;
+import org.n52.sta.serdes.model.STAEntityDefinition;
 import org.n52.sta.edm.provider.entities.SensorEntityProvider;
 import org.n52.sta.edm.provider.entities.ThingEntityProvider;
 import org.n52.sta.exception.STACRUDException;
@@ -87,6 +87,8 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     private final FormatRepository formatRepository;
     private final DataRepository dataRepository;
     private final DatasetRepository datasetRepository;
+
+    private static final String UNKNOWN = "unknown";
 
     private DatastreamMapper mapper;
 
@@ -429,6 +431,50 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
         //collections.put(ET_OBSERVATION_NAME, observationIds);
 
         return collections;
+    }
+
+    @Override
+    public DatastreamEntity merge(DatastreamEntity existing, DatastreamEntity toMerge) throws STACRUDException {
+        mergeName(existing, toMerge);
+        mergeDescription(existing, toMerge);
+        checkObservationType(existing, toMerge);
+        // observedArea
+        if (toMerge.isSetGeometry()) {
+            existing.setGeometryEntity(toMerge.getGeometryEntity());
+        }
+        // unit
+        if (toMerge.isSetUnit() && existing.getUnit().getSymbol().equals(toMerge.getUnit().getSymbol())) {
+            existing.setUnit(toMerge.getUnit());
+        }
+
+        // resultTime
+        if (toMerge.hasResultTimeStart() && toMerge.hasResultTimeEnd()) {
+            existing.setResultTimeStart(toMerge.getResultTimeStart());
+            existing.setResultTimeEnd(toMerge.getResultTimeEnd());
+        }
+        // observationType
+        if (existing.getDatasets() == null || existing.getDatasets().isEmpty() && toMerge.isSetObservationType()) {
+            if (!existing.getObservationType().getFormat().equals(toMerge.getObservationType().getFormat())
+                    && !toMerge.getObservationType().getFormat().equalsIgnoreCase(UNKNOWN)) {
+                existing.setObservationType(toMerge.getObservationType());
+            }
+        }
+        return existing;
+    }
+
+    private void checkObservationType(DatastreamEntity existing, DatastreamEntity toMerge)
+            throws STACRUDException {
+        if (toMerge.isSetObservationType() && !toMerge.getObservationType()
+                .getFormat()
+                .equalsIgnoreCase(UNKNOWN)
+                && !existing.getObservationType().getFormat().equals(toMerge.getObservationType().getFormat())) {
+            throw new STACRUDException(
+                    String.format(
+                            "The updated observationType (%s) does not comply with the existing observationType (%s)",
+                            toMerge.getObservationType().getFormat(),
+                            existing.getObservationType().getFormat()),
+                    HttpStatus.CONFLICT);
+        }
     }
 
 }

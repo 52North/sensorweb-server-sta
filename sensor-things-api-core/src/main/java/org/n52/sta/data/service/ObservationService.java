@@ -56,15 +56,15 @@ import org.n52.sta.data.repositories.DataRepository;
 import org.n52.sta.data.repositories.DatasetRepository;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.OfferingRepository;
-import org.n52.sta.data.serialization.ElementWithQueryOptions;
-import org.n52.sta.data.serialization.ElementWithQueryOptions.ObservationWithQueryOptions;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.edm.provider.entities.DatastreamEntityProvider;
 import org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider;
-import org.n52.sta.edm.provider.entities.STAEntityDefinition;
 import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.mapping.FeatureOfInterestMapper;
 import org.n52.sta.mapping.ObservationMapper;
+import org.n52.sta.serdes.ElementWithQueryOptions;
+import org.n52.sta.serdes.ElementWithQueryOptions.ObservationWithQueryOptions;
+import org.n52.sta.serdes.model.STAEntityDefinition;
 import org.n52.sta.service.query.QueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -364,11 +364,12 @@ public class ObservationService extends
         if (!observation.hasFeatureOfInterest()) {
             AbstractFeatureEntity<?> feature = null;
             for (LocationEntity location : datastream.getThing().getLocations()) {
+                //TODO: check why this looks weird.
                 if (feature == null) {
-                    feature = featureMapper.createFeatureOfInterest(location);
+                    feature = ServiceUtils.createFeatureOfInterest(location);
                 }
                 if (location.isSetGeometry()) {
-                    feature = featureMapper.createFeatureOfInterest(location);
+                    feature = ServiceUtils.createFeatureOfInterest(location);
                     break;
                 }
             }
@@ -605,4 +606,50 @@ public class ObservationService extends
         return collections;
     }
 
+    @Override
+    public DataEntity<?> merge(DataEntity<?> existing, DataEntity<?> toMerge) throws STACRUDException {
+        // phenomenonTime
+        mergeSamplingTimeAndCheckResultTime(existing, toMerge);
+        // resultTime
+        if (toMerge.getResultTime() != null) {
+            existing.setResultTime(toMerge.getResultTime());
+        }
+        // validTime
+        if (toMerge.isSetValidTime()) {
+            existing.setValidTimeStart(toMerge.getValidTimeStart());
+            existing.setValidTimeEnd(toMerge.getValidTimeEnd());
+        }
+        // parameter
+        // value
+        if (toMerge.getValue() != null) {
+            checkValue(existing, toMerge);
+        }
+        return existing;
+    }
+
+    protected void mergeSamplingTimeAndCheckResultTime(DataEntity<?> existing, DataEntity<?> toMerge) {
+        if (toMerge.getSamplingTimeEnd() != null && existing.getSamplingTimeEnd().equals(existing.getResultTime())) {
+            existing.setResultTime(toMerge.getSamplingTimeEnd());
+        }
+        super.mergeSamplingTime(existing, toMerge);
+    }
+
+    private void checkValue(DataEntity<?> existing, DataEntity<?> toMerge) throws STACRUDException {
+        if (existing instanceof QuantityDataEntity) {
+            ((QuantityDataEntity) existing)
+                    .setValue(BigDecimal.valueOf(Double.parseDouble(toMerge.getValue().toString())));
+        } else if (existing instanceof CountDataEntity) {
+            ((CountDataEntity) existing).setValue(Integer.parseInt(toMerge.getValue().toString()));
+        } else if (existing instanceof BooleanDataEntity) {
+            ((BooleanDataEntity) existing).setValue(Boolean.parseBoolean(toMerge.getValue().toString()));
+        } else if (existing instanceof TextDataEntity) {
+            ((TextDataEntity) existing).setValue(toMerge.getValue().toString());
+        } else if (existing instanceof CategoryDataEntity) {
+            ((CategoryDataEntity) existing).setValue(toMerge.getValue().toString());
+        } else {
+            throw new STACRUDException(
+                    String.format("The observation value for @iot.id %s can not be updated!", existing.getIdentifier()),
+                    HttpStatus.CONFLICT);
+        }
+    }
 }

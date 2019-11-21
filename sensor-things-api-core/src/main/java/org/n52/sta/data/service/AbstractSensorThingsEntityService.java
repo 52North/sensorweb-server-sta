@@ -33,15 +33,17 @@
  */
 package org.n52.sta.data.service;
 
+import org.n52.series.db.beans.DescribableEntity;
+import org.n52.series.db.beans.HibernateRelations;
 import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.data.OffsetLimitBasedPageRequest;
 import org.n52.sta.data.repositories.IdentifierRepository;
-import org.n52.sta.data.serialization.ElementWithQueryOptions;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.exception.STAInvalidQueryException;
+import org.n52.sta.serdes.ElementWithQueryOptions;
 import org.n52.sta.service.query.QueryOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -436,6 +438,45 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      */
     public String checkPropertyName(String property) {
         return property;
+    }
+
+    /**
+     * //TODO: write javadoc
+     * @param existing
+     * @param toMerge
+     * @return
+     */
+    protected abstract S merge(S existing, S toMerge) throws STACRUDException;
+
+    protected void mergeIdentifierNameDescription(DescribableEntity existing, DescribableEntity toMerge) {
+        if (toMerge.isSetIdentifier()) {
+            existing.setIdentifier(toMerge.getIdentifier());
+        }
+        mergeNameDescription(existing, toMerge);
+    }
+
+    protected void mergeNameDescription(DescribableEntity existing, DescribableEntity toMerge) {
+        mergeName(existing, toMerge);
+        mergeDescription(existing, toMerge);
+    }
+
+    protected void mergeName(HibernateRelations.HasName existing, HibernateRelations.HasName toMerge) {
+        if (toMerge.isSetName()) {
+            existing.setName(toMerge.getName());
+        }
+    }
+
+    protected void mergeDescription(HibernateRelations.HasDescription existing, HibernateRelations.HasDescription toMerge) {
+        if (toMerge.isSetDescription()) {
+            existing.setDescription(toMerge.getDescription());
+        }
+    }
+
+    protected void mergeSamplingTime(HibernateRelations.HasPhenomenonTime existing, HibernateRelations.HasPhenomenonTime toMerge) {
+        if (toMerge.hasSamplingTimeStart() && toMerge.hasSamplingTimeEnd()) {
+            existing.setSamplingTimeStart(toMerge.getSamplingTimeStart());
+            existing.setSamplingTimeEnd(toMerge.getSamplingTimeEnd());
+        }
     }
 
     /**

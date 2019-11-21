@@ -35,11 +35,11 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.data.query.LocationQuerySpecifications;
 import org.n52.sta.data.repositories.LocationEncodingRepository;
 import org.n52.sta.data.repositories.LocationRepository;
-import org.n52.sta.data.serialization.ElementWithQueryOptions;
-import org.n52.sta.data.serialization.ElementWithQueryOptions.LocationWithQueryOptions;
+import org.n52.sta.serdes.ElementWithQueryOptions;
+import org.n52.sta.serdes.ElementWithQueryOptions.LocationWithQueryOptions;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider;
-import org.n52.sta.edm.provider.entities.STAEntityDefinition;
+import org.n52.sta.serdes.model.STAEntityDefinition;
 import org.n52.sta.edm.provider.entities.ThingEntityProvider;
 import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.mapping.LocationMapper;
@@ -299,4 +299,16 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
         return collections;
     }
 
+    @Override
+    protected LocationEntity merge(LocationEntity existing, LocationEntity toMerge) {
+        mergeName(existing, toMerge);
+        mergeDescription(existing, toMerge);
+        if (toMerge.hasLocation()) {
+            existing.setLocation(toMerge.getLocation());
+        }
+        if (toMerge.isSetGeometry()) {
+            existing.setGeometryEntity(toMerge.getGeometryEntity());
+        }
+        return existing;
+    }
 }

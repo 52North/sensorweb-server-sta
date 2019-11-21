@@ -35,13 +35,13 @@ import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.data.query.ThingQuerySpecifications;
 import org.n52.sta.data.repositories.ThingRepository;
-import org.n52.sta.data.serialization.ElementWithQueryOptions;
-import org.n52.sta.data.serialization.ElementWithQueryOptions.ThingWithQueryOptions;
+import org.n52.sta.serdes.ElementWithQueryOptions;
+import org.n52.sta.serdes.ElementWithQueryOptions.ThingWithQueryOptions;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.edm.provider.entities.DatastreamEntityProvider;
 import org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider;
 import org.n52.sta.edm.provider.entities.LocationEntityProvider;
-import org.n52.sta.edm.provider.entities.STAEntityDefinition;
+import org.n52.sta.serdes.model.STAEntityDefinition;
 import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.mapping.ThingMapper;
 import org.n52.sta.service.query.QueryOptions;
@@ -156,7 +156,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
         if (HttpMethod.PATCH.equals(method)) {
             Optional<PlatformEntity> existing = getRepository().findByIdentifier(id);
             if (existing.isPresent()) {
-                PlatformEntity merged = mapper.merge(existing.get(), entity);
+                PlatformEntity merged = merge(existing.get(), entity);
                 if (entity.hasLocationEntities()) {
                     merged.setLocations(entity.getLocations());
                     processLocations(merged);
@@ -171,6 +171,16 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
             throw new STACRUDException("Http PUT is not yet supported!", HttpStatus.NOT_IMPLEMENTED);
         }
         throw new STACRUDException("Invalid http method for updating entity!", HttpStatus.BAD_REQUEST);
+    }
+
+    @Override
+    protected PlatformEntity merge(PlatformEntity existing, PlatformEntity toMerge) {
+        mergeName(existing, toMerge);
+        mergeDescription(existing, toMerge);
+        if (toMerge.hasProperties()) {
+            existing.setProperties(toMerge.getProperties());
+        }
+        return existing;
     }
 
     @Override
@@ -327,5 +337,4 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
         }
         return collections;
     }
-
 }

@@ -39,11 +39,11 @@ import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.FormatRepository;
 import org.n52.sta.data.repositories.ProcedureHistoryRepository;
 import org.n52.sta.data.repositories.ProcedureRepository;
-import org.n52.sta.data.serialization.ElementWithQueryOptions;
-import org.n52.sta.data.serialization.ElementWithQueryOptions.SensorWithQueryOptions;
+import org.n52.sta.serdes.ElementWithQueryOptions;
+import org.n52.sta.serdes.ElementWithQueryOptions.SensorWithQueryOptions;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.edm.provider.entities.DatastreamEntityProvider;
-import org.n52.sta.edm.provider.entities.STAEntityDefinition;
+import org.n52.sta.serdes.model.STAEntityDefinition;
 import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.service.query.QueryOptions;
 import org.slf4j.Logger;
@@ -199,9 +199,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
         if (HttpMethod.PATCH.equals(method)) {
             Optional<ProcedureEntity> existing = getRepository().findByIdentifier(id);
             if (existing.isPresent()) {
-                //TODO: FIX
-                // ProcedureEntity merged = mapper.merge(existing.get(), entity);
-                ProcedureEntity merged = null;
+                ProcedureEntity merged = merge(existing.get(), entity);
                 if (entity instanceof SensorEntity) {
                     // TODO insert datastream
                     logger.trace("TODO: insert datastream.");
@@ -288,5 +286,14 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
                 sensor.setDescriptionFile(sensor.getProcedureHistory().iterator().next().getXml());
             }
         }
+    }
+
+    @Override
+    protected ProcedureEntity merge(ProcedureEntity existing, ProcedureEntity toMerge) {
+        mergeIdentifierNameDescription(existing, toMerge);
+        if (toMerge.isSetDescriptionFile()) {
+            existing.setDescriptionFile(toMerge.getDescriptionFile());
+        }
+        return existing;
     }
 }

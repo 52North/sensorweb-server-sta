@@ -42,12 +42,12 @@ import org.n52.sta.data.repositories.DatasetRepository;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.FeatureOfInterestRepository;
 import org.n52.sta.data.repositories.FormatRepository;
-import org.n52.sta.data.serialization.ElementWithQueryOptions;
-import org.n52.sta.data.serialization.ElementWithQueryOptions.FeatureOfInterestWithQueryOptions;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
-import org.n52.sta.edm.provider.entities.STAEntityDefinition;
 import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.mapping.FeatureOfInterestMapper;
+import org.n52.sta.serdes.ElementWithQueryOptions;
+import org.n52.sta.serdes.ElementWithQueryOptions.FeatureOfInterestWithQueryOptions;
+import org.n52.sta.serdes.model.STAEntityDefinition;
 import org.n52.sta.service.query.QueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +63,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+
+import static org.n52.sta.data.service.ServiceUtils.createFeatureType;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -303,4 +305,23 @@ public class FeatureOfInterestService
 
         return collections;
     }
+
+    @Override
+    public AbstractFeatureEntity<?> merge(AbstractFeatureEntity<?> existing, AbstractFeatureEntity<?> toMerge) {
+        mergeIdentifierNameDescription(existing, toMerge);
+        if (toMerge.isSetGeometry()) {
+            existing.setGeometryEntity(toMerge.getGeometryEntity());
+        }
+        mergeFeatureType(existing);
+        return existing;
+    }
+
+    private void mergeFeatureType(AbstractFeatureEntity<?> existing) {
+        FormatEntity featureType = createFeatureType(existing.getGeometry());
+        if (!featureType.getFormat().equals(existing.getFeatureType().getFormat())) {
+            existing.setFeatureType(featureType);
+        }
+    }
+
+
 }

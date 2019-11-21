@@ -37,11 +37,11 @@ import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.ObservedPropertyQuerySpecifications;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.PhenomenonRepository;
-import org.n52.sta.data.serialization.ElementWithQueryOptions;
-import org.n52.sta.data.serialization.ElementWithQueryOptions.ObservedPropertyWithQueryOptions;
+import org.n52.sta.serdes.ElementWithQueryOptions;
+import org.n52.sta.serdes.ElementWithQueryOptions.ObservedPropertyWithQueryOptions;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.edm.provider.entities.DatastreamEntityProvider;
-import org.n52.sta.edm.provider.entities.STAEntityDefinition;
+import org.n52.sta.serdes.model.STAEntityDefinition;
 import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.mapping.ObservedPropertyMapper;
 import org.n52.sta.service.query.QueryOptions;
@@ -276,5 +276,20 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
                         .map(DatastreamEntity::getIdentifier)
                         .collect(Collectors.toSet()));
         return collections;
+    }
+
+    @Override
+    public PhenomenonEntity merge(PhenomenonEntity existing, PhenomenonEntity toMerge) {
+        mergeIdentifierNameDescription(existing, toMerge);
+        return existing;
+    }
+
+    // TODO: check if this is used somewhere
+    public ObservablePropertyEntity mergeObservablePropertyEntity(ObservablePropertyEntity existing,
+                                                                  ObservablePropertyEntity toMerge) {
+        if (toMerge.hasDatastreams()) {
+            toMerge.getDatastreams().forEach(d -> existing.addDatastream(d));
+        }
+        return (ObservablePropertyEntity) merge(existing, toMerge);
     }
 }

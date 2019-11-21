@@ -34,11 +34,11 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.data.query.HistoricalLocationQuerySpecifications;
 import org.n52.sta.data.repositories.HistoricalLocationRepository;
 import org.n52.sta.data.repositories.LocationRepository;
-import org.n52.sta.data.serialization.ElementWithQueryOptions;
-import org.n52.sta.data.serialization.ElementWithQueryOptions.HistoricalLocationWithQueryOptions;
+import org.n52.sta.serdes.ElementWithQueryOptions;
+import org.n52.sta.serdes.ElementWithQueryOptions.HistoricalLocationWithQueryOptions;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.edm.provider.entities.LocationEntityProvider;
-import org.n52.sta.edm.provider.entities.STAEntityDefinition;
+import org.n52.sta.serdes.model.STAEntityDefinition;
 import org.n52.sta.edm.provider.entities.ThingEntityProvider;
 import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.mapping.HistoricalLocationMapper;
@@ -257,5 +257,13 @@ public class HistoricalLocationService
                             .collect(Collectors.toSet()));
         }
         return collections;
+    }
+
+    @Override
+    public HistoricalLocationEntity merge(HistoricalLocationEntity existing, HistoricalLocationEntity toMerge) {
+        if (toMerge.getTime() != null) {
+            existing.setTime(toMerge.getTime());
+        }
+        return existing;
     }
 }
