@@ -1,33 +1,28 @@
-package org.n52.sta.edm.provider.entities;
+package org.n52.sta.serdes.model;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class DatastreamEntityDefinition extends STAEntityDefinition {
+public class FeatureOfInterestEntityDefinition extends STAEntityDefinition {
 
     private static String[] navProps = new String[] {
-            SENSOR,
-            THING,
-            OBSERVED_PROPERTY,
             OBSERVATIONS
     };
 
     private static String[] entityProps = new String[] {
             PROP_NAME,
             PROP_DESCRIPTION,
-            PROP_OBSERVATION_TYPE,
-            PROP_UOM,
-            PROP_OBSERVED_AREA,
-            PROP_PHENOMENON_TIME,
-            PROP_RESULT_TIME
+            PROP_ENCODINGTYPE,
+            PROP_FEATURE
     };
 
     public static Set<String> navigationProperties = new HashSet<>(Arrays.asList(navProps));
 
     public static Set<String> entityProperties = new HashSet<>(Arrays.asList(entityProps));
 
-    public static String entityName = DATASTREAM;
+    public static String entityName = FEATURE_OF_INTEREST;
 
-    public static String entitySetName = DATASTREAMS;
+    public static String entitySetName = FEATURES_OF_INTEREST;
+
 }

@@ -1,4 +1,4 @@
-package org.n52.sta.edm.provider.entities;
+package org.n52.sta.serdes.model;
 
 public abstract class STAEntityDefinition {
 
