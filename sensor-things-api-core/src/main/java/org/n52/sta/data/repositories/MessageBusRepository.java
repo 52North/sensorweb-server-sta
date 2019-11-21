@@ -40,14 +40,20 @@ import org.n52.sta.SpringApplicationContext;
 import org.n52.sta.data.STAEventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 public class MessageBusRepository<T, I extends Serializable>
@@ -76,6 +82,24 @@ public class MessageBusRepository<T, I extends Serializable>
         this.mqttHandler = (STAEventHandler) SpringApplicationContext.getBean("mqttEventHandler");
         Assert.notNull(this.mqttHandler, "Could not autowire Mqtt handler!");
     }
+
+    @Transactional(readOnly = true)
+    public Optional<String> identifier(Specification<T> spec, String columnName) {
+        CriteriaBuilder builder = em.getCriteriaBuilder();
+        CriteriaQuery<Object> query = builder.createQuery(Object.class);
+        Root<T> root = query.from(getDomainClass());
+        if (spec != null) {
+            Predicate predicate = spec.toPredicate(root, query, builder);
+            if (predicate != null) {
+                query.where(predicate);
+            }
+        }
+        if (columnName != null) {
+            query.select(root.get(columnName));
+        }
+        return Optional.of((String) em.createQuery(query).getSingleResult());
+    }
+
 
     @Transactional
     @Override

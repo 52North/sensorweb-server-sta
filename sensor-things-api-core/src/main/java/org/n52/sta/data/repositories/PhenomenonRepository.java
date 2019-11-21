@@ -27,6 +27,7 @@
  * Public License for more details.
  */
 package org.n52.sta.data.repositories;
+
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,9 +43,5 @@ public interface PhenomenonRepository extends ParameterDataRepository<Phenomenon
 
     boolean existsByStaIdentifier(String id);
 
-    StaIdentifierIF staIdentifier(Specification<PhenomenonEntity> spec);
-
-    interface StaIdentifierIF {
-        String getStaIdentifier();
-    }
+    Optional<String> identifier(Specification<PhenomenonEntity> spec, String columnName);
 }

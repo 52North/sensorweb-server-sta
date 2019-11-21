@@ -213,9 +213,10 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      * @return Id of the Entity. Null if no entity is present
      */
     public String getEntityIdByRelatedEntity(String relatedId, String relatedType) {
-        //TODO: check if this actually works
-        return getRepository().identifier(this.byRelatedEntityFilter(relatedId, relatedType,null))
-                .getIdentifier();
+        Optional<String> entity = getRepository().identifier(
+                this.byRelatedEntityFilter(relatedId, relatedType, null),
+                IDENTIFIER);
+        return entity.isPresent()? entity.get(): null;
     }
 
     /**
@@ -458,7 +459,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
 
     //TODO(specki): check if this needs to be overridden by observedproperty that uses different field
     protected OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions) {
-        return this.createPageableRequest(queryOptions, "identifier");
+        return this.createPageableRequest(queryOptions, IDENTIFIER);
     }
 
     /**

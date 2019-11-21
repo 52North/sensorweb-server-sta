@@ -43,9 +43,5 @@ public interface IdentifierRepository<T> extends JpaSpecificationExecutor<T> {
 
     T getOneByIdentifier(String identifier);
 
-    IdentifierIF identifier(Specification<T> spec);
-
-    interface IdentifierIF {
-        String getIdentifier();
-    }
+    Optional<String> identifier(Specification<T> spec, String columnName);
 }
