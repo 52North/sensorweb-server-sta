@@ -2,7 +2,7 @@ package org.n52.sta.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.n52.series.db.beans.IdEntity;
-import org.n52.sta.data.serialization.ElementWithQueryOptions;
+import org.n52.sta.serdes.ElementWithQueryOptions;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.exception.STACRUDException;

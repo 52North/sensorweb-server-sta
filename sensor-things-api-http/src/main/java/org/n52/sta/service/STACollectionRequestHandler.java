@@ -1,6 +1,6 @@
 package org.n52.sta.service;
 
-import org.n52.sta.data.serialization.ElementWithQueryOptions;
+import org.n52.sta.serdes.ElementWithQueryOptions;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.exception.STAInvalidUrlException;
