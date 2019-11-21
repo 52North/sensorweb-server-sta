@@ -42,8 +42,10 @@ import org.n52.sta.data.repositories.DatasetRepository;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.FeatureOfInterestRepository;
 import org.n52.sta.data.repositories.FormatRepository;
+import org.n52.sta.data.serialization.ElementWithQueryOptions;
 import org.n52.sta.data.serialization.ElementWithQueryOptions.FeatureOfInterestWithQueryOptions;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
+import org.n52.sta.edm.provider.entities.STAEntityDefinition;
 import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.mapping.FeatureOfInterestMapper;
 import org.n52.sta.service.query.QueryOptions;
@@ -105,7 +107,7 @@ public class FeatureOfInterestService
     }
 
     @Override
-    protected Object createWrapper(Object entity, QueryOptions queryOptions) {
+    protected ElementWithQueryOptions createWrapper(Object entity, QueryOptions queryOptions) {
         return new FeatureOfInterestWithQueryOptions((AbstractFeatureEntity<?>) entity, queryOptions);
     }
 
@@ -115,7 +117,7 @@ public class FeatureOfInterestService
                                                                             String ownId) {
         Specification<AbstractFeatureEntity<?>> filter;
         switch (relatedType) {
-            case IOT_OBSERVATION: {
+            case STAEntityDefinition.OBSERVATIONS: {
                 filter = foiQS.withObservationIdentifier(relatedId);
                 break;
             }

@@ -37,9 +37,11 @@ import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.ObservedPropertyQuerySpecifications;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.PhenomenonRepository;
+import org.n52.sta.data.serialization.ElementWithQueryOptions;
 import org.n52.sta.data.serialization.ElementWithQueryOptions.ObservedPropertyWithQueryOptions;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.edm.provider.entities.DatastreamEntityProvider;
+import org.n52.sta.edm.provider.entities.STAEntityDefinition;
 import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.mapping.ObservedPropertyMapper;
 import org.n52.sta.service.query.QueryOptions;
@@ -94,7 +96,7 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
     }
 
     @Override
-    protected Object createWrapper(Object entity, QueryOptions queryOptions) {
+    protected ElementWithQueryOptions createWrapper(Object entity, QueryOptions queryOptions) {
         return new ObservedPropertyWithQueryOptions((PhenomenonEntity) entity, queryOptions);
     }
 
@@ -107,13 +109,17 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
      */
     @Override
     public String getEntityIdByRelatedEntity(String relatedId, String relatedType) {
-        return getRepository().staIdentifier(this.byRelatedEntityFilter(relatedId, relatedType, null)).getStaIdentifier();
+        Optional<String> entity = getRepository().identifier(
+                this.byRelatedEntityFilter(relatedId, relatedType, null),
+                STAIDENTIFIER);
+        return entity.isPresent()? entity.get(): null;
     }
+
 
     @Override
     public boolean existsEntityByRelatedEntity(String relatedId, String relatedType, String ownId) {
         switch (relatedType) {
-            case IOT_DATASTREAM: {
+            case STAEntityDefinition.DATASTREAMS: {
                 return getRepository().findOne(byRelatedEntityFilter(relatedId, relatedType, ownId)).isPresent();
             }
             default:
@@ -126,7 +132,7 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
                                                                  String relatedType,
                                                                  String ownId) {
         switch (relatedType) {
-            case IOT_DATASTREAM: {
+            case STAEntityDefinition.DATASTREAMS: {
                 return (root, query, builder) -> {
                     Subquery<PhenomenonEntity> sq = query.subquery(PhenomenonEntity.class);
                     Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);

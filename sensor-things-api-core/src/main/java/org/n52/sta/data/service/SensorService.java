@@ -39,9 +39,11 @@ import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.FormatRepository;
 import org.n52.sta.data.repositories.ProcedureHistoryRepository;
 import org.n52.sta.data.repositories.ProcedureRepository;
+import org.n52.sta.data.serialization.ElementWithQueryOptions;
 import org.n52.sta.data.serialization.ElementWithQueryOptions.SensorWithQueryOptions;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.edm.provider.entities.DatastreamEntityProvider;
+import org.n52.sta.edm.provider.entities.STAEntityDefinition;
 import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.service.query.QueryOptions;
 import org.slf4j.Logger;
@@ -75,7 +77,6 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     private final FormatRepository formatRepository;
     private final ProcedureHistoryRepository procedureHistoryRepository;
     private final DatastreamRepository datastreamRepository;
-    private final String IOT_DATASTREAM = "iot.Datastream";
 
 
     @Autowired
@@ -100,7 +101,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     }
 
     @Override
-    protected Object createWrapper(Object entity, QueryOptions queryOptions) {
+    protected ElementWithQueryOptions createWrapper(Object entity, QueryOptions queryOptions) {
         return new SensorWithQueryOptions((ProcedureEntity) entity, queryOptions);
     }
 
@@ -110,7 +111,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
                                                                    String ownId) {
         Specification<ProcedureEntity> filter;
         switch (relatedType) {
-            case IOT_DATASTREAM: {
+            case STAEntityDefinition.DATASTREAMS: {
                 filter = sQS.withDatastreamIdentifier(relatedId);
                 break;
             }

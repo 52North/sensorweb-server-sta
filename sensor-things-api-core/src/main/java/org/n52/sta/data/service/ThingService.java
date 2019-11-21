@@ -35,11 +35,13 @@ import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.data.query.ThingQuerySpecifications;
 import org.n52.sta.data.repositories.ThingRepository;
+import org.n52.sta.data.serialization.ElementWithQueryOptions;
 import org.n52.sta.data.serialization.ElementWithQueryOptions.ThingWithQueryOptions;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.edm.provider.entities.DatastreamEntityProvider;
 import org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider;
 import org.n52.sta.edm.provider.entities.LocationEntityProvider;
+import org.n52.sta.edm.provider.entities.STAEntityDefinition;
 import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.mapping.ThingMapper;
 import org.n52.sta.service.query.QueryOptions;
@@ -82,7 +84,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     }
 
     @Override
-    protected Object createWrapper(Object entity, QueryOptions queryOptions) {
+    protected ElementWithQueryOptions createWrapper(Object entity, QueryOptions queryOptions) {
         return new ThingWithQueryOptions((PlatformEntity) entity, queryOptions);
     }
 
@@ -92,15 +94,15 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
                                                                   String ownId) {
         Specification<PlatformEntity> filter;
         switch (relatedType) {
-            case IOT_HISTORICAL_LOCATION: {
+            case STAEntityDefinition.HISTORICAL_LOCATIONS: {
                 filter = tQS.withRelatedHistoricalLocationIdentifier(relatedId);
                 break;
             }
-            case IOT_DATASTREAM: {
+            case STAEntityDefinition.DATASTREAMS: {
                 filter = tQS.withRelatedDatastreamIdentifier(relatedId);
                 break;
             }
-            case IOT_LOCATION: {
+            case STAEntityDefinition.LOCATIONS: {
                 filter = tQS.withRelatedLocationIdentifier(relatedId);
                 break;
             }

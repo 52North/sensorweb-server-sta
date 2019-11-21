@@ -34,9 +34,11 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.data.query.HistoricalLocationQuerySpecifications;
 import org.n52.sta.data.repositories.HistoricalLocationRepository;
 import org.n52.sta.data.repositories.LocationRepository;
+import org.n52.sta.data.serialization.ElementWithQueryOptions;
 import org.n52.sta.data.serialization.ElementWithQueryOptions.HistoricalLocationWithQueryOptions;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.edm.provider.entities.LocationEntityProvider;
+import org.n52.sta.edm.provider.entities.STAEntityDefinition;
 import org.n52.sta.edm.provider.entities.ThingEntityProvider;
 import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.mapping.HistoricalLocationMapper;
@@ -89,7 +91,7 @@ public class HistoricalLocationService
     }
 
     @Override
-    protected Object createWrapper(Object entity, QueryOptions queryOptions) {
+    protected ElementWithQueryOptions createWrapper(Object entity, QueryOptions queryOptions) {
         return new HistoricalLocationWithQueryOptions((HistoricalLocationEntity) entity, queryOptions);
     }
 
@@ -99,11 +101,11 @@ public class HistoricalLocationService
                                                                             String ownId) {
         Specification<HistoricalLocationEntity> filter;
         switch (relatedType) {
-            case IOT_LOCATION: {
+            case STAEntityDefinition.LOCATIONS: {
                 filter = hlQS.withRelatedLocationIdentifier(relatedId);
                 break;
             }
-            case IOT_THING: {
+            case STAEntityDefinition.THINGS: {
                 filter = hlQS.withRelatedThingIdentifier(relatedId);
                 break;
             }

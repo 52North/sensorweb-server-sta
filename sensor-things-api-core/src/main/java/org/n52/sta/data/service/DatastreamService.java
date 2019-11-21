@@ -44,9 +44,11 @@ import org.n52.sta.data.repositories.DatasetRepository;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.FormatRepository;
 import org.n52.sta.data.repositories.UnitRepository;
+import org.n52.sta.data.serialization.ElementWithQueryOptions;
 import org.n52.sta.data.serialization.ElementWithQueryOptions.DatastreamWithQueryOptions;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider;
+import org.n52.sta.edm.provider.entities.STAEntityDefinition;
 import org.n52.sta.edm.provider.entities.SensorEntityProvider;
 import org.n52.sta.edm.provider.entities.ThingEntityProvider;
 import org.n52.sta.exception.STACRUDException;
@@ -109,7 +111,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     }
 
     @Override
-    protected Object createWrapper(Object entity, QueryOptions queryOptions) {
+    protected ElementWithQueryOptions createWrapper(Object entity, QueryOptions queryOptions) {
         return new DatastreamWithQueryOptions((DatastreamEntity) entity, queryOptions);
     }
 
@@ -119,19 +121,19 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
                                                                     String ownId) {
         Specification<DatastreamEntity> filter;
         switch (relatedType) {
-            case IOT_THING: {
+            case STAEntityDefinition.THINGS: {
                 filter = dQS.withThingIdentifier(relatedId);
                 break;
             }
-            case IOT_SENSOR: {
+            case STAEntityDefinition.SENSORS: {
                 filter = dQS.withSensorIdentifier(relatedId);
                 break;
             }
-            case IOT_OBSERVED_PROPERTY: {
+            case STAEntityDefinition.OBSERVED_PROPERTIES: {
                 filter = dQS.withObservedPropertyIdentifier(relatedId);
                 break;
             }
-            case IOT_OBSERVATION: {
+            case STAEntityDefinition.OBSERVATIONS: {
                 filter = dQS.withObservationIdentifier(relatedId);
                 break;
             }

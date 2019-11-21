@@ -56,10 +56,12 @@ import org.n52.sta.data.repositories.DataRepository;
 import org.n52.sta.data.repositories.DatasetRepository;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.OfferingRepository;
+import org.n52.sta.data.serialization.ElementWithQueryOptions;
 import org.n52.sta.data.serialization.ElementWithQueryOptions.ObservationWithQueryOptions;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.edm.provider.entities.DatastreamEntityProvider;
 import org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider;
+import org.n52.sta.edm.provider.entities.STAEntityDefinition;
 import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.mapping.FeatureOfInterestMapper;
 import org.n52.sta.mapping.ObservationMapper;
@@ -131,7 +133,7 @@ public class ObservationService extends
     }
 
     @Override
-    protected Object createWrapper(Object entity, QueryOptions queryOptions) {
+    protected ElementWithQueryOptions createWrapper(Object entity, QueryOptions queryOptions) {
         return new ObservationWithQueryOptions((DataEntity<?>) entity, queryOptions);
     }
 
@@ -141,11 +143,11 @@ public class ObservationService extends
                                                               String ownId) {
         Specification<DataEntity<?>> filter;
         switch (relatedType) {
-            case IOT_DATASTREAM: {
+            case STAEntityDefinition.DATASTREAMS: {
                 filter = oQS.withDatastreamIdentifier(relatedId);
                 break;
             }
-            case IOT_FEATUREOFINTEREST: {
+            case STAEntityDefinition.FEATURES_OF_INTEREST: {
                 filter = oQS.withFeatureOfInterestIdentifier(relatedId);
                 break;
             }

@@ -33,13 +33,12 @@
  */
 package org.n52.sta.data.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.data.OffsetLimitBasedPageRequest;
 import org.n52.sta.data.repositories.IdentifierRepository;
+import org.n52.sta.data.serialization.ElementWithQueryOptions;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.exception.STAInvalidQueryException;
@@ -55,7 +54,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 
@@ -70,18 +68,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
     @Autowired
     private EntityServiceRepository serviceRepository;
 
-    @Autowired
-    private ObjectMapper mapper;
-
-    protected final String IOT_DATASTREAM = "iot.Datastream";
-    protected final String IOT_THING = "iot.Thing";
-    protected final String IOT_FEATUREOFINTEREST = "iot.FeatureOfInterest";
-    protected final String IOT_OBSERVATION = "iot.Observation";
-    protected final String IOT_LOCATION = "iot.Location";
-    protected final String IOT_SENSOR = "iot.Sensor";
-    protected final String IOT_OBSERVED_PROPERTY = "iot.ObservedProperty";
-    protected final String IOT_HISTORICAL_LOCATION = "iot.HistoricalLocation";
-
+    protected final String IDENTIFIER = "identifier";
     protected final String STAIDENTIFIER = "staIdentifier";
     protected final String ENCODINGTYPE = "encodingType";
 
@@ -117,9 +104,9 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      * @param id the id of the Entity
      * @return
      */
-    public String getEntity(String id ,QueryOptions queryOptions) throws STACRUDException {
+    public ElementWithQueryOptions getEntity(String id , QueryOptions queryOptions) throws STACRUDException {
         try {
-            return this.serializeEntity(getRepository().findByIdentifier(id).get(), queryOptions);
+            return this.createWrapper(getRepository().findByIdentifier(id).get(), queryOptions);
         } catch (RuntimeException e) {
             throw new STACRUDException(e.getMessage());
         }
@@ -132,36 +119,15 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      * @return the full EntityCollection
      * @throws STAInvalidQueryException if the queryOptions are invalid
      */
-    public List<String> getEntityCollection(QueryOptions queryOptions) throws STACRUDException {
+    public List<ElementWithQueryOptions> getEntityCollection(QueryOptions queryOptions) throws STACRUDException {
         try {
             Specification<S> filter = getFilterPredicate(entityClass, queryOptions);
             return getRepository()
                     .findAll(filter, createPageableRequest(queryOptions))
-                    .map((S e) -> serializeEntity(e, queryOptions))
+                    .map((S e) -> createWrapper(e, queryOptions))
                     .getContent();
         } catch (RuntimeException e) {
             throw new STACRUDException(e.getMessage());
-        }
-    }
-
-    /**
-     * Wraps serialization of Entities. Converts checked Exceptions into RuntimeException to allow for use in
-     * Stream Processing
-     *
-     * @param e object to be serialized
-     * @param queryOptions {@link QueryOptions} used for serialization
-     * @return JSON serialization of the Object
-     */
-    protected String serializeEntity(Object e, QueryOptions queryOptions) {
-        try {
-            if (e instanceof Optional && ((Optional) e).isPresent()) {
-                Object o = ((Optional) e).get();
-                return mapper.writeValueAsString(createWrapper(o, queryOptions));
-            } else {
-                return mapper.writeValueAsString(createWrapper(e, queryOptions));
-            }
-        } catch (NoSuchElementException | JsonProcessingException ex) {
-            throw new RuntimeException(ex);
         }
     }
 
@@ -171,7 +137,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      * @param queryOptions query options
      * @return instance of ElementWithQueryOptions
      */
-    protected abstract Object createWrapper(Object entity, QueryOptions queryOptions);
+    protected abstract ElementWithQueryOptions createWrapper(Object entity, QueryOptions queryOptions);
 
     /**
      * Checks if an entity with given ownId exists that relates to an entity with given relatedId and relatedType
@@ -193,10 +159,10 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      * @param queryOptions {@link QueryOptions} used for serialization
      * @return Entity that matches
      */
-    public String getEntityByRelatedEntity(String relatedId, String relatedType, String ownId, QueryOptions queryOptions)
+    public ElementWithQueryOptions getEntityByRelatedEntity(String relatedId, String relatedType, String ownId, QueryOptions queryOptions)
             throws STACRUDException {
         try {
-            return this.serializeEntity(
+            return this.createWrapper(
                     getRepository().findOne(byRelatedEntityFilter(relatedId, relatedType, ownId)),
                     queryOptions);
         } catch (RuntimeException e) {
@@ -229,14 +195,14 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      * @return List of Entities that match
      * @throws STAInvalidQueryException if the queryOptions are invalid
      */
-    public List<String> getEntityCollectionByRelatedEntity(String relatedId,
-                                                           String relatedType,
-                                                           QueryOptions queryOptions) throws STACRUDException {
+    public List<ElementWithQueryOptions> getEntityCollectionByRelatedEntity(String relatedId,
+                                                                            String relatedType,
+                                                                            QueryOptions queryOptions) throws STACRUDException {
         try {
             return getRepository()
                     .findAll(byRelatedEntityFilter(relatedId, relatedType, null),
                             createPageableRequest(queryOptions))
-                    .map((S e) -> serializeEntity(e, queryOptions))
+                    .map((S e) -> createWrapper(e, queryOptions))
                     .getContent();
 
         } catch (RuntimeException e) {
@@ -265,9 +231,9 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      * @param relatedType EntityType of the related Entity
      * @return the count of related entities
      */
-    public long getEntityCollectionCountByRelatedEntity(String relatedId, String relatedType) {
-        return 0;
-    }
+    // public long getEntityCollectionCountByRelatedEntity(String relatedId, String relatedType) {
+    //    return 0;
+    //}
 
 
     /**
@@ -367,15 +333,15 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public String create(S entity) throws STACRUDException {
-        return this.serializeEntity(createEntity(entity), null);
+    public ElementWithQueryOptions create(S entity) throws STACRUDException {
+        return this.createWrapper(createEntity(entity), null);
     };
 
     protected abstract S createEntity(S entity) throws STACRUDException;
 
     @Transactional(rollbackFor = Exception.class)
-    public String update(String id, S entity, HttpMethod method) throws STACRUDException {
-        return this.serializeEntity(updateEntity(id, entity, method), null);
+    public ElementWithQueryOptions update(String id, S entity, HttpMethod method) throws STACRUDException {
+        return this.createWrapper(updateEntity(id, entity, method), null);
     };
 
     protected abstract S updateEntity(String id, S entity, HttpMethod method) throws STACRUDException;
