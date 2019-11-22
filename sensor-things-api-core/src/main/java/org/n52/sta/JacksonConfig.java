@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleDeserializers;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.module.SimpleSerializers;
+import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
@@ -70,6 +71,7 @@ public class JacksonConfig {
         module.setSerializers(serializers);
         module.setDeserializers(deserializers);
         modules.add(module);
+        modules.add(new AfterburnerModule());
         return Jackson2ObjectMapperBuilder.json()
                 .modules(modules)
                 .build();
