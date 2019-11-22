@@ -68,6 +68,7 @@ public class DatastreamSerdes {
             }
 
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_OBSERVED_AREA)) {
+                //TODO: fix serialization
                 gen.writeStringField(STAEntityDefinition.PROP_OBSERVED_AREA, datastream.getGeometryEntity().toString());
             }
 

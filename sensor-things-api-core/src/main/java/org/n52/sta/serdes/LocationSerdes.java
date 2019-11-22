@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.serdes.json.JSONLocation;
 import org.n52.sta.serdes.model.LocationEntityDefinition;
@@ -20,6 +21,8 @@ public class LocationSerdes {
     public static class LocationSerializer extends AbstractSTASerializer<LocationWithQueryOptions> {
 
         private static final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
+
+        private static final GeoJsonWriter geoJsonWriter = new GeoJsonWriter();
 
         public LocationSerializer(String rootUrl) {
             super(LocationWithQueryOptions.class);
@@ -64,7 +67,12 @@ public class LocationSerdes {
                 }
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_LOCATION)) {
-                gen.writeStringField(STAEntityDefinition.PROP_LOCATION, location.getGeometryEntity().toString());
+                gen.writeObjectFieldStart(STAEntityDefinition.PROP_LOCATION);
+                gen.writeStringField("type", "Feature");
+                gen.writeObjectFieldStart("geometry");
+                gen.writeRaw(geoJsonWriter.write(location.getGeometryEntity().getGeometry()));
+                gen.writeEndObject();
+                gen.writeEndObject();
             }
 
             // navigation properties

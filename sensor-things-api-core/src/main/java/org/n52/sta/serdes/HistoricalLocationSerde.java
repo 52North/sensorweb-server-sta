@@ -7,9 +7,9 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.sta.serdes.json.JSONHistoricalLocation;
+import org.n52.sta.serdes.model.ElementWithQueryOptions.HistoricalLocationWithQueryOptions;
 import org.n52.sta.serdes.model.HistoricalLocationEntityDefinition;
 import org.n52.sta.serdes.model.STAEntityDefinition;
-import org.n52.sta.serdes.model.ElementWithQueryOptions.HistoricalLocationWithQueryOptions;
 import org.n52.sta.service.query.QueryOptions;
 
 import java.io.IOException;
@@ -51,7 +51,7 @@ public class HistoricalLocationSerde {
 
             // actual properties
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_TIME)) {
-                gen.writeStringField(STAEntityDefinition.PROP_TIME, histLoc.getTime().toString());
+                gen.writeStringField(STAEntityDefinition.PROP_TIME, histLoc.getTime().toInstant().toString());
             }
 
             // navigation properties

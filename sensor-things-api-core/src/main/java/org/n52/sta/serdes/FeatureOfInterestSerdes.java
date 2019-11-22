@@ -5,12 +5,13 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.FeatureEntity;
 import org.n52.sta.serdes.json.JSONFeatureOfInterest;
+import org.n52.sta.serdes.model.ElementWithQueryOptions.FeatureOfInterestWithQueryOptions;
 import org.n52.sta.serdes.model.FeatureOfInterestEntityDefinition;
 import org.n52.sta.serdes.model.STAEntityDefinition;
-import org.n52.sta.serdes.model.ElementWithQueryOptions.FeatureOfInterestWithQueryOptions;
 import org.n52.sta.service.query.QueryOptions;
 
 import java.io.IOException;
@@ -21,6 +22,8 @@ public class FeatureOfInterestSerdes {
     public static class FeatureOfInterestSerializer extends AbstractSTASerializer<FeatureOfInterestWithQueryOptions> {
 
         private static final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
+
+        private static final GeoJsonWriter geoJsonWriter = new GeoJsonWriter();
 
         public FeatureOfInterestSerializer(String rootUrl) {
             super(FeatureOfInterestWithQueryOptions.class);
@@ -66,7 +69,12 @@ public class FeatureOfInterestSerdes {
                 }
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_FEATURE)) {
-                gen.writeStringField(STAEntityDefinition.PROP_FEATURE, feature.getGeometryEntity().toString());
+                gen.writeObjectFieldStart(STAEntityDefinition.PROP_LOCATION);
+                gen.writeStringField("type", "Feature");
+                gen.writeObjectFieldStart("geometry");
+                gen.writeRaw(geoJsonWriter.write(feature.getGeometryEntity().getGeometry()));
+                gen.writeEndObject();
+                gen.writeEndObject();
             }
 
 
