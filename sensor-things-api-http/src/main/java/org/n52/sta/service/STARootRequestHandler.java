@@ -41,7 +41,7 @@ public class STARootRequestHandler {
         for (String collection : STAEntityDefinition.allCollections) {
             ObjectNode node = mapper.createObjectNode();
             node.put("name", collection);
-            node.put("url", rootUrl + "/" + collection);
+            node.put("url", rootUrl + collection);
             arrayNode.add(node);
         }
 
