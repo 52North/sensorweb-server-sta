@@ -6,9 +6,10 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.sta.serdes.json.JSONLocation;
 import org.n52.sta.serdes.model.LocationEntityDefinition;
 import org.n52.sta.serdes.model.STAEntityDefinition;
-import org.n52.sta.serdes.ElementWithQueryOptions.LocationWithQueryOptions;
+import org.n52.sta.serdes.model.ElementWithQueryOptions.LocationWithQueryOptions;
 import org.n52.sta.service.query.QueryOptions;
 
 import java.io.IOException;
@@ -81,7 +82,7 @@ public class LocationSerdes {
 
         @Override
         public LocationEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return p.readValueAs(STASerdesTypes.JSONLocation.class).toEntity();
+            return p.readValueAs(JSONLocation.class).toEntity();
         }
     }
 }

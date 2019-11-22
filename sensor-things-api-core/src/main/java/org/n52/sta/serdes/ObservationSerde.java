@@ -5,6 +5,8 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.n52.series.db.beans.BlobDataEntity;
 import org.n52.series.db.beans.BooleanDataEntity;
 import org.n52.series.db.beans.CategoryDataEntity;
@@ -18,9 +20,14 @@ import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.ReferencedDataEntity;
 import org.n52.series.db.beans.TextDataEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
+import org.n52.shetland.ogc.gml.time.Time;
+import org.n52.shetland.ogc.gml.time.TimeInstant;
+import org.n52.shetland.ogc.gml.time.TimePeriod;
+import org.n52.shetland.util.DateTimeHelper;
+import org.n52.sta.serdes.json.JSONObservation;
+import org.n52.sta.serdes.model.ElementWithQueryOptions.ObservationWithQueryOptions;
 import org.n52.sta.serdes.model.ObservationEntityDefinition;
 import org.n52.sta.serdes.model.STAEntityDefinition;
-import org.n52.sta.serdes.ElementWithQueryOptions.ObservationWithQueryOptions;
 import org.n52.sta.service.query.QueryOptions;
 
 import java.io.IOException;
@@ -72,13 +79,17 @@ public class ObservationSerde {
                 }
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_PHENOMENON_TIME)) {
-                //TODO: implement
+                String phenomenonTime = DateTimeHelper.format(createPhenomenonTime(observation));
+                gen.writeStringField(STAEntityDefinition.PROP_PHENOMENON_TIME, phenomenonTime);
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_RESULT_QUALITY)) {
                 //TODO: implement
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_VALID_TIME)) {
-                //TODO: implement
+                if (observation.isSetValidTime()) {
+                    gen.writeStringField(STAEntityDefinition.PROP_VALID_TIME,
+                            DateTimeHelper.format(createValidTime(observation)));
+                }
             }
 
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_PARAMETERS)) {
@@ -100,6 +111,37 @@ public class ObservationSerde {
             //TODO: Deal with $expand
             gen.writeEndObject();
         }
+
+        private Time createPhenomenonTime(DataEntity<?> observation) {
+            final DateTime start = new DateTime(observation.getSamplingTimeStart(), DateTimeZone.UTC);
+            DateTime end;
+            if (observation.getSamplingTimeEnd() != null) {
+                end = new DateTime(observation.getSamplingTimeEnd(), DateTimeZone.UTC);
+            } else {
+                end = start;
+            }
+            return createTime(start, end);
+        }
+
+        private Time createValidTime(DataEntity<?> observation) {
+            final DateTime start = new DateTime(observation.getValidTimeStart(), DateTimeZone.UTC);
+            DateTime end;
+            if (observation.getValidTimeEnd() != null) {
+                end = new DateTime(observation.getValidTimeEnd(), DateTimeZone.UTC);
+            } else {
+                end = start;
+            }
+            return createTime(start, end);
+        }
+
+        private Time createTime(DateTime start, DateTime end) {
+            if (start.equals(end)) {
+                return new TimeInstant(start);
+            } else {
+                return new TimePeriod(start, end);
+            }
+        }
+
     }
 
     private static String getResult(DataEntity o) {
@@ -153,7 +195,7 @@ public class ObservationSerde {
 
         @Override
         public DataEntity<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return p.readValueAs(STASerdesTypes.JSONObservation.class).toEntity();
+            return p.readValueAs(JSONObservation.class).toEntity();
         }
     }
 }

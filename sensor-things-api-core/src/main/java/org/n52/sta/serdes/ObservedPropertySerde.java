@@ -6,9 +6,10 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import org.n52.series.db.beans.PhenomenonEntity;
+import org.n52.sta.serdes.json.JSONObservedProperty;
 import org.n52.sta.serdes.model.ObservedPropertyEntityDefinition;
 import org.n52.sta.serdes.model.STAEntityDefinition;
-import org.n52.sta.serdes.ElementWithQueryOptions.ObservedPropertyWithQueryOptions;
+import org.n52.sta.serdes.model.ElementWithQueryOptions.ObservedPropertyWithQueryOptions;
 import org.n52.sta.service.query.QueryOptions;
 
 import java.io.IOException;
@@ -77,7 +78,7 @@ public class ObservedPropertySerde {
 
         @Override
         public PhenomenonEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return p.readValueAs(STASerdesTypes.JSONObservedProperty.class).toEntity();
+            return p.readValueAs(JSONObservedProperty.class).toEntity();
         }
     }
 }

@@ -7,9 +7,10 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.FeatureEntity;
+import org.n52.sta.serdes.json.JSONFeatureOfInterest;
 import org.n52.sta.serdes.model.FeatureOfInterestEntityDefinition;
 import org.n52.sta.serdes.model.STAEntityDefinition;
-import org.n52.sta.serdes.ElementWithQueryOptions.FeatureOfInterestWithQueryOptions;
+import org.n52.sta.serdes.model.ElementWithQueryOptions.FeatureOfInterestWithQueryOptions;
 import org.n52.sta.service.query.QueryOptions;
 
 import java.io.IOException;
@@ -84,7 +85,7 @@ public class FeatureOfInterestSerdes {
 
         @Override
         public FeatureEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return p.readValueAs(STASerdesTypes.JSONFeatureOfInterest.class).toEntity();
+            return p.readValueAs(JSONFeatureOfInterest.class).toEntity();
         }
     }
 }

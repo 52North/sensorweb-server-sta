@@ -1,4 +1,4 @@
-package org.n52.sta.serdes;
+package org.n52.sta.serdes.model;
 
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DataEntity;

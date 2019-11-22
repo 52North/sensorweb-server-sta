@@ -8,9 +8,10 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
+import org.n52.sta.serdes.json.JSONSensor;
 import org.n52.sta.serdes.model.STAEntityDefinition;
 import org.n52.sta.serdes.model.SensorEntityDefinition;
-import org.n52.sta.serdes.ElementWithQueryOptions.SensorWithQueryOptions;
+import org.n52.sta.serdes.model.ElementWithQueryOptions.SensorWithQueryOptions;
 import org.n52.sta.service.query.QueryOptions;
 
 import java.io.IOException;
@@ -96,7 +97,7 @@ public class SensorSerdes {
 
         @Override
         public SensorEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return p.readValueAs(STASerdesTypes.JSONSensor.class).toEntity();
+            return p.readValueAs(JSONSensor.class).toEntity();
         }
     }
 }

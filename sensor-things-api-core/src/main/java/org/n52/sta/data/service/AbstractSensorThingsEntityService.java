@@ -43,7 +43,7 @@ import org.n52.sta.data.repositories.IdentifierRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.exception.STAInvalidQueryException;
-import org.n52.sta.serdes.ElementWithQueryOptions;
+import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.n52.sta.service.query.QueryOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
