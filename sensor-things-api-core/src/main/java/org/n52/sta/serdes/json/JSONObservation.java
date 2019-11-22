@@ -1,5 +1,6 @@
 package org.n52.sta.serdes.json;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.joda.time.DateTime;
 import org.n52.series.db.beans.DataEntity;
@@ -11,7 +12,7 @@ import org.springframework.util.Assert;
 
 import java.util.Date;
 
-public class JSONObservation extends JSONBase.JSONwithIdTime implements AbstractJSONEntity {
+public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> implements AbstractJSONEntity {
 
     // JSON Properties. Matched by Annotation or variable name
     public String phenomenonTime;
@@ -21,18 +22,18 @@ public class JSONObservation extends JSONBase.JSONwithIdTime implements Abstract
     public String validTime;
     public JsonNode parameters;
 
+    @JsonManagedReference
     public JSONFeatureOfInterest FeatureOfInterest;
+    @JsonManagedReference
     public JSONDatastream Datastream;
-
-    //TODO: check datatypes
 
     public JSONObservation() {
     }
 
     public DataEntity<?> toEntity() {
-        StaDataEntity observation = new StaDataEntity();
+        self = new StaDataEntity();
 
-        if (!generatedId && result != null) {
+        if (!generatedId && result == null) {
 
             Assert.isNull(phenomenonTime, INVALID_REFERENCED_ENTITY);
             Assert.isNull(resultTime, INVALID_REFERENCED_ENTITY);
@@ -41,8 +42,8 @@ public class JSONObservation extends JSONBase.JSONwithIdTime implements Abstract
             Assert.isNull(resultQuality, INVALID_REFERENCED_ENTITY);
             Assert.isNull(parameters, INVALID_REFERENCED_ENTITY);
 
-            observation.setIdentifier(identifier);
-            return observation;
+            self.setIdentifier(identifier);
+            return self;
         } else {
             Assert.notNull(result, INVALID_INLINE_ENTITY + "result");
             Assert.notNull(resultTime, INVALID_INLINE_ENTITY + "resultTime");
@@ -51,30 +52,30 @@ public class JSONObservation extends JSONBase.JSONwithIdTime implements Abstract
             if (phenomenonTime != null) {
                 Time time = parseTime(phenomenonTime);
                 if (time instanceof TimeInstant) {
-                    observation.setSamplingTimeStart(((TimeInstant) time).getValue().toDate());
-                    observation.setSamplingTimeEnd(((TimeInstant) time).getValue().toDate());
+                    self.setSamplingTimeStart(((TimeInstant) time).getValue().toDate());
+                    self.setSamplingTimeEnd(((TimeInstant) time).getValue().toDate());
                 } else if (time instanceof TimePeriod) {
-                    observation.setSamplingTimeStart(((TimePeriod) time).getStart().toDate());
-                    observation.setSamplingTimeEnd(((TimePeriod) time).getEnd().toDate());
+                    self.setSamplingTimeStart(((TimePeriod) time).getStart().toDate());
+                    self.setSamplingTimeEnd(((TimePeriod) time).getEnd().toDate());
                 }
             } else {
                 // Use time of POST Request as fallback
                 Date date = DateTime.now().toDate();
-                observation.setSamplingTimeStart(date);
-                observation.setSamplingTimeEnd(date);
+                self.setSamplingTimeStart(date);
+                self.setSamplingTimeEnd(date);
             }
             // resultTime
-            observation.setResultTime(((TimeInstant) parseTime(resultTime)).getValue().toDate());
+            self.setResultTime(((TimeInstant) parseTime(resultTime)).getValue().toDate());
 
             // validTime
             if (validTime != null) {
                 Time time = parseTime(validTime);
                 if (time instanceof TimeInstant) {
-                    observation.setValidTimeStart(((TimeInstant) time).getValue().toDate());
-                    observation.setValidTimeEnd(((TimeInstant) time).getValue().toDate());
+                    self.setValidTimeStart(((TimeInstant) time).getValue().toDate());
+                    self.setValidTimeEnd(((TimeInstant) time).getValue().toDate());
                 } else if (time instanceof TimePeriod) {
-                    observation.setValidTimeStart(((TimePeriod) time).getStart().toDate());
-                    observation.setValidTimeEnd(((TimePeriod) time).getEnd().toDate());
+                    self.setValidTimeStart(((TimePeriod) time).getStart().toDate());
+                    self.setValidTimeEnd(((TimePeriod) time).getEnd().toDate());
                 }
             }
 
@@ -83,12 +84,28 @@ public class JSONObservation extends JSONBase.JSONwithIdTime implements Abstract
                 //TODO: handle parameters
                 //observation.setParameters();
             }
+            // result
+            self.setValue(result);
 
-            observation.setFeatureOfInterest(FeatureOfInterest.toEntity());
-            observation.setDatastream(Datastream.toEntity());
+            // Link to Datastream
+            if (Datastream != null) {
+                self.setDatastream(Datastream.toEntity());
+            } else if (backReference instanceof JSONDatastream) {
+                self.setDatastream(((JSONDatastream) backReference).getEntity());
+            } else {
+                Assert.notNull(null, INVALID_INLINE_ENTITY + "Datastream");
+            }
 
-            observation.setValue(result);
-            return observation;
+            // Link to FOI
+            if (FeatureOfInterest != null) {
+                self.setFeatureOfInterest(FeatureOfInterest.toEntity());
+            } else if (backReference instanceof JSONFeatureOfInterest) {
+                self.setFeatureOfInterest(((JSONFeatureOfInterest) backReference).getEntity());
+            } else {
+                Assert.notNull(null, INVALID_INLINE_ENTITY + "FeatureOfInterest");
+            }
+
+            return self;
         }
     }
 }

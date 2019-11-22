@@ -1,5 +1,7 @@
 package org.n52.sta.serdes.json;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
@@ -13,7 +15,8 @@ import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
 import org.springframework.util.Assert;
 
-public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime implements AbstractJSONEntity {
+public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<DatastreamEntity>
+        implements AbstractJSONEntity {
 
     static class JSONUnitOfMeasurement {
         public String symbol;
@@ -27,9 +30,13 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime imple
     public JsonNode observedArea;
     public String phenomenonTime;
     public String resultTime;
+    @JsonManagedReference
     public JSONSensor Sensor;
+    @JsonManagedReference
     public JSONThing Thing;
+    @JsonManagedReference
     public JSONObservedProperty ObservedProperty;
+    @JsonManagedReference
     public JSONObservation[] Observations;
 
     private final GeometryFactory factory =
@@ -45,58 +52,56 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime imple
     private final String OM_TruthObservation =
             "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_TruthObservation";
 
+    // Deals with linking to parent Objects during deep insert
+    @JsonBackReference
+    public Object backReference;
 
     public JSONDatastream() {
     }
 
     public DatastreamEntity toEntity() {
-        DatastreamEntity datastream = new DatastreamEntity();
+        self = new DatastreamEntity();
 
-        if (!generatedId && name != null) {
-            Assert.notNull(name, INVALID_REFERENCED_ENTITY);
-            Assert.notNull(description, INVALID_REFERENCED_ENTITY);
-            Assert.notNull(observationType, INVALID_REFERENCED_ENTITY);
-            Assert.notNull(unitOfMeasurement, INVALID_REFERENCED_ENTITY);
-            Assert.notNull(observedArea, INVALID_REFERENCED_ENTITY);
-            Assert.notNull(phenomenonTime, INVALID_REFERENCED_ENTITY);
-            Assert.notNull(resultTime, INVALID_REFERENCED_ENTITY);
+        if (!generatedId && name == null) {
+            Assert.isNull(name, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(description, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(observationType, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(unitOfMeasurement, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(observedArea, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(phenomenonTime, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(resultTime, INVALID_REFERENCED_ENTITY);
 
-            Assert.notNull(Sensor, INVALID_REFERENCED_ENTITY);
-            Assert.notNull(ObservedProperty, INVALID_REFERENCED_ENTITY);
-            Assert.notNull(Thing, INVALID_REFERENCED_ENTITY);
-            Assert.notNull(Observations, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(Sensor, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(ObservedProperty, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(Thing, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(Observations, INVALID_REFERENCED_ENTITY);
 
-            datastream.setIdentifier(identifier);
-            return datastream;
+            self.setIdentifier(identifier);
+            return self;
         } else {
             Assert.notNull(name, INVALID_INLINE_ENTITY + "name");
             Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
             Assert.state(
-                    observationType.equals(OM_CategoryObservation)
+                    observationType.equals(OM_Measurement)
                             || observationType.equals(OM_CountObservation)
-                            || observationType.equals(OM_Measurement)
+                            || observationType.equals(OM_CategoryObservation)
                             || observationType.equals(OM_Observation)
                             || observationType.equals(OM_TruthObservation)
             );
-            Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
             Assert.notNull(unitOfMeasurement, INVALID_INLINE_ENTITY + "unitOfMeasurement");
             Assert.notNull(unitOfMeasurement.name, INVALID_INLINE_ENTITY + "unitOfMeasurement->name");
             Assert.notNull(unitOfMeasurement.symbol, INVALID_INLINE_ENTITY + "unitOfMeasurement->symbol");
             Assert.notNull(unitOfMeasurement.definition, INVALID_INLINE_ENTITY + "unitOfMeasurement->definition");
 
-            Assert.notNull(Sensor, INVALID_INLINE_ENTITY + "Sensor");
-            Assert.notNull(ObservedProperty, INVALID_INLINE_ENTITY + "ObservedProperty");
-            Assert.notNull(Thing, INVALID_INLINE_ENTITY + "Thing");
-
-            datastream.setIdentifier(identifier);
-            datastream.setName(name);
-            datastream.setDescription(description);
-            datastream.setObservationType(new FormatEntity().setFormat(observationType));
+            self.setIdentifier(identifier);
+            self.setName(name);
+            self.setDescription(description);
+            self.setObservationType(new FormatEntity().setFormat(observationType));
 
             if (observedArea != null) {
                 GeoJsonReader reader = new GeoJsonReader(factory);
                 try {
-                    datastream.setGeometry(reader.read(observedArea.toString()));
+                    self.setGeometry(reader.read(observedArea.toString()));
                 } catch (ParseException e) {
                     Assert.notNull(null, "Could not parse observedArea to GeoJSON. Error was:" + e.getMessage());
                 }
@@ -106,16 +111,16 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime imple
             unit.setLink(unitOfMeasurement.definition);
             unit.setName(unitOfMeasurement.name);
             unit.setSymbol(unitOfMeasurement.symbol);
-            datastream.setUnit(unit);
+            self.setUnit(unit);
 
             if (resultTime != null) {
                 Time time = parseTime(resultTime);
                 if (time instanceof TimeInstant) {
-                    datastream.setResultTimeStart(((TimeInstant) time).getValue().toDate());
-                    datastream.setResultTimeEnd(((TimeInstant) time).getValue().toDate());
+                    self.setResultTimeStart(((TimeInstant) time).getValue().toDate());
+                    self.setResultTimeEnd(((TimeInstant) time).getValue().toDate());
                 } else if (time instanceof TimePeriod) {
-                    datastream.setResultTimeStart(((TimePeriod) time).getStart().toDate());
-                    datastream.setResultTimeEnd(((TimePeriod) time).getEnd().toDate());
+                    self.setResultTimeStart(((TimePeriod) time).getStart().toDate());
+                    self.setResultTimeEnd(((TimePeriod) time).getEnd().toDate());
                 }
             }
 
@@ -123,11 +128,33 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime imple
                 // phenomenonTime (aka samplingTime) is automatically calculated based on associated Observations
                 // phenomenonTime parsed from json is therefore ignored.
             }
+            if (Thing != null) {
+                self.setThing(Thing.toEntity());
+            } else if (backReference instanceof JSONThing) {
+                self.setThing(((JSONThing) backReference).getEntity());
+            } else {
+                Assert.notNull(null, INVALID_INLINE_ENTITY + "Thing");
+            }
 
-            datastream.setThing(Thing.toEntity());
-            datastream.setObservableProperty(ObservedProperty.toEntity());
-            datastream.setProcedure(Sensor.toEntity());
-            return datastream;
+            if (Sensor != null) {
+                self.setProcedure(Sensor.toEntity());
+            } else if (backReference instanceof JSONSensor) {
+                self.setProcedure(((JSONSensor) backReference).getEntity());
+            } else {
+                Assert.notNull(null, INVALID_INLINE_ENTITY + "Sensor");
+            }
+
+            if (ObservedProperty != null) {
+                self.setObservableProperty(ObservedProperty.toEntity());
+            } else if (backReference instanceof JSONObservedProperty) {
+                self.setObservableProperty(((JSONObservedProperty) backReference).getEntity());
+            } else {
+                Assert.notNull(null, INVALID_INLINE_ENTITY + "ObservedProperty");
+            }
+
+            //TODO: Add handling for Observations
+
+            return self;
         }
     }
 }

@@ -7,4 +7,7 @@ public interface AbstractJSONEntity {
 
     String INVALID_INLINE_ENTITY =
             "Invalid Entity. Not all required properties present! Missing: ";
+
+    String INVALID_BACKREFERENCE =
+            "Invalid nesting of Entites!";
 }

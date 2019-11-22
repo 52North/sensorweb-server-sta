@@ -1,5 +1,6 @@
 package org.n52.sta.serdes.json;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import org.joda.time.DateTime;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
@@ -11,12 +12,14 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class JSONSensor extends JSONBase.JSONwithIdNameDescription implements AbstractJSONEntity{
+public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorEntity> implements AbstractJSONEntity{
 
     // JSON Properties. Matched by Annotation or variable name
     public String properties;
     public String encodingType;
     public String metadata;
+
+    @JsonManagedReference
     public JSONDatastream[] Datastreams;
 
     private static final String STA_SENSORML_2 = "http://www.opengis.net/doc/IS/SensorML/2.0";
@@ -27,50 +30,57 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription implements Ab
     }
 
     public SensorEntity toEntity() {
-        SensorEntity sensor = new SensorEntity();
+        self = new SensorEntity();
 
-        if (!generatedId && name != null) {
+        if (!generatedId && name == null) {
             Assert.isNull(name, INVALID_REFERENCED_ENTITY);
             Assert.isNull(description, INVALID_REFERENCED_ENTITY);
             Assert.isNull(encodingType, INVALID_REFERENCED_ENTITY);
             Assert.isNull(metadata, INVALID_REFERENCED_ENTITY);
+
             Assert.isNull(Datastreams, INVALID_REFERENCED_ENTITY);
 
-            sensor.setIdentifier(identifier);
-            return sensor;
+            self.setIdentifier(identifier);
+            return self;
         } else {
             Assert.notNull(name, INVALID_INLINE_ENTITY + "name");
             Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
             Assert.notNull(encodingType, INVALID_INLINE_ENTITY + "encodingType");
             Assert.notNull(metadata, INVALID_INLINE_ENTITY + "metadata");
 
-            sensor.setIdentifier(identifier);
-            sensor.setName(name);
-            sensor.setDescription(description);
+            self.setIdentifier(identifier);
+            self.setName(name);
+            self.setDescription(description);
 
             if (encodingType.equalsIgnoreCase(STA_SENSORML_2)) {
-                sensor.setFormat(new FormatEntity().setFormat(SENSORML_2));
+                self.setFormat(new FormatEntity().setFormat(SENSORML_2));
                 ProcedureHistoryEntity procedureHistoryEntity = new ProcedureHistoryEntity();
-                procedureHistoryEntity.setProcedure(sensor);
-                procedureHistoryEntity.setFormat(sensor.getFormat());
+                procedureHistoryEntity.setProcedure(self);
+                procedureHistoryEntity.setFormat(self.getFormat());
                 procedureHistoryEntity.setStartTime(DateTime.now().toDate());
                 procedureHistoryEntity.setXml(metadata);
                 Set<ProcedureHistoryEntity> set = new LinkedHashSet<>();
                 set.add(procedureHistoryEntity);
-                sensor.setProcedureHistory(set);
+                self.setProcedureHistory(set);
             } else if (encodingType.equalsIgnoreCase(PDF)) {
-                sensor.setFormat(new FormatEntity().setFormat(PDF));
-                sensor.setDescriptionFile(metadata);
+                self.setFormat(new FormatEntity().setFormat(PDF));
+                self.setDescriptionFile(metadata);
             } else {
                 Assert.notNull(null, "Invalid encodingType supplied. Only SensorML or PDF allowed.");
             }
 
             if (Datastreams != null) {
-                sensor.setDatastreams(Arrays.stream(Datastreams)
+                self.setDatastreams(Arrays.stream(Datastreams)
                         .map(JSONDatastream::toEntity)
                         .collect(Collectors.toSet()));
             }
-            return sensor;
+
+            // Deal with back reference during deep insert
+            if (backReference != null) {
+                self.addDatastream(((JSONDatastream) backReference).getEntity());
+            }
+
+            return self;
         }
     }
 }
