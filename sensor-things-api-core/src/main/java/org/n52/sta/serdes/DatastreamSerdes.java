@@ -5,20 +5,26 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import org.apache.commons.lang.NotImplementedException;
+import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.shetland.util.DateTimeHelper;
 import org.n52.sta.serdes.json.JSONDatastream;
 import org.n52.sta.serdes.model.DatastreamEntityDefinition;
-import org.n52.sta.serdes.model.STAEntityDefinition;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.DatastreamWithQueryOptions;
+import org.n52.sta.serdes.model.STAEntityDefinition;
 import org.n52.sta.service.query.QueryOptions;
 
 import java.io.IOException;
 import java.util.Set;
 
+import static org.n52.sta.utils.TimeUtil.createDateTime;
+import static org.n52.sta.utils.TimeUtil.createTime;
+
 public class DatastreamSerdes {
 
     public static class DatastreamSerializer extends AbstractSTASerializer<DatastreamWithQueryOptions> {
+
+        private static final GeoJsonWriter GEO_JSON_WRITER = new GeoJsonWriter();
 
         public DatastreamSerializer(String rootUrl) {
             super(DatastreamWithQueryOptions.class);
@@ -70,17 +76,22 @@ public class DatastreamSerdes {
             }
 
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_OBSERVED_AREA)) {
-                //TODO: fix serialization
-                gen.writeStringField(STAEntityDefinition.PROP_OBSERVED_AREA, datastream.getGeometryEntity().toString());
+                gen.writeObjectFieldStart(STAEntityDefinition.PROP_OBSERVED_AREA);
+                gen.writeRaw(GEO_JSON_WRITER.write(datastream.getGeometryEntity().getGeometry()));
+                gen.writeEndObject();
             }
 
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_RESULT_TIME)) {
-                throw new NotImplementedException();
-                //TODO: implement
+                gen.writeStringField(STAEntityDefinition.PROP_RESULT_TIME,
+                    DateTimeHelper.format(createTime(createDateTime(datastream.getResultTimeStart()),
+                            createDateTime(datastream.getResultTimeEnd())))
+                );
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_PHENOMENON_TIME)) {
-                throw new NotImplementedException();
-                //TODO: implement
+                gen.writeStringField(STAEntityDefinition.PROP_PHENOMENON_TIME,
+                        DateTimeHelper.format(createTime(createDateTime(datastream.getPhenomenonTimeStart()),
+                                createDateTime(datastream.getPhenomenonTimeEnd())))
+                );
             }
 
             // navigation properties

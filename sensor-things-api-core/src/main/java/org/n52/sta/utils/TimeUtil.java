@@ -12,11 +12,11 @@ import java.util.Date;
 
 public class TimeUtil {
 
-    protected static DateTime createDateTime(Date date) {
+    public static DateTime createDateTime(Date date) {
         return new DateTime(date, DateTimeZone.UTC);
     }
 
-    protected static Time createTime(DateTime time) {
+    public static Time createTime(DateTime time) {
         return new TimeInstant(time);
     }
 
@@ -27,7 +27,7 @@ public class TimeUtil {
      * @param end   End {@link DateTime}
      * @return Resulting {@link Time}
      */
-    protected static Time createTime(DateTime start, DateTime end) {
+    public static Time createTime(DateTime start, DateTime end) {
         if (start.equals(end)) {
             return createTime(start);
         } else {

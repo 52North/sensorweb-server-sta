@@ -2,7 +2,6 @@ package org.n52.sta.serdes.json;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.JsonNode;
-import org.apache.commons.lang.NotImplementedException;
 import org.joda.time.DateTime;
 import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.shetland.ogc.gml.time.Time;
@@ -46,7 +45,6 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> impl
             return self;
         } else {
             Assert.notNull(result, INVALID_INLINE_ENTITY + "result");
-            Assert.notNull(resultTime, INVALID_INLINE_ENTITY + "resultTime");
 
             // phenomenonTime
             if (phenomenonTime != null) {
@@ -64,8 +62,13 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> impl
                 self.setSamplingTimeStart(date);
                 self.setSamplingTimeEnd(date);
             }
-            // resultTime
-            self.setResultTime(((TimeInstant) parseTime(resultTime)).getValue().toDate());
+
+            if (resultTime != null) {
+                // resultTime
+                self.setResultTime(((TimeInstant) parseTime(resultTime)).getValue().toDate());
+            } else {
+                self.setResultTime(new Date());
+            }
 
             // validTime
             if (validTime != null) {
@@ -83,7 +86,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> impl
             if (parameters != null) {
                 //TODO: handle parameters
                 //observation.setParameters();
-                throw new NotImplementedException();
+                //throw new NotImplementedException();
             }
             // result
             self.setValue(result);

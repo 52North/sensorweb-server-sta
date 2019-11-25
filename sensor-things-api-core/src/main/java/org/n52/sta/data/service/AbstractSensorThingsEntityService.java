@@ -173,9 +173,14 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
                                                             QueryOptions queryOptions)
             throws STACRUDException {
         try {
-            return this.createWrapper(
-                    getRepository().findOne(byRelatedEntityFilter(relatedId, relatedType, ownId)),
-                    queryOptions);
+            Optional<S> elem = getRepository().findOne(byRelatedEntityFilter(relatedId, relatedType, ownId));
+            if (elem.isPresent()) {
+                return this.createWrapper(
+                        elem.get(),
+                        queryOptions);
+            } else {
+                return null;
+            }
         } catch (RuntimeException e) {
             throw new STACRUDException(e.getMessage());
         }

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import org.apache.commons.lang.NotImplementedException;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.n52.series.db.beans.BlobDataEntity;
@@ -76,7 +75,7 @@ public class ObservationSerde {
                 Date resultTime = observation.getResultTime();
                 Date samplingTime = observation.getSamplingTimeEnd();
                 if (!resultTime.equals(samplingTime)) {
-                    gen.writeStringField(STAEntityDefinition.PROP_RESULT_TIME, resultTime.toString());
+                    gen.writeStringField(STAEntityDefinition.PROP_RESULT_TIME, resultTime.toInstant().toString());
                 }
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_PHENOMENON_TIME)) {
@@ -85,7 +84,7 @@ public class ObservationSerde {
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_RESULT_QUALITY)) {
                 //TODO: implement
-                throw new NotImplementedException();
+                //throw new NotImplementedException();
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_VALID_TIME)) {
                 if (observation.isSetValidTime()) {

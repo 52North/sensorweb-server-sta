@@ -2,7 +2,6 @@ package org.n52.sta.serdes.json;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.JsonNode;
-import org.apache.commons.lang.NotImplementedException;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
@@ -17,7 +16,7 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
 
     // JSON Properties. Matched by Annotation or variable name
     public String encodingType;
-    public JsonNode feature;
+    public JSONNestedFeature feature;
     @JsonManagedReference
     public JSONObservation[] Observations;
 
@@ -46,6 +45,9 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
             Assert.notNull(feature, INVALID_INLINE_ENTITY + "feature");
             Assert.state(encodingType.equals(ENCODINGTYPE_GEOJSON),
                     "Invalid encodingType supplied. Only GeoJSON (application/vnd.geo+json) is supported!");
+            Assert.notNull(feature.geometry, INVALID_INLINE_ENTITY + "feature->geometry");
+            Assert.notNull(feature.type, INVALID_INLINE_ENTITY + "feature->type");
+            Assert.state(feature.type.equals("Feature"), "Invalid Featuretype.");
 
             self.setIdentifier(identifier);
             self.setName(name);
@@ -53,7 +55,7 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
 
             GeoJsonReader reader = new GeoJsonReader(factory);
             try {
-                self.setGeometry(reader.read(feature.toString()));
+                self.setGeometry(reader.read(feature.geometry.toString()));
             } catch (ParseException e) {
                 Assert.notNull(null, "Could not parse feature to GeoJSON. Error was:" + e.getMessage());
             }
@@ -63,10 +65,15 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
 
             if (backReference != null) {
                 // TODO: link feature to observations?
-                throw new NotImplementedException();
+                // throw new NotImplementedException();
             }
 
             return self;
         }
+    }
+
+    private static class JSONNestedFeature {
+        public String type;
+        public JsonNode geometry;
     }
 }

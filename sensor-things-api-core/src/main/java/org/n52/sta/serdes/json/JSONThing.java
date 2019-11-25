@@ -24,8 +24,6 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
     }
 
     public PlatformEntity toEntity() {
-        self = new PlatformEntity();
-
         // Check if Entity is only referenced via id and not provided fully
         // More complex since implementation allows custom setting of id by user
         if (!generatedId && name == null) {
