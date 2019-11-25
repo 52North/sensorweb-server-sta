@@ -12,7 +12,12 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorEntity> implements AbstractJSONEntity{
+@SuppressWarnings("VisibilityModifier")
+public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorEntity> implements AbstractJSONEntity {
+
+    private static final String STA_SENSORML_2 = "http://www.opengis.net/doc/IS/SensorML/2.0";
+    private static final String SENSORML_2 = "http://www.opengis.net/sensorml/2.0";
+    private static final String PDF = "application/pdf";
 
     // JSON Properties. Matched by Annotation or variable name
     public String properties;
@@ -22,9 +27,6 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorEntity>
     @JsonManagedReference
     public JSONDatastream[] Datastreams;
 
-    private static final String STA_SENSORML_2 = "http://www.opengis.net/doc/IS/SensorML/2.0";
-    private static final String SENSORML_2 = "http://www.opengis.net/sensorml/2.0";
-    private static final String PDF = "application/pdf";
 
     public JSONSensor() {
         self = new SensorEntity();

@@ -32,7 +32,8 @@ public class SensorSerdes {
         }
 
         @Override
-        public void serialize(SensorWithQueryOptions value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+        public void serialize(SensorWithQueryOptions value, JsonGenerator gen, SerializerProvider provider)
+                throws IOException {
             gen.writeStartObject();
             ProcedureEntity sensor = value.getEntity();
             QueryOptions options = value.getQueryOptions();

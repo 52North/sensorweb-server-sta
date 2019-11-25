@@ -64,8 +64,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.n52.sta.data.service.ServiceUtils.createFeatureType;
-
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
@@ -317,7 +315,7 @@ public class FeatureOfInterestService
     }
 
     private void mergeFeatureType(AbstractFeatureEntity<?> existing) {
-        FormatEntity featureType = createFeatureType(existing.getGeometry());
+        FormatEntity featureType = ServiceUtils.createFeatureType(existing.getGeometry());
         if (!featureType.getFormat().equals(existing.getFeatureType().getFormat())) {
             existing.setFeatureType(featureType);
         }

@@ -112,7 +112,7 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
         Optional<String> entity = getRepository().identifier(
                 this.byRelatedEntityFilter(relatedId, relatedType, null),
                 STAIDENTIFIER);
-        return entity.isPresent()? entity.get(): null;
+        return entity.isPresent() ? entity.get() : null;
     }
 
 
@@ -184,7 +184,8 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
     }
 
     @Override
-    public PhenomenonEntity updateEntity(String id, PhenomenonEntity entity, HttpMethod method) throws STACRUDException {
+    public PhenomenonEntity updateEntity(String id, PhenomenonEntity entity, HttpMethod method)
+            throws STACRUDException {
         checkUpdate(entity);
         if (HttpMethod.PATCH.equals(method)) {
             Optional<PhenomenonEntity> existing = getRepository().findByStaIdentifier(id);

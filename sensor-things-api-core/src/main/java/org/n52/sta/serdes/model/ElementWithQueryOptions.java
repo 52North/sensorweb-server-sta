@@ -55,6 +55,7 @@ public abstract class ElementWithQueryOptions<P extends IdEntity> {
             this.queryOptions = queryOptions;
         }
     }
+
     public static class LocationWithQueryOptions extends ElementWithQueryOptions<LocationEntity> {
 
         public LocationWithQueryOptions(LocationEntity thing, QueryOptions queryOptions) {

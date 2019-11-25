@@ -1,5 +1,6 @@
 package org.n52.sta.serdes.model;
 
+@SuppressWarnings("VisibilityModifier")
 public abstract class STAEntityDefinition {
 
     public static final String DATASTREAMS = "Datastreams";
@@ -11,7 +12,7 @@ public abstract class STAEntityDefinition {
     public static final String OBSERVED_PROPERTIES = "ObservedProperties";
     public static final String FEATURES_OF_INTEREST = "FeaturesOfInterest";
 
-    public static final String[] allCollections = new String[] {
+    public static final String[] ALLCOLLECTIONS = new String[] {
             DATASTREAMS,
             OBSERVATIONS,
             THINGS,

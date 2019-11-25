@@ -23,7 +23,7 @@ public class FeatureOfInterestSerdes {
 
         private static final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
 
-        private static final GeoJsonWriter geoJsonWriter = new GeoJsonWriter();
+        private static final GeoJsonWriter GEO_JSON_WRITER = new GeoJsonWriter();
 
         public FeatureOfInterestSerializer(String rootUrl) {
             super(FeatureOfInterestWithQueryOptions.class);
@@ -72,7 +72,7 @@ public class FeatureOfInterestSerdes {
                 gen.writeObjectFieldStart(STAEntityDefinition.PROP_LOCATION);
                 gen.writeStringField("type", "Feature");
                 gen.writeObjectFieldStart("geometry");
-                gen.writeRaw(geoJsonWriter.write(feature.getGeometryEntity().getGeometry()));
+                gen.writeRaw(GEO_JSON_WRITER.write(feature.getGeometryEntity().getGeometry()));
                 gen.writeEndObject();
                 gen.writeEndObject();
             }

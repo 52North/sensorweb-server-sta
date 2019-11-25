@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import org.apache.commons.lang.NotImplementedException;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.n52.series.db.beans.BlobDataEntity;
@@ -84,6 +85,7 @@ public class ObservationSerde {
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_RESULT_QUALITY)) {
                 //TODO: implement
+                throw new NotImplementedException();
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_VALID_TIME)) {
                 if (observation.isSetValidTime()) {
@@ -142,53 +144,53 @@ public class ObservationSerde {
             }
         }
 
-    }
+        private String getResult(DataEntity o) {
+            if (o instanceof QuantityDataEntity) {
+                if ((((QuantityDataEntity) o).getValue().doubleValue() - ((QuantityDataEntity) o).getValue()
+                        .intValue()) == 0.0) {
+                    return Integer.toString(((QuantityDataEntity) o).getValue().intValue());
+                }
+                return ((QuantityDataEntity) o).getValue().toString();
+            } else if (o instanceof BlobDataEntity) {
+                // TODO: check if Object.tostring is what we want here
+                return o.getValue().toString();
+            } else if (o instanceof BooleanDataEntity) {
+                return ((BooleanDataEntity) o).getValue().toString();
+            } else if (o instanceof CategoryDataEntity) {
+                return ((CategoryDataEntity) o).getValue();
+            } else if (o instanceof ComplexDataEntity) {
 
-    private static String getResult(DataEntity o) {
-        if (o instanceof QuantityDataEntity) {
-            if ((((QuantityDataEntity) o).getValue().doubleValue() - ((QuantityDataEntity) o).getValue()
-                    .intValue()) == 0.0) {
-                return Integer.toString(((QuantityDataEntity) o).getValue().intValue());
+                // TODO: implement
+                // return ((ComplexDataEntity)o).getValue();
+                return null;
+
+            } else if (o instanceof CountDataEntity) {
+                return ((CountDataEntity) o).getValue().toString();
+            } else if (o instanceof GeometryDataEntity) {
+
+                // TODO: check if we want WKT here
+                return ((GeometryDataEntity) o).getValue().getGeometry().toText();
+
+            } else if (o instanceof TextDataEntity) {
+                return ((TextDataEntity) o).getValue();
+            } else if (o instanceof DataArrayDataEntity) {
+
+                // TODO: implement
+                // return ((DataArrayDataEntity)o).getValue();
+                return null;
+
+            } else if (o instanceof ProfileDataEntity) {
+
+                // TODO: implement
+                // return ((ProfileDataEntity)o).getValue();
+                return null;
+
+            } else if (o instanceof ReferencedDataEntity) {
+                return ((ReferencedDataEntity) o).getValue();
             }
-            return ((QuantityDataEntity) o).getValue().toString();
-        } else if (o instanceof BlobDataEntity) {
-            // TODO: check if Object.tostring is what we want here
-            return o.getValue().toString();
-        } else if (o instanceof BooleanDataEntity) {
-            return ((BooleanDataEntity) o).getValue().toString();
-        } else if (o instanceof CategoryDataEntity) {
-            return ((CategoryDataEntity) o).getValue();
-        } else if (o instanceof ComplexDataEntity) {
-
-            // TODO: implement
-            // return ((ComplexDataEntity)o).getValue();
-            return null;
-
-        } else if (o instanceof CountDataEntity) {
-            return ((CountDataEntity) o).getValue().toString();
-        } else if (o instanceof GeometryDataEntity) {
-
-            // TODO: check if we want WKT here
-            return ((GeometryDataEntity) o).getValue().getGeometry().toText();
-
-        } else if (o instanceof TextDataEntity) {
-            return ((TextDataEntity) o).getValue();
-        } else if (o instanceof DataArrayDataEntity) {
-
-            // TODO: implement
-            // return ((DataArrayDataEntity)o).getValue();
-            return null;
-
-        } else if (o instanceof ProfileDataEntity) {
-
-            // TODO: implement
-            // return ((ProfileDataEntity)o).getValue();
-            return null;
-
-        } else if (o instanceof ReferencedDataEntity) {
-            return ((ReferencedDataEntity) o).getValue();
+            return "";
         }
-        return "";
+
     }
 
     public static class ObservationDeserializer extends JsonDeserializer<DataEntity<?>> {

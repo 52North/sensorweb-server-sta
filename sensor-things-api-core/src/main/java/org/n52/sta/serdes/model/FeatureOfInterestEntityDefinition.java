@@ -4,7 +4,12 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+@SuppressWarnings("VisibilityModifier")
 public class FeatureOfInterestEntityDefinition extends STAEntityDefinition {
+
+    public static String entityName = FEATURE_OF_INTEREST;
+
+    public static String entitySetName = FEATURES_OF_INTEREST;
 
     private static String[] navProps = new String[] {
             OBSERVATIONS
@@ -20,9 +25,4 @@ public class FeatureOfInterestEntityDefinition extends STAEntityDefinition {
     public static Set<String> navigationProperties = new HashSet<>(Arrays.asList(navProps));
 
     public static Set<String> entityProperties = new HashSet<>(Arrays.asList(entityProps));
-
-    public static String entityName = FEATURE_OF_INTEREST;
-
-    public static String entitySetName = FEATURES_OF_INTEREST;
-
 }

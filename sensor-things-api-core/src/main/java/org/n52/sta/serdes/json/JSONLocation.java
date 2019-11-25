@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("VisibilityModifier")
 public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEntity> implements AbstractJSONEntity {
 
     // JSON Properties. Matched by Annotation or variable name
@@ -29,11 +30,6 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
 
     private final GeometryFactory factory =
             new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
-
-    private static class JSONNestedLocation {
-        public String type;
-        public JsonNode geometry;
-    }
 
     public JSONLocation() {
         self = new LocationEntity();
@@ -97,5 +93,10 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
             }
             return self;
         }
+    }
+
+    private static class JSONNestedLocation {
+        public String type;
+        public JsonNode geometry;
     }
 }

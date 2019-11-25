@@ -44,18 +44,16 @@ import org.n52.sta.data.repositories.DatasetRepository;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.FormatRepository;
 import org.n52.sta.data.repositories.UnitRepository;
-import org.n52.sta.serdes.model.ElementWithQueryOptions;
-import org.n52.sta.serdes.model.ElementWithQueryOptions.DatastreamWithQueryOptions;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider;
-import org.n52.sta.serdes.model.STAEntityDefinition;
 import org.n52.sta.edm.provider.entities.SensorEntityProvider;
 import org.n52.sta.edm.provider.entities.ThingEntityProvider;
 import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.mapping.DatastreamMapper;
+import org.n52.sta.serdes.model.ElementWithQueryOptions;
+import org.n52.sta.serdes.model.ElementWithQueryOptions.DatastreamWithQueryOptions;
+import org.n52.sta.serdes.model.STAEntityDefinition;
 import org.n52.sta.service.query.QueryOptions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
@@ -79,16 +77,16 @@ import java.util.UUID;
 @DependsOn({"springApplicationContext"})
 public class DatastreamService extends AbstractSensorThingsEntityService<DatastreamRepository, DatastreamEntity> {
 
-    private static final Logger logger = LoggerFactory.getLogger(DatastreamService.class);
+    //private static final Logger logger = LoggerFactory.getLogger(DatastreamService.class);
     private static final DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
     private static final ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
+    private static final String UNKNOWN = "unknown";
 
     private final UnitRepository unitRepository;
     private final FormatRepository formatRepository;
     private final DataRepository dataRepository;
     private final DatasetRepository datasetRepository;
 
-    private static final String UNKNOWN = "unknown";
 
     private DatastreamMapper mapper;
 
@@ -178,7 +176,8 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
             datastream.setProcesssed(true);
             checkObservationType(datastream);
             checkUnit(datastream);
-            datastream.setObservableProperty(getObservedPropertyService().createEntity(datastream.getObservableProperty()));
+            datastream.setObservableProperty(getObservedPropertyService()
+                    .createEntity(datastream.getObservableProperty()));
             datastream.setProcedure(getSensorService().createEntity(datastream.getProcedure()));
             datastream.setThing(getThingService().createEntity(datastream.getThing()));
             if (datastream.getIdentifier() != null) {
@@ -232,7 +231,8 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     }
 
     @Override
-    public DatastreamEntity updateEntity(String id, DatastreamEntity entity, HttpMethod method) throws STACRUDException {
+    public DatastreamEntity updateEntity(String id, DatastreamEntity entity, HttpMethod method)
+            throws STACRUDException {
         checkUpdate(entity);
         if (HttpMethod.PATCH.equals(method)) {
             Optional<DatastreamEntity> existing = getRepository().findOne(dQS.withIdentifier(id));
@@ -362,6 +362,21 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
         datastream.setObservationType(format);
     }
 
+    private void checkObservationType(DatastreamEntity existing, DatastreamEntity toMerge)
+            throws STACRUDException {
+        if (toMerge.isSetObservationType() && !toMerge.getObservationType()
+                .getFormat()
+                .equalsIgnoreCase(UNKNOWN)
+                && !existing.getObservationType().getFormat().equals(toMerge.getObservationType().getFormat())) {
+            throw new STACRUDException(
+                    String.format(
+                            "The updated observationType (%s) does not comply with the existing observationType (%s)",
+                            toMerge.getObservationType().getFormat(),
+                            existing.getObservationType().getFormat()),
+                    HttpStatus.CONFLICT);
+        }
+    }
+
     private DatastreamEntity processObservation(DatastreamEntity datastream,
                                                 Set<StaDataEntity> observations) throws STACRUDException {
         if (observations != null && !observations.isEmpty()) {
@@ -460,21 +475,6 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
             }
         }
         return existing;
-    }
-
-    private void checkObservationType(DatastreamEntity existing, DatastreamEntity toMerge)
-            throws STACRUDException {
-        if (toMerge.isSetObservationType() && !toMerge.getObservationType()
-                .getFormat()
-                .equalsIgnoreCase(UNKNOWN)
-                && !existing.getObservationType().getFormat().equals(toMerge.getObservationType().getFormat())) {
-            throw new STACRUDException(
-                    String.format(
-                            "The updated observationType (%s) does not comply with the existing observationType (%s)",
-                            toMerge.getObservationType().getFormat(),
-                            existing.getObservationType().getFormat()),
-                    HttpStatus.CONFLICT);
-        }
     }
 
 }

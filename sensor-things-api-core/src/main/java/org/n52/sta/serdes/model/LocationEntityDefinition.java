@@ -4,7 +4,12 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+@SuppressWarnings("VisibilityModifier")
 public class LocationEntityDefinition extends STAEntityDefinition {
+
+    public static String entityName = LOCATION;
+
+    public static String entitySetName = LOCATIONS;
 
     private static String[] navProps = new String[] {
             THINGS,
@@ -21,9 +26,4 @@ public class LocationEntityDefinition extends STAEntityDefinition {
     public static Set<String> navigationProperties = new HashSet<>(Arrays.asList(navProps));
 
     public static Set<String> entityProperties = new HashSet<>(Arrays.asList(entityProps));
-
-    public static String entityName = LOCATION;
-
-    public static String entitySetName = LOCATIONS;
-
 }

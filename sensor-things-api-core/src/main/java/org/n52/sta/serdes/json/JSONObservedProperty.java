@@ -8,10 +8,13 @@ import org.springframework.util.Assert;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-public class JSONObservedProperty extends JSONBase.JSONwithIdNameDescription<ObservablePropertyEntity> implements AbstractJSONEntity {
+@SuppressWarnings("VisibilityModifier")
+public class JSONObservedProperty extends JSONBase.JSONwithIdNameDescription<ObservablePropertyEntity>
+        implements AbstractJSONEntity {
 
     // JSON Properties. Matched by Annotation or variable name
     public String definition;
+
     @JsonManagedReference
     public JSONDatastream[] Datastreams;
 

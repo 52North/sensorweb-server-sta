@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import org.apache.commons.lang.NotImplementedException;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.sta.serdes.json.JSONDatastream;
 import org.n52.sta.serdes.model.DatastreamEntityDefinition;
@@ -26,7 +27,8 @@ public class DatastreamSerdes {
         }
 
         @Override
-        public void serialize(DatastreamWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+        public void serialize(DatastreamWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers)
+                throws IOException {
             gen.writeStartObject();
             DatastreamEntity datastream = value.getEntity();
             QueryOptions options = value.getQueryOptions();
@@ -73,9 +75,11 @@ public class DatastreamSerdes {
             }
 
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_RESULT_TIME)) {
+                throw new NotImplementedException();
                 //TODO: implement
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_PHENOMENON_TIME)) {
+                throw new NotImplementedException();
                 //TODO: implement
             }
 

@@ -2,6 +2,7 @@ package org.n52.sta.serdes.json;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.commons.lang.NotImplementedException;
 import org.joda.time.DateTime;
 import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.shetland.ogc.gml.time.Time;
@@ -11,6 +12,7 @@ import org.springframework.util.Assert;
 
 import java.util.Date;
 
+@SuppressWarnings("VisibilityModifier")
 public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> implements AbstractJSONEntity {
 
     // JSON Properties. Matched by Annotation or variable name
@@ -81,6 +83,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> impl
             if (parameters != null) {
                 //TODO: handle parameters
                 //observation.setParameters();
+                throw new NotImplementedException();
             }
             // result
             self.setValue(result);

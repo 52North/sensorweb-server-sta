@@ -74,6 +74,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
 
     private static final Logger logger = LoggerFactory.getLogger(LocationService.class);
     private static final LocationQuerySpecifications lQS = new LocationQuerySpecifications();
+    private static final String UNABLE_TO_UPDATE_ENTITY_NOT_FOUND = "Unable to update. Entity not found";
 
     private final LocationEncodingRepository locationEncodingRepository;
 
@@ -156,7 +157,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
                 LocationEntity merged = mapper.merge(existing.get(), entity);
                 return getRepository().save(merged);
             }
-            throw new STACRUDException("Unable to update. Entity not found.", HttpStatus.NOT_FOUND);
+            throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HttpStatus.NOT_FOUND);
         } else if (HttpMethod.PUT.equals(method)) {
             throw new STACRUDException("Http PUT is not yet supported!", HttpStatus.NOT_IMPLEMENTED);
         }
@@ -187,7 +188,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
             }
             getRepository().deleteByIdentifier(id);
         } else {
-            throw new STACRUDException("Unable to update. Entity not found.", HttpStatus.NOT_FOUND);
+            throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HttpStatus.NOT_FOUND);
         }
     }
 

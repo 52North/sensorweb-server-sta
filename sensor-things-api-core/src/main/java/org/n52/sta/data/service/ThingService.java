@@ -174,6 +174,11 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     }
 
     @Override
+    protected PlatformEntity updateEntity(PlatformEntity entity) {
+        return getRepository().save(entity);
+    }
+
+    @Override
     protected PlatformEntity merge(PlatformEntity existing, PlatformEntity toMerge) {
         mergeName(existing, toMerge);
         mergeDescription(existing, toMerge);
@@ -181,11 +186,6 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
             existing.setProperties(toMerge.getProperties());
         }
         return existing;
-    }
-
-    @Override
-    protected PlatformEntity updateEntity(PlatformEntity entity) {
-        return getRepository().save(entity);
     }
 
     private void checkUpdate(PlatformEntity thing) throws STACRUDException {

@@ -14,12 +14,14 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.stream.Collectors;
 
-public class JSONHistoricalLocation extends JSONBase.JSONwithId<HistoricalLocationEntity>
+@SuppressWarnings("VisibilityModifier")
+public class JSONHistoricalLocation extends JSONBase.JSONwithIdTime<HistoricalLocationEntity>
         implements AbstractJSONEntity {
 
     // JSON Properties. Matched by Annotation or variable name
     public Object time;
     public JSONThing Thing;
+
     @JsonManagedReference
     public JSONLocation[] Locations;
 
@@ -56,7 +58,7 @@ public class JSONHistoricalLocation extends JSONBase.JSONwithId<HistoricalLocati
                         .map(JSONLocation::toEntity)
                         .collect(Collectors.toSet()));
             } else if (backReference instanceof JSONLocation) {
-                self.setLocations(Collections.singleton(((JSONLocation)backReference).getEntity()));
+                self.setLocations(Collections.singleton(((JSONLocation) backReference).getEntity()));
             } else {
                 Assert.notNull(null, INVALID_INLINE_ENTITY + "Location");
             }
@@ -71,14 +73,14 @@ public class JSONHistoricalLocation extends JSONBase.JSONwithId<HistoricalLocati
      * @param rawTime raw Time
      */
     public void setTime(Object rawTime) throws ParsingException {
-        Time time = TimeUtil.parseTime(rawTime);
-        if (time instanceof TimeInstant) {
-            date = ((TimeInstant) time).getValue().toDate();
-        } else if (time instanceof TimePeriod) {
-            date = ((TimePeriod) time).getEnd().toDate();
+        Time parsed = TimeUtil.parseTime(rawTime);
+        if (parsed instanceof TimeInstant) {
+            date = ((TimeInstant) parsed).getValue().toDate();
+        } else if (parsed instanceof TimePeriod) {
+            date = ((TimePeriod) parsed).getEnd().toDate();
         } else {
             //TODO: refine error message
-            throw new ParsingException("Invalid time format.");
+            throw new ParsingException("Invalid parsed format.");
         }
     }
 }

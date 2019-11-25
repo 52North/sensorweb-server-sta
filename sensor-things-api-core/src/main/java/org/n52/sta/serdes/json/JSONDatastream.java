@@ -18,14 +18,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("VisibilityModifier")
 public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<DatastreamEntity>
         implements AbstractJSONEntity {
-
-    static class JSONUnitOfMeasurement {
-        public String symbol;
-        public String name;
-        public String definition;
-    }
 
     // JSON Properties. Matched by Annotation or variable name
     public String observationType;
@@ -33,6 +28,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
     public JsonNode observedArea;
     public String phenomenonTime;
     public String resultTime;
+
     @JsonManagedReference
     public JSONSensor Sensor;
     @JsonManagedReference
@@ -44,6 +40,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
 
     private final GeometryFactory factory =
             new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
+
     private final String OM_CategoryObservation =
             "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CategoryObservation";
     private final String OM_CountObservation =
@@ -101,7 +98,8 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
                 try {
                     self.setGeometry(reader.read(observedArea.toString()));
                 } catch (ParseException e) {
-                    Assert.notNull(null, "Could not parse observedArea to GeoJSON. Error was:" + e.getMessage());
+                    Assert.notNull(null,
+                            "Could not parse observedArea to GeoJSON. Error was:" + e.getMessage());
                 }
             }
 
@@ -122,10 +120,10 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
                 }
             }
 
-            if (phenomenonTime != null) {
+            //if (phenomenonTime != null) {
                 // phenomenonTime (aka samplingTime) is automatically calculated based on associated Observations
                 // phenomenonTime parsed from json is therefore ignored.
-            }
+            //}
             if (Thing != null) {
                 self.setThing(Thing.toEntity());
             } else if (backReference instanceof JSONThing) {
@@ -163,4 +161,23 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
             return self;
         }
     }
+
+    static class JSONUnitOfMeasurement {
+        public String symbol;
+        public String name;
+        public String definition;
+    }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+

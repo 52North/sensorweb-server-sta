@@ -2,6 +2,7 @@ package org.n52.sta.serdes.json;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.commons.lang.NotImplementedException;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
@@ -10,6 +11,7 @@ import org.n52.series.db.beans.FeatureEntity;
 import org.n52.sta.data.service.ServiceUtils;
 import org.springframework.util.Assert;
 
+@SuppressWarnings("VisibilityModifier")
 public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<FeatureEntity>
         implements AbstractJSONEntity {
 
@@ -61,6 +63,7 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
 
             if (backReference != null) {
                 // TODO: link feature to observations?
+                throw new NotImplementedException();
             }
 
             return self;

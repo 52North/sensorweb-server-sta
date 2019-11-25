@@ -379,7 +379,8 @@ public class ObservationService extends
             }
             observation.setFeatureOfInterest(feature);
         }
-        AbstractFeatureEntity<?> feature = getFeatureOfInterestService().createEntity(observation.getFeatureOfInterest());
+        AbstractFeatureEntity<?> feature = getFeatureOfInterestService()
+                .createEntity(observation.getFeatureOfInterest());
         observation.setFeatureOfInterest(feature);
         return feature;
     }

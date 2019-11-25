@@ -35,6 +35,8 @@ package org.n52.sta.data.service;
 
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.HibernateRelations;
+import org.n52.series.db.beans.HibernateRelations.HasDescription;
+import org.n52.series.db.beans.HibernateRelations.HasName;
 import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
@@ -67,12 +69,13 @@ import java.util.Set;
  */
 public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepository<S>, S extends IdEntity> {
 
-    @Autowired
-    private EntityServiceRepository serviceRepository;
-
     protected final String IDENTIFIER = "identifier";
     protected final String STAIDENTIFIER = "staIdentifier";
     protected final String ENCODINGTYPE = "encodingType";
+
+    @Autowired
+    private EntityServiceRepository serviceRepository;
+
 
     private Class entityClass;
 
@@ -149,9 +152,12 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      * @param ownId       ID of the requested Entity. Can be null.
      * @return true if an Entity exists
      */
-    public boolean existsEntityByRelatedEntity(String relatedId, String relatedType, String ownId) {
+    public boolean existsEntityByRelatedEntity(String relatedId,
+                                               String relatedType,
+                                               String ownId) {
         return getRepository().count(byRelatedEntityFilter(relatedId, relatedType, ownId)) > 0;
     }
+
     /**
      * Requests the Entity with given ownId that is related to a single Entity with given relatedId and relatedType
      *
@@ -161,7 +167,10 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      * @param queryOptions {@link QueryOptions} used for serialization
      * @return Entity that matches
      */
-    public ElementWithQueryOptions getEntityByRelatedEntity(String relatedId, String relatedType, String ownId, QueryOptions queryOptions)
+    public ElementWithQueryOptions getEntityByRelatedEntity(String relatedId,
+                                                            String relatedType,
+                                                            String ownId,
+                                                            QueryOptions queryOptions)
             throws STACRUDException {
         try {
             return this.createWrapper(
@@ -184,7 +193,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
         Optional<String> entity = getRepository().identifier(
                 this.byRelatedEntityFilter(relatedId, relatedType, null),
                 IDENTIFIER);
-        return entity.isPresent()? entity.get(): null;
+        return entity.isPresent() ? entity.get() : null;
     }
 
     /**
@@ -199,7 +208,8 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      */
     public List<ElementWithQueryOptions> getEntityCollectionByRelatedEntity(String relatedId,
                                                                             String relatedType,
-                                                                            QueryOptions queryOptions) throws STACRUDException {
+                                                                            QueryOptions queryOptions)
+            throws STACRUDException {
         try {
             return getRepository()
                     .findAll(byRelatedEntityFilter(relatedId, relatedType, null),
@@ -337,14 +347,14 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
     @Transactional(rollbackFor = Exception.class)
     public ElementWithQueryOptions create(S entity) throws STACRUDException {
         return this.createWrapper(createEntity(entity), null);
-    };
+    }
 
     protected abstract S createEntity(S entity) throws STACRUDException;
 
     @Transactional(rollbackFor = Exception.class)
     public ElementWithQueryOptions update(String id, S entity, HttpMethod method) throws STACRUDException {
         return this.createWrapper(updateEntity(id, entity, method), null);
-    };
+    }
 
     protected abstract S updateEntity(String id, S entity, HttpMethod method) throws STACRUDException;
 
@@ -440,12 +450,6 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
         return property;
     }
 
-    /**
-     * //TODO: write javadoc
-     * @param existing
-     * @param toMerge
-     * @return
-     */
     protected abstract S merge(S existing, S toMerge) throws STACRUDException;
 
     protected void mergeIdentifierNameDescription(DescribableEntity existing, DescribableEntity toMerge) {
@@ -460,19 +464,22 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
         mergeDescription(existing, toMerge);
     }
 
-    protected void mergeName(HibernateRelations.HasName existing, HibernateRelations.HasName toMerge) {
+    protected void mergeName(HasName existing,
+                             HasName toMerge) {
         if (toMerge.isSetName()) {
             existing.setName(toMerge.getName());
         }
     }
 
-    protected void mergeDescription(HibernateRelations.HasDescription existing, HibernateRelations.HasDescription toMerge) {
+    protected void mergeDescription(HasDescription existing,
+                                    HasDescription toMerge) {
         if (toMerge.isSetDescription()) {
             existing.setDescription(toMerge.getDescription());
         }
     }
 
-    protected void mergeSamplingTime(HibernateRelations.HasPhenomenonTime existing, HibernateRelations.HasPhenomenonTime toMerge) {
+    protected void mergeSamplingTime(HibernateRelations.HasPhenomenonTime existing,
+                                     HibernateRelations.HasPhenomenonTime toMerge) {
         if (toMerge.hasSamplingTimeStart() && toMerge.hasSamplingTimeEnd()) {
             existing.setSamplingTimeStart(toMerge.getSamplingTimeStart());
             existing.setSamplingTimeEnd(toMerge.getSamplingTimeEnd());

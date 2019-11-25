@@ -12,19 +12,22 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.UUID;
 
+@SuppressWarnings("VisibilityModifier")
 public class JSONBase {
 
     abstract static class JSONwithId <T> {
+
         @JsonProperty("@iot.id")
         public String identifier = UUID.randomUUID().toString();
-        protected boolean generatedId = true;
 
+        @JsonBackReference
+        public Object backReference;
+
+        // Deals with linking to parent Objects during deep insert
         // Used for dealing with nested inserts
         protected T self;
 
-        // Deals with linking to parent Objects during deep insert
-        @JsonBackReference
-        public Object backReference;
+        protected boolean generatedId = true;
 
         public void setIdentifier(String rawIdentifier) throws UnsupportedEncodingException {
             generatedId = false;

@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("VisibilityModifier")
 public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity> implements AbstractJSONEntity {
 
     // JSON Properties. Matched by Annotation or variable name
@@ -73,7 +74,7 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
                         self.setDatastreams(Collections.singleton(((JSONDatastream) backReference).getEntity()));
                     }
                 } else {
-                    self.addHistoricalLocation(((JSONHistoricalLocation)backReference).getEntity());
+                    self.addHistoricalLocation(((JSONHistoricalLocation) backReference).getEntity());
                 }
             }
 

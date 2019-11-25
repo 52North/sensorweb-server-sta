@@ -44,7 +44,6 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
-import java.util.Date;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
