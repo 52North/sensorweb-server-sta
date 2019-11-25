@@ -16,11 +16,10 @@ public class JSONObservedProperty extends JSONBase.JSONwithIdNameDescription<Obs
     public JSONDatastream[] Datastreams;
 
     public JSONObservedProperty() {
+        self = new ObservablePropertyEntity();
     }
 
     public PhenomenonEntity toEntity() {
-        self = new ObservablePropertyEntity();
-
         if (!generatedId && name == null) {
             Assert.isNull(name, INVALID_REFERENCED_ENTITY);
             Assert.isNull(description, INVALID_REFERENCED_ENTITY);

@@ -19,6 +19,7 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
     public JSONDatastream[] Datastreams;
 
     public JSONThing() {
+        self = new PlatformEntity();
     }
 
     public PlatformEntity toEntity() {

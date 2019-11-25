@@ -3,7 +3,6 @@ package org.n52.sta.serdes.json;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.joda.time.DateTime;
-import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
@@ -28,11 +27,10 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> impl
     public JSONDatastream Datastream;
 
     public JSONObservation() {
+        self = new StaDataEntity();
     }
 
-    public DataEntity<?> toEntity() {
-        self = new StaDataEntity();
-
+    public StaDataEntity toEntity() {
         if (!generatedId && result == null) {
 
             Assert.isNull(phenomenonTime, INVALID_REFERENCED_ENTITY);

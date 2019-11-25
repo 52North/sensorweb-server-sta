@@ -36,11 +36,10 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
     }
 
     public JSONLocation() {
+        self = new LocationEntity();
     }
 
     public LocationEntity toEntity() {
-        self = new LocationEntity();
-
         if (!generatedId && name == null) {
             Assert.isNull(name, INVALID_REFERENCED_ENTITY);
             Assert.isNull(description, INVALID_REFERENCED_ENTITY);

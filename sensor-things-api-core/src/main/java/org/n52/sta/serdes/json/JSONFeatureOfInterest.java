@@ -25,11 +25,10 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
 
 
     public JSONFeatureOfInterest() {
+        self = new FeatureEntity();
     }
 
     public FeatureEntity toEntity() {
-        self = new FeatureEntity();
-
         if (!generatedId && name == null) {
             Assert.isNull(name, INVALID_REFERENCED_ENTITY);
             Assert.isNull(description, INVALID_REFERENCED_ENTITY);

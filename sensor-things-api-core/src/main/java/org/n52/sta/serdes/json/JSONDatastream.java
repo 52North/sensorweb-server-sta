@@ -1,6 +1,5 @@
 package org.n52.sta.serdes.json;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -14,6 +13,10 @@ import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
 import org.springframework.util.Assert;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<DatastreamEntity>
         implements AbstractJSONEntity {
@@ -52,16 +55,11 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
     private final String OM_TruthObservation =
             "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_TruthObservation";
 
-    // Deals with linking to parent Objects during deep insert
-    @JsonBackReference
-    public Object backReference;
-
     public JSONDatastream() {
+        self = new DatastreamEntity();
     }
 
     public DatastreamEntity toEntity() {
-        self = new DatastreamEntity();
-
         if (!generatedId && name == null) {
             Assert.isNull(name, INVALID_REFERENCED_ENTITY);
             Assert.isNull(description, INVALID_REFERENCED_ENTITY);
@@ -152,7 +150,15 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
                 Assert.notNull(null, INVALID_INLINE_ENTITY + "ObservedProperty");
             }
 
-            //TODO: Add handling for Observations
+            if (Observations != null) {
+                self.setObservations(
+                        Arrays.stream(Observations)
+                                .map(JSONObservation::toEntity)
+                                .collect(Collectors.toSet())
+                );
+            } else if (backReference instanceof JSONObservation) {
+                self.setObservations(Collections.singleton(((JSONObservation) backReference).self));
+            }
 
             return self;
         }

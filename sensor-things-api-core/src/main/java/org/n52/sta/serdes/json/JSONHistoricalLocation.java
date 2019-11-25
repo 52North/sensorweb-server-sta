@@ -26,11 +26,10 @@ public class JSONHistoricalLocation extends JSONBase.JSONwithId<HistoricalLocati
     private Date date;
 
     public JSONHistoricalLocation() {
+        self = new HistoricalLocationEntity();
     }
 
     public HistoricalLocationEntity toEntity() {
-        self = new HistoricalLocationEntity();
-
         if (!generatedId && time == null) {
             Assert.isNull(time, INVALID_REFERENCED_ENTITY);
             Assert.isNull(Thing, INVALID_REFERENCED_ENTITY);

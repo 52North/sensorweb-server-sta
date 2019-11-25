@@ -27,11 +27,10 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorEntity>
     private static final String PDF = "application/pdf";
 
     public JSONSensor() {
+        self = new SensorEntity();
     }
 
     public SensorEntity toEntity() {
-        self = new SensorEntity();
-
         if (!generatedId && name == null) {
             Assert.isNull(name, INVALID_REFERENCED_ENTITY);
             Assert.isNull(description, INVALID_REFERENCED_ENTITY);
