@@ -42,21 +42,24 @@ public class STARequestUtils {
     final String IDENTIFIED_BY_FEATURE_OF_INTEREST_REGEX =
             "FeaturesOfInterest" + IDENTIFIER_REGEX + "/Observations";
 
-    final String IDENTIFIED_BY_DATASTREAM_PATH =
-            "{entity:Datastreams" + IDENTIFIER_REGEX + "}/{target:Sensor|ObservedProperty|Thing|Observations}";
-    final String IDENTIFIED_BY_OBSERVATION_PATH =
+    final String ENTITY_IDENTIFIED_BY_DATASTREAM_PATH =
+            "{entity:Datastreams" + IDENTIFIER_REGEX + "}/{target:Sensor|ObservedProperty|Thing}";
+    final String ENTITY_IDENTIFIED_BY_OBSERVATION_PATH =
             "{entity:Observations" + IDENTIFIER_REGEX + "}/{target:Datastream|FeatureOfInterest}";
-    final String IDENTIFIED_BY_HISTORICAL_LOCATION_PATH =
+    final String ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH =
             "{entity:HistoricalLocations" + IDENTIFIER_REGEX + "}/{target:Thing}";
-    final String IDENTIFIED_BY_THING_PATH =
+
+    final String COLLECTION_IDENTIFIED_BY_DATASTREAM_PATH =
+            "{entity:Datastreams" + IDENTIFIER_REGEX + "}/{target:Observations}";
+    final String COLLECTION_IDENTIFIED_BY_THING_PATH =
             "{entity:Things" + IDENTIFIER_REGEX + "}/{target:Datastreams|HistoricalLocations|Locations}";
-    final String IDENTIFIED_BY_LOCATION_PATH =
+    final String COLLECTION_IDENTIFIED_BY_LOCATION_PATH =
             "{entity:Locations" + IDENTIFIER_REGEX + "}/{target:Things|HistoricalLocations}";
-    final String IDENTIFIED_BY_SENSOR_PATH =
+    final String COLLECTION_IDENTIFIED_BY_SENSOR_PATH =
             "{entity:Sensors" + IDENTIFIER_REGEX + "}/{target:Datastreams}";
-    final String IDENTIFIED_BY_OBSERVED_PROPERTY_PATH =
+    final String COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH =
             "{entity:ObservedProperties" + IDENTIFIER_REGEX + "}/{target:Datastreams}";
-    final String IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH =
+    final String COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH =
             "{entity:FeaturesOfInterest" + IDENTIFIER_REGEX + "}/{target:Observations}";
 
     final static Map<String, Class> collectionNameToClass;

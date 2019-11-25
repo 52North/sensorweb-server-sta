@@ -66,9 +66,9 @@ public class STAEntityRequestHandler extends STARequestUtils {
      * @return JSON String representing Entity
      */
     @GetMapping(
-            value = {mappingPrefix + IDENTIFIED_BY_DATASTREAM_PATH,
-                    mappingPrefix + IDENTIFIED_BY_OBSERVATION_PATH,
-                    mappingPrefix + IDENTIFIED_BY_HISTORICAL_LOCATION_PATH
+            value = {mappingPrefix + ENTITY_IDENTIFIED_BY_DATASTREAM_PATH,
+                     mappingPrefix + ENTITY_IDENTIFIED_BY_OBSERVATION_PATH,
+                     mappingPrefix + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH
             },
             produces = "application/json"
     )

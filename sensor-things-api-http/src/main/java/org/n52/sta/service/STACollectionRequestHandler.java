@@ -56,11 +56,12 @@ public class STACollectionRequestHandler extends STARequestUtils {
      * @return JSON String representing Entity
      */
     @GetMapping(
-            value = {mappingPrefix + IDENTIFIED_BY_THING_PATH,
-                     mappingPrefix + IDENTIFIED_BY_LOCATION_PATH,
-                     mappingPrefix + IDENTIFIED_BY_OBSERVED_PROPERTY_PATH,
-                     mappingPrefix + IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH,
-                     mappingPrefix + IDENTIFIED_BY_SENSOR_PATH
+            value = {mappingPrefix + COLLECTION_IDENTIFIED_BY_THING_PATH,
+                     mappingPrefix + COLLECTION_IDENTIFIED_BY_LOCATION_PATH,
+                     mappingPrefix + COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH,
+                     mappingPrefix + COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH,
+                     mappingPrefix + COLLECTION_IDENTIFIED_BY_SENSOR_PATH,
+                     mappingPrefix + COLLECTION_IDENTIFIED_BY_DATASTREAM_PATH
             },
             produces = "application/json"
     )
