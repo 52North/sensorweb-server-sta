@@ -15,7 +15,7 @@
         </id>
 
         <property name="datasetType" index="idx_dataset_dataset_type">
-            <column name="dataset_type" scale="20" not-null="true" check="dataset_type in ('individualObservation', 'sampling', 'timeseries', 'profile', 'trajectory', 'not_initialized')">
+            <column name="dataset_type" scale="20" not-null="true" default="'not_initialized'" check="dataset_type in ('individualObservation', 'sampling', 'timeseries', 'profile', 'trajectory', 'not_initialized')">
                 <comment>Indicator whether the dataset provides individualObservation (individual observations), timeseries (timeseries obervations) or trajectories (trajectory observations).</comment>
             </column>
             <type name="org.hibernate.type.EnumType">
@@ -25,7 +25,7 @@
         </property>
 
         <property name="observationType" index="idx_dataset_observation_type">
-            <column name="observation_type" scale="20" not-null="true" check="observation_type in ('simple', 'profile', 'timeseries', 'trajectory', 'not_initialized')">
+            <column name="observation_type" scale="20" not-null="true" default="'not_initialized'" check="observation_type in ('simple', 'profile', 'timeseries', 'trajectory', 'not_initialized')">
                 <comment>Indicator whether the dataset observations are of type simple (a simple observation, e.g. a scalar value like the temperature) or profile (profile observations)</comment>
             </column>
              <type name="org.hibernate.type.EnumType">
@@ -35,7 +35,7 @@
         </property>
 
         <property name="valueType" index="idx_dataset_value_type">
-            <column name="value_type" scale="20" not-null="true" check="value_type in ('quantity', 'count', 'text', 'category', 'bool', 'geometry', 'blob', 'reference', 'complex', 'dataarray', 'not_initialized')">
+            <column name="value_type" scale="20" not-null="true" default="'not_initialized'" check="value_type in ('quantity', 'count', 'text', 'category', 'bool', 'geometry', 'blob', 'reference', 'complex', 'dataarray', 'not_initialized')">
                 <comment>Indicator of the type of the single values. Valid values are quantity (scalar values), count (integer values), text (textual values), category (categorical values), bool (boolean values), reference (references, e.g. link to a source, photo, video)</comment>
             </column>
              <type name="org.hibernate.type.EnumType">
@@ -75,7 +75,7 @@
             </column>
         </many-to-one>
 
-        <many-to-one name="omObservationType" class="FormatEntity" not-null="false" foreign-key="fk_dataset_om_observation_type">
+        <many-to-one name="omObservationType" class="FormatEntity" not-null="false" foreign-key="fk_dataset_om_obs_type">
             <column name="fk_format_id">
                 <comment>Reference to the observationType in the format table. Required by the SOS to persist the valid observationType for the dataset.</comment>
             </column>
@@ -191,7 +191,7 @@
             </column>
         </property>
 
-        <many-to-one name="identifierCodespace" class="CodespaceEntity" foreign-key="fk_dataset_identifier_codespace">
+        <many-to-one name="identifierCodespace" class="CodespaceEntity" foreign-key="fk_dataset_identifier_codesp">
             <column name="fk_identifier_codespace_id">
                 <comment>The codespace of the dataset identifier, reference to the codespace table. Can be null.</comment>
             </column>
@@ -215,7 +215,7 @@
             </column>
         </property>
 
-        <set inverse="false" name="parameters" table="dataset_parameter" cascade="delete-orphan">
+        <set inverse="false" name="parameters" table="dataset_parameter" cascade="remove">
             <comment>Storage of relations between dataset and related parameter</comment>
             <key not-null="true" foreign-key="fk_dataset_parameter">
                 <column name="fk_dataset_id">
@@ -228,6 +228,11 @@
                 </column>
             </many-to-many>
         </set>
+        <many-to-one class="VerticalMetadataEntity" name="verticalMetadata" foreign-key="fk_value_profile">
+            <column name="fk_value_profile_id" not-null="false">
+                <comment>Reference to the vertical metadata that belongs to this profile dataset.</comment>
+            </column>
+        </many-to-one>
         <component name="samplingProfile" class="org.n52.series.db.beans.sampling.SamplingProfileDatasetEntity">
             <set inverse="true" name="samplings" table="sampling_dataset" >
                 <comment>Storage of relations between dataset and related samplings</comment>
@@ -256,8 +261,7 @@
                 </many-to-many>
             </set>
         </component>
-
-        <set name="translations" table="dataset_i18n" inverse="true" fetch="select">
+        <set name="translations" table="dataset_i18n" inverse="true" fetch="select" cascade="remove">
             <key column="fk_dataset_id" not-null="true" />
             <one-to-many class="org.n52.series.db.beans.i18n.I18nDatasetEntity" />
         </set>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <hibernate-mapping package="org.n52.series.db.beans"
-    xmlns="http://www.hibernate.org/xsd/hibernate-mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.hibernate.org/xsd/hibernate-mapping"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.hibernate.org/xsd/hibernate-mapping http://www.hibernate.org/xsd/hibernate-mapping/hibernate-mapping-4.0.xsd">
     <class name="DataEntity" table="observation" check="value_type in ('quantity', 'count', 'text', 'category', 'bool', 'profile', 'complex', 'dataarray', 'geometry', 'blob', 'reference')">
         <comment>Storage of the observation values with the timestamp and additional metadata. The metadata are height/depth values for profile observation and sampling geometries for trajectory observations. In each observation entry only one value_... column should be filled with a value!</comment>
@@ -23,6 +24,9 @@
                 <comment>Reference to the dataset to which this observation belongs.</comment>
             </column>
         </many-to-one>
+        <property name="datasetId" insert="false" update="false" type="long" >
+            <column name="fk_dataset_id" not-null="true" />
+        </property>
 
         <property name="samplingTimeStart" type="timestamp" unique-key="un_observation_identity">
             <column index="idx_sampling_time_start" name="sampling_time_start" length="29" not-null="true">
@@ -47,7 +51,7 @@
                 <comment>Unique identifier of the observation which can be for used filtering, e.g. GetObservationById in the SOS. Should be a URI, UUID. E.g. http://www.example.org/123, 123-321</comment>
             </column>
         </property>
-        <many-to-one name="identifierCodespace" class="CodespaceEntity" foreign-key="fk_data_identifier_codespace">
+        <many-to-one name="identifierCodespace" class="CodespaceEntity" foreign-key="fk_data_identifier_codesp">
             <column name="fk_identifier_codespace_id">
                 <comment>The codespace of the data/observation identifier, reference to the codespace table. Can be null.</comment>
             </column>
@@ -70,7 +74,7 @@
             </column>
         </property>
 
-        <property name="deleted" type="org.n52.hibernate.type.SmallBooleanType">
+        <property name="deleted" type="org.n52.hibernate.type.SmallBooleanType" index="idx_observation_is_deleted">
             <column name="is_deleted" not-null="true" default="0" check="is_deleted in (1,0)">
                 <comment>Flag that indicates if this observation is deleted</comment>
             </column>
@@ -90,9 +94,9 @@
 
         <component class="GeometryEntity" name="geometryEntity">
             <!--
-                <property column="lat" name="lat" type="big_decimal" precision="20" scale="10" />
-                <property column="lon" name="lon" type="big_decimal" precision="20" scale="10" />
-            -->
+            <property column="lat" name="lat" type="big_decimal" precision="20" scale="10" />
+            <property column="lon" name="lon" type="big_decimal" precision="20" scale="10" />
+             -->
             <property name="geometry" type="jts_geometry" not-null="false">
                 <column name="sampling_geometry">
                     <comment>The geometry that represents the location where the observation was observed, e.g. mobile observations (trajectories) where this geometry is different from the feature geometry.</comment>
@@ -101,7 +105,7 @@
         </component>
 
         <!-- Or add only to specific subclasses -->
-        <set inverse="true" name="parameters" table="observation_parameter" cascade="all" fetch="join">
+        <set inverse="false" name="parameters" table="observation_parameter" fetch="join" cascade="remove">
             <comment>Storage of relations between data/observation and related parameter</comment>
             <key not-null="true" foreign-key="fk_observation_parameter">
                 <column name="fk_observation_id">
@@ -150,7 +154,7 @@
             </column>
         </property>
 
-        <property name="parent" type="long" insert="false" update="false">
+        <property name="parent" type="long">
             <column name="fk_parent_observation_id" not-null="false">
                 <comment>Reference to the parent observation in the case of complex observations like profiles, complex or swedataarray observations.</comment>
             </column>
@@ -162,8 +166,20 @@
                     <comment>The id of the sampling this observation belongs to.</comment>
                 </column>
             </many-to-one>
+        </component>
 
-            <component class="org.n52.series.db.beans.sampling.DetectionLimitEntity" name="detectionLimit">
+        <set name="translations" table="observation_i18n" inverse="true" fetch="select" cascade="remove">
+            <key column="fk_observation_id" not-null="true" foreign-key="fk_observation_i18n"/>
+            <one-to-many class="org.n52.series.db.beans.i18n.I18nDataEntity" />
+        </set>
+
+        <subclass extends="DataEntity" name="QuantityDataEntity" discriminator-value="quantity">
+            <property name="value" type="big_decimal" precision="20" scale="10">
+                <column name="value_quantity" precision="20" scale="10">
+                    <comment>The quantity value of an observation (Measurement)</comment>
+                </column>
+            </property>
+            <component class="org.n52.series.db.beans.DetectionLimitEntity" name="detectionLimit">
                 <property name="flag" type="java.lang.Short">
                     <column name="detection_limit_flag" not-null="false" check="detection_limit_flag in (null, -1, 1)">
                         <comment>Flag that indicates if measured value lower/higher of the detection limit.</comment>
@@ -175,19 +191,6 @@
                     </column>
                 </property>
             </component>
-        </component>
-
-        <set name="translations" table="observation_i18n" inverse="true" fetch="select">
-            <key column="fk_observation_id" not-null="true" foreign-key="fk_observation_i18n"/>
-            <one-to-many class="org.n52.series.db.beans.i18n.I18nDataEntity" />
-        </set>
-
-        <subclass extends="DataEntity" name="QuantityDataEntity" discriminator-value="quantity">
-            <property name="value" type="big_decimal" precision="20" scale="10">
-                <column name="value_quantity" precision="20" scale="10">
-                    <comment>The quantity value of an observation (Measurement)</comment>
-                </column>
-            </property>
         </subclass>
 
         <subclass extends="DataEntity" name="TextDataEntity" discriminator-value="text">
@@ -233,8 +236,8 @@
         <subclass name="GeometryDataEntity" extends="DataEntity" discriminator-value="geometry">
             <component class="GeometryEntity" name="geometryEntity">
                 <!--
-                    <property column="value_lat" name="lat" type="big_decimal" precision="20" scale="10" />
-                    <property column="value_lon" name="lon" type="big_decimal" precision="20" scale="10" />
+                <property column="value_lat" name="lat" type="big_decimal" precision="20" scale="10" />
+                <property column="value_lon" name="lon" type="big_decimal" precision="20" scale="10" />
                 -->
                 <property name="geometry" type="geolatte_geometry">
                 <column name="value_geometry">
@@ -262,7 +265,12 @@
         </subclass>
 
         <subclass name="DataArrayDataEntity" extends="DataEntity" discriminator-value="dataarray">
-            <set name="value" table="observation" inverse="true">
+            <property name="stringValue" type="text">
+                <column name="value_array">
+                    <comment>The textual value of an observation (SweDataArrayObservation))</comment>
+                </column>
+            </property>
+            <set name="value" table="observation" cascade="remove">
                 <key foreign-key="fk_parent_observation">
                      <column name="fk_parent_observation_id" not-null="false">
                         <comment>Reference to the parent data/observation</comment>
@@ -270,45 +278,26 @@
                 </key>
                 <one-to-many class="DataEntity" />
             </set>
-            <join table="value_data_array">
-                <comment>Storage of the data array observation value.</comment>
-                <key foreign-key="fk_data_array_value">
-                    <column name="fk_observation_id">
-                        <comment>Reference to the data/observation</comment>
-                    </column>
-                </key>
-               <property name="structure" type="text">
-                    <column name="structure" not-null="true">
-                        <comment>The structure of the data array</comment>
-                    </column>
-                </property>
-
-                <property name="encoding" type="text">
-                    <column name="encoding" not-null="true">
-                        <comment>The encoding of the data array values</comment>
-                    </column>
-                </property>
-            </join>
+            <many-to-one name="resultTemplate" class="ResultTemplateEntity" foreign-key="fk_result_template">
+                <column name="fk_result_template_id" not-null="false">
+                    <comment>Reference to the result template which holds the structure and encoding.</comment>
+                </column>
+            </many-to-one>
         </subclass>
 
         <subclass name="ComplexDataEntity" extends="DataEntity" discriminator-value="complex">
             <!-- See above comments for DataArrayDataEntity -->
-            <set name="value" table="observation" inverse="true">
+            <set name="value" table="observation" cascade="remove">
                 <key column="fk_parent_observation_id" not-null="false" foreign-key="fk_parent_observation"/>
                 <one-to-many class="DataEntity" />
             </set>
         </subclass>
 
         <subclass name="ProfileDataEntity" extends="DataEntity" discriminator-value="profile">
-            <set name="value" table="observation" inverse="true">
+            <set name="value" table="observation" cascade="remove">
                 <key column="fk_parent_observation_id" not-null="false" foreign-key="fk_parent_observation"/>
                 <one-to-many class="DataEntity" />
             </set>
-            <many-to-one class="VerticalMetadataEntity" name="verticalMetadata" foreign-key="fk_value_profile">
-                <column name="fk_value_profile_id" not-null="false">
-                    <comment>Reference to the vertical metadata that belongs that belongs to this profile dataset.</comment>
-                </column>
-            </many-to-one>
         </subclass>
 
     </class>

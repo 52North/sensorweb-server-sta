@@ -31,3 +31,4 @@ sensor-things-api-app/console.log
 # IntelliJ IDE Files
 .idea/*
 *.iml
+*.checkstyle

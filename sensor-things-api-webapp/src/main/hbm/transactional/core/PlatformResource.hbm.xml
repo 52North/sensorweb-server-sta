@@ -18,7 +18,7 @@
                 <comment>Unique identifier of the platform which can be used for filtering. Should be a URI, UUID. E.g. http://www.example.org/123, 123-321</comment>
             </column>
         </property>
-        <many-to-one name="identifierCodespace" class="CodespaceEntity" foreign-key="fk_platform_identifier_codespace">
+        <many-to-one name="identifierCodespace" class="CodespaceEntity" foreign-key="fk_platform_identifier_codesp">
             <column name="fk_identifier_codespace_id">
                 <comment>The codespace of the platform identifier, reference to the codespace table.</comment>
             </column>
@@ -38,7 +38,7 @@
                 <comment>A short description of the platform</comment>
             </column>
         </property>
-        <set inverse="true" name="parameters" table="platform_parameter" cascade="all" fetch="join">
+        <set inverse="true" name="parameters" table="platform_parameter" fetch="join">
             <comment>Storage of relations between platform and related parameter</comment>
             <key not-null="true" foreign-key="fk_platform_parameter">
                 <column name="fk_platform_id">
@@ -51,6 +51,29 @@
                 </column>
             </many-to-many>
         </set>
+        <set name="locations" table="thing_location" inverse="false">
+            <key foreign-key="fk_thing_location">
+                <column name="fk_thing_id" not-null="false"/>
+            </key>
+            <many-to-many class="org.n52.series.db.beans.sta.LocationEntity" foreign-key="fk_location_thing">
+                <column name="fk_location_id" not-null="false"/>
+            </many-to-many>
+        </set>
+        <set name="historicalLocations" table="historical_location" inverse="false" >
+            <key foreign-key="fk_thing_historical_location" update="false">
+                <column name="fk_thing_id" not-null="true"/>
+            </key>
+            <one-to-many class="org.n52.series.db.beans.sta.HistoricalLocationEntity" />
+        </set>
+        <set name="datastreams" table="datastream" inverse="true">
+            <key foreign-key="fk_datastream_thing">
+                <column name="fk_thing_id" not-null="true"/>
+            </key>
+            <one-to-many class="org.n52.series.db.beans.sta.DatastreamEntity" />
+        </set>
+        <property name="properties" type="text">
+            <column name="properties" not-null="false"/>
+        </property>
         <set name="translations" table="platform_i18n" inverse="true" fetch="select">
             <key column="fk_platform_id" not-null="true" />
             <one-to-many class="org.n52.series.db.beans.i18n.I18nPlatformEntity" />

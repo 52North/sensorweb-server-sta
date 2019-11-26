@@ -101,6 +101,9 @@ public class ObservationService extends
     private static final DatasetQuerySpecifications dQS = new DatasetQuerySpecifications();
     private static final DatastreamQuerySpecifications dsQS = new DatastreamQuerySpecifications();
 
+    private static final String STA = "STA";
+
+
     private final CategoryRepository categoryRepository;
     private final OfferingRepository offeringRepository;
     private final DatastreamRepository datastreamRepository;
@@ -338,7 +341,7 @@ public class ObservationService extends
         dataset.setCategory(category);
         dataset.setFeature(feature);
         dataset.setOffering(offering);
-        dataset.setPlatform(dataset.getPlatform());
+        dataset.setPlatform(datastream.getThing());
         dataset.setUnit(datastream.getUnit());
         dataset.setOmObservationType(datastream.getObservationType());
         Specification<DatasetEntity> query = dQS.matchProcedures(datastream.getProcedure().getIdentifier())
@@ -421,9 +424,9 @@ public class ObservationService extends
     private CategoryEntity checkCategory(DatastreamEntity datastream) {
         CategoryEntity category = new CategoryEntity();
         PhenomenonEntity obsProp = datastream.getObservableProperty();
-        category.setIdentifier(obsProp.getStaIdentifier());
-        category.setName(obsProp.getName());
-        category.setDescription(obsProp.getDescription());
+        category.setIdentifier(STA);
+        category.setName(STA);
+        category.setDescription("Default SOS category");
         if (!categoryRepository.existsByIdentifier(category.getIdentifier())) {
             return categoryRepository.save(category);
         } else {
