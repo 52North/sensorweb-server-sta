@@ -33,35 +33,37 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import org.n52.series.db.beans.PhenomenonEntity;
-import org.n52.sta.serdes.json.JSONObservedProperty;
-import org.n52.sta.serdes.model.ObservedPropertyEntityDefinition;
+import org.locationtech.jts.io.geojson.GeoJsonWriter;
+import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.sta.serdes.json.JSONLocation;
+import org.n52.sta.serdes.model.LocationEntityDefinition;
 import org.n52.sta.serdes.model.STAEntityDefinition;
-import org.n52.sta.serdes.model.ElementWithQueryOptions.ObservedPropertyWithQueryOptions;
+import org.n52.sta.serdes.model.ElementWithQueryOptions.LocationWithQueryOptions;
 import org.n52.sta.service.query.QueryOptions;
 
 import java.io.IOException;
 import java.util.Set;
 
-public class ObservedPropertySerde {
+public class LocationSerDes {
 
-    public static class ObservedPropertySerializer extends AbstractSTASerializer<ObservedPropertyWithQueryOptions> {
+    public static class LocationSerializer extends AbstractSTASerializer<LocationWithQueryOptions> {
 
-        private final String rootUrl;
-        private final String entitySetName;
+        private static final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
 
-        public ObservedPropertySerializer(String rootUrl) {
-            super(ObservedPropertyWithQueryOptions.class);
+        private static final GeoJsonWriter GEO_JSON_WRITER = new GeoJsonWriter();
+
+        public LocationSerializer(String rootUrl) {
+            super(LocationWithQueryOptions.class);
             this.rootUrl = rootUrl;
-            this.entitySetName = ObservedPropertyEntityDefinition.entitySetName;
+            this.entitySetName = LocationEntityDefinition.entitySetName;
         }
 
         @Override
-        public void serialize(ObservedPropertyWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers)
+        public void serialize(LocationWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers)
                 throws IOException {
             gen.writeStartObject();
-            PhenomenonEntity obsProp = value.getEntity();
-            QueryOptions options = value .getQueryOptions();
+            LocationEntity location = value.getEntity();
+            QueryOptions options = value.getQueryOptions();
 
             Set<String> fieldsToSerialize = null;
             boolean hasSelectOption = false;
@@ -71,42 +73,52 @@ public class ObservedPropertySerde {
                     fieldsToSerialize = options.getSelectOption();
                 }
             }
-
             // olingo @iot links
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
-                writeId(gen, obsProp.getStaIdentifier());
+                writeId(gen, location.getIdentifier());
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_SELF_LINK)) {
-                writeSelfLink(gen, obsProp.getStaIdentifier());
+                writeSelfLink(gen, location.getIdentifier());
             }
 
+            // actual properties
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_NAME)) {
-                gen.writeStringField(STAEntityDefinition.PROP_NAME, obsProp.getName());
+                gen.writeStringField(STAEntityDefinition.PROP_NAME, location.getName());
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_DESCRIPTION)) {
-                gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, obsProp.getDescription());
+                gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, location.getDescription());
             }
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_DEFINITION)) {
-                gen.writeObjectField(STAEntityDefinition.PROP_PROPERTIES, obsProp.getIdentifier());
+            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ENCODINGTYPE)) {
+                // only write out encodingtype if there is a location present
+                if (location.isSetGeometry()) {
+                    gen.writeStringField(STAEntityDefinition.PROP_ENCODINGTYPE, ENCODINGTYPE_GEOJSON);
+                }
+            }
+            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_LOCATION)) {
+                gen.writeObjectFieldStart(STAEntityDefinition.PROP_LOCATION);
+                gen.writeStringField("type", "Feature");
+                gen.writeObjectFieldStart("geometry");
+                gen.writeRaw(GEO_JSON_WRITER.write(location.getGeometryEntity().getGeometry()));
+                gen.writeEndObject();
+                gen.writeEndObject();
             }
 
             // navigation properties
-            for (String navigationProperty : ObservedPropertyEntityDefinition.navigationProperties) {
+            for (String navigationProperty : LocationEntityDefinition.navigationProperties) {
                 if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
-                    writeNavigationProp(gen, navigationProperty, obsProp.getStaIdentifier());
+                    writeNavigationProp(gen, navigationProperty, location.getIdentifier());
                 }
             }
             //TODO: Deal with $expand
-
             gen.writeEndObject();
         }
     }
 
-    public static class ObservedPropertyDeserializer extends JsonDeserializer<PhenomenonEntity> {
+    public static class LocationDeserializer extends JsonDeserializer<LocationEntity> {
 
         @Override
-        public PhenomenonEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return p.readValueAs(JSONObservedProperty.class).toEntity();
+        public LocationEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+            return p.readValueAs(JSONLocation.class).toEntity();
         }
     }
 }

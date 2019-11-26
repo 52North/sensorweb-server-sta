@@ -33,32 +33,38 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import org.n52.series.db.beans.sta.HistoricalLocationEntity;
-import org.n52.sta.serdes.json.JSONHistoricalLocation;
-import org.n52.sta.serdes.model.ElementWithQueryOptions.HistoricalLocationWithQueryOptions;
-import org.n52.sta.serdes.model.HistoricalLocationEntityDefinition;
+import org.locationtech.jts.io.geojson.GeoJsonWriter;
+import org.n52.series.db.beans.AbstractFeatureEntity;
+import org.n52.series.db.beans.FeatureEntity;
+import org.n52.sta.serdes.json.JSONFeatureOfInterest;
+import org.n52.sta.serdes.model.ElementWithQueryOptions.FeatureOfInterestWithQueryOptions;
+import org.n52.sta.serdes.model.FeatureOfInterestEntityDefinition;
 import org.n52.sta.serdes.model.STAEntityDefinition;
 import org.n52.sta.service.query.QueryOptions;
 
 import java.io.IOException;
 import java.util.Set;
 
-public class HistoricalLocationSerde {
+public class FeatureOfInterestSerDes {
 
-    public static class HistoricalLocationSerializer extends AbstractSTASerializer<HistoricalLocationWithQueryOptions> {
+    public static class FeatureOfInterestSerializer extends AbstractSTASerializer<FeatureOfInterestWithQueryOptions> {
 
-        public HistoricalLocationSerializer(String rootUrl) {
-            super(HistoricalLocationWithQueryOptions.class);
+        private static final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
+
+        private static final GeoJsonWriter GEO_JSON_WRITER = new GeoJsonWriter();
+
+        public FeatureOfInterestSerializer(String rootUrl) {
+            super(FeatureOfInterestWithQueryOptions.class);
             this.rootUrl = rootUrl;
-            this.entitySetName = HistoricalLocationEntityDefinition.entitySetName;
+            this.entitySetName = FeatureOfInterestEntityDefinition.entitySetName;
         }
 
         @Override
-        public void serialize(HistoricalLocationWithQueryOptions value,
+        public void serialize(FeatureOfInterestWithQueryOptions value,
                               JsonGenerator gen,
                               SerializerProvider serializers) throws IOException {
             gen.writeStartObject();
-            HistoricalLocationEntity histLoc = value.getEntity();
+            AbstractFeatureEntity feature = value.getEntity();
             QueryOptions options = value.getQueryOptions();
 
             Set<String> fieldsToSerialize = null;
@@ -71,21 +77,39 @@ public class HistoricalLocationSerde {
             }
             // olingo @iot links
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
-                writeId(gen, histLoc.getIdentifier());
+                writeId(gen, feature.getIdentifier());
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_SELF_LINK)) {
-                writeSelfLink(gen, histLoc.getIdentifier());
+                writeSelfLink(gen, feature.getIdentifier());
             }
 
             // actual properties
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_TIME)) {
-                gen.writeStringField(STAEntityDefinition.PROP_TIME, histLoc.getTime().toInstant().toString());
+            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_NAME)) {
+                gen.writeStringField(STAEntityDefinition.PROP_NAME, feature.getName());
+            }
+            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_DESCRIPTION)) {
+                gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, feature.getDescription());
+            }
+            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ENCODINGTYPE)) {
+                // only write out encodingtype if there is a location present
+                if (feature.isSetGeometry()) {
+                    gen.writeStringField(STAEntityDefinition.PROP_ENCODINGTYPE, ENCODINGTYPE_GEOJSON);
+                }
+            }
+            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_FEATURE)) {
+                gen.writeObjectFieldStart(STAEntityDefinition.PROP_LOCATION);
+                gen.writeStringField("type", "Feature");
+                gen.writeObjectFieldStart("geometry");
+                gen.writeRaw(GEO_JSON_WRITER.write(feature.getGeometryEntity().getGeometry()));
+                gen.writeEndObject();
+                gen.writeEndObject();
             }
 
+
             // navigation properties
-            for (String navigationProperty : HistoricalLocationEntityDefinition.navigationProperties) {
+            for (String navigationProperty : FeatureOfInterestEntityDefinition.navigationProperties) {
                 if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
-                    writeNavigationProp(gen, navigationProperty, histLoc.getIdentifier());
+                    writeNavigationProp(gen, navigationProperty, feature.getIdentifier());
                 }
             }
             //TODO: Deal with $expand
@@ -93,11 +117,11 @@ public class HistoricalLocationSerde {
         }
     }
 
-    public static class HistoricalLocationDeserializer extends JsonDeserializer<HistoricalLocationEntity> {
+    public static class FeatureOfInterestDeserializer extends JsonDeserializer<FeatureEntity> {
 
         @Override
-        public HistoricalLocationEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return p.readValueAs(JSONHistoricalLocation.class).toEntity();
+        public FeatureEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+            return p.readValueAs(JSONFeatureOfInterest.class).toEntity();
         }
     }
 }

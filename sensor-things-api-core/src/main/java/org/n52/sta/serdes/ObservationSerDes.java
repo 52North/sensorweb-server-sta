@@ -62,7 +62,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Set;
 
-public class ObservationSerde {
+public class ObservationSerDes {
 
     public static class ObservationSerializer extends AbstractSTASerializer<ObservationWithQueryOptions> {
 

@@ -31,39 +31,33 @@ package org.n52.sta.serdes;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import org.n52.series.db.beans.ProcedureEntity;
-import org.n52.series.db.beans.ProcedureHistoryEntity;
-import org.n52.series.db.beans.sta.SensorEntity;
-import org.n52.sta.serdes.json.JSONSensor;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import org.n52.series.db.beans.PlatformEntity;
+import org.n52.sta.serdes.json.JSONThing;
 import org.n52.sta.serdes.model.STAEntityDefinition;
-import org.n52.sta.serdes.model.SensorEntityDefinition;
-import org.n52.sta.serdes.model.ElementWithQueryOptions.SensorWithQueryOptions;
+import org.n52.sta.serdes.model.ThingEntityDefinition;
+import org.n52.sta.serdes.model.ElementWithQueryOptions.ThingWithQueryOptions;
 import org.n52.sta.service.query.QueryOptions;
 
 import java.io.IOException;
-import java.util.Optional;
 import java.util.Set;
 
-public class SensorSerdes {
+public class ThingSerDes {
 
-    public static class SensorSerializer extends AbstractSTASerializer<SensorWithQueryOptions> {
+    public static class ThingSerializer extends AbstractSTASerializer<ThingWithQueryOptions> {
 
-        private static final String STA_SENSORML_2 = "http://www.opengis.net/doc/IS/SensorML/2.0";
-        private static final String SENSORML_2 = "http://www.opengis.net/sensorml/2.0";
-
-        public SensorSerializer(String rootUrl) {
-            super(SensorWithQueryOptions.class);
+        public ThingSerializer(String rootUrl) {
+            super(ThingWithQueryOptions.class);
             this.rootUrl = rootUrl;
-            this.entitySetName = SensorEntityDefinition.entitySetName;
+            this.entitySetName = ThingEntityDefinition.entitySetName;
         }
 
         @Override
-        public void serialize(SensorWithQueryOptions value, JsonGenerator gen, SerializerProvider provider)
+        public void serialize(ThingWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers)
                 throws IOException {
             gen.writeStartObject();
-            ProcedureEntity sensor = value.getEntity();
+            PlatformEntity thing = value.getEntity();
             QueryOptions options = value.getQueryOptions();
 
             Set<String> fieldsToSerialize = null;
@@ -76,57 +70,46 @@ public class SensorSerdes {
             }
             // olingo @iot links
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
-                writeId(gen, sensor.getIdentifier());
+                writeId(gen, thing.getIdentifier());
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_SELF_LINK)) {
-                writeSelfLink(gen, sensor.getIdentifier());
+                writeSelfLink(gen, thing.getIdentifier());
             }
 
             // actual properties
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_NAME)) {
-                gen.writeStringField(STAEntityDefinition.PROP_NAME, sensor.getName());
+                gen.writeStringField(STAEntityDefinition.PROP_NAME, thing.getName());
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_DESCRIPTION)) {
-                gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, sensor.getDescription());
+                gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, thing.getDescription());
             }
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ENCODINGTYPE)) {
-                String format = sensor.getFormat().getFormat();
-                if (format.equalsIgnoreCase(SENSORML_2)) {
-                    format = STA_SENSORML_2;
-                }
-                gen.writeObjectField(STAEntityDefinition.PROP_ENCODINGTYPE, format);
-            }
-
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_METADATA)) {
-                String metadata = "metadata";
-                if (sensor.getDescriptionFile() != null && !sensor.getDescriptionFile().isEmpty()) {
-                    metadata = sensor.getDescriptionFile();
-                } else if (sensor.hasProcedureHistory()) {
-                    Optional<ProcedureHistoryEntity> history =
-                            sensor.getProcedureHistory().stream().filter(h -> h.getEndTime() == null).findFirst();
-                    if (history.isPresent()) {
-                        metadata = history.get().getXml();
-                    }
-                }
-                gen.writeStringField(STAEntityDefinition.PROP_METADATA, metadata);
+            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_PROPERTIES)) {
+                gen.writeObjectField(STAEntityDefinition.PROP_PROPERTIES, thing.getProperties());
             }
 
             // navigation properties
-            for (String navigationProperty : SensorEntityDefinition.navigationProperties) {
+            for (String navigationProperty : ThingEntityDefinition.navigationProperties) {
                 if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
-                    writeNavigationProp(gen, navigationProperty, sensor.getIdentifier());
+                    writeNavigationProp(gen, navigationProperty, thing.getIdentifier());
                 }
             }
             //TODO: Deal with $expand
             gen.writeEndObject();
         }
+
     }
 
-    public static class SensorDeserializer extends JsonDeserializer<SensorEntity> {
+    public static class ThingDeserializer extends StdDeserializer<PlatformEntity> {
+
+        public ThingDeserializer() {
+            super(PlatformEntity.class);
+        }
 
         @Override
-        public SensorEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return p.readValueAs(JSONSensor.class).toEntity();
+        public PlatformEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+            return p.readValueAs(JSONThing.class).toEntity();
         }
     }
+
+
 }

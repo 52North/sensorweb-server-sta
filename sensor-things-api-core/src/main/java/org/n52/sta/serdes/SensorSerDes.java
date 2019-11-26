@@ -33,38 +33,37 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import org.locationtech.jts.io.geojson.GeoJsonWriter;
-import org.n52.series.db.beans.AbstractFeatureEntity;
-import org.n52.series.db.beans.FeatureEntity;
-import org.n52.sta.serdes.json.JSONFeatureOfInterest;
-import org.n52.sta.serdes.model.ElementWithQueryOptions.FeatureOfInterestWithQueryOptions;
-import org.n52.sta.serdes.model.FeatureOfInterestEntityDefinition;
+import org.n52.series.db.beans.ProcedureEntity;
+import org.n52.series.db.beans.ProcedureHistoryEntity;
+import org.n52.series.db.beans.sta.SensorEntity;
+import org.n52.sta.serdes.json.JSONSensor;
 import org.n52.sta.serdes.model.STAEntityDefinition;
+import org.n52.sta.serdes.model.SensorEntityDefinition;
+import org.n52.sta.serdes.model.ElementWithQueryOptions.SensorWithQueryOptions;
 import org.n52.sta.service.query.QueryOptions;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.Set;
 
-public class FeatureOfInterestSerdes {
+public class SensorSerDes {
 
-    public static class FeatureOfInterestSerializer extends AbstractSTASerializer<FeatureOfInterestWithQueryOptions> {
+    public static class SensorSerializer extends AbstractSTASerializer<SensorWithQueryOptions> {
 
-        private static final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
+        private static final String STA_SENSORML_2 = "http://www.opengis.net/doc/IS/SensorML/2.0";
+        private static final String SENSORML_2 = "http://www.opengis.net/sensorml/2.0";
 
-        private static final GeoJsonWriter GEO_JSON_WRITER = new GeoJsonWriter();
-
-        public FeatureOfInterestSerializer(String rootUrl) {
-            super(FeatureOfInterestWithQueryOptions.class);
+        public SensorSerializer(String rootUrl) {
+            super(SensorWithQueryOptions.class);
             this.rootUrl = rootUrl;
-            this.entitySetName = FeatureOfInterestEntityDefinition.entitySetName;
+            this.entitySetName = SensorEntityDefinition.entitySetName;
         }
 
         @Override
-        public void serialize(FeatureOfInterestWithQueryOptions value,
-                              JsonGenerator gen,
-                              SerializerProvider serializers) throws IOException {
+        public void serialize(SensorWithQueryOptions value, JsonGenerator gen, SerializerProvider provider)
+                throws IOException {
             gen.writeStartObject();
-            AbstractFeatureEntity feature = value.getEntity();
+            ProcedureEntity sensor = value.getEntity();
             QueryOptions options = value.getQueryOptions();
 
             Set<String> fieldsToSerialize = null;
@@ -77,39 +76,45 @@ public class FeatureOfInterestSerdes {
             }
             // olingo @iot links
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
-                writeId(gen, feature.getIdentifier());
+                writeId(gen, sensor.getIdentifier());
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_SELF_LINK)) {
-                writeSelfLink(gen, feature.getIdentifier());
+                writeSelfLink(gen, sensor.getIdentifier());
             }
 
             // actual properties
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_NAME)) {
-                gen.writeStringField(STAEntityDefinition.PROP_NAME, feature.getName());
+                gen.writeStringField(STAEntityDefinition.PROP_NAME, sensor.getName());
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_DESCRIPTION)) {
-                gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, feature.getDescription());
+                gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, sensor.getDescription());
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ENCODINGTYPE)) {
-                // only write out encodingtype if there is a location present
-                if (feature.isSetGeometry()) {
-                    gen.writeStringField(STAEntityDefinition.PROP_ENCODINGTYPE, ENCODINGTYPE_GEOJSON);
+                String format = sensor.getFormat().getFormat();
+                if (format.equalsIgnoreCase(SENSORML_2)) {
+                    format = STA_SENSORML_2;
                 }
-            }
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_FEATURE)) {
-                gen.writeObjectFieldStart(STAEntityDefinition.PROP_LOCATION);
-                gen.writeStringField("type", "Feature");
-                gen.writeObjectFieldStart("geometry");
-                gen.writeRaw(GEO_JSON_WRITER.write(feature.getGeometryEntity().getGeometry()));
-                gen.writeEndObject();
-                gen.writeEndObject();
+                gen.writeObjectField(STAEntityDefinition.PROP_ENCODINGTYPE, format);
             }
 
+            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_METADATA)) {
+                String metadata = "metadata";
+                if (sensor.getDescriptionFile() != null && !sensor.getDescriptionFile().isEmpty()) {
+                    metadata = sensor.getDescriptionFile();
+                } else if (sensor.hasProcedureHistory()) {
+                    Optional<ProcedureHistoryEntity> history =
+                            sensor.getProcedureHistory().stream().filter(h -> h.getEndTime() == null).findFirst();
+                    if (history.isPresent()) {
+                        metadata = history.get().getXml();
+                    }
+                }
+                gen.writeStringField(STAEntityDefinition.PROP_METADATA, metadata);
+            }
 
             // navigation properties
-            for (String navigationProperty : FeatureOfInterestEntityDefinition.navigationProperties) {
+            for (String navigationProperty : SensorEntityDefinition.navigationProperties) {
                 if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
-                    writeNavigationProp(gen, navigationProperty, feature.getIdentifier());
+                    writeNavigationProp(gen, navigationProperty, sensor.getIdentifier());
                 }
             }
             //TODO: Deal with $expand
@@ -117,11 +122,11 @@ public class FeatureOfInterestSerdes {
         }
     }
 
-    public static class FeatureOfInterestDeserializer extends JsonDeserializer<FeatureEntity> {
+    public static class SensorDeserializer extends JsonDeserializer<SensorEntity> {
 
         @Override
-        public FeatureEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return p.readValueAs(JSONFeatureOfInterest.class).toEntity();
+        public SensorEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+            return p.readValueAs(JSONSensor.class).toEntity();
         }
     }
 }

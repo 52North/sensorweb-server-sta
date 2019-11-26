@@ -31,33 +31,34 @@ package org.n52.sta.serdes;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import org.n52.series.db.beans.PlatformEntity;
-import org.n52.sta.serdes.json.JSONThing;
+import org.n52.series.db.beans.sta.HistoricalLocationEntity;
+import org.n52.sta.serdes.json.JSONHistoricalLocation;
+import org.n52.sta.serdes.model.ElementWithQueryOptions.HistoricalLocationWithQueryOptions;
+import org.n52.sta.serdes.model.HistoricalLocationEntityDefinition;
 import org.n52.sta.serdes.model.STAEntityDefinition;
-import org.n52.sta.serdes.model.ThingEntityDefinition;
-import org.n52.sta.serdes.model.ElementWithQueryOptions.ThingWithQueryOptions;
 import org.n52.sta.service.query.QueryOptions;
 
 import java.io.IOException;
 import java.util.Set;
 
-public class ThingSerdes {
+public class HistoricalLocationSerDes {
 
-    public static class ThingSerializer extends AbstractSTASerializer<ThingWithQueryOptions> {
+    public static class HistoricalLocationSerializer extends AbstractSTASerializer<HistoricalLocationWithQueryOptions> {
 
-        public ThingSerializer(String rootUrl) {
-            super(ThingWithQueryOptions.class);
+        public HistoricalLocationSerializer(String rootUrl) {
+            super(HistoricalLocationWithQueryOptions.class);
             this.rootUrl = rootUrl;
-            this.entitySetName = ThingEntityDefinition.entitySetName;
+            this.entitySetName = HistoricalLocationEntityDefinition.entitySetName;
         }
 
         @Override
-        public void serialize(ThingWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers)
-                throws IOException {
+        public void serialize(HistoricalLocationWithQueryOptions value,
+                              JsonGenerator gen,
+                              SerializerProvider serializers) throws IOException {
             gen.writeStartObject();
-            PlatformEntity thing = value.getEntity();
+            HistoricalLocationEntity histLoc = value.getEntity();
             QueryOptions options = value.getQueryOptions();
 
             Set<String> fieldsToSerialize = null;
@@ -70,46 +71,33 @@ public class ThingSerdes {
             }
             // olingo @iot links
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
-                writeId(gen, thing.getIdentifier());
+                writeId(gen, histLoc.getIdentifier());
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_SELF_LINK)) {
-                writeSelfLink(gen, thing.getIdentifier());
+                writeSelfLink(gen, histLoc.getIdentifier());
             }
 
             // actual properties
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_NAME)) {
-                gen.writeStringField(STAEntityDefinition.PROP_NAME, thing.getName());
-            }
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_DESCRIPTION)) {
-                gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, thing.getDescription());
-            }
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_PROPERTIES)) {
-                gen.writeObjectField(STAEntityDefinition.PROP_PROPERTIES, thing.getProperties());
+            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_TIME)) {
+                gen.writeStringField(STAEntityDefinition.PROP_TIME, histLoc.getTime().toInstant().toString());
             }
 
             // navigation properties
-            for (String navigationProperty : ThingEntityDefinition.navigationProperties) {
+            for (String navigationProperty : HistoricalLocationEntityDefinition.navigationProperties) {
                 if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
-                    writeNavigationProp(gen, navigationProperty, thing.getIdentifier());
+                    writeNavigationProp(gen, navigationProperty, histLoc.getIdentifier());
                 }
             }
             //TODO: Deal with $expand
             gen.writeEndObject();
         }
-
     }
 
-    public static class ThingDeserializer extends StdDeserializer<PlatformEntity> {
-
-        public ThingDeserializer() {
-            super(PlatformEntity.class);
-        }
+    public static class HistoricalLocationDeserializer extends JsonDeserializer<HistoricalLocationEntity> {
 
         @Override
-        public PlatformEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return p.readValueAs(JSONThing.class).toEntity();
+        public HistoricalLocationEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+            return p.readValueAs(JSONHistoricalLocation.class).toEntity();
         }
     }
-
-
 }

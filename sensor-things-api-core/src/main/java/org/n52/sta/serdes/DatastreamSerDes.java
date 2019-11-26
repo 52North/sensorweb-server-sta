@@ -47,7 +47,7 @@ import java.util.Set;
 
 import org.n52.sta.utils.TimeUtil;
 
-public class DatastreamSerdes {
+public class DatastreamSerDes {
 
     public static class DatastreamSerializer extends AbstractSTASerializer<DatastreamWithQueryOptions> {
 
