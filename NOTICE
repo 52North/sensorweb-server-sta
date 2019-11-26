@@ -44,6 +44,7 @@ This project includes:
   J2ObjC Annotations under The Apache Software License, Version 2.0
   Jackson datatype: jdk8 under The Apache Software License, Version 2.0
   Jackson datatype: JSR310 under The Apache Software License, Version 2.0
+  Jackson module: Afterburner under The Apache Software License, Version 2.0
   Jackson-annotations under The Apache Software License, Version 2.0
   Jackson-core under The Apache Software License, Version 2.0
   jackson-databind under The Apache Software License, Version 2.0
@@ -64,6 +65,7 @@ This project includes:
   JBoss Logging 3 under Apache License, version 2.0
   JCL 1.2 implemented over SLF4J under Apache License, Version 2.0
   Joda-Time under Apache License, Version 2.0
+  JSON.simple under The Apache Software License, Version 2.0
   JUL to SLF4J bridge under MIT License
   JVM Integration for Metrics under Apache License 2.0
   Librato Metrics API Java Library under Apache License 2.0
@@ -86,6 +88,7 @@ This project includes:
   odata-commons-core under The Apache Software License, Version 2.0
   odata-server-api under The Apache Software License, Version 2.0
   odata-server-core under The Apache Software License, Version 2.0
+  org.locationtech.jts.io:jts-io-common under Eclipse Publish License, Version 1.0 or Eclipse Distribution License - v 1.0
   org.locationtech.jts:jts-core under Eclipse Publish License, Version 1.0 or Eclipse Distribution License - v 1.0
   PostgreSQL JDBC Driver - JDBC 4.2 under BSD-2-Clause
   sensor-things-api-app under The Apache Software License, Version 2.0
