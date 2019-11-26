@@ -19,12 +19,7 @@
                 <comment>Unique identifier of the phenomenon which can be used for filtering. Should be a URI (reference to a vacabulary entry), UUID. E.g. http://www.example.org/123, 123-321</comment>
             </column>
         </property>
-        <property name="staIdentifier" type="string" index="idx_staIdentifier">
-            <column name="sta_identifier" not-null="true" unique-key="fk_phenomenon_id">
-                <comment>Unique identifier used by SensorThingsAPI for addressing the entity. Should be a URI (reference to a vacabulary entry), UUID. E.g. http://www.example.org/123, 123-321</comment>
-            </column>
-        </property>
-        <many-to-one name="identifierCodespace" class="CodespaceEntity" foreign-key="fk_phenomenon_identifier_codespace">
+        <many-to-one name="identifierCodespace" class="CodespaceEntity" foreign-key="fk_phenomenon_identifier_codesp">
             <column name="fk_identifier_codespace_id">
                 <comment>The codespace of the phenomenon identifier, reference to the codespace table.</comment>
             </column>

@@ -18,7 +18,7 @@
                 <!-- <comment>Unique identifier of the procedure which can be used for filtering. Should be a URI, UUID. E.g. http://www.example.org/123, 123-321</comment> -->
             </column>
         </property>
-        <many-to-one name="identifierCodespace" class="CodespaceEntity" foreign-key="fk_procedure_identifier_codespace">
+        <many-to-one name="identifierCodespace" class="CodespaceEntity" foreign-key="fk_procedure_identifier_codesp">
             <column name="fk_identifier_codespace_id">
                 <!-- <comment>The codespace of the procedure identifier, reference to the codespace table.</comment> -->
             </column>

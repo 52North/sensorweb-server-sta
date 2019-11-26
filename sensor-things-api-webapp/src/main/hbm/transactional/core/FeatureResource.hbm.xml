@@ -31,7 +31,7 @@
                 <comment>Unique identifier of the feature which is used for filtering. Should be a URI, UUID. E.g. http://www.example.org/123, 123-321</comment>
             </column>
         </property>
-        <many-to-one name="identifierCodespace" class="CodespaceEntity" foreign-key="fk_feature_identifier_codespace">
+        <many-to-one name="identifierCodespace" class="CodespaceEntity" foreign-key="fk_feature_identifier_codesp">
             <column name="fk_identifier_codespace_id">
                 <comment>The codespace of the feature identifier, reference to the codespace table.</comment>
             </column>
@@ -95,7 +95,7 @@
             <many-to-many class="AbstractFeatureEntity" column="fk_child_feature_id" foreign-key="fk_feature_child"/>
         </set>
 
-        <set name="parameters" table="feature_parameter" cascade="delete-orphan" inverse="false">
+        <set inverse="false" name="parameters" table="feature_parameter" fetch="join">
             <comment>Storage of relations between feature and related parameter</comment>
             <key not-null="true" foreign-key="fk_feature_parameter">
                 <column name="fk_feature_id">

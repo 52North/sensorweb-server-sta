@@ -33,7 +33,7 @@
                 <comment>The name of the vertical from values, e.g. to or depthTo</comment>
             </column>
         </property>
-        <many-to-one name="verticalUnit" class="UnitEntity" fetch="select" lazy="no-proxy" foreign-key="fk_profile_unit">
+        <many-to-one name="verticalUnit" class="UnitEntity" foreign-key="fk_profile_unit">
             <column name="fk_vertical_unit_id" not-null="true">
                 <comment>The unit of the vertical value, e.g. m</comment>
             </column>
