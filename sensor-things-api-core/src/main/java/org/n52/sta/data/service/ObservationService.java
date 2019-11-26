@@ -466,7 +466,7 @@ public class ObservationService extends
         dataset.setCategory(category);
         dataset.setFeature(feature);
         dataset.setOffering(offering);
-        dataset.setPlatform(dataset.getPlatform());
+        dataset.setPlatform(datastream.getThing());
         dataset.setUnit(datastream.getUnit());
         dataset.setOmObservationType(datastream.getObservationType());
         Specification<DatasetEntity> query = dQS.matchProcedures(datastream.getProcedure().getIdentifier())
