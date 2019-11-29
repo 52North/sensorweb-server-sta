@@ -35,16 +35,12 @@ import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.data.query.ThingQuerySpecifications;
 import org.n52.sta.data.repositories.ThingRepository;
+import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
+import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.ThingWithQueryOptions;
-import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
-import org.n52.sta.edm.provider.entities.DatastreamEntityProvider;
-import org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider;
-import org.n52.sta.edm.provider.entities.LocationEntityProvider;
 import org.n52.sta.serdes.model.STAEntityDefinition;
-import org.n52.sta.exception.STACRUDException;
-import org.n52.sta.mapping.ThingMapper;
-import org.n52.sta.service.query.QueryOptions;
+import org.n52.sta.utils.QueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.DependsOn;
@@ -71,11 +67,8 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     private static final Logger logger = LoggerFactory.getLogger(ThingService.class);
     private static final ThingQuerySpecifications tQS = new ThingQuerySpecifications();
 
-    private ThingMapper mapper;
-
-    public ThingService(ThingRepository repository, ThingMapper mapper) {
+    public ThingService(ThingRepository repository) {
         super(repository, PlatformEntity.class);
-        this.mapper = mapper;
     }
 
     @Override
@@ -312,7 +305,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
 
         if (entity.hasLocationEntities()) {
             collections.put(
-                    LocationEntityProvider.ET_LOCATION_NAME,
+                    STAEntityDefinition.LOCATION,
                     entity.getLocations()
                             .stream()
                             .map(LocationEntity::getIdentifier)
@@ -321,7 +314,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
 
         if (entity.hasHistoricalLocations()) {
             collections.put(
-                    HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME,
+                    STAEntityDefinition.HISTORICAL_LOCATION,
                     entity.getHistoricalLocations()
                             .stream()
                             .map(HistoricalLocationEntity::getIdentifier)
@@ -329,7 +322,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
         }
 
         if (entity.hasDatastreams()) {
-            collections.put(DatastreamEntityProvider.ET_DATASTREAM_NAME,
+            collections.put(STAEntityDefinition.DATASTREAM,
                     entity.getDatastreams()
                             .stream()
                             .map(DatastreamEntity::getIdentifier)

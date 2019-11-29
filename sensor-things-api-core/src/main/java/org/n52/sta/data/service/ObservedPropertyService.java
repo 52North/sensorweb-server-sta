@@ -37,14 +37,12 @@ import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.ObservedPropertyQuerySpecifications;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.PhenomenonRepository;
+import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
+import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.ObservedPropertyWithQueryOptions;
-import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
-import org.n52.sta.edm.provider.entities.DatastreamEntityProvider;
 import org.n52.sta.serdes.model.STAEntityDefinition;
-import org.n52.sta.exception.STACRUDException;
-import org.n52.sta.mapping.ObservedPropertyMapper;
-import org.n52.sta.service.query.QueryOptions;
+import org.n52.sta.utils.QueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,14 +77,10 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
 
     private final DatastreamRepository datastreamRepository;
 
-    private ObservedPropertyMapper mapper;
-
     @Autowired
     public ObservedPropertyService(PhenomenonRepository repository,
-                                   ObservedPropertyMapper mapper,
                                    DatastreamRepository datastreamRepository) {
         super(repository, PhenomenonEntity.class);
-        this.mapper = mapper;
         this.datastreamRepository = datastreamRepository;
     }
 
@@ -190,7 +184,7 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
         if (HttpMethod.PATCH.equals(method)) {
             Optional<PhenomenonEntity> existing = getRepository().findByStaIdentifier(id);
             if (existing.isPresent()) {
-                PhenomenonEntity merged = mapper.merge(existing.get(), entity);
+                PhenomenonEntity merged = merge(existing.get(), entity);
                 return getRepository().save(getAsPhenomenonEntity(merged));
             }
             throw new STACRUDException("Unable to update. Entity not found.", HttpStatus.NOT_FOUND);
@@ -271,7 +265,7 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
         List<DatastreamEntity> observations = datastreamRepository
                 .findAll(dQS.withObservedPropertyIdentifier(entity.getStaIdentifier()));
         collections.put(
-                DatastreamEntityProvider.ET_DATASTREAM_NAME,
+                STAEntityDefinition.DATASTREAM,
                 observations
                         .stream()
                         .map(DatastreamEntity::getIdentifier)

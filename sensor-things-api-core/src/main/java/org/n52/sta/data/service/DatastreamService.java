@@ -45,15 +45,11 @@ import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.FormatRepository;
 import org.n52.sta.data.repositories.UnitRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
-import org.n52.sta.edm.provider.entities.ObservedPropertyEntityProvider;
-import org.n52.sta.edm.provider.entities.SensorEntityProvider;
-import org.n52.sta.edm.provider.entities.ThingEntityProvider;
 import org.n52.sta.exception.STACRUDException;
-import org.n52.sta.mapping.DatastreamMapper;
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.DatastreamWithQueryOptions;
 import org.n52.sta.serdes.model.STAEntityDefinition;
-import org.n52.sta.service.query.QueryOptions;
+import org.n52.sta.utils.QueryOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
@@ -87,18 +83,13 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     private final DataRepository dataRepository;
     private final DatasetRepository datasetRepository;
 
-
-    private DatastreamMapper mapper;
-
     @Autowired
     public DatastreamService(DatastreamRepository repository,
-                             DatastreamMapper mapper,
                              UnitRepository unitRepository,
                              FormatRepository formatRepository,
                              DataRepository dataRepository,
                              DatasetRepository datasetRepository) {
         super(repository, DatastreamEntity.class);
-        this.mapper = mapper;
         this.unitRepository = unitRepository;
         this.formatRepository = formatRepository;
         this.dataRepository = dataRepository;
@@ -237,7 +228,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
         if (HttpMethod.PATCH.equals(method)) {
             Optional<DatastreamEntity> existing = getRepository().findOne(dQS.withIdentifier(id));
             if (existing.isPresent()) {
-                DatastreamEntity merged = mapper.merge(existing.get(), entity);
+                DatastreamEntity merged = merge(existing.get(), entity);
                 checkUnit(merged, entity);
                 if (merged.getDatasets() != null) {
                     merged.getDatasets().forEach(d -> {
@@ -424,17 +415,17 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
         DatastreamEntity entity = (DatastreamEntity) rawObject;
 
         if (entity.hasThing()) {
-            collections.put(ThingEntityProvider.ET_THING_NAME,
+            collections.put(STAEntityDefinition.THING,
                     Collections.singleton(entity.getThing().getIdentifier()));
         }
 
         if (entity.hasProcedure()) {
-            collections.put(SensorEntityProvider.ET_SENSOR_NAME,
+            collections.put(STAEntityDefinition.SENSOR,
                     Collections.singleton(entity.getProcedure().getIdentifier()));
         }
 
         if (entity.hasObservableProperty()) {
-            collections.put(ObservedPropertyEntityProvider.ET_OBSERVED_PROPERTY_NAME,
+            collections.put(STAEntityDefinition.OBSERVED_PROPERTY,
                     Collections.singleton(entity.getObservableProperty().getIdentifier()));
         }
 

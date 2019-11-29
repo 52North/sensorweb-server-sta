@@ -35,15 +35,12 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.data.query.LocationQuerySpecifications;
 import org.n52.sta.data.repositories.LocationEncodingRepository;
 import org.n52.sta.data.repositories.LocationRepository;
+import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
+import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.LocationWithQueryOptions;
-import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
-import org.n52.sta.edm.provider.entities.HistoricalLocationEntityProvider;
 import org.n52.sta.serdes.model.STAEntityDefinition;
-import org.n52.sta.edm.provider.entities.ThingEntityProvider;
-import org.n52.sta.exception.STACRUDException;
-import org.n52.sta.mapping.LocationMapper;
-import org.n52.sta.service.query.QueryOptions;
+import org.n52.sta.utils.QueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,15 +74,10 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     private static final String UNABLE_TO_UPDATE_ENTITY_NOT_FOUND = "Unable to update. Entity not found";
 
     private final LocationEncodingRepository locationEncodingRepository;
-
-    private LocationMapper mapper;
-
     @Autowired
     public LocationService(LocationRepository repository,
-                           LocationMapper mapper,
                            LocationEncodingRepository locationEncodingRepository) {
         super(repository, LocationEntity.class);
-        this.mapper = mapper;
         this.locationEncodingRepository = locationEncodingRepository;
     }
 
@@ -154,7 +146,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
         if (HttpMethod.PATCH.equals(method)) {
             Optional<LocationEntity> existing = getRepository().findByIdentifier(id);
             if (existing.isPresent()) {
-                LocationEntity merged = mapper.merge(existing.get(), entity);
+                LocationEntity merged = merge(existing.get(), entity);
                 return getRepository().save(merged);
             }
             throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HttpStatus.NOT_FOUND);
@@ -283,7 +275,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
         LocationEntity entity = (LocationEntity) rawObject;
 
         if (entity.hasHistoricalLocations()) {
-            collections.put(HistoricalLocationEntityProvider.ET_HISTORICAL_LOCATION_NAME,
+            collections.put(STAEntityDefinition.HISTORICAL_LOCATION,
                     entity.getHistoricalLocations()
                             .stream()
                             .map(HistoricalLocationEntity::getIdentifier)
@@ -291,7 +283,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
         }
 
         if (entity.hasThings()) {
-            collections.put(ThingEntityProvider.ET_THING_NAME,
+            collections.put(STAEntityDefinition.THING,
                     entity.getThings()
                             .stream()
                             .map(PlatformEntity::getIdentifier)

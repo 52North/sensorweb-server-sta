@@ -44,11 +44,10 @@ import org.n52.sta.data.repositories.FeatureOfInterestRepository;
 import org.n52.sta.data.repositories.FormatRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.exception.STACRUDException;
-import org.n52.sta.mapping.FeatureOfInterestMapper;
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.FeatureOfInterestWithQueryOptions;
 import org.n52.sta.serdes.model.STAEntityDefinition;
-import org.n52.sta.service.query.QueryOptions;
+import org.n52.sta.utils.QueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,17 +83,13 @@ public class FeatureOfInterestService
     private final DatasetRepository datasetRepository;
     private final DatastreamRepository datastreamRepository;
 
-    private FeatureOfInterestMapper mapper;
-
     @Autowired
     public FeatureOfInterestService(FeatureOfInterestRepository repository,
-                                    FeatureOfInterestMapper mapper,
                                     FormatRepository formatRepository,
                                     DataRepository dataRepository,
                                     DatasetRepository datasetRepository,
                                     DatastreamRepository datastreamRepository) {
         super(repository, AbstractFeatureEntity.class);
-        this.mapper = mapper;
         this.formatRepository = formatRepository;
         this.dataRepository = dataRepository;
         this.datasetRepository = datasetRepository;
@@ -192,7 +187,7 @@ public class FeatureOfInterestService
         if (HttpMethod.PATCH.equals(method)) {
             Optional<AbstractFeatureEntity<?>> existing = getRepository().findByIdentifier(id);
             if (existing.isPresent()) {
-                AbstractFeatureEntity<?> merged = mapper.merge(existing.get(), entity);
+                AbstractFeatureEntity<?> merged = merge(existing.get(), entity);
                 return getRepository().save(merged);
             }
             throw new STACRUDException("Unable to update. Entity not found.", HttpStatus.NOT_FOUND);

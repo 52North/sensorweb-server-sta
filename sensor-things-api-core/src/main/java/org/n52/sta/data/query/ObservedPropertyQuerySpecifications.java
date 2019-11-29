@@ -28,11 +28,11 @@
  */
 package org.n52.sta.data.query;
 
-import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
-import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.sta.exception.STAInvalidFilterExpressionException;
+import org.n52.sta.utils.ComparisonOperator;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -63,9 +63,9 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
     @Override
     public Specification<PhenomenonEntity> getFilterForProperty(String propertyName,
                                                                 Object propertyValue,
-                                                                BinaryOperatorKind operator,
+                                                                ComparisonOperator operator,
                                                                 boolean switched)
-            throws ExpressionVisitException {
+            throws STAInvalidFilterExpressionException {
         if (propertyName.equals(DATASTREAMS)) {
             return handleRelatedPropertyFilter(propertyName, (Specification<String>) propertyValue);
         } else if (propertyName.equals("id")) {
@@ -73,7 +73,7 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
                 try {
                     return handleDirectStringPropertyFilter(root.get(PhenomenonEntity.PROPERTY_IDENTIFIER),
                             propertyValue.toString(), operator, builder, false);
-                } catch (ExpressionVisitException e) {
+                } catch (STAInvalidFilterExpressionException e) {
                     throw new RuntimeException(e);
                 }
                 //
@@ -94,7 +94,7 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
 
     private Specification<PhenomenonEntity> handleDirectPropertyFilter(String propertyName,
                                                                        Object propertyValue,
-                                                                       BinaryOperatorKind operator,
+                                                                       ComparisonOperator operator,
                                                                        boolean switched) {
         return new Specification<PhenomenonEntity>() {
             @Override
@@ -123,7 +123,7 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
                             throw new RuntimeException("Error getting filter for Property: \"" + propertyName
                                     + "\". No such property in Entity.");
                     }
-                } catch (ExpressionVisitException e) {
+                } catch (STAInvalidFilterExpressionException e) {
                     throw new RuntimeException(e);
                 }
             }

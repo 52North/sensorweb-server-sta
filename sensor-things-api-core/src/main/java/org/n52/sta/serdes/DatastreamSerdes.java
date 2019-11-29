@@ -12,7 +12,7 @@ import org.n52.sta.serdes.json.JSONDatastream;
 import org.n52.sta.serdes.model.DatastreamEntityDefinition;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.DatastreamWithQueryOptions;
 import org.n52.sta.serdes.model.STAEntityDefinition;
-import org.n52.sta.service.query.QueryOptions;
+import org.n52.sta.utils.QueryOptions;
 
 import java.io.IOException;
 import java.util.Set;

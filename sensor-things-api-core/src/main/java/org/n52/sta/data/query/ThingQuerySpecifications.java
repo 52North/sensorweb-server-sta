@@ -28,13 +28,13 @@
  */
 package org.n52.sta.data.query;
 
-import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
-import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.sta.exception.STAInvalidFilterExpressionException;
+import org.n52.sta.utils.ComparisonOperator;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -82,9 +82,9 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
     @Override
     public Specification<PlatformEntity> getFilterForProperty(String propertyName,
                                                               Object propertyValue,
-                                                              BinaryOperatorKind operator,
+                                                              ComparisonOperator operator,
                                                               boolean switched)
-            throws ExpressionVisitException {
+            throws STAInvalidFilterExpressionException {
         if (propertyName.equals(DATASTREAMS) || propertyName.equals(LOCATIONS)
                 || propertyName.equals(HISTORICAL_LOCATIONS)) {
             return handleRelatedPropertyFilter(propertyName, (Subquery<String>) propertyValue);
@@ -93,7 +93,7 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
                 try {
                     return handleDirectStringPropertyFilter(root.get(PlatformEntity.PROPERTY_IDENTIFIER),
                             propertyValue.toString(), operator, builder, false);
-                } catch (ExpressionVisitException e) {
+                } catch (STAInvalidFilterExpressionException e) {
                     throw new RuntimeException(e);
                 }
                 //
@@ -138,10 +138,10 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
                         // return
                         // qPlatform.historicalLocationEntities.any().id.eqAny(propertyValue);
                     default:
-                        throw new ExpressionVisitException(
+                        throw new STAInvalidFilterExpressionException(
                                 "Filtering by Related Properties with cardinality >1 is currently not supported!");
                 }
-            } catch (ExpressionVisitException e) {
+            } catch (STAInvalidFilterExpressionException e) {
                 throw new RuntimeException(e);
             }
         };
@@ -149,7 +149,7 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
 
     private Specification<PlatformEntity> handleDirectPropertyFilter(String propertyName,
                                                                      Object propertyValue,
-                                                                     BinaryOperatorKind operator,
+                                                                     ComparisonOperator operator,
                                                                      boolean switched) {
         return new Specification<PlatformEntity>() {
             @Override
@@ -179,7 +179,7 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
                             throw new RuntimeException("Error getting filter for Property: \"" + propertyName
                                     + "\". No such property in Entity.");
                     }
-                } catch (ExpressionVisitException e) {
+                } catch (STAInvalidFilterExpressionException e) {
                     throw new RuntimeException(e);
                 }
             }

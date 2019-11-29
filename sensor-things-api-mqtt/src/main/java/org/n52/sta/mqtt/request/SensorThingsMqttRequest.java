@@ -34,15 +34,14 @@
 package org.n52.sta.mqtt.request;
 
 import org.apache.olingo.server.api.uri.UriResource;
-import org.n52.sta.service.query.QueryOptions;
-import org.n52.sta.service.request.SensorThingsRequest;
+import org.n52.sta.utils.QueryOptions;
 
 import java.util.List;
 
 /**
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
-public class SensorThingsMqttRequest extends SensorThingsRequest {
+public class SensorThingsMqttRequest {
 
     private String topic;
 
@@ -52,7 +51,8 @@ public class SensorThingsMqttRequest extends SensorThingsRequest {
      * @param queryOptions  {@link QueryOptions} for the request
      */
     public SensorThingsMqttRequest(String topic, List<UriResource> resourcePaths, QueryOptions queryOptions) {
-        super(resourcePaths, queryOptions);
+        //TODO: fix
+        //super(resourcePaths, queryOptions);
         this.topic = topic;
     }
 

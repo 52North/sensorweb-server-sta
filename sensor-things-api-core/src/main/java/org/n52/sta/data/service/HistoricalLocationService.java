@@ -34,15 +34,12 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.data.query.HistoricalLocationQuerySpecifications;
 import org.n52.sta.data.repositories.HistoricalLocationRepository;
 import org.n52.sta.data.repositories.LocationRepository;
+import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
+import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.HistoricalLocationWithQueryOptions;
-import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
-import org.n52.sta.edm.provider.entities.LocationEntityProvider;
 import org.n52.sta.serdes.model.STAEntityDefinition;
-import org.n52.sta.edm.provider.entities.ThingEntityProvider;
-import org.n52.sta.exception.STACRUDException;
-import org.n52.sta.mapping.HistoricalLocationMapper;
-import org.n52.sta.service.query.QueryOptions;
+import org.n52.sta.utils.QueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,14 +71,10 @@ public class HistoricalLocationService
 
     private final LocationRepository locationRepository;
 
-    private HistoricalLocationMapper mapper;
-
     @Autowired
     public HistoricalLocationService(HistoricalLocationRepository repository,
-                                     HistoricalLocationMapper mapper,
                                      LocationRepository locationRepository) {
         super(repository, HistoricalLocationEntity.class);
-        this.mapper = mapper;
         this.locationRepository = locationRepository;
     }
 
@@ -163,7 +156,7 @@ public class HistoricalLocationService
         if (HttpMethod.PATCH.equals(method)) {
             Optional<HistoricalLocationEntity> existing = getRepository().findByIdentifier(id);
             if (existing.isPresent()) {
-                HistoricalLocationEntity merged = mapper.merge(existing.get(), entity);
+                HistoricalLocationEntity merged = merge(existing.get(), entity);
                 return getRepository().save(merged);
             }
             throw new STACRUDException("Unable to update. Entity not found.", HttpStatus.NOT_FOUND);
@@ -245,12 +238,12 @@ public class HistoricalLocationService
         HistoricalLocationEntity entity = (HistoricalLocationEntity) rawObject;
 
         if (entity.hasThing()) {
-            collections.put(ThingEntityProvider.ET_THING_NAME,
+            collections.put(STAEntityDefinition.THING,
                     Collections.singleton(entity.getThing().getIdentifier()));
         }
 
         if (entity.hasLocationEntities()) {
-            collections.put(LocationEntityProvider.ET_LOCATION_NAME,
+            collections.put(STAEntityDefinition.LOCATION,
                     entity.getLocations()
                             .stream()
                             .map(LocationEntity::getIdentifier)

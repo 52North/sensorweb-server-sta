@@ -39,13 +39,12 @@ import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.FormatRepository;
 import org.n52.sta.data.repositories.ProcedureHistoryRepository;
 import org.n52.sta.data.repositories.ProcedureRepository;
+import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
+import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.SensorWithQueryOptions;
-import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
-import org.n52.sta.edm.provider.entities.DatastreamEntityProvider;
 import org.n52.sta.serdes.model.STAEntityDefinition;
-import org.n52.sta.exception.STACRUDException;
-import org.n52.sta.service.query.QueryOptions;
+import org.n52.sta.utils.QueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +76,6 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     private final FormatRepository formatRepository;
     private final ProcedureHistoryRepository procedureHistoryRepository;
     private final DatastreamRepository datastreamRepository;
-
 
     @Autowired
     public SensorService(ProcedureRepository repository,
@@ -160,7 +158,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
         SensorEntity entity = (SensorEntity) rawObject;
 
         if (entity.hasDatastreams()) {
-            collections.put(DatastreamEntityProvider.ET_DATASTREAM_NAME,
+            collections.put(STAEntityDefinition.DATASTREAM,
                     entity.getDatastreams()
                             .stream()
                             .map(DatastreamEntity::getIdentifier)

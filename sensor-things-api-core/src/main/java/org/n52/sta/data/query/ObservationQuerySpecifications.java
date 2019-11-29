@@ -28,8 +28,6 @@
  */
 package org.n52.sta.data.query;
 
-import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
-import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.joda.time.DateTime;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
@@ -37,6 +35,8 @@ import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.sta.exception.STAInvalidFilterExpressionException;
+import org.n52.sta.utils.ComparisonOperator;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.Join;
@@ -91,8 +91,9 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
     @Override
     public Specification<DataEntity<?>> getFilterForProperty(String propertyName,
                                                              Object propertyValue,
-                                                             BinaryOperatorKind operator,
-                                                             boolean switched) throws ExpressionVisitException {
+                                                             ComparisonOperator operator,
+                                                             boolean switched)
+            throws STAInvalidFilterExpressionException {
 
         if (propertyName.equals(DATASTREAM) || propertyName.equals(FEATUREOFINTEREST)) {
             return handleRelatedPropertyFilter(propertyName, (Specification<String>) propertyValue);
@@ -101,7 +102,7 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
                 try {
                     return handleDirectStringPropertyFilter(root.get(DataEntity.PROPERTY_IDENTIFIER),
                             propertyValue.toString(), operator, builder, false);
-                } catch (ExpressionVisitException e) {
+                } catch (STAInvalidFilterExpressionException e) {
                     throw new RuntimeException(e);
                 }
                 //
@@ -144,7 +145,7 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
     @SuppressWarnings({"unchecked", "rawtypes"})
     private Specification<DataEntity<?>> handleDirectPropertyFilter(String propertyName,
                                                                     Object propertyValue,
-                                                                    BinaryOperatorKind operator,
+                                                                    ComparisonOperator operator,
                                                                     boolean switched) {
         return (root, query, builder) -> {
             try {
@@ -203,7 +204,7 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
                                         builder);
                                 return builder.or(neStart, neEnd);
                             default:
-                                throw new ExpressionVisitException("Operator not implemented!");
+                                throw new STAInvalidFilterExpressionException("Operator not implemented!");
                         }
                     case "resultTime":
                         return this.handleDirectDateTimePropertyFilter(
@@ -212,9 +213,9 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
                                 operator,
                                 builder);
                     default:
-                        throw new ExpressionVisitException("Currently not implemented!");
+                        throw new STAInvalidFilterExpressionException("Currently not implemented!");
                 }
-            } catch (ExpressionVisitException e) {
+            } catch (STAInvalidFilterExpressionException e) {
                 throw new RuntimeException(e);
             }
         };

@@ -28,7 +28,7 @@ import org.n52.sta.serdes.json.JSONObservation;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.ObservationWithQueryOptions;
 import org.n52.sta.serdes.model.ObservationEntityDefinition;
 import org.n52.sta.serdes.model.STAEntityDefinition;
-import org.n52.sta.service.query.QueryOptions;
+import org.n52.sta.utils.QueryOptions;
 
 import java.io.IOException;
 import java.util.Date;

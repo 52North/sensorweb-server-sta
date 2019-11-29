@@ -28,25 +28,8 @@
  */
 package org.n52.sta.mqtt.core;
 
-import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmProvider;
-import org.apache.olingo.commons.api.edmx.EdmxReference;
-import org.apache.olingo.server.api.OData;
-import org.apache.olingo.server.api.ServiceMetadata;
-import org.apache.olingo.server.core.uri.parser.Parser;
-import org.n52.sta.mapping.AbstractMapper;
-import org.n52.sta.mapping.DatastreamMapper;
-import org.n52.sta.mapping.FeatureOfInterestMapper;
-import org.n52.sta.mapping.HistoricalLocationMapper;
-import org.n52.sta.mapping.LocationMapper;
-import org.n52.sta.mapping.ObservationMapper;
-import org.n52.sta.mapping.ObservedPropertyMapper;
-import org.n52.sta.mapping.SensorMapper;
-import org.n52.sta.mapping.ThingMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -103,34 +86,7 @@ public class MqttUtil {
         TYPEMAP = Collections.unmodifiableMap(map);
     }
 
-    private final ObservationMapper obsMapper;
-    private final DatastreamMapper dsMapper;
-    private final FeatureOfInterestMapper foiMapper;
-    private final HistoricalLocationMapper hlocMapper;
-    private final LocationMapper locMapper;
-    private final ObservedPropertyMapper obspropMapper;
-    private final SensorMapper sensorMapper;
-    private final ThingMapper thingMapper;
-
-    @Autowired
-    public MqttUtil(ObservationMapper obsMapper,
-                    DatastreamMapper dsMapper,
-                    FeatureOfInterestMapper foiMapper,
-                    HistoricalLocationMapper hlocMapper,
-                    LocationMapper locMapper,
-                    ObservedPropertyMapper obspropMapper,
-                    SensorMapper sensorMapper,
-                    ThingMapper thingMapper) {
-        this.obsMapper = obsMapper;
-        this.dsMapper = dsMapper;
-        this.foiMapper = foiMapper;
-        this.hlocMapper = hlocMapper;
-        this.locMapper = locMapper;
-        this.obspropMapper = obspropMapper;
-        this.sensorMapper = sensorMapper;
-        this.thingMapper = thingMapper;
-    }
-
+    /*
     @Bean
     public Parser uriParser(CsdlAbstractEdmProvider provider) {
         OData odata = OData.newInstance();
@@ -144,6 +100,7 @@ public class MqttUtil {
      * @param className Name of the base class
      * @return Mapper appropiate for this class
      */
+    /*
     public AbstractMapper getMapper(String className) {
         switch (className) {
             case OBSERVATION_ENTITY:
@@ -166,5 +123,6 @@ public class MqttUtil {
                 return null;
         }
     }
+    */
 
 }

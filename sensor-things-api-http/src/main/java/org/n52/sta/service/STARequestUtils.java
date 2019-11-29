@@ -1,6 +1,5 @@
 package org.n52.sta.service;
 
-import org.apache.olingo.server.api.uri.queryoption.OrderByOption;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
@@ -11,7 +10,7 @@ import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.exception.STAInvalidUrlException;
-import org.n52.sta.service.query.QueryOptions;
+import org.n52.sta.utils.QueryOptions;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -217,10 +216,6 @@ public class STARequestUtils {
     static QueryOptions createQueryOptions(Map<String, String> raw) {
 
         return new QueryOptions() {
-            @Override
-            public String getBaseURI() {
-                return null;
-            }
 
             @Override
             public boolean hasCountOption() {
@@ -253,7 +248,7 @@ public class STARequestUtils {
             }
 
             @Override
-            public OrderByOption getOrderByOption() {
+            public String getOrderByOption() {
                 return null;
             }
 

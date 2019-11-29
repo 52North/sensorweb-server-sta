@@ -63,11 +63,7 @@ public class MqttEntitySubscription extends AbstractMqttSubscription {
         }
 
         // Check ID (if not collection) and fail-fast if wrong id is present
-        if (!entityId.equals(entity.getProperty("id").getValue())) {
-            return false;
-        }
-
-        return true;
+        return entityId.equals(entity.getProperty("id").getValue());
     }
 
 }

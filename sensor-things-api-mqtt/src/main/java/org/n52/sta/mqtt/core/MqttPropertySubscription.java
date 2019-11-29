@@ -77,11 +77,8 @@ public class MqttPropertySubscription extends AbstractMqttSubscription {
         }
 
         // Check if property changed
-        if (differenceMap == null || differenceMap.contains(watchedEdmProperty)) {
-            return true;
-        }
+        return differenceMap == null || differenceMap.contains(watchedEdmProperty);
         // Subscription is not applicable
-        return false;
     }
 
     @Override

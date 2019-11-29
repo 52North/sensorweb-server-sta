@@ -28,13 +28,13 @@
  */
 package org.n52.sta.data.query;
 
-import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
-import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.sta.exception.STAInvalidFilterExpressionException;
+import org.n52.sta.utils.ComparisonOperator;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.Join;
@@ -78,7 +78,7 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
     @Override
     public Specification<LocationEntity> getFilterForProperty(String propertyName,
                                                               Object propertyValue,
-                                                              BinaryOperatorKind operator,
+                                                              ComparisonOperator operator,
                                                               boolean switched) {
         if (propertyName.equals(THINGS) || propertyName.equals(HISTORICAL_LOCATIONS)) {
             return handleRelatedPropertyFilter(propertyName, (Specification<String>) propertyValue);
@@ -87,7 +87,7 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
                 try {
                     return handleDirectStringPropertyFilter(root.get(LocationEntity.PROPERTY_IDENTIFIER),
                             propertyValue.toString(), operator, builder, false);
-                } catch (ExpressionVisitException e) {
+                } catch (STAInvalidFilterExpressionException e) {
                     throw new RuntimeException(e);
                 }
                 //
@@ -120,7 +120,7 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
     }
 
     private Specification<LocationEntity> handleDirectPropertyFilter(String propertyName, Object propertyValue,
-                                                                     BinaryOperatorKind operator, boolean switched) {
+                                                                     ComparisonOperator operator, boolean switched) {
         return (Specification<LocationEntity>) (root, query, builder) -> {
             try {
                 switch (propertyName) {
@@ -141,7 +141,7 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
                         throw new RuntimeException("Error getting filter for Property: \"" + propertyName
                                 + "\". No such property in Entity.");
                 }
-            } catch (ExpressionVisitException e) {
+            } catch (STAInvalidFilterExpressionException e) {
                 throw new RuntimeException(e);
             }
         };

@@ -57,15 +57,11 @@ import org.n52.sta.data.repositories.DatasetRepository;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.OfferingRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
-import org.n52.sta.edm.provider.entities.DatastreamEntityProvider;
-import org.n52.sta.edm.provider.entities.FeatureOfInterestEntityProvider;
 import org.n52.sta.exception.STACRUDException;
-import org.n52.sta.mapping.FeatureOfInterestMapper;
-import org.n52.sta.mapping.ObservationMapper;
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.ObservationWithQueryOptions;
 import org.n52.sta.serdes.model.STAEntityDefinition;
-import org.n52.sta.service.query.QueryOptions;
+import org.n52.sta.utils.QueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,21 +102,13 @@ public class ObservationService extends
     private final DatastreamRepository datastreamRepository;
     private final DatasetRepository datasetRepository;
 
-    private final ObservationMapper mapper;
-    private final FeatureOfInterestMapper featureMapper;
-
-
     @Autowired
     public ObservationService(DataRepository<DataEntity<?>> repository,
-                              ObservationMapper mapper,
-                              FeatureOfInterestMapper featureMapper,
                               CategoryRepository categoryRepository,
                               OfferingRepository offeringRepository,
                               DatastreamRepository datastreamRepository,
                               DatasetRepository datasetRepository) {
         super(repository, DataEntity.class);
-        this.mapper = mapper;
-        this.featureMapper = featureMapper;
         this.categoryRepository = categoryRepository;
         this.offeringRepository = offeringRepository;
         this.datastreamRepository = datastreamRepository;
@@ -257,7 +245,7 @@ public class ObservationService extends
         if (HttpMethod.PATCH.equals(method)) {
             Optional<DataEntity<?>> existing = getRepository().findByIdentifier(id);
             if (existing.isPresent()) {
-                DataEntity<?> merged = mapper.merge(existing.get(), entity);
+                DataEntity<?> merged = merge(existing.get(), entity);
                 DataEntity<?> saved = getRepository().save(merged);
 
                 List<DatastreamEntity> datastreamEntity =
@@ -592,14 +580,14 @@ public class ObservationService extends
         DataEntity<?> entity = (DataEntity<?>) rawObject;
 
         if (entity.getDataset() != null && entity.getDataset().getFeature() != null) {
-            collections.put(FeatureOfInterestEntityProvider.ET_FEATURE_OF_INTEREST_NAME,
+            collections.put(STAEntityDefinition.FEATURE_OF_INTEREST,
                     Collections.singleton(entity.getDataset().getFeature().getIdentifier()));
         }
 
         Optional<DatastreamEntity> datastreamEntity =
                 datastreamRepository.findOne(dsQS.withObservationIdentifier(entity.getIdentifier()));
         if (datastreamEntity.isPresent()) {
-            collections.put(DatastreamEntityProvider.ET_DATASTREAM_NAME,
+            collections.put(STAEntityDefinition.DATASTREAM,
                     Collections.singleton(datastreamEntity.get().getIdentifier()));
         } else {
             logger.debug("No Datastream associated with this Entity {}", entity.getIdentifier());

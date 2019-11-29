@@ -8,10 +8,10 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.serdes.json.JSONLocation;
+import org.n52.sta.serdes.model.ElementWithQueryOptions.LocationWithQueryOptions;
 import org.n52.sta.serdes.model.LocationEntityDefinition;
 import org.n52.sta.serdes.model.STAEntityDefinition;
-import org.n52.sta.serdes.model.ElementWithQueryOptions.LocationWithQueryOptions;
-import org.n52.sta.service.query.QueryOptions;
+import org.n52.sta.utils.QueryOptions;
 
 import java.io.IOException;
 import java.util.Set;

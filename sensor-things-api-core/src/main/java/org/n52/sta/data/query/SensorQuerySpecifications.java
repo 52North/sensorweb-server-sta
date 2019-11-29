@@ -28,12 +28,12 @@
  */
 package org.n52.sta.data.query;
 
-import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
-import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.sta.exception.STAInvalidFilterExpressionException;
+import org.n52.sta.utils.ComparisonOperator;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -68,7 +68,7 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications<Procedu
     @Override
     public Specification<ProcedureEntity> getFilterForProperty(String propertyName,
                                                                Object propertyValue,
-                                                               BinaryOperatorKind operator,
+                                                               ComparisonOperator operator,
                                                                boolean switched) {
         if (propertyName.equals(DATASTREAMS)) {
             return handleRelatedPropertyFilter(propertyName, (Specification<String>) propertyValue);
@@ -77,7 +77,7 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications<Procedu
                 try {
                     return handleDirectStringPropertyFilter(root.get(ProcedureEntity.PROPERTY_IDENTIFIER),
                             propertyValue.toString(), operator, builder, false);
-                } catch (ExpressionVisitException e) {
+                } catch (STAInvalidFilterExpressionException e) {
                     throw new RuntimeException(e);
                 }
                 //
@@ -104,7 +104,7 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications<Procedu
 
     private Specification<ProcedureEntity> handleDirectPropertyFilter(String propertyName,
                                                                       Object propertyValue,
-                                                                      BinaryOperatorKind operator,
+                                                                      ComparisonOperator operator,
                                                                       boolean switched) {
         return new Specification<ProcedureEntity>() {
             @Override
@@ -132,7 +132,7 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications<Procedu
                             throw new RuntimeException("Error getting filter for Property: \"" + propertyName
                                     + "\". No such property in Entity.");
                     }
-                } catch (ExpressionVisitException e) {
+                } catch (STAInvalidFilterExpressionException e) {
                     throw new RuntimeException(e);
                 }
             }

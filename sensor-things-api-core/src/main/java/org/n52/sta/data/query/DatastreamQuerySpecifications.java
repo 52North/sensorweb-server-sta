@@ -28,8 +28,6 @@
  */
 package org.n52.sta.data.query;
 
-import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
-import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
@@ -38,6 +36,8 @@ import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.sta.exception.STAInvalidFilterExpressionException;
+import org.n52.sta.utils.ComparisonOperator;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.Join;
@@ -134,9 +134,9 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
     @Override
     public Specification<DatastreamEntity> getFilterForProperty(String propertyName,
                                                                 Object propertyValue,
-                                                                BinaryOperatorKind operator,
+                                                                ComparisonOperator operator,
                                                                 boolean switched)
-            throws ExpressionVisitException {
+            throws STAInvalidFilterExpressionException {
         if (propertyName.equals(SENSOR) || propertyName.equals(OBSERVED_PROPERTY) || propertyName.equals(THING)
                 || propertyName.equals(OBSERVATIONS)) {
             return handleRelatedPropertyFilter(propertyName, propertyValue, switched);
@@ -145,7 +145,7 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
                 try {
                     return handleDirectStringPropertyFilter(root.get(DatastreamEntity.PROPERTY_IDENTIFIER),
                             propertyValue.toString(), operator, builder, false);
-                } catch (ExpressionVisitException e) {
+                } catch (STAInvalidFilterExpressionException e) {
                     throw new RuntimeException(e);
                 }
                 //
@@ -156,7 +156,7 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
     }
 
     private Specification<DatastreamEntity> handleDirectPropertyFilter(String propertyName, Object propertyValue,
-                                                                       BinaryOperatorKind operator, boolean switched) {
+                                                                       ComparisonOperator operator, boolean switched) {
         return (Specification<DatastreamEntity>) (root, query, builder) -> {
             try {
                 switch (propertyName) {
@@ -176,7 +176,7 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
                         throw new RuntimeException("Error getting filter for Property: \"" + propertyName
                                 + "\". No such property in Entity.");
                 }
-            } catch (ExpressionVisitException e) {
+            } catch (STAInvalidFilterExpressionException e) {
                 throw new RuntimeException(e);
             }
         };
@@ -222,7 +222,7 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
                         return builder.in(join.get(DatasetEntity.PROPERTY_IDENTIFIER)).value(sq);
                     }
                     default:
-                        throw new ExpressionVisitException(
+                        throw new STAInvalidFilterExpressionException(
                                 "Error getting filter for Property \"" + propertyName + "\". No such related Entity.");
                 }
             } catch (Exception e) {

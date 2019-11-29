@@ -9,10 +9,10 @@ import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.sta.serdes.json.JSONSensor;
+import org.n52.sta.serdes.model.ElementWithQueryOptions.SensorWithQueryOptions;
 import org.n52.sta.serdes.model.STAEntityDefinition;
 import org.n52.sta.serdes.model.SensorEntityDefinition;
-import org.n52.sta.serdes.model.ElementWithQueryOptions.SensorWithQueryOptions;
-import org.n52.sta.service.query.QueryOptions;
+import org.n52.sta.utils.QueryOptions;
 
 import java.io.IOException;
 import java.util.Optional;

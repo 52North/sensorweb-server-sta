@@ -7,10 +7,10 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.sta.serdes.json.JSONThing;
+import org.n52.sta.serdes.model.ElementWithQueryOptions.ThingWithQueryOptions;
 import org.n52.sta.serdes.model.STAEntityDefinition;
 import org.n52.sta.serdes.model.ThingEntityDefinition;
-import org.n52.sta.serdes.model.ElementWithQueryOptions.ThingWithQueryOptions;
-import org.n52.sta.service.query.QueryOptions;
+import org.n52.sta.utils.QueryOptions;
 
 import java.io.IOException;
 import java.util.Set;
