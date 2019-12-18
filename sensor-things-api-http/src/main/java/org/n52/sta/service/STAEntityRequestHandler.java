@@ -46,7 +46,6 @@ import java.util.Map;
 public class STAEntityRequestHandler extends STARequestUtils {
 
     private final EntityServiceRepository serviceRepository;
-    private final String mappingPrefix = "**/";
     private final int rootUrlLength;
 
     public STAEntityRequestHandler(@Value("${server.rootUrl}") String rootUrl,
@@ -114,8 +113,8 @@ public class STAEntityRequestHandler extends STARequestUtils {
             return ex;
         }
 
-        String sourceType = entity.split("\\(")[0];
-        String sourceId = entity.split("\\(")[1].replace(")", "");
+        String sourceType = entity.substring(0, entity.indexOf("("));
+        String sourceId = entity.substring(sourceType.length()+1, entity.length() - 1);
 
         return serviceRepository.getEntityService(target)
                         .getEntityByRelatedEntity(sourceId, sourceType, null, createQueryOptions(queryOptions));

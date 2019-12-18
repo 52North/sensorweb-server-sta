@@ -95,7 +95,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> impl
             if (resultTime != null) {
                 // resultTime
                 self.setResultTime(((TimeInstant) parseTime(resultTime)).getValue().toDate());
-            } else {
+            } else if (validate) {
                 self.setResultTime(new Date());
             }
 
@@ -125,7 +125,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> impl
                 self.setDatastream(Datastream.toEntity());
             } else if (backReference instanceof JSONDatastream) {
                 self.setDatastream(((JSONDatastream) backReference).getEntity());
-            } else {
+            } else if (validate) {
                 Assert.notNull(null, INVALID_INLINE_ENTITY + "Datastream");
             }
 
@@ -134,7 +134,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> impl
                 self.setFeatureOfInterest(FeatureOfInterest.toEntity());
             } else if (backReference instanceof JSONFeatureOfInterest) {
                 self.setFeatureOfInterest(((JSONFeatureOfInterest) backReference).getEntity());
-            } else {
+            } else if (validate) {
                 Assert.notNull(null, INVALID_INLINE_ENTITY + "FeatureOfInterest");
             }
 

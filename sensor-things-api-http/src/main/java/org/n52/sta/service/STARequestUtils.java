@@ -38,15 +38,14 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.exception.STAInvalidUrlException;
-import org.n52.sta.serdes.DatastreamSerdes.DatastreamEntityPatch;
-import org.n52.sta.serdes.EntityPatch;
-import org.n52.sta.serdes.FeatureOfInterestSerdes.AbstractFeatureEntityPatch;
-import org.n52.sta.serdes.HistoricalLocationSerde.HistoricalLocationEntityPatch;
-import org.n52.sta.serdes.LocationSerdes.LocationEntityPatch;
-import org.n52.sta.serdes.ObservationSerde.StaDataEntityPatch;
-import org.n52.sta.serdes.ObservedPropertySerde.PhenomenonEntityPatch;
-import org.n52.sta.serdes.SensorSerdes.SensorEntityPatch;
-import org.n52.sta.serdes.ThingSerdes.PlatformEntityPatch;
+import org.n52.sta.serdes.DatastreamSerDes;
+import org.n52.sta.serdes.FeatureOfInterestSerDes;
+import org.n52.sta.serdes.HistoricalLocationSerDes;
+import org.n52.sta.serdes.LocationSerDes;
+import org.n52.sta.serdes.ObservationSerDes;
+import org.n52.sta.serdes.ObservedPropertySerDes;
+import org.n52.sta.serdes.SensorSerDes;
+import org.n52.sta.serdes.ThingSerDes;
 import org.n52.sta.utils.QueryOptions;
 
 import java.util.Collections;
@@ -56,6 +55,8 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 public class STARequestUtils {
+
+    final String mappingPrefix = "**/";
 
     final String IDENTIFIER_REGEX = "(?:\\()['\\-0-9a-zA-Z]+(?:\\))";
     final String COLLECTION_REGEX =
@@ -99,7 +100,7 @@ public class STARequestUtils {
             "{entity:FeaturesOfInterest" + IDENTIFIER_REGEX + "}/{target:Observations}";
 
     final static Map<String, Class> collectionNameToClass;
-    final static Map<String, Class<EntityPatch>> collectionNameToPatchClass;
+    final static Map<String, Class> collectionNameToPatchClass;
 
     static {
         HashMap<String, Class> map = new HashMap<>();
@@ -113,16 +114,25 @@ public class STARequestUtils {
         map.put("FeaturesOfInterest", AbstractFeatureEntity.class);
         collectionNameToClass = Collections.unmodifiableMap(map);
 
-        map = new HashMap<>();
-        map.put("Things", PlatformEntityPatch.class);
-        map.put("Locations", LocationEntityPatch.class);
-        map.put("Datastreams", DatastreamEntityPatch.class);
-        map.put("HistoricalLocations", HistoricalLocationEntityPatch.class);
-        map.put("Sensors", SensorEntityPatch.class);
-        map.put("Observations", StaDataEntityPatch.class);
-        map.put("ObservedProperties", PhenomenonEntityPatch.class);
-        map.put("FeaturesOfInterest", AbstractFeatureEntityPatch.class);
-        collectionNameToPatchClass = Collections.unmodifiableMap(map);
+        HashMap<String, Class> patchMap = new HashMap<>();
+        patchMap.put("Things", ThingSerDes.PlatformEntityPatch.class);
+        patchMap.put("Locations", LocationSerDes.LocationEntityPatch.class);
+        patchMap.put("Datastreams", DatastreamSerDes.DatastreamEntityPatch.class);
+        patchMap.put("HistoricalLocations", HistoricalLocationSerDes.HistoricalLocationEntityPatch.class);
+        patchMap.put("Sensors", SensorSerDes.SensorEntityPatch.class);
+        patchMap.put("Observations", ObservationSerDes.StaDataEntityPatch.class);
+        patchMap.put("ObservedProperties", ObservedPropertySerDes.PhenomenonEntityPatch.class);
+        patchMap.put("FeaturesOfInterest", FeatureOfInterestSerDes.AbstractFeatureEntityPatch.class);
+
+        patchMap.put("Thing", ThingSerDes.PlatformEntityPatch.class);
+        patchMap.put("Location", LocationSerDes.LocationEntityPatch.class);
+        patchMap.put("Datastream", DatastreamSerDes.DatastreamEntityPatch.class);
+        patchMap.put("HistoricalLocation", HistoricalLocationSerDes.HistoricalLocationEntityPatch.class);
+        patchMap.put("Sensor", SensorSerDes.SensorEntityPatch.class);
+        patchMap.put("Observation", ObservationSerDes.StaDataEntityPatch.class);
+        patchMap.put("ObservedProperty", ObservedPropertySerDes.PhenomenonEntityPatch.class);
+        patchMap.put("FeatureOfInterest", FeatureOfInterestSerDes.AbstractFeatureEntityPatch.class);
+        collectionNameToPatchClass = Collections.unmodifiableMap(patchMap);
     }
 
     final Pattern byIdPattern = Pattern.compile("(" + COLLECTION_REGEX + ")" + IDENTIFIER_REGEX);
@@ -243,8 +253,8 @@ public class STARequestUtils {
                 // e.g. /Things(1)/
                 // Only checking exists as Id is already known
                 targetId = targetEntity[1].replace(")", "");
-                if (!serviceRepository.getEntityService(sourceType)
-                        .existsEntityByRelatedEntity(sourceId, targetType, targetId)) {
+                if (!serviceRepository.getEntityService(targetType)
+                        .existsEntityByRelatedEntity(sourceId, sourceType, targetId)) {
                     return new STAInvalidUrlException("No Entity: "
                             + uriResources[i]
                             + " associated with "

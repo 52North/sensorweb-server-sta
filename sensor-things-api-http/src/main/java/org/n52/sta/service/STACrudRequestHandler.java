@@ -39,6 +39,7 @@ import org.n52.sta.serdes.EntityPatch;
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -80,8 +81,8 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
     }
 
     /**
-     * Matches all requests on Entities referenced directly via id
-     * e.g. /Datastreams(52)
+     * Matches all PATCH requests on Entities referenced directly via id
+     * e.g. ../Datastreams(52)
      *
      * @param collectionName name of entity. Automatically set by Spring via @PathVariable
      * @param id             id of entity. Automatically set by Spring via @PathVariable
@@ -92,10 +93,10 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
             produces = "application/json"
     )
     @SuppressWarnings("unchecked")
-    public Object handlePatch(@PathVariable String collectionName,
-                              @PathVariable String id,
-                              @RequestBody String body,
-                              HttpServletRequest request) throws STACRUDException, IOException {
+    public Object handleDirectPatch(@PathVariable String collectionName,
+                                    @PathVariable String id,
+                                    @RequestBody String body,
+                                    HttpServletRequest request) throws STACRUDException, IOException {
         STAInvalidUrlException ex = validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
         if (ex != null) {
             return ex;
@@ -104,14 +105,125 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
             ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
             String strippedId = id.substring(1, id.length() - 1);
             jsonBody.put("@iot.id", strippedId);
-            return ((AbstractSensorThingsEntityService<?, T>) serviceRepository.getEntityService(collectionName))
-                    .update(strippedId,
-                            (T) ((mapper.readValue(jsonBody.toString(), clazz))).getEntity(),
-                            HttpMethod.PATCH);
+            try {
+                return ((AbstractSensorThingsEntityService<?, T>) serviceRepository.getEntityService(collectionName))
+                        .update(strippedId,
+                                (T) ((mapper.readValue(jsonBody.toString(), clazz))).getEntity(),
+                                HttpMethod.PATCH);
+            } catch (RuntimeException re) {
+                return re.getMessage();
+            }
         }
     }
 
-    @DeleteMapping(
-            
+    /**
+     * Matches all PATCH requests on Entities referenced via association with different Entity.
+     * e.g. /Datastreams(1)/Sensor
+     *
+     * @param entity  identifier of related. Automatically set by Spring via @PathVariable
+     * @param target  name of entity. Automatically set by Spring via @PathVariable
+     * @param request full request
+     */
+    @PatchMapping(
+            value = {mappingPrefix + ENTITY_IDENTIFIED_BY_DATASTREAM_PATH,
+                    mappingPrefix + ENTITY_IDENTIFIED_BY_OBSERVATION_PATH,
+                    mappingPrefix + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH
+            },
+            produces = "application/json"
     )
+    @SuppressWarnings("unchecked")
+    public Object handleRelatedPatch(@PathVariable String entity,
+                                     @PathVariable String target,
+                                     @RequestBody String body,
+                                     HttpServletRequest request) throws STACRUDException, IOException {
+        STAInvalidUrlException ex = validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
+        if (ex != null) {
+            return ex;
+        } else {
+            String sourceType = entity.substring(0, entity.indexOf("("));
+            String sourceId = entity.substring(sourceType.length() + 1, entity.length() - 1);
+            AbstractSensorThingsEntityService<?, T> entityService =
+                    (AbstractSensorThingsEntityService<?, T>) serviceRepository.getEntityService(target);
+
+            // Get Id from datastore
+            String entityId = entityService.getEntityIdByRelatedEntity(sourceId, sourceType);
+            Assert.notNull(entityId, "Could not find related Entity!");
+
+            // Create Patch Entity
+            Class<EntityPatch> clazz = collectionNameToPatchClass.get(target);
+            Assert.notNull(clazz, "Could not find Patch Class!");
+
+            ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
+            jsonBody.put("@iot.id", entityId);
+
+            // Do update
+            return entityService.update(entityId,
+                    (T) ((mapper.readValue(jsonBody.toString(), clazz))).getEntity(),
+                    HttpMethod.PATCH);
+        }
+    }
+
+
+    /**
+     * Matches all DELETE requests on Entities referenced directly via id
+     * e.g. ../Datastreams(52)
+     *
+     * @param collectionName name of entity. Automatically set by Spring via @PathVariable
+     * @param id             id of entity. Automatically set by Spring via @PathVariable
+     * @param request        full request
+     */
+    @DeleteMapping(
+            value = "**/{collectionName:" + COLLECTION_REGEX + "}{id:" + IDENTIFIER_REGEX + "$}",
+            produces = "application/json"
+    )
+    public Object handleDelete(@PathVariable String collectionName,
+                               @PathVariable String id,
+                               HttpServletRequest request) throws STACRUDException {
+        STAInvalidUrlException ex = validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
+        if (ex != null) {
+            return ex;
+        } else {
+            serviceRepository.getEntityService(collectionName).delete(id.substring(1, id.length() - 1));
+            return null;
+        }
+    }
+
+    /**
+     * Matches all DELETE requests on Entities referenced via association with different Entity.
+     * e.g. /Datastreams(1)/Sensor
+     *
+     * @param entity  identifier of related. Automatically set by Spring via @PathVariable
+     * @param target  name of entity. Automatically set by Spring via @PathVariable
+     * @param request full request
+     */
+    @DeleteMapping(
+            value = {mappingPrefix + ENTITY_IDENTIFIED_BY_DATASTREAM_PATH,
+                    mappingPrefix + ENTITY_IDENTIFIED_BY_OBSERVATION_PATH,
+                    mappingPrefix + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH
+            },
+            produces = "application/json"
+    )
+    @SuppressWarnings("unchecked")
+    public Object handleRelatedDelete(@PathVariable String entity,
+                                      @PathVariable String target,
+                                      @RequestBody String body,
+                                      HttpServletRequest request) throws STACRUDException {
+        STAInvalidUrlException ex = validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
+        if (ex != null) {
+            return ex;
+        } else {
+            String sourceType = entity.substring(0, entity.indexOf("("));
+            String sourceId = entity.substring(sourceType.length() + 1, entity.length() - 1);
+            AbstractSensorThingsEntityService<?, T> entityService =
+                    (AbstractSensorThingsEntityService<?, T>) serviceRepository.getEntityService(target);
+
+            // Get Id from datastore
+            String entityId = entityService.getEntityIdByRelatedEntity(sourceId, sourceType);
+            Assert.notNull(entityId, "Could not find related Entity!");
+
+            // Do update
+            entityService.delete(entityId);
+            return null;
+        }
+    }
 }

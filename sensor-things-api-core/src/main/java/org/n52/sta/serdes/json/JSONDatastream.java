@@ -153,37 +153,31 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
             }
 
             //if (phenomenonTime != null) {
-                // phenomenonTime (aka samplingTime) is automatically calculated based on associated Observations
-                // phenomenonTime parsed from json is therefore ignored.
+            // phenomenonTime (aka samplingTime) is automatically calculated based on associated Observations
+            // phenomenonTime parsed from json is therefore ignored.
             //}
             if (Thing != null) {
                 self.setThing(Thing.toEntity());
             } else if (backReference instanceof JSONThing) {
                 self.setThing(((JSONThing) backReference).getEntity());
-            } else {
-                if (validate) {
-                    Assert.notNull(null, INVALID_INLINE_ENTITY + "Thing");
-                }
+            } else if (validate) {
+                Assert.notNull(null, INVALID_INLINE_ENTITY + "Thing");
             }
 
             if (Sensor != null) {
                 self.setProcedure(Sensor.toEntity());
             } else if (backReference instanceof JSONSensor) {
                 self.setProcedure(((JSONSensor) backReference).getEntity());
-            } else {
-                if (validate) {
-                    Assert.notNull(null, INVALID_INLINE_ENTITY + "Sensor");
-                }
+            } else if (validate) {
+                Assert.notNull(null, INVALID_INLINE_ENTITY + "Sensor");
             }
 
             if (ObservedProperty != null) {
                 self.setObservableProperty(ObservedProperty.toEntity());
             } else if (backReference instanceof JSONObservedProperty) {
                 self.setObservableProperty(((JSONObservedProperty) backReference).getEntity());
-            } else {
-                if (validate) {
-                    Assert.notNull(null, INVALID_INLINE_ENTITY + "ObservedProperty");
-                }
+            } else if (validate) {
+                Assert.notNull(null, INVALID_INLINE_ENTITY + "ObservedProperty");
             }
 
             if (Observations != null) {

@@ -5,6 +5,6 @@ package org.n52.sta.serdes;
  */
 public interface EntityPatch<T> {
 
-    abstract T getEntity();
+    T getEntity();
 
 }

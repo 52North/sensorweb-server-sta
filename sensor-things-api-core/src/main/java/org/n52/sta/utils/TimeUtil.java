@@ -30,7 +30,6 @@ package org.n52.sta.utils;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.joda.time.Instant;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
@@ -66,7 +65,7 @@ public class TimeUtil {
     public static Time parseTime(Object object) {
         if (object instanceof Timestamp) {
             Timestamp timestamp = (Timestamp) object;
-            return new TimeInstant(new Instant(timestamp.getTime()));
+            return new TimeInstant(timestamp);
         } else {
             String obj = object.toString();
             if (obj.contains("/")) {

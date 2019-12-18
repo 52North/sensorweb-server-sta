@@ -79,10 +79,8 @@ public class JSONHistoricalLocation extends JSONBase.JSONwithIdTime<HistoricalLo
                 self.setThing(Thing.toEntity());
             } else if (backReference instanceof JSONThing) {
                 self.setThing(((JSONThing) backReference).getEntity());
-            } else {
-                if (validate) {
-                    Assert.notNull(null, INVALID_INLINE_ENTITY + "Thing");
-                }
+            } else if (validate) {
+                Assert.notNull(null, INVALID_INLINE_ENTITY + "Thing");
             }
 
             if (Locations != null) {
@@ -91,10 +89,8 @@ public class JSONHistoricalLocation extends JSONBase.JSONwithIdTime<HistoricalLo
                         .collect(Collectors.toSet()));
             } else if (backReference instanceof JSONLocation) {
                 self.setLocations(Collections.singleton(((JSONLocation) backReference).getEntity()));
-            } else {
-                if (validate) {
-                    Assert.notNull(null, INVALID_INLINE_ENTITY + "Location");
-                }
+            } else if (validate) {
+                Assert.notNull(null, INVALID_INLINE_ENTITY + "Location");
             }
 
             return self;
