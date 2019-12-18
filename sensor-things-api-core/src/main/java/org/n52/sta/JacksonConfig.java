@@ -1,3 +1,31 @@
+/*
+ * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Software GmbH
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation.
+ *
+ * If the program is linked with libraries which are licensed under one of
+ * the following licenses, the combination of the program with the linked
+ * library is not considered a "derivative work" of the program:
+ *
+ *     - Apache License, version 2.0
+ *     - Apache Software License, version 1.0
+ *     - GNU Lesser General Public License, version 3
+ *     - Mozilla Public License, versions 1.0, 1.1 and 2.0
+ *     - Common Development and Distribution License (CDDL), version 1.0
+ *
+ * Therefore the distribution of the program linked with libraries licensed
+ * under the aforementioned licenses, is permitted by the copyright holders
+ * if the distribution is compliant with both the GNU General Public
+ * License version 2 and the aforementioned licenses.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details.
+ */
 package org.n52.sta;
 
 import com.fasterxml.jackson.databind.Module;
@@ -14,38 +42,14 @@ import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
-import org.n52.sta.serdes.DatastreamSerdes.DatastreamDeserializer;
-import org.n52.sta.serdes.DatastreamSerdes.DatastreamEntityPatch;
-import org.n52.sta.serdes.DatastreamSerdes.DatastreamPatchDeserializer;
-import org.n52.sta.serdes.DatastreamSerdes.DatastreamSerializer;
-import org.n52.sta.serdes.FeatureOfInterestSerdes.AbstractFeatureEntityPatch;
-import org.n52.sta.serdes.FeatureOfInterestSerdes.FeatureOfInterestDeserializer;
-import org.n52.sta.serdes.FeatureOfInterestSerdes.FeatureOfInterestPatchDeserializer;
-import org.n52.sta.serdes.FeatureOfInterestSerdes.FeatureOfInterestSerializer;
-import org.n52.sta.serdes.HistoricalLocationSerde.HistoricalLocationDeserializer;
-import org.n52.sta.serdes.HistoricalLocationSerde.HistoricalLocationEntityPatch;
-import org.n52.sta.serdes.HistoricalLocationSerde.HistoricalLocationPatchDeserializer;
-import org.n52.sta.serdes.HistoricalLocationSerde.HistoricalLocationSerializer;
-import org.n52.sta.serdes.LocationSerdes.LocationDeserializer;
-import org.n52.sta.serdes.LocationSerdes.LocationEntityPatch;
-import org.n52.sta.serdes.LocationSerdes.LocationPatchDeserializer;
-import org.n52.sta.serdes.LocationSerdes.LocationSerializer;
-import org.n52.sta.serdes.ObservationSerde.ObservationDeserializer;
-import org.n52.sta.serdes.ObservationSerde.ObservationPatchDeserializer;
-import org.n52.sta.serdes.ObservationSerde.ObservationSerializer;
-import org.n52.sta.serdes.ObservationSerde.StaDataEntityPatch;
-import org.n52.sta.serdes.ObservedPropertySerde.ObservedPropertyDeserializer;
-import org.n52.sta.serdes.ObservedPropertySerde.ObservedPropertyPatchDeserializer;
-import org.n52.sta.serdes.ObservedPropertySerde.ObservedPropertySerializer;
-import org.n52.sta.serdes.ObservedPropertySerde.PhenomenonEntityPatch;
-import org.n52.sta.serdes.SensorSerdes;
-import org.n52.sta.serdes.SensorSerdes.SensorDeserializer;
-import org.n52.sta.serdes.SensorSerdes.SensorEntityPatch;
-import org.n52.sta.serdes.SensorSerdes.SensorPatchDeserializer;
-import org.n52.sta.serdes.ThingSerdes.PlatformEntityPatch;
-import org.n52.sta.serdes.ThingSerdes.ThingDeserializer;
-import org.n52.sta.serdes.ThingSerdes.ThingPatchDeserializer;
-import org.n52.sta.serdes.ThingSerdes.ThingSerializer;
+import org.n52.sta.serdes.DatastreamSerDes;
+import org.n52.sta.serdes.FeatureOfInterestSerDes;
+import org.n52.sta.serdes.HistoricalLocationSerDes;
+import org.n52.sta.serdes.LocationSerDes;
+import org.n52.sta.serdes.ObservationSerDes;
+import org.n52.sta.serdes.ObservedPropertySerDes;
+import org.n52.sta.serdes.SensorSerDes;
+import org.n52.sta.serdes.ThingSerDes;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -65,33 +69,49 @@ public class JacksonConfig {
 
         // Register Serializers/Deserializers for all custom types
         SimpleSerializers serializers = new SimpleSerializers();
-        serializers.addSerializer(new ThingSerializer(rootUrl));
-        serializers.addSerializer(new LocationSerializer(rootUrl));
-        serializers.addSerializer(new SensorSerdes.SensorSerializer(rootUrl));
-        serializers.addSerializer(new ObservationSerializer(rootUrl));
-        serializers.addSerializer(new ObservedPropertySerializer(rootUrl));
-        serializers.addSerializer(new FeatureOfInterestSerializer(rootUrl));
-        serializers.addSerializer(new HistoricalLocationSerializer(rootUrl));
-        serializers.addSerializer(new DatastreamSerializer(rootUrl));
+        serializers.addSerializer(new ThingSerDes.ThingSerializer(rootUrl));
+        serializers.addSerializer(new LocationSerDes.LocationSerializer(rootUrl));
+        serializers.addSerializer(new SensorSerDes.SensorSerializer(rootUrl));
+        serializers.addSerializer(new ObservationSerDes.ObservationSerializer(rootUrl));
+        serializers.addSerializer(new ObservedPropertySerDes.ObservedPropertySerializer(rootUrl));
+        serializers.addSerializer(new FeatureOfInterestSerDes.FeatureOfInterestSerializer(rootUrl));
+        serializers.addSerializer(new HistoricalLocationSerDes.HistoricalLocationSerializer(rootUrl));
+        serializers.addSerializer(new DatastreamSerDes.DatastreamSerializer(rootUrl));
 
         SimpleDeserializers deserializers = new SimpleDeserializers();
-        deserializers.addDeserializer(PlatformEntity.class, new ThingDeserializer());
-        deserializers.addDeserializer(LocationEntity.class, new LocationDeserializer());
-        deserializers.addDeserializer(SensorEntity.class, new SensorDeserializer());
-        deserializers.addDeserializer(DataEntity.class, new ObservationDeserializer());
-        deserializers.addDeserializer(PhenomenonEntity.class, new ObservedPropertyDeserializer());
-        deserializers.addDeserializer(AbstractFeatureEntity.class, new FeatureOfInterestDeserializer());
-        deserializers.addDeserializer(HistoricalLocationEntity.class, new HistoricalLocationDeserializer());
-        deserializers.addDeserializer(DatastreamEntity.class, new DatastreamDeserializer());
+        deserializers.addDeserializer(PlatformEntity.class,
+                new ThingSerDes.ThingDeserializer());
+        deserializers.addDeserializer(LocationEntity.class,
+                new LocationSerDes.LocationDeserializer());
+        deserializers.addDeserializer(SensorEntity.class,
+                new SensorSerDes.SensorDeserializer());
+        deserializers.addDeserializer(DataEntity.class,
+                new ObservationSerDes.ObservationDeserializer());
+        deserializers.addDeserializer(PhenomenonEntity.class,
+                new ObservedPropertySerDes.ObservedPropertyDeserializer());
+        deserializers.addDeserializer(AbstractFeatureEntity.class,
+                new FeatureOfInterestSerDes.FeatureOfInterestDeserializer());
+        deserializers.addDeserializer(HistoricalLocationEntity.class,
+                new HistoricalLocationSerDes.HistoricalLocationDeserializer());
+        deserializers.addDeserializer(DatastreamEntity.class,
+                new DatastreamSerDes.DatastreamDeserializer());
 
-        deserializers.addDeserializer(PlatformEntityPatch.class, new ThingPatchDeserializer());
-        deserializers.addDeserializer(LocationEntityPatch.class, new LocationPatchDeserializer());
-        deserializers.addDeserializer(SensorEntityPatch.class, new SensorPatchDeserializer());
-        deserializers.addDeserializer(StaDataEntityPatch.class, new ObservationPatchDeserializer());
-        deserializers.addDeserializer(PhenomenonEntityPatch.class, new ObservedPropertyPatchDeserializer());
-        deserializers.addDeserializer(AbstractFeatureEntityPatch.class, new FeatureOfInterestPatchDeserializer());
-        deserializers.addDeserializer(HistoricalLocationEntityPatch.class, new HistoricalLocationPatchDeserializer());
-        deserializers.addDeserializer(DatastreamEntityPatch.class, new DatastreamPatchDeserializer());
+        deserializers.addDeserializer(ThingSerDes.PlatformEntityPatch.class,
+                new ThingSerDes.ThingPatchDeserializer());
+        deserializers.addDeserializer(LocationSerDes.LocationEntityPatch.class,
+                new LocationSerDes.LocationPatchDeserializer());
+        deserializers.addDeserializer(SensorSerDes.SensorEntityPatch.class,
+                new SensorSerDes.SensorPatchDeserializer());
+        deserializers.addDeserializer(ObservationSerDes.StaDataEntityPatch.class,
+                new ObservationSerDes.ObservationPatchDeserializer());
+        deserializers.addDeserializer(ObservedPropertySerDes.PhenomenonEntityPatch.class,
+                new ObservedPropertySerDes.ObservedPropertyPatchDeserializer());
+        deserializers.addDeserializer(FeatureOfInterestSerDes.AbstractFeatureEntityPatch.class,
+                new FeatureOfInterestSerDes.FeatureOfInterestPatchDeserializer());
+        deserializers.addDeserializer(HistoricalLocationSerDes.HistoricalLocationEntityPatch.class,
+                new HistoricalLocationSerDes.HistoricalLocationPatchDeserializer());
+        deserializers.addDeserializer(DatastreamSerDes.DatastreamEntityPatch.class,
+                new DatastreamSerDes.DatastreamPatchDeserializer());
 
 
         module.setSerializers(serializers);

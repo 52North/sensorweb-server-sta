@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.n52</groupId>
         <artifactId>parent</artifactId>
-        <version>14</version>
+        <version>16</version>
     </parent>
 
     <groupId>org.n52.sta</groupId>
@@ -40,15 +40,15 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <odata.version>4.6.0-STA-SNAPSHOT</odata.version>
-        <series-hbm.version>2.0.0-alpha.3</series-hbm.version>
-        <arctic-sea.version>6.0.0</arctic-sea.version>
-        <spring-boot.version>2.1.4.RELEASE</spring-boot.version>
+        <series-hbm.version>2.0.0-SNAPSHOT</series-hbm.version>
+        <arctic-sea.version>7.3.0-SNAPSHOT</arctic-sea.version>
+        <spring-boot.version>2.2.1.RELEASE</spring-boot.version>
         <geolatte-geom.version>1.4.0</geolatte-geom.version>
         <hibernate.version>5.4.2.Final</hibernate.version>
-        <jackson.version>2.9.8</jackson.version>
-        <hamcrest.version>2.1</hamcrest.version>
+        <jackson.version>2.10.1</jackson.version>
+        <hamcrest.version>2.2</hamcrest.version>
         <locationtech-jts.version>1.16.1</locationtech-jts.version>
-        <h2database.version>1.4.196</h2database.version>
+        <h2database.version>1.4.200</h2database.version>
     </properties>
 
     <dependencyManagement>
@@ -99,7 +99,7 @@
             <dependency>
                 <groupId>javax</groupId>
                 <artifactId>javaee-api</artifactId>
-                <version>7.0</version>
+                <version>8.0.1</version>
                 <scope>provided</scope>
             </dependency>
 
@@ -184,7 +184,7 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
-                <version>1.7.25</version>
+                <version>1.7.29</version>
             </dependency>
             <dependency>
                 <groupId>org.hamcrest</groupId>
@@ -344,9 +344,9 @@
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
+                    <aggregate>true</aggregate>
                     <header>etc/52N_GPLv2_License.xt</header>
-                    <properties>
-                    </properties>
+                    
                     <includes>
                         <include>**/src/**/*.java</include>
                     </includes>
@@ -356,6 +356,12 @@
                         <exclude>etc/**</exclude>
                     </excludes>
                     <strictCheck>true</strictCheck>
+                    <properties>
+                      <year>${project.inceptionYear}-${currentYearDynamic}</year>
+                    </properties>
+                    <mapping>
+                        <java>SLASHSTAR_STYLE</java>
+                    </mapping>
                 </configuration>
             </plugin>
         </plugins>

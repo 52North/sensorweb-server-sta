@@ -14,8 +14,7 @@
             <column name="identifier" not-null="true" unique-key="un_location_identifier">
                 <comment>Unique identifier of the location. Should be a URI, UUID. E.g. http://www.example.org/123, 123-321.</comment>
             </column>
-        </property>
-        <property name="name" type="string">
+        </property><property name="name" type="string">
             <column name="name" not-null="true"/>
         </property>
         <property name="description" type="text">
@@ -41,10 +40,10 @@
             </many-to-many>
         </set>
         <set name="historicalLocations" table="location_historical_location" inverse="false">
-            <key foreign-key="fk_location_historical_location">
+            <key foreign-key="fk_location_historical_loc">
                 <column name="fk_location_id" not-null="true"/>
             </key>
-            <many-to-many class="HistoricalLocationEntity" foreign-key="fk_historical_location_location">
+            <many-to-many class="HistoricalLocationEntity" foreign-key="fk_historical_loc_location">
                 <column name="fk_historical_location_id" not-null="true"/>
             </many-to-many>
         </set>
@@ -66,10 +65,10 @@
             <column name="fk_thing_id" not-null="true"/>
         </many-to-one>
         <set name="locations" table="location_historical_location" inverse="true">
-            <key foreign-key="fk_historical_location_location">
+            <key foreign-key="fk_historical_loc_location">
                 <column name="fk_historical_location_id" not-null="true"/>
             </key>
-            <many-to-many class="LocationEntity" foreign-key="fk_location_historical_location">
+            <many-to-many class="LocationEntity" foreign-key="fk_location_historical_loc">
                 <column name="fk_location_id" not-null="true"/>
             </many-to-many>
         </set>
