@@ -43,7 +43,6 @@ import org.n52.sta.serdes.model.STAEntityDefinition;
 import org.n52.sta.utils.QueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
@@ -74,7 +73,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     private static final String UNABLE_TO_UPDATE_ENTITY_NOT_FOUND = "Unable to update. Entity not found";
 
     private final LocationEncodingRepository locationEncodingRepository;
-    @Autowired
+
     public LocationService(LocationRepository repository,
                            LocationEncodingRepository locationEncodingRepository) {
         super(repository, LocationEntity.class);

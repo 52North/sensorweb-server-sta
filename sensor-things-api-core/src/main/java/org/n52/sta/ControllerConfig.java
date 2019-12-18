@@ -22,8 +22,8 @@ import javax.persistence.PersistenceException;
 @ControllerAdvice
 public class ControllerConfig {
 
-    final ObjectMapper mapper;
-    final HttpHeaders headers;
+    private final ObjectMapper mapper;
+    private final HttpHeaders headers;
 
     public ControllerConfig(ObjectMapper mapper) {
         this.mapper = mapper;

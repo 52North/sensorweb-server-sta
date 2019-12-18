@@ -32,7 +32,7 @@ import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
-import org.n52.shetland.util.JavaHelper;
+import org.n52.shetland.util.IdGenerator;
 import org.n52.sta.data.query.DatasetQuerySpecifications;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.FeatureOfInterestQuerySpecifications;
@@ -273,7 +273,7 @@ public class FeatureOfInterestService
     }
 
     private void generateIdentifier(AbstractFeatureEntity<?> feature) {
-        feature.setIdentifier(JavaHelper.generateID(feature.getIdentifier()));
+        feature.setIdentifier(IdGenerator.generate(feature.getIdentifier()));
     }
 
     private AbstractSensorThingsEntityService<?, DatastreamEntity> getDatastreamService() {
