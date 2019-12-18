@@ -147,17 +147,17 @@ public class STARequestUtils {
 
     STAInvalidUrlException validateURL(StringBuffer requestURL,
                        EntityServiceRepository serviceRepository,
-                       int rootUrlLength) {
+                       int rootUrlLength) throws STAInvalidUrlException {
         String[] uriResources = requestURL.substring(rootUrlLength).split("/");
 
         STAInvalidUrlException ex;
         ex = validateURISyntax(uriResources);
         if (ex != null) {
-            return ex;
+            throw ex;
         }
         ex = validateURISemantic(uriResources, serviceRepository);
         if (ex != null) {
-            return ex;
+            throw ex;
         }
         return null;
     }

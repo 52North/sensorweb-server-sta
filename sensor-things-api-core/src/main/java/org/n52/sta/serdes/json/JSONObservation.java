@@ -75,6 +75,8 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> impl
                 Assert.notNull(result, INVALID_INLINE_ENTITY + "result");
             }
 
+            self.setIdentifier(identifier);
+
             // phenomenonTime
             if (phenomenonTime != null) {
                 Time time = parseTime(phenomenonTime);

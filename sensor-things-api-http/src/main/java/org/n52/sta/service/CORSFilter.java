@@ -46,7 +46,7 @@ public class CORSFilter implements Filter {
     @Value("${http.cors.allowOrigin:*}")
     private String CORSOrigin;
 
-    @Value("${http.cors.allowMethods:POST, PUT, GET, OPTIONS, DELETE, PATCH}")
+    @Value("${http.cors.allowMethods:POST, GET, OPTIONS, DELETE, PATCH}")
     private String CORSMethods;
 
     @Value("${http.cors.maxAge:3600}")

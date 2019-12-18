@@ -69,7 +69,8 @@ public class STACollectionRequestHandler extends STARequestUtils {
             produces = "application/json"
     )
     public List<ElementWithQueryOptions> readCollectionDirect(@PathVariable String collectionName,
-                                                              @RequestParam Map<String, String> queryOptions) throws STACRUDException {
+                                                              @RequestParam Map<String, String> queryOptions)
+            throws STACRUDException {
         return serviceRepository
                 .getEntityService(collectionName)
                 .getEntityCollection(createQueryOptions(queryOptions));
@@ -96,16 +97,13 @@ public class STACollectionRequestHandler extends STARequestUtils {
     public Object readRelatedCollection(@PathVariable String entity,
                                         @PathVariable String target,
                                         @RequestParam Map<String, String> queryOptions,
-                                        HttpServletRequest request) throws STACRUDException {
+                                        HttpServletRequest request) throws STACRUDException, STAInvalidUrlException {
 
         // TODO(specki): check if something needs to be cut from the front like rootUrl
         // TODO(specki): short-circuit if url is only one element as spring already validated that when the path matched
         // TODO(specki): Error serialization for nice output
 
-        STAInvalidUrlException ex = validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
-        if (ex != null) {
-            return ex;
-        }
+        validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
 
         String sourceType = entity.split("\\(")[0];
         String sourceId = entity.split("\\(")[1].replace(")", "");

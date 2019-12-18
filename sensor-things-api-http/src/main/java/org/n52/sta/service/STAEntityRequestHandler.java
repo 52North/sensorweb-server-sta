@@ -69,16 +69,13 @@ public class STAEntityRequestHandler extends STARequestUtils {
     public Object readEntityDirect(@PathVariable String entity,
                                    @PathVariable String id,
                                    @RequestParam Map<String, String> queryOptions,
-                                   HttpServletRequest request) throws STACRUDException {
+                                   HttpServletRequest request) throws STACRUDException, STAInvalidUrlException {
 
         // TODO(specki): check if something needs to be cut from the front like rootUrl
         // TODO(specki): short-circuit if url is only one element as spring already validated that
         //TODO(specki): Error serialization for nice output
 
-        STAInvalidUrlException ex = validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
-        if (ex != null) {
-            return ex;
-        }
+        validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
 
         String entityId = id.substring(1, id.length() - 1);
         return serviceRepository.getEntityService(entity).getEntity(entityId, createQueryOptions(queryOptions));
@@ -102,16 +99,13 @@ public class STAEntityRequestHandler extends STARequestUtils {
     public Object readRelatedEntity(@PathVariable String entity,
                                     @PathVariable String target,
                                     @RequestParam Map<String, String> queryOptions,
-                                    HttpServletRequest request) throws STACRUDException {
+                                    HttpServletRequest request) throws STACRUDException, STAInvalidUrlException {
 
         // TODO(specki): check if something needs to be cut from the front like rootUrl
         // TODO(specki): short-circuit if url is only one element as spring already validated that when the path matched
         // TODO(specki): Error serialization for nice output
 
-        STAInvalidUrlException ex = validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
-        if (ex != null) {
-            return ex;
-        }
+        validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
 
         String sourceType = entity.substring(0, entity.indexOf("("));
         String sourceId = entity.substring(sourceType.length()+1, entity.length() - 1);

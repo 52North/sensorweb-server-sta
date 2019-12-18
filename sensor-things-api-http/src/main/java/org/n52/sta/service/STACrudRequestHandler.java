@@ -96,24 +96,17 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
     public Object handleDirectPatch(@PathVariable String collectionName,
                                     @PathVariable String id,
                                     @RequestBody String body,
-                                    HttpServletRequest request) throws STACRUDException, IOException {
-        STAInvalidUrlException ex = validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
-        if (ex != null) {
-            return ex;
-        } else {
-            Class<EntityPatch> clazz = collectionNameToPatchClass.get(collectionName);
-            ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
-            String strippedId = id.substring(1, id.length() - 1);
-            jsonBody.put("@iot.id", strippedId);
-            try {
-                return ((AbstractSensorThingsEntityService<?, T>) serviceRepository.getEntityService(collectionName))
-                        .update(strippedId,
-                                (T) ((mapper.readValue(jsonBody.toString(), clazz))).getEntity(),
-                                HttpMethod.PATCH);
-            } catch (RuntimeException re) {
-                return re.getMessage();
-            }
-        }
+                                    HttpServletRequest request)
+            throws STACRUDException, IOException, STAInvalidUrlException {
+        validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
+        Class<EntityPatch> clazz = collectionNameToPatchClass.get(collectionName);
+        ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
+        String strippedId = id.substring(1, id.length() - 1);
+        jsonBody.put("@iot.id", strippedId);
+        return ((AbstractSensorThingsEntityService<?, T>) serviceRepository.getEntityService(collectionName))
+                .update(strippedId,
+                        (T) ((mapper.readValue(jsonBody.toString(), clazz))).getEntity(),
+                        HttpMethod.PATCH);
     }
 
     /**
@@ -135,32 +128,30 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
     public Object handleRelatedPatch(@PathVariable String entity,
                                      @PathVariable String target,
                                      @RequestBody String body,
-                                     HttpServletRequest request) throws STACRUDException, IOException {
-        STAInvalidUrlException ex = validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
-        if (ex != null) {
-            return ex;
-        } else {
-            String sourceType = entity.substring(0, entity.indexOf("("));
-            String sourceId = entity.substring(sourceType.length() + 1, entity.length() - 1);
-            AbstractSensorThingsEntityService<?, T> entityService =
-                    (AbstractSensorThingsEntityService<?, T>) serviceRepository.getEntityService(target);
+                                     HttpServletRequest request)
+            throws STACRUDException, IOException, STAInvalidUrlException {
+        validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
 
-            // Get Id from datastore
-            String entityId = entityService.getEntityIdByRelatedEntity(sourceId, sourceType);
-            Assert.notNull(entityId, "Could not find related Entity!");
+        String sourceType = entity.substring(0, entity.indexOf("("));
+        String sourceId = entity.substring(sourceType.length() + 1, entity.length() - 1);
+        AbstractSensorThingsEntityService<?, T> entityService =
+                (AbstractSensorThingsEntityService<?, T>) serviceRepository.getEntityService(target);
 
-            // Create Patch Entity
-            Class<EntityPatch> clazz = collectionNameToPatchClass.get(target);
-            Assert.notNull(clazz, "Could not find Patch Class!");
+        // Get Id from datastore
+        String entityId = entityService.getEntityIdByRelatedEntity(sourceId, sourceType);
+        Assert.notNull(entityId, "Could not find related Entity!");
 
-            ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
-            jsonBody.put("@iot.id", entityId);
+        // Create Patch Entity
+        Class<EntityPatch> clazz = collectionNameToPatchClass.get(target);
+        Assert.notNull(clazz, "Could not find Patch Class!");
 
-            // Do update
-            return entityService.update(entityId,
-                    (T) ((mapper.readValue(jsonBody.toString(), clazz))).getEntity(),
-                    HttpMethod.PATCH);
-        }
+        ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
+        jsonBody.put("@iot.id", entityId);
+
+        // Do update
+        return entityService.update(entityId,
+                (T) ((mapper.readValue(jsonBody.toString(), clazz))).getEntity(),
+                HttpMethod.PATCH);
     }
 
 
@@ -178,14 +169,11 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
     )
     public Object handleDelete(@PathVariable String collectionName,
                                @PathVariable String id,
-                               HttpServletRequest request) throws STACRUDException {
-        STAInvalidUrlException ex = validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
-        if (ex != null) {
-            return ex;
-        } else {
-            serviceRepository.getEntityService(collectionName).delete(id.substring(1, id.length() - 1));
-            return null;
-        }
+                               HttpServletRequest request)
+            throws STACRUDException, STAInvalidUrlException {
+        validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
+        serviceRepository.getEntityService(collectionName).delete(id.substring(1, id.length() - 1));
+        return null;
     }
 
     /**
@@ -207,23 +195,21 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
     public Object handleRelatedDelete(@PathVariable String entity,
                                       @PathVariable String target,
                                       @RequestBody String body,
-                                      HttpServletRequest request) throws STACRUDException {
-        STAInvalidUrlException ex = validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
-        if (ex != null) {
-            return ex;
-        } else {
-            String sourceType = entity.substring(0, entity.indexOf("("));
-            String sourceId = entity.substring(sourceType.length() + 1, entity.length() - 1);
-            AbstractSensorThingsEntityService<?, T> entityService =
-                    (AbstractSensorThingsEntityService<?, T>) serviceRepository.getEntityService(target);
+                                      HttpServletRequest request)
+            throws STACRUDException, STAInvalidUrlException {
+        validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
 
-            // Get Id from datastore
-            String entityId = entityService.getEntityIdByRelatedEntity(sourceId, sourceType);
-            Assert.notNull(entityId, "Could not find related Entity!");
+        String sourceType = entity.substring(0, entity.indexOf("("));
+        String sourceId = entity.substring(sourceType.length() + 1, entity.length() - 1);
+        AbstractSensorThingsEntityService<?, T> entityService =
+                (AbstractSensorThingsEntityService<?, T>) serviceRepository.getEntityService(target);
 
-            // Do update
-            entityService.delete(entityId);
-            return null;
-        }
+        // Get Id from datastore
+        String entityId = entityService.getEntityIdByRelatedEntity(sourceId, sourceType);
+        Assert.notNull(entityId, "Could not find related Entity!");
+
+        // Do update
+        entityService.delete(entityId);
+        return null;
     }
 }
