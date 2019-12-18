@@ -1,7 +1,6 @@
 package org.n52.sta.serdes.json;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.sta.ObservablePropertyEntity;
 import org.springframework.util.Assert;
 
@@ -22,8 +21,8 @@ public class JSONObservedProperty extends JSONBase.JSONwithIdNameDescription<Obs
         self = new ObservablePropertyEntity();
     }
 
-    public PhenomenonEntity toEntity() {
-        if (!generatedId && name == null) {
+    public ObservablePropertyEntity toEntity(boolean validate) {
+        if (!generatedId && name == null && validate) {
             Assert.isNull(name, INVALID_REFERENCED_ENTITY);
             Assert.isNull(description, INVALID_REFERENCED_ENTITY);
             Assert.isNull(definition, INVALID_REFERENCED_ENTITY);
@@ -32,10 +31,11 @@ public class JSONObservedProperty extends JSONBase.JSONwithIdNameDescription<Obs
             self.setStaIdentifier(identifier);
             return self;
         } else {
-
-            Assert.notNull(name, INVALID_INLINE_ENTITY + "name");
-            Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
-            Assert.notNull(definition, INVALID_INLINE_ENTITY + "definition");
+            if (validate) {
+                Assert.notNull(name, INVALID_INLINE_ENTITY + "name");
+                Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
+                Assert.notNull(definition, INVALID_INLINE_ENTITY + "definition");
+            }
 
             self.setStaIdentifier(identifier);
             self.setName(name);

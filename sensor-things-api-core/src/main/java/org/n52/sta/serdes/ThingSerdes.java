@@ -17,6 +17,18 @@ import java.util.Set;
 
 public class ThingSerdes {
 
+    public static class PlatformEntityPatch extends PlatformEntity implements EntityPatch<PlatformEntity> {
+        private final PlatformEntity entity;
+
+        public PlatformEntityPatch (PlatformEntity entity) {
+            this.entity = entity;
+        }
+
+        public PlatformEntity getEntity() {
+            return entity;
+        }
+    }
+
     public static class ThingSerializer extends AbstractSTASerializer<ThingWithQueryOptions> {
 
         public ThingSerializer(String rootUrl) {
@@ -83,5 +95,15 @@ public class ThingSerdes {
         }
     }
 
+    public static class ThingPatchDeserializer extends StdDeserializer<PlatformEntityPatch> {
 
+        public ThingPatchDeserializer() {
+            super(PlatformEntityPatch.class);
+        }
+
+        @Override
+        public PlatformEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+            return new PlatformEntityPatch(p.readValueAs(JSONThing.class).toEntity(false));
+        }
+    }
 }

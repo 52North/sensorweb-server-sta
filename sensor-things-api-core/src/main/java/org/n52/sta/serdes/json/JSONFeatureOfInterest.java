@@ -29,8 +29,8 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
         self = new FeatureEntity();
     }
 
-    public FeatureEntity toEntity() {
-        if (!generatedId && name == null) {
+    public FeatureEntity toEntity(boolean validate) {
+        if (!generatedId && name == null && validate) {
             Assert.isNull(name, INVALID_REFERENCED_ENTITY);
             Assert.isNull(description, INVALID_REFERENCED_ENTITY);
             Assert.isNull(encodingType, INVALID_REFERENCED_ENTITY);
@@ -40,29 +40,32 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
             self.setIdentifier(identifier);
             return self;
         } else {
-            Assert.notNull(name, INVALID_INLINE_ENTITY + "name");
-            Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
-            Assert.notNull(feature, INVALID_INLINE_ENTITY + "feature");
-            Assert.state(encodingType.equals(ENCODINGTYPE_GEOJSON),
-                    "Invalid encodingType supplied. Only GeoJSON (application/vnd.geo+json) is supported!");
-            Assert.notNull(feature.geometry, INVALID_INLINE_ENTITY + "feature->geometry");
-            Assert.notNull(feature.type, INVALID_INLINE_ENTITY + "feature->type");
-            Assert.state(feature.type.equals("Feature"), "Invalid Featuretype.");
+            if (validate) {
+                Assert.notNull(name, INVALID_INLINE_ENTITY + "name");
+                Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
+                Assert.notNull(feature, INVALID_INLINE_ENTITY + "feature");
+                Assert.state(encodingType.equals(ENCODINGTYPE_GEOJSON),
+                        "Invalid encodingType supplied. Only GeoJSON (application/vnd.geo+json) is supported!");
+                Assert.notNull(feature.geometry, INVALID_INLINE_ENTITY + "feature->geometry");
+                Assert.notNull(feature.type, INVALID_INLINE_ENTITY + "feature->type");
+                Assert.state(feature.type.equals("Feature"), "Invalid Featuretype.");
+            }
 
             self.setIdentifier(identifier);
             self.setName(name);
             self.setDescription(description);
 
-            GeoJsonReader reader = new GeoJsonReader(factory);
-            try {
-                self.setGeometry(reader.read(feature.geometry.toString()));
-            } catch (ParseException e) {
-                Assert.notNull(null, "Could not parse feature to GeoJSON. Error was:" + e.getMessage());
+            if (feature != null) {
+                GeoJsonReader reader = new GeoJsonReader(factory);
+                try {
+                    self.setGeometry(reader.read(feature.geometry.toString()));
+                } catch (ParseException e) {
+                    Assert.notNull(null, "Could not parse feature to GeoJSON. Error was:" + e.getMessage());
+                }
+                self.setFeatureType(ServiceUtils.createFeatureType(self.getGeometry()));
             }
-            self.setFeatureType(ServiceUtils.createFeatureType(self.getGeometry()));
 
             //TODO: handle nested observations
-
             if (backReference != null) {
                 // TODO: link feature to observations?
                 // throw new NotImplementedException();

@@ -3,8 +3,8 @@ package org.n52.sta.serdes;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.n52.series.db.beans.BlobDataEntity;
@@ -20,6 +20,7 @@ import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.ReferencedDataEntity;
 import org.n52.series.db.beans.TextDataEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
+import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
@@ -35,6 +36,18 @@ import java.util.Date;
 import java.util.Set;
 
 public class ObservationSerde {
+
+    public static class StaDataEntityPatch extends StaDataEntity implements EntityPatch<DataEntity> {
+        private final StaDataEntity entity;
+
+        public StaDataEntityPatch (StaDataEntity entity) {
+            this.entity = entity;
+        }
+
+        public StaDataEntity getEntity() {
+            return entity;
+        }
+    }
 
     public static class ObservationSerializer extends AbstractSTASerializer<ObservationWithQueryOptions> {
 
@@ -192,11 +205,27 @@ public class ObservationSerde {
 
     }
 
-    public static class ObservationDeserializer extends JsonDeserializer<DataEntity<?>> {
+    public static class ObservationDeserializer extends StdDeserializer<StaDataEntity> {
+
+        public ObservationDeserializer() {
+            super(StaDataEntity.class);
+        }
 
         @Override
-        public DataEntity<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+        public StaDataEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return p.readValueAs(JSONObservation.class).toEntity();
+        }
+    }
+
+    public static class ObservationPatchDeserializer extends StdDeserializer<StaDataEntityPatch> {
+
+        public ObservationPatchDeserializer() {
+            super(StaDataEntityPatch.class);
+        }
+
+        @Override
+        public StaDataEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+            return new StaDataEntityPatch(p.readValueAs(JSONObservation.class).toEntity(false));
         }
     }
 }

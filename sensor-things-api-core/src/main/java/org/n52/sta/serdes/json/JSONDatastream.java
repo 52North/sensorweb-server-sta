@@ -56,8 +56,8 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
         self = new DatastreamEntity();
     }
 
-    public DatastreamEntity toEntity() {
-        if (!generatedId && name == null) {
+    public DatastreamEntity toEntity(boolean validate) {
+        if (!generatedId && name == null && validate) {
             Assert.isNull(name, INVALID_REFERENCED_ENTITY);
             Assert.isNull(description, INVALID_REFERENCED_ENTITY);
             Assert.isNull(observationType, INVALID_REFERENCED_ENTITY);
@@ -74,19 +74,21 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
             self.setIdentifier(identifier);
             return self;
         } else {
-            Assert.notNull(name, INVALID_INLINE_ENTITY + "name");
-            Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
-            Assert.state(
-                    observationType.equals(OM_Measurement)
-                            || observationType.equals(OM_CountObservation)
-                            || observationType.equals(OM_CategoryObservation)
-                            || observationType.equals(OM_Observation)
-                            || observationType.equals(OM_TruthObservation)
-            );
-            Assert.notNull(unitOfMeasurement, INVALID_INLINE_ENTITY + "unitOfMeasurement");
-            Assert.notNull(unitOfMeasurement.name, INVALID_INLINE_ENTITY + "unitOfMeasurement->name");
-            Assert.notNull(unitOfMeasurement.symbol, INVALID_INLINE_ENTITY + "unitOfMeasurement->symbol");
-            Assert.notNull(unitOfMeasurement.definition, INVALID_INLINE_ENTITY + "unitOfMeasurement->definition");
+            if (validate) {
+                Assert.notNull(name, INVALID_INLINE_ENTITY + "name");
+                Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
+                Assert.state(
+                        observationType.equals(OM_Measurement)
+                                || observationType.equals(OM_CountObservation)
+                                || observationType.equals(OM_CategoryObservation)
+                                || observationType.equals(OM_Observation)
+                                || observationType.equals(OM_TruthObservation)
+                );
+                Assert.notNull(unitOfMeasurement, INVALID_INLINE_ENTITY + "unitOfMeasurement");
+                Assert.notNull(unitOfMeasurement.name, INVALID_INLINE_ENTITY + "unitOfMeasurement->name");
+                Assert.notNull(unitOfMeasurement.symbol, INVALID_INLINE_ENTITY + "unitOfMeasurement->symbol");
+                Assert.notNull(unitOfMeasurement.definition, INVALID_INLINE_ENTITY + "unitOfMeasurement->definition");
+            }
 
             self.setIdentifier(identifier);
             self.setName(name);
@@ -103,11 +105,13 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
                 }
             }
 
-            UnitEntity unit = new UnitEntity();
-            unit.setLink(unitOfMeasurement.definition);
-            unit.setName(unitOfMeasurement.name);
-            unit.setSymbol(unitOfMeasurement.symbol);
-            self.setUnit(unit);
+            if (unitOfMeasurement != null) {
+                UnitEntity unit = new UnitEntity();
+                unit.setLink(unitOfMeasurement.definition);
+                unit.setName(unitOfMeasurement.name);
+                unit.setSymbol(unitOfMeasurement.symbol);
+                self.setUnit(unit);
+            }
 
             if (resultTime != null) {
                 Time time = parseTime(resultTime);
@@ -129,7 +133,9 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
             } else if (backReference instanceof JSONThing) {
                 self.setThing(((JSONThing) backReference).getEntity());
             } else {
-                Assert.notNull(null, INVALID_INLINE_ENTITY + "Thing");
+                if (validate) {
+                    Assert.notNull(null, INVALID_INLINE_ENTITY + "Thing");
+                }
             }
 
             if (Sensor != null) {
@@ -137,7 +143,9 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
             } else if (backReference instanceof JSONSensor) {
                 self.setProcedure(((JSONSensor) backReference).getEntity());
             } else {
-                Assert.notNull(null, INVALID_INLINE_ENTITY + "Sensor");
+                if (validate) {
+                    Assert.notNull(null, INVALID_INLINE_ENTITY + "Sensor");
+                }
             }
 
             if (ObservedProperty != null) {
@@ -145,7 +153,9 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
             } else if (backReference instanceof JSONObservedProperty) {
                 self.setObservableProperty(((JSONObservedProperty) backReference).getEntity());
             } else {
-                Assert.notNull(null, INVALID_INLINE_ENTITY + "ObservedProperty");
+                if (validate) {
+                    Assert.notNull(null, INVALID_INLINE_ENTITY + "ObservedProperty");
+                }
             }
 
             if (Observations != null) {

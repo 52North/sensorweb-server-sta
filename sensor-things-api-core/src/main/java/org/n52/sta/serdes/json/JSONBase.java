@@ -42,6 +42,23 @@ public class JSONBase {
             Assert.notNull(self, "Trying to get Entity prior to creation!");
             return this.self;
         }
+
+        /**
+         * Creates and validates the Database Entity to conform to invariants defined in standard.
+         * Used when creating Entities in normal POST Requests
+         * @return created Entity
+         */
+        public T toEntity() {
+            return toEntity(true);
+        }
+
+        /**
+         * Creates the Database Entity.
+         * validate = true : Used when creating Entities in normal POST Requests upholding invariants
+         * validate = false : Used when patching Entities in PATCH Requests
+         * @return created Entity
+         */
+        abstract T toEntity(boolean validate);
     }
 
     abstract static class JSONwithIdNameDescription<T> extends JSONwithId<T> {

@@ -35,8 +35,8 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
         self = new LocationEntity();
     }
 
-    public LocationEntity toEntity() {
-        if (!generatedId && name == null) {
+    public LocationEntity toEntity(boolean validate) {
+        if (!generatedId && name == null && validate) {
             Assert.isNull(name, INVALID_REFERENCED_ENTITY);
             Assert.isNull(description, INVALID_REFERENCED_ENTITY);
             Assert.isNull(encodingType, INVALID_REFERENCED_ENTITY);
@@ -46,14 +46,16 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
             self.setIdentifier(identifier);
             return self;
         } else {
-            Assert.notNull(name, INVALID_INLINE_ENTITY + "name");
-            Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
-            Assert.notNull(encodingType, INVALID_INLINE_ENTITY + "encodingType");
-            Assert.notNull(location, INVALID_INLINE_ENTITY + "location");
-            Assert.notNull(location.type, INVALID_INLINE_ENTITY + "location->type");
-            Assert.notNull(location.geometry, INVALID_INLINE_ENTITY + "location->geometry");
-            Assert.state(encodingType.equals(ENCODINGTYPE_GEOJSON),
-                    "Invalid encodingType supplied. Only GeoJSON (application/vnd.geo+json) is supported!");
+            if (validate) {
+                Assert.notNull(name, INVALID_INLINE_ENTITY + "name");
+                Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
+                Assert.notNull(encodingType, INVALID_INLINE_ENTITY + "encodingType");
+                Assert.notNull(location, INVALID_INLINE_ENTITY + "location");
+                Assert.notNull(location.type, INVALID_INLINE_ENTITY + "location->type");
+                Assert.notNull(location.geometry, INVALID_INLINE_ENTITY + "location->geometry");
+                Assert.state(encodingType.equals(ENCODINGTYPE_GEOJSON),
+                        "Invalid encodingType supplied. Only GeoJSON (application/vnd.geo+json) is supported!");
+            }
 
             self.setIdentifier(identifier);
             self.setName(name);

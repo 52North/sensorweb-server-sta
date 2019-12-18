@@ -1,14 +1,17 @@
 package org.n52.sta.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.n52.series.db.beans.IdEntity;
-import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.exception.STAInvalidUrlException;
+import org.n52.sta.serdes.EntityPatch;
+import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,7 +46,7 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
     public ElementWithQueryOptions handlePost(@PathVariable String collectionName,
                                               @RequestBody String body) throws IOException, STACRUDException {
 
-        Class clazz = collectionNameToClass.get(collectionName);
+        Class<T> clazz = collectionNameToClass.get(collectionName);
         return ((AbstractSensorThingsEntityService<?, T>) serviceRepository.getEntityService(collectionName))
                 .create((T) mapper.readValue(body, clazz));
     }
@@ -52,25 +55,35 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
      * Matches all requests on Entities referenced directly via id
      * e.g. /Datastreams(52)
      *
-     * @param collectionName  name of entity. Automatically set by Spring via @PathVariable
-     * @param id  id of entity. Automatically set by Spring via @PathVariable
-     * @param request full request
+     * @param collectionName name of entity. Automatically set by Spring via @PathVariable
+     * @param id             id of entity. Automatically set by Spring via @PathVariable
+     * @param request        full request
      */
     @PatchMapping(
             value = "**/{collectionName:" + COLLECTION_REGEX + "}{id:" + IDENTIFIER_REGEX + "$}",
             produces = "application/json"
     )
-    public Object readEntityDirect(@PathVariable String collectionName,
-                                   @PathVariable String id,
-                                   @RequestBody String body,
-                                   HttpServletRequest request) throws STACRUDException, IOException {
+    @SuppressWarnings("unchecked")
+    public Object handlePatch(@PathVariable String collectionName,
+                              @PathVariable String id,
+                              @RequestBody String body,
+                              HttpServletRequest request) throws STACRUDException, IOException {
         STAInvalidUrlException ex = validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
         if (ex != null) {
             return ex;
         } else {
-            Class clazz = collectionNameToClass.get(collectionName);
+            Class<EntityPatch> clazz = collectionNameToPatchClass.get(collectionName);
+            ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
+            String strippedId = id.substring(1, id.length() - 1);
+            jsonBody.put("@iot.id", strippedId);
             return ((AbstractSensorThingsEntityService<?, T>) serviceRepository.getEntityService(collectionName))
-                    .update(id, (T) mapper.readValue(body, clazz), HttpMethod.PATCH);
+                    .update(strippedId,
+                            (T) ((mapper.readValue(jsonBody.toString(), clazz))).getEntity(),
+                            HttpMethod.PATCH);
         }
     }
+
+    @DeleteMapping(
+            
+    )
 }

@@ -3,8 +3,8 @@ package org.n52.sta.serdes;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
@@ -19,6 +19,18 @@ import java.util.Optional;
 import java.util.Set;
 
 public class SensorSerdes {
+
+    public static class SensorEntityPatch extends SensorEntity implements EntityPatch<SensorEntity> {
+        private final SensorEntity entity;
+
+        public SensorEntityPatch (SensorEntity entity) {
+            this.entity = entity;
+        }
+
+        public SensorEntity getEntity() {
+            return entity;
+        }
+    }
 
     public static class SensorSerializer extends AbstractSTASerializer<SensorWithQueryOptions> {
 
@@ -94,11 +106,27 @@ public class SensorSerdes {
         }
     }
 
-    public static class SensorDeserializer extends JsonDeserializer<SensorEntity> {
+    public static class SensorDeserializer extends StdDeserializer<SensorEntity> {
+
+        public SensorDeserializer() {
+            super(SensorEntity.class);
+        }
 
         @Override
         public SensorEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return p.readValueAs(JSONSensor.class).toEntity();
+        }
+    }
+
+    public static class SensorPatchDeserializer extends StdDeserializer<SensorEntityPatch> {
+
+        public SensorPatchDeserializer() {
+            super(SensorEntityPatch.class);
+        }
+
+        @Override
+        public SensorEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+            return new SensorEntityPatch(p.readValueAs(JSONSensor.class).toEntity(false));
         }
     }
 }

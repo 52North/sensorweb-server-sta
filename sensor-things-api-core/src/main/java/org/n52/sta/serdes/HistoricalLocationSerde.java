@@ -3,8 +3,8 @@ package org.n52.sta.serdes;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.sta.serdes.json.JSONHistoricalLocation;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.HistoricalLocationWithQueryOptions;
@@ -16,6 +16,19 @@ import java.io.IOException;
 import java.util.Set;
 
 public class HistoricalLocationSerde {
+
+    public static class HistoricalLocationEntityPatch extends HistoricalLocationEntity
+            implements EntityPatch<HistoricalLocationEntity> {
+        private final HistoricalLocationEntity entity;
+
+        public HistoricalLocationEntityPatch (HistoricalLocationEntity entity) {
+            this.entity = entity;
+        }
+
+        public HistoricalLocationEntity getEntity() {
+            return entity;
+        }
+    }
 
     public static class HistoricalLocationSerializer extends AbstractSTASerializer<HistoricalLocationWithQueryOptions> {
 
@@ -65,11 +78,28 @@ public class HistoricalLocationSerde {
         }
     }
 
-    public static class HistoricalLocationDeserializer extends JsonDeserializer<HistoricalLocationEntity> {
+    public static class HistoricalLocationDeserializer extends StdDeserializer<HistoricalLocationEntity> {
+
+        public HistoricalLocationDeserializer() {
+            super(HistoricalLocationEntity.class);
+        }
 
         @Override
         public HistoricalLocationEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return p.readValueAs(JSONHistoricalLocation.class).toEntity();
+        }
+    }
+
+    public static class HistoricalLocationPatchDeserializer extends StdDeserializer<HistoricalLocationEntityPatch> {
+
+        public HistoricalLocationPatchDeserializer() {
+            super(HistoricalLocationEntityPatch.class);
+        }
+
+        @Override
+        public HistoricalLocationEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+            return new HistoricalLocationEntityPatch(p.readValueAs(JSONHistoricalLocation.class)
+                    .toEntity(false));
         }
     }
 }

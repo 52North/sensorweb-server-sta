@@ -31,8 +31,8 @@ public class JSONHistoricalLocation extends JSONBase.JSONwithIdTime<HistoricalLo
         self = new HistoricalLocationEntity();
     }
 
-    public HistoricalLocationEntity toEntity() {
-        if (!generatedId && time == null) {
+    public HistoricalLocationEntity toEntity(boolean validate) {
+        if (!generatedId && time == null && validate) {
             Assert.isNull(time, INVALID_REFERENCED_ENTITY);
             Assert.isNull(Thing, INVALID_REFERENCED_ENTITY);
             Assert.isNull(Locations, INVALID_REFERENCED_ENTITY);
@@ -40,7 +40,9 @@ public class JSONHistoricalLocation extends JSONBase.JSONwithIdTime<HistoricalLo
             self.setIdentifier(identifier);
             return self;
         } else {
-            Assert.notNull(time, INVALID_INLINE_ENTITY + "time");
+            if (validate) {
+                Assert.notNull(time, INVALID_INLINE_ENTITY + "time");
+            }
 
             self.setIdentifier(identifier);
             self.setTime(date);
@@ -50,7 +52,9 @@ public class JSONHistoricalLocation extends JSONBase.JSONwithIdTime<HistoricalLo
             } else if (backReference instanceof JSONThing) {
                 self.setThing(((JSONThing) backReference).getEntity());
             } else {
-                Assert.notNull(null, INVALID_INLINE_ENTITY + "Thing");
+                if (validate) {
+                    Assert.notNull(null, INVALID_INLINE_ENTITY + "Thing");
+                }
             }
 
             if (Locations != null) {
@@ -60,7 +64,9 @@ public class JSONHistoricalLocation extends JSONBase.JSONwithIdTime<HistoricalLo
             } else if (backReference instanceof JSONLocation) {
                 self.setLocations(Collections.singleton(((JSONLocation) backReference).getEntity()));
             } else {
-                Assert.notNull(null, INVALID_INLINE_ENTITY + "Location");
+                if (validate) {
+                    Assert.notNull(null, INVALID_INLINE_ENTITY + "Location");
+                }
             }
 
             return self;

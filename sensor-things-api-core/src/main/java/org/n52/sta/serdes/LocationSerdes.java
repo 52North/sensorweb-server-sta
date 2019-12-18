@@ -3,8 +3,8 @@ package org.n52.sta.serdes;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.serdes.json.JSONLocation;
@@ -17,6 +17,19 @@ import java.io.IOException;
 import java.util.Set;
 
 public class LocationSerdes {
+
+    public static class LocationEntityPatch extends LocationEntity implements EntityPatch<LocationEntity> {
+        private final LocationEntity entity;
+
+        public LocationEntityPatch (LocationEntity entity) {
+            this.entity = entity;
+        }
+
+        public LocationEntity getEntity() {
+            return entity;
+        }
+    }
+
 
     public static class LocationSerializer extends AbstractSTASerializer<LocationWithQueryOptions> {
 
@@ -86,11 +99,27 @@ public class LocationSerdes {
         }
     }
 
-    public static class LocationDeserializer extends JsonDeserializer<LocationEntity> {
+    public static class LocationDeserializer extends StdDeserializer<LocationEntity> {
+
+        public LocationDeserializer() {
+            super(LocationEntity.class);
+        }
 
         @Override
         public LocationEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return p.readValueAs(JSONLocation.class).toEntity();
+        }
+    }
+
+    public static class LocationPatchDeserializer extends StdDeserializer<LocationEntityPatch> {
+
+        public LocationPatchDeserializer() {
+            super(LocationEntityPatch.class);
+        }
+
+        @Override
+        public LocationEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+            return new LocationEntityPatch(p.readValueAs(JSONLocation.class).toEntity(false));
         }
     }
 }

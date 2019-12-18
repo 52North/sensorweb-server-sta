@@ -4,12 +4,21 @@ import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
-import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.exception.STAInvalidUrlException;
+import org.n52.sta.serdes.DatastreamSerdes.DatastreamEntityPatch;
+import org.n52.sta.serdes.EntityPatch;
+import org.n52.sta.serdes.FeatureOfInterestSerdes.AbstractFeatureEntityPatch;
+import org.n52.sta.serdes.HistoricalLocationSerde.HistoricalLocationEntityPatch;
+import org.n52.sta.serdes.LocationSerdes.LocationEntityPatch;
+import org.n52.sta.serdes.ObservationSerde.StaDataEntityPatch;
+import org.n52.sta.serdes.ObservedPropertySerde.PhenomenonEntityPatch;
+import org.n52.sta.serdes.SensorSerdes.SensorEntityPatch;
+import org.n52.sta.serdes.ThingSerdes.PlatformEntityPatch;
 import org.n52.sta.utils.QueryOptions;
 
 import java.util.Collections;
@@ -20,7 +29,7 @@ import java.util.regex.Pattern;
 
 public class STARequestUtils {
 
-    final String IDENTIFIER_REGEX = "\\(['\\-0-9a-zA-Z]+\\)";
+    final String IDENTIFIER_REGEX = "(?:\\()['\\-0-9a-zA-Z]+(?:\\))";
     final String COLLECTION_REGEX =
             "Observations|Datastreams|Things|Sensors|Locations|HistoricalLocations|" +
                     "FeaturesOfInterest|ObservedProperties";
@@ -62,6 +71,7 @@ public class STARequestUtils {
             "{entity:FeaturesOfInterest" + IDENTIFIER_REGEX + "}/{target:Observations}";
 
     final static Map<String, Class> collectionNameToClass;
+    final static Map<String, Class<EntityPatch>> collectionNameToPatchClass;
 
     static {
         HashMap<String, Class> map = new HashMap<>();
@@ -69,11 +79,22 @@ public class STARequestUtils {
         map.put("Locations", LocationEntity.class);
         map.put("Datastreams", DatastreamEntity.class);
         map.put("HistoricalLocations", HistoricalLocationEntity.class);
-        map.put("Sensors", ProcedureEntity.class);
+        map.put("Sensors", SensorEntity.class);
         map.put("Observations", DataEntity.class);
         map.put("ObservedProperties", PhenomenonEntity.class);
         map.put("FeaturesOfInterest", AbstractFeatureEntity.class);
         collectionNameToClass = Collections.unmodifiableMap(map);
+
+        map = new HashMap<>();
+        map.put("Things", PlatformEntityPatch.class);
+        map.put("Locations", LocationEntityPatch.class);
+        map.put("Datastreams", DatastreamEntityPatch.class);
+        map.put("HistoricalLocations", HistoricalLocationEntityPatch.class);
+        map.put("Sensors", SensorEntityPatch.class);
+        map.put("Observations", StaDataEntityPatch.class);
+        map.put("ObservedProperties", PhenomenonEntityPatch.class);
+        map.put("FeaturesOfInterest", AbstractFeatureEntityPatch.class);
+        collectionNameToPatchClass = Collections.unmodifiableMap(map);
     }
 
     final Pattern byIdPattern = Pattern.compile("(" + COLLECTION_REGEX + ")" + IDENTIFIER_REGEX);

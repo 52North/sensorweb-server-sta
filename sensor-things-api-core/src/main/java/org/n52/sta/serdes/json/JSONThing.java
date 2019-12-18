@@ -23,10 +23,10 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
         self = new PlatformEntity();
     }
 
-    public PlatformEntity toEntity() {
+    public PlatformEntity toEntity(boolean validate) {
         // Check if Entity is only referenced via id and not provided fully
         // More complex since implementation allows custom setting of id by user
-        if (!generatedId && name == null) {
+        if (!generatedId && name == null && validate) {
             Assert.isNull(name, INVALID_REFERENCED_ENTITY);
             Assert.isNull(description, INVALID_REFERENCED_ENTITY);
             Assert.isNull(properties, INVALID_REFERENCED_ENTITY);
@@ -37,8 +37,10 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
             self.setIdentifier(identifier);
             return self;
         } else {
-            Assert.notNull(name, INVALID_INLINE_ENTITY + "name");
-            Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
+            if (validate) {
+                Assert.notNull(name, INVALID_INLINE_ENTITY + "name");
+                Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
+            }
 
             self.setIdentifier(identifier);
             self.setName(name);

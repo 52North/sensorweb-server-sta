@@ -31,9 +31,8 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> impl
         self = new StaDataEntity();
     }
 
-    public StaDataEntity toEntity() {
-        if (!generatedId && result == null) {
-
+    public StaDataEntity toEntity(boolean validate) {
+        if (!generatedId && result == null && validate) {
             Assert.isNull(phenomenonTime, INVALID_REFERENCED_ENTITY);
             Assert.isNull(resultTime, INVALID_REFERENCED_ENTITY);
             Assert.isNull(result, INVALID_REFERENCED_ENTITY);
@@ -44,7 +43,9 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> impl
             self.setIdentifier(identifier);
             return self;
         } else {
-            Assert.notNull(result, INVALID_INLINE_ENTITY + "result");
+            if (validate) {
+                Assert.notNull(result, INVALID_INLINE_ENTITY + "result");
+            }
 
             // phenomenonTime
             if (phenomenonTime != null) {
@@ -56,7 +57,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> impl
                     self.setSamplingTimeStart(((TimePeriod) time).getStart().toDate());
                     self.setSamplingTimeEnd(((TimePeriod) time).getEnd().toDate());
                 }
-            } else {
+            } else if (validate) {
                 // Use time of POST Request as fallback
                 Date date = DateTime.now().toDate();
                 self.setSamplingTimeStart(date);

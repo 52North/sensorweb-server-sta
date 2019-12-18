@@ -3,8 +3,8 @@ package org.n52.sta.serdes;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.shetland.util.DateTimeHelper;
@@ -21,6 +21,18 @@ import static org.n52.sta.utils.TimeUtil.createDateTime;
 import static org.n52.sta.utils.TimeUtil.createTime;
 
 public class DatastreamSerdes {
+
+    public static class DatastreamEntityPatch extends DatastreamEntity implements EntityPatch<DatastreamEntity> {
+        private final DatastreamEntity entity;
+
+        public DatastreamEntityPatch (DatastreamEntity entity) {
+            this.entity = entity;
+        }
+
+        public DatastreamEntity getEntity() {
+            return entity;
+        }
+    }
 
     public static class DatastreamSerializer extends AbstractSTASerializer<DatastreamWithQueryOptions> {
 
@@ -105,11 +117,27 @@ public class DatastreamSerdes {
         }
     }
 
-    public static class DatastreamDeserializer extends JsonDeserializer<DatastreamEntity> {
+    public static class DatastreamDeserializer extends StdDeserializer<DatastreamEntity> {
+
+        public DatastreamDeserializer() {
+            super(DatastreamEntity.class);
+        }
 
         @Override
         public DatastreamEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return p.readValueAs(JSONDatastream.class).toEntity();
+        }
+    }
+
+    public static class DatastreamPatchDeserializer extends StdDeserializer<DatastreamEntityPatch> {
+
+        public DatastreamPatchDeserializer() {
+            super(DatastreamEntityPatch.class);
+        }
+
+        @Override
+        public DatastreamEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+            return new DatastreamEntityPatch(p.readValueAs(JSONDatastream.class).toEntity(false));
         }
     }
 }

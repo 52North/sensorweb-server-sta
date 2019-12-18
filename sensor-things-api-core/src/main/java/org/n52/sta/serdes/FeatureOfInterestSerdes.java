@@ -3,8 +3,8 @@ package org.n52.sta.serdes;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.FeatureEntity;
@@ -18,6 +18,18 @@ import java.io.IOException;
 import java.util.Set;
 
 public class FeatureOfInterestSerdes {
+
+    public static class AbstractFeatureEntityPatch extends AbstractFeatureEntity implements EntityPatch<AbstractFeatureEntity> {
+        private final AbstractFeatureEntity entity;
+
+        public AbstractFeatureEntityPatch(FeatureEntity entity) {
+            this.entity = entity;
+        }
+
+        public AbstractFeatureEntity getEntity() {
+            return entity;
+        }
+    }
 
     public static class FeatureOfInterestSerializer extends AbstractSTASerializer<FeatureOfInterestWithQueryOptions> {
 
@@ -89,11 +101,28 @@ public class FeatureOfInterestSerdes {
         }
     }
 
-    public static class FeatureOfInterestDeserializer extends JsonDeserializer<FeatureEntity> {
+    public static class FeatureOfInterestDeserializer extends StdDeserializer<AbstractFeatureEntity<?>> {
+
+        public FeatureOfInterestDeserializer() {
+            super(AbstractFeatureEntity.class);
+        }
 
         @Override
-        public FeatureEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+        public AbstractFeatureEntity<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return p.readValueAs(JSONFeatureOfInterest.class).toEntity();
+        }
+    }
+
+    public static class FeatureOfInterestPatchDeserializer extends StdDeserializer<AbstractFeatureEntityPatch> {
+
+        public FeatureOfInterestPatchDeserializer() {
+            super(AbstractFeatureEntityPatch.class);
+        }
+
+        @Override
+        public AbstractFeatureEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+            return new AbstractFeatureEntityPatch(p.readValueAs(JSONFeatureOfInterest.class)
+                    .toEntity(false));
         }
     }
 }
