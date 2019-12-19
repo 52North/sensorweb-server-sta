@@ -111,7 +111,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
                                 || observationType.equals(OM_CategoryObservation)
                                 || observationType.equals(OM_Observation)
                                 || observationType.equals(OM_TruthObservation)
-                );
+                , INVALID_INLINE_ENTITY + "observationType");
                 Assert.notNull(unitOfMeasurement, INVALID_INLINE_ENTITY + "unitOfMeasurement");
                 Assert.notNull(unitOfMeasurement.name, INVALID_INLINE_ENTITY + "unitOfMeasurement->name");
                 Assert.notNull(unitOfMeasurement.symbol, INVALID_INLINE_ENTITY + "unitOfMeasurement->symbol");

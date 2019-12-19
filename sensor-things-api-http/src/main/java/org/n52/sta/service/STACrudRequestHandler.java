@@ -69,7 +69,7 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
 
     @PostMapping(
             consumes = "application/json",
-            value = "/{collectionName: " + COLLECTION_REGEX + "$}",
+            value = "/{collectionName:" + COLLECTION_REGEX + "$}",
             produces = "application/json")
     @SuppressWarnings("unchecked")
     public ElementWithQueryOptions handlePost(@PathVariable String collectionName,

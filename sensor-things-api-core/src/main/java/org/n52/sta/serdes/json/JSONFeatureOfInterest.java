@@ -44,7 +44,7 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
 
     // JSON Properties. Matched by Annotation or variable name
     public String encodingType;
-    public JSONNestedFeature feature;
+    public JsonNode feature;
     @JsonManagedReference
     public JSONObservation[] Observations;
 
@@ -74,9 +74,6 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
                 Assert.notNull(feature, INVALID_INLINE_ENTITY + "feature");
                 Assert.state(encodingType.equals(ENCODINGTYPE_GEOJSON),
                         "Invalid encodingType supplied. Only GeoJSON (application/vnd.geo+json) is supported!");
-                Assert.notNull(feature.geometry, INVALID_INLINE_ENTITY + "feature->geometry");
-                Assert.notNull(feature.type, INVALID_INLINE_ENTITY + "feature->type");
-                Assert.state(feature.type.equals("Feature"), "Invalid Featuretype.");
             }
 
             self.setIdentifier(identifier);
@@ -86,7 +83,7 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
             if (feature != null) {
                 GeoJsonReader reader = new GeoJsonReader(factory);
                 try {
-                    self.setGeometry(reader.read(feature.geometry.toString()));
+                    self.setGeometry(reader.read(feature.toString()));
                 } catch (ParseException e) {
                     Assert.notNull(null, "Could not parse feature to GeoJSON. Error was:" + e.getMessage());
                 }
@@ -101,10 +98,5 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
 
             return self;
         }
-    }
-
-    private static class JSONNestedFeature {
-        public String type;
-        public JsonNode geometry;
     }
 }

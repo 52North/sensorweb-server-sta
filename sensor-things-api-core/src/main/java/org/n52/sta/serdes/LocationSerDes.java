@@ -108,12 +108,8 @@ public class LocationSerDes {
                 }
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_LOCATION)) {
-                gen.writeObjectFieldStart(STAEntityDefinition.PROP_LOCATION);
-                gen.writeStringField("type", "Feature");
-                gen.writeObjectFieldStart("geometry");
-                gen.writeRaw(GEO_JSON_WRITER.write(location.getGeometryEntity().getGeometry()));
-                gen.writeEndObject();
-                gen.writeEndObject();
+                gen.writeFieldName(STAEntityDefinition.PROP_LOCATION);
+                gen.writeRawValue(GEO_JSON_WRITER.write(location.getGeometryEntity().getGeometry()));
             }
 
             // navigation properties

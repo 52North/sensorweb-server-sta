@@ -60,9 +60,6 @@ public class ObservedPropertySerDes {
 
     public static class ObservedPropertySerializer extends AbstractSTASerializer<ObservedPropertyWithQueryOptions> {
 
-        private final String rootUrl;
-        private final String entitySetName;
-
         public ObservedPropertySerializer(String rootUrl) {
             super(ObservedPropertyWithQueryOptions.class);
             this.rootUrl = rootUrl;

@@ -117,6 +117,9 @@ public class ObservationSerDes {
                 Date samplingTime = observation.getSamplingTimeEnd();
                 if (!resultTime.equals(samplingTime)) {
                     gen.writeStringField(STAEntityDefinition.PROP_RESULT_TIME, resultTime.toInstant().toString());
+                } else {
+                    gen.writeFieldName(STAEntityDefinition.PROP_RESULT_TIME);
+                    gen.writeNull();
                 }
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_PHENOMENON_TIME)) {

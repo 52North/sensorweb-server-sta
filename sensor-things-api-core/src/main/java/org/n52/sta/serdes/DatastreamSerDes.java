@@ -41,11 +41,10 @@ import org.n52.sta.serdes.model.DatastreamEntityDefinition;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.DatastreamWithQueryOptions;
 import org.n52.sta.serdes.model.STAEntityDefinition;
 import org.n52.sta.utils.QueryOptions;
+import org.n52.sta.utils.TimeUtil;
 
 import java.io.IOException;
 import java.util.Set;
-
-import org.n52.sta.utils.TimeUtil;
 
 public class DatastreamSerDes {
 
@@ -115,9 +114,12 @@ public class DatastreamSerDes {
             }
 
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_OBSERVED_AREA)) {
-                gen.writeObjectFieldStart(STAEntityDefinition.PROP_OBSERVED_AREA);
-                gen.writeRaw(GEO_JSON_WRITER.write(datastream.getGeometryEntity().getGeometry()));
-                gen.writeEndObject();
+                gen.writeFieldName(STAEntityDefinition.PROP_OBSERVED_AREA);
+                if (datastream.getGeometryEntity() != null) {
+                    gen.writeRawValue(GEO_JSON_WRITER.write(datastream.getGeometryEntity().getGeometry()));
+                } else {
+                    gen.writeNull();
+                }
             }
 
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_RESULT_TIME)) {

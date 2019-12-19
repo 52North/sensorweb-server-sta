@@ -47,7 +47,7 @@ public class JSONHistoricalLocation extends JSONBase.JSONwithIdTime<HistoricalLo
         implements AbstractJSONEntity {
 
     // JSON Properties. Matched by Annotation or variable name
-    public Object time;
+    public String time;
     public JSONThing Thing;
 
     @JsonManagedReference
@@ -69,7 +69,7 @@ public class JSONHistoricalLocation extends JSONBase.JSONwithIdTime<HistoricalLo
             return self;
         } else {
             if (validate) {
-                Assert.notNull(time, INVALID_INLINE_ENTITY + "time");
+                Assert.notNull(date, INVALID_INLINE_ENTITY + "time");
             }
 
             self.setIdentifier(identifier);

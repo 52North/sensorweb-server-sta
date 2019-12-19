@@ -47,7 +47,8 @@ import java.util.Set;
 
 public class FeatureOfInterestSerDes {
 
-    public static class AbstractFeatureEntityPatch extends AbstractFeatureEntity implements EntityPatch<AbstractFeatureEntity> {
+    public static class AbstractFeatureEntityPatch extends AbstractFeatureEntity
+            implements EntityPatch<AbstractFeatureEntity> {
         private final AbstractFeatureEntity entity;
 
         public AbstractFeatureEntityPatch(FeatureEntity entity) {
@@ -109,14 +110,9 @@ public class FeatureOfInterestSerDes {
                 }
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_FEATURE)) {
-                gen.writeObjectFieldStart(STAEntityDefinition.PROP_LOCATION);
-                gen.writeStringField("type", "Feature");
-                gen.writeObjectFieldStart("geometry");
-                gen.writeRaw(GEO_JSON_WRITER.write(feature.getGeometryEntity().getGeometry()));
-                gen.writeEndObject();
-                gen.writeEndObject();
+                gen.writeFieldName(STAEntityDefinition.PROP_FEATURE);
+                gen.writeRawValue(GEO_JSON_WRITER.write(feature.getGeometryEntity().getGeometry()));
             }
-
 
             // navigation properties
             for (String navigationProperty : FeatureOfInterestEntityDefinition.navigationProperties) {

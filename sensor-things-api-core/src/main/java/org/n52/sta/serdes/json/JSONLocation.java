@@ -47,7 +47,7 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
 
     // JSON Properties. Matched by Annotation or variable name
     public String encodingType;
-    public JSONNestedLocation location;
+    public JsonNode location;
 
     @JsonManagedReference
     public JSONThing[] Things;
@@ -79,8 +79,8 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
                 Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
                 Assert.notNull(encodingType, INVALID_INLINE_ENTITY + "encodingType");
                 Assert.notNull(location, INVALID_INLINE_ENTITY + "location");
-                Assert.notNull(location.type, INVALID_INLINE_ENTITY + "location->type");
-                Assert.notNull(location.geometry, INVALID_INLINE_ENTITY + "location->geometry");
+                //Assert.notNull(location.type, INVALID_INLINE_ENTITY + "location->type");
+                //Assert.notNull(location.geometry, INVALID_INLINE_ENTITY + "location->geometry");
                 Assert.state(encodingType.equals(ENCODINGTYPE_GEOJSON),
                         "Invalid encodingType supplied. Only GeoJSON (application/vnd.geo+json) is supported!");
             }
@@ -92,8 +92,7 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
 
             GeoJsonReader reader = new GeoJsonReader(factory);
             try {
-                Assert.state(location.type.equals("Feature"));
-                self.setGeometry(reader.read(location.geometry.toString()));
+                self.setGeometry(reader.read(location.toString()));
             } catch (ParseException e) {
                 Assert.notNull(null, "Could not parse location to GeoJSON. Error was:" + e.getMessage());
             }
@@ -123,10 +122,5 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
             }
             return self;
         }
-    }
-
-    private static class JSONNestedLocation {
-        public String type;
-        public JsonNode geometry;
     }
 }
