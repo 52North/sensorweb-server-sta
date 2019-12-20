@@ -97,7 +97,7 @@ public class ObservedPropertySerDes {
                 gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, obsProp.getDescription());
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_DEFINITION)) {
-                gen.writeObjectField(STAEntityDefinition.PROP_PROPERTIES, obsProp.getIdentifier());
+                gen.writeObjectField(STAEntityDefinition.PROP_DEFINITION, obsProp.getIdentifier());
             }
 
             // navigation properties

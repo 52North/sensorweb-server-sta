@@ -3,7 +3,7 @@
 //@AutoConfigureTestDatabase
 //@DataJpaTest
 
-package org.n52.sta;
+package org.n52.sta.test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
