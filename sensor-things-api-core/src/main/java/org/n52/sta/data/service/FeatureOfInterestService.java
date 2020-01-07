@@ -28,6 +28,7 @@
  */
 package org.n52.sta.data.service;
 
+import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
@@ -54,7 +55,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -162,7 +162,7 @@ public class FeatureOfInterestService
                 // This should never fail as we checked exist earlier
                 return getRepository().findByIdentifier(feature.getIdentifier()).orElse(null);
             } else {
-                throw new STACRUDException("Identifier already exists!", HttpStatus.BAD_REQUEST);
+                throw new STACRUDException("Identifier already exists!", HTTPStatus.BAD_REQUEST);
             }
         }
         feature.setXml(null);
@@ -190,11 +190,11 @@ public class FeatureOfInterestService
                 AbstractFeatureEntity<?> merged = merge(existing.get(), entity);
                 return getRepository().save(merged);
             }
-            throw new STACRUDException("Unable to update. Entity not found.", HttpStatus.NOT_FOUND);
+            throw new STACRUDException("Unable to update. Entity not found.", HTTPStatus.NOT_FOUND);
         } else if (HttpMethod.PUT.equals(method)) {
-            throw new STACRUDException("Http PUT is not yet supported!", HttpStatus.NOT_IMPLEMENTED);
+            throw new STACRUDException("Http PUT is not yet supported!", HTTPStatus.NOT_IMPLEMENTED);
         }
-        throw new STACRUDException("Invalid http method for updating entity!", HttpStatus.BAD_REQUEST);
+        throw new STACRUDException("Invalid http method for updating entity!", HTTPStatus.BAD_REQUEST);
     }
 
     @Override
@@ -209,7 +209,7 @@ public class FeatureOfInterestService
             deleteRelatedObservationsAndUpdateDatasets(id);
             getRepository().deleteByIdentifier(id);
         } else {
-            throw new STACRUDException("Unable to delete. Entity not found.", HttpStatus.NOT_FOUND);
+            throw new STACRUDException("Unable to delete. Entity not found.", HTTPStatus.NOT_FOUND);
         }
     }
 

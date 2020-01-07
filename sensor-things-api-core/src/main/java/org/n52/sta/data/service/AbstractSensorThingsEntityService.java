@@ -33,6 +33,14 @@
  */
 package org.n52.sta.data.service;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+import javax.annotation.PostConstruct;
+
+import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.HibernateRelations;
 import org.n52.series.db.beans.HibernateRelations.HasDescription;
@@ -51,14 +59,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.annotation.PostConstruct;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 
 /**
  * Interface for requesting Sensor Things entities
@@ -121,7 +122,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      *
      * @param queryOptions {@link QueryOptions}
      * @return the full EntityCollection
-     * @throws STAInvalidQueryException if the queryOptions are invalid
+     * @throws STACRUDException if the queryOptions are invalid
      */
     public List<ElementWithQueryOptions> getEntityCollection(QueryOptions queryOptions) throws STACRUDException {
         try {
@@ -208,7 +209,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      * @param relatedType  EntityType of the related Entity
      * @param queryOptions {@link QueryOptions}
      * @return List of Entities that match
-     * @throws STAInvalidQueryException if the queryOptions are invalid
+     * @throws STACRUDException if the queryOptions are invalid
      */
     public List<ElementWithQueryOptions> getEntityCollectionByRelatedEntity(String relatedId,
                                                                             String relatedType,
@@ -293,7 +294,6 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      *
      * @param queryOptions {@link QueryOptions}
      * @return count of entities
-     * @throws STAInvalidQueryException if the queryOptions are invalid
      */
     public long getCount(QueryOptions queryOptions) {
         return getRepository().count(getFilterPredicate(entityClass, queryOptions));
@@ -391,14 +391,14 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
                 || datastream.isSetDescription()
                 || datastream.isSetUnit()) {
             throw new STACRUDException("Inlined datastream entities are not allowed for updates!",
-                    HttpStatus.BAD_REQUEST);
+                    HTTPStatus.BAD_REQUEST);
         }
     }
 
     protected void checkInlineLocation(LocationEntity location) throws STACRUDException {
         if (location.getIdentifier() == null || location.isSetName() || location.isSetDescription()) {
             throw new STACRUDException("Inlined location entities are not allowed for updates!",
-                    HttpStatus.BAD_REQUEST);
+                    HTTPStatus.BAD_REQUEST);
         }
     }
 
