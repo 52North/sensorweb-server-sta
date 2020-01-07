@@ -63,7 +63,7 @@ public class STAEntityRequestHandler extends STARequestUtils {
      * @param request full request
      */
     @GetMapping(
-            value = "**/{entity:" + COLLECTION_REGEX + "}{id:" + IDENTIFIER_REGEX + "$}",
+            value = MAPPING_PREFIX + "{entity:" + COLLECTION_REGEX + "}{id:" + IDENTIFIER_REGEX + "$}",
             produces = "application/json"
     )
     public Object readEntityDirect(@PathVariable String entity,
@@ -90,9 +90,9 @@ public class STAEntityRequestHandler extends STARequestUtils {
      * @return JSON String representing Entity
      */
     @GetMapping(
-            value = {mappingPrefix + ENTITY_IDENTIFIED_BY_DATASTREAM_PATH,
-                     mappingPrefix + ENTITY_IDENTIFIED_BY_OBSERVATION_PATH,
-                     mappingPrefix + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH
+            value = {MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_DATASTREAM_PATH,
+                     MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_OBSERVATION_PATH,
+                     MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH
             },
             produces = "application/json"
     )
@@ -108,7 +108,7 @@ public class STAEntityRequestHandler extends STARequestUtils {
         validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
 
         String sourceType = entity.substring(0, entity.indexOf("("));
-        String sourceId = entity.substring(sourceType.length()+1, entity.length() - 1);
+        String sourceId = entity.substring(sourceType.length() + 1, entity.length() - 1);
 
         return serviceRepository.getEntityService(target)
                         .getEntityByRelatedEntity(sourceId, sourceType, null, createQueryOptions(queryOptions));

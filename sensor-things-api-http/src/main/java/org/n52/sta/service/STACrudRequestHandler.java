@@ -56,6 +56,7 @@ import java.io.IOException;
 @RequestMapping("/v2")
 public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
 
+    private static final String COULD_NOT_FIND_RELATED_ENTITY = "Could not find related Entity!";
     private final int rootUrlLength;
     private final EntityServiceRepository serviceRepository;
     private final ObjectMapper mapper;
@@ -78,7 +79,7 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
 
         Class<T> clazz = collectionNameToClass.get(collectionName);
         return ((AbstractSensorThingsEntityService<?, T>) serviceRepository.getEntityService(collectionName))
-                .create((T) mapper.readValue(body, clazz));
+                .create(mapper.readValue(body, clazz));
     }
 
     /**
@@ -103,7 +104,7 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
         Class<EntityPatch> clazz = collectionNameToPatchClass.get(collectionName);
         ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
         String strippedId = id.substring(1, id.length() - 1);
-        jsonBody.put("@iot.id", strippedId);
+        jsonBody.put(StaConstants.AT_IOT_ID, strippedId);
         return ((AbstractSensorThingsEntityService<?, T>) serviceRepository.getEntityService(collectionName))
                 .update(strippedId,
                         (T) ((mapper.readValue(jsonBody.toString(), clazz))).getEntity(),
@@ -119,9 +120,9 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
      * @param request full request
      */
     @PatchMapping(
-            value = {mappingPrefix + ENTITY_IDENTIFIED_BY_DATASTREAM_PATH,
-                    mappingPrefix + ENTITY_IDENTIFIED_BY_OBSERVATION_PATH,
-                    mappingPrefix + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH
+            value = {MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_DATASTREAM_PATH,
+                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_OBSERVATION_PATH,
+                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH
             },
             produces = "application/json"
     )
@@ -140,14 +141,14 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
 
         // Get Id from datastore
         String entityId = entityService.getEntityIdByRelatedEntity(sourceId, sourceType);
-        Assert.notNull(entityId, "Could not find related Entity!");
+        Assert.notNull(entityId, COULD_NOT_FIND_RELATED_ENTITY);
 
         // Create Patch Entity
         Class<EntityPatch> clazz = collectionNameToPatchClass.get(target);
         Assert.notNull(clazz, "Could not find Patch Class!");
 
         ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
-        jsonBody.put("@iot.id", entityId);
+        jsonBody.put(StaConstants.AT_IOT_ID, entityId);
 
         // Do update
         return entityService.update(entityId,
@@ -186,9 +187,9 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
      * @param request full request
      */
     @DeleteMapping(
-            value = {mappingPrefix + ENTITY_IDENTIFIED_BY_DATASTREAM_PATH,
-                    mappingPrefix + ENTITY_IDENTIFIED_BY_OBSERVATION_PATH,
-                    mappingPrefix + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH
+            value = {MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_DATASTREAM_PATH,
+                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_OBSERVATION_PATH,
+                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH
             },
             produces = "application/json"
     )
@@ -207,7 +208,7 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
 
         // Get Id from datastore
         String entityId = entityService.getEntityIdByRelatedEntity(sourceId, sourceType);
-        Assert.notNull(entityId, "Could not find related Entity!");
+        Assert.notNull(entityId, COULD_NOT_FIND_RELATED_ENTITY);
 
         // Do update
         entityService.delete(entityId);

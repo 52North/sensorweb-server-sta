@@ -48,7 +48,6 @@ import java.util.Map;
 public class STACollectionRequestHandler extends STARequestUtils {
 
     private final EntityServiceRepository serviceRepository;
-    private final String mappingPrefix = "**/";
     private final int rootUrlLength;
 
     public STACollectionRequestHandler(@Value("${server.rootUrl}") String rootUrl,
@@ -85,12 +84,12 @@ public class STACollectionRequestHandler extends STARequestUtils {
      * @return JSON String representing Entity
      */
     @GetMapping(
-            value = {mappingPrefix + COLLECTION_IDENTIFIED_BY_THING_PATH,
-                     mappingPrefix + COLLECTION_IDENTIFIED_BY_LOCATION_PATH,
-                     mappingPrefix + COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH,
-                     mappingPrefix + COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH,
-                     mappingPrefix + COLLECTION_IDENTIFIED_BY_SENSOR_PATH,
-                     mappingPrefix + COLLECTION_IDENTIFIED_BY_DATASTREAM_PATH
+            value = {MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_THING_PATH,
+                     MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_LOCATION_PATH,
+                     MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH,
+                     MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH,
+                     MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_SENSOR_PATH,
+                     MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_DATASTREAM_PATH
             },
             produces = "application/json"
     )
@@ -105,8 +104,9 @@ public class STACollectionRequestHandler extends STARequestUtils {
 
         validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
 
-        String sourceType = entity.split("\\(")[0];
-        String sourceId = entity.split("\\(")[1].replace(")", "");
+        String[] split = splitId(entity);
+        String sourceType = split[0];
+        String sourceId = split[1].replace(")", "");
 
         return serviceRepository.getEntityService(target)
                 .getEntityCollectionByRelatedEntity(sourceId, sourceType, createQueryOptions(queryOptions));
