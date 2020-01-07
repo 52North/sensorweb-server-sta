@@ -37,7 +37,7 @@ import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
-import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
+import org.n52.shetland.ogc.sta.exception.STAInvalidUrlThrowable;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.serdes.DatastreamSerDes;
 import org.n52.sta.serdes.FeatureOfInterestSerDes;
@@ -165,12 +165,12 @@ public class STARequestUtils implements StaConstants {
     protected final Pattern byObservedPropertiesPattern = Pattern.compile(IDENTIFIED_BY_OBSERVED_PROPERTY_REGEX);
     protected final Pattern byFeaturesOfInterestPattern = Pattern.compile(IDENTIFIED_BY_FEATURE_OF_INTEREST_REGEX);
 
-    protected STAInvalidUrlException validateURL(StringBuffer requestURL,
+    protected STAInvalidUrlThrowable validateURL(StringBuffer requestURL,
                        EntityServiceRepository serviceRepository,
-                       int rootUrlLength) throws STAInvalidUrlException {
+                       int rootUrlLength) throws STAInvalidUrlThrowable {
         String[] uriResources = requestURL.substring(rootUrlLength).split("/");
 
-        STAInvalidUrlException ex;
+        STAInvalidUrlThrowable ex;
         ex = validateURISyntax(uriResources);
         if (ex != null) {
             throw ex;
@@ -188,7 +188,7 @@ public class STARequestUtils implements StaConstants {
      * @param uriResources URI of the Request split by "/"
      * @return STAInvalidUrlException if URI is malformed
      */
-    private STAInvalidUrlException validateURISyntax(String[] uriResources) {
+    private STAInvalidUrlThrowable validateURISyntax(String[] uriResources) {
         // Validate URL syntax via Regex
         // Skip validation if no navigationPath is provided as Spring already validated syntax
         if (uriResources.length > 1) {
@@ -208,14 +208,14 @@ public class STARequestUtils implements StaConstants {
                                 || byObservationPattern.matcher(resource).matches()
                                 || bySensorsPattern.matcher(resource).matches()
                                 || byObservedPropertiesPattern.matcher(resource).matches())) {
-                            return new STAInvalidUrlException(URL_INVALID
+                            return new STAInvalidUrlThrowable(URL_INVALID
                                     + uriResources[i - 1]
                                     + "/" + uriResources[i]
                                     + " is not a valid resource path.");
 
                         }
                     } else {
-                        return new STAInvalidUrlException(URL_INVALID
+                        return new STAInvalidUrlThrowable(URL_INVALID
                                 + uriResources[i]
                                 + " is not a valid resource.");
                     }
@@ -234,7 +234,7 @@ public class STARequestUtils implements StaConstants {
      * @param uriResources URI of the Request split by "/"
      * @return STAInvalidUrlException if URI is malformed
      */
-    private STAInvalidUrlException validateURISemantic(String[] uriResources,
+    private STAInvalidUrlThrowable validateURISemantic(String[] uriResources,
                                                          EntityServiceRepository serviceRepository) {
         // Check if this is Request to root collection. They are always valid
         if (uriResources.length == 1 && !uriResources[0].contains("(")) {
@@ -282,11 +282,11 @@ public class STARequestUtils implements StaConstants {
         return null;
     }
 
-    private STAInvalidUrlException createInvalidUrlExceptionNoEntit(String entity) {
-        return new STAInvalidUrlException("No Entity: " + entity + " found!");
+    private STAInvalidUrlThrowable createInvalidUrlExceptionNoEntit(String entity) {
+        return new STAInvalidUrlThrowable("No Entity: " + entity + " found!");
     }
 
-    private STAInvalidUrlException createInvalidUrlExceptionNoEntitAssociated(String first, String last) {
+    private STAInvalidUrlThrowable createInvalidUrlExceptionNoEntitAssociated(String first, String last) {
         return createInvalidUrlExceptionNoEntit(first + " associated with " + last);
     }
 

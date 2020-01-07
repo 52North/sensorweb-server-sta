@@ -30,7 +30,7 @@ package org.n52.sta.service;
 
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
-import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
+import org.n52.shetland.ogc.sta.exception.STAInvalidUrlThrowable;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -96,7 +96,7 @@ public class STACollectionRequestHandler extends STARequestUtils {
     public Object readRelatedCollection(@PathVariable String entity,
                                         @PathVariable String target,
                                         @RequestParam Map<String, String> queryOptions,
-                                        HttpServletRequest request) throws STACRUDException, STAInvalidUrlException {
+                                        HttpServletRequest request) throws STACRUDException, STAInvalidUrlThrowable {
 
         // TODO(specki): check if something needs to be cut from the front like rootUrl
         // TODO(specki): short-circuit if url is only one element as spring already validated that when the path matched

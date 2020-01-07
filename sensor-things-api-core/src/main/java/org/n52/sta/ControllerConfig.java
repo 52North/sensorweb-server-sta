@@ -34,7 +34,7 @@ import org.hibernate.exception.DataException;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
-import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
+import org.n52.shetland.ogc.sta.exception.STAInvalidUrlThrowable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -83,8 +83,8 @@ public class ControllerConfig {
     }
 
 
-    @ExceptionHandler(value = STAInvalidUrlException.class)
-    public ResponseEntity<Object> staInvalidUrlException(STAInvalidUrlException exception) {
+    @ExceptionHandler(value = STAInvalidUrlThrowable.class)
+    public ResponseEntity<Object> staInvalidUrlException(STAInvalidUrlThrowable exception) {
         return new ResponseEntity<>(
                 createErrorMessage(exception.getClass().getName(), exception.getMessage()),
                 headers,
