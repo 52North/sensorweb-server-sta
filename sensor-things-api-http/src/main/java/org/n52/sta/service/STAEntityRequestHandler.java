@@ -28,9 +28,9 @@
  */
 package org.n52.sta.service;
 
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
+import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.sta.data.service.EntityServiceRepository;
-import org.n52.sta.exception.STACRUDException;
-import org.n52.sta.exception.STAInvalidUrlException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
