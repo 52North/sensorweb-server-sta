@@ -13,7 +13,7 @@ RUN git clone https://github.com/52North/sensor-things \
 
 RUN git clone https://github.com/52North/series-hibernate \
     && cd series-hibernate \
-    && git checkout v2.0.0-alpha.3
+    && git checkout v2.0.0-alpha.4
 
 FROM maven:3.6.1-jdk-8-slim as buildstage
 WORKDIR /app
@@ -26,8 +26,7 @@ RUN cd series-hibernate \
     && mvn install
 
 RUN cd sensor-things \
-    && sed -i 's/2.0.0-SNAPSHOT/2.0.0-alpha.3/g' pom.xml \
-    && sed -i 's/4.6.0-STA-alpha.2/4.6.0-STA-SNAPSHOT/g' pom.xml \
+    && sed -i 's/<odata.version>4.6.0-STA-alpha.2/<odata.version>4.6.0-STA-SNAPSHOT/g' pom.xml \
     && mvn package
 
 FROM openjdk:8-jre-alpine as runstage

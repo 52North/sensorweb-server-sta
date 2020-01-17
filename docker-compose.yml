@@ -4,7 +4,7 @@ services:
     image: 52n/sensorthingsapi
     build:
       context: .
-      dockerfile: sensor-things-api-app/Dockerfile
+      dockerfile: Dockerfile
     ports:
       - 8081:8081
       - 1883:1883
