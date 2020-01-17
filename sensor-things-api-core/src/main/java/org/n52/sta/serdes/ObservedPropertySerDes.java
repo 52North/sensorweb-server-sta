@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.n52.series.db.beans.PhenomenonEntity;
+import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONObservedProperty;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.ObservedPropertyWithQueryOptions;
 import org.n52.sta.serdes.model.ObservedPropertyEntityDefinition;
@@ -120,7 +121,7 @@ public class ObservedPropertySerDes {
 
         @Override
         public PhenomenonEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return p.readValueAs(JSONObservedProperty.class).toEntity();
+            return p.readValueAs(JSONObservedProperty.class).toEntity(JSONBase.EntityType.FULL);
         }
     }
 
@@ -132,7 +133,8 @@ public class ObservedPropertySerDes {
 
         @Override
         public PhenomenonEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return new PhenomenonEntityPatch(p.readValueAs(JSONObservedProperty.class).toEntity(false));
+            return new PhenomenonEntityPatch(p.readValueAs(JSONObservedProperty.class)
+                    .toEntity(JSONBase.EntityType.PATCH));
         }
     }
 }

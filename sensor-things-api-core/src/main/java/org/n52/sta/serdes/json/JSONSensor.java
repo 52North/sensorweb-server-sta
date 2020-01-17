@@ -60,63 +60,95 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorEntity>
         self = new SensorEntity();
     }
 
-    public SensorEntity toEntity(boolean validate) {
-        if (!generatedId && name == null && validate) {
-            Assert.isNull(name, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(description, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(encodingType, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(metadata, INVALID_REFERENCED_ENTITY);
-
-            Assert.isNull(Datastreams, INVALID_REFERENCED_ENTITY);
-
-            self.setIdentifier(identifier);
-            return self;
-        } else {
-            if (validate) {
+    public SensorEntity toEntity(JSONBase.EntityType type) {
+        switch (type) {
+            case FULL:
                 Assert.notNull(name, INVALID_INLINE_ENTITY + "name");
                 Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
                 Assert.notNull(encodingType, INVALID_INLINE_ENTITY + "encodingType");
                 Assert.notNull(metadata, INVALID_INLINE_ENTITY + "metadata");
-            }
+                self.setIdentifier(identifier);
+                self.setName(name);
+                self.setDescription(description);
 
-            self.setIdentifier(identifier);
-            self.setName(name);
-            self.setDescription(description);
-
-            if  (encodingType != null) {
-                if (encodingType.equalsIgnoreCase(STA_SENSORML_2)) {
-                    self.setFormat(new FormatEntity().setFormat(SENSORML_2));
-                    ProcedureHistoryEntity procedureHistoryEntity = new ProcedureHistoryEntity();
-                    procedureHistoryEntity.setProcedure(self);
-                    procedureHistoryEntity.setFormat(self.getFormat());
-                    procedureHistoryEntity.setStartTime(DateTime.now().toDate());
-                    procedureHistoryEntity.setXml(metadata);
-                    Set<ProcedureHistoryEntity> set = new LinkedHashSet<>();
-                    set.add(procedureHistoryEntity);
-                    self.setProcedureHistory(set);
-                } else if (encodingType.equalsIgnoreCase(PDF)) {
-                    self.setFormat(new FormatEntity().setFormat(PDF));
-                    self.setDescriptionFile(metadata);
+                if  (encodingType != null) {
+                    if (encodingType.equalsIgnoreCase(STA_SENSORML_2)) {
+                        self.setFormat(new FormatEntity().setFormat(SENSORML_2));
+                        ProcedureHistoryEntity procedureHistoryEntity = new ProcedureHistoryEntity();
+                        procedureHistoryEntity.setProcedure(self);
+                        procedureHistoryEntity.setFormat(self.getFormat());
+                        procedureHistoryEntity.setStartTime(DateTime.now().toDate());
+                        procedureHistoryEntity.setXml(metadata);
+                        Set<ProcedureHistoryEntity> set = new LinkedHashSet<>();
+                        set.add(procedureHistoryEntity);
+                        self.setProcedureHistory(set);
+                    } else if (encodingType.equalsIgnoreCase(PDF)) {
+                        self.setFormat(new FormatEntity().setFormat(PDF));
+                        self.setDescriptionFile(metadata);
+                    } else {
+                        Assert.notNull(null, "Invalid encodingType supplied. Only SensorML or PDF allowed.");
+                    }
                 } else {
-                    Assert.notNull(null, "Invalid encodingType supplied. Only SensorML or PDF allowed.");
+                    // Used when PATCHing new metadata
+                    self.setDescriptionFile(metadata);
                 }
-            } else {
-                // Used when PATCHing new metadata
-                self.setDescriptionFile(metadata);
-            }
 
-            if (Datastreams != null) {
-                self.setDatastreams(Arrays.stream(Datastreams)
-                        .map(JSONDatastream::toEntity)
-                        .collect(Collectors.toSet()));
-            }
+                if (Datastreams != null) {
+                    self.setDatastreams(Arrays.stream(Datastreams)
+                            .map(ds -> ds.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE))
+                            .collect(Collectors.toSet()));
+                }
 
-            // Deal with back reference during deep insert
-            if (backReference != null) {
-                self.addDatastream(((JSONDatastream) backReference).getEntity());
-            }
+                // Deal with back reference during deep insert
+                if (backReference != null) {
+                    self.addDatastream(((JSONDatastream) backReference).getEntity());
+                }
 
-            return self;
+                return self;
+            case PATCH:
+                self.setIdentifier(identifier);
+                self.setName(name);
+                self.setDescription(description);
+
+                if  (encodingType != null) {
+                    if (encodingType.equalsIgnoreCase(STA_SENSORML_2)) {
+                        self.setFormat(new FormatEntity().setFormat(SENSORML_2));
+                        ProcedureHistoryEntity procedureHistoryEntity = new ProcedureHistoryEntity();
+                        procedureHistoryEntity.setProcedure(self);
+                        procedureHistoryEntity.setFormat(self.getFormat());
+                        procedureHistoryEntity.setStartTime(DateTime.now().toDate());
+                        procedureHistoryEntity.setXml(metadata);
+                        Set<ProcedureHistoryEntity> set = new LinkedHashSet<>();
+                        set.add(procedureHistoryEntity);
+                        self.setProcedureHistory(set);
+                    } else if (encodingType.equalsIgnoreCase(PDF)) {
+                        self.setFormat(new FormatEntity().setFormat(PDF));
+                        self.setDescriptionFile(metadata);
+                    } else {
+                        Assert.notNull(null, "Invalid encodingType supplied. Only SensorML or PDF allowed.");
+                    }
+                } else {
+                    // Used when PATCHing new metadata
+                    self.setDescriptionFile(metadata);
+                }
+
+                if (Datastreams != null) {
+                    self.setDatastreams(Arrays.stream(Datastreams)
+                            .map(ds -> ds.toEntity(JSONBase.EntityType.REFERENCE))
+                            .collect(Collectors.toSet()));
+                }
+                return self;
+            case REFERENCE:
+                Assert.isNull(name, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(description, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(encodingType, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(metadata, INVALID_REFERENCED_ENTITY);
+
+                Assert.isNull(Datastreams, INVALID_REFERENCED_ENTITY);
+
+                self.setIdentifier(identifier);
+                return self;
         }
+        return null;
     }
 }

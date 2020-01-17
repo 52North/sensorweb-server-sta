@@ -36,6 +36,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
+import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONSensor;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.SensorWithQueryOptions;
 import org.n52.sta.serdes.model.STAEntityDefinition;
@@ -142,7 +143,7 @@ public class SensorSerDes {
 
         @Override
         public SensorEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return p.readValueAs(JSONSensor.class).toEntity();
+            return p.readValueAs(JSONSensor.class).toEntity(JSONBase.EntityType.FULL);
         }
     }
 
@@ -154,7 +155,7 @@ public class SensorSerDes {
 
         @Override
         public SensorEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return new SensorEntityPatch(p.readValueAs(JSONSensor.class).toEntity(false));
+            return new SensorEntityPatch(p.readValueAs(JSONSensor.class).toEntity(JSONBase.EntityType.PATCH));
         }
     }
 }

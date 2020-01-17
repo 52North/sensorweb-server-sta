@@ -257,6 +257,9 @@ public class HistoricalLocationService
         if (toMerge.getTime() != null) {
             existing.setTime(toMerge.getTime());
         }
+        if (toMerge.getLocations() != null) {
+            existing.getLocations().addAll(toMerge.getLocations());
+        }
         return existing;
     }
 }

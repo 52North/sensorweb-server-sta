@@ -51,62 +51,83 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
         self = new PlatformEntity();
     }
 
-    public PlatformEntity toEntity(boolean validate) {
-        // Check if Entity is only referenced via id and not provided fully
-        // More complex since implementation allows custom setting of id by user
-        if (!generatedId && name == null && validate) {
-            Assert.isNull(name, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(description, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(properties, INVALID_REFERENCED_ENTITY);
-
-            Assert.isNull(Locations, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(Datastreams, INVALID_REFERENCED_ENTITY);
-
-            self.setIdentifier(identifier);
-            return self;
-        } else {
-            if (validate) {
+    public PlatformEntity toEntity(JSONBase.EntityType type) {
+        switch (type) {
+            case FULL:
                 Assert.notNull(name, INVALID_INLINE_ENTITY + "name");
                 Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
-            }
 
-            self.setIdentifier(identifier);
-            self.setName(name);
-            self.setDescription(description);
+                self.setIdentifier(identifier);
+                self.setName(name);
+                self.setDescription(description);
 
-            //TODO: check if this is correct
-            if (properties != null) {
-                self.setProperties(properties.toString());
-            }
-
-            if (Locations != null) {
-                self.setLocations(Arrays.stream(Locations)
-                        .map(JSONLocation::toEntity)
-                        .collect(Collectors.toSet()));
-            }
-
-            if (Datastreams != null) {
-                self.setDatastreams(Arrays.stream(Datastreams)
-                        .map(JSONDatastream::toEntity)
-                        .collect(Collectors.toSet()));
-            }
-
-            // Deal with back reference during deep insert
-            if (backReference != null) {
-                if (backReference instanceof JSONLocation) {
-                    self.addLocationEntity(((JSONLocation) backReference).getEntity());
-                } else if (backReference instanceof JSONDatastream) {
-                    if (self.getDatastreams() != null) {
-                        self.getDatastreams().add(((JSONDatastream) backReference).getEntity());
-                    } else {
-                        self.setDatastreams(Collections.singleton(((JSONDatastream) backReference).getEntity()));
-                    }
-                } else {
-                    self.addHistoricalLocation(((JSONHistoricalLocation) backReference).getEntity());
+                //TODO: check if this is correct
+                if (properties != null) {
+                    self.setProperties(properties.toString());
                 }
-            }
 
-            return self;
+                if (Locations != null) {
+                    self.setLocations(Arrays.stream(Locations)
+                            .map(loc -> loc.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE))
+                            .collect(Collectors.toSet()));
+                }
+
+                if (Datastreams != null) {
+                    self.setDatastreams(Arrays.stream(Datastreams)
+                            .map(ds -> ds.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE))
+                            .collect(Collectors.toSet()));
+                }
+
+                // Deal with back reference during deep insert
+                if (backReference != null) {
+                    if (backReference instanceof JSONLocation) {
+                        self.addLocationEntity(((JSONLocation) backReference).getEntity());
+                    } else if (backReference instanceof JSONDatastream) {
+                        if (self.getDatastreams() != null) {
+                            self.getDatastreams().add(((JSONDatastream) backReference).getEntity());
+                        } else {
+                            self.setDatastreams(Collections.singleton(((JSONDatastream) backReference).getEntity()));
+                        }
+                    } else {
+                        self.addHistoricalLocation(((JSONHistoricalLocation) backReference).getEntity());
+                    }
+                }
+
+                return self;
+            case PATCH:
+                self.setIdentifier(identifier);
+                self.setName(name);
+                self.setDescription(description);
+
+                //TODO: check if this is correct
+                if (properties != null) {
+                    self.setProperties(properties.toString());
+                }
+
+                if (Locations != null) {
+                    self.setLocations(Arrays.stream(Locations)
+                            .map(loc -> loc.toEntity(JSONBase.EntityType.REFERENCE))
+                            .collect(Collectors.toSet()));
+                }
+
+                if (Datastreams != null) {
+                    self.setDatastreams(Arrays.stream(Datastreams)
+                            .map(ds -> ds.toEntity(JSONBase.EntityType.REFERENCE))
+                            .collect(Collectors.toSet()));
+                }
+
+                return self;
+            case REFERENCE:
+                Assert.isNull(name, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(description, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(properties, INVALID_REFERENCED_ENTITY);
+
+                Assert.isNull(Locations, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(Datastreams, INVALID_REFERENCED_ENTITY);
+
+                self.setIdentifier(identifier);
+                return self;
         }
+        return null;
     }
 }

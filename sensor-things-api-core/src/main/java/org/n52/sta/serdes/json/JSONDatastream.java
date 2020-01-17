@@ -86,25 +86,9 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
         self = new DatastreamEntity();
     }
 
-    public DatastreamEntity toEntity(boolean validate) {
-        if (!generatedId && name == null && validate) {
-            Assert.isNull(name, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(description, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(observationType, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(unitOfMeasurement, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(observedArea, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(phenomenonTime, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(resultTime, INVALID_REFERENCED_ENTITY);
-
-            Assert.isNull(Sensor, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(ObservedProperty, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(Thing, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(Observations, INVALID_REFERENCED_ENTITY);
-
-            self.setIdentifier(identifier);
-            return self;
-        } else {
-            if (validate) {
+    public DatastreamEntity toEntity(JSONBase.EntityType type) {
+        switch (type) {
+            case FULL:
                 Assert.notNull(name, INVALID_INLINE_ENTITY + "name");
                 Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
                 Assert.notNull(observationType, INVALID_INLINE_ENTITY + obsType);
@@ -114,90 +98,170 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
                                 || observationType.equals(OM_CategoryObservation)
                                 || observationType.equals(OM_Observation)
                                 || observationType.equals(OM_TruthObservation)
-                , INVALID_INLINE_ENTITY + obsType);
+                        , INVALID_INLINE_ENTITY + obsType);
                 Assert.notNull(unitOfMeasurement, INVALID_INLINE_ENTITY + "unitOfMeasurement");
                 Assert.notNull(unitOfMeasurement.name, INVALID_INLINE_ENTITY + "unitOfMeasurement->name");
                 Assert.notNull(unitOfMeasurement.symbol, INVALID_INLINE_ENTITY + "unitOfMeasurement->symbol");
                 Assert.notNull(unitOfMeasurement.definition, INVALID_INLINE_ENTITY + "unitOfMeasurement->definition");
-            }
 
-            self.setIdentifier(identifier);
-            self.setName(name);
-            self.setDescription(description);
+                return createPostEntity();
+            case PATCH:
+                return createPatchEntity();
 
-            if (observationType != null) {
-                self.setObservationType(new FormatEntity().setFormat(observationType));
-            }
+            case REFERENCE:
+                Assert.isNull(name, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(description, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(observationType, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(unitOfMeasurement, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(observedArea, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(phenomenonTime, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(resultTime, INVALID_REFERENCED_ENTITY);
 
-            if (observedArea != null) {
-                GeoJsonReader reader = new GeoJsonReader(factory);
-                try {
-                    self.setGeometry(reader.read(observedArea.toString()));
-                } catch (ParseException e) {
-                    Assert.notNull(null,
-                            "Could not parse observedArea to GeoJSON. Error was:" + e.getMessage());
-                }
-            }
+                Assert.isNull(Sensor, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(ObservedProperty, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(Thing, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(Observations, INVALID_REFERENCED_ENTITY);
 
-            if (unitOfMeasurement != null) {
-                UnitEntity unit = new UnitEntity();
-                unit.setLink(unitOfMeasurement.definition);
-                unit.setName(unitOfMeasurement.name);
-                unit.setSymbol(unitOfMeasurement.symbol);
-                self.setUnit(unit);
-            }
-
-            if (resultTime != null) {
-                Time time = parseTime(resultTime);
-                if (time instanceof TimeInstant) {
-                    self.setResultTimeStart(((TimeInstant) time).getValue().toDate());
-                    self.setResultTimeEnd(((TimeInstant) time).getValue().toDate());
-                } else if (time instanceof TimePeriod) {
-                    self.setResultTimeStart(((TimePeriod) time).getStart().toDate());
-                    self.setResultTimeEnd(((TimePeriod) time).getEnd().toDate());
-                }
-            }
-
-            //if (phenomenonTime != null) {
-            // phenomenonTime (aka samplingTime) is automatically calculated based on associated Observations
-            // phenomenonTime parsed from json is therefore ignored.
-            //}
-            if (Thing != null) {
-                self.setThing(Thing.toEntity());
-            } else if (backReference instanceof JSONThing) {
-                self.setThing(((JSONThing) backReference).getEntity());
-            } else if (validate) {
-                Assert.notNull(null, INVALID_INLINE_ENTITY + "Thing");
-            }
-
-            if (Sensor != null) {
-                self.setProcedure(Sensor.toEntity());
-            } else if (backReference instanceof JSONSensor) {
-                self.setProcedure(((JSONSensor) backReference).getEntity());
-            } else if (validate) {
-                Assert.notNull(null, INVALID_INLINE_ENTITY + "Sensor");
-            }
-
-            if (ObservedProperty != null) {
-                self.setObservableProperty(ObservedProperty.toEntity());
-            } else if (backReference instanceof JSONObservedProperty) {
-                self.setObservableProperty(((JSONObservedProperty) backReference).getEntity());
-            } else if (validate) {
-                Assert.notNull(null, INVALID_INLINE_ENTITY + "ObservedProperty");
-            }
-
-            if (Observations != null) {
-                self.setObservations(
-                        Arrays.stream(Observations)
-                                .map(JSONObservation::toEntity)
-                                .collect(Collectors.toSet())
-                );
-            } else if (backReference instanceof JSONObservation) {
-                self.setObservations(Collections.singleton(((JSONObservation) backReference).self));
-            }
-
-            return self;
+                self.setIdentifier(identifier);
+                return self;
         }
+        return null;
+    }
+
+    private DatastreamEntity createPatchEntity() {
+        self.setIdentifier(identifier);
+        self.setName(name);
+        self.setDescription(description);
+
+        if (observationType != null) {
+            self.setObservationType(new FormatEntity().setFormat(observationType));
+        }
+
+        if (observedArea != null) {
+            GeoJsonReader reader = new GeoJsonReader(factory);
+            try {
+                self.setGeometry(reader.read(observedArea.toString()));
+            } catch (ParseException e) {
+                Assert.notNull(null,
+                        "Could not parse observedArea to GeoJSON. Error was:" + e.getMessage());
+            }
+        }
+
+        if (unitOfMeasurement != null) {
+            UnitEntity unit = new UnitEntity();
+            unit.setLink(unitOfMeasurement.definition);
+            unit.setName(unitOfMeasurement.name);
+            unit.setSymbol(unitOfMeasurement.symbol);
+            self.setUnit(unit);
+        }
+
+        if (resultTime != null) {
+            Time time = parseTime(resultTime);
+            if (time instanceof TimeInstant) {
+                self.setResultTimeStart(((TimeInstant) time).getValue().toDate());
+                self.setResultTimeEnd(((TimeInstant) time).getValue().toDate());
+            } else if (time instanceof TimePeriod) {
+                self.setResultTimeStart(((TimePeriod) time).getStart().toDate());
+                self.setResultTimeEnd(((TimePeriod) time).getEnd().toDate());
+            }
+        }
+
+        //if (phenomenonTime != null) {
+        // phenomenonTime (aka samplingTime) is automatically calculated based on associated Observations
+        // phenomenonTime parsed from json is therefore ignored.
+        //}
+        if (Thing != null) {
+            self.setThing(Thing.toEntity(JSONBase.EntityType.REFERENCE));
+        }
+
+        if (Sensor != null) {
+            self.setProcedure(Sensor.toEntity(JSONBase.EntityType.REFERENCE));
+        }
+
+        if (ObservedProperty != null) {
+            self.setObservableProperty(ObservedProperty.toEntity(JSONBase.EntityType.REFERENCE));
+        }
+
+        if (Observations != null) {
+            self.setObservations(Arrays.stream(Observations)
+                    .map(obs -> obs.toEntity(JSONBase.EntityType.REFERENCE))
+                    .collect(Collectors.toSet()));
+        }
+
+        return self;
+    }
+
+    private DatastreamEntity createPostEntity() {
+        self.setIdentifier(identifier);
+        self.setName(name);
+        self.setDescription(description);
+        self.setObservationType(new FormatEntity().setFormat(observationType));
+
+        if (observedArea != null) {
+            GeoJsonReader reader = new GeoJsonReader(factory);
+            try {
+                self.setGeometry(reader.read(observedArea.toString()));
+            } catch (ParseException e) {
+                Assert.notNull(null,
+                        "Could not parse observedArea to GeoJSON. Error was:" + e.getMessage());
+            }
+        }
+
+        UnitEntity unit = new UnitEntity();
+        unit.setLink(unitOfMeasurement.definition);
+        unit.setName(unitOfMeasurement.name);
+        unit.setSymbol(unitOfMeasurement.symbol);
+        self.setUnit(unit);
+
+        if (resultTime != null) {
+            Time time = parseTime(resultTime);
+            if (time instanceof TimeInstant) {
+                self.setResultTimeStart(((TimeInstant) time).getValue().toDate());
+                self.setResultTimeEnd(((TimeInstant) time).getValue().toDate());
+            } else if (time instanceof TimePeriod) {
+                self.setResultTimeStart(((TimePeriod) time).getStart().toDate());
+                self.setResultTimeEnd(((TimePeriod) time).getEnd().toDate());
+            }
+        }
+
+        if (Thing != null) {
+            self.setThing(Thing
+                    .toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+        } else if (backReference instanceof JSONThing) {
+            self.setThing(((JSONThing) backReference).getEntity());
+        } else {
+            Assert.notNull(null, INVALID_INLINE_ENTITY + "Thing");
+        }
+
+        if (Sensor != null) {
+            self.setProcedure(Sensor
+                    .toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+        } else if (backReference instanceof JSONSensor) {
+            self.setProcedure(((JSONSensor) backReference).getEntity());
+        } else {
+            Assert.notNull(null, INVALID_INLINE_ENTITY + "Sensor");
+        }
+
+        if (ObservedProperty != null) {
+            self.setObservableProperty(ObservedProperty
+                    .toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+        } else if (backReference instanceof JSONObservedProperty) {
+            self.setObservableProperty(((JSONObservedProperty) backReference).getEntity());
+        } else {
+            Assert.notNull(null, INVALID_INLINE_ENTITY + "ObservedProperty");
+        }
+
+        if (Observations != null) {
+            self.setObservations(
+                    Arrays.stream(Observations)
+                            .map(entity -> entity
+                                    .toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE))
+                            .collect(Collectors.toSet())
+            );
+        } else if (backReference instanceof JSONObservation) {
+            self.setObservations(Collections.singleton(((JSONObservation) backReference).self));
+        }
+        return self;
     }
 
     static class JSONUnitOfMeasurement {

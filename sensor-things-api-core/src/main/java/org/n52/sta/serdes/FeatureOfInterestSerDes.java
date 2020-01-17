@@ -36,6 +36,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.FeatureEntity;
+import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONFeatureOfInterest;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.FeatureOfInterestWithQueryOptions;
 import org.n52.sta.serdes.model.FeatureOfInterestEntityDefinition;
@@ -133,7 +134,7 @@ public class FeatureOfInterestSerDes {
 
         @Override
         public AbstractFeatureEntity<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return p.readValueAs(JSONFeatureOfInterest.class).toEntity();
+            return p.readValueAs(JSONFeatureOfInterest.class).toEntity(JSONBase.EntityType.FULL);
         }
     }
 
@@ -146,7 +147,7 @@ public class FeatureOfInterestSerDes {
         @Override
         public AbstractFeatureEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return new AbstractFeatureEntityPatch(p.readValueAs(JSONFeatureOfInterest.class)
-                    .toEntity(false));
+                    .toEntity(JSONBase.EntityType.PATCH));
         }
     }
 }

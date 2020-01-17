@@ -59,42 +59,57 @@ public class JSONHistoricalLocation extends JSONBase.JSONwithIdTime<HistoricalLo
         self = new HistoricalLocationEntity();
     }
 
-    public HistoricalLocationEntity toEntity(boolean validate) {
-        if (!generatedId && time == null && validate) {
-            Assert.isNull(time, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(Thing, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(Locations, INVALID_REFERENCED_ENTITY);
-
-            self.setIdentifier(identifier);
-            return self;
-        } else {
-            if (validate) {
+    public HistoricalLocationEntity toEntity(JSONBase.EntityType type) {
+        switch (type) {
+            case FULL:
                 Assert.notNull(date, INVALID_INLINE_ENTITY + "time");
-            }
 
-            self.setIdentifier(identifier);
-            self.setTime(date);
+                self.setIdentifier(identifier);
+                self.setTime(date);
 
-            if (Thing != null) {
-                self.setThing(Thing.toEntity());
-            } else if (backReference instanceof JSONThing) {
-                self.setThing(((JSONThing) backReference).getEntity());
-            } else if (validate) {
-                Assert.notNull(null, INVALID_INLINE_ENTITY + "Thing");
-            }
+                if (Thing != null) {
+                    self.setThing(Thing.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+                } else if (backReference instanceof JSONThing) {
+                    self.setThing(((JSONThing) backReference).getEntity());
+                } else {
+                    Assert.notNull(null, INVALID_INLINE_ENTITY + "Thing");
+                }
 
-            if (Locations != null) {
-                self.setLocations(Arrays.stream(Locations)
-                        .map(JSONLocation::toEntity)
-                        .collect(Collectors.toSet()));
-            } else if (backReference instanceof JSONLocation) {
-                self.setLocations(Collections.singleton(((JSONLocation) backReference).getEntity()));
-            } else if (validate) {
-                Assert.notNull(null, INVALID_INLINE_ENTITY + "Location");
-            }
+                if (Locations != null) {
+                    self.setLocations(Arrays.stream(Locations)
+                            .map(loc -> loc.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE))
+                            .collect(Collectors.toSet()));
+                } else if (backReference instanceof JSONLocation) {
+                    self.setLocations(Collections.singleton(((JSONLocation) backReference).getEntity()));
+                } else {
+                    Assert.notNull(null, INVALID_INLINE_ENTITY + "Location");
+                }
 
-            return self;
+                return self;
+            case PATCH:
+                self.setIdentifier(identifier);
+                self.setTime(date);
+
+                if (Thing != null) {
+                    self.setThing(Thing.toEntity(JSONBase.EntityType.REFERENCE));
+                }
+
+                if (Locations != null) {
+                    self.setLocations(Arrays.stream(Locations)
+                            .map(loc -> loc.toEntity(JSONBase.EntityType.REFERENCE))
+                            .collect(Collectors.toSet()));
+                }
+
+                return self;
+            case REFERENCE:
+                Assert.isNull(time, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(Thing, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(Locations, INVALID_REFERENCED_ENTITY);
+
+                self.setIdentifier(identifier);
+                return self;
         }
+       return null;
     }
 
     /**

@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.n52.series.db.beans.PlatformEntity;
+import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONThing;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.ThingWithQueryOptions;
 import org.n52.sta.serdes.model.STAEntityDefinition;
@@ -119,7 +120,7 @@ public class ThingSerDes {
 
         @Override
         public PlatformEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return p.readValueAs(JSONThing.class).toEntity();
+            return p.readValueAs(JSONThing.class).toEntity(JSONBase.EntityType.FULL);
         }
     }
 
@@ -131,7 +132,7 @@ public class ThingSerDes {
 
         @Override
         public PlatformEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return new PlatformEntityPatch(p.readValueAs(JSONThing.class).toEntity(false));
+            return new PlatformEntityPatch(p.readValueAs(JSONThing.class).toEntity(JSONBase.EntityType.PATCH));
         }
     }
 }

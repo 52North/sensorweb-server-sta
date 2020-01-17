@@ -36,6 +36,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.shetland.util.DateTimeHelper;
+import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONDatastream;
 import org.n52.sta.serdes.model.DatastreamEntityDefinition;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.DatastreamWithQueryOptions;
@@ -157,7 +158,7 @@ public class DatastreamSerDes {
 
         @Override
         public DatastreamEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return p.readValueAs(JSONDatastream.class).toEntity();
+            return p.readValueAs(JSONDatastream.class).toEntity(JSONBase.EntityType.FULL);
         }
     }
 
@@ -169,7 +170,7 @@ public class DatastreamSerDes {
 
         @Override
         public DatastreamEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return new DatastreamEntityPatch(p.readValueAs(JSONDatastream.class).toEntity(false));
+            return new DatastreamEntityPatch(p.readValueAs(JSONDatastream.class).toEntity(JSONBase.EntityType.PATCH));
         }
     }
 }

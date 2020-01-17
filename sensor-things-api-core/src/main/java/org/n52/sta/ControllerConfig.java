@@ -37,7 +37,7 @@ public class ControllerConfig {
         if (exception.getCause() instanceof DataException) {
             msg = ((DataException) exception.getCause()).getSQLException().toString();
         } else {
-            msg = exception.getCause().toString();
+            msg = exception.getMessage();
         }
 
         return new ResponseEntity<>(

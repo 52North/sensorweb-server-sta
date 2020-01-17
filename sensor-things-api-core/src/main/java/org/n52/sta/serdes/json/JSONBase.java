@@ -43,6 +43,12 @@ import java.util.UUID;
 @SuppressWarnings("VisibilityModifier")
 public class JSONBase {
 
+    public static enum EntityType {
+        FULL,
+        PATCH,
+        REFERENCE
+    }
+
     abstract static class JSONwithId <T> {
 
         @JsonProperty("@iot.id")
@@ -73,20 +79,24 @@ public class JSONBase {
 
         /**
          * Creates and validates the Database Entity to conform to invariants defined in standard.
-         * Used when creating Entities in normal POST Requests
+         * What is validated is dictated by given type parameter
          * @return created Entity
          */
-        public T toEntity() {
-            return toEntity(true);
-        }
+        public abstract T toEntity(EntityType type);
 
-        /**
-         * Creates the Database Entity.
-         * validate = true : Used when creating Entities in normal POST Requests upholding invariants
-         * validate = false : Used when patching Entities in PATCH Requests
-         * @return created Entity
+        /** Used when multiple Entity Types are allowed.
+         *
+         * @param type1 first type to check
+         * @param type2 second type to check
+         * @return created entity
          */
-        abstract T toEntity(boolean validate);
+        public T toEntity(EntityType type1, EntityType type2) {
+            try {
+                return toEntity(type1);
+            } catch (Exception ex) {
+                return toEntity(type2);
+            }
+        }
     }
 
     abstract static class JSONwithIdNameDescription<T> extends JSONwithId<T> {

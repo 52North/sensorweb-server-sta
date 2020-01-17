@@ -53,6 +53,7 @@ import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
 import org.n52.shetland.util.DateTimeHelper;
+import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONObservation;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.ObservationWithQueryOptions;
 import org.n52.sta.serdes.model.ObservationEntityDefinition;
@@ -244,7 +245,7 @@ public class ObservationSerDes {
 
         @Override
         public StaDataEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return p.readValueAs(JSONObservation.class).toEntity();
+            return p.readValueAs(JSONObservation.class).toEntity(JSONBase.EntityType.FULL);
         }
     }
 
@@ -256,7 +257,7 @@ public class ObservationSerDes {
 
         @Override
         public StaDataEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return new StaDataEntityPatch(p.readValueAs(JSONObservation.class).toEntity(false));
+            return new StaDataEntityPatch(p.readValueAs(JSONObservation.class).toEntity(JSONBase.EntityType.PATCH));
         }
     }
 }

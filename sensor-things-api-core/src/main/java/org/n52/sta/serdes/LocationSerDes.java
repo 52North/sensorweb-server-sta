@@ -35,6 +35,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONLocation;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.LocationWithQueryOptions;
 import org.n52.sta.serdes.model.LocationEntityDefinition;
@@ -131,7 +132,7 @@ public class LocationSerDes {
 
         @Override
         public LocationEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return p.readValueAs(JSONLocation.class).toEntity();
+            return p.readValueAs(JSONLocation.class).toEntity(JSONBase.EntityType.FULL);
         }
     }
 
@@ -143,7 +144,7 @@ public class LocationSerDes {
 
         @Override
         public LocationEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return new LocationEntityPatch(p.readValueAs(JSONLocation.class).toEntity(false));
+            return new LocationEntityPatch(p.readValueAs(JSONLocation.class).toEntity(JSONBase.EntityType.PATCH));
         }
     }
 }

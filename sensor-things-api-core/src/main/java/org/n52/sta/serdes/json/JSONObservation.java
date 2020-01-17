@@ -46,7 +46,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> impl
     public String phenomenonTime;
     public String resultTime;
     public String result;
-    public String[] resultQuality;
+    public Object resultQuality;
     public String validTime;
     public JsonNode parameters;
 
@@ -59,88 +59,141 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> impl
         self = new StaDataEntity();
     }
 
-    public StaDataEntity toEntity(boolean validate) {
-        if (!generatedId && result == null && validate) {
-            Assert.isNull(phenomenonTime, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(resultTime, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(result, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(resultTime, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(resultQuality, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(parameters, INVALID_REFERENCED_ENTITY);
-
-            self.setIdentifier(identifier);
-            return self;
-        } else {
-            if (validate) {
+    public StaDataEntity toEntity(JSONBase.EntityType type) {
+        switch (type) {
+            case FULL:
                 Assert.notNull(result, INVALID_INLINE_ENTITY + "result");
+                return createPostEntity();
+            case PATCH:
+                return createPatchEntity();
+            case REFERENCE:
+                Assert.isNull(phenomenonTime, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(resultTime, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(result, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(resultTime, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(resultQuality, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(parameters, INVALID_REFERENCED_ENTITY);
+
+                self.setIdentifier(identifier);
+                return self;
+        }
+        return null;
+    }
+
+    private StaDataEntity createPatchEntity() {
+
+        self.setIdentifier(identifier);
+
+        // phenomenonTime
+        if (phenomenonTime != null) {
+            Time time = parseTime(phenomenonTime);
+            if (time instanceof TimeInstant) {
+                self.setSamplingTimeStart(((TimeInstant) time).getValue().toDate());
+                self.setSamplingTimeEnd(((TimeInstant) time).getValue().toDate());
+            } else if (time instanceof TimePeriod) {
+                self.setSamplingTimeStart(((TimePeriod) time).getStart().toDate());
+                self.setSamplingTimeEnd(((TimePeriod) time).getEnd().toDate());
             }
+        }
 
-            self.setIdentifier(identifier);
+        // Set resultTime only when supplied
+        if (resultTime != null) {
+            // resultTime
+            self.setResultTime(((TimeInstant) parseTime(resultTime)).getValue().toDate());
+        }
 
-            // phenomenonTime
-            if (phenomenonTime != null) {
-                Time time = parseTime(phenomenonTime);
-                if (time instanceof TimeInstant) {
-                    self.setSamplingTimeStart(((TimeInstant) time).getValue().toDate());
-                    self.setSamplingTimeEnd(((TimeInstant) time).getValue().toDate());
-                } else if (time instanceof TimePeriod) {
-                    self.setSamplingTimeStart(((TimePeriod) time).getStart().toDate());
-                    self.setSamplingTimeEnd(((TimePeriod) time).getEnd().toDate());
-                }
-            } else if (validate) {
-                // Use time of POST Request as fallback
-                Date date = DateTime.now().toDate();
-                self.setSamplingTimeStart(date);
-                self.setSamplingTimeEnd(date);
+        // validTime
+        if (validTime != null) {
+            Time time = parseTime(validTime);
+            if (time instanceof TimeInstant) {
+                self.setValidTimeStart(((TimeInstant) time).getValue().toDate());
+                self.setValidTimeEnd(((TimeInstant) time).getValue().toDate());
+            } else if (time instanceof TimePeriod) {
+                self.setValidTimeStart(((TimePeriod) time).getStart().toDate());
+                self.setValidTimeEnd(((TimePeriod) time).getEnd().toDate());
             }
+        }
 
-            // Set resultTime only when supplied
-            if (resultTime != null) {
-                // resultTime
-                self.setResultTime(((TimeInstant) parseTime(resultTime)).getValue().toDate());
+        self.setValue(result);
+
+        // Link to Datastream
+        if (Datastream != null) {
+            self.setDatastream(Datastream.toEntity(JSONBase.EntityType.REFERENCE));
+        }
+
+        // Link to FOI
+        if (FeatureOfInterest != null) {
+            self.setFeatureOfInterest(FeatureOfInterest.toEntity(JSONBase.EntityType.REFERENCE));
+        }
+
+        return self;
+    }
+
+    private StaDataEntity createPostEntity() {
+        self.setIdentifier(identifier);
+
+        // phenomenonTime
+        if (phenomenonTime != null) {
+            Time time = parseTime(phenomenonTime);
+            if (time instanceof TimeInstant) {
+                self.setSamplingTimeStart(((TimeInstant) time).getValue().toDate());
+                self.setSamplingTimeEnd(((TimeInstant) time).getValue().toDate());
+            } else if (time instanceof TimePeriod) {
+                self.setSamplingTimeStart(((TimePeriod) time).getStart().toDate());
+                self.setSamplingTimeEnd(((TimePeriod) time).getEnd().toDate());
             }
+        } else {
+            // Use time of POST Request as fallback
+            Date date = DateTime.now().toDate();
+            self.setSamplingTimeStart(date);
+            self.setSamplingTimeEnd(date);
+        }
 
-            // validTime
-            if (validTime != null) {
-                Time time = parseTime(validTime);
-                if (time instanceof TimeInstant) {
-                    self.setValidTimeStart(((TimeInstant) time).getValue().toDate());
-                    self.setValidTimeEnd(((TimeInstant) time).getValue().toDate());
-                } else if (time instanceof TimePeriod) {
-                    self.setValidTimeStart(((TimePeriod) time).getStart().toDate());
-                    self.setValidTimeEnd(((TimePeriod) time).getEnd().toDate());
-                }
+        // Set resultTime only when supplied
+        if (resultTime != null) {
+            // resultTime
+            self.setResultTime(((TimeInstant) parseTime(resultTime)).getValue().toDate());
+        }
+
+        // validTime
+        if (validTime != null) {
+            Time time = parseTime(validTime);
+            if (time instanceof TimeInstant) {
+                self.setValidTimeStart(((TimeInstant) time).getValue().toDate());
+                self.setValidTimeEnd(((TimeInstant) time).getValue().toDate());
+            } else if (time instanceof TimePeriod) {
+                self.setValidTimeStart(((TimePeriod) time).getStart().toDate());
+                self.setValidTimeEnd(((TimePeriod) time).getEnd().toDate());
             }
+        }
 
-            // parameters
+        // parameters
 //            if (parameters != null) {
 //                //TODO: handle parameters
 //                //observation.setParameters();
 //                //throw new NotImplementedException();
 //            }
-            // result
-            self.setValue(result);
+        // result
+        self.setValue(result);
 
-            // Link to Datastream
-            if (Datastream != null) {
-                self.setDatastream(Datastream.toEntity());
-            } else if (backReference instanceof JSONDatastream) {
-                self.setDatastream(((JSONDatastream) backReference).getEntity());
-            } else if (validate) {
-                Assert.notNull(null, INVALID_INLINE_ENTITY + "Datastream");
-            }
-
-            // Link to FOI
-            if (FeatureOfInterest != null) {
-                self.setFeatureOfInterest(FeatureOfInterest.toEntity());
-            } else if (backReference instanceof JSONFeatureOfInterest) {
-                self.setFeatureOfInterest(((JSONFeatureOfInterest) backReference).getEntity());
-            // } else if (validate) {
-                // Feature is autogenerated on service layer
-                // Assert.notNull(null, INVALID_INLINE_ENTITY + "FeatureOfInterest");
-            }
-
-            return self;
+        // Link to Datastream
+        if (Datastream != null) {
+            self.setDatastream(
+                    Datastream.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+        } else if (backReference instanceof JSONDatastream) {
+            self.setDatastream(((JSONDatastream) backReference).getEntity());
+        } else {
+            Assert.notNull(null, INVALID_INLINE_ENTITY + "Datastream");
         }
+
+        // Link to FOI
+        if (FeatureOfInterest != null) {
+            self.setFeatureOfInterest(
+                    FeatureOfInterest.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+        } else if (backReference instanceof JSONFeatureOfInterest) {
+            self.setFeatureOfInterest(((JSONFeatureOfInterest) backReference).getEntity());
+        }
+
+        return self;
     }
 }
