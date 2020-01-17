@@ -26,6 +26,7 @@ RUN cd series-hibernate \
     && mvn install
 
 RUN cd sensor-things \
+    && sed -i 's/2.0.0-SNAPSHOT/2.0.0-alpha.3/g' pom.xml \
     && sed -i 's/4.6.0-STA-alpha.2/4.6.0-STA-SNAPSHOT/g' pom.xml \
     && mvn package
 
