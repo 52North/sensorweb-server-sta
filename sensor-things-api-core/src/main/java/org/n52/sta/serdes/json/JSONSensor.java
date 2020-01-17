@@ -100,6 +100,9 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorEntity>
                 } else {
                     Assert.notNull(null, "Invalid encodingType supplied. Only SensorML or PDF allowed.");
                 }
+            } else {
+                // Used when PATCHing new metadata
+                self.setDescriptionFile(metadata);
             }
 
             if (Datastreams != null) {

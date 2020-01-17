@@ -80,6 +80,8 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
     private final String OM_TruthObservation =
             "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_TruthObservation";
 
+    private final String obsType = "observationType";
+
     public JSONDatastream() {
         self = new DatastreamEntity();
     }
@@ -105,13 +107,14 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
             if (validate) {
                 Assert.notNull(name, INVALID_INLINE_ENTITY + "name");
                 Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
+                Assert.notNull(observationType, INVALID_INLINE_ENTITY + obsType);
                 Assert.state(
                         observationType.equals(OM_Measurement)
                                 || observationType.equals(OM_CountObservation)
                                 || observationType.equals(OM_CategoryObservation)
                                 || observationType.equals(OM_Observation)
                                 || observationType.equals(OM_TruthObservation)
-                , INVALID_INLINE_ENTITY + "observationType");
+                , INVALID_INLINE_ENTITY + obsType);
                 Assert.notNull(unitOfMeasurement, INVALID_INLINE_ENTITY + "unitOfMeasurement");
                 Assert.notNull(unitOfMeasurement.name, INVALID_INLINE_ENTITY + "unitOfMeasurement->name");
                 Assert.notNull(unitOfMeasurement.symbol, INVALID_INLINE_ENTITY + "unitOfMeasurement->symbol");
@@ -121,7 +124,10 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
             self.setIdentifier(identifier);
             self.setName(name);
             self.setDescription(description);
-            self.setObservationType(new FormatEntity().setFormat(observationType));
+
+            if (observationType != null) {
+                self.setObservationType(new FormatEntity().setFormat(observationType));
+            }
 
             if (observedArea != null) {
                 GeoJsonReader reader = new GeoJsonReader(factory);

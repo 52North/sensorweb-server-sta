@@ -95,6 +95,17 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
     }
 
     /**
+     * Checks if an Entity with given id exists
+     *
+     * @param id the id of the Entity
+     * @return true if an Entity with given id exists
+     */
+    @Override
+    public boolean existsEntity(String id) {
+        return getRepository().existsByStaIdentifier(id);
+    }
+
+    /**
      * Overrides the default method as different field is used to store identifier
      *
      * @param relatedId   ID of the related Entity

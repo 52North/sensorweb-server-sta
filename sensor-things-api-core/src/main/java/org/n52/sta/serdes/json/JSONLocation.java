@@ -81,8 +81,10 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
                 Assert.notNull(location, INVALID_INLINE_ENTITY + "location");
                 //Assert.notNull(location.type, INVALID_INLINE_ENTITY + "location->type");
                 //Assert.notNull(location.geometry, INVALID_INLINE_ENTITY + "location->geometry");
-                Assert.state(encodingType.equals(ENCODINGTYPE_GEOJSON),
-                        "Invalid encodingType supplied. Only GeoJSON (application/vnd.geo+json) is supported!");
+                final String INVALID_ENCODINGTYPE =
+                        "Invalid encodingType supplied. Only GeoJSON (application/vnd.geo+json) is supported!";
+                Assert.notNull(encodingType, INVALID_ENCODINGTYPE);
+                Assert.state(encodingType.equals(ENCODINGTYPE_GEOJSON), INVALID_ENCODINGTYPE);
             }
 
             self.setIdentifier(identifier);

@@ -26,11 +26,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.n52.sta.data.service;
 
 import org.n52.series.db.beans.DescribableEntity;
@@ -412,6 +407,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      * Create {@link PageRequest}
      *
      * @param queryOptions {@link QueryOptions} to create {@link PageRequest}
+     * @param defaultSortingProperty
      * @return {@link PageRequest} of type {@link OffsetLimitBasedPageRequest}
      */
     protected OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions,

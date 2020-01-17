@@ -123,16 +123,19 @@ public class DatastreamSerDes {
             }
 
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_RESULT_TIME)) {
-                gen.writeStringField(STAEntityDefinition.PROP_RESULT_TIME,
-                    DateTimeHelper.format(TimeUtil.createTime(TimeUtil.createDateTime(datastream.getResultTimeStart()),
-                            TimeUtil.createDateTime(datastream.getResultTimeEnd())))
-                );
+                if (datastream.getResultTimeStart() != null) {
+                    gen.writeStringField(STAEntityDefinition.PROP_RESULT_TIME,
+                            DateTimeHelper.format(TimeUtil.createTime(TimeUtil.createDateTime(datastream.getResultTimeStart()),
+                                    TimeUtil.createDateTime(datastream.getResultTimeEnd()))));
+                }
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_PHENOMENON_TIME)) {
-                gen.writeStringField(STAEntityDefinition.PROP_PHENOMENON_TIME,
-                        DateTimeHelper
-                                .format(TimeUtil.createTime(TimeUtil.createDateTime(datastream.getSamplingTimeStart()),
-                                        TimeUtil.createDateTime(datastream.getSamplingTimeEnd()))));
+                if (datastream.getSamplingTimeStart() != null) {
+                    gen.writeStringField(STAEntityDefinition.PROP_PHENOMENON_TIME,
+                            DateTimeHelper
+                                    .format(TimeUtil.createTime(TimeUtil.createDateTime(datastream.getSamplingTimeStart()),
+                                            TimeUtil.createDateTime(datastream.getSamplingTimeEnd()))));
+                }
             }
 
             // navigation properties

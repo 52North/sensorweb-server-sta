@@ -51,7 +51,7 @@ public class ControllerConfig {
         return new ResponseEntity<>(
                 createErrorMessage(exception.getClass().getName(), exception.getMessage()),
                 headers,
-                HttpStatus.INTERNAL_SERVER_ERROR);
+                HttpStatus.BAD_REQUEST);
     }
 
 
@@ -79,6 +79,23 @@ public class ControllerConfig {
                 headers,
                 HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(value = IllegalArgumentException.class)
+    public ResponseEntity<Object> staIllegalArgumentException(IllegalArgumentException exception) {
+        return new ResponseEntity<>(
+                createErrorMessage(exception.getClass().getName(), exception.getMessage()),
+                headers,
+                HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(value = IllegalStateException.class)
+    public ResponseEntity<Object> staIllegalStateException(IllegalStateException exception) {
+        return new ResponseEntity<>(
+                createErrorMessage(exception.getClass().getName(), exception.getMessage()),
+                headers,
+                HttpStatus.BAD_REQUEST);
+    }
+
 
 
     private String createErrorMessage(String error, String message) {

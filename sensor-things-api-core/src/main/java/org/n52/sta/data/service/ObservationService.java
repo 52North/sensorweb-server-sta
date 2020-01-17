@@ -207,8 +207,10 @@ public class ObservationService extends
     private void updateDatastreamPhenomenonTimeOnObservationUpdate(
             List<DatastreamEntity> datastreams, DataEntity<?> observation) {
         for (DatastreamEntity datastreamEntity : datastreams) {
-            if (observation.getPhenomenonTimeStart().compareTo(datastreamEntity.getPhenomenonTimeStart()) != 1
-                    || observation.getPhenomenonTimeEnd().compareTo(datastreamEntity.getPhenomenonTimeEnd()) != -1
+            if (datastreamEntity.getPhenomenonTimeStart() == null ||
+                datastreamEntity.getPhenomenonTimeEnd() == null ||
+                observation.getPhenomenonTimeStart().compareTo(datastreamEntity.getPhenomenonTimeStart()) != 1 ||
+                observation.getPhenomenonTimeEnd().compareTo(datastreamEntity.getPhenomenonTimeEnd()) != -1
             ) {
                 List<Long> datasetIds = datastreamEntity
                         .getDatasets()

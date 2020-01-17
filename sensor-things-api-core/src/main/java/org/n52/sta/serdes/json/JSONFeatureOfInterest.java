@@ -72,8 +72,10 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
                 Assert.notNull(name, INVALID_INLINE_ENTITY + "name");
                 Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
                 Assert.notNull(feature, INVALID_INLINE_ENTITY + "feature");
-                Assert.state(encodingType.equals(ENCODINGTYPE_GEOJSON),
-                        "Invalid encodingType supplied. Only GeoJSON (application/vnd.geo+json) is supported!");
+                final String INVALID_ENCODINGTYPE =
+                        "Invalid encodingType supplied. Only GeoJSON (application/vnd.geo+json) is supported!";
+                Assert.notNull(encodingType, INVALID_ENCODINGTYPE);
+                Assert.state(encodingType.equals(ENCODINGTYPE_GEOJSON), INVALID_ENCODINGTYPE);
             }
 
             self.setIdentifier(identifier);
