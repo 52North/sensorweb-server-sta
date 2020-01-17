@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -33,7 +33,7 @@ import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
-import org.n52.sta.exception.ParsingException;
+import org.n52.shetland.ogc.sta.exception.ParsingException;
 import org.n52.sta.utils.TimeUtil;
 import org.springframework.util.Assert;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -28,6 +28,7 @@
  */
 package org.n52.sta.data.service;
 
+import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.BooleanDataEntity;
 import org.n52.series.db.beans.CategoryDataEntity;
@@ -48,6 +49,7 @@ import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.shetland.ogc.om.OmConstants;
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.query.DatasetQuerySpecifications;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
@@ -57,7 +59,6 @@ import org.n52.sta.data.repositories.DatasetRepository;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.OfferingRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
-import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.ObservationWithQueryOptions;
 import org.n52.sta.serdes.model.STAEntityDefinition;
@@ -68,7 +69,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -196,7 +196,7 @@ public class ObservationService extends
     private void check(StaDataEntity observation) throws STACRUDException {
         if (observation.getDatastream() == null) {
             throw new STACRUDException("The observation to create is invalid. Missing datastream!",
-                    HttpStatus.BAD_REQUEST);
+                    HTTPStatus.BAD_REQUEST);
         }
     }
 
@@ -260,11 +260,11 @@ public class ObservationService extends
                 }
                 return saved;
             }
-            throw new STACRUDException("Unable to update. Entity not found.", HttpStatus.NOT_FOUND);
+            throw new STACRUDException("Unable to update. Entity not found.", HTTPStatus.NOT_FOUND);
         } else if (HttpMethod.PUT.equals(method)) {
-            throw new STACRUDException("Http PUT is not yet supported!", HttpStatus.NOT_IMPLEMENTED);
+            throw new STACRUDException("Http PUT is not yet supported!", HTTPStatus.NOT_IMPLEMENTED);
         }
-        throw new STACRUDException("Invalid http method for updating entity!", HttpStatus.BAD_REQUEST);
+        throw new STACRUDException("Invalid http method for updating entity!", HTTPStatus.BAD_REQUEST);
     }
 
     @Override
@@ -279,7 +279,7 @@ public class ObservationService extends
             checkDataset(observation);
             delete(observation);
         } else {
-            throw new STACRUDException("Unable to delete. Entity not found.", HttpStatus.NOT_FOUND);
+            throw new STACRUDException("Unable to delete. Entity not found.", HTTPStatus.NOT_FOUND);
         }
     }
 
@@ -368,7 +368,7 @@ public class ObservationService extends
             }
             if (feature == null) {
                 throw new STACRUDException("The observation to create is invalid." +
-                        " Missing feature or thing.location!", HttpStatus.BAD_REQUEST);
+                        " Missing feature or thing.location!", HTTPStatus.BAD_REQUEST);
             }
             observation.setFeatureOfInterest(feature);
         }
@@ -554,7 +554,7 @@ public class ObservationService extends
             data.setDataset(dataset);
             if (observation.getIdentifier() != null) {
                 if (getRepository().existsByIdentifier(observation.getIdentifier())) {
-                    throw new STACRUDException("Identifier already exists!", HttpStatus.BAD_REQUEST);
+                    throw new STACRUDException("Identifier already exists!", HTTPStatus.BAD_REQUEST);
                 } else {
                     data.setIdentifier(observation.getIdentifier());
                 }
@@ -643,7 +643,7 @@ public class ObservationService extends
         } else {
             throw new STACRUDException(
                     String.format("The observation value for @iot.id %s can not be updated!", existing.getIdentifier()),
-                    HttpStatus.CONFLICT);
+                    HTTPStatus.CONFLICT);
         }
     }
 }

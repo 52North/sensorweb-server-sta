@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -28,14 +28,15 @@
  */
 package org.n52.sta.data.service;
 
+import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.query.HistoricalLocationQuerySpecifications;
 import org.n52.sta.data.repositories.HistoricalLocationRepository;
 import org.n52.sta.data.repositories.LocationRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
-import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.HistoricalLocationWithQueryOptions;
 import org.n52.sta.serdes.model.STAEntityDefinition;
@@ -46,7 +47,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -126,7 +126,7 @@ public class HistoricalLocationService
 
     private void check(HistoricalLocationEntity historicalLocation) throws STACRUDException {
         if (historicalLocation.getThing() == null && historicalLocation.getLocations() != null) {
-            throw new STACRUDException("The datastream to create is invalid", HttpStatus.BAD_REQUEST);
+            throw new STACRUDException("The datastream to create is invalid", HTTPStatus.BAD_REQUEST);
         }
     }
 
@@ -159,11 +159,11 @@ public class HistoricalLocationService
                 HistoricalLocationEntity merged = merge(existing.get(), entity);
                 return getRepository().save(merged);
             }
-            throw new STACRUDException("Unable to update. Entity not found.", HttpStatus.NOT_FOUND);
+            throw new STACRUDException("Unable to update. Entity not found.", HTTPStatus.NOT_FOUND);
         } else if (HttpMethod.PUT.equals(method)) {
-            throw new STACRUDException("Http PUT is not yet supported!", HttpStatus.NOT_IMPLEMENTED);
+            throw new STACRUDException("Http PUT is not yet supported!", HTTPStatus.NOT_IMPLEMENTED);
         }
-        throw new STACRUDException("Invalid http method for updating entity!", HttpStatus.BAD_REQUEST);
+        throw new STACRUDException("Invalid http method for updating entity!", HTTPStatus.BAD_REQUEST);
     }
 
     @Override
@@ -179,7 +179,7 @@ public class HistoricalLocationService
             updateThing(historicalLocation);
             getRepository().deleteByIdentifier(id);
         } else {
-            throw new STACRUDException("Unable to delete. Entity not found.", HttpStatus.NOT_FOUND);
+            throw new STACRUDException("Unable to delete. Entity not found.", HTTPStatus.NOT_FOUND);
         }
     }
 

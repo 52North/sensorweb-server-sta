@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -29,9 +29,9 @@
 package org.n52.sta.service;
 
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
+import org.n52.shetland.ogc.sta.exception.STAInvalidUrlThrowable;
 import org.n52.sta.data.service.EntityServiceRepository;
-import org.n52.sta.exception.STACRUDException;
-import org.n52.sta.exception.STAInvalidUrlException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -48,7 +48,6 @@ import java.util.Map;
 public class STACollectionRequestHandler extends STARequestUtils {
 
     private final EntityServiceRepository serviceRepository;
-    private final String mappingPrefix = "**/";
     private final int rootUrlLength;
 
     public STACollectionRequestHandler(@Value("${server.rootUrl}") String rootUrl,
@@ -85,19 +84,19 @@ public class STACollectionRequestHandler extends STARequestUtils {
      * @return JSON String representing Entity
      */
     @GetMapping(
-            value = {mappingPrefix + COLLECTION_IDENTIFIED_BY_THING_PATH,
-                     mappingPrefix + COLLECTION_IDENTIFIED_BY_LOCATION_PATH,
-                     mappingPrefix + COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH,
-                     mappingPrefix + COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH,
-                     mappingPrefix + COLLECTION_IDENTIFIED_BY_SENSOR_PATH,
-                     mappingPrefix + COLLECTION_IDENTIFIED_BY_DATASTREAM_PATH
+            value = {MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_THING_PATH,
+                     MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_LOCATION_PATH,
+                     MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH,
+                     MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH,
+                     MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_SENSOR_PATH,
+                     MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_DATASTREAM_PATH
             },
             produces = "application/json"
     )
     public Object readRelatedCollection(@PathVariable String entity,
                                         @PathVariable String target,
                                         @RequestParam Map<String, String> queryOptions,
-                                        HttpServletRequest request) throws STACRUDException, STAInvalidUrlException {
+                                        HttpServletRequest request) throws STACRUDException, STAInvalidUrlThrowable {
 
         // TODO(specki): check if something needs to be cut from the front like rootUrl
         // TODO(specki): short-circuit if url is only one element as spring already validated that when the path matched
@@ -105,8 +104,9 @@ public class STACollectionRequestHandler extends STARequestUtils {
 
         validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
 
-        String sourceType = entity.split("\\(")[0];
-        String sourceId = entity.split("\\(")[1].replace(")", "");
+        String[] split = splitId(entity);
+        String sourceType = split[0];
+        String sourceId = split[1].replace(")", "");
 
         return serviceRepository.getEntityService(target)
                 .getEntityCollectionByRelatedEntity(sourceId, sourceType, createQueryOptions(queryOptions));

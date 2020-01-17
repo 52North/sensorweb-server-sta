@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -26,12 +26,24 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.exception;
+package org.n52.sta.service;
 
-public class STAInvalidQueryException extends Exception {
+import static org.junit.Assert.assertEquals;
 
-    STAInvalidQueryException(String msg) {
-        super(msg);
+import org.junit.Test;
+
+public class STARequestUtilsTest {
+
+
+    @Test
+    public void identifiedByDatastreamRegex() {
+        assertEquals("Datastreams(?:\\()['\\-0-9a-zA-Z]+(?:\\))/(Sensor|ObservedProperty|Thing|Observations)",
+                STARequestUtils.IDENTIFIED_BY_DATASTREAM_REGEX);
     }
 
+    @Test
+    public void entityIdentifiedByDatastreamPath() {
+        assertEquals("{entity:Datastreams(?:\\()['\\-0-9a-zA-Z]+(?:\\))}/{target:Sensor|ObservedProperty|Thing}",
+                STARequestUtils.ENTITY_IDENTIFIED_BY_DATASTREAM_PATH);
+    }
 }

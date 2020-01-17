@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -28,9 +28,9 @@
  */
 package org.n52.sta.service;
 
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
+import org.n52.shetland.ogc.sta.exception.STAInvalidUrlThrowable;
 import org.n52.sta.data.service.EntityServiceRepository;
-import org.n52.sta.exception.STACRUDException;
-import org.n52.sta.exception.STAInvalidUrlException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -63,13 +63,13 @@ public class STAEntityRequestHandler extends STARequestUtils {
      * @param request full request
      */
     @GetMapping(
-            value = "**/{entity:" + COLLECTION_REGEX + "}{id:" + IDENTIFIER_REGEX + "$}",
+            value = MAPPING_PREFIX + "{entity:" + COLLECTION_REGEX + "}{id:" + IDENTIFIER_REGEX + "$}",
             produces = "application/json"
     )
     public Object readEntityDirect(@PathVariable String entity,
                                    @PathVariable String id,
                                    @RequestParam Map<String, String> queryOptions,
-                                   HttpServletRequest request) throws STACRUDException, STAInvalidUrlException {
+                                   HttpServletRequest request) throws STACRUDException, STAInvalidUrlThrowable {
 
         // TODO(specki): check if something needs to be cut from the front like rootUrl
         // TODO(specki): short-circuit if url is only one element as spring already validated that
@@ -90,16 +90,16 @@ public class STAEntityRequestHandler extends STARequestUtils {
      * @return JSON String representing Entity
      */
     @GetMapping(
-            value = {mappingPrefix + ENTITY_IDENTIFIED_BY_DATASTREAM_PATH,
-                     mappingPrefix + ENTITY_IDENTIFIED_BY_OBSERVATION_PATH,
-                     mappingPrefix + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH
+            value = {MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_DATASTREAM_PATH,
+                     MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_OBSERVATION_PATH,
+                     MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH
             },
             produces = "application/json"
     )
     public Object readRelatedEntity(@PathVariable String entity,
                                     @PathVariable String target,
                                     @RequestParam Map<String, String> queryOptions,
-                                    HttpServletRequest request) throws STACRUDException, STAInvalidUrlException {
+                                    HttpServletRequest request) throws STACRUDException, STAInvalidUrlThrowable {
 
         // TODO(specki): check if something needs to be cut from the front like rootUrl
         // TODO(specki): short-circuit if url is only one element as spring already validated that when the path matched
@@ -108,7 +108,7 @@ public class STAEntityRequestHandler extends STARequestUtils {
         validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
 
         String sourceType = entity.substring(0, entity.indexOf("("));
-        String sourceId = entity.substring(sourceType.length()+1, entity.length() - 1);
+        String sourceId = entity.substring(sourceType.length() + 1, entity.length() - 1);
 
         return serviceRepository.getEntityService(target)
                         .getEntityByRelatedEntity(sourceId, sourceType, null, createQueryOptions(queryOptions));

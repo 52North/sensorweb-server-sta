@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -35,7 +35,7 @@ import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
-import org.n52.sta.exception.STAInvalidFilterExpressionException;
+import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.sta.utils.ComparisonOperator;
 import org.springframework.data.jpa.domain.Specification;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -29,14 +29,15 @@
 package org.n52.sta.data.service;
 
 import org.joda.time.DateTime;
+import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.query.ThingQuerySpecifications;
 import org.n52.sta.data.repositories.ThingRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
-import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.ThingWithQueryOptions;
 import org.n52.sta.serdes.model.STAEntityDefinition;
@@ -46,7 +47,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -130,7 +130,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
                     thing.setIdentifier(UUID.randomUUID().toString());
                 }
             } else if (getRepository().existsByIdentifier(thing.getIdentifier())) {
-                throw new STACRUDException("Identifier already exists!", HttpStatus.BAD_REQUEST);
+                throw new STACRUDException("Identifier already exists!", HTTPStatus.BAD_REQUEST);
             }
             thing.setProcesssed(true);
             processLocations(thing);
@@ -158,12 +158,12 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
                 }
                 return getRepository().save(merged);
             } else {
-                throw new STACRUDException("Unable to update. Entity not found.", HttpStatus.NOT_FOUND);
+                throw new STACRUDException("Unable to update. Entity not found.", HTTPStatus.NOT_FOUND);
             }
         } else if (HttpMethod.PUT.equals(method)) {
-            throw new STACRUDException("Http PUT is not yet supported!", HttpStatus.NOT_IMPLEMENTED);
+            throw new STACRUDException("Http PUT is not yet supported!", HTTPStatus.NOT_IMPLEMENTED);
         }
-        throw new STACRUDException("Invalid http method for updating entity!", HttpStatus.BAD_REQUEST);
+        throw new STACRUDException("Invalid http method for updating entity!", HTTPStatus.BAD_REQUEST);
     }
 
     @Override
@@ -218,7 +218,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
             });
             getRepository().deleteByIdentifier(identifier);
         } else {
-            throw new STACRUDException("Unable to delete. Entity not found.", HttpStatus.NOT_FOUND);
+            throw new STACRUDException("Unable to delete. Entity not found.", HTTPStatus.NOT_FOUND);
         }
     }
 

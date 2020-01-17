@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -28,17 +28,18 @@
  */
 package org.n52.sta.data.service;
 
+import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.ObservablePropertyEntity;
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.ObservedPropertyQuerySpecifications;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.PhenomenonRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
-import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.ObservedPropertyWithQueryOptions;
 import org.n52.sta.serdes.model.STAEntityDefinition;
@@ -49,7 +50,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.criteria.Join;
@@ -183,7 +183,7 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
                 observableProperty.setStaIdentifier(UUID.randomUUID().toString());
             }
         } else if (getRepository().existsByStaIdentifier(observableProperty.getStaIdentifier())) {
-            throw new STACRUDException("Identifier already exists!", HttpStatus.BAD_REQUEST);
+            throw new STACRUDException("Identifier already exists!", HTTPStatus.BAD_REQUEST);
         }
         return getRepository().save(getAsPhenomenonEntity(observableProperty));
     }
@@ -198,11 +198,11 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
                 PhenomenonEntity merged = merge(existing.get(), entity);
                 return getRepository().save(getAsPhenomenonEntity(merged));
             }
-            throw new STACRUDException("Unable to update. Entity not found.", HttpStatus.NOT_FOUND);
+            throw new STACRUDException("Unable to update. Entity not found.", HTTPStatus.NOT_FOUND);
         } else if (HttpMethod.PUT.equals(method)) {
-            throw new STACRUDException("Http PUT is not yet supported!", HttpStatus.NOT_IMPLEMENTED);
+            throw new STACRUDException("Http PUT is not yet supported!", HTTPStatus.NOT_IMPLEMENTED);
         }
-        throw new STACRUDException("Invalid http method for updating entity!", HttpStatus.BAD_REQUEST);
+        throw new STACRUDException("Invalid http method for updating entity!", HTTPStatus.BAD_REQUEST);
     }
 
     @Override
@@ -236,7 +236,7 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
             getRepository().deleteByStaIdentifier(id);
         } else {
             throw new STACRUDException(
-                    "Unable to delete. Entity not found.", HttpStatus.NOT_FOUND);
+                    "Unable to delete. Entity not found.", HTTPStatus.NOT_FOUND);
         }
     }
 

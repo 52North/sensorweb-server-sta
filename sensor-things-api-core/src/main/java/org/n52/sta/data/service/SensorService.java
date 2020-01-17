@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -28,11 +28,13 @@
  */
 package org.n52.sta.data.service;
 
+import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.SensorQuerySpecifications;
 import org.n52.sta.data.repositories.DatastreamRepository;
@@ -40,7 +42,6 @@ import org.n52.sta.data.repositories.FormatRepository;
 import org.n52.sta.data.repositories.ProcedureHistoryRepository;
 import org.n52.sta.data.repositories.ProcedureRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
-import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.SensorWithQueryOptions;
 import org.n52.sta.serdes.model.STAEntityDefinition;
@@ -51,7 +52,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -183,7 +183,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
             }
         } else if (getRepository().existsByIdentifier(sensor.getIdentifier())) {
             throw new STACRUDException("Identifier already exists!",
-                    HttpStatus.BAD_REQUEST);
+                    HTTPStatus.BAD_REQUEST);
         }
         checkFormat(sensor);
         ProcedureEntity procedure = getAsProcedureEntity(sensor);
@@ -204,11 +204,11 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
                 }
                 return getRepository().save(getAsProcedureEntity(merged));
             }
-            throw new STACRUDException("Unable to update. Entity not found.", HttpStatus.NOT_FOUND);
+            throw new STACRUDException("Unable to update. Entity not found.", HTTPStatus.NOT_FOUND);
         } else if (HttpMethod.PUT.equals(method)) {
-            throw new STACRUDException("Http PUT is not yet supported!", HttpStatus.NOT_IMPLEMENTED);
+            throw new STACRUDException("Http PUT is not yet supported!", HTTPStatus.NOT_IMPLEMENTED);
         }
-        throw new STACRUDException("Invalid http method for updating entity!", HttpStatus.BAD_REQUEST);
+        throw new STACRUDException("Invalid http method for updating entity!", HTTPStatus.BAD_REQUEST);
     }
 
     @Override
@@ -242,7 +242,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
             });
             getRepository().deleteByIdentifier(identifier);
         } else {
-            throw new STACRUDException("Unable to delete. Entity not found.", HttpStatus.NOT_FOUND);
+            throw new STACRUDException("Unable to delete. Entity not found.", HTTPStatus.NOT_FOUND);
         }
     }
 

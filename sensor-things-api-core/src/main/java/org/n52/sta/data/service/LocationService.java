@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -28,15 +28,16 @@
  */
 package org.n52.sta.data.service;
 
+import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.query.LocationQuerySpecifications;
 import org.n52.sta.data.repositories.LocationEncodingRepository;
 import org.n52.sta.data.repositories.LocationRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
-import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.LocationWithQueryOptions;
 import org.n52.sta.serdes.model.STAEntityDefinition;
@@ -49,7 +50,6 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -130,7 +130,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
                     location.setIdentifier(UUID.randomUUID().toString());
                 }
             } else if (getRepository().existsByIdentifier(location.getIdentifier())) {
-                throw new STACRUDException("Identifier already exists!", HttpStatus.BAD_REQUEST);
+                throw new STACRUDException("Identifier already exists!", HTTPStatus.BAD_REQUEST);
             }
             location.setProcesssed(true);
             checkLocationEncoding(location);
@@ -148,11 +148,11 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
                 LocationEntity merged = merge(existing.get(), entity);
                 return getRepository().save(merged);
             }
-            throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HttpStatus.NOT_FOUND);
+            throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
         } else if (HttpMethod.PUT.equals(method)) {
-            throw new STACRUDException("Http PUT is not yet supported!", HttpStatus.NOT_IMPLEMENTED);
+            throw new STACRUDException("Http PUT is not yet supported!", HTTPStatus.NOT_IMPLEMENTED);
         }
-        throw new STACRUDException("Invalid http method for updating entity!", HttpStatus.BAD_REQUEST);
+        throw new STACRUDException("Invalid http method for updating entity!", HTTPStatus.BAD_REQUEST);
     }
 
     @Override
@@ -179,7 +179,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
             }
             getRepository().deleteByIdentifier(id);
         } else {
-            throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HttpStatus.NOT_FOUND);
+            throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
         }
     }
 

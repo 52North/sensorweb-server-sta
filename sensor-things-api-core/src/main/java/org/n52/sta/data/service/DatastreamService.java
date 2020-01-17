@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -28,6 +28,7 @@
  */
 package org.n52.sta.data.service;
 
+import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
@@ -37,6 +38,7 @@ import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.UnitEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
 import org.n52.sta.data.repositories.DataRepository;
@@ -45,7 +47,6 @@ import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.FormatRepository;
 import org.n52.sta.data.repositories.UnitRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
-import org.n52.sta.exception.STACRUDException;
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.DatastreamWithQueryOptions;
 import org.n52.sta.serdes.model.STAEntityDefinition;
@@ -54,7 +55,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -173,7 +173,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
             datastream.setThing(getThingService().createEntity(datastream.getThing()));
             if (datastream.getIdentifier() != null) {
                 if (getRepository().existsByIdentifier(datastream.getIdentifier())) {
-                    throw new STACRUDException("Identifier already exists!", HttpStatus.BAD_REQUEST);
+                    throw new STACRUDException("Identifier already exists!", HTTPStatus.BAD_REQUEST);
                 } else {
                     datastream.setIdentifier(datastream.getIdentifier());
                 }
@@ -212,7 +212,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     private void check(DatastreamEntity datastream) throws STACRUDException {
         if (datastream.getThing() == null || datastream.getObservableProperty() == null
                 || datastream.getProcedure() == null) {
-            throw new STACRUDException("The datastream to create is invalid", HttpStatus.BAD_REQUEST);
+            throw new STACRUDException("The datastream to create is invalid", HTTPStatus.BAD_REQUEST);
         }
     }
 
@@ -238,33 +238,33 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
                 }
                 return getRepository().save(merged);
             }
-            throw new STACRUDException("Unable to update. Entity not found.", HttpStatus.NOT_FOUND);
+            throw new STACRUDException("Unable to update. Entity not found.", HTTPStatus.NOT_FOUND);
         } else if (HttpMethod.PUT.equals(method)) {
-            throw new STACRUDException("Http PUT is not yet supported!", HttpStatus.NOT_IMPLEMENTED);
+            throw new STACRUDException("Http PUT is not yet supported!", HTTPStatus.NOT_IMPLEMENTED);
         }
-        throw new STACRUDException("Invalid http method for updating entity!", HttpStatus.BAD_REQUEST);
+        throw new STACRUDException("Invalid http method for updating entity!", HTTPStatus.BAD_REQUEST);
     }
 
     private void checkUpdate(DatastreamEntity entity) throws STACRUDException {
         String ERROR_MSG = "Inlined entities are not allowed for updates!";
         if (entity.getObservableProperty() != null && (entity.getObservableProperty().getIdentifier() == null
                 || entity.getObservableProperty().isSetName() || entity.getObservableProperty().isSetDescription())) {
-            throw new STACRUDException(ERROR_MSG, HttpStatus.BAD_REQUEST);
+            throw new STACRUDException(ERROR_MSG, HTTPStatus.BAD_REQUEST);
         }
 
         if (entity.getProcedure() != null
                 && (entity.getProcedure().getIdentifier() == null
                 || entity.getProcedure().isSetName()
                 || entity.getProcedure().isSetDescription())) {
-            throw new STACRUDException(ERROR_MSG, HttpStatus.BAD_REQUEST);
+            throw new STACRUDException(ERROR_MSG, HTTPStatus.BAD_REQUEST);
         }
 
         if (entity.getThing() != null && (entity.getThing().getIdentifier() == null || entity.getThing().isSetName()
                 || entity.getThing().isSetDescription())) {
-            throw new STACRUDException(ERROR_MSG, HttpStatus.BAD_REQUEST);
+            throw new STACRUDException(ERROR_MSG, HTTPStatus.BAD_REQUEST);
         }
         if (entity.getObservations() != null) {
-            throw new STACRUDException(ERROR_MSG, HttpStatus.BAD_REQUEST);
+            throw new STACRUDException(ERROR_MSG, HTTPStatus.BAD_REQUEST);
         }
     }
 
@@ -277,7 +277,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
             // check observations
             getRepository().deleteByIdentifier(id);
         } else {
-            throw new STACRUDException("Unable to delete. Entity not found.", HttpStatus.NOT_FOUND);
+            throw new STACRUDException("Unable to delete. Entity not found.", HTTPStatus.NOT_FOUND);
         }
     }
 
@@ -364,7 +364,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
                             "The updated observationType (%s) does not comply with the existing observationType (%s)",
                             toMerge.getObservationType().getFormat(),
                             existing.getObservationType().getFormat()),
-                    HttpStatus.CONFLICT);
+                    HTTPStatus.CONFLICT);
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -36,8 +36,9 @@ import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
+import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.shetland.ogc.sta.exception.STAInvalidUrlThrowable;
 import org.n52.sta.data.service.EntityServiceRepository;
-import org.n52.sta.exception.STAInvalidUrlException;
 import org.n52.sta.serdes.DatastreamSerDes;
 import org.n52.sta.serdes.FeatureOfInterestSerDes;
 import org.n52.sta.serdes.HistoricalLocationSerDes;
@@ -48,109 +49,128 @@ import org.n52.sta.serdes.SensorSerDes;
 import org.n52.sta.serdes.ThingSerDes;
 import org.n52.sta.utils.QueryOptions;
 
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-public class STARequestUtils {
+public class STARequestUtils implements StaConstants {
 
-    final String mappingPrefix = "**/";
+    protected static final String MAPPING_PREFIX = "**/";
+    protected static final String IDENTIFIER_REGEX = "(?:\\()['\\-0-9a-zA-Z]+(?:\\))";
+    protected static final String PATH_ENTITY = "{entity:";
+    protected static final String PATH_TARGET = "}/{target:";
+    protected static final String SLASH_BRACKET = "/(";
 
-    final String IDENTIFIER_REGEX = "(?:\\()['\\-0-9a-zA-Z]+(?:\\))";
-    final String COLLECTION_REGEX =
-            "Observations|Datastreams|Things|Sensors|Locations|HistoricalLocations|" +
-                    "FeaturesOfInterest|ObservedProperties";
-    final String IDENTIFIED_BY_DATASTREAM_REGEX =
-            "Datastreams" + IDENTIFIER_REGEX + "/(Sensor|ObservedProperty|Thing|Observations)";
-    final String IDENTIFIED_BY_OBSERVATION_REGEX =
-            "Observations" + IDENTIFIER_REGEX + "/(Datastream|FeatureOfInterest)";
-    final String IDENTIFIED_BY_HISTORICAL_LOCATION_REGEX =
-            "HistoricalLocations" + IDENTIFIER_REGEX + "/Thing";
-    final String IDENTIFIED_BY_THING_REGEX =
-            "Things" + IDENTIFIER_REGEX + "/(Datastreams|HistoricalLocations|Locations)";
-    final String IDENTIFIED_BY_LOCATION_REGEX =
-            "Locations" + IDENTIFIER_REGEX + "/(Things|HistoricalLocations)}";
-    final String IDENTIFIED_BY_SENSOR_REGEX =
-            "Sensors" + IDENTIFIER_REGEX + "/Datastreams";
-    final String IDENTIFIED_BY_OBSERVED_PROPERTY_REGEX =
-            "ObservedProperties" + IDENTIFIER_REGEX + "/Datastreams";
-    final String IDENTIFIED_BY_FEATURE_OF_INTEREST_REGEX =
-            "FeaturesOfInterest" + IDENTIFIER_REGEX + "/Observations";
+    protected static final String COLLECTION_REGEX = OBSERVATIONS + "|" + DATASTREAMS + "|" + THINGS + "|" + SENSORS
+            + "|" + LOCATIONS + "|" + HISTORICAL_LOCATIONS + "|" + FEATURES_OF_INTEREST + "|" + OBSERVED_PROPERTIES;
 
-    final String ENTITY_IDENTIFIED_BY_DATASTREAM_PATH =
-            "{entity:Datastreams" + IDENTIFIER_REGEX + "}/{target:Sensor|ObservedProperty|Thing}";
-    final String ENTITY_IDENTIFIED_BY_OBSERVATION_PATH =
-            "{entity:Observations" + IDENTIFIER_REGEX + "}/{target:Datastream|FeatureOfInterest}";
-    final String ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH =
-            "{entity:HistoricalLocations" + IDENTIFIER_REGEX + "}/{target:Thing}";
+    protected static final String IDENTIFIED_BY_DATASTREAM_REGEX = DATASTREAMS + IDENTIFIER_REGEX + SLASH_BRACKET
+            + SENSOR + "|" + OBSERVED_PROPERTY + "|" + THING + "|" + OBSERVATIONS + ")";
 
-    final String COLLECTION_IDENTIFIED_BY_DATASTREAM_PATH =
-            "{entity:Datastreams" + IDENTIFIER_REGEX + "}/{target:Observations}";
-    final String COLLECTION_IDENTIFIED_BY_THING_PATH =
-            "{entity:Things" + IDENTIFIER_REGEX + "}/{target:Datastreams|HistoricalLocations|Locations}";
-    final String COLLECTION_IDENTIFIED_BY_LOCATION_PATH =
-            "{entity:Locations" + IDENTIFIER_REGEX + "}/{target:Things|HistoricalLocations}";
-    final String COLLECTION_IDENTIFIED_BY_SENSOR_PATH =
-            "{entity:Sensors" + IDENTIFIER_REGEX + "}/{target:Datastreams}";
-    final String COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH =
-            "{entity:ObservedProperties" + IDENTIFIER_REGEX + "}/{target:Datastreams}";
-    final String COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH =
-            "{entity:FeaturesOfInterest" + IDENTIFIER_REGEX + "}/{target:Observations}";
+    protected static final String IDENTIFIED_BY_OBSERVATION_REGEX =
+            OBSERVATIONS + IDENTIFIER_REGEX + SLASH_BRACKET + DATASTREAM + "|" + FEATURE_OF_INTEREST + ")";
 
-    final static Map<String, Class> collectionNameToClass;
-    final static Map<String, Class> collectionNameToPatchClass;
+    protected static final String IDENTIFIED_BY_HISTORICAL_LOCATION_REGEX =
+            HISTORICAL_LOCATIONS + IDENTIFIER_REGEX + "/" + THING;
+
+    protected static final String IDENTIFIED_BY_THING_REGEX = THINGS + IDENTIFIER_REGEX + SLASH_BRACKET + DATASTREAMS
+            + "|" + HISTORICAL_LOCATIONS + "|" + LOCATIONS + ")";
+
+    protected static final String IDENTIFIED_BY_LOCATION_REGEX =
+            LOCATIONS + IDENTIFIER_REGEX + SLASH_BRACKET + THINGS + "|" + HISTORICAL_LOCATIONS + ")}";
+
+    protected static final String IDENTIFIED_BY_SENSOR_REGEX = SENSORS + IDENTIFIER_REGEX + "/" + DATASTREAMS;
+
+    protected static final String IDENTIFIED_BY_OBSERVED_PROPERTY_REGEX =
+            OBSERVED_PROPERTIES + IDENTIFIER_REGEX + "/" + DATASTREAMS;
+
+    protected static final String IDENTIFIED_BY_FEATURE_OF_INTEREST_REGEX =
+            FEATURES_OF_INTEREST + IDENTIFIER_REGEX + "/" + OBSERVATIONS;
+
+    protected static final String ENTITY_IDENTIFIED_BY_DATASTREAM_PATH = PATH_ENTITY + DATASTREAMS + IDENTIFIER_REGEX
+            + PATH_TARGET + SENSOR + "|" + OBSERVED_PROPERTY + "|" + THING + "}";
+
+    protected static final String ENTITY_IDENTIFIED_BY_OBSERVATION_PATH =
+            PATH_ENTITY + OBSERVATIONS + IDENTIFIER_REGEX + PATH_TARGET + DATASTREAM + "|" + FEATURE_OF_INTEREST + "}";
+
+    protected static final String ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH =
+            PATH_ENTITY + HISTORICAL_LOCATIONS + IDENTIFIER_REGEX + PATH_TARGET + THING + "}";
+
+    protected static final String COLLECTION_IDENTIFIED_BY_DATASTREAM_PATH =
+            PATH_ENTITY + DATASTREAMS + IDENTIFIER_REGEX + PATH_TARGET + OBSERVATIONS + "}";
+
+    protected static final String COLLECTION_IDENTIFIED_BY_THING_PATH = PATH_ENTITY + THINGS + IDENTIFIER_REGEX
+            + PATH_TARGET + DATASTREAMS + "|" + HISTORICAL_LOCATIONS + "|" + LOCATIONS + "}";
+
+    protected static final String COLLECTION_IDENTIFIED_BY_LOCATION_PATH =
+            PATH_ENTITY + LOCATIONS + IDENTIFIER_REGEX + PATH_TARGET + THINGS + "|" + HISTORICAL_LOCATIONS + "}";
+
+    protected static final String COLLECTION_IDENTIFIED_BY_SENSOR_PATH =
+            PATH_ENTITY + SENSORS + IDENTIFIER_REGEX + PATH_TARGET + DATASTREAMS + "}";
+
+    protected static final String COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH =
+            PATH_ENTITY + OBSERVED_PROPERTIES + IDENTIFIER_REGEX + PATH_TARGET + DATASTREAMS + "}";
+
+    protected static final String COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH =
+            PATH_ENTITY + FEATURES_OF_INTEREST + IDENTIFIER_REGEX + PATH_TARGET + OBSERVATIONS + "}";
+
+    protected static Map<String, Class> collectionNameToClass;
+    protected static Map<String, Class> collectionNameToPatchClass;
+
+    private static final String URL_INVALID = "Url is invalid. ";
 
     static {
         HashMap<String, Class> map = new HashMap<>();
-        map.put("Things", PlatformEntity.class);
-        map.put("Locations", LocationEntity.class);
-        map.put("Datastreams", DatastreamEntity.class);
-        map.put("HistoricalLocations", HistoricalLocationEntity.class);
-        map.put("Sensors", SensorEntity.class);
-        map.put("Observations", DataEntity.class);
-        map.put("ObservedProperties", PhenomenonEntity.class);
-        map.put("FeaturesOfInterest", AbstractFeatureEntity.class);
+        map.put(THINGS, PlatformEntity.class);
+        map.put(LOCATIONS, LocationEntity.class);
+        map.put(DATASTREAMS, DatastreamEntity.class);
+        map.put(HISTORICAL_LOCATIONS, HistoricalLocationEntity.class);
+        map.put(SENSORS, SensorEntity.class);
+        map.put(OBSERVATIONS, DataEntity.class);
+        map.put(OBSERVED_PROPERTIES, PhenomenonEntity.class);
+        map.put(FEATURES_OF_INTEREST, AbstractFeatureEntity.class);
         collectionNameToClass = Collections.unmodifiableMap(map);
 
         HashMap<String, Class> patchMap = new HashMap<>();
-        patchMap.put("Things", ThingSerDes.PlatformEntityPatch.class);
-        patchMap.put("Locations", LocationSerDes.LocationEntityPatch.class);
-        patchMap.put("Datastreams", DatastreamSerDes.DatastreamEntityPatch.class);
-        patchMap.put("HistoricalLocations", HistoricalLocationSerDes.HistoricalLocationEntityPatch.class);
-        patchMap.put("Sensors", SensorSerDes.SensorEntityPatch.class);
-        patchMap.put("Observations", ObservationSerDes.StaDataEntityPatch.class);
-        patchMap.put("ObservedProperties", ObservedPropertySerDes.PhenomenonEntityPatch.class);
-        patchMap.put("FeaturesOfInterest", FeatureOfInterestSerDes.AbstractFeatureEntityPatch.class);
+        patchMap.put(THINGS, ThingSerDes.PlatformEntityPatch.class);
+        patchMap.put(LOCATIONS, LocationSerDes.LocationEntityPatch.class);
+        patchMap.put(DATASTREAMS, DatastreamSerDes.DatastreamEntityPatch.class);
+        patchMap.put(HISTORICAL_LOCATIONS, HistoricalLocationSerDes.HistoricalLocationEntityPatch.class);
+        patchMap.put(SENSORS, SensorSerDes.SensorEntityPatch.class);
+        patchMap.put(OBSERVATIONS, ObservationSerDes.StaDataEntityPatch.class);
+        patchMap.put(OBSERVED_PROPERTIES, ObservedPropertySerDes.PhenomenonEntityPatch.class);
+        patchMap.put(FEATURES_OF_INTEREST, FeatureOfInterestSerDes.AbstractFeatureEntityPatch.class);
 
-        patchMap.put("Thing", ThingSerDes.PlatformEntityPatch.class);
-        patchMap.put("Location", LocationSerDes.LocationEntityPatch.class);
-        patchMap.put("Datastream", DatastreamSerDes.DatastreamEntityPatch.class);
-        patchMap.put("HistoricalLocation", HistoricalLocationSerDes.HistoricalLocationEntityPatch.class);
-        patchMap.put("Sensor", SensorSerDes.SensorEntityPatch.class);
-        patchMap.put("Observation", ObservationSerDes.StaDataEntityPatch.class);
-        patchMap.put("ObservedProperty", ObservedPropertySerDes.PhenomenonEntityPatch.class);
-        patchMap.put("FeatureOfInterest", FeatureOfInterestSerDes.AbstractFeatureEntityPatch.class);
+        patchMap.put(THING, ThingSerDes.PlatformEntityPatch.class);
+        patchMap.put(LOCATION, LocationSerDes.LocationEntityPatch.class);
+        patchMap.put(DATASTREAM, DatastreamSerDes.DatastreamEntityPatch.class);
+        patchMap.put(HISTORICAL_LOCATION, HistoricalLocationSerDes.HistoricalLocationEntityPatch.class);
+        patchMap.put(SENSOR, SensorSerDes.SensorEntityPatch.class);
+        patchMap.put(OBSERVATION, ObservationSerDes.StaDataEntityPatch.class);
+        patchMap.put(OBSERVED_PROPERTY, ObservedPropertySerDes.PhenomenonEntityPatch.class);
+        patchMap.put(FEATURE_OF_INTEREST, FeatureOfInterestSerDes.AbstractFeatureEntityPatch.class);
         collectionNameToPatchClass = Collections.unmodifiableMap(patchMap);
     }
 
-    final Pattern byIdPattern = Pattern.compile("(" + COLLECTION_REGEX + ")" + IDENTIFIER_REGEX);
-    final Pattern byDatastreamPattern = Pattern.compile(IDENTIFIED_BY_DATASTREAM_REGEX);
-    final Pattern byObservationPattern = Pattern.compile(IDENTIFIED_BY_OBSERVATION_REGEX);
-    final Pattern byHistoricalLocationPattern = Pattern.compile(IDENTIFIED_BY_HISTORICAL_LOCATION_REGEX);
-    final Pattern byLocationPattern = Pattern.compile(IDENTIFIED_BY_LOCATION_REGEX);
-    final Pattern byThingPattern = Pattern.compile(IDENTIFIED_BY_THING_REGEX);
-    final Pattern bySensorsPattern = Pattern.compile(IDENTIFIED_BY_SENSOR_REGEX);
-    final Pattern byObservedPropertiesPattern = Pattern.compile(IDENTIFIED_BY_OBSERVED_PROPERTY_REGEX);
-    final Pattern byFeaturesOfInterestPattern = Pattern.compile(IDENTIFIED_BY_FEATURE_OF_INTEREST_REGEX);
+    protected final Pattern byIdPattern = Pattern.compile("(" + COLLECTION_REGEX + ")" + IDENTIFIER_REGEX);
+    protected final Pattern byDatastreamPattern = Pattern.compile(IDENTIFIED_BY_DATASTREAM_REGEX);
+    protected final Pattern byObservationPattern = Pattern.compile(IDENTIFIED_BY_OBSERVATION_REGEX);
+    protected final Pattern byHistoricalLocationPattern = Pattern.compile(IDENTIFIED_BY_HISTORICAL_LOCATION_REGEX);
+    protected final Pattern byLocationPattern = Pattern.compile(IDENTIFIED_BY_LOCATION_REGEX);
+    protected final Pattern byThingPattern = Pattern.compile(IDENTIFIED_BY_THING_REGEX);
+    protected final Pattern bySensorsPattern = Pattern.compile(IDENTIFIED_BY_SENSOR_REGEX);
+    protected final Pattern byObservedPropertiesPattern = Pattern.compile(IDENTIFIED_BY_OBSERVED_PROPERTY_REGEX);
+    protected final Pattern byFeaturesOfInterestPattern = Pattern.compile(IDENTIFIED_BY_FEATURE_OF_INTEREST_REGEX);
 
-    STAInvalidUrlException validateURL(StringBuffer requestURL,
+    protected STAInvalidUrlThrowable validateURL(StringBuffer requestURL,
                        EntityServiceRepository serviceRepository,
-                       int rootUrlLength) throws STAInvalidUrlException {
+                       int rootUrlLength) throws STAInvalidUrlThrowable {
         String[] uriResources = requestURL.substring(rootUrlLength).split("/");
 
-        STAInvalidUrlException ex;
+        STAInvalidUrlThrowable ex;
         ex = validateURISyntax(uriResources);
         if (ex != null) {
             throw ex;
@@ -168,16 +188,13 @@ public class STARequestUtils {
      * @param uriResources URI of the Request split by "/"
      * @return STAInvalidUrlException if URI is malformed
      */
-    private STAInvalidUrlException validateURISyntax(String[] uriResources) {
+    private STAInvalidUrlThrowable validateURISyntax(String[] uriResources) {
         // Validate URL syntax via Regex
         // Skip validation if no navigationPath is provided as Spring already validated syntax
         if (uriResources.length > 1) {
             // check iteratively and fail-fast
             for (int i = 0; i < uriResources.length; i++) {
-                if (byIdPattern.matcher(uriResources[i]).matches()) {
-                    // Resource is adressed by Id
-                    // e.g. Things(1)
-                } else {
+                if (!byIdPattern.matcher(uriResources[i]).matches()) {
                     // Resource is addressed by relation to other entity
                     // e.g. Datastreams(1)/Thing
                     if (i > 0) {
@@ -191,18 +208,20 @@ public class STARequestUtils {
                                 || byObservationPattern.matcher(resource).matches()
                                 || bySensorsPattern.matcher(resource).matches()
                                 || byObservedPropertiesPattern.matcher(resource).matches())) {
-                            return new STAInvalidUrlException("Url is invalid. "
+                            return new STAInvalidUrlThrowable(URL_INVALID
                                     + uriResources[i - 1]
                                     + "/" + uriResources[i]
                                     + " is not a valid resource path.");
 
                         }
                     } else {
-                        return new STAInvalidUrlException("Url is invalid. "
+                        return new STAInvalidUrlThrowable(URL_INVALID
                                 + uriResources[i]
                                 + " is not a valid resource.");
                     }
                 }
+                // Resource is adressed by Id
+                // e.g. Things(1), no processing required
             }
         }
         return null;
@@ -215,24 +234,24 @@ public class STARequestUtils {
      * @param uriResources URI of the Request split by "/"
      * @return STAInvalidUrlException if URI is malformed
      */
-    private STAInvalidUrlException validateURISemantic(String[] uriResources,
+    private STAInvalidUrlThrowable validateURISemantic(String[] uriResources,
                                                          EntityServiceRepository serviceRepository) {
         // Check if this is Request to root collection. They are always valid
         if (uriResources.length == 1 && !uriResources[0].contains("(")) {
             return null;
         }
         // Parse first navigation Element
-        String[] sourceEntity = uriResources[0].split("\\(");
+        String[] sourceEntity = splitId(uriResources[0]);
         String sourceId = sourceEntity[1].replace(")", "");
         String sourceType = sourceEntity[0];
 
         if (!serviceRepository.getEntityService(sourceType).existsEntity(sourceId)) {
-            return new STAInvalidUrlException("No Entity: " + uriResources[0] + " found!");
+            return createInvalidUrlExceptionNoEntit(uriResources[0]);
         }
 
         // Iterate over the rest of the uri validating each resource
         for (int i = 1, uriResourcesLength = uriResources.length; i < uriResourcesLength; i++) {
-            String[] targetEntity = uriResources[i].split("\\(");
+            String[] targetEntity = splitId(uriResources[i]);
             String targetType = targetEntity[0];
             String targetId = null;
             if (targetEntity.length == 1) {
@@ -242,11 +261,7 @@ public class STARequestUtils {
                 targetId = serviceRepository.getEntityService(targetType)
                         .getEntityIdByRelatedEntity(sourceId, sourceType);
                 if (targetId == null) {
-                    return new STAInvalidUrlException("No Entity: "
-                            + uriResources[i]
-                            + " associated with "
-                            + uriResources[i - 1]
-                            + " found!");
+                    return createInvalidUrlExceptionNoEntitAssociated(uriResources[i], uriResources[i - 1]);
                 }
             } else {
                 // Resource is addressed by Id directly
@@ -255,11 +270,7 @@ public class STARequestUtils {
                 targetId = targetEntity[1].replace(")", "");
                 if (!serviceRepository.getEntityService(targetType)
                         .existsEntityByRelatedEntity(sourceId, sourceType, targetId)) {
-                    return new STAInvalidUrlException("No Entity: "
-                            + uriResources[i]
-                            + " associated with "
-                            + uriResources[i - 1]
-                            + " found!");
+                    return createInvalidUrlExceptionNoEntitAssociated(uriResources[i], uriResources[i - 1]);
                 }
             }
 
@@ -269,6 +280,18 @@ public class STARequestUtils {
         }
         // As no error is thrown the uri is valid
         return null;
+    }
+
+    private STAInvalidUrlThrowable createInvalidUrlExceptionNoEntit(String entity) {
+        return new STAInvalidUrlThrowable("No Entity: " + entity + " found!");
+    }
+
+    private STAInvalidUrlThrowable createInvalidUrlExceptionNoEntitAssociated(String first, String last) {
+        return createInvalidUrlExceptionNoEntit(first + " associated with " + last);
+    }
+
+    protected static String[] splitId(String entity) {
+        return entity.split("\\(");
     }
 
     //TODO: actually implement parsing of Query options

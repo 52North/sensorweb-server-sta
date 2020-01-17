@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -31,10 +31,11 @@ package org.n52.sta.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.n52.series.db.beans.IdEntity;
+import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
+import org.n52.shetland.ogc.sta.exception.STAInvalidUrlThrowable;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
-import org.n52.sta.exception.STACRUDException;
-import org.n52.sta.exception.STAInvalidUrlException;
 import org.n52.sta.serdes.EntityPatch;
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,6 +56,7 @@ import java.io.IOException;
 @RequestMapping("/v2")
 public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
 
+    private static final String COULD_NOT_FIND_RELATED_ENTITY = "Could not find related Entity!";
     private final int rootUrlLength;
     private final EntityServiceRepository serviceRepository;
     private final ObjectMapper mapper;
@@ -77,7 +79,7 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
 
         Class<T> clazz = collectionNameToClass.get(collectionName);
         return ((AbstractSensorThingsEntityService<?, T>) serviceRepository.getEntityService(collectionName))
-                .create((T) mapper.readValue(body, clazz));
+                .create(mapper.readValue(body, clazz));
     }
 
     /**
@@ -97,12 +99,12 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
                                     @PathVariable String id,
                                     @RequestBody String body,
                                     HttpServletRequest request)
-            throws STACRUDException, IOException, STAInvalidUrlException {
+            throws STACRUDException, IOException, STAInvalidUrlThrowable {
         validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
         Class<EntityPatch> clazz = collectionNameToPatchClass.get(collectionName);
         ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
         String strippedId = id.substring(1, id.length() - 1);
-        jsonBody.put("@iot.id", strippedId);
+        jsonBody.put(StaConstants.AT_IOT_ID, strippedId);
         return ((AbstractSensorThingsEntityService<?, T>) serviceRepository.getEntityService(collectionName))
                 .update(strippedId,
                         (T) ((mapper.readValue(jsonBody.toString(), clazz))).getEntity(),
@@ -118,9 +120,9 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
      * @param request full request
      */
     @PatchMapping(
-            value = {mappingPrefix + ENTITY_IDENTIFIED_BY_DATASTREAM_PATH,
-                    mappingPrefix + ENTITY_IDENTIFIED_BY_OBSERVATION_PATH,
-                    mappingPrefix + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH
+            value = {MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_DATASTREAM_PATH,
+                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_OBSERVATION_PATH,
+                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH
             },
             produces = "application/json"
     )
@@ -129,7 +131,7 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
                                      @PathVariable String target,
                                      @RequestBody String body,
                                      HttpServletRequest request)
-            throws STACRUDException, IOException, STAInvalidUrlException {
+            throws STACRUDException, IOException, STAInvalidUrlThrowable {
         validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
 
         String sourceType = entity.substring(0, entity.indexOf("("));
@@ -139,14 +141,14 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
 
         // Get Id from datastore
         String entityId = entityService.getEntityIdByRelatedEntity(sourceId, sourceType);
-        Assert.notNull(entityId, "Could not find related Entity!");
+        Assert.notNull(entityId, COULD_NOT_FIND_RELATED_ENTITY);
 
         // Create Patch Entity
         Class<EntityPatch> clazz = collectionNameToPatchClass.get(target);
         Assert.notNull(clazz, "Could not find Patch Class!");
 
         ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
-        jsonBody.put("@iot.id", entityId);
+        jsonBody.put(StaConstants.AT_IOT_ID, entityId);
 
         // Do update
         return entityService.update(entityId,
@@ -170,7 +172,7 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
     public Object handleDelete(@PathVariable String collectionName,
                                @PathVariable String id,
                                HttpServletRequest request)
-            throws STACRUDException, STAInvalidUrlException {
+            throws STACRUDException, STAInvalidUrlThrowable {
         validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
         serviceRepository.getEntityService(collectionName).delete(id.substring(1, id.length() - 1));
         return null;
@@ -185,9 +187,9 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
      * @param request full request
      */
     @DeleteMapping(
-            value = {mappingPrefix + ENTITY_IDENTIFIED_BY_DATASTREAM_PATH,
-                    mappingPrefix + ENTITY_IDENTIFIED_BY_OBSERVATION_PATH,
-                    mappingPrefix + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH
+            value = {MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_DATASTREAM_PATH,
+                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_OBSERVATION_PATH,
+                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH
             },
             produces = "application/json"
     )
@@ -196,7 +198,7 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
                                       @PathVariable String target,
                                       @RequestBody String body,
                                       HttpServletRequest request)
-            throws STACRUDException, STAInvalidUrlException {
+            throws STACRUDException, STAInvalidUrlThrowable {
         validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
 
         String sourceType = entity.substring(0, entity.indexOf("("));
@@ -206,7 +208,7 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
 
         // Get Id from datastore
         String entityId = entityService.getEntityIdByRelatedEntity(sourceId, sourceType);
-        Assert.notNull(entityId, "Could not find related Entity!");
+        Assert.notNull(entityId, COULD_NOT_FIND_RELATED_ENTITY);
 
         // Do update
         entityService.delete(entityId);
