@@ -1,7 +1,9 @@
 package org.n52.sta.test;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPatch;
@@ -17,12 +19,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Profile;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.n52.sta.test.TestUtil.compareJsonNodes;
@@ -36,6 +40,7 @@ import static org.n52.sta.test.TestUtil.getRelatedEntityEndpoint;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Profile("test")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class Conformance2 {
 
     protected final static String jsonMimeType = "application/json";
@@ -75,47 +80,6 @@ public class Conformance2 {
 
     private final String idKey = "@iot.id";
 
-    /**
-     * The list of ids for all the Things created during test procedure (will be
-     * used for clean-up)
-     */
-    private Set<String> thingIds = new HashSet<>();
-    /**
-     * The list of ids for all the Locations created during test procedure (will
-     * be used for clean-up)
-     */
-    private Set<String> locationIds = new HashSet<>();
-    /**
-     * The list of ids for all the HistoricalLocations created during test
-     * procedure (will be used for clean-up)
-     */
-    private Set<String> historicalLocationIds = new HashSet<>();
-    /**
-     * The list of ids for all the Datastreams created during test procedure
-     * (will be used for clean-up)
-     */
-    private Set<String> datastreamIds = new HashSet<>();
-    /**
-     * The list of ids for all the Observations created during test procedure
-     * (will be used for clean-up)
-     */
-    private Set<String> observationIds = new HashSet<>();
-    /**
-     * The list of ids for all the Sensors created during test procedure (will
-     * be used for clean-up)
-     */
-    private Set<String> sensorIds = new HashSet<>();
-    /**
-     * The list of ids for all the ObservedPropeties created during test
-     * procedure (will be used for clean-up)
-     */
-    private Set<String> obsPropIds = new HashSet<>();
-    /**
-     * The list of ids for all the FeaturesOfInterest created during test
-     * procedure (will be used for clean-up)
-     */
-    private Set<String> foiIds = new HashSet<>();
-
     @Test
     public void createEntities() throws IOException {
         /* Thing */
@@ -126,7 +90,6 @@ public class Conformance2 {
         JsonNode entity = postEntity(EntityType.THING, urlParameters);
         String thingId = entity.get(idKey).asText();
         compareJsonNodes(mapper.readTree(urlParameters), entity);
-        thingIds.add(thingId);
 
         /* Location */
         urlParameters = "{\n"
@@ -135,11 +98,9 @@ public class Conformance2 {
                 + "  \"encodingType\": \"application/vnd.geo+json\",\n"
                 + "  \"location\": { \"type\": \"Point\", \"coordinates\": [-114.05, 51.05] }\n"
                 + "}";
-        entity = postEntity(EntityType.LOCATION, urlParameters);
-        String locationId = entity.get(idKey).asText();
-        compareJsonNodes(mapper.readTree(urlParameters), entity);
-        locationIds.add(locationId);
-        JsonNode locationEntity = entity;
+        JsonNode locationEntity = postEntity(EntityType.LOCATION, urlParameters);
+        String locationId = locationEntity.get(idKey).asText();
+        compareJsonNodes(mapper.readTree(urlParameters), locationEntity);
 
         /* Sensor */
         urlParameters = "{\n"
@@ -150,7 +111,7 @@ public class Conformance2 {
                 + "}";
         entity = postEntity(EntityType.SENSOR, urlParameters);
         String sensorId = entity.get(idKey).asText();
-        sensorIds.add(sensorId);
+        compareJsonNodes(mapper.readTree(urlParameters), entity);
 
         /* ObservedProperty */
         urlParameters = "{\n"
@@ -161,7 +122,6 @@ public class Conformance2 {
         entity = postEntity(EntityType.OBSERVED_PROPERTY, urlParameters);
         String obsPropId = entity.get(idKey).asText();
         compareJsonNodes(mapper.readTree(urlParameters), entity);
-        obsPropIds.add(obsPropId);
 
         /* FeatureOfInterest */
         urlParameters = "{\n"
@@ -179,7 +139,6 @@ public class Conformance2 {
         entity = postEntity(EntityType.FEATURE_OF_INTEREST, urlParameters);
         String foiId = entity.get(idKey).asText();
         compareJsonNodes(mapper.readTree(urlParameters), entity);
-        foiIds.add(foiId);
 
         /* Datastream */
         urlParameters = "{\n"
@@ -198,7 +157,6 @@ public class Conformance2 {
         entity = postEntity(EntityType.DATASTREAM, urlParameters);
         String datastreamId = entity.get(idKey).asText();
         compareJsonNodes(mapper.readTree(urlParameters), entity);
-        datastreamIds.add(datastreamId);
 
         /* Observation */
         urlParameters = "{\n"
@@ -210,7 +168,6 @@ public class Conformance2 {
         entity = postEntity(EntityType.OBSERVATION, urlParameters);
         String obsId1 = entity.get(idKey).asText();
         compareJsonNodes(mapper.readTree(urlParameters), entity);
-        observationIds.add(obsId1);
 
         //POST Observation without FOI (Automatic creation of FOI)
         //Add location to the Thing
@@ -230,9 +187,7 @@ public class Conformance2 {
                 entity.get("resultTime")
         );
         String obsId2 = entity.get(idKey).asText();
-        observationIds.add(obsId2);
         String automatedFOIId = checkAutomaticInsertionOfFOI(obsId2, locationEntity, null);
-        foiIds.add(automatedFOIId);
 
         //POST another Observation to make sure it is linked to the previously created FOI
         urlParameters = "{\n"
@@ -247,7 +202,6 @@ public class Conformance2 {
                 entity.get("resultTime")
         );
         String obsId3 = entity.get(idKey).asText();
-        observationIds.add(obsId3);
         checkAutomaticInsertionOfFOI(obsId2, locationEntity, automatedFOIId);
 
         // Move the Thing to a new location, create a new observation
@@ -261,7 +215,6 @@ public class Conformance2 {
                 + "}";
         entity = postEntity(EntityType.LOCATION, urlParameters);
         String location2Id = entity.get(idKey).asText();
-        locationIds.add(location2Id);
         JsonNode location2Entity = entity;
 
         //Add second location to the Thing
@@ -277,9 +230,7 @@ public class Conformance2 {
                 + "}";
         entity = postEntity(EntityType.OBSERVATION, urlParameters);
         String obsId4 = entity.get(idKey).asText();
-        observationIds.add(obsId4);
         String automatedFOI2Id = checkAutomaticInsertionOfFOI(obsId4, location2Entity, null);
-        foiIds.add(automatedFOI2Id);
         Assert.assertNotEquals(
                 "A new FoI should have been created, since the Thing moved.",
                 automatedFOIId,
@@ -296,7 +247,6 @@ public class Conformance2 {
                 + "}";
         entity = postEntity(EntityType.THING, urlParameters);
         String thing2Id = entity.get(idKey).asText();
-        thingIds.add(thing2Id);
 
         /* Datastream2 */
         urlParameters = "{\n"
@@ -314,7 +264,6 @@ public class Conformance2 {
                 + "}";
         entity = postEntity(EntityType.DATASTREAM, urlParameters);
         String datastream2Id = entity.get(idKey).asText();
-        datastreamIds.add(datastream2Id);
 
         /* Post new Observation without FoI */
         urlParameters = "{\n"
@@ -325,7 +274,6 @@ public class Conformance2 {
                 + "}";
         entity = postEntity(EntityType.OBSERVATION, urlParameters);
         String obsId5 = entity.get(idKey).asText();
-        observationIds.add(obsId5);
         String automatedFOI3Id = checkAutomaticInsertionOfFOI(obsId5, locationEntity, null);
         Assert.assertEquals(
                 "The generated FoI should be the same as the first generated FoI, since Thing2 has the same Location.",
@@ -341,7 +289,6 @@ public class Conformance2 {
                 + "}";
         entity = postEntity(EntityType.HISTORICAL_LOCATION, urlParameters);
         String histLocId = entity.get(idKey).asText();
-        historicalLocationIds.add(histLocId);
     }
 
     /**
@@ -405,7 +352,6 @@ public class Conformance2 {
                 + "      \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\"\n"
                 + "    }\n");
         String datastreamId = checkRelatedEntity(EntityType.THING, thingId, EntityType.DATASTREAM, deepInsertedObj);
-        datastreamIds.add(datastreamId);
         //Check Location
         deepInsertedObj = mapper.readTree("{\n"
                 + "      \"name\": \"West Roof\",\n"
@@ -413,7 +359,7 @@ public class Conformance2 {
                 + "      \"location\": { \"type\": \"Point\", \"coordinates\": [-117.05, 51.05] },\n"
                 + "      \"encodingType\": \"application/vnd.geo+json\"\n"
                 + "    }\n");
-        locationIds.add(checkRelatedEntity(EntityType.THING, thingId, EntityType.LOCATION, deepInsertedObj));
+        checkRelatedEntity(EntityType.THING, thingId, EntityType.LOCATION, deepInsertedObj);
         //Check Sensor
         deepInsertedObj = mapper.readTree("{\n"
                 + "        \"name\": \"Acme Fluxomatic 1000\",\n"
@@ -421,15 +367,14 @@ public class Conformance2 {
                 + "        \"encodingType\": \"application/pdf\",\n"
                 + "        \"metadata\": \"Light flux sensor\"\n"
                 + "      }\n");
-        sensorIds.add(checkRelatedEntity(EntityType.DATASTREAM, datastreamId, EntityType.SENSOR, deepInsertedObj));
+        checkRelatedEntity(EntityType.DATASTREAM, datastreamId, EntityType.SENSOR, deepInsertedObj);
         //Check ObservedProperty
         deepInsertedObj = mapper.readTree("{\n"
                 + "        \"name\": \"Luminous Flux\",\n"
                 + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
                 + "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light.\"\n"
                 + "      },\n");
-        obsPropIds.add(checkRelatedEntity(EntityType.DATASTREAM, datastreamId, EntityType.OBSERVED_PROPERTY, deepInsertedObj));
-        thingIds.add(thingId);
+        checkRelatedEntity(EntityType.DATASTREAM, datastreamId, EntityType.OBSERVED_PROPERTY, deepInsertedObj);
 
         /* Datastream */
         urlParameters = "{\n"
@@ -469,21 +414,20 @@ public class Conformance2 {
                 + "        \"encodingType\": \"application/pdf\",\n"
                 + "        \"metadata\": \"Light flux sensor\"\n"
                 + "      }\n");
-        sensorIds.add(checkRelatedEntity(EntityType.DATASTREAM, datastreamId, EntityType.SENSOR, deepInsertedObj));
+        checkRelatedEntity(EntityType.DATASTREAM, datastreamId, EntityType.SENSOR, deepInsertedObj);
         //Check ObservedProperty
         deepInsertedObj = mapper.readTree("{\n"
                 + "\"name\": \"More Luminous Flux\",\n"
                 + "\"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFluxWithMorePower\",\n"
                 + "\"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light. This has even more power than regular flux.\"\n"
                 + "}\n");
-        obsPropIds.add(checkRelatedEntity(EntityType.DATASTREAM, datastreamId, EntityType.OBSERVED_PROPERTY, deepInsertedObj));
+        checkRelatedEntity(EntityType.DATASTREAM, datastreamId, EntityType.OBSERVED_PROPERTY, deepInsertedObj);
         //Check Observation
         deepInsertedObj = mapper.readTree("{\n"
                 + "          \"phenomenonTime\": \"2015-03-01T00:10:00.000Z\",\n"
                 + "          \"result\": 10\n"
                 + "        }\n");
-        observationIds.add(checkRelatedEntity(EntityType.DATASTREAM, datastreamId, EntityType.OBSERVATION, deepInsertedObj));
-        datastreamIds.add(datastreamId);
+        checkRelatedEntity(EntityType.DATASTREAM, datastreamId, EntityType.OBSERVATION, deepInsertedObj);
 
         /* Observation */
         urlParameters = "{\n"
@@ -518,9 +462,811 @@ public class Conformance2 {
                 + "      ]\n"
                 + "    }\n"
                 + "  }\n");
-        foiIds.add(checkRelatedEntity(EntityType.OBSERVATION, obsId1, EntityType.FEATURE_OF_INTEREST, deepInsertedObj));
-        observationIds.add(obsId1);
+        checkRelatedEntity(EntityType.OBSERVATION, obsId1, EntityType.FEATURE_OF_INTEREST, deepInsertedObj);
     }
+
+    @Test
+    public void createInvalidEntitiesWithDeepInsert() throws IOException {
+        String urlParameters = "{\n"
+                + "  \"name\": \"Office Building\",\n"
+                + "  \"description\": \"Office Building\",\n"
+                + "  \"properties\": {\n"
+                + "    \"reference\": \"Third Floor\"\n"
+                + "  },\n"
+                + "  \"Locations\": [\n"
+                + "    {\n"
+                + "      \"name\": \"West Roof\",\n"
+                + "      \"description\": \"West Roof\",\n"
+                + "      \"location\": { \"type\": \"Point\", \"coordinates\": [-117.05, 51.05] },\n"
+                + "      \"encodingType\": \"application/vnd.geo+json\"\n"
+                + "    }\n"
+                + "  ],\n"
+                + "  \"Datastreams\": [\n"
+                + "    {\n"
+                + "      \"unitOfMeasurement\": {\n"
+                + "        \"name\": \"Lumen\",\n"
+                + "        \"symbol\": \"lm\",\n"
+                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Lumen\"\n"
+                + "      },\n"
+                + "      \"name\": \"Light exposure.\",\n"
+                + "      \"description\": \"Light exposure.\",\n"
+                + "      \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
+                + "      \"ObservedProperty\": {\n"
+                + "        \"name\": \"Luminous Flux\",\n"
+                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFluxWithEvenMorePower\",\n"
+                + "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light.\"\n"
+                + "      }\n"
+                + "    }\n"
+                + "  ]\n"
+                + "}";
+        postInvalidEntity(EntityType.THING, urlParameters);
+        List<EntityType> entityTypesToCheck = new ArrayList<>();
+        entityTypesToCheck.add(EntityType.THING);
+        entityTypesToCheck.add(EntityType.LOCATION);
+        entityTypesToCheck.add(EntityType.HISTORICAL_LOCATION);
+        entityTypesToCheck.add(EntityType.DATASTREAM);
+        entityTypesToCheck.add(EntityType.OBSERVED_PROPERTY);
+        checkNotExisting(entityTypesToCheck);
+
+        /* Datastream */
+        urlParameters = "{"
+                + "\"name\": \"Office Building\","
+                + "\"description\": \"Office Building\""
+                + "}";
+        String thingId = postEntity(EntityType.THING, urlParameters).get(idKey).asText();
+
+        urlParameters = "{\n"
+                + "  \"unitOfMeasurement\": {\n"
+                + "    \"name\": \"Celsius\",\n"
+                + "    \"symbol\": \"degC\",\n"
+                + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
+                + "  },\n"
+                + "  \"name\": \"test datastream.\",\n"
+                + "  \"description\": \"test datastream.\",\n"
+                + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
+                + "  \"Thing\": { \"@iot.id\": " + escape(thingId) + " },\n"
+                + "   \"ObservedProperty\": {\n"
+                + "        \"name\": \"Luminous Flux\",\n"
+                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
+                + "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light.\"\n"
+                + "   },\n"
+                + "      \"Observations\": [\n"
+                + "        {\n"
+                + "          \"phenomenonTime\": \"2015-03-01T00:10:00Z\",\n"
+                + "          \"result\": 10\n"
+                + "        }\n"
+                + "      ]"
+                + "}";
+        postInvalidEntity(EntityType.DATASTREAM, urlParameters);
+
+        urlParameters = "{\n"
+                + "  \"unitOfMeasurement\": {\n"
+                + "    \"name\": \"Celsius\",\n"
+                + "    \"symbol\": \"degC\",\n"
+                + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
+                + "  },\n"
+                + "  \"name\": \"test datastream.\",\n"
+                + "  \"description\": \"test datastream.\",\n"
+                + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
+                + "  \"Thing\": { \"@iot.id\": " + escape(thingId) + " },\n"
+                + "   \"Sensor\": {        \n"
+                + "        \"name\": \"Acme Fluxomatic 1000\",\n"
+                + "        \"description\": \"Acme Fluxomatic 1000\",\n"
+                + "        \"encodingType\": \"application/pdf\",\n"
+                + "        \"metadata\": \"Light flux sensor\"\n"
+                + "   },\n"
+                + "      \"Observations\": [\n"
+                + "        {\n"
+                + "          \"phenomenonTime\": \"2015-03-01T00:10:00Z\",\n"
+                + "          \"result\": 10\n"
+                + "        }\n"
+                + "      ]"
+                + "}";
+        postInvalidEntity(EntityType.DATASTREAM, urlParameters);
+
+        urlParameters = "{\n"
+                + "  \"unitOfMeasurement\": {\n"
+                + "    \"name\": \"Celsius\",\n"
+                + "    \"symbol\": \"degC\",\n"
+                + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
+                + "  },\n"
+                + "  \"name\": \"test datastream.\",\n"
+                + "  \"description\": \"test datastream.\",\n"
+                + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
+                + "   \"ObservedProperty\": {\n"
+                + "        \"name\": \"Luminous Flux\",\n"
+                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
+                + "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light.\"\n"
+                + "   },\n"
+                + "   \"Sensor\": {        \n"
+                + "        \"name\": \"Acme Fluxomatic 1000\",\n"
+                + "        \"description\": \"Acme Fluxomatic 1000\",\n"
+                + "        \"encodingType\": \"application/pdf\",\n"
+                + "        \"metadata\": \"Light flux sensor\"\n"
+                + "   },\n"
+                + "      \"Observations\": [\n"
+                + "        {\n"
+                + "          \"phenomenonTime\": \"2015-03-01T00:10:00Z\",\n"
+                + "          \"result\": 10\n"
+                + "        }\n"
+                + "      ]"
+                + "}";
+        postInvalidEntity(EntityType.DATASTREAM, urlParameters);
+
+        entityTypesToCheck.clear();
+        entityTypesToCheck.add(EntityType.DATASTREAM);
+        entityTypesToCheck.add(EntityType.SENSOR);
+        entityTypesToCheck.add(EntityType.OBSERVATION);
+        entityTypesToCheck.add(EntityType.FEATURE_OF_INTEREST);
+        entityTypesToCheck.add(EntityType.OBSERVED_PROPERTY);
+        checkNotExisting(entityTypesToCheck);
+
+        /* Observation */
+        urlParameters = "{\n"
+                + "  \"unitOfMeasurement\": {\n"
+                + "    \"name\": \"Celsius\",\n"
+                + "    \"symbol\": \"degC\",\n"
+                + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
+                + "  },\n"
+                + "  \"name\": \"test datastream.\",\n"
+                + "  \"description\": \"test datastream.\",\n"
+                + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
+                + "  \"Thing\": { \"@iot.id\": " + escape(thingId) + " },\n"
+                + "   \"ObservedProperty\": {\n"
+                + "        \"name\": \"Luminous Flux\",\n"
+                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
+                + "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light.\"\n"
+                + "   },\n"
+                + "   \"Sensor\": {        \n"
+                + "        \"name\": \"Acme Fluxomatic 1000\",\n"
+                + "        \"description\": \"Acme Fluxomatic 1000\",\n"
+                + "        \"encodingType\": \"application/pdf\",\n"
+                + "        \"metadata\": \"Light flux sensor\"\n"
+                + "   }\n"
+                + "}";
+        String datastreamId = postEntity(EntityType.DATASTREAM, urlParameters).get(idKey).asText();
+
+        urlParameters = "{\n"
+                + "  \"phenomenonTime\": \"2015-03-01T00:00:00Z\",\n"
+                + "  \"result\": 100,\n"
+                + "  \"Datastream\":{\"@iot.id\": " + escape(datastreamId) + "}\n"
+                + "}";
+        postInvalidEntity(EntityType.OBSERVATION, urlParameters);
+
+        urlParameters = "{\n"
+                + "  \"phenomenonTime\": \"2015-03-01T00:00:00Z\",\n"
+                + "  \"result\": 100,\n"
+                + "  \"FeatureOfInterest\": {\n"
+                + "  \t\"name\": \"A weather station.\",\n"
+                + "  \t\"description\": \"A weather station.\",\n"
+                + "    \"feature\": {\n"
+                + "      \"type\": \"Point\",\n"
+                + "      \"coordinates\": [\n"
+                + "        -114.05,\n"
+                + "        51.05\n"
+                + "      ]\n"
+                + "    }\n"
+                + "  },\n"
+                + "  \"Datastream\":{\"@iot.id\": " + escape(datastreamId) + "}\n"
+                + "}";
+        postInvalidEntity(EntityType.OBSERVATION, urlParameters);
+
+        entityTypesToCheck.clear();
+        entityTypesToCheck.add(EntityType.OBSERVATION);
+        entityTypesToCheck.add(EntityType.FEATURE_OF_INTEREST);
+        checkNotExisting(entityTypesToCheck);
+    }
+
+    @Test()
+    public void createInvalidEntities() throws IOException {
+        // Create necessary structures
+        /* Thing */
+        String urlParameters = "{"
+                + "\"name\":\"Test Thing\","
+                + "\"description\":\"This is a Test Thing From TestNG\""
+                + "}";
+        JsonNode entity = postEntity(EntityType.THING, urlParameters);
+        String thingId = entity.get(idKey).asText();
+
+        /* Sensor */
+        urlParameters = "{\n"
+                + "  \"name\": \"Fuguro Barometer\",\n"
+                + "  \"description\": \"Fuguro Barometer\",\n"
+                + "  \"encodingType\": \"application/pdf\",\n"
+                + "  \"metadata\": \"Barometer\"\n"
+                + "}";
+        entity = postEntity(EntityType.SENSOR, urlParameters);
+        String sensorId = entity.get(idKey).asText();
+
+        /* ObservedProperty */
+        urlParameters = "{\n"
+                + "  \"name\": \"DewPoint Temperature\",\n"
+                + "  \"definition\": \"http://dbpedia.org/page/Dew_point\",\n"
+                + "  \"description\": \"The dewpoint temperature is the temperature to which the air must be cooled, at constant pressure, for dew to form. As the grass and other objects near the ground cool to the dewpoint, some of the water vapor in the atmosphere condenses into liquid water on the objects.\"\n"
+                + "}";
+        entity = postEntity(EntityType.OBSERVED_PROPERTY, urlParameters);
+        String obsPropId = entity.get(idKey).asText();
+
+        /* Datastream */
+        // Without Sensor
+        urlParameters = "{\n"
+                + "  \"unitOfMeasurement\": {\n"
+                + "    \"name\": \"Celsius\",\n"
+                + "    \"symbol\": \"degC\",\n"
+                + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
+                + "  },\n"
+                + "  \"name\": \"test datastream.\",\n"
+                + "  \"description\": \"test datastream.\",\n"
+                + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
+                + "  \"Thing\": { \"@iot.id\": " + escape(thingId) + " },\n"
+                + "  \"ObservedProperty\":{ \"@iot.id\":" + escape(obsPropId) + "}\n"
+                + "}";
+        postInvalidEntity(EntityType.DATASTREAM, urlParameters);
+
+        //Without ObservedProperty
+        urlParameters = "{\n"
+                + "  \"unitOfMeasurement\": {\n"
+                + "    \"name\": \"Celsius\",\n"
+                + "    \"symbol\": \"degC\",\n"
+                + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
+                + "  },\n"
+                + "  \"name\": \"test datastream.\",\n"
+                + "  \"description\": \"test datastream.\",\n"
+                + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
+                + "  \"Thing\": { \"@iot.id\": " + escape(thingId) + " },\n"
+                + "  \"Sensor\": { \"@iot.id\": " + escape(sensorId) + " }\n"
+                + "}";
+        postInvalidEntity(EntityType.DATASTREAM, urlParameters);
+        //Without Things
+        urlParameters = "{\n"
+                + "  \"unitOfMeasurement\": {\n"
+                + "    \"name\": \"Celsius\",\n"
+                + "    \"symbol\": \"degC\",\n"
+                + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
+                + "  },\n"
+                + "  \"name\": \"test datastream.\",\n"
+                + "  \"description\": \"test datastream.\",\n"
+                + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
+                + "  \"ObservedProperty\":{ \"@iot.id\":" + escape(obsPropId) + "},\n"
+                + "  \"Sensor\": { \"@iot.id\": " + escape(sensorId) + " }\n"
+                + "}";
+        postInvalidEntity(EntityType.DATASTREAM, urlParameters);
+
+        /* Observation */
+        //Create Thing and Datastream
+        urlParameters = "{"
+                + "\"name\":\"This is a Test Thing From TestNG\","
+                + "\"description\":\"This is a Test Thing From TestNG\""
+                + "}";
+        entity = postEntity(EntityType.THING, urlParameters);
+        String thingId2 = entity.get(idKey).asText();
+        urlParameters = "{\n"
+                + "  \"unitOfMeasurement\": {\n"
+                + "    \"name\": \"Celsius\",\n"
+                + "    \"symbol\": \"degC\",\n"
+                + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
+                + "  },\n"
+                + "  \"name\": \"test datastream.\",\n"
+                + "  \"description\": \"test datastream.\",\n"
+                + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
+                + "  \"Thing\": { \"@iot.id\": " + escape(thingId2) + " },\n"
+                + "  \"ObservedProperty\":{ \"@iot.id\":" + escape(obsPropId) + "},\n"
+                + "  \"Sensor\": { \"@iot.id\": " + escape(sensorId) + " }\n"
+                + "}";
+
+        entity = postEntity(EntityType.DATASTREAM, urlParameters);
+        String datastreamId = entity.get(idKey).asText();
+
+        /* FeatureOfInterest */
+        urlParameters = "{\n"
+                + "  \"name\": \"A weather station.\",\n"
+                + "  \"description\": \"A weather station.\",\n"
+                + "  \"encodingType\": \"application/vnd.geo+json\",\n"
+                + "  \"feature\": {\n"
+                + "    \"type\": \"Point\",\n"
+                + "    \"coordinates\": [\n"
+                + "      10,\n"
+                + "      10\n"
+                + "    ]\n"
+                + "  }\n"
+                + "}";
+        entity = postEntity(EntityType.FEATURE_OF_INTEREST, urlParameters);
+        String foiId = entity.get(idKey).asText();
+
+        //Without Datastream
+        urlParameters = "{\n"
+                + "  \"phenomenonTime\": \"2015-03-01T00:40:00.000Z\",\n"
+                + "  \"result\": 8,\n"
+                + "  \"FeatureOfInterest\": {\"@iot.id\": " + escape(foiId) + "}  \n"
+                + "}";
+        postInvalidEntity(EntityType.OBSERVATION, urlParameters);
+        //Without FOI and without Thing's Location
+        urlParameters = "{\n"
+                + "  \"phenomenonTime\": \"2015-03-01T00:00:00.000Z\",\n"
+                + "  \"result\": 100,\n"
+                + "  \"Datastream\":{\"@iot.id\": " + escape(datastreamId) + "}\n"
+                + "}";
+        postInvalidEntity(EntityType.OBSERVATION, urlParameters);
+    }
+
+    /**
+     * This method is testing partial update or PATCH. The response should be
+     * 200 and only the properties in the PATCH body should be updated, and the
+     * rest must be unchanged.
+     */
+    @Test()
+    public void patchEntities() throws IOException {
+        // Create Entities
+
+        /* Thing */
+        String urlParameters = "{"
+                + "\"name\":\"Test Thing\","
+                + "\"description\":\"This is a Test Thing From TestNG\""
+                + "}";
+        JsonNode thingEntity = postEntity(EntityType.THING, urlParameters);
+        String thingId = thingEntity.get(idKey).asText();
+
+        /* Location */
+        urlParameters = "{\n"
+                + "  \"name\": \"bow river\",\n"
+                + "  \"description\": \"bow river\",\n"
+                + "  \"encodingType\": \"application/vnd.geo+json\",\n"
+                + "  \"location\": { \"type\": \"Point\", \"coordinates\": [-114.05, 51.05] }\n"
+                + "}";
+        JsonNode locationEntity = postEntity(EntityType.LOCATION, urlParameters);
+        String locationId = locationEntity.get(idKey).asText();
+
+        /* Sensor */
+        urlParameters = "{\n"
+                + "  \"name\": \"Fuguro Barometer\",\n"
+                + "  \"description\": \"Fuguro Barometer\",\n"
+                + "  \"encodingType\": \"application/pdf\",\n"
+                + "  \"metadata\": \"Barometer\"\n"
+                + "}";
+        JsonNode sensorEntity = postEntity(EntityType.SENSOR, urlParameters);
+        String sensorId = sensorEntity.get(idKey).asText();
+
+        /* ObservedProperty */
+        urlParameters = "{\n"
+                + "  \"name\": \"DewPoint Temperature\",\n"
+                + "  \"definition\": \"http://dbpedia.org/page/Dew_point\",\n"
+                + "  \"description\": \"The dewpoint temperature is the temperature to which the air must be cooled, at constant pressure, for dew to form. As the grass and other objects near the ground cool to the dewpoint, some of the water vapor in the atmosphere condenses into liquid water on the objects.\"\n"
+                + "}";
+        JsonNode obsPropEntity = postEntity(EntityType.OBSERVED_PROPERTY, urlParameters);
+        String obsPropId = obsPropEntity.get(idKey).asText();
+
+        /* HistoricalLocation */
+        urlParameters = "{\n"
+                + "  \"time\": \"2015-03-01T00:40:00.000Z\",\n"
+                + "  \"Thing\":{\"@iot.id\": " + escape(thingId) + "},\n"
+                + "  \"Locations\": [{\"@iot.id\": " + escape(locationId) + "}]  \n"
+                + "}";
+        JsonNode histLocEntity = postEntity(EntityType.HISTORICAL_LOCATION, urlParameters);
+        String histLocId = histLocEntity.get(idKey).asText();
+
+        /* FeatureOfInterest */
+        urlParameters = "{\n"
+                + "  \"name\": \"A weather station.\",\n"
+                + "  \"description\": \"A weather station.\",\n"
+                + "  \"encodingType\": \"application/vnd.geo+json\",\n"
+                + "  \"feature\": {\n"
+                + "    \"type\": \"Point\",\n"
+                + "    \"coordinates\": [\n"
+                + "      10,\n"
+                + "      10\n"
+                + "    ]\n"
+                + "  }\n"
+                + "}";
+        JsonNode foiEntity = postEntity(EntityType.FEATURE_OF_INTEREST, urlParameters);
+        String foiId = foiEntity.get(idKey).asText();
+
+        /* Datastream */
+        urlParameters = "{\n"
+                + "  \"unitOfMeasurement\": {\n"
+                + "    \"name\": \"Celsius\",\n"
+                + "    \"symbol\": \"degC\",\n"
+                + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
+                + "  },\n"
+                + "  \"name\": \"test datastream.\",\n"
+                + "  \"description\": \"test datastream.\",\n"
+                + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
+                + "  \"Thing\": { \"@iot.id\": " + escape(thingId) + " },\n"
+                + "  \"ObservedProperty\":{ \"@iot.id\":" + escape(obsPropId) + "},\n"
+                + "  \"Sensor\": { \"@iot.id\": " + escape(sensorId) + " }\n"
+                + "}";
+        JsonNode datastreamEntity = postEntity(EntityType.DATASTREAM, urlParameters);
+        String datastreamId = datastreamEntity.get(idKey).asText();
+
+        /* Observation */
+        urlParameters = "{\n"
+                + "  \"phenomenonTime\": \"2015-03-01T00:40:00.000Z\",\n"
+                + "  \"result\": 8,\n"
+                + "  \"Datastream\":{\"@iot.id\": " + escape(datastreamId) + "},\n"
+                + "  \"FeatureOfInterest\": {\"@iot.id\": " + escape(foiId) + "}  \n"
+                + "}";
+        JsonNode obsEntity = postEntity(EntityType.OBSERVATION, urlParameters);
+        String obsId = obsEntity.get(idKey).asText();
+
+        // Patch and check Entities
+
+        /* Thing */
+        urlParameters = "{\"description\":\"This is a PATCHED Test Thing From TestNG\"}";
+        Map<String, String> diffs = new HashMap<>();
+        diffs.put("description", "This is a PATCHED Test Thing From TestNG");
+        JsonNode updatedEntity = patchEntity(EntityType.THING, urlParameters, thingId);
+        checkPatch(EntityType.THING, thingEntity, updatedEntity, diffs);
+
+        /* Location */
+        urlParameters = "{\"location\": { \"type\": \"Point\", \"coordinates\": [114.05, -50] }}";
+        diffs = new HashMap<>();
+        diffs.put("location", "{ \"type\": \"Point\", \"coordinates\": [114.05, -50] }}");
+        updatedEntity = patchEntity(EntityType.LOCATION, urlParameters, locationId);
+        checkPatch(EntityType.LOCATION, locationEntity, updatedEntity, diffs);
+
+        /* HistoricalLocation */
+        urlParameters = "{\"time\": \"2015-07-01T00:00:00Z\"}";
+        diffs = new HashMap<>();
+        diffs.put("time", "2015-07-01T00:00:00Z");
+        updatedEntity = patchEntity(EntityType.HISTORICAL_LOCATION, urlParameters, histLocId);
+        checkPatch(EntityType.HISTORICAL_LOCATION, histLocEntity, updatedEntity, diffs);
+
+        /* Sensor */
+        urlParameters = "{\"metadata\": \"PATCHED\"}";
+        diffs = new HashMap<>();
+        diffs.put("metadata", "PATCHED");
+        updatedEntity = patchEntity(EntityType.SENSOR, urlParameters, sensorId);
+        checkPatch(EntityType.SENSOR, sensorEntity, updatedEntity, diffs);
+
+        /* ObserverdProperty */
+        urlParameters = "{\"description\":\"PATCHED\"}";
+        diffs = new HashMap<>();
+        diffs.put("description", "PATCHED");
+        updatedEntity = patchEntity(EntityType.OBSERVED_PROPERTY, urlParameters, obsPropId);
+        checkPatch(EntityType.OBSERVED_PROPERTY, obsPropEntity, updatedEntity, diffs);
+
+        /* FeatureOfInterest */
+        urlParameters = "{\"feature\":{ \"type\": \"Point\", \"coordinates\": [114.05, -51.05] }}";
+        diffs = new HashMap<>();
+        diffs.put("feature", "{ \"type\": \"Point\", \"coordinates\": [114.05, -51.05] }");
+        updatedEntity = patchEntity(EntityType.FEATURE_OF_INTEREST, urlParameters, foiId);
+        checkPatch(EntityType.FEATURE_OF_INTEREST, foiEntity, updatedEntity, diffs);
+
+        /* Datastream */
+        urlParameters = "{\"description\": \"Patched Description\"}";
+        diffs = new HashMap<>();
+        diffs.put("description", "Patched Description");
+        updatedEntity = patchEntity(EntityType.DATASTREAM, urlParameters, datastreamId);
+        checkPatch(EntityType.DATASTREAM, datastreamEntity, updatedEntity, diffs);
+
+        //Second PATCH for UOM
+        JsonNode patchedDatastream = updatedEntity;
+        urlParameters = "{ \"unitOfMeasurement\": {\n"
+                + "    \"name\": \"Entropy2\",\n"
+                + "    \"symbol\": \"S2\",\n"
+                + "    \"definition\": \"http://qudt.org/vocab/unit#Entropy2\"\n"
+                + "  } }";
+        diffs = new HashMap<>();
+        diffs.put("unitOfMeasurement", "{\"name\": \"Entropy2\",\"symbol\": \"S2\",\"definition\": \"http://qudt.org/vocab/unit#Entropy2\"}");
+        updatedEntity = patchEntity(EntityType.DATASTREAM, urlParameters, datastreamId);
+        checkPatch(EntityType.DATASTREAM, patchedDatastream, updatedEntity, diffs);
+
+        /* Observation */
+        urlParameters = "{\"phenomenonTime\": \"2015-07-01T00:40:00.000Z\"}";
+        diffs = new HashMap<>();
+        diffs.put("phenomenonTime", "2015-07-01T00:40:00.000Z");
+        updatedEntity = patchEntity(EntityType.OBSERVATION, urlParameters, obsId);
+        checkPatch(EntityType.OBSERVATION, obsEntity, updatedEntity, diffs);
+}
+
+//    /**
+//     * This method is testing DELETE and its integrity constraint. The response
+//     * should be 200. After DELETE the GET request to that entity should return
+//     * 404.
+//     */
+//    @Test()
+//    public void deleteEntities() {
+//        observationIds.stream().collect(Collectors.toSet()).forEach(elem -> {
+//            deleteEntity(EntityType.OBSERVATION, elem);
+//        });
+//
+//        foiIds.stream().collect(Collectors.toSet()).forEach(elem -> {
+//            deleteEntity(EntityType.FEATURE_OF_INTEREST, elem);
+//        });
+//
+//        datastreamIds.stream().collect(Collectors.toSet()).forEach(elem -> {
+//            deleteEntity(EntityType.DATASTREAM, elem);
+//        });
+//
+//        obsPropIds.stream().collect(Collectors.toSet()).forEach(elem -> {
+//            deleteEntity(EntityType.OBSERVED_PROPERTY, elem);
+//        });
+//
+//        sensorIds.stream().collect(Collectors.toSet()).forEach(elem -> {
+//            deleteEntity(EntityType.SENSOR, elem);
+//        });
+//
+//        historicalLocationIds.stream().collect(Collectors.toSet()).forEach(elem -> {
+//            deleteEntity(EntityType.HISTORICAL_LOCATION, elem);
+//        });
+//
+//        locationIds.stream().collect(Collectors.toSet()).forEach(elem -> {
+//            deleteEntity(EntityType.LOCATION, elem);
+//        });
+//
+//        thingIds.stream().collect(Collectors.toSet()).forEach(elem -> {
+//            deleteEntity(EntityType.THING, elem);
+//        });
+//        checkDeleteIntegrityConstraint();
+//    }
+//
+//    /**
+//     * This is helper method for checking the integrity containt of DELETE. For
+//     * each entity, it checks after deleting, it confirm the deletion of its
+//     * related entities mentioned in the integrity constraint of the
+//     * specification.
+//     */
+//    private void checkDeleteIntegrityConstraint() {
+//        //Thing
+//        createEntitiesForDelete();
+//        deleteEntity(EntityType.THING, thingIds.get(0));
+//        List<EntityType> entityTypes = new ArrayList<>();
+//        entityTypes.add(EntityType.THING);
+//        entityTypes.add(EntityType.DATASTREAM);
+//        entityTypes.add(EntityType.HISTORICAL_LOCATION);
+//        entityTypes.add(EntityType.OBSERVATION);
+//        checkNotExisting(entityTypes);
+//        entityTypes.clear();
+//        entityTypes.add(EntityType.LOCATION);
+//        entityTypes.add(EntityType.SENSOR);
+//        entityTypes.add(EntityType.OBSERVED_PROPERTY);
+//        entityTypes.add(EntityType.FEATURE_OF_INTEREST);
+//        checkExisting(entityTypes);
+//
+//        //Datastream
+//        createEntitiesForDelete();
+//        deleteEntity(EntityType.DATASTREAM, datastreamIds.get(0));
+//        entityTypes.clear();
+//        entityTypes.add(EntityType.DATASTREAM);
+//        entityTypes.add(EntityType.OBSERVATION);
+//        checkNotExisting(entityTypes);
+//        entityTypes.clear();
+//        entityTypes.add(EntityType.THING);
+//        entityTypes.add(EntityType.SENSOR);
+//        entityTypes.add(EntityType.OBSERVED_PROPERTY);
+//        entityTypes.add(EntityType.FEATURE_OF_INTEREST);
+//        entityTypes.add(EntityType.LOCATION);
+//        entityTypes.add(EntityType.HISTORICAL_LOCATION);
+//        checkExisting(entityTypes);
+//
+//        //Loation
+//        createEntitiesForDelete();
+//        deleteEntity(EntityType.LOCATION, locationIds.get(0));
+//        entityTypes.clear();
+//        entityTypes.add(EntityType.LOCATION);
+//        entityTypes.add(EntityType.HISTORICAL_LOCATION);
+//        checkNotExisting(entityTypes);
+//        entityTypes.clear();
+//        entityTypes.add(EntityType.THING);
+//        entityTypes.add(EntityType.SENSOR);
+//        entityTypes.add(EntityType.OBSERVED_PROPERTY);
+//        entityTypes.add(EntityType.FEATURE_OF_INTEREST);
+//        entityTypes.add(EntityType.DATASTREAM);
+//        entityTypes.add(EntityType.OBSERVATION);
+//        checkExisting(entityTypes);
+//
+//        //HistoricalLoation
+//        createEntitiesForDelete();
+//        deleteEntity(EntityType.HISTORICAL_LOCATION, historicalLocationIds.get(0));
+//        entityTypes.clear();
+//        entityTypes.add(EntityType.HISTORICAL_LOCATION);
+//        checkNotExisting(entityTypes);
+//        entityTypes.clear();
+//        entityTypes.add(EntityType.THING);
+//        entityTypes.add(EntityType.SENSOR);
+//        entityTypes.add(EntityType.OBSERVED_PROPERTY);
+//        entityTypes.add(EntityType.FEATURE_OF_INTEREST);
+//        entityTypes.add(EntityType.DATASTREAM);
+//        entityTypes.add(EntityType.OBSERVATION);
+//        entityTypes.add(EntityType.LOCATION);
+//        checkExisting(entityTypes);
+//
+//        //Sensor
+//        createEntitiesForDelete();
+//        deleteEntity(EntityType.SENSOR, sensorIds.get(0));
+//        entityTypes.clear();
+//        entityTypes.add(EntityType.SENSOR);
+//        entityTypes.add(EntityType.DATASTREAM);
+//        entityTypes.add(EntityType.OBSERVATION);
+//        checkNotExisting(entityTypes);
+//        entityTypes.clear();
+//        entityTypes.add(EntityType.THING);
+//        entityTypes.add(EntityType.OBSERVED_PROPERTY);
+//        entityTypes.add(EntityType.FEATURE_OF_INTEREST);
+//        entityTypes.add(EntityType.LOCATION);
+//        entityTypes.add(EntityType.HISTORICAL_LOCATION);
+//        checkExisting(entityTypes);
+//
+//        //ObservedProperty
+//        createEntitiesForDelete();
+//        deleteEntity(EntityType.OBSERVED_PROPERTY, obsPropIds.get(0));
+//        entityTypes.clear();
+//        entityTypes.add(EntityType.OBSERVED_PROPERTY);
+//        entityTypes.add(EntityType.DATASTREAM);
+//        entityTypes.add(EntityType.OBSERVATION);
+//        checkNotExisting(entityTypes);
+//        entityTypes.clear();
+//        entityTypes.add(EntityType.THING);
+//        entityTypes.add(EntityType.SENSOR);
+//        entityTypes.add(EntityType.FEATURE_OF_INTEREST);
+//        entityTypes.add(EntityType.LOCATION);
+//        entityTypes.add(EntityType.HISTORICAL_LOCATION);
+//        checkExisting(entityTypes);
+//
+//        //FeatureOfInterest
+//        createEntitiesForDelete();
+//        deleteEntity(EntityType.FEATURE_OF_INTEREST, foiIds.get(0));
+//        entityTypes.clear();
+//        entityTypes.add(EntityType.FEATURE_OF_INTEREST);
+//        entityTypes.add(EntityType.OBSERVATION);
+//        checkNotExisting(entityTypes);
+//        entityTypes.clear();
+//        entityTypes.add(EntityType.THING);
+//        entityTypes.add(EntityType.SENSOR);
+//        entityTypes.add(EntityType.OBSERVED_PROPERTY);
+//        entityTypes.add(EntityType.LOCATION);
+//        entityTypes.add(EntityType.HISTORICAL_LOCATION);
+//        entityTypes.add(EntityType.DATASTREAM);
+//        checkExisting(entityTypes);
+//
+//        //Observation
+//        createEntitiesForDelete();
+//        deleteEntity(EntityType.OBSERVATION, observationIds.get(0));
+//        entityTypes.clear();
+//        entityTypes.add(EntityType.OBSERVATION);
+//        checkNotExisting(entityTypes);
+//        entityTypes.clear();
+//        entityTypes.add(EntityType.THING);
+//        entityTypes.add(EntityType.SENSOR);
+//        entityTypes.add(EntityType.OBSERVED_PROPERTY);
+//        entityTypes.add(EntityType.FEATURE_OF_INTEREST);
+//        entityTypes.add(EntityType.DATASTREAM);
+//        entityTypes.add(EntityType.HISTORICAL_LOCATION);
+//        entityTypes.add(EntityType.LOCATION);
+//        checkExisting(entityTypes);
+//    }
+//
+//    //TODO: Add invalid PATCH test for other entities when it is implemented in the service
+//
+//    /**
+//     * This method is testing invalid partial update or PATCH. The PATCH request
+//     * is invalid if the body contains related entities as inline content.
+//     */
+//    /*
+//    @Test(description = "Invalid PATCH Entities", groups = "level-2", priority = 4)
+//    public void invalidPatchEntities() {
+//        /**
+//         * Thing *
+//         */
+//        long thingId = thingIds.get(0);
+//        String urlParameters = "{\"Locations\": [\n"
+//                + "    {\n"
+//                + "      \"name\": \"West Roof\",\n"
+//                + "      \"description\": \"West Roof\",\n"
+//                + "      \"location\": { \"type\": \"Point\", \"coordinates\": [-117.05, 51.05] },\n"
+//                + "      \"encodingType\": \"application/vnd.geo+json\"\n"
+//                + "    }\n"
+//                + "  ]}";
+//        invalidPatchEntity(EntityType.THING, urlParameters, thingId);
+//        urlParameters = "{\"Datastreams\": [\n"
+//                + "    {\n"
+//                + "      \"unitOfMeasurement\": {\n"
+//                + "        \"name\": \"Lumen\",\n"
+//                + "        \"symbol\": \"lm\",\n"
+//                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Lumen\"\n"
+//                + "      }}]}";
+//        invalidPatchEntity(EntityType.THING, urlParameters, thingId);
+//
+////        /** Location **/
+////        long locationId = locationIds.get(0);
+////        urlParameters = "{\"Things\":[{\"description\":\"Orange\"}]}";
+////        invalidPatchEntity(EntityType.LOCATION, urlParameters, locationId);
+////
+////        /** HistoricalLocation **/
+////        long histLocId = historicalLocationIds.get(0);
+////        urlParameters = "{\"time\": \"2015-07-01T00:00:00.000Z\"}";
+////        invalidPatchEntity(EntityType.HISTORICAL_LOCATION, urlParameters, histLocId);
+////
+//        /**
+//         * Sensor *
+//         */
+//        long sensorId = sensorIds.get(0);
+//        urlParameters = "{\"Datastreams\": [\n"
+//                + "    {\n"
+//                + "      \"unitOfMeasurement\": {\n"
+//                + "        \"name\": \"Lumen\",\n"
+//                + "        \"symbol\": \"lm\",\n"
+//                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Lumen\"}\n"
+//                + "        ,\"Thing\":{\"@iot.id\":" + thingId + "}"
+//                + "      }]}";
+//        invalidPatchEntity(EntityType.SENSOR, urlParameters, sensorId);
+//
+//        /**
+//         * ObserverdProperty *
+//         */
+//        long obsPropId = obsPropIds.get(0);
+//        urlParameters = "{\"Datastreams\": [\n"
+//                + "    {\n"
+//                + "      \"unitOfMeasurement\": {\n"
+//                + "        \"name\": \"Lumen\",\n"
+//                + "        \"symbol\": \"lm\",\n"
+//                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Lumen\"}\n"
+//                + "        ,\"Thing\":{\"@iot.id\":" + thingId + "}"
+//                + "      }]}";
+//        invalidPatchEntity(EntityType.OBSERVED_PROPERTY, urlParameters, obsPropId);
+//
+////        /** FeatureOfInterest **/
+////        long foiId = foiIds.get(0);
+////        urlParameters = "{\"feature\":{ \"type\": \"Point\", \"coordinates\": [114.05, -51.05] }}";
+////        invalidPatchEntity(EntityType.FEATURE_OF_INTEREST, urlParameters, foiId);
+//        /**
+//         * Datastream *
+//         */
+//        long datastreamId = datastreamIds.get(0);
+//        urlParameters = "{\"ObservedProperty\": {\n"
+//                + "  \t\"name\": \"Count\",\n"
+//                + "\t\"definition\": \"http://qudt.org/vocab/unit#Dimensionless\",\n"
+//                + "\t\"name\": \"Count is a dimensionless property.\",\n"
+//                + "\t\"description\": \"Count is a dimensionless property.\"\n"
+//                + "  } }";
+//        invalidPatchEntity(EntityType.DATASTREAM, urlParameters, datastreamId);
+//        urlParameters = "{\"Sensor\": {\n"
+//                + "  \t\"name\": \"Acme Traffic 2000\",  \n"
+//                + "  \t\"description\": \"Acme Traffic 2000\",  \n"
+//                + "  \t\"encodingType\": \"application/pdf\",\n"
+//                + "  \t\"metadata\": \"Traffic counting device\"\n"
+//                + "  }}";
+//        invalidPatchEntity(EntityType.DATASTREAM, urlParameters, datastreamId);
+//        urlParameters = "{"
+//                + "\"Thing\": {"
+//                + "  \"name\": \"test\","
+//                + "  \"description\": \"test\""
+//                + " }"
+//                + "}";
+//        invalidPatchEntity(EntityType.DATASTREAM, urlParameters, datastreamId);
+//        urlParameters = "{\"Observations\": [\n"
+//                + "    {\n"
+//                + "      \"phenomenonTime\": \"2015-03-01T00:00:00Z\",\n"
+//                + "      \"result\": 92122,\n"
+//                + "      \"resultQuality\": \"High\"\n"
+//                + "    }\n"
+//                + "  ]}";
+//        invalidPatchEntity(EntityType.DATASTREAM, urlParameters, datastreamId);
+//
+////        /** Observation **/
+////        long obsId1 = observationIds.get(0);
+////        urlParameters = "{\"phenomenonTime\": \"2015-07-01T00:40:00.000Z\"}";
+////        invalidPatchEntity(EntityType.OBSERVATION, urlParameters, obsId1);
+//    }
+//    */
+
+    /**
+     * This method is testing DELETE request for a nonexistent entity. The
+     * response should be 404.
+     *
+     **/
+    /*
+    @Test(description = "DELETE nonexistent Entities", groups = "level-2", priority = 5)
+    public void deleteNoneexistentEntities() {
+        deleteNonExsistentEntity(EntityType.THING);
+        deleteNonExsistentEntity(EntityType.LOCATION);
+        deleteNonExsistentEntity(EntityType.HISTORICAL_LOCATION);
+        deleteNonExsistentEntity(EntityType.SENSOR);
+        deleteNonExsistentEntity(EntityType.OBSERVED_PROPERTY);
+        deleteNonExsistentEntity(EntityType.DATASTREAM);
+        deleteNonExsistentEntity(EntityType.OBSERVATION);
+        deleteNonExsistentEntity(EntityType.FEATURE_OF_INTEREST);
+    }
+    */
 
     private String escape(String val) {
         return "\"" + val + "\"";
@@ -545,7 +1291,37 @@ public class Conformance2 {
                 jsonMimeType,
                 mimeType);
 
-        return mapper.readTree(response.getEntity().getContent());
+        JsonNode result = mapper.readTree(response.getEntity().getContent());
+        if (logger.isTraceEnabled()) {
+            System.out.printf("RETURNED by Server: %s\n", request.getURI());
+            System.out.println(result.toPrettyString());
+        }
+        return result;
+    }
+
+    private JsonNode postInvalidEntity(EntityType type, String body) throws IOException {
+        HttpPost request = new HttpPost(rootUrl + endpoints.get(type));
+        request.setEntity(new StringEntity(body));
+        request.setHeader("Content-Type", "application/json");
+
+        if (logger.isTraceEnabled()) {
+            System.out.printf("POSTed to URL: %s\n", request.getURI());
+            System.out.println(body);
+        }
+
+        HttpResponse response = HttpClientBuilder.create().build().execute(request);
+        Assert.assertTrue(
+                "Entity " + rootUrl + endpoints.get(type) + " should not have been created but response Code  is: " +
+                        response.getStatusLine().getStatusCode(),
+                response.getStatusLine().getStatusCode() == 400 || response.getStatusLine().getStatusCode() == 409
+        );
+
+        JsonNode result = mapper.readTree(response.getEntity().getContent());
+        if (logger.isTraceEnabled()) {
+            System.out.printf("RETURNED by Server: %s\n", request.getURI());
+            System.out.println(result.toPrettyString());
+        }
+        return result;
     }
 
     private JsonNode patchEntity(EntityType type, String body, String id) throws IOException {
@@ -559,10 +1335,21 @@ public class Conformance2 {
 
         HttpResponse response = HttpClientBuilder.create().build().execute(request);
 
+        if (logger.isTraceEnabled()) {
+            System.out.printf("PATCHed to URL: %s\n", request.getURI());
+            System.out.println(body);
+        }
+
         // Check Response MIME Type
         String mimeType = ContentType.getOrDefault(response.getEntity()).getMimeType();
         assertEquals(jsonMimeType, mimeType);
-        return mapper.readTree(response.getEntity().getContent());
+
+        JsonNode result = mapper.readTree(response.getEntity().getContent());
+        if (logger.isTraceEnabled()) {
+            System.out.printf("RETURNED by Server: %s\n", request.getURI());
+            System.out.println(result.toPrettyString());
+        }
+        return result;
     }
 
     private JsonNode getEntity(String path) throws IOException {
@@ -646,5 +1433,62 @@ public class Conformance2 {
         return result.get(idKey).asText();
     }
 
+    /**
+     * Check the patched entity properties are updates correctly
+     *
+     * @param entityType Entity type in from EntityType enum
+     * @param oldEntity  The old properties of the patched entity
+     * @param newEntity  The updated properties of the patched entity
+     * @param diffs      The properties that supposed to be updated based on the
+     *                   request due to the specification
+     */
+    private void checkPatch(EntityType entityType, JsonNode oldEntity, JsonNode newEntity, Map<String, String> diffs) {
+        oldEntity.fieldNames().forEachRemaining(field -> {
+            if (diffs.containsKey(field)) {
+                if (newEntity.get(field).isTextual()) {
+                    Assert.assertEquals(
+                            "PATCH was not applied correctly for " + entityType + "'s " + field + ".",
+                            diffs.get(field),
+                            newEntity.get(field).asText()
+                    );
+                } else {
+                    // Ignore crs field
+                    if (newEntity.get(field).isObject() && newEntity.get(field).has("crs")) {
+                        ((ObjectNode) newEntity.get(field)).remove("crs");
+                    }
+                    try {
+                        Assert.assertTrue(
+                                "PATCH was not applied correctly for " + entityType + "'s " + field + ".",
+                                newEntity.get(field).equals(mapper.readTree(diffs.get(field)))
+                        );
+                    } catch (JsonProcessingException e) {
+                        Assert.assertTrue(
+                                "Error parsing test value!",
+                                false
+                        );
+                    }
+                }
+            } else {
+                Assert.assertTrue(
+                        "PATCH was not applied correctly for " + entityType + "'s " + field + ".",
+                        oldEntity.get(field).equals(newEntity.get(field))
+                );
+            }
+        });
+    }
 
+    /**
+     * Check the database is empty of certain entity types
+     *
+     * @param entityTypes List of entity types
+     */
+    private void checkNotExisting(List<EntityType> entityTypes) throws IOException {
+        for (EntityType entityType : entityTypes) {
+            JsonNode response = getEntity(endpoints.get(entityType));
+            Assert.assertTrue(
+                    "Entity with type: " + entityType.name() + " is created although it shouldn't",
+                    response.isEmpty()
+            );
+        }
+    }
 }
