@@ -9,7 +9,7 @@ RUN git clone https://github.com/speckij/olingo-odata4 \
 
 RUN git clone https://github.com/52North/sensor-things \
     && cd sensor-things \
-    && git checkout master
+    && git checkout v1.0.0-alpha.2
 
 RUN git clone https://github.com/52North/series-hibernate \
     && cd series-hibernate \
