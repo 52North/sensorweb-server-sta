@@ -28,13 +28,6 @@
  */
 package org.n52.sta.data.service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
-import javax.annotation.PostConstruct;
-
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.HibernateRelations;
@@ -55,6 +48,12 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpMethod;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.PostConstruct;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Interface for requesting Sensor Things entities
@@ -137,6 +136,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      * @param queryOptions query options
      * @return instance of ElementWithQueryOptions
      */
+    @Transactional(rollbackFor = Exception.class)
     protected abstract ElementWithQueryOptions createWrapper(Object entity, QueryOptions queryOptions);
 
     /**
@@ -355,6 +355,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
         return this.createWrapper(updateEntity(id, entity, method), null);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     protected abstract S updateEntity(String id, S entity, HttpMethod method) throws STACRUDException;
 
     protected abstract S updateEntity(S entity) throws STACRUDException;
@@ -372,6 +373,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      * @return updated entity
      * @throws STACRUDException if an error occurred
      */
+
     protected abstract S createOrUpdate(S entity) throws STACRUDException;
     //protected S createOrUpdate(S entity) throws ODataApplicationException {
     //    if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
