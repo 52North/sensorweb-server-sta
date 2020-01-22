@@ -30,9 +30,13 @@ package org.n52.sta.data.repositories;
 
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+@NoRepositoryBean
+@Transactional
 public interface IdentifierRepository<T> extends JpaSpecificationExecutor<T> {
 
     boolean existsByIdentifier(String identifier);
