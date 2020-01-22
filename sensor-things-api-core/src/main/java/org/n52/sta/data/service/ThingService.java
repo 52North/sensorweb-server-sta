@@ -50,6 +50,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -133,7 +134,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
                 throw new STACRUDException("Identifier already exists!", HTTPStatus.BAD_REQUEST);
             }
             thing.setProcesssed(true);
-            processLocations(thing);
+            processLocations(thing, thing.getLocations());
             thing = getRepository().intermediateSave(thing);
             processHistoricalLocations(thing);
             processDatastreams(thing);
@@ -151,8 +152,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
             if (existing.isPresent()) {
                 PlatformEntity merged = merge(existing.get(), entity);
                 if (entity.hasLocationEntities()) {
-                    merged.setLocations(entity.getLocations());
-                    processLocations(merged);
+                    processLocations(merged, entity.getLocations());
                     merged = getRepository().save(merged);
                     processHistoricalLocations(merged);
                 }
@@ -247,10 +247,11 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
         }
     }
 
-    private void processLocations(PlatformEntity thing) throws STACRUDException {
-        if (thing.hasLocationEntities()) {
-            Set<LocationEntity> locations = new LinkedHashSet<>();
-            for (LocationEntity location : thing.getLocations()) {
+    private void processLocations(PlatformEntity thing, Set<LocationEntity> oldLocations) throws STACRUDException {
+        if (oldLocations != null) {
+            Set<LocationEntity> locations = new HashSet<>();
+            thing.setLocations(new HashSet<>());
+            for (LocationEntity location : oldLocations) {
                 LocationEntity optionalLocation = getLocationService().createEntity(location);
                 locations.add(optionalLocation != null ? optionalLocation : location);
             }
