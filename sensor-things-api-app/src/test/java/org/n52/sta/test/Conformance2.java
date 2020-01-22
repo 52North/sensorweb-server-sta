@@ -1366,6 +1366,10 @@ public class Conformance2 {
             System.out.printf("RETURNED by Server: %s\n", request.getURI());
             System.out.println(result.toPrettyString());
         }
+        int statusCode = response.getStatusLine().getStatusCode();
+        Assert.assertEquals("Error: PATCH does not work properly for " + request.getURI(),
+                200,
+                statusCode);
         return result;
     }
 
@@ -1467,7 +1471,7 @@ public class Conformance2 {
         }
         if (!canError) {
             Assert.assertEquals("DELETE does not work properly for nonexistent " + request.getURI(),
-                    400,
+                    200,
                     statusCode);
         }
     }
