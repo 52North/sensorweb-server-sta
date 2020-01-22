@@ -241,12 +241,11 @@ public class FeatureOfInterestService
             d.setLastValueAt(null);
             datasetRepository.saveAndFlush(d);
             // delete observations
-            dataRepository.deleteAll(dataRepository.findAll(oQS.withDataset(d.getIdentifier())));
+            dataRepository.deleteAll(dataRepository.findAll(oQS.withDatasetId(d.getId())));
             getRepository().flush();
-            datastreamRepository.findAll(dsQS.withDatasetIdentifier(d.getIdentifier())).forEach(ds -> {
+            datastreamRepository.findAll(dsQS.withDatasetId(d.getId())).forEach(ds -> {
                 ds.getDatasets().remove(d);
                 datastreamRepository.saveAndFlush(ds);
-
             });
         });
         // delete datasets

@@ -75,11 +75,11 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
         };
     }
 
-    public Specification<DataEntity<?>> withDataset(final String datasetIdentifier) {
+    public Specification<DataEntity<?>> withDatasetId(final long datasetId) {
         return (root, query, builder) -> {
             final Join<DataEntity, DatasetEntity> join =
                     root.join(DataEntity.PROPERTY_DATASET, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), datasetIdentifier);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), datasetId);
         };
     }
 

@@ -99,19 +99,19 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
         };
     }
 
-    public Specification<DatastreamEntity> withDatasetIdentifier(final String datasetId) {
+    public Specification<DatastreamEntity> withDatasetId(final long datasetId) {
         return (root, query, builder) -> {
             final Join<DatastreamEntity, DatasetEntity> join =
                     root.join(DatastreamEntity.PROPERTY_DATASETS, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), datasetId);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), datasetId);
         };
     }
 
-    public Specification<DatastreamEntity> withDatasetIdentifiers(final Collection<String> datasetIds) {
+    public Specification<DatastreamEntity> withDatasetIds(final Collection<Long> datasetIds) {
         return (root, query, builder) -> {
             final Join<DatastreamEntity, DatasetEntity> join =
                     root.join(DatastreamEntity.PROPERTY_DATASETS, JoinType.INNER);
-            return join.get(DescribableEntity.PROPERTY_IDENTIFIER).in(datasetIds);
+            return join.get(DescribableEntity.PROPERTY_ID).in(datasetIds);
         };
     }
 
