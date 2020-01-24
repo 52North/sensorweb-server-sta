@@ -53,7 +53,7 @@ import java.util.Map;
 @Configuration
 public class DaoConfig {
 
-    @Value("META-INF/persistence.xml")
+    @Value("${database.jpa.persistence-location}")
     private String persistenceXmlLocation;
 
     @Bean
