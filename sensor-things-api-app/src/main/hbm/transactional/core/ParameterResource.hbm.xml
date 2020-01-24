@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hibernate-mapping package="org.n52.series.db.beans.parameter"
+    xmlns="http://www.hibernate.org/xsd/hibernate-mapping"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.hibernate.org/xsd/hibernate-mapping http://www.hibernate.org/xsd/hibernate-mapping/hibernate-mapping-4.0.xsd">
+    <class name="ParameterEntity" table="parameter" check="type in ('bool', 'category', 'count', 'quantity', 'text', 'xml', 'json')">
+        <comment>Storage for additional information for features, observations or datasets</comment>
+        <id name="id" type="long">
+            <column name="parameter_id">
+                <comment>PK column of the table</comment>
+            </column>
+            <generator class="native">
+                <param name="sequence_name">parameter_seq</param>
+            </generator>
+        </id>
+        <discriminator type="string">
+            <column name="type">
+                <comment>Indicator used by Hibernate to map value specific entities.</comment>
+            </column>
+        </discriminator>
+        <property name="name" type="string">
+            <column name="name" not-null="true" index="idx_param_name">
+                <comment>The name of the parameter</comment>
+            </column>
+        </property>
+        <property name="lastUpdate" not-null="false" type="timestamp">
+            <column name="last_update">
+            <comment>Timestamp that provides the time of the last modification of this entry</comment>
+            </column>
+        </property>
+          <property name="domain" not-null="false" type="string">
+            <column name="domain">
+                <comment>The domain this parameter belongs to.</comment>
+            </column>
+        </property>
+        <subclass discriminator-value="bool" extends="ParameterEntity" name="ParameterBooleanEntity">
+            <property name="value" type="org.n52.hibernate.type.SmallBooleanType">
+                <column name="value_boolean">
+                    <comment>Storage of a boolean parameter value.</comment>
+                </column>
+            </property>
+        </subclass>
+        <subclass discriminator-value="category" extends="ParameterEntity" name="ParameterCategoryEntity">
+            <property name="value" type="string">
+                <column name="value_category">
+                    <comment>Storage of a categorical parameter value.</comment>
+                </column>
+            </property>
+            <many-to-one class="org.n52.series.db.beans.UnitEntity" name="unit" not-null="false" foreign-key="fk_param_unit">
+                <column name="fk_unit_id">
+                    <comment>Reference to the unit of this value in the unit table</comment>
+                </column>
+            </many-to-one>
+        </subclass>
+        <subclass discriminator-value="count" extends="ParameterEntity" name="ParameterCountEntity">
+            <property name="value" type="integer">
+                <column name="value_count">
+                    <comment>Storage of a count parameter value.</comment>
+                </column>
+            </property>
+        </subclass>
+        <subclass discriminator-value="quantity" extends="ParameterEntity" name="ParameterQuantityEntity">
+            <property name="value" type="big_decimal" precision="20" scale="10">
+                <column name="value_quantity">
+                    <comment>Storage of a quantity parameter value.</comment>
+                </column>
+            </property>
+            <many-to-one class="org.n52.series.db.beans.UnitEntity" name="unit" not-null="false" foreign-key="fk_param_unit">
+                <column name="fk_unit_id">
+                    <!-- Comment is defined above for category! -->
+                </column>
+            </many-to-one>
+        </subclass>
+        <subclass discriminator-value="text" extends="ParameterEntity" name="ParameterTextEntity">
+            <property name="value" type="string">
+                <column name="value_text">
+                    <comment>Storage of a textual parameter value.</comment>
+                </column>
+            </property>
+        </subclass>
+        <subclass discriminator-value="xml" extends="ParameterEntity" name="ParameterXmlEntity">
+            <property name="value" type="text">
+                <column name="value_xml">
+                    <comment>Storage of a XML encoded parameter value.</comment>
+                </column>
+            </property>
+        </subclass>
+        <subclass discriminator-value="json" extends="ParameterEntity" name="ParameterJsonEntity">
+            <property name="value" type="text">
+                <column name="value_json">
+                    <comment>Storage of a JSON encoded parameter value.</comment>
+                </column>
+            </property>
+        </subclass>
+    </class>
+</hibernate-mapping>

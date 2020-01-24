@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hibernate-mapping package="org.n52.series.db.beans"
+    xmlns="http://www.hibernate.org/xsd/hibernate-mapping"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.hibernate.org/xsd/hibernate-mapping http://www.hibernate.org/xsd/hibernate-mapping/hibernate-mapping-4.0.xsd">
+    <class name="PlatformEntity" table="platform">
+        <comment>Storage of the platforms. With a platform several procedures can be grouped or in the case of citizen science the platform can be the camera or mobile phone. An example of a platform is a vessel that has multiple sensors (Procedure). In most cases, the platform is the same as the feature or procedure, such as a weather station or a water level location.</comment>
+        <id name="id" type="long">
+            <column name="platform_id">
+                <comment>PK column of the table</comment>
+            </column>
+            <generator class="native">
+                <param name="sequence_name">platform_seq</param>
+            </generator>
+        </id>
+        <property name="identifier" type="string" index="idx_platform_identifier">
+            <column name="identifier" not-null="true" unique-key="un_platform_identifier">
+                <comment>Unique identifier of the platform which can be used for filtering. Should be a URI, UUID. E.g. http://www.example.org/123, 123-321</comment>
+            </column>
+        </property>
+        <many-to-one name="identifierCodespace" class="CodespaceEntity" foreign-key="fk_platform_identifier_codesp">
+            <column name="fk_identifier_codespace_id">
+                <comment>The codespace of the platform identifier, reference to the codespace table.</comment>
+            </column>
+        </many-to-one>
+        <property name="name" type="string">
+            <column name="name">
+                <comment>The human readable name of the platform.</comment>
+            </column>
+        </property>
+         <many-to-one name="nameCodespace" class="CodespaceEntity" foreign-key="fk_platform_name_codespace">
+            <column name="fk_name_codespace_id">
+                <comment>The codespace of the platform name, reference to the codespace table.</comment>
+            </column>
+        </many-to-one>
+         <property name="description" type="text">
+            <column name="description">
+                <comment>A short description of the platform</comment>
+            </column>
+        </property>
+        <set inverse="true" name="parameters" table="platform_parameter" fetch="join">
+            <comment>Storage of relations between platform and related parameter</comment>
+            <key not-null="true" foreign-key="fk_platform_parameter">
+                <column name="fk_platform_id">
+                    <comment>The reference to the platform in the observation table</comment>
+                </column>
+            </key>
+            <many-to-many class="org.n52.series.db.beans.parameter.ParameterEntity" foreign-key="fk_parameter_platform">
+                <column name="fk_parameter_id">
+                    <comment>The reference to the parameter in the platform parameter</comment>
+                </column>
+            </many-to-many>
+        </set>
+        <set name="locations" table="thing_location" inverse="false">
+            <key foreign-key="fk_thing_location">
+                <column name="fk_thing_id" not-null="false"/>
+            </key>
+            <many-to-many class="org.n52.series.db.beans.sta.LocationEntity" foreign-key="fk_location_thing">
+                <column name="fk_location_id" not-null="false"/>
+            </many-to-many>
+        </set>
+        <set name="historicalLocations" table="historical_location" inverse="false" >
+            <key foreign-key="fk_thing_historical_location" update="false">
+                <column name="fk_thing_id" not-null="true"/>
+            </key>
+            <one-to-many class="org.n52.series.db.beans.sta.HistoricalLocationEntity" />
+        </set>
+        <set name="datastreams" table="datastream" inverse="true">
+            <key foreign-key="fk_datastream_thing">
+                <column name="fk_thing_id" not-null="true"/>
+            </key>
+            <one-to-many class="org.n52.series.db.beans.sta.DatastreamEntity" />
+        </set>
+        <property name="properties" type="text">
+            <column name="properties" not-null="false"/>
+        </property>
+        <set name="translations" table="platform_i18n" inverse="true" fetch="select">
+            <key column="fk_platform_id" not-null="true" />
+            <one-to-many class="org.n52.series.db.beans.i18n.I18nPlatformEntity" />
+        </set>
+    </class>
+
+    <class name="org.n52.series.db.beans.i18n.I18nPlatformEntity" table="platform_i18n">
+        <id name="id" type="long">
+            <column name="platform_i18n_id">
+                <comment>PK column of the table</comment>
+            </column>
+            <generator class="native">
+                <param name="sequence_name">platform_i18n_seq</param>
+            </generator>
+        </id>
+        <many-to-one name="entity" class="PlatformEntity" foreign-key="fk_platform">
+            <column name="fk_platform_id" not-null="true">
+                <comment>Reference to the feature table this internationalization belongs to.</comment>
+            </column>
+        </many-to-one>
+        <property name="locale" not-null="true" type="string">
+            <column name="locale">
+                <comment>Locale/language specification for this entry. ISO 639 Codes (http://www.loc.gov/standards/iso639-2/php/code_list.php)</comment>
+            </column>
+        </property>
+        <property name="name" type="string">
+            <column name="name">
+                <comment>Locale/language specific name of the platform</comment>
+            </column>
+        </property>
+        <property name="description" type="text">
+            <column name="description">
+                <comment>Locale/language specific description of the platform</comment>
+            </column>
+        </property>
+    </class>
+</hibernate-mapping>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hibernate-mapping package="org.n52.series.db.beans"
+    xmlns="http://www.hibernate.org/xsd/hibernate-mapping"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.hibernate.org/xsd/hibernate-mapping http://www.hibernate.org/xsd/hibernate-mapping/hibernate-mapping-4.0.xsd">
+    <class name="RelatedDatasetEntity" table="related_dataset">
+        <comment>Store the relation of two datasets, e.g. one dataset depends on other datasets to provide context</comment>
+        <composite-id>
+            <key-many-to-one name="item" class="DatasetEntity"
+                foreign-key="fk_rel_dataset_dataset">
+                <column name="fk_dataset_id" not-null="true">
+                    <comment>The reference to the dataset that has a related dataset</comment>
+                </column>
+            </key-many-to-one>
+            <key-many-to-one name="relatedItem"
+                class="DatasetEntity" foreign-key="fk_rel_dataset_rel_dataset">
+                <column name="fk_related_dataset_id" not-null="true">
+                    <comment>The reference to the related dataset</comment>
+                </column>
+            </key-many-to-one>
+        </composite-id>
+        <property name="role" type="string">
+            <column name="role">
+                <comment>Definition of the role of the relation</comment>
+            </column>
+        </property>
+        <property name="relatedUrl" type="string" not-null="false">
+            <column name="url">
+                <comment>URL that point to external information</comment>
+            </column>
+        </property>
+    </class>
+</hibernate-mapping>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hibernate-mapping package="org.n52.series.db.beans"
+    xmlns="http://www.hibernate.org/xsd/hibernate-mapping"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.hibernate.org/xsd/hibernate-mapping http://www.hibernate.org/xsd/hibernate-mapping/hibernate-mapping-4.0.xsd">
+    <class name="VerticalMetadataEntity" table="value_profile">
+        <comment>Storage of meta-information about a profile measurement. These are the orientation (height/depth) and name of the depth/height value as they should be named in the output and the unit of the depth/height value. A value_profile must be defined for each dataset containing profile data.</comment>
+        <id name="id" type="long" >
+             <column name="value_profile_id">
+                <comment>PK column of the table</comment>
+            </column>
+            <generator class="native">
+                <param name="sequence_name">value_profile_seq</param>
+            </generator>
+        </id>
+        <property name="orientation" type="short">
+            <column name="orientation" not-null="false">
+                <comment>The "orientation" of the vertical values as integer. 1 => above verticalOriginName and -1 => below verticalOriginName</comment>
+            </column>
+        </property>
+        <property name="verticalOriginName" type="string">
+            <column name="vertical_origin_name" not-null="false">
+                <comment>The vertical origin name of the vertical values, e.g. water surface</comment>
+            </column>
+        </property>
+        <property name="verticalFromName" type="string">
+            <column name="vertical_from_name" not-null="false">
+                <comment>The name of the vertical from values, e.g. from or depthFrom</comment>
+            </column>
+        </property>
+        <property name="verticalToName" type="string">
+            <column name="vertical_to_name" not-null="false">
+                <comment>The name of the vertical from values, e.g. to or depthTo</comment>
+            </column>
+        </property>
+        <many-to-one name="verticalUnit" class="UnitEntity" foreign-key="fk_profile_unit">
+            <column name="fk_vertical_unit_id" not-null="true">
+                <comment>The unit of the vertical value, e.g. m</comment>
+            </column>
+        </many-to-one>
+        <set name="translations" table="value_profile_i18n" inverse="true" fetch="select">
+            <key column="fk_value_profile_id" not-null="true" foreign-key="fk_value_profile_i18n"/>
+            <one-to-many class="org.n52.series.db.beans.i18n.I18nVerticalMetadataEntity" />
+        </set>
+    </class>
+
+    <class name="org.n52.series.db.beans.i18n.I18nVerticalMetadataEntity" table="value_profile_i18n">
+        <id name="id" type="long">
+            <column name="value_profile_i18n_id">
+                <comment>PK column of the table</comment>
+            </column>
+            <generator class="native">
+                <param name="sequence_name">value_profile_i18n_seq</param>
+            </generator>
+        </id>
+        <many-to-one name="entity" class="VerticalMetadataEntity" foreign-key="fk_i18n_value_profile">
+            <column name="fk_value_profile_id" not-null="true">
+                <comment>Reference to the value_profile table this internationalization belongs to.</comment>
+            </column>
+        </many-to-one>
+          <property name="locale" not-null="true" type="string">
+            <column name="locale">
+                <comment>Locale/language specification for this entry. ISO 639 Codes (http://www.loc.gov/standards/iso639-2/php/code_list.php)</comment>
+            </column>
+        </property>
+        <property name="verticalOriginName" type="string">
+            <column name="vertical_origin_name" not-null="false">
+                <comment>Locale/language specific vertical origin name of the vertical metadata entity</comment>
+            </column>
+        </property>
+        <property name="verticalFromName" type="string">
+            <column name="vertical_from_name">
+                <comment>Locale/language specific verticalTo name of the vertical metadata entity</comment>
+            </column>
+        </property>
+        <property name="verticalToName" type="string">
+            <column name="vertical_to_name">
+                <comment>Locale/language specific verticalTo name of the vertical metadata entity</comment>
+            </column>
+        </property>
+    </class>
+</hibernate-mapping>
