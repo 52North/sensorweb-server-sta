@@ -35,4 +35,5 @@ ARG DEPENDENCY=/app/sensor-things/sensor-things-api-app/target/unpacked
 COPY --from=buildstage ${DEPENDENCY}/BOOT-INF/lib /app/lib
 COPY --from=buildstage ${DEPENDENCY}/META-INF /app/META-INF
 COPY --from=buildstage ${DEPENDENCY}/BOOT-INF/classes /app
+COPY --from=buildstage /app/sensor-things/sensor-things-api-core/src/main/resources/META-INF/persistence.xml /app/
 ENTRYPOINT ["java","-cp","app:app/lib/*","org.n52.sta.Application"]
