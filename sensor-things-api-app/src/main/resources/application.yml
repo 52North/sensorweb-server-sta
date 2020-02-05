@@ -10,7 +10,7 @@ server:
 # Database Configuration
 database:
   jpa:
-    persistence-location: classpath:META-INF/persistence.xml
+    persistence-location: classpath:META-INF/sensorthings-persistence.xml
 spring:
   datasource:
     platform: postgres
