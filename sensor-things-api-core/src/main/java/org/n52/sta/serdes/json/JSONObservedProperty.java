@@ -29,6 +29,7 @@
 package org.n52.sta.serdes.json;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.sta.ObservablePropertyEntity;
 import org.springframework.util.Assert;
 
@@ -36,6 +37,7 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("VisibilityModifier")
+@SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
 public class JSONObservedProperty extends JSONBase.JSONwithIdNameDescription<ObservablePropertyEntity>
         implements AbstractJSONEntity {
 

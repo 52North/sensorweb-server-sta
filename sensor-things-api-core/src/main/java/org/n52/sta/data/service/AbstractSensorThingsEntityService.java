@@ -63,9 +63,9 @@ import java.util.Set;
  */
 public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepository<S>, S extends IdEntity> {
 
-    protected final String IDENTIFIER = "identifier";
-    protected final String STAIDENTIFIER = "staIdentifier";
-    protected final String ENCODINGTYPE = "encodingType";
+    static final String IDENTIFIER = "identifier";
+    static final String STAIDENTIFIER = "staIdentifier";
+    static final String ENCODINGTYPE = "encodingType";
 
     @Autowired
     private EntityServiceRepository serviceRepository;

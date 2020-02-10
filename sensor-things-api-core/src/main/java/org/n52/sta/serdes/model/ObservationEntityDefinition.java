@@ -29,22 +29,23 @@
 package org.n52.sta.serdes.model;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 @SuppressWarnings("VisibilityModifier")
 public class ObservationEntityDefinition extends STAEntityDefinition {
 
-    public static String entityName = OBSERVATION;
+    public static final String entityName = OBSERVATION;
 
-    public static String entitySetName = OBSERVATIONS;
+    public static final String entitySetName = OBSERVATIONS;
 
-    private static String[] navProps = new String[] {
+    private static final String[] navProps = new String[] {
             DATASTREAM,
             FEATURE_OF_INTEREST
     };
 
-    private static String[] entityProps = new String[] {
+    private static final String[] entityProps = new String[] {
             PROP_PHENOMENON_TIME,
             PROP_RESULT_TIME,
             PROP_RESULT_QUALITY,
@@ -53,7 +54,9 @@ public class ObservationEntityDefinition extends STAEntityDefinition {
             PROP_PARAMETERS
     };
 
-    public static Set<String> navigationProperties = new HashSet<>(Arrays.asList(navProps));
+    public static final Set<String> navigationProperties =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(navProps)));
 
-    public static Set<String> entityProperties = new HashSet<>(Arrays.asList(entityProps));
+    public static final Set<String> entityProperties =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(entityProps)));
 }

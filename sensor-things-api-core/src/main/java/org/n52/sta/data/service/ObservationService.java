@@ -38,7 +38,6 @@ import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.OfferingEntity;
-import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.TextDataEntity;
@@ -413,7 +412,7 @@ public class ObservationService extends
 
     private CategoryEntity checkCategory(DatastreamEntity datastream) {
         CategoryEntity category = new CategoryEntity();
-        PhenomenonEntity obsProp = datastream.getObservableProperty();
+        // PhenomenonEntity obsProp = datastream.getObservableProperty();
         category.setIdentifier(STA);
         category.setName(STA);
         category.setDescription("Default SOS category");
