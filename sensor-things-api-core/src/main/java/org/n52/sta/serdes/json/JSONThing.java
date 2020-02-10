@@ -51,6 +51,7 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
         self = new PlatformEntity();
     }
 
+    @Override
     public PlatformEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
             case FULL:
@@ -127,7 +128,8 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
 
                 self.setIdentifier(identifier);
                 return self;
+            default:
+                return null;
         }
-        return null;
     }
 }

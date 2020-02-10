@@ -57,6 +57,7 @@ public class DatastreamSerDes {
             this.entity = entity;
         }
 
+        @Override
         public DatastreamEntity getEntity() {
             return entity;
         }
@@ -129,15 +130,16 @@ public class DatastreamSerDes {
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_RESULT_TIME)) {
                 if (datastream.getResultTimeStart() != null) {
                     gen.writeStringField(STAEntityDefinition.PROP_RESULT_TIME,
-                            DateTimeHelper.format(TimeUtil.createTime(TimeUtil.createDateTime(datastream.getResultTimeStart()),
-                                    TimeUtil.createDateTime(datastream.getResultTimeEnd()))));
+                            DateTimeHelper.format(
+                                    TimeUtil.createTime(TimeUtil.createDateTime(datastream.getResultTimeStart()),
+                                            TimeUtil.createDateTime(datastream.getResultTimeEnd()))));
                 }
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_PHENOMENON_TIME)) {
                 if (datastream.getSamplingTimeStart() != null) {
                     gen.writeStringField(STAEntityDefinition.PROP_PHENOMENON_TIME,
-                            DateTimeHelper
-                                    .format(TimeUtil.createTime(TimeUtil.createDateTime(datastream.getSamplingTimeStart()),
+                            DateTimeHelper.format(
+                                    TimeUtil.createTime(TimeUtil.createDateTime(datastream.getSamplingTimeStart()),
                                             TimeUtil.createDateTime(datastream.getSamplingTimeEnd()))));
                 }
             }

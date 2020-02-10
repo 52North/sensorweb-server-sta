@@ -59,6 +59,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> impl
         self = new StaDataEntity();
     }
 
+    @Override
     public StaDataEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
             case FULL:
@@ -76,8 +77,9 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> impl
 
                 self.setIdentifier(identifier);
                 return self;
+            default:
+                return null;
         }
-        return null;
     }
 
     private StaDataEntity createPatchEntity() {

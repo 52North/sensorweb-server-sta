@@ -59,6 +59,7 @@ public class JSONHistoricalLocation extends JSONBase.JSONwithIdTime<HistoricalLo
         self = new HistoricalLocationEntity();
     }
 
+    @Override
     public HistoricalLocationEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
             case FULL:
@@ -108,8 +109,9 @@ public class JSONHistoricalLocation extends JSONBase.JSONwithIdTime<HistoricalLo
 
                 self.setIdentifier(identifier);
                 return self;
+            default:
+                return null;
         }
-       return null;
     }
 
     /**
