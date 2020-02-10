@@ -33,6 +33,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.serdes.json.JSONBase;
@@ -44,12 +45,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Set;
 
 public class ThingSerDes {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SensorSerDes.class);
 
+    @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     public static class PlatformEntityPatch extends PlatformEntity implements EntityPatch<PlatformEntity> {
 
         private static final long serialVersionUID = -2233037380407692718L;
@@ -88,6 +91,7 @@ public class ThingSerDes {
                 if (hasSelectOption) {
                     //TODO: Implement
                     // fieldsToSerialize = options.getSelectOption();
+                    fieldsToSerialize = new HashSet<>();
                     LOGGER.error("not implemented!");
                 }
             }

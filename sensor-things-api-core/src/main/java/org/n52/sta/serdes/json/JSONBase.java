@@ -30,6 +30,7 @@ package org.n52.sta.serdes.json;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.joda.time.DateTime;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
@@ -103,11 +104,13 @@ public class JSONBase {
         }
     }
 
+    @SuppressFBWarnings("UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD")
     abstract static class JSONwithIdNameDescription<T> extends JSONwithId<T> {
         public String name;
         public String description;
     }
 
+    @SuppressFBWarnings("UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD")
     abstract static class JSONwithIdNameDescriptionTime<T> extends JSONwithIdTime<T> {
         public String name;
         public String description;

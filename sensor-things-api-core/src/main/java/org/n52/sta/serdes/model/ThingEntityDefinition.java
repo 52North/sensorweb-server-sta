@@ -35,23 +35,23 @@ import java.util.Set;
 @SuppressWarnings("VisibilityModifier")
 public class ThingEntityDefinition extends STAEntityDefinition {
 
-    public static String entityName = THING;
+    public static final String entityName = THING;
 
-    public static String entitySetName = THINGS;
+    public static final String entitySetName = THINGS;
 
-    private static String[] navProps = new String[] {
+    private static final String[] navProps = new String[] {
             DATASTREAMS,
             LOCATIONS,
             HISTORICAL_LOCATIONS
     };
 
-    private static String[] entityProps = new String[] {
+    private static final String[] entityProps = new String[] {
             PROP_NAME,
             PROP_DESCRIPTION,
             PROP_PROPERTIES
     };
 
-    public static Set<String> navigationProperties = new HashSet<>(Arrays.asList(navProps));
+    public static final Set<String> navigationProperties = new HashSet<>(Arrays.asList(navProps));
 
-    public static Set<String> entityProperties = new HashSet<>(Arrays.asList(entityProps));
+    public static final Set<String> entityProperties = new HashSet<>(Arrays.asList(entityProps));
 }

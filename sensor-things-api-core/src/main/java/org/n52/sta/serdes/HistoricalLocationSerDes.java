@@ -33,6 +33,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.serdes.json.JSONBase;
@@ -44,12 +45,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Set;
 
 public class HistoricalLocationSerDes {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HistoricalLocationSerDes.class);
 
+    @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     public static class HistoricalLocationEntityPatch extends HistoricalLocationEntity
             implements EntityPatch<HistoricalLocationEntity> {
 
@@ -90,6 +93,7 @@ public class HistoricalLocationSerDes {
                 if (hasSelectOption) {
                     //TODO: Implement
                     // fieldsToSerialize = options.getSelectOption();
+                    fieldsToSerialize = new HashSet<>();
                     LOGGER.error("not implemented!");
                 }
             }

@@ -30,6 +30,7 @@ package org.n52.sta.serdes.json;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.JsonNode;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.joda.time.DateTime;
 import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.shetland.ogc.gml.time.Time;
@@ -40,6 +41,7 @@ import org.springframework.util.Assert;
 import java.util.Date;
 
 @SuppressWarnings("VisibilityModifier")
+@SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
 public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> implements AbstractJSONEntity {
 
     // JSON Properties. Matched by Annotation or variable name

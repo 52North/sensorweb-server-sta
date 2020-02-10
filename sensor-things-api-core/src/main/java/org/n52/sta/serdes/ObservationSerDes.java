@@ -33,6 +33,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.n52.series.db.beans.BlobDataEntity;
@@ -64,12 +65,14 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 public class ObservationSerDes {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ObservationSerDes.class);
 
+    @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     public static class StaDataEntityPatch extends StaDataEntity implements EntityPatch<DataEntity> {
 
         private static final long serialVersionUID = 7385044376634149048L;
@@ -108,6 +111,7 @@ public class ObservationSerDes {
                 if (hasSelectOption) {
                     //TODO: Implement
                     // fieldsToSerialize = options.getSelectOption();
+                    fieldsToSerialize = new HashSet<>();
                     LOGGER.error("not implemented!");
                 }
             }

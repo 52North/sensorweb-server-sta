@@ -35,18 +35,18 @@ import java.util.Set;
 @SuppressWarnings("VisibilityModifier")
 public class DatastreamEntityDefinition extends STAEntityDefinition {
 
-    public static String entityName = DATASTREAM;
+    public static final String entityName = DATASTREAM;
 
-    public static String entitySetName = DATASTREAMS;
+    public static final String entitySetName = DATASTREAMS;
 
-    private static String[] navProps = new String[] {
+    private static final String[] navProps = new String[] {
             SENSOR,
             THING,
             OBSERVED_PROPERTY,
             OBSERVATIONS
     };
 
-    private static String[] entityProps = new String[] {
+    private static final String[] entityProps = new String[] {
             PROP_NAME,
             PROP_DESCRIPTION,
             PROP_OBSERVATION_TYPE,

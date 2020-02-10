@@ -29,6 +29,7 @@
 package org.n52.sta.serdes.json;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.joda.time.DateTime;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
@@ -41,6 +42,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("VisibilityModifier")
+@SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
 public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorEntity> implements AbstractJSONEntity {
 
     private static final String INALID_ENCODING_TYPE = "Invalid encodingType supplied. Only SensorML or PDF allowed.";
