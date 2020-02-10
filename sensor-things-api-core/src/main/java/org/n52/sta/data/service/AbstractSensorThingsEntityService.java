@@ -408,7 +408,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      * Create {@link PageRequest}
      *
      * @param queryOptions {@link QueryOptions} to create {@link PageRequest}
-     * @param defaultSortingProperty
+     * @param defaultSortingProperty Teh defualt sorting property
      * @return {@link PageRequest} of type {@link OffsetLimitBasedPageRequest}
      */
     protected OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions,

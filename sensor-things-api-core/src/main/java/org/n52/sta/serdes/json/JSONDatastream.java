@@ -50,6 +50,7 @@ import java.util.stream.Collectors;
 public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<DatastreamEntity>
         implements AbstractJSONEntity {
 
+    private static final String COULD_NOT_PARSE_OBS_AREA = "Could not parse observedArea to GeoJSON. Error was: ";
     // JSON Properties. Matched by Annotation or variable name
     public String observationType;
     public JSONUnitOfMeasurement unitOfMeasurement;
@@ -86,46 +87,44 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
         self = new DatastreamEntity();
     }
 
+    @Override
     public DatastreamEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
-            case FULL:
-                Assert.notNull(name, INVALID_INLINE_ENTITY + "name");
-                Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
-                Assert.notNull(observationType, INVALID_INLINE_ENTITY + obsType);
-                Assert.state(
-                        observationType.equals(OM_Measurement)
-                                || observationType.equals(OM_CountObservation)
-                                || observationType.equals(OM_CategoryObservation)
-                                || observationType.equals(OM_Observation)
-                                || observationType.equals(OM_TruthObservation)
-                        , INVALID_INLINE_ENTITY + obsType);
-                Assert.notNull(unitOfMeasurement, INVALID_INLINE_ENTITY + "unitOfMeasurement");
-                Assert.notNull(unitOfMeasurement.name, INVALID_INLINE_ENTITY + "unitOfMeasurement->name");
-                Assert.notNull(unitOfMeasurement.symbol, INVALID_INLINE_ENTITY + "unitOfMeasurement->symbol");
-                Assert.notNull(unitOfMeasurement.definition, INVALID_INLINE_ENTITY + "unitOfMeasurement->definition");
+        case FULL:
+            Assert.notNull(name, INVALID_INLINE_ENTITY + "name");
+            Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
+            Assert.notNull(observationType, INVALID_INLINE_ENTITY + obsType);
+            Assert.state(observationType.equals(OM_Measurement) || observationType.equals(OM_CountObservation)
+                    || observationType.equals(OM_CategoryObservation) || observationType.equals(OM_Observation)
+                    || observationType.equals(OM_TruthObservation), INVALID_INLINE_ENTITY + obsType);
+            Assert.notNull(unitOfMeasurement, INVALID_INLINE_ENTITY + "unitOfMeasurement");
+            Assert.notNull(unitOfMeasurement.name, INVALID_INLINE_ENTITY + "unitOfMeasurement->name");
+            Assert.notNull(unitOfMeasurement.symbol, INVALID_INLINE_ENTITY + "unitOfMeasurement->symbol");
+            Assert.notNull(unitOfMeasurement.definition, INVALID_INLINE_ENTITY + "unitOfMeasurement->definition");
 
-                return createPostEntity();
-            case PATCH:
-                return createPatchEntity();
+            return createPostEntity();
+        case PATCH:
+            return createPatchEntity();
 
-            case REFERENCE:
-                Assert.isNull(name, INVALID_REFERENCED_ENTITY);
-                Assert.isNull(description, INVALID_REFERENCED_ENTITY);
-                Assert.isNull(observationType, INVALID_REFERENCED_ENTITY);
-                Assert.isNull(unitOfMeasurement, INVALID_REFERENCED_ENTITY);
-                Assert.isNull(observedArea, INVALID_REFERENCED_ENTITY);
-                Assert.isNull(phenomenonTime, INVALID_REFERENCED_ENTITY);
-                Assert.isNull(resultTime, INVALID_REFERENCED_ENTITY);
+        case REFERENCE:
+            Assert.isNull(name, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(description, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(observationType, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(unitOfMeasurement, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(observedArea, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(phenomenonTime, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(resultTime, INVALID_REFERENCED_ENTITY);
 
-                Assert.isNull(Sensor, INVALID_REFERENCED_ENTITY);
-                Assert.isNull(ObservedProperty, INVALID_REFERENCED_ENTITY);
-                Assert.isNull(Thing, INVALID_REFERENCED_ENTITY);
-                Assert.isNull(Observations, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(Sensor, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(ObservedProperty, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(Thing, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(Observations, INVALID_REFERENCED_ENTITY);
 
-                self.setIdentifier(identifier);
-                return self;
+            self.setIdentifier(identifier);
+            return self;
+        default:
+            return null;
         }
-        return null;
     }
 
     private DatastreamEntity createPatchEntity() {
@@ -142,8 +141,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
             try {
                 self.setGeometry(reader.read(observedArea.toString()));
             } catch (ParseException e) {
-                Assert.notNull(null,
-                        "Could not parse observedArea to GeoJSON. Error was:" + e.getMessage());
+                Assert.notNull(null, COULD_NOT_PARSE_OBS_AREA + e.getMessage());
             }
         }
 
@@ -166,10 +164,11 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
             }
         }
 
-        //if (phenomenonTime != null) {
-        // phenomenonTime (aka samplingTime) is automatically calculated based on associated Observations
+        // if (phenomenonTime != null) {
+        // phenomenonTime (aka samplingTime) is automatically calculated based
+        // on associated Observations
         // phenomenonTime parsed from json is therefore ignored.
-        //}
+        // }
         if (Thing != null) {
             self.setThing(Thing.toEntity(JSONBase.EntityType.REFERENCE));
         }
@@ -183,8 +182,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
         }
 
         if (Observations != null) {
-            self.setObservations(Arrays.stream(Observations)
-                    .map(obs -> obs.toEntity(JSONBase.EntityType.REFERENCE))
+            self.setObservations(Arrays.stream(Observations).map(obs -> obs.toEntity(JSONBase.EntityType.REFERENCE))
                     .collect(Collectors.toSet()));
         }
 
@@ -202,8 +200,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
             try {
                 self.setGeometry(reader.read(observedArea.toString()));
             } catch (ParseException e) {
-                Assert.notNull(null,
-                        "Could not parse observedArea to GeoJSON. Error was:" + e.getMessage());
+                Assert.notNull(null, COULD_NOT_PARSE_OBS_AREA + e.getMessage());
             }
         }
 
@@ -225,8 +222,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
         }
 
         if (Thing != null) {
-            self.setThing(Thing
-                    .toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+            self.setThing(Thing.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
         } else if (backReference instanceof JSONThing) {
             self.setThing(((JSONThing) backReference).getEntity());
         } else {
@@ -234,8 +230,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
         }
 
         if (Sensor != null) {
-            self.setProcedure(Sensor
-                    .toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+            self.setProcedure(Sensor.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
         } else if (backReference instanceof JSONSensor) {
             self.setProcedure(((JSONSensor) backReference).getEntity());
         } else {
@@ -243,8 +238,8 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
         }
 
         if (ObservedProperty != null) {
-            self.setObservableProperty(ObservedProperty
-                    .toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+            self.setObservableProperty(
+                    ObservedProperty.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
         } else if (backReference instanceof JSONObservedProperty) {
             self.setObservableProperty(((JSONObservedProperty) backReference).getEntity());
         } else {
@@ -252,12 +247,9 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
         }
 
         if (Observations != null) {
-            self.setObservations(
-                    Arrays.stream(Observations)
-                            .map(entity -> entity
-                                    .toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE))
-                            .collect(Collectors.toSet())
-            );
+            self.setObservations(Arrays.stream(Observations)
+                    .map(entity -> entity.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE))
+                    .collect(Collectors.toSet()));
         } else if (backReference instanceof JSONObservation) {
             self.setObservations(Collections.singleton(((JSONObservation) backReference).self));
         }
@@ -266,20 +258,10 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
 
     static class JSONUnitOfMeasurement {
         public String symbol;
+
         public String name;
+
         public String definition;
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-

@@ -49,6 +49,7 @@ public class JSONObservedProperty extends JSONBase.JSONwithIdNameDescription<Obs
         self = new ObservablePropertyEntity();
     }
 
+    @Override
     public ObservablePropertyEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
             case FULL:
@@ -93,7 +94,8 @@ public class JSONObservedProperty extends JSONBase.JSONwithIdNameDescription<Obs
 
                 self.setStaIdentifier(identifier);
                 return self;
+            default:
+                return null;
         }
-        return null;
     }
 }

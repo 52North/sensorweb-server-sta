@@ -43,6 +43,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("VisibilityModifier")
 public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorEntity> implements AbstractJSONEntity {
 
+    private static final String INALID_ENCODING_TYPE = "Invalid encodingType supplied. Only SensorML or PDF allowed.";
     private static final String STA_SENSORML_2 = "http://www.opengis.net/doc/IS/SensorML/2.0";
     private static final String SENSORML_2 = "http://www.opengis.net/sensorml/2.0";
     private static final String PDF = "application/pdf";
@@ -60,6 +61,7 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorEntity>
         self = new SensorEntity();
     }
 
+    @Override
     public SensorEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
             case FULL:
@@ -86,7 +88,7 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorEntity>
                         self.setFormat(new FormatEntity().setFormat(PDF));
                         self.setDescriptionFile(metadata);
                     } else {
-                        Assert.notNull(null, "Invalid encodingType supplied. Only SensorML or PDF allowed.");
+                        Assert.notNull(null, INALID_ENCODING_TYPE);
                     }
                 } else {
                     // Used when PATCHing new metadata
@@ -125,7 +127,7 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorEntity>
                         self.setFormat(new FormatEntity().setFormat(PDF));
                         self.setDescriptionFile(metadata);
                     } else {
-                        Assert.notNull(null, "Invalid encodingType supplied. Only SensorML or PDF allowed.");
+                        Assert.notNull(null, INALID_ENCODING_TYPE);
                     }
                 } else {
                     // Used when PATCHing new metadata
@@ -148,7 +150,8 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorEntity>
 
                 self.setIdentifier(identifier);
                 return self;
+            default:
+                return null;
         }
-        return null;
     }
 }

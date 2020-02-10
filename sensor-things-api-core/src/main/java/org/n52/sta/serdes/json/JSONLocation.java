@@ -45,6 +45,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("VisibilityModifier")
 public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEntity> implements AbstractJSONEntity {
 
+    private static final String COULD_NOT_PARSE = "Could not parse location to GeoJSON. Error was: ";
     // JSON Properties. Matched by Annotation or variable name
     public String encodingType;
     public JsonNode location;
@@ -63,6 +64,7 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
         self = new LocationEntity();
     }
 
+    @Override
     public LocationEntity toEntity(JSONBase.EntityType type) {
         GeoJsonReader reader = new GeoJsonReader(factory);
         switch (type) {
@@ -86,7 +88,7 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
                 try {
                     self.setGeometry(reader.read(location.toString()));
                 } catch (ParseException e) {
-                    Assert.notNull(null, "Could not parse location to GeoJSON. Error was:" + e.getMessage());
+                    Assert.notNull(null, COULD_NOT_PARSE + e.getMessage());
                 }
 
                 if (Things != null) {
@@ -122,7 +124,7 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
                 try {
                     self.setGeometry(reader.read(location.toString()));
                 } catch (ParseException e) {
-                    Assert.notNull(null, "Could not parse location to GeoJSON. Error was:" + e.getMessage());
+                    Assert.notNull(null, COULD_NOT_PARSE + e.getMessage());
                 }
 
                 if (Things != null) {
@@ -146,7 +148,8 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
 
                 self.setIdentifier(identifier);
                 return self;
+            default:
+                return null;
         }
-        return null;
     }
 }

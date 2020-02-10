@@ -43,7 +43,7 @@ import java.util.UUID;
 @SuppressWarnings("VisibilityModifier")
 public class JSONBase {
 
-    public static enum EntityType {
+    public enum EntityType {
         FULL,
         PATCH,
         REFERENCE
