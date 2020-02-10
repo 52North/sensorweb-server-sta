@@ -54,7 +54,7 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("/v2")
-public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
+public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtils {
 
     private static final String COULD_NOT_FIND_RELATED_ENTITY = "Could not find related Entity!";
     private final int rootUrlLength;
@@ -77,7 +77,7 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
     public ElementWithQueryOptions handlePost(@PathVariable String collectionName,
                                               @RequestBody String body) throws IOException, STACRUDException {
 
-        Class<T> clazz = collectionNameToClass.get(collectionName);
+        Class<T> clazz = collectionNameToClass(collectionName);
         return ((AbstractSensorThingsEntityService<?, T>) serviceRepository.getEntityService(collectionName))
                 .create(mapper.readValue(body, clazz));
     }
@@ -101,7 +101,7 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
                                     HttpServletRequest request)
             throws STACRUDException, IOException, STAInvalidUrlThrowable {
         validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
-        Class<EntityPatch> clazz = collectionNameToPatchClass.get(collectionName);
+        Class<EntityPatch> clazz = collectionNameToPatchClass(collectionName);
         ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
         String strippedId = id.substring(1, id.length() - 1);
         jsonBody.put(StaConstants.AT_IOT_ID, strippedId);
@@ -120,9 +120,9 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
      * @param request full request
      */
     @PatchMapping(
-            value = {MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_DATASTREAM_PATHVARIABLE,
-                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_OBSERVATION_PATHVARIABLE,
-                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATHVARIABLE
+            value = {MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
+                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE,
+                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE
             },
             produces = "application/json"
     )
@@ -144,7 +144,7 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
         Assert.notNull(entityId, COULD_NOT_FIND_RELATED_ENTITY);
 
         // Create Patch Entity
-        Class<EntityPatch> clazz = collectionNameToPatchClass.get(target);
+        Class<EntityPatch> clazz = collectionNameToPatchClass(target);
         Assert.notNull(clazz, "Could not find Patch Class!");
 
         ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
@@ -187,9 +187,9 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
      * @param request full request
      */
     @DeleteMapping(
-            value = {MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_DATASTREAM_PATHVARIABLE,
-                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_OBSERVATION_PATHVARIABLE,
-                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATHVARIABLE
+            value = {MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
+                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE,
+                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE
             },
             produces = "application/json"
     )

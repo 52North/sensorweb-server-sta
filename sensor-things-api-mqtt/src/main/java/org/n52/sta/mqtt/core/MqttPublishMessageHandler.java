@@ -46,7 +46,7 @@ import org.springframework.stereotype.Component;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
-public class MqttPublishMessageHandler extends STARequestUtils {
+public class MqttPublishMessageHandler implements STARequestUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttPublishMessageHandler.class);
 

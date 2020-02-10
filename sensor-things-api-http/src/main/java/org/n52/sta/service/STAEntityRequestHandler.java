@@ -45,7 +45,7 @@ import java.util.Map;
 
 @RequestMapping("/v2")
 @RestController
-public class STAEntityRequestHandler extends STARequestUtils {
+public class STAEntityRequestHandler implements STARequestUtils {
 
     private final EntityServiceRepository serviceRepository;
     private final int rootUrlLength;
@@ -94,9 +94,9 @@ public class STAEntityRequestHandler extends STARequestUtils {
      */
     @GetMapping(
             value = {
-                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_DATASTREAM_PATHVARIABLE,
-                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_OBSERVATION_PATHVARIABLE,
-                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATHVARIABLE
+                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
+                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE,
+                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE
             },
             produces = "application/json"
     )

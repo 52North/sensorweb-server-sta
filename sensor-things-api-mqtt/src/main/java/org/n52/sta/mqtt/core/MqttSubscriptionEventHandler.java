@@ -69,7 +69,7 @@ import java.util.regex.Pattern;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Component
-public class MqttSubscriptionEventHandler extends STARequestUtils implements STAEventHandler {
+public class MqttSubscriptionEventHandler implements STARequestUtils, STAEventHandler {
     public static final String INTERNAL_CLIENT_ID = "POC";
 
     private static final String BASE_URL = "";
@@ -91,7 +91,7 @@ public class MqttSubscriptionEventHandler extends STARequestUtils implements STA
     /*
      * List of all Entity Types that are currently subscribed to. Used for fail-fast.
      */
-    private Set<String> watchedEntityTypes = new HashSet<String>();
+    private Set<String> watchedEntityTypes = new HashSet<>();
 
     public MqttSubscriptionEventHandler(MqttUtil config,
                                         EntityServiceRepository serviceRepository,
@@ -101,6 +101,7 @@ public class MqttSubscriptionEventHandler extends STARequestUtils implements STA
         this.mapper = mapper;
     }
 
+    @Override
     public Set<String> getWatchedEntityTypes() {
         return watchedEntityTypes;
     }
@@ -191,7 +192,7 @@ public class MqttSubscriptionEventHandler extends STARequestUtils implements STA
             // Check topic for syntax+semantics
             validateURL(new StringBuffer(topic), serviceRepository, 0);
 
-            for (Pattern collectionPattern : namedCollectionPatterns) {
+            for (Pattern collectionPattern : NAMED_COLL_PATTERNS) {
                 mt = collectionPattern.matcher(topic);
                 if (mt.matches()) {
                     // OGC-15-078r6 14.2.1
@@ -199,7 +200,7 @@ public class MqttSubscriptionEventHandler extends STARequestUtils implements STA
                 }
             }
 
-            for (Pattern namedEntityPattern : namedEntityPatterns) {
+            for (Pattern namedEntityPattern : NAMED_ENTITY_PATTERNS) {
                 mt = namedEntityPattern.matcher(topic);
                 if (mt.matches()) {
                     // OGC-15-078r6 14.2.2
@@ -207,7 +208,7 @@ public class MqttSubscriptionEventHandler extends STARequestUtils implements STA
                 }
             }
 
-            for (Pattern namedSelectPattern : namedSelectPatterns) {
+            for (Pattern namedSelectPattern : NAMED_SELECT_PATTERNS) {
                 mt = namedSelectPattern.matcher(topic);
                 if (mt.matches()) {
                     // OGC-15-078r6 14.2.4
@@ -215,7 +216,7 @@ public class MqttSubscriptionEventHandler extends STARequestUtils implements STA
                 }
             }
 
-            for (Pattern namedPropertyPattern : namedPropertyPatterns) {
+            for (Pattern namedPropertyPattern : NAMED_PROP_PATTERNS) {
                 mt = namedPropertyPattern.matcher(topic);
                 if (mt.matches()) {
                     // OGC-15-078r6 14.2.3

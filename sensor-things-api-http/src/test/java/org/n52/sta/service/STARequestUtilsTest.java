@@ -34,7 +34,6 @@ import org.junit.Test;
 
 public class STARequestUtilsTest {
 
-
     @Test
     public void identifiedByDatastreamRegex() {
         assertEquals("Datastreams(?:\\()['\\-0-9a-zA-Z]+(?:\\))/(Sensor|ObservedProperty|Thing|Observations)",
@@ -44,6 +43,6 @@ public class STARequestUtilsTest {
     @Test
     public void entityIdentifiedByDatastreamPath() {
         assertEquals("{entity:Datastreams(?:\\()['\\-0-9a-zA-Z]+(?:\\))}/{target:Sensor|ObservedProperty|Thing}",
-                STARequestUtils.ENTITY_IDENTIFIED_BY_DATASTREAM_PATH);
+                STARequestUtils.ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE);
     }
 }

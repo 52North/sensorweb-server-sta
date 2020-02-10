@@ -49,212 +49,205 @@ import org.n52.sta.serdes.ObservedPropertySerDes;
 import org.n52.sta.serdes.SensorSerDes;
 import org.n52.sta.serdes.ThingSerDes;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Pattern;
 
-public class STARequestUtils implements StaConstants {
+public interface STARequestUtils extends StaConstants {
 
     // Used for identifying/referencing source Entity Type
     // e.g. "Datastreams" in /Datastreams(52)/Thing
-    public static final String GROUPNAME_SOURCE_NAME = "sourceName";
+    String GROUPNAME_SOURCE_NAME = "sourceName";
 
     // Used for identifying/referencing source Entity Id
     // e.g. "52" in /Datastreams(52)/Thing
-    public static final String GROUPNAME_SOURCE_IDENTIFIER = "sourceId";
+    String GROUPNAME_SOURCE_IDENTIFIER = "sourceId";
 
     // Used for identifying/referencing requested Entity Type
     // e.g. "Thing" in /Datastreams(52)/Thing
-    public static final String GROUPNAME_WANTED_NAME = "wantedName";
+    String GROUPNAME_WANTED_NAME = "wantedName";
 
     // Used for identifying/referencing requested Entity Type
     // e.g. "Thing" in /Datastreams(52)/Thing
-    public static final String GROUPNAME_WANTED_IDENTIFIER = "wantedId";
+    String GROUPNAME_WANTED_IDENTIFIER = "wantedId";
 
     // Used for identifying/referencing $select option
     // e.g. "name" in /Datastreams(52)/Thing$select=name
-    public static final String GROUPNAME_SELECT = "select";
+    String GROUPNAME_SELECT = "select";
 
     // Used for identifying/referencing source Entity Type
     // e.g. "name" in /Datastreams(52)/Thing/name
-    public static final String GROUPNAME_PROPERTY = "property";
+    String GROUPNAME_PROPERTY = "property";
 
-    protected static Map<String, Class> collectionNameToClass;
-    protected static Map<String, Class> collectionNameToPatchClass;
+    String MAPPING_PREFIX = "**/";
+    String IDENTIFIER_REGEX = "(?:\\()['\\-0-9a-zA-Z]+(?:\\))";
 
+    String URL_INVALID = "Url is invalid. ";
 
-    static final String MAPPING_PREFIX = "**/";
-    static final String IDENTIFIER_REGEX = "(?:\\()['\\-0-9a-zA-Z]+(?:\\))";
-
-    private static final String URL_INVALID = "Url is invalid. ";
-
-    private static final String PATH_ENTITY = "{entity:";
-    private static final String PATH_TARGET = "}/{target:";
-    private static final String SLASH = "/";
-    private static final String BACKSLASH = "\\";
-    private static final String OR = "|";
-    private static final String DOLLAR = "$";
-    private static final String QUESTIONMARK = "?";
-    private static final String PLUS = "+";
-    private static final String LESS_THAN = "<";
-    private static final String GREATER_THAN = ">";
-    private static final String ROUND_BRACKET_CLOSE = ")";
-    private static final String ROUND_BRACKET_OPEN = "(";
-    private static final String SQUARE_BRACKET_CLOSE = "]";
-    private static final String SQUARE_BRACKET_OPEN = "[";
-    private static final String CURLY_BRACKET_OPEN = "{";
-    private static final String CURLY_BRACKET_CLOSE = "}";
+    String PATH_ENTITY = "{entity:";
+    String PATH_TARGET = "}/{target:";
+    String SLASH = "/";
+    String BACKSLASH = "\\";
+    String OR = "|";
+    String DOLLAR = "$";
+    String QUESTIONMARK = "?";
+    String PLUS = "+";
+    String LESS_THAN = "<";
+    String GREATER_THAN = ">";
+    String ROUND_BRACKET_CLOSE = ")";
+    String ROUND_BRACKET_OPEN = "(";
+    String SQUARE_BRACKET_CLOSE = "]";
+    String SQUARE_BRACKET_OPEN = "[";
+    String CURLY_BRACKET_OPEN = "{";
+    String CURLY_BRACKET_CLOSE = "}";
 
     // Used to mark start and end of named capturing groups
-    private static final String SOURCE_NAME_GROUP_START =
+    String SOURCE_NAME_GROUP_START =
             ROUND_BRACKET_OPEN + QUESTIONMARK + LESS_THAN + GROUPNAME_SOURCE_NAME + GREATER_THAN;
-    private static final String SOURCE_NAME_GROUP_END = ROUND_BRACKET_CLOSE;
-    private static final String SOURCE_ID_GROUP_START =
+    String SOURCE_NAME_GROUP_END = ROUND_BRACKET_CLOSE;
+    String SOURCE_ID_GROUP_START =
             ROUND_BRACKET_OPEN + QUESTIONMARK + LESS_THAN + GROUPNAME_SOURCE_IDENTIFIER + GREATER_THAN;
-    private static final String SOURCE_ID_GROUP_END = ROUND_BRACKET_CLOSE;
-    private static final String WANTED_NAME_GROUP_START =
+    String SOURCE_ID_GROUP_END = ROUND_BRACKET_CLOSE;
+    String WANTED_NAME_GROUP_START =
             ROUND_BRACKET_OPEN + QUESTIONMARK + LESS_THAN + GROUPNAME_WANTED_NAME + GREATER_THAN;
-    private static final String WANTED_NAME_GROUP_END = ROUND_BRACKET_CLOSE;
-    private static final String WANTED_ID_GROUP_START =
+    String WANTED_NAME_GROUP_END = ROUND_BRACKET_CLOSE;
+    String WANTED_ID_GROUP_START =
             ROUND_BRACKET_OPEN + QUESTIONMARK + LESS_THAN + GROUPNAME_WANTED_IDENTIFIER + GREATER_THAN;
-    private static final String WANTED_ID_GROUP_END = ROUND_BRACKET_CLOSE;
-    private static final String SELECT_GROUP_START =
+    String WANTED_ID_GROUP_END = ROUND_BRACKET_CLOSE;
+    String SELECT_GROUP_START =
             ROUND_BRACKET_OPEN + QUESTIONMARK + LESS_THAN + GROUPNAME_SELECT + GREATER_THAN;
-    private static final String SELECT_GROUP_END = ROUND_BRACKET_CLOSE;
-    private static final String PROPERTY_GROUP_START =
+    String SELECT_GROUP_END = ROUND_BRACKET_CLOSE;
+    String PROPERTY_GROUP_START =
             ROUND_BRACKET_OPEN + QUESTIONMARK + LESS_THAN + GROUPNAME_PROPERTY + GREATER_THAN;
-    private static final String PROPERTY_GROUP_END = ROUND_BRACKET_CLOSE;
+    String PROPERTY_GROUP_END = ROUND_BRACKET_CLOSE;
 
-    private static final String IDENTIFIED_BY_DATASTREAM_REGEX =
+    String IDENTIFIED_BY_DATASTREAM_REGEX =
             DATASTREAMS + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN
                     + SENSOR + OR + OBSERVED_PROPERTY + OR + THING + OR + OBSERVATIONS + ROUND_BRACKET_CLOSE;
 
-    private static final String IDENTIFIED_BY_OBSERVATION_REGEX =
+    String IDENTIFIED_BY_OBSERVATION_REGEX =
             OBSERVATIONS + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN + DATASTREAM + OR + FEATURE_OF_INTEREST +
                     ROUND_BRACKET_CLOSE;
 
-    private static final String IDENTIFIED_BY_HISTORICAL_LOCATION_REGEX =
+    String IDENTIFIED_BY_HISTORICAL_LOCATION_REGEX =
             HISTORICAL_LOCATIONS + IDENTIFIER_REGEX + SLASH + THING;
 
-    private static final String IDENTIFIED_BY_THING_REGEX =
+    String IDENTIFIED_BY_THING_REGEX =
             THINGS + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN + DATASTREAMS
                     + OR + HISTORICAL_LOCATIONS + OR + LOCATIONS + ROUND_BRACKET_CLOSE;
 
-    private static final String IDENTIFIED_BY_LOCATION_REGEX =
+    String IDENTIFIED_BY_LOCATION_REGEX =
             LOCATIONS + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN + THINGS + OR + HISTORICAL_LOCATIONS +
                     ROUND_BRACKET_CLOSE + CURLY_BRACKET_CLOSE;
 
-    private static final String IDENTIFIED_BY_SENSOR_REGEX = SENSORS + IDENTIFIER_REGEX + SLASH + DATASTREAMS;
+    String IDENTIFIED_BY_SENSOR_REGEX = SENSORS + IDENTIFIER_REGEX + SLASH + DATASTREAMS;
 
-    private static final String IDENTIFIED_BY_OBSERVED_PROPERTY_REGEX =
+    String IDENTIFIED_BY_OBSERVED_PROPERTY_REGEX =
             OBSERVED_PROPERTIES + IDENTIFIER_REGEX + SLASH + DATASTREAMS;
 
-    private static final String IDENTIFIED_BY_FEATURE_OF_INTEREST_REGEX =
+    String IDENTIFIED_BY_FEATURE_OF_INTEREST_REGEX =
             FEATURES_OF_INTEREST + IDENTIFIER_REGEX + SLASH + OBSERVATIONS;
 
     // /Datastreams(52)/Sensor
     // /Datastreams(52)/ObservedProperty
     // /Datastreams(52)/Thing
-    private static final String ENTITY_IDENTIFIED_BY_DATASTREAM =
+    String ENTITY_IDENTIFIED_BY_DATASTREAM =
             SOURCE_NAME_GROUP_START + DATASTREAMS + SOURCE_NAME_GROUP_END
                     + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
                     + SLASH
                     + WANTED_NAME_GROUP_START + SENSOR + OR + OBSERVED_PROPERTY + OR + THING + WANTED_NAME_GROUP_END;
 
-    static final String ENTITY_IDENTIFIED_BY_DATASTREAM_PATHVARIABLE =
+    String ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE =
             PATH_ENTITY + DATASTREAMS + IDENTIFIER_REGEX
                     + PATH_TARGET + SENSOR + OR + OBSERVED_PROPERTY + OR + THING + CURLY_BRACKET_CLOSE;
 
     // /Observations(52)/Datastream
     // /Observations(52)/FeatureOfInterest
-    private static final String ENTITY_IDENTIFIED_BY_OBSERVATION =
+    String ENTITY_IDENTIFIED_BY_OBSERVATION =
             SOURCE_NAME_GROUP_START + OBSERVATIONS + SOURCE_NAME_GROUP_END
                     + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
                     + SLASH
                     + WANTED_NAME_GROUP_START + DATASTREAM + OR + FEATURE_OF_INTEREST + WANTED_NAME_GROUP_END;
 
-    static final String ENTITY_IDENTIFIED_BY_OBSERVATION_PATHVARIABLE =
+    String ENTITY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE =
             PATH_ENTITY + OBSERVATIONS + IDENTIFIER_REGEX + PATH_TARGET + DATASTREAM + OR + FEATURE_OF_INTEREST +
                     CURLY_BRACKET_CLOSE;
 
     // /HistoricalLocations(52)/Thing
-    private static final String ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION =
+    String ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION =
             SOURCE_NAME_GROUP_START + HISTORICAL_LOCATIONS + SOURCE_NAME_GROUP_END
                     + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
                     + SLASH
                     + WANTED_NAME_GROUP_START + THING + WANTED_NAME_GROUP_END;
 
-    static final String ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATHVARIABLE =
+    String ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE =
             PATH_ENTITY + HISTORICAL_LOCATIONS + IDENTIFIER_REGEX + PATH_TARGET + THING + CURLY_BRACKET_CLOSE;
 
     // /Datastream(52)/Observations
-    private static final String COLLECTION_IDENTIFIED_BY_DATASTREAM =
+    String COLLECTION_IDENTIFIED_BY_DATASTREAM =
             SOURCE_NAME_GROUP_START + DATASTREAMS + ROUND_BRACKET_CLOSE
                     + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
                     + SLASH
                     + WANTED_NAME_GROUP_START + OBSERVATIONS + WANTED_NAME_GROUP_END;
 
-    static final String COLLECTION_IDENTIFIED_BY_DATASTREAM_PATHVARIABLE =
+    String COLLECTION_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE =
             PATH_ENTITY + DATASTREAMS + IDENTIFIER_REGEX + PATH_TARGET + OBSERVATIONS + CURLY_BRACKET_CLOSE;
 
     // /Things(52)/Datastreams
     // /Things(52)/HistoricalLocations
     // /Things(52)/Locations
-    private static final String COLLECTION_IDENTIFIED_BY_THING =
+    String COLLECTION_IDENTIFIED_BY_THING =
             SOURCE_NAME_GROUP_START + THINGS + SOURCE_NAME_GROUP_END
                     + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
                     + SLASH
                     + WANTED_NAME_GROUP_START + DATASTREAMS + OR + HISTORICAL_LOCATIONS + OR + LOCATIONS +
                     WANTED_NAME_GROUP_END;
 
-    static final String COLLECTION_IDENTIFIED_BY_THING_PATHVARIABLE =
+    String COLLECTION_IDENTIFIED_BY_THING_PATH_VARIABLE =
             PATH_ENTITY + THINGS + IDENTIFIER_REGEX + PATH_TARGET
                     + DATASTREAMS + OR + HISTORICAL_LOCATIONS + OR + LOCATIONS + CURLY_BRACKET_CLOSE;
 
     // /Locations(52)/Things
     // /Locations(52)/HistoricalLocations
-    private static final String COLLECTION_IDENTIFIED_BY_LOCATION =
+    String COLLECTION_IDENTIFIED_BY_LOCATION =
             SOURCE_NAME_GROUP_START + LOCATIONS + SOURCE_NAME_GROUP_END
                     + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
                     + SLASH
                     + WANTED_NAME_GROUP_START + THINGS + OR + HISTORICAL_LOCATIONS + WANTED_NAME_GROUP_END;
 
-    static final String COLLECTION_IDENTIFIED_BY_LOCATION_PATHVARIABLE =
+    String COLLECTION_IDENTIFIED_BY_LOCATION_PATH_VARIABLE =
             PATH_ENTITY + LOCATIONS + IDENTIFIER_REGEX + PATH_TARGET + THINGS + OR + HISTORICAL_LOCATIONS +
                     CURLY_BRACKET_CLOSE;
 
     // /Sensors(52)/Datastreams
-    private static final String COLLECTION_IDENTIFIED_BY_SENSOR =
+    String COLLECTION_IDENTIFIED_BY_SENSOR =
             SOURCE_NAME_GROUP_START + SENSORS + SOURCE_NAME_GROUP_END
                     + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
                     + SLASH
                     + WANTED_NAME_GROUP_START + DATASTREAMS + WANTED_NAME_GROUP_END;
 
-    static final String COLLECTION_IDENTIFIED_BY_SENSOR_PATHVARIABLE =
+    String COLLECTION_IDENTIFIED_BY_SENSOR_PATH_VARIABLE =
             PATH_ENTITY + SENSORS + IDENTIFIER_REGEX + PATH_TARGET + DATASTREAMS + CURLY_BRACKET_CLOSE;
 
     // /ObservedProperties(52)/Datastreams
-    private static final String COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY =
+    String COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY =
             SOURCE_NAME_GROUP_START + OBSERVED_PROPERTIES + SOURCE_NAME_GROUP_END
                     + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
                     + SLASH
                     + WANTED_NAME_GROUP_START + DATASTREAMS + WANTED_NAME_GROUP_END;
 
-    static final String COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATHVARIABLE =
+    String COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH_VARIABLE =
             PATH_ENTITY + OBSERVED_PROPERTIES + IDENTIFIER_REGEX + PATH_TARGET + DATASTREAMS + CURLY_BRACKET_CLOSE;
 
     // /FeaturesOfInterest(52)/Observations
-    private static final String COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST =
+    String COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST =
             SOURCE_NAME_GROUP_START + FEATURES_OF_INTEREST + SOURCE_NAME_GROUP_END
                     + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
                     + SLASH
                     + WANTED_NAME_GROUP_START + OBSERVATIONS + WANTED_NAME_GROUP_END;
 
-    static final String COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATHVARIABLE =
+    String COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH_VARIABLE =
             PATH_ENTITY + FEATURES_OF_INTEREST + IDENTIFIER_REGEX + PATH_TARGET + OBSERVATIONS + CURLY_BRACKET_CLOSE;
 
-    static final String BASE_COLLECTION_REGEX =
+    String BASE_COLLECTION_REGEX =
             WANTED_NAME_GROUP_START
                     + OBSERVATIONS + OR
                     + DATASTREAMS + OR
@@ -266,143 +259,165 @@ public class STARequestUtils implements StaConstants {
                     + OBSERVED_PROPERTIES
                     + WANTED_NAME_GROUP_END;
 
-    private static final String SELECT_REGEX_NAMED_GROUPS =
+    String SELECT_REGEX_NAMED_GROUPS =
             BACKSLASH + QUESTIONMARK + BACKSLASH + DOLLAR + "select=" +
                     SELECT_GROUP_START + SQUARE_BRACKET_OPEN + BACKSLASH + "w" + BACKSLASH + "," +
                     SQUARE_BRACKET_CLOSE + PLUS + SELECT_GROUP_END;
 
-    private static final String PROPERTY_REGEX_NAMED_GROUPS =
+    String PROPERTY_REGEX_NAMED_GROUPS =
             SLASH + PROPERTY_GROUP_START + SQUARE_BRACKET_OPEN + "A-z," + SQUARE_BRACKET_CLOSE + PLUS +
                     PROPERTY_GROUP_END;
 
     // Patterns used for matching Paths in mqtt with named groups
     // Java does not support duplicate names so patterns are handled separately
     // OGC-15-078r6 14.2.1
-    private final Pattern collectionPattern1 = Pattern.compile(BASE_COLLECTION_REGEX + DOLLAR);
-    private final Pattern collectionPattern2 = Pattern.compile(COLLECTION_IDENTIFIED_BY_DATASTREAM + DOLLAR);
-    private final Pattern collectionPattern3 = Pattern.compile(COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST + DOLLAR);
-    private final Pattern collectionPattern4 = Pattern.compile(COLLECTION_IDENTIFIED_BY_LOCATION + DOLLAR);
-    private final Pattern collectionPattern5 = Pattern.compile(COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY + DOLLAR);
-    private final Pattern collectionPattern6 = Pattern.compile(COLLECTION_IDENTIFIED_BY_SENSOR + DOLLAR);
-    private final Pattern collectionPattern7 = Pattern.compile(COLLECTION_IDENTIFIED_BY_THING + DOLLAR);
+   Pattern CP_BASE = Pattern.compile(BASE_COLLECTION_REGEX + DOLLAR);
+   Pattern CP_IDENT_BY_DATASTREAM = Pattern.compile(COLLECTION_IDENTIFIED_BY_DATASTREAM + DOLLAR);
+   Pattern CP_IDENT_BY_FOI = Pattern.compile(COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST + DOLLAR);
+   Pattern CP_IDENT_BY_LOCATION = Pattern.compile(COLLECTION_IDENTIFIED_BY_LOCATION + DOLLAR);
+   Pattern CP_IDENT_BY_OBS_PROP = Pattern.compile(COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY + DOLLAR);
+   Pattern CP_IDENT_BY_SENSOR = Pattern.compile(COLLECTION_IDENTIFIED_BY_SENSOR + DOLLAR);
+   Pattern CP_IDENT_BY_THING = Pattern.compile(COLLECTION_IDENTIFIED_BY_THING + DOLLAR);
 
-    protected final Pattern[] namedCollectionPatterns =
+   Pattern[] NAMED_COLL_PATTERNS =
             new Pattern[] {
-                    collectionPattern1,
-                    collectionPattern2,
-                    collectionPattern3,
-                    collectionPattern4,
-                    collectionPattern5,
-                    collectionPattern6,
-                    collectionPattern7,
+                    CP_BASE,
+                    CP_IDENT_BY_DATASTREAM,
+                    CP_IDENT_BY_FOI,
+                    CP_IDENT_BY_LOCATION,
+                    CP_IDENT_BY_OBS_PROP,
+                    CP_IDENT_BY_SENSOR,
+                    CP_IDENT_BY_THING,
             };
 
     // OGC-15-078r6 14.2.2
-    private final Pattern entityPattern1 = Pattern.compile(
+   Pattern EP_BASE = Pattern.compile(
             BASE_COLLECTION_REGEX + WANTED_ID_GROUP_START + IDENTIFIER_REGEX + WANTED_ID_GROUP_END + DOLLAR);
-    private final Pattern entityPattern2 = Pattern.compile(ENTITY_IDENTIFIED_BY_DATASTREAM + DOLLAR);
-    private final Pattern entityPattern3 = Pattern.compile(ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION + DOLLAR);
-    private final Pattern entityPattern4 = Pattern.compile(ENTITY_IDENTIFIED_BY_OBSERVATION + DOLLAR);
+   Pattern EP_IDENT_BY_DATASTREAM = Pattern.compile(ENTITY_IDENTIFIED_BY_DATASTREAM + DOLLAR);
+   Pattern EP_IDENT_BY_HIST_LOC = Pattern.compile(ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION + DOLLAR);
+   Pattern EP_IDENT_BY_OBSERVATION = Pattern.compile(ENTITY_IDENTIFIED_BY_OBSERVATION + DOLLAR);
 
-    protected final Pattern[] namedEntityPatterns =
+   Pattern[] NAMED_ENTITY_PATTERNS =
             new Pattern[] {
-                    entityPattern1,
-                    entityPattern2,
-                    entityPattern3,
-                    entityPattern4
+                    EP_BASE,
+                    EP_IDENT_BY_DATASTREAM,
+                    EP_IDENT_BY_HIST_LOC,
+                    EP_IDENT_BY_OBSERVATION
             };
 
     // OGC-15-078r6 14.2.3
-    private final Pattern propertyPattern1 = Pattern.compile(
+   Pattern PROP_PATTERN_BASE = Pattern.compile(
             BASE_COLLECTION_REGEX + WANTED_ID_GROUP_START + IDENTIFIER_REGEX + WANTED_ID_GROUP_END +
                     PROPERTY_REGEX_NAMED_GROUPS + DOLLAR);
-    private final Pattern propertyPattern2 =
+   Pattern PROP_PATTERN_IDENT_BY_DATASTREAM =
             Pattern.compile(ENTITY_IDENTIFIED_BY_DATASTREAM + PROPERTY_REGEX_NAMED_GROUPS + DOLLAR);
-    private final Pattern propertyPattern3 =
+   Pattern PROP_PATTERN_IDENT_BY_HIST_LOC =
             Pattern.compile(ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION + PROPERTY_REGEX_NAMED_GROUPS + DOLLAR);
-    private final Pattern propertyPattern4 =
+   Pattern PROP_PATTERN_IDENT_BY_OBSERVATION =
             Pattern.compile(ENTITY_IDENTIFIED_BY_OBSERVATION + PROPERTY_REGEX_NAMED_GROUPS + DOLLAR);
 
-    protected final Pattern[] namedPropertyPatterns =
+   Pattern[] NAMED_PROP_PATTERNS =
             new Pattern[] {
-                    propertyPattern1,
-                    propertyPattern2,
-                    propertyPattern3,
-                    propertyPattern4
+                    PROP_PATTERN_BASE,
+                    PROP_PATTERN_IDENT_BY_DATASTREAM,
+                    PROP_PATTERN_IDENT_BY_HIST_LOC,
+                    PROP_PATTERN_IDENT_BY_OBSERVATION
             };
 
     // OGC-15-078r6 14.2.4
-    private final Pattern namedSelectPattern1 =
+   Pattern NAMED_SELECT_PATTER_BASE =
             Pattern.compile(BASE_COLLECTION_REGEX + SELECT_REGEX_NAMED_GROUPS + DOLLAR);
-    private final Pattern namedSelectPattern2 =
+   Pattern NAMED_SELECT_PATTER_IDENT_BY_DATASTREAM =
             Pattern.compile(COLLECTION_IDENTIFIED_BY_DATASTREAM + SELECT_REGEX_NAMED_GROUPS + DOLLAR);
-    private final Pattern namedSelectPattern3 =
+   Pattern NAMED_SELECT_PATTER_IDENT_BY_FOI =
             Pattern.compile(COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST + SELECT_REGEX_NAMED_GROUPS + DOLLAR);
-    private final Pattern namedSelectPattern4 =
+   Pattern NAMED_SELECT_PATTER_IDENT_BY_LOCATION =
             Pattern.compile(COLLECTION_IDENTIFIED_BY_LOCATION + SELECT_REGEX_NAMED_GROUPS + DOLLAR);
-    private final Pattern namedSelectPattern5 =
+   Pattern NAMED_SELECT_PATTER_IDENT_BY_OBS_PROP =
             Pattern.compile(COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY + SELECT_REGEX_NAMED_GROUPS + DOLLAR);
-    private final Pattern namedSelectPattern6 =
+   Pattern NAMED_SELECT_PATTER_IDENT_BY_SENSOR =
             Pattern.compile(COLLECTION_IDENTIFIED_BY_SENSOR + SELECT_REGEX_NAMED_GROUPS + DOLLAR);
-    private final Pattern namedSelectPattern7 =
+   Pattern NAMED_SELECT_PATTER_IDENT_BY_THING =
             Pattern.compile(COLLECTION_IDENTIFIED_BY_THING + SELECT_REGEX_NAMED_GROUPS + DOLLAR);
 
-    protected final Pattern[] namedSelectPatterns =
+   Pattern[] NAMED_SELECT_PATTERNS =
             new Pattern[] {
-                    namedSelectPattern1,
-                    namedSelectPattern2,
-                    namedSelectPattern3,
-                    namedSelectPattern4,
-                    namedSelectPattern5,
-                    namedSelectPattern6,
-                    namedSelectPattern7,
+                    NAMED_SELECT_PATTER_BASE,
+                    NAMED_SELECT_PATTER_IDENT_BY_DATASTREAM,
+                    NAMED_SELECT_PATTER_IDENT_BY_FOI,
+                    NAMED_SELECT_PATTER_IDENT_BY_LOCATION,
+                    NAMED_SELECT_PATTER_IDENT_BY_OBS_PROP,
+                    NAMED_SELECT_PATTER_IDENT_BY_SENSOR,
+                    NAMED_SELECT_PATTER_IDENT_BY_THING,
             };
 
-    static {
-        HashMap<String, Class> map = new HashMap<>();
-        map.put(THINGS, PlatformEntity.class);
-        map.put(LOCATIONS, LocationEntity.class);
-        map.put(DATASTREAMS, DatastreamEntity.class);
-        map.put(HISTORICAL_LOCATIONS, HistoricalLocationEntity.class);
-        map.put(SENSORS, SensorEntity.class);
-        map.put(OBSERVATIONS, DataEntity.class);
-        map.put(OBSERVED_PROPERTIES, PhenomenonEntity.class);
-        map.put(FEATURES_OF_INTEREST, AbstractFeatureEntity.class);
-        collectionNameToClass = Collections.unmodifiableMap(map);
+   Pattern BY_ID_PATTERN =
+            Pattern.compile(ROUND_BRACKET_OPEN + BASE_COLLECTION_REGEX + ROUND_BRACKET_CLOSE + IDENTIFIER_REGEX);
+   Pattern BY_DATASTREAM_PATTERN = Pattern.compile(IDENTIFIED_BY_DATASTREAM_REGEX);
+   Pattern BY_OBSERVATION_PATTERN = Pattern.compile(IDENTIFIED_BY_OBSERVATION_REGEX);
+   Pattern BY_HIST_LOC_PATTERN = Pattern.compile(IDENTIFIED_BY_HISTORICAL_LOCATION_REGEX);
+   Pattern BY_LOCATION_PATTERN = Pattern.compile(IDENTIFIED_BY_LOCATION_REGEX);
+   Pattern BY_THING_PATTERN = Pattern.compile(IDENTIFIED_BY_THING_REGEX);
+   Pattern BY_SENSOR_PATTERN = Pattern.compile(IDENTIFIED_BY_SENSOR_REGEX);
+   Pattern BY_OBSER_PROP_PATTERN = Pattern.compile(IDENTIFIED_BY_OBSERVED_PROPERTY_REGEX);
+   Pattern BY_FOI_PATTERN = Pattern.compile(IDENTIFIED_BY_FEATURE_OF_INTEREST_REGEX);
 
-        HashMap<String, Class> patchMap = new HashMap<>();
-        patchMap.put(THINGS, ThingSerDes.PlatformEntityPatch.class);
-        patchMap.put(LOCATIONS, LocationSerDes.LocationEntityPatch.class);
-        patchMap.put(DATASTREAMS, DatastreamSerDes.DatastreamEntityPatch.class);
-        patchMap.put(HISTORICAL_LOCATIONS, HistoricalLocationSerDes.HistoricalLocationEntityPatch.class);
-        patchMap.put(SENSORS, SensorSerDes.SensorEntityPatch.class);
-        patchMap.put(OBSERVATIONS, ObservationSerDes.StaDataEntityPatch.class);
-        patchMap.put(OBSERVED_PROPERTIES, ObservedPropertySerDes.PhenomenonEntityPatch.class);
-        patchMap.put(FEATURES_OF_INTEREST, FeatureOfInterestSerDes.AbstractFeatureEntityPatch.class);
 
-        patchMap.put(THING, ThingSerDes.PlatformEntityPatch.class);
-        patchMap.put(LOCATION, LocationSerDes.LocationEntityPatch.class);
-        patchMap.put(DATASTREAM, DatastreamSerDes.DatastreamEntityPatch.class);
-        patchMap.put(HISTORICAL_LOCATION, HistoricalLocationSerDes.HistoricalLocationEntityPatch.class);
-        patchMap.put(SENSOR, SensorSerDes.SensorEntityPatch.class);
-        patchMap.put(OBSERVATION, ObservationSerDes.StaDataEntityPatch.class);
-        patchMap.put(OBSERVED_PROPERTY, ObservedPropertySerDes.PhenomenonEntityPatch.class);
-        patchMap.put(FEATURE_OF_INTEREST, FeatureOfInterestSerDes.AbstractFeatureEntityPatch.class);
-        collectionNameToPatchClass = Collections.unmodifiableMap(patchMap);
+    default Class collectionNameToClass(String collectionName) {
+        switch (collectionName) {
+        case THINGS:
+            return PlatformEntity.class;
+        case LOCATIONS:
+            return LocationEntity.class;
+        case DATASTREAMS:
+            return DatastreamEntity.class;
+        case HISTORICAL_LOCATIONS:
+            return HistoricalLocationEntity.class;
+        case SENSORS:
+            return SensorEntity.class;
+        case OBSERVATIONS:
+            return DataEntity.class;
+        case OBSERVED_PROPERTIES:
+            return PhenomenonEntity.class;
+        case FEATURES_OF_INTEREST:
+            return AbstractFeatureEntity.class;
+        default:
+            return null;
+        }
     }
 
-    private final Pattern byIdPattern =
-            Pattern.compile(ROUND_BRACKET_OPEN + BASE_COLLECTION_REGEX + ROUND_BRACKET_CLOSE + IDENTIFIER_REGEX);
-    private final Pattern byDatastreamPattern = Pattern.compile(IDENTIFIED_BY_DATASTREAM_REGEX);
-    private final Pattern byObservationPattern = Pattern.compile(IDENTIFIED_BY_OBSERVATION_REGEX);
-    private final Pattern byHistoricalLocationPattern = Pattern.compile(IDENTIFIED_BY_HISTORICAL_LOCATION_REGEX);
-    private final Pattern byLocationPattern = Pattern.compile(IDENTIFIED_BY_LOCATION_REGEX);
-    private final Pattern byThingPattern = Pattern.compile(IDENTIFIED_BY_THING_REGEX);
-    private final Pattern bySensorsPattern = Pattern.compile(IDENTIFIED_BY_SENSOR_REGEX);
-    private final Pattern byObservedPropertiesPattern = Pattern.compile(IDENTIFIED_BY_OBSERVED_PROPERTY_REGEX);
-    private final Pattern byFeaturesOfInterestPattern = Pattern.compile(IDENTIFIED_BY_FEATURE_OF_INTEREST_REGEX);
+    default Class collectionNameToPatchClass(String collectionName) {
+        switch (collectionName) {
+        case THINGS:
+        case THING:
+            return ThingSerDes.PlatformEntityPatch.class;
+        case LOCATIONS:
+        case LOCATION:
+            return LocationSerDes.LocationEntityPatch.class;
+        case DATASTREAMS:
+        case DATASTREAM:
+            return DatastreamSerDes.DatastreamEntityPatch.class;
+        case HISTORICAL_LOCATIONS:
+        case HISTORICAL_LOCATION:
+            return HistoricalLocationSerDes.HistoricalLocationEntityPatch.class;
+        case SENSORS:
+        case SENSOR:
+            return SensorSerDes.SensorEntityPatch.class;
+        case OBSERVATIONS:
+        case OBSERVATION:
+            return ObservationSerDes.StaDataEntityPatch.class;
+        case OBSERVED_PROPERTIES:
+        case OBSERVED_PROPERTY:
+            return ObservedPropertySerDes.PhenomenonEntityPatch.class;
+        case FEATURES_OF_INTEREST:
+        case FEATURE_OF_INTEREST:
+            return FeatureOfInterestSerDes.AbstractFeatureEntityPatch.class;
+        default:
+            return null;
+        }
+    }
 
-    public STAInvalidUrlThrowable validateURL(StringBuffer requestURL,
+    default STAInvalidUrlThrowable validateURL(StringBuffer requestURL,
                                               EntityServiceRepository serviceRepository,
                                               int rootUrlLength) throws STAInvalidUrlThrowable {
         String[] uriResources = requestURL.substring(rootUrlLength).split(SLASH);
@@ -425,26 +440,26 @@ public class STARequestUtils implements StaConstants {
      * @param uriResources URI of the Request split by SLASH
      * @return STAInvalidUrlException if URI is malformed
      */
-    private STAInvalidUrlThrowable validateURISyntax(String[] uriResources) {
+    default STAInvalidUrlThrowable validateURISyntax(String[] uriResources) {
         // Validate URL syntax via Regex
         // Skip validation if no navigationPath is provided as Spring already validated syntax
         if (uriResources.length > 1) {
             // check iteratively and fail-fast
             for (int i = 0; i < uriResources.length; i++) {
-                if (!byIdPattern.matcher(uriResources[i]).matches()) {
+                if (!BY_ID_PATTERN.matcher(uriResources[i]).matches()) {
                     // Resource is addressed by relation to other entity
                     // e.g. Datastreams(1)/Thing
                     if (i > 0) {
                         // Look back at last resource and check if association is valid
                         String resource = uriResources[i - 1] + SLASH + uriResources[i];
-                        if (!(byDatastreamPattern.matcher(resource).matches()
-                                || byHistoricalLocationPattern.matcher(resource).matches()
-                                || byLocationPattern.matcher(resource).matches()
-                                || byThingPattern.matcher(resource).matches()
-                                || byFeaturesOfInterestPattern.matcher(resource).matches()
-                                || byObservationPattern.matcher(resource).matches()
-                                || bySensorsPattern.matcher(resource).matches()
-                                || byObservedPropertiesPattern.matcher(resource).matches())) {
+                        if (!(BY_DATASTREAM_PATTERN.matcher(resource).matches()
+                                || BY_HIST_LOC_PATTERN.matcher(resource).matches()
+                                || BY_LOCATION_PATTERN.matcher(resource).matches()
+                                || BY_THING_PATTERN.matcher(resource).matches()
+                                || BY_FOI_PATTERN.matcher(resource).matches()
+                                || BY_OBSER_PROP_PATTERN.matcher(resource).matches()
+                                || BY_SENSOR_PATTERN.matcher(resource).matches()
+                                || BY_OBSER_PROP_PATTERN.matcher(resource).matches())) {
                             return new STAInvalidUrlThrowable(URL_INVALID
                                                                       + uriResources[i - 1]
                                                                       + SLASH + uriResources[i]
@@ -471,7 +486,7 @@ public class STARequestUtils implements StaConstants {
      * @param uriResources URI of the Request split by SLASH
      * @return STAInvalidUrlException if URI is malformed
      */
-    private STAInvalidUrlThrowable validateURISemantic(String[] uriResources,
+    default STAInvalidUrlThrowable validateURISemantic(String[] uriResources,
                                                        EntityServiceRepository serviceRepository) {
         // Check if this is Request to root collection. They are always valid
         if (uriResources.length == 1 && !uriResources[0].contains(ROUND_BRACKET_OPEN)) {
@@ -519,15 +534,15 @@ public class STARequestUtils implements StaConstants {
         return null;
     }
 
-    private STAInvalidUrlThrowable createInvalidUrlExceptionNoEntit(String entity) {
+    default STAInvalidUrlThrowable createInvalidUrlExceptionNoEntit(String entity) {
         return new STAInvalidUrlThrowable("No Entity: " + entity + " found!");
     }
 
-    private STAInvalidUrlThrowable createInvalidUrlExceptionNoEntitAssociated(String first, String last) {
+    default STAInvalidUrlThrowable createInvalidUrlExceptionNoEntitAssociated(String first, String last) {
         return createInvalidUrlExceptionNoEntit(first + " associated with " + last);
     }
 
-    protected static String[] splitId(String entity) {
+    default String[] splitId(String entity) {
         return entity.split("\\(");
     }
 
