@@ -71,7 +71,7 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
 
     @PostMapping(
             consumes = "application/json",
-            value = "/{collectionName:" + COLLECTION_REGEX + "$}",
+            value = "/{collectionName:" + BASE_COLLECTION_REGEX + "$}",
             produces = "application/json")
     @SuppressWarnings("unchecked")
     public ElementWithQueryOptions handlePost(@PathVariable String collectionName,
@@ -91,7 +91,7 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
      * @param request        full request
      */
     @PatchMapping(
-            value = "**/{collectionName:" + COLLECTION_REGEX + "}{id:" + IDENTIFIER_REGEX + "$}",
+            value = "**/{collectionName:" + BASE_COLLECTION_REGEX + "}{id:" + IDENTIFIER_REGEX + "$}",
             produces = "application/json"
     )
     @SuppressWarnings("unchecked")
@@ -120,9 +120,9 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
      * @param request full request
      */
     @PatchMapping(
-            value = {MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_DATASTREAM_PATH,
-                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_OBSERVATION_PATH,
-                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH
+            value = {MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_DATASTREAM_PATHVARIABLE,
+                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_OBSERVATION_PATHVARIABLE,
+                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATHVARIABLE
             },
             produces = "application/json"
     )
@@ -166,7 +166,7 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
      * @param request        full request
      */
     @DeleteMapping(
-            value = "**/{collectionName:" + COLLECTION_REGEX + "}{id:" + IDENTIFIER_REGEX + "$}",
+            value = "**/{collectionName:" + BASE_COLLECTION_REGEX + "}{id:" + IDENTIFIER_REGEX + "$}",
             produces = "application/json"
     )
     public Object handleDelete(@PathVariable String collectionName,
@@ -187,9 +187,9 @@ public class STACrudRequestHandler<T extends IdEntity> extends STARequestUtils {
      * @param request full request
      */
     @DeleteMapping(
-            value = {MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_DATASTREAM_PATH,
-                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_OBSERVATION_PATH,
-                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH
+            value = {MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_DATASTREAM_PATHVARIABLE,
+                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_OBSERVATION_PATHVARIABLE,
+                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATHVARIABLE
             },
             produces = "application/json"
     )

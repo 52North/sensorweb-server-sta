@@ -28,6 +28,7 @@
  */
 package org.n52.sta.service;
 
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlThrowable;
@@ -64,15 +65,16 @@ public class STACollectionRequestHandler extends STARequestUtils {
      * @param queryOptions   query options. Automatically set by Spring via @RequestParam
      */
     @GetMapping(
-            value = "/{collectionName:" + COLLECTION_REGEX + "}",
+            value = "/{collectionName:" + BASE_COLLECTION_REGEX + "}",
             produces = "application/json"
     )
     public List<ElementWithQueryOptions> readCollectionDirect(@PathVariable String collectionName,
-                                                              @RequestParam Map<String, String> queryOptions)
+                                                              @RequestParam Map<String, String> queryOptions,
+                                                              HttpServletRequest request)
             throws STACRUDException {
         return serviceRepository
                 .getEntityService(collectionName)
-                .getEntityCollection(createQueryOptions(queryOptions));
+                .getEntityCollection(new QueryOptions(request.getRequestURL().toString()));
     }
 
     /**
@@ -84,12 +86,12 @@ public class STACollectionRequestHandler extends STARequestUtils {
      * @return JSON String representing Entity
      */
     @GetMapping(
-            value = {MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_THING_PATH,
-                     MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_LOCATION_PATH,
-                     MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH,
-                     MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH,
-                     MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_SENSOR_PATH,
-                     MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_DATASTREAM_PATH
+            value = {MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_THING_PATHVARIABLE,
+                     MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_LOCATION_PATHVARIABLE,
+                     MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATHVARIABLE,
+                     MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATHVARIABLE,
+                     MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_SENSOR_PATHVARIABLE,
+                     MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_DATASTREAM_PATHVARIABLE
             },
             produces = "application/json"
     )
@@ -109,6 +111,6 @@ public class STACollectionRequestHandler extends STARequestUtils {
         String sourceId = split[1].replace(")", "");
 
         return serviceRepository.getEntityService(target)
-                .getEntityCollectionByRelatedEntity(sourceId, sourceType, createQueryOptions(queryOptions));
+                .getEntityCollectionByRelatedEntity(sourceId, sourceType, new QueryOptions(request.getRequestURL().toString()));
     }
 }

@@ -28,6 +28,7 @@
  */
 package org.n52.sta.service;
 
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlThrowable;
 import org.n52.sta.data.service.EntityServiceRepository;
@@ -63,7 +64,7 @@ public class STAEntityRequestHandler extends STARequestUtils {
      * @param request full request
      */
     @GetMapping(
-            value = MAPPING_PREFIX + "{entity:" + COLLECTION_REGEX + "}{id:" + IDENTIFIER_REGEX + "$}",
+            value = MAPPING_PREFIX + "{entity:" + BASE_COLLECTION_REGEX + "}{id:" + IDENTIFIER_REGEX + "$}",
             produces = "application/json"
     )
     public Object readEntityDirect(@PathVariable String entity,
@@ -78,7 +79,7 @@ public class STAEntityRequestHandler extends STARequestUtils {
         validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
 
         String entityId = id.substring(1, id.length() - 1);
-        return serviceRepository.getEntityService(entity).getEntity(entityId, createQueryOptions(queryOptions));
+        return serviceRepository.getEntityService(entity).getEntity(entityId, new QueryOptions(request.getRequestURL().toString()));
     }
 
     /**
@@ -90,9 +91,9 @@ public class STAEntityRequestHandler extends STARequestUtils {
      * @return JSON String representing Entity
      */
     @GetMapping(
-            value = {MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_DATASTREAM_PATH,
-                     MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_OBSERVATION_PATH,
-                     MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH
+            value = {MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_DATASTREAM_PATHVARIABLE,
+                     MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_OBSERVATION_PATHVARIABLE,
+                     MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATHVARIABLE
             },
             produces = "application/json"
     )
@@ -111,6 +112,6 @@ public class STAEntityRequestHandler extends STARequestUtils {
         String sourceId = entity.substring(sourceType.length() + 1, entity.length() - 1);
 
         return serviceRepository.getEntityService(target)
-                        .getEntityByRelatedEntity(sourceId, sourceType, null, createQueryOptions(queryOptions));
+                        .getEntityByRelatedEntity(sourceId, sourceType, null, new QueryOptions(request.getRequestURL().toString()));
     }
 }
