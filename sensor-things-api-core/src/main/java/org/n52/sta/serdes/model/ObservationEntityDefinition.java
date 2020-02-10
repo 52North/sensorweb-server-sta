@@ -29,6 +29,7 @@
 package org.n52.sta.serdes.model;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -53,7 +54,9 @@ public class ObservationEntityDefinition extends STAEntityDefinition {
             PROP_PARAMETERS
     };
 
-    public static final Set<String> navigationProperties = new HashSet<>(Arrays.asList(navProps));
+    public static final Set<String> navigationProperties =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(navProps)));
 
-    public static final Set<String> entityProperties = new HashSet<>(Arrays.asList(entityProps));
+    public static final Set<String> entityProperties =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(entityProps)));
 }
