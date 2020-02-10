@@ -81,7 +81,7 @@ public class MessageBusRepository<T, I extends Serializable>
         this.em = entityManager;
         this.entityInformation = entityInformation;
 
-        this.mqttHandler = (STAEventHandler) SpringApplicationContext.getBean("mqttEventHandler");
+        this.mqttHandler = (STAEventHandler) SpringApplicationContext.getBean(STAEventHandler.class);
         Assert.notNull(this.mqttHandler, "Could not autowire Mqtt handler!");
     }
 
@@ -110,13 +110,16 @@ public class MessageBusRepository<T, I extends Serializable>
     @Transactional
     @Override
     public <S extends T> S save(S newEntity) {
-        boolean intercept = mqttHandler.getWatchedEntityTypes().contains(entityInformation.getJavaType().getName());
+        //TODO: refactor to use STA name and not java class name
+        String entityType = entityInformation.getJavaType().getName();
+
+        boolean intercept = mqttHandler.getWatchedEntityTypes().contains(entityType);
 
         if (entityInformation.isNew(newEntity)) {
             em.persist(newEntity);
             em.flush();
             if (intercept) {
-                this.mqttHandler.handleEvent(newEntity, null);
+                this.mqttHandler.handleEvent(newEntity, entityType, null);
             }
         } else {
             if (intercept) {
@@ -127,7 +130,7 @@ public class MessageBusRepository<T, I extends Serializable>
                 if (oldEntity == entity) {
                     return entity;
                 }
-                this.mqttHandler.handleEvent(entity, computeDifferenceMap(oldEntity, entity));
+                this.mqttHandler.handleEvent(entity, entityType, computeDifferenceMap(oldEntity, entity));
             } else {
                 return em.merge(newEntity);
             }
