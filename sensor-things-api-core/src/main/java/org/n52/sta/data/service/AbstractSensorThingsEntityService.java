@@ -36,12 +36,12 @@ import org.n52.series.db.beans.HibernateRelations.HasName;
 import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.OffsetLimitBasedPageRequest;
 import org.n52.sta.data.repositories.IdentifierRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
-import org.n52.sta.utils.QueryOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
@@ -162,7 +162,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      * @param queryOptions {@link QueryOptions} used for serialization
      * @return Entity that matches
      */
-    public ElementWithQueryOptions getEntityByRelatedEntity(String relatedId,
+    public ElementWithQueryOptions<?> getEntityByRelatedEntity(String relatedId,
                                                             String relatedType,
                                                             String ownId,
                                                             QueryOptions queryOptions)

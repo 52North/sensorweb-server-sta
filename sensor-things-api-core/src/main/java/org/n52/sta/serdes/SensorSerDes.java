@@ -36,12 +36,12 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONSensor;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.SensorWithQueryOptions;
 import org.n52.sta.serdes.model.STAEntityDefinition;
 import org.n52.sta.serdes.model.SensorEntityDefinition;
-import org.n52.sta.utils.QueryOptions;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -50,6 +50,7 @@ import java.util.Set;
 public class SensorSerDes {
 
     public static class SensorEntityPatch extends SensorEntity implements EntityPatch<SensorEntity> {
+        private static final long serialVersionUID = 2966462269307558981L;
         private final SensorEntity entity;
 
         public SensorEntityPatch (SensorEntity entity) {
@@ -65,6 +66,7 @@ public class SensorSerDes {
 
         private static final String STA_SENSORML_2 = "http://www.opengis.net/doc/IS/SensorML/2.0";
         private static final String SENSORML_2 = "http://www.opengis.net/sensorml/2.0";
+        private static final long serialVersionUID = -2190624056257407974L;
 
         public SensorSerializer(String rootUrl) {
             super(SensorWithQueryOptions.class);
@@ -84,7 +86,8 @@ public class SensorSerDes {
             if (options != null) {
                 hasSelectOption = options.hasSelectOption();
                 if (hasSelectOption) {
-                    fieldsToSerialize = options.getSelectOption();
+                    //TODO: Implement
+                    // fieldsToSerialize = options.getSelectOption();
                 }
             }
             // olingo @iot links
@@ -137,6 +140,8 @@ public class SensorSerDes {
 
     public static class SensorDeserializer extends StdDeserializer<SensorEntity> {
 
+        private static final long serialVersionUID = -6513819346703020350L;
+
         public SensorDeserializer() {
             super(SensorEntity.class);
         }
@@ -148,6 +153,8 @@ public class SensorSerDes {
     }
 
     public static class SensorPatchDeserializer extends StdDeserializer<SensorEntityPatch> {
+
+        private static final long serialVersionUID = -6636765136530111251L;
 
         public SensorPatchDeserializer() {
             super(SensorEntityPatch.class);

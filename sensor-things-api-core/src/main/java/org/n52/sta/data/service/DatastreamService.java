@@ -38,6 +38,7 @@ import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.UnitEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
@@ -50,7 +51,6 @@ import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.DatastreamWithQueryOptions;
 import org.n52.sta.serdes.model.STAEntityDefinition;
-import org.n52.sta.utils.QueryOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
@@ -102,7 +102,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     }
 
     @Override
-    protected ElementWithQueryOptions createWrapper(Object entity, QueryOptions queryOptions) {
+    protected ElementWithQueryOptions<?> createWrapper(Object entity, QueryOptions queryOptions) {
         return new DatastreamWithQueryOptions((DatastreamEntity) entity, queryOptions);
     }
 

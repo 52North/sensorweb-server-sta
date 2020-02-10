@@ -34,12 +34,12 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONHistoricalLocation;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.HistoricalLocationWithQueryOptions;
 import org.n52.sta.serdes.model.HistoricalLocationEntityDefinition;
 import org.n52.sta.serdes.model.STAEntityDefinition;
-import org.n52.sta.utils.QueryOptions;
 
 import java.io.IOException;
 import java.util.Set;
@@ -48,6 +48,7 @@ public class HistoricalLocationSerDes {
 
     public static class HistoricalLocationEntityPatch extends HistoricalLocationEntity
             implements EntityPatch<HistoricalLocationEntity> {
+        private static final long serialVersionUID = -154825501303466727L;
         private final HistoricalLocationEntity entity;
 
         public HistoricalLocationEntityPatch (HistoricalLocationEntity entity) {
@@ -60,6 +61,8 @@ public class HistoricalLocationSerDes {
     }
 
     public static class HistoricalLocationSerializer extends AbstractSTASerializer<HistoricalLocationWithQueryOptions> {
+
+        private static final long serialVersionUID = 8651925159358792370L;
 
         public HistoricalLocationSerializer(String rootUrl) {
             super(HistoricalLocationWithQueryOptions.class);
@@ -80,7 +83,8 @@ public class HistoricalLocationSerDes {
             if (options != null) {
                 hasSelectOption = options.hasSelectOption();
                 if (hasSelectOption) {
-                    fieldsToSerialize = options.getSelectOption();
+                    //TODO: Implement
+                    // fieldsToSerialize = options.getSelectOption();
                 }
             }
             // olingo @iot links
@@ -109,6 +113,8 @@ public class HistoricalLocationSerDes {
 
     public static class HistoricalLocationDeserializer extends StdDeserializer<HistoricalLocationEntity> {
 
+        private static final long serialVersionUID = -7462598674289427663L;
+
         public HistoricalLocationDeserializer() {
             super(HistoricalLocationEntity.class);
         }
@@ -120,6 +126,8 @@ public class HistoricalLocationSerDes {
     }
 
     public static class HistoricalLocationPatchDeserializer extends StdDeserializer<HistoricalLocationEntityPatch> {
+
+        private static final long serialVersionUID = 8354140158937306874L;
 
         public HistoricalLocationPatchDeserializer() {
             super(HistoricalLocationEntityPatch.class);

@@ -36,12 +36,12 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.FeatureEntity;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONFeatureOfInterest;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.FeatureOfInterestWithQueryOptions;
 import org.n52.sta.serdes.model.FeatureOfInterestEntityDefinition;
 import org.n52.sta.serdes.model.STAEntityDefinition;
-import org.n52.sta.utils.QueryOptions;
 
 import java.io.IOException;
 import java.util.Set;
@@ -50,6 +50,7 @@ public class FeatureOfInterestSerDes {
 
     public static class AbstractFeatureEntityPatch extends AbstractFeatureEntity
             implements EntityPatch<AbstractFeatureEntity> {
+        private static final long serialVersionUID = 4488526324452194583L;
         private final AbstractFeatureEntity entity;
 
         public AbstractFeatureEntityPatch(FeatureEntity entity) {
@@ -66,6 +67,7 @@ public class FeatureOfInterestSerDes {
         private static final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
 
         private static final GeoJsonWriter GEO_JSON_WRITER = new GeoJsonWriter();
+        private static final long serialVersionUID = -2476879916353087078L;
 
         public FeatureOfInterestSerializer(String rootUrl) {
             super(FeatureOfInterestWithQueryOptions.class);
@@ -86,7 +88,8 @@ public class FeatureOfInterestSerDes {
             if (options != null) {
                 hasSelectOption = options.hasSelectOption();
                 if (hasSelectOption) {
-                    fieldsToSerialize = options.getSelectOption();
+                    //TODO: Implement
+                    // fieldsToSerialize = options.getSelectOption();
                 }
             }
             // olingo @iot links
@@ -128,6 +131,8 @@ public class FeatureOfInterestSerDes {
 
     public static class FeatureOfInterestDeserializer extends StdDeserializer<AbstractFeatureEntity<?>> {
 
+        private static final long serialVersionUID = 2394467109279839681L;
+
         public FeatureOfInterestDeserializer() {
             super(AbstractFeatureEntity.class);
         }
@@ -139,6 +144,8 @@ public class FeatureOfInterestSerDes {
     }
 
     public static class FeatureOfInterestPatchDeserializer extends StdDeserializer<AbstractFeatureEntityPatch> {
+
+        private static final long serialVersionUID = 7273345348512569187L;
 
         public FeatureOfInterestPatchDeserializer() {
             super(AbstractFeatureEntityPatch.class);

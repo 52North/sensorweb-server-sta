@@ -34,12 +34,12 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.n52.series.db.beans.PlatformEntity;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONThing;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.ThingWithQueryOptions;
 import org.n52.sta.serdes.model.STAEntityDefinition;
 import org.n52.sta.serdes.model.ThingEntityDefinition;
-import org.n52.sta.utils.QueryOptions;
 
 import java.io.IOException;
 import java.util.Set;
@@ -47,6 +47,7 @@ import java.util.Set;
 public class ThingSerDes {
 
     public static class PlatformEntityPatch extends PlatformEntity implements EntityPatch<PlatformEntity> {
+        private static final long serialVersionUID = -2233037380407692718L;
         private final PlatformEntity entity;
 
         public PlatformEntityPatch (PlatformEntity entity) {
@@ -59,6 +60,8 @@ public class ThingSerDes {
     }
 
     public static class ThingSerializer extends AbstractSTASerializer<ThingWithQueryOptions> {
+
+        private static final long serialVersionUID = -1618289129123682794L;
 
         public ThingSerializer(String rootUrl) {
             super(ThingWithQueryOptions.class);
@@ -78,7 +81,8 @@ public class ThingSerDes {
             if (options != null) {
                 hasSelectOption = options.hasSelectOption();
                 if (hasSelectOption) {
-                    fieldsToSerialize = options.getSelectOption();
+                    //TODO: Implement
+                    // fieldsToSerialize = options.getSelectOption();
                 }
             }
             // olingo @iot links
@@ -114,6 +118,8 @@ public class ThingSerDes {
 
     public static class ThingDeserializer extends StdDeserializer<PlatformEntity> {
 
+        private static final long serialVersionUID = 3942005672394573517L;
+
         public ThingDeserializer() {
             super(PlatformEntity.class);
         }
@@ -125,6 +131,8 @@ public class ThingSerDes {
     }
 
     public static class ThingPatchDeserializer extends StdDeserializer<PlatformEntityPatch> {
+
+        private static final long serialVersionUID = -6355786322787893665L;
 
         public ThingPatchDeserializer() {
             super(PlatformEntityPatch.class);

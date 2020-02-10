@@ -35,13 +35,13 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.util.DateTimeHelper;
 import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONDatastream;
 import org.n52.sta.serdes.model.DatastreamEntityDefinition;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.DatastreamWithQueryOptions;
 import org.n52.sta.serdes.model.STAEntityDefinition;
-import org.n52.sta.utils.QueryOptions;
 import org.n52.sta.utils.TimeUtil;
 
 import java.io.IOException;
@@ -50,6 +50,7 @@ import java.util.Set;
 public class DatastreamSerDes {
 
     public static class DatastreamEntityPatch extends DatastreamEntity implements EntityPatch<DatastreamEntity> {
+        private static final long serialVersionUID = -8968753678464145994L;
         private final DatastreamEntity entity;
 
         public DatastreamEntityPatch (DatastreamEntity entity) {
@@ -64,6 +65,7 @@ public class DatastreamSerDes {
     public static class DatastreamSerializer extends AbstractSTASerializer<DatastreamWithQueryOptions> {
 
         private static final GeoJsonWriter GEO_JSON_WRITER = new GeoJsonWriter();
+        private static final long serialVersionUID = -6555417490577181829L;
 
         public DatastreamSerializer(String rootUrl) {
             super(DatastreamWithQueryOptions.class);
@@ -83,7 +85,8 @@ public class DatastreamSerDes {
             if (options != null) {
                 hasSelectOption = options.hasSelectOption();
                 if (hasSelectOption) {
-                    fieldsToSerialize = options.getSelectOption();
+                    //TODO: Implement
+                    // fieldsToSerialize = options.getSelectOption();
                 }
             }
             // olingo @iot links
@@ -152,6 +155,8 @@ public class DatastreamSerDes {
 
     public static class DatastreamDeserializer extends StdDeserializer<DatastreamEntity> {
 
+        private static final long serialVersionUID = 7491123624385588769L;
+
         public DatastreamDeserializer() {
             super(DatastreamEntity.class);
         }
@@ -163,6 +168,8 @@ public class DatastreamSerDes {
     }
 
     public static class DatastreamPatchDeserializer extends StdDeserializer<DatastreamEntityPatch> {
+
+        private static final long serialVersionUID = 6354638503794606750L;
 
         public DatastreamPatchDeserializer() {
             super(DatastreamEntityPatch.class);

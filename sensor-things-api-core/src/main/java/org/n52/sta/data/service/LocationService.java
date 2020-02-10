@@ -33,6 +33,7 @@ import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.query.LocationQuerySpecifications;
 import org.n52.sta.data.repositories.LocationEncodingRepository;
@@ -41,7 +42,6 @@ import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.LocationWithQueryOptions;
 import org.n52.sta.serdes.model.STAEntityDefinition;
-import org.n52.sta.utils.QueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.DependsOn;
@@ -86,7 +86,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     }
 
     @Override
-    protected ElementWithQueryOptions createWrapper(Object entity, QueryOptions queryOptions) {
+    protected ElementWithQueryOptions<?> createWrapper(Object entity, QueryOptions queryOptions) {
         return new LocationWithQueryOptions((LocationEntity) entity, queryOptions);
     }
 

@@ -34,12 +34,12 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.n52.series.db.beans.PhenomenonEntity;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONObservedProperty;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.ObservedPropertyWithQueryOptions;
 import org.n52.sta.serdes.model.ObservedPropertyEntityDefinition;
 import org.n52.sta.serdes.model.STAEntityDefinition;
-import org.n52.sta.utils.QueryOptions;
 
 import java.io.IOException;
 import java.util.Set;
@@ -47,9 +47,10 @@ import java.util.Set;
 public class ObservedPropertySerDes {
 
     public static class PhenomenonEntityPatch extends PhenomenonEntity implements EntityPatch<PhenomenonEntity> {
+        private static final long serialVersionUID = 2568180072428202569L;
         private final PhenomenonEntity entity;
 
-        public PhenomenonEntityPatch (PhenomenonEntity entity) {
+        public PhenomenonEntityPatch(PhenomenonEntity entity) {
             this.entity = entity;
         }
 
@@ -60,6 +61,8 @@ public class ObservedPropertySerDes {
 
 
     public static class ObservedPropertySerializer extends AbstractSTASerializer<ObservedPropertyWithQueryOptions> {
+
+        private static final long serialVersionUID = -393434867481235299L;
 
         public ObservedPropertySerializer(String rootUrl) {
             super(ObservedPropertyWithQueryOptions.class);
@@ -72,14 +75,15 @@ public class ObservedPropertySerDes {
                 throws IOException {
             gen.writeStartObject();
             PhenomenonEntity obsProp = value.getEntity();
-            QueryOptions options = value .getQueryOptions();
+            QueryOptions options = value.getQueryOptions();
 
             Set<String> fieldsToSerialize = null;
             boolean hasSelectOption = false;
             if (options != null) {
                 hasSelectOption = options.hasSelectOption();
                 if (hasSelectOption) {
-                    fieldsToSerialize = options.getSelectOption();
+                    //TODO: Implement
+                    // fieldsToSerialize = options.getSelectOption();
                 }
             }
 
@@ -115,6 +119,8 @@ public class ObservedPropertySerDes {
 
     public static class ObservedPropertyDeserializer extends StdDeserializer<PhenomenonEntity> {
 
+        private static final long serialVersionUID = -1880043109904466341L;
+
         public ObservedPropertyDeserializer() {
             super(PhenomenonEntity.class);
         }
@@ -126,6 +132,8 @@ public class ObservedPropertySerDes {
     }
 
     public static class ObservedPropertyPatchDeserializer extends StdDeserializer<PhenomenonEntityPatch> {
+
+        private static final long serialVersionUID = 574088735297768175L;
 
         public ObservedPropertyPatchDeserializer() {
             super(PhenomenonEntityPatch.class);

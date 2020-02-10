@@ -35,12 +35,12 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONLocation;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.LocationWithQueryOptions;
 import org.n52.sta.serdes.model.LocationEntityDefinition;
 import org.n52.sta.serdes.model.STAEntityDefinition;
-import org.n52.sta.utils.QueryOptions;
 
 import java.io.IOException;
 import java.util.Set;
@@ -48,6 +48,7 @@ import java.util.Set;
 public class LocationSerDes {
 
     public static class LocationEntityPatch extends LocationEntity implements EntityPatch<LocationEntity> {
+        private static final long serialVersionUID = -8421752856535036959L;
         private final LocationEntity entity;
 
         public LocationEntityPatch (LocationEntity entity) {
@@ -65,6 +66,7 @@ public class LocationSerDes {
         private static final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
 
         private static final GeoJsonWriter GEO_JSON_WRITER = new GeoJsonWriter();
+        private static final long serialVersionUID = 5481294508394633788L;
 
         public LocationSerializer(String rootUrl) {
             super(LocationWithQueryOptions.class);
@@ -84,7 +86,8 @@ public class LocationSerDes {
             if (options != null) {
                 hasSelectOption = options.hasSelectOption();
                 if (hasSelectOption) {
-                    fieldsToSerialize = options.getSelectOption();
+                    //TODO: Implement
+                    // fieldsToSerialize = options.getSelectOption();
                 }
             }
             // olingo @iot links
@@ -126,6 +129,8 @@ public class LocationSerDes {
 
     public static class LocationDeserializer extends StdDeserializer<LocationEntity> {
 
+        private static final long serialVersionUID = -5978576540306282111L;
+
         public LocationDeserializer() {
             super(LocationEntity.class);
         }
@@ -137,6 +142,8 @@ public class LocationSerDes {
     }
 
     public static class LocationPatchDeserializer extends StdDeserializer<LocationEntityPatch> {
+
+        private static final long serialVersionUID = -4192059850856965261L;
 
         public LocationPatchDeserializer() {
             super(LocationEntityPatch.class);

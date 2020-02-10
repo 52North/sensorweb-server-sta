@@ -49,6 +49,7 @@ import org.n52.series.db.beans.ReferencedDataEntity;
 import org.n52.series.db.beans.TextDataEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
@@ -58,7 +59,6 @@ import org.n52.sta.serdes.json.JSONObservation;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.ObservationWithQueryOptions;
 import org.n52.sta.serdes.model.ObservationEntityDefinition;
 import org.n52.sta.serdes.model.STAEntityDefinition;
-import org.n52.sta.utils.QueryOptions;
 
 import java.io.IOException;
 import java.util.Date;
@@ -67,6 +67,7 @@ import java.util.Set;
 public class ObservationSerDes {
 
     public static class StaDataEntityPatch extends StaDataEntity implements EntityPatch<DataEntity> {
+        private static final long serialVersionUID = 7385044376634149048L;
         private final StaDataEntity entity;
 
         public StaDataEntityPatch (StaDataEntity entity) {
@@ -79,6 +80,8 @@ public class ObservationSerDes {
     }
 
     public static class ObservationSerializer extends AbstractSTASerializer<ObservationWithQueryOptions> {
+
+        private static final long serialVersionUID = -4575044340713191285L;
 
         public ObservationSerializer(String rootUrl) {
             super(ObservationWithQueryOptions.class);
@@ -98,7 +101,8 @@ public class ObservationSerDes {
             if (options != null) {
                 hasSelectOption = options.hasSelectOption();
                 if (hasSelectOption) {
-                    fieldsToSerialize = options.getSelectOption();
+                    //TODO: Implement
+                    // fieldsToSerialize = options.getSelectOption();
                 }
             }
             // olingo @iot links
@@ -239,6 +243,8 @@ public class ObservationSerDes {
 
     public static class ObservationDeserializer extends StdDeserializer<StaDataEntity> {
 
+        private static final long serialVersionUID = 2731654401126762133L;
+
         public ObservationDeserializer() {
             super(StaDataEntity.class);
         }
@@ -250,6 +256,8 @@ public class ObservationSerDes {
     }
 
     public static class ObservationPatchDeserializer extends StdDeserializer<StaDataEntityPatch> {
+
+        private static final long serialVersionUID = 9042768872493184420L;
 
         public ObservationPatchDeserializer() {
             super(StaDataEntityPatch.class);

@@ -33,6 +33,7 @@ import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.util.IdGenerator;
 import org.n52.sta.data.query.DatasetQuerySpecifications;
@@ -48,7 +49,6 @@ import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.FeatureOfInterestWithQueryOptions;
 import org.n52.sta.serdes.model.STAEntityDefinition;
-import org.n52.sta.utils.QueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,7 +102,7 @@ public class FeatureOfInterestService
     }
 
     @Override
-    protected ElementWithQueryOptions createWrapper(Object entity, QueryOptions queryOptions) {
+    protected ElementWithQueryOptions<?> createWrapper(Object entity, QueryOptions queryOptions) {
         return new FeatureOfInterestWithQueryOptions((AbstractFeatureEntity<?>) entity, queryOptions);
     }
 
@@ -275,6 +275,7 @@ public class FeatureOfInterestService
         feature.setIdentifier(IdGenerator.generate(feature.getIdentifier()));
     }
 
+    @SuppressWarnings("unchecked")
     private AbstractSensorThingsEntityService<?, DatastreamEntity> getDatastreamService() {
         return (AbstractSensorThingsEntityService<?, DatastreamEntity>) getEntityService(
                 EntityTypes.Datastream);
