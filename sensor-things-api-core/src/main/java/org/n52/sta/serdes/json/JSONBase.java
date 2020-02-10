@@ -34,6 +34,8 @@ import org.joda.time.DateTime;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
 import java.io.UnsupportedEncodingException;
@@ -50,6 +52,8 @@ public class JSONBase {
     }
 
     abstract static class JSONwithId <T> {
+
+        private static Logger LOGGER = LoggerFactory.getLogger(JSONwithId.class);
 
         @JsonProperty("@iot.id")
         public String identifier = UUID.randomUUID().toString();
@@ -93,7 +97,7 @@ public class JSONBase {
         public T toEntity(EntityType type1, EntityType type2) {
             try {
                 return toEntity(type1);
-            } catch (Exception ex) {
+            } catch (IllegalStateException | IllegalArgumentException ex) {
                 return toEntity(type2);
             }
         }
