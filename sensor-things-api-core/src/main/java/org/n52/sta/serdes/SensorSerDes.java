@@ -79,7 +79,7 @@ public class SensorSerDes {
         public SensorSerializer(String rootUrl) {
             super(SensorWithQueryOptions.class);
             this.rootUrl = rootUrl;
-            this.entitySetName = SensorEntityDefinition.entitySetName;
+            this.entitySetName = SensorEntityDefinition.ENTITY_SET_NAME;
         }
 
         @Override
@@ -138,7 +138,7 @@ public class SensorSerDes {
             }
 
             // navigation properties
-            for (String navigationProperty : SensorEntityDefinition.navigationProperties) {
+            for (String navigationProperty : SensorEntityDefinition.NAVIGATION_PROPERTIES) {
                 if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
                     writeNavigationProp(gen, navigationProperty, sensor.getIdentifier());
                 }

@@ -28,17 +28,10 @@
  */
 package org.n52.sta.serdes.model;
 
-@SuppressWarnings("VisibilityModifier")
-public abstract class STAEntityDefinition {
+import org.n52.shetland.ogc.sta.StaConstants;
 
-    public static final String DATASTREAMS = "Datastreams";
-    public static final String OBSERVATIONS = "Observations";
-    public static final String THINGS = "Things";
-    public static final String LOCATIONS = "Locations";
-    public static final String HISTORICAL_LOCATIONS = "HistoricalLocations";
-    public static final String SENSORS = "Sensors";
-    public static final String OBSERVED_PROPERTIES = "ObservedProperties";
-    public static final String FEATURES_OF_INTEREST = "FeaturesOfInterest";
+@SuppressWarnings("VisibilityModifier")
+public abstract class STAEntityDefinition implements StaConstants {
 
     public static final String[] ALLCOLLECTIONS = new String[] {
             DATASTREAMS,
@@ -50,15 +43,6 @@ public abstract class STAEntityDefinition {
             OBSERVED_PROPERTIES,
             FEATURES_OF_INTEREST
     };
-
-    public static final String DATASTREAM = "Datastream";
-    public static final String OBSERVATION = "Observation";
-    public static final String THING = "Thing";
-    public static final String LOCATION = "Location";
-    public static final String HISTORICAL_LOCATION = "HistoricalLocation";
-    public static final String SENSOR = "Sensor";
-    public static final String OBSERVED_PROPERTY = "ObservedProperty";
-    public static final String FEATURE_OF_INTEREST = "FeatureofInterest";
 
     // Entity Property Names
     public static final String PROP_ID = "id";

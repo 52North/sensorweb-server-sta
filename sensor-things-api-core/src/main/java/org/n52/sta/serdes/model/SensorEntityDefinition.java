@@ -36,24 +36,24 @@ import java.util.Set;
 @SuppressWarnings("VisibilityModifier")
 public class SensorEntityDefinition extends STAEntityDefinition {
 
-    public static final String entityName = SENSOR;
+    public static final String ENTITY_NAME = SENSOR;
 
-    public static final String entitySetName = SENSORS;
+    public static final String ENTITY_SET_NAME = SENSORS;
 
-    private static final String[] navProps = new String[] {
+    private static final String[] NAV_PROPS = new String[] {
             DATASTREAMS
     };
 
-    private static final String[] entityProps = new String[] {
+    private static final String[] ENTITY_PROPS = new String[] {
             PROP_NAME,
             PROP_DESCRIPTION,
             PROP_ENCODINGTYPE,
             PROP_METADATA
     };
 
-    public static final Set<String> navigationProperties =
-            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(navProps)));
+    public static final Set<String> NAVIGATION_PROPERTIES =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(NAV_PROPS)));
 
-    public static final Set<String> entityProperties =
-            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(entityProps)));
+    public static final Set<String> ENTITY_PROPERTIES =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(ENTITY_PROPS)));
 }

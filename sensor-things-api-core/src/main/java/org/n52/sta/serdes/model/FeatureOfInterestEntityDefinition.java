@@ -36,24 +36,24 @@ import java.util.Set;
 @SuppressWarnings("VisibilityModifier")
 public class FeatureOfInterestEntityDefinition extends STAEntityDefinition {
 
-    public static final String entityName = FEATURE_OF_INTEREST;
+    public static final String ENTITY_NAME = FEATURE_OF_INTEREST;
 
-    public static final String entitySetName = FEATURES_OF_INTEREST;
+    public static final String ENTITY_SET_NAME = FEATURES_OF_INTEREST;
 
-    private static final String[] navProps = new String[] {
+    private static final String[] NAV_PROPS = new String[] {
             OBSERVATIONS
     };
 
-    private static final String[] entityProps = new String[] {
+    private static final String[] ENTITY_PROPS = new String[] {
             PROP_NAME,
             PROP_DESCRIPTION,
             PROP_ENCODINGTYPE,
             PROP_FEATURE
     };
 
-    public static final Set<String> navigationProperties =
-            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(navProps)));
+    public static final Set<String> NAVIGATION_PROPERTIES =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(NAV_PROPS)));
 
-    public static final Set<String> entityProperties =
-            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(entityProps)));
+    public static final Set<String> ENTITY_PROPERTIES =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(ENTITY_PROPS)));
 }

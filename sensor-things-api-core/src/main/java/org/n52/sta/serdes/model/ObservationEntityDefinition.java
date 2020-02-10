@@ -36,16 +36,16 @@ import java.util.Set;
 @SuppressWarnings("VisibilityModifier")
 public class ObservationEntityDefinition extends STAEntityDefinition {
 
-    public static final String entityName = OBSERVATION;
+    public static final String ENTITY_NAME = OBSERVATION;
 
-    public static final String entitySetName = OBSERVATIONS;
+    public static final String ENTITY_SET_NAME = OBSERVATIONS;
 
-    private static final String[] navProps = new String[] {
+    private static final String[] NAV_PROPS = new String[] {
             DATASTREAM,
             FEATURE_OF_INTEREST
     };
 
-    private static final String[] entityProps = new String[] {
+    private static final String[] ENTITY_PROPS = new String[] {
             PROP_PHENOMENON_TIME,
             PROP_RESULT_TIME,
             PROP_RESULT_QUALITY,
@@ -54,9 +54,9 @@ public class ObservationEntityDefinition extends STAEntityDefinition {
             PROP_PARAMETERS
     };
 
-    public static final Set<String> navigationProperties =
-            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(navProps)));
+    public static final Set<String> NAVIGATION_PROPERTIES =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(NAV_PROPS)));
 
-    public static final Set<String> entityProperties =
-            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(entityProps)));
+    public static final Set<String> ENTITY_PROPERTIES =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(ENTITY_PROPS)));
 }

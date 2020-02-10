@@ -36,18 +36,18 @@ import java.util.Set;
 @SuppressWarnings("VisibilityModifier")
 public class DatastreamEntityDefinition extends STAEntityDefinition {
 
-    public static final String entityName = DATASTREAM;
+    public static final String ENTITY_NAME = DATASTREAM;
 
-    public static final String entitySetName = DATASTREAMS;
+    public static final String ENTITY_SET_NAME = DATASTREAMS;
 
-    private static final String[] navProps = new String[] {
+    private static final String[] NAV_PROPS = new String[] {
             SENSOR,
             THING,
             OBSERVED_PROPERTY,
             OBSERVATIONS
     };
 
-    private static final String[] entityProps = new String[] {
+    private static final String[] ENTITY_PROPS = new String[] {
             PROP_NAME,
             PROP_DESCRIPTION,
             PROP_OBSERVATION_TYPE,
@@ -57,9 +57,9 @@ public class DatastreamEntityDefinition extends STAEntityDefinition {
             PROP_RESULT_TIME
     };
 
-    public static final Set<String> navigationProperties =
-            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(navProps)));
+    public static final Set<String> NAVIGATION_PROPERTIES =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(NAV_PROPS)));
 
-    public static final Set<String> entityProperties =
-            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(entityProps)));
+    public static final Set<String> ENTITY_PROPERTIES =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(ENTITY_PROPS)));
 }

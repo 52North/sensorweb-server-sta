@@ -75,7 +75,7 @@ public class ObservedPropertySerDes {
         public ObservedPropertySerializer(String rootUrl) {
             super(ObservedPropertyWithQueryOptions.class);
             this.rootUrl = rootUrl;
-            this.entitySetName = ObservedPropertyEntityDefinition.entitySetName;
+            this.entitySetName = ObservedPropertyEntityDefinition.ENTITY_SET_NAME;
         }
 
         @Override
@@ -116,7 +116,7 @@ public class ObservedPropertySerDes {
             }
 
             // navigation properties
-            for (String navigationProperty : ObservedPropertyEntityDefinition.navigationProperties) {
+            for (String navigationProperty : ObservedPropertyEntityDefinition.NAVIGATION_PROPERTIES) {
                 if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
                     writeNavigationProp(gen, navigationProperty, obsProp.getStaIdentifier());
                 }

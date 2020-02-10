@@ -65,6 +65,7 @@ public class FeatureOfInterestSerDes {
             this.entity = entity;
         }
 
+        @Override
         public AbstractFeatureEntity getEntity() {
             return entity;
         }
@@ -80,7 +81,7 @@ public class FeatureOfInterestSerDes {
         public FeatureOfInterestSerializer(String rootUrl) {
             super(FeatureOfInterestWithQueryOptions.class);
             this.rootUrl = rootUrl;
-            this.entitySetName = FeatureOfInterestEntityDefinition.entitySetName;
+            this.entitySetName = FeatureOfInterestEntityDefinition.ENTITY_SET_NAME;
         }
 
         @Override
@@ -129,7 +130,7 @@ public class FeatureOfInterestSerDes {
             }
 
             // navigation properties
-            for (String navigationProperty : FeatureOfInterestEntityDefinition.navigationProperties) {
+            for (String navigationProperty : FeatureOfInterestEntityDefinition.NAVIGATION_PROPERTIES) {
                 if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
                     writeNavigationProp(gen, navigationProperty, feature.getIdentifier());
                 }

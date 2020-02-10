@@ -94,7 +94,7 @@ public class ObservationSerDes {
         public ObservationSerializer(String rootUrl) {
             super(ObservationWithQueryOptions.class);
             this.rootUrl = rootUrl;
-            this.entitySetName = ObservationEntityDefinition.entitySetName;
+            this.entitySetName = ObservationEntityDefinition.ENTITY_SET_NAME;
         }
 
         @Override
@@ -163,7 +163,7 @@ public class ObservationSerDes {
             }
 
             // navigation properties
-            for (String navigationProperty : ObservationEntityDefinition.navigationProperties) {
+            for (String navigationProperty : ObservationEntityDefinition.NAVIGATION_PROPERTIES) {
                 if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
                     writeNavigationProp(gen, navigationProperty, observation.getIdentifier());
                 }

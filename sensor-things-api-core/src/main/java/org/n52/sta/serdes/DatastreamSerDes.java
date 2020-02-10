@@ -79,7 +79,7 @@ public class DatastreamSerDes {
         public DatastreamSerializer(String rootUrl) {
             super(DatastreamWithQueryOptions.class);
             this.rootUrl = rootUrl;
-            this.entitySetName = DatastreamEntityDefinition.entitySetName;
+            this.entitySetName = DatastreamEntityDefinition.ENTITY_SET_NAME;
         }
 
         @Override
@@ -155,7 +155,7 @@ public class DatastreamSerDes {
             }
 
             // navigation properties
-            for (String navigationProperty : DatastreamEntityDefinition.navigationProperties) {
+            for (String navigationProperty : DatastreamEntityDefinition.NAVIGATION_PROPERTIES) {
                 if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
                     writeNavigationProp(gen, navigationProperty, datastream.getIdentifier());
                 }

@@ -74,7 +74,7 @@ public class ThingSerDes {
         public ThingSerializer(String rootUrl) {
             super(ThingWithQueryOptions.class);
             this.rootUrl = rootUrl;
-            this.entitySetName = ThingEntityDefinition.entitySetName;
+            this.entitySetName = ThingEntityDefinition.ENTITY_SET_NAME;
         }
 
         @Override
@@ -115,7 +115,7 @@ public class ThingSerDes {
             }
 
             // navigation properties
-            for (String navigationProperty : ThingEntityDefinition.navigationProperties) {
+            for (String navigationProperty : ThingEntityDefinition.NAVIGATION_PROPERTIES) {
                 if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
                     writeNavigationProp(gen, navigationProperty, thing.getIdentifier());
                 }

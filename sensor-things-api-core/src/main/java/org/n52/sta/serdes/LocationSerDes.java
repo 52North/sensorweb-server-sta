@@ -79,7 +79,7 @@ public class LocationSerDes {
         public LocationSerializer(String rootUrl) {
             super(LocationWithQueryOptions.class);
             this.rootUrl = rootUrl;
-            this.entitySetName = LocationEntityDefinition.entitySetName;
+            this.entitySetName = LocationEntityDefinition.ENTITY_SET_NAME;
         }
 
         @Override
@@ -127,7 +127,7 @@ public class LocationSerDes {
             }
 
             // navigation properties
-            for (String navigationProperty : LocationEntityDefinition.navigationProperties) {
+            for (String navigationProperty : LocationEntityDefinition.NAVIGATION_PROPERTIES) {
                 if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
                     writeNavigationProp(gen, navigationProperty, location.getIdentifier());
                 }

@@ -75,7 +75,7 @@ public class HistoricalLocationSerDes {
         public HistoricalLocationSerializer(String rootUrl) {
             super(HistoricalLocationWithQueryOptions.class);
             this.rootUrl = rootUrl;
-            this.entitySetName = HistoricalLocationEntityDefinition.entitySetName;
+            this.entitySetName = HistoricalLocationEntityDefinition.ENTITY_SET_NAME;
         }
 
         @Override
@@ -111,7 +111,7 @@ public class HistoricalLocationSerDes {
             }
 
             // navigation properties
-            for (String navigationProperty : HistoricalLocationEntityDefinition.navigationProperties) {
+            for (String navigationProperty : HistoricalLocationEntityDefinition.NAVIGATION_PROPERTIES) {
                 if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
                     writeNavigationProp(gen, navigationProperty, histLoc.getIdentifier());
                 }
