@@ -40,17 +40,22 @@ import org.n52.sta.serdes.json.JSONThing;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.ThingWithQueryOptions;
 import org.n52.sta.serdes.model.STAEntityDefinition;
 import org.n52.sta.serdes.model.ThingEntityDefinition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Set;
 
 public class ThingSerDes {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SensorSerDes.class);
+
     public static class PlatformEntityPatch extends PlatformEntity implements EntityPatch<PlatformEntity> {
+
         private static final long serialVersionUID = -2233037380407692718L;
         private final PlatformEntity entity;
 
-        public PlatformEntityPatch (PlatformEntity entity) {
+        PlatformEntityPatch (PlatformEntity entity) {
             this.entity = entity;
         }
 
@@ -83,6 +88,7 @@ public class ThingSerDes {
                 if (hasSelectOption) {
                     //TODO: Implement
                     // fieldsToSerialize = options.getSelectOption();
+                    LOGGER.error("not implemented!");
                 }
             }
             // olingo @iot links

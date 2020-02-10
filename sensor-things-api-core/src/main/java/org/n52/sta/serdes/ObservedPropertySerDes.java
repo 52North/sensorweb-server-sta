@@ -40,17 +40,22 @@ import org.n52.sta.serdes.json.JSONObservedProperty;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.ObservedPropertyWithQueryOptions;
 import org.n52.sta.serdes.model.ObservedPropertyEntityDefinition;
 import org.n52.sta.serdes.model.STAEntityDefinition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Set;
 
 public class ObservedPropertySerDes {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ObservedPropertySerDes.class);
+
     public static class PhenomenonEntityPatch extends PhenomenonEntity implements EntityPatch<PhenomenonEntity> {
+
         private static final long serialVersionUID = 2568180072428202569L;
         private final PhenomenonEntity entity;
 
-        public PhenomenonEntityPatch(PhenomenonEntity entity) {
+        PhenomenonEntityPatch(PhenomenonEntity entity) {
             this.entity = entity;
         }
 
@@ -84,6 +89,7 @@ public class ObservedPropertySerDes {
                 if (hasSelectOption) {
                     //TODO: Implement
                     // fieldsToSerialize = options.getSelectOption();
+                    LOGGER.error("not implemented!");
                 }
             }
 

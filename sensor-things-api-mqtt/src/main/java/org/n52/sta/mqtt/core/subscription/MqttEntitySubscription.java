@@ -35,6 +35,7 @@ package org.n52.sta.mqtt.core.subscription;
 
 import org.n52.series.db.beans.HibernateRelations;
 import org.n52.series.db.beans.PhenomenonEntity;
+import org.n52.sta.service.STARequestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
@@ -42,11 +43,6 @@ import org.springframework.util.Assert;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
-
-import static org.n52.sta.service.STARequestUtils.GROUPNAME_SOURCE_IDENTIFIER;
-import static org.n52.sta.service.STARequestUtils.GROUPNAME_SOURCE_NAME;
-import static org.n52.sta.service.STARequestUtils.GROUPNAME_WANTED_IDENTIFIER;
-import static org.n52.sta.service.STARequestUtils.GROUPNAME_WANTED_NAME;
 
 /**
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
@@ -62,22 +58,21 @@ public class MqttEntitySubscription extends AbstractMqttSubscription {
 
         // Referenced Entity
         // E.g. /Datastream(52)/Sensor
-        if (mt.group(GROUPNAME_WANTED_IDENTIFIER) == null) {
-            sourceEntityType = mt.group(GROUPNAME_SOURCE_NAME);
-            sourceId = mt.group(GROUPNAME_SOURCE_IDENTIFIER);
-            wantedEntityType = mt.group(GROUPNAME_WANTED_NAME);
-            Assert.notNull(wantedEntityType, "Unable to parse topic. Could not extract wantedEntityType");
+        if (mt.group(STARequestUtils.GROUPNAME_WANTED_IDENTIFIER) == null) {
+            sourceEntityType = mt.group(STARequestUtils.GROUPNAME_SOURCE_NAME);
+            sourceId = mt.group(STARequestUtils.GROUPNAME_SOURCE_IDENTIFIER);
+            wantedEntityType = mt.group(STARequestUtils.GROUPNAME_WANTED_NAME);
             Assert.notNull(sourceId, "Unable to parse topic. Could not extract sourceId");
             Assert.notNull(sourceEntityType, "Unable to parse topic. Could not extract sourceEntityType");
         } else {
             // Direct Entity
             // E.g. /Things(52)
-            wantedEntityType = mt.group(GROUPNAME_WANTED_NAME);
-            wantedIdentifier = mt.group(GROUPNAME_WANTED_IDENTIFIER);
-            Assert.notNull(wantedEntityType, "Unable to parse topic. Could not extract wantedEntityType");
+            wantedEntityType = mt.group(STARequestUtils.GROUPNAME_WANTED_NAME);
+            wantedIdentifier = mt.group(STARequestUtils.GROUPNAME_WANTED_IDENTIFIER);
             Assert.notNull(wantedIdentifier, "Unable to parse topic. Could not extract wantedIdentifier");
         }
 
+        Assert.notNull(wantedEntityType, "Unable to parse topic. Could not extract wantedEntityType");
         LOGGER.debug(this.toString());
     }
 

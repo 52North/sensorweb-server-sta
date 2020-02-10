@@ -43,17 +43,22 @@ import org.n52.sta.serdes.model.DatastreamEntityDefinition;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.DatastreamWithQueryOptions;
 import org.n52.sta.serdes.model.STAEntityDefinition;
 import org.n52.sta.utils.TimeUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Set;
 
 public class DatastreamSerDes {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatastreamSerDes.class);
+
     public static class DatastreamEntityPatch extends DatastreamEntity implements EntityPatch<DatastreamEntity> {
+
         private static final long serialVersionUID = -8968753678464145994L;
         private final DatastreamEntity entity;
 
-        public DatastreamEntityPatch (DatastreamEntity entity) {
+        DatastreamEntityPatch (DatastreamEntity entity) {
             this.entity = entity;
         }
 
@@ -88,6 +93,7 @@ public class DatastreamSerDes {
                 if (hasSelectOption) {
                     //TODO: Implement
                     // fieldsToSerialize = options.getSelectOption();
+                    LOGGER.error("not implemented!");
                 }
             }
             // olingo @iot links

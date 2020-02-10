@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.service;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
@@ -60,7 +61,7 @@ public class STAEntityRequestHandler extends STARequestUtils {
      * e.g. /Datastreams(52)
      *
      * @param entity  name of entity. Automatically set by Spring via @PathVariable
-     * @param id  id of entity. Automatically set by Spring via @PathVariable
+     * @param id      id of entity. Automatically set by Spring via @PathVariable
      * @param request full request
      */
     @GetMapping(
@@ -79,7 +80,8 @@ public class STAEntityRequestHandler extends STARequestUtils {
         validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
 
         String entityId = id.substring(1, id.length() - 1);
-        return serviceRepository.getEntityService(entity).getEntity(entityId, new QueryOptions(request.getRequestURL().toString()));
+        return serviceRepository.getEntityService(entity)
+                                .getEntity(entityId, new QueryOptions(request.getRequestURL().toString()));
     }
 
     /**
@@ -91,9 +93,10 @@ public class STAEntityRequestHandler extends STARequestUtils {
      * @return JSON String representing Entity
      */
     @GetMapping(
-            value = {MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_DATASTREAM_PATHVARIABLE,
-                     MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_OBSERVATION_PATHVARIABLE,
-                     MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATHVARIABLE
+            value = {
+                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_DATASTREAM_PATHVARIABLE,
+                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_OBSERVATION_PATHVARIABLE,
+                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATHVARIABLE
             },
             produces = "application/json"
     )
@@ -112,6 +115,9 @@ public class STAEntityRequestHandler extends STARequestUtils {
         String sourceId = entity.substring(sourceType.length() + 1, entity.length() - 1);
 
         return serviceRepository.getEntityService(target)
-                        .getEntityByRelatedEntity(sourceId, sourceType, null, new QueryOptions(request.getRequestURL().toString()));
+                                .getEntityByRelatedEntity(sourceId,
+                                                          sourceType,
+                                                          null,
+                                                          new QueryOptions(request.getRequestURL().toString()));
     }
 }

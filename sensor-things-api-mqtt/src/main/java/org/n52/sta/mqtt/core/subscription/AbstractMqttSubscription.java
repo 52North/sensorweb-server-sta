@@ -43,13 +43,13 @@ public abstract class AbstractMqttSubscription {
 
     protected Matcher matcher;
 
-    private final String topic;
-
     protected String sourceEntityType;
 
     protected String sourceId;
 
     protected String wantedEntityType;
+
+    private final String topic;
 
     public AbstractMqttSubscription(String topic, Matcher mt) {
         this.topic = topic;

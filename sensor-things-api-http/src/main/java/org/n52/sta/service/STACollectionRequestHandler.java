@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.service;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
@@ -86,12 +87,13 @@ public class STACollectionRequestHandler extends STARequestUtils {
      * @return JSON String representing Entity
      */
     @GetMapping(
-            value = {MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_THING_PATHVARIABLE,
-                     MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_LOCATION_PATHVARIABLE,
-                     MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATHVARIABLE,
-                     MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATHVARIABLE,
-                     MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_SENSOR_PATHVARIABLE,
-                     MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_DATASTREAM_PATHVARIABLE
+            value = {
+                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_THING_PATHVARIABLE,
+                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_LOCATION_PATHVARIABLE,
+                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATHVARIABLE,
+                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATHVARIABLE,
+                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_SENSOR_PATHVARIABLE,
+                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_DATASTREAM_PATHVARIABLE
             },
             produces = "application/json"
     )
@@ -111,6 +113,9 @@ public class STACollectionRequestHandler extends STARequestUtils {
         String sourceId = split[1].replace(")", "");
 
         return serviceRepository.getEntityService(target)
-                .getEntityCollectionByRelatedEntity(sourceId, sourceType, new QueryOptions(request.getRequestURL().toString()));
+                                .getEntityCollectionByRelatedEntity(sourceId,
+                                                                    sourceType,
+                                                                    new QueryOptions(request.getRequestURL()
+                                                                                            .toString()));
     }
 }

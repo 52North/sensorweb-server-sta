@@ -1,13 +1,12 @@
 package org.n52.sta.mqtt.core.subscription;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.sta.service.STARequestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
 import java.util.regex.Matcher;
-
-import static org.n52.sta.service.STARequestUtils.GROUPNAME_SELECT;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -23,7 +22,7 @@ public class MqttSelectSubscription extends MqttEntityCollectionSubscription {
     public MqttSelectSubscription(String topic, Matcher mt) {
         super(topic, mt);
 
-        selectOption = mt.group(GROUPNAME_SELECT);
+        selectOption = mt.group(STARequestUtils.GROUPNAME_SELECT);
         Assert.notNull(selectOption, "Unable to parse topic. Could not extract selectOption");
 
         queryOptions = new QueryOptions(getTopic());

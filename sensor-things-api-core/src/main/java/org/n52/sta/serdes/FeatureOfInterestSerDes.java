@@ -42,18 +42,23 @@ import org.n52.sta.serdes.json.JSONFeatureOfInterest;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.FeatureOfInterestWithQueryOptions;
 import org.n52.sta.serdes.model.FeatureOfInterestEntityDefinition;
 import org.n52.sta.serdes.model.STAEntityDefinition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Set;
 
 public class FeatureOfInterestSerDes {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(FeatureOfInterestSerDes.class);
+
     public static class AbstractFeatureEntityPatch extends AbstractFeatureEntity
             implements EntityPatch<AbstractFeatureEntity> {
+
         private static final long serialVersionUID = 4488526324452194583L;
         private final AbstractFeatureEntity entity;
 
-        public AbstractFeatureEntityPatch(FeatureEntity entity) {
+        AbstractFeatureEntityPatch(FeatureEntity entity) {
             this.entity = entity;
         }
 
@@ -90,6 +95,7 @@ public class FeatureOfInterestSerDes {
                 if (hasSelectOption) {
                     //TODO: Implement
                     // fieldsToSerialize = options.getSelectOption();
+                    LOGGER.error("not implemented!");
                 }
             }
             // olingo @iot links

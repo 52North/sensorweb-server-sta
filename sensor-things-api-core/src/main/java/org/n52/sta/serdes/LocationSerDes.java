@@ -41,17 +41,22 @@ import org.n52.sta.serdes.json.JSONLocation;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.LocationWithQueryOptions;
 import org.n52.sta.serdes.model.LocationEntityDefinition;
 import org.n52.sta.serdes.model.STAEntityDefinition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Set;
 
 public class LocationSerDes {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(LocationSerDes.class);
+
     public static class LocationEntityPatch extends LocationEntity implements EntityPatch<LocationEntity> {
+
         private static final long serialVersionUID = -8421752856535036959L;
         private final LocationEntity entity;
 
-        public LocationEntityPatch (LocationEntity entity) {
+        LocationEntityPatch (LocationEntity entity) {
             this.entity = entity;
         }
 
@@ -88,6 +93,7 @@ public class LocationSerDes {
                 if (hasSelectOption) {
                     //TODO: Implement
                     // fieldsToSerialize = options.getSelectOption();
+                    LOGGER.error("not implemented!");
                 }
             }
             // olingo @iot links

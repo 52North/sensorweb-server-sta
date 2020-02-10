@@ -34,6 +34,7 @@
 package org.n52.sta.mqtt.core.subscription;
 
 import org.n52.series.db.beans.HibernateRelations;
+import org.n52.sta.service.STARequestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
@@ -43,17 +44,13 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 
-import static org.n52.sta.service.STARequestUtils.GROUPNAME_SOURCE_NAME;
-import static org.n52.sta.service.STARequestUtils.GROUPNAME_SOURCE_IDENTIFIER;
-import static org.n52.sta.service.STARequestUtils.GROUPNAME_WANTED_NAME;
-
 /**
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 public class MqttEntityCollectionSubscription extends AbstractMqttSubscription {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(MqttEntityCollectionSubscription.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MqttEntityCollectionSubscription.class);
 
     public MqttEntityCollectionSubscription(String topic, Matcher mt) {
         super(topic, mt);
@@ -65,9 +62,9 @@ public class MqttEntityCollectionSubscription extends AbstractMqttSubscription {
         } else {
             // Related collection
             // E.g. /Things(52)/Datastreams
-            sourceEntityType = mt.group(GROUPNAME_SOURCE_NAME);
-            sourceId = mt.group(GROUPNAME_SOURCE_IDENTIFIER);
-            wantedEntityType = mt.group(GROUPNAME_WANTED_NAME);
+            sourceEntityType = mt.group(STARequestUtils.GROUPNAME_SOURCE_NAME);
+            sourceId = mt.group(STARequestUtils.GROUPNAME_SOURCE_IDENTIFIER);
+            wantedEntityType = mt.group(STARequestUtils.GROUPNAME_WANTED_NAME);
             Assert.notNull(sourceEntityType, "Unable to parse topic. Could not extract sourceEntityType");
             Assert.notNull(sourceId, "Unable to parse topic. Could not extract sourceId");
         }

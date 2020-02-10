@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.mqtt.core;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -92,7 +93,9 @@ public class MqttSubscriptionEventHandler extends STARequestUtils implements STA
      */
     private Set<String> watchedEntityTypes = new HashSet<String>();
 
-    public MqttSubscriptionEventHandler(MqttUtil config, EntityServiceRepository serviceRepository, ObjectMapper mapper) {
+    public MqttSubscriptionEventHandler(MqttUtil config,
+                                        EntityServiceRepository serviceRepository,
+                                        ObjectMapper mapper) {
         this.config = config;
         this.serviceRepository = serviceRepository;
         this.mapper = mapper;
@@ -112,7 +115,6 @@ public class MqttSubscriptionEventHandler extends STARequestUtils implements STA
             // Store serialized Versions for reusing while processing other subscriptions.
             // Multiple serializations may be necessary due to different select clauses.
             Map<QueryOptions, ByteBuf> serializedCache = new HashMap<>();
-
 
             // Check all subscriptions for a match
             for (AbstractMqttSubscription subscrip : subscriptions.keySet()) {
@@ -138,8 +140,8 @@ public class MqttSubscriptionEventHandler extends STARequestUtils implements STA
                         serializedCache.put(subscrip.getQueryOptions(), out);
                     }
                     MqttPublishMessage msg = new MqttPublishMessage(mqttFixedHeader,
-                            new MqttPublishVariableHeader(topic, 52),
-                            out);
+                                                                    new MqttPublishVariableHeader(topic, 52),
+                                                                    out);
                     mqttBroker.internalPublish(msg, INTERNAL_CLIENT_ID);
                     LOGGER.debug("Posted Message to Topic: {}", topic);
                 }
@@ -215,7 +217,7 @@ public class MqttSubscriptionEventHandler extends STARequestUtils implements STA
 
             for (Pattern namedPropertyPattern : namedPropertyPatterns) {
                 mt = namedPropertyPattern.matcher(topic);
-                {
+                if (mt.matches()) {
                     // OGC-15-078r6 14.2.3
                     return new MqttPropertySubscription(topic, mt);
                 }

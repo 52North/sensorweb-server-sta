@@ -34,6 +34,7 @@
 package org.n52.sta.mqtt.core.subscription;
 
 import org.n52.series.db.beans.HibernateRelations;
+import org.n52.sta.service.STARequestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
@@ -41,8 +42,6 @@ import org.springframework.util.Assert;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
-
-import static org.n52.sta.service.STARequestUtils.GROUPNAME_PROPERTY;
 
 /**
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
@@ -55,7 +54,7 @@ public class MqttPropertySubscription extends MqttEntitySubscription {
 
     public MqttPropertySubscription(String topic, Matcher mt) {
         super(topic, mt);
-        watchedProperty = mt.group(GROUPNAME_PROPERTY);
+        watchedProperty = mt.group(STARequestUtils.GROUPNAME_PROPERTY);
         Assert.notNull(watchedProperty, "Unable to parse topic. Could not extract watchedProperty");
         LOGGER.debug(this.toString());
     }

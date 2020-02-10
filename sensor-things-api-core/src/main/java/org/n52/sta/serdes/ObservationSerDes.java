@@ -59,6 +59,8 @@ import org.n52.sta.serdes.json.JSONObservation;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.ObservationWithQueryOptions;
 import org.n52.sta.serdes.model.ObservationEntityDefinition;
 import org.n52.sta.serdes.model.STAEntityDefinition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Date;
@@ -66,11 +68,14 @@ import java.util.Set;
 
 public class ObservationSerDes {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ObservationSerDes.class);
+
     public static class StaDataEntityPatch extends StaDataEntity implements EntityPatch<DataEntity> {
+
         private static final long serialVersionUID = 7385044376634149048L;
         private final StaDataEntity entity;
 
-        public StaDataEntityPatch (StaDataEntity entity) {
+        StaDataEntityPatch (StaDataEntity entity) {
             this.entity = entity;
         }
 
@@ -103,6 +108,7 @@ public class ObservationSerDes {
                 if (hasSelectOption) {
                     //TODO: Implement
                     // fieldsToSerialize = options.getSelectOption();
+                    LOGGER.error("not implemented!");
                 }
             }
             // olingo @iot links
