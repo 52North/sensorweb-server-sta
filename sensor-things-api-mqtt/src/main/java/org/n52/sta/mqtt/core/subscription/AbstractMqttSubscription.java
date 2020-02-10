@@ -26,42 +26,42 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.mqtt.core;
+package org.n52.sta.mqtt.core.subscription;
 
-import org.apache.olingo.commons.api.data.Entity;
-import org.apache.olingo.commons.api.edm.EdmEntitySet;
-import org.apache.olingo.commons.api.edm.EdmEntityType;
-import org.apache.olingo.server.api.uri.queryoption.SelectOption;
+import org.n52.series.db.beans.HibernateRelations;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Matcher;
 
 /**
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 public abstract class AbstractMqttSubscription {
 
-    protected String entityTypeName;
+    protected Matcher matcher;
 
     private final String topic;
-    private final EdmEntityType entityType;
-    private final EdmEntitySet entitySet;
 
-    public AbstractMqttSubscription(String topic,
-                                    EdmEntityType entityType,
-                                    EdmEntitySet entitySet) {
+    protected String sourceEntityType;
+
+    protected String sourceId;
+
+    protected String wantedEntityType;
+
+    public AbstractMqttSubscription(String topic, Matcher mt) {
         this.topic = topic;
-        this.entityType = entityType;
-        this.entitySet = entitySet;
-        this.entityTypeName = "iot." + getEdmEntityType().getName();
+        this.matcher = mt;
     }
 
     /**
      * Returns the topic given entity should be posted to. null if the entity
      * does not match this subscription.
      *
-     * @param entity          Entity to be posted
+     * @param rawObject       Entity to be posted
+     * @param entityType      Type of Entity
      * @param relatedEntities Map with EntityType-ID pairs for the related
      *                        entities
      * @param differenceMap   differenceMap names of properties that have changed.
@@ -69,24 +69,19 @@ public abstract class AbstractMqttSubscription {
      * @return Topic to be posted to. May be null if Entity does not match this
      * subscription.
      */
-    public String checkSubscription(Entity entity,
+    public String checkSubscription(Object rawObject,
+                                    String entityType,
                                     Map<String, Set<String>> relatedEntities,
                                     Set<String> differenceMap) {
-        return matches(entity, relatedEntities, differenceMap) ? topic : null;
+        return matches(rawObject, entityType, relatedEntities, differenceMap) ? topic : null;
     }
-
-    public abstract boolean matches(Entity entity, Map<String, Set<String>> collections, Set<String> differenceMap);
 
     public String getTopic() {
         return topic;
     }
 
-    public EdmEntityType getEdmEntityType() {
-        return entityType;
-    }
-
-    public EdmEntitySet getEdmEntitySet() {
-        return this.entitySet;
+    public String getEntityType() {
+        return null;
     }
 
     @Override
@@ -105,7 +100,40 @@ public abstract class AbstractMqttSubscription {
      *
      * @return SelectOption if present, else null
      */
-    public SelectOption getSelectOption() {
+    public QueryOptions getQueryOptions() {
         return null;
+    }
+
+    public boolean matches(Object entity,
+                           String realEntityType,
+                           Map<String, Set<String>> collections,
+                           Set<String> differenceMap) {
+        return matches((HibernateRelations.HasIdentifier) entity, realEntityType, collections, differenceMap);
+    }
+
+    protected abstract boolean matches(HibernateRelations.HasIdentifier entity,
+                                       String realEntityType,
+                                       Map<String, Set<String>> collections,
+                                       Set<String> differenceMap);
+
+    @Override
+    public String toString() {
+        return new StringBuilder()
+                .append("New ")
+                .append(this.getClass().getSimpleName())
+                .append("[")
+                .append("topic=")
+                .append(topic)
+                .append(",")
+                .append("sourceEntityType=")
+                .append(sourceEntityType)
+                .append(",")
+                .append("sourceId=")
+                .append(sourceId)
+                .append(",")
+                .append("wantedEntityType=")
+                .append(wantedEntityType)
+                .append("]")
+                .toString();
     }
 }

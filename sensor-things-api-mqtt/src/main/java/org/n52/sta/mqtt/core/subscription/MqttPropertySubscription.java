@@ -31,39 +31,58 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.n52.sta.mqtt.core;
+package org.n52.sta.mqtt.core.subscription;
 
-import org.apache.olingo.commons.api.data.Entity;
-import org.apache.olingo.commons.api.edm.EdmEntitySet;
-import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.n52.series.db.beans.HibernateRelations;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+
+import static org.n52.sta.service.STARequestUtils.GROUPNAME_PROPERTY;
 
 /**
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
-public class MqttEntitySubscription extends AbstractMqttSubscription {
+public class MqttPropertySubscription extends MqttEntitySubscription {
 
-    private String entityId;
+    private static final Logger LOGGER = LoggerFactory.getLogger(MqttPropertySubscription.class);
 
-    public MqttEntitySubscription(String entityId,
-                                  EdmEntitySet entitySet,
-                                  EdmEntityType entityType,
-                                  String topic) {
-        super(topic, entityType, entitySet);
-        this.entityId = entityId;
+    private String watchedProperty;
+
+    public MqttPropertySubscription(String topic, Matcher mt) {
+        super(topic, mt);
+        watchedProperty = mt.group(GROUPNAME_PROPERTY);
+        Assert.notNull(watchedProperty, "Unable to parse topic. Could not extract watchedProperty");
+        LOGGER.debug(this.toString());
     }
 
     @Override
-    public boolean matches(Entity entity, Map<String, Set<String>> collections, Set<String> differenceMap) {
-        // Check type and fail-fast on type mismatch
-        if (!(entity.getType().equals(entityTypeName))) {
+    public boolean matches(HibernateRelations.HasIdentifier entity,
+                              String realEntityType,
+                              Map<String, Set<String>> collections,
+                              Set<String> differenceMap) {
+        boolean superMatches = super.matches(entity, realEntityType, collections, differenceMap);
+
+        if (superMatches) {
+            return differenceMap == null || differenceMap.contains(watchedProperty);
+        } else {
             return false;
         }
-
-        // Check ID (if not collection) and fail-fast if wrong id is present
-        return entityId.equals(entity.getProperty("id").getValue());
     }
 
+    @Override
+    public String toString() {
+        String base = super.toString();
+        return new StringBuilder()
+                .append(base)
+                .deleteCharAt(base.length() - 1)
+                .append(",watchedProperty=")
+                .append(watchedProperty)
+                .append("]")
+                .toString();
+    }
 }

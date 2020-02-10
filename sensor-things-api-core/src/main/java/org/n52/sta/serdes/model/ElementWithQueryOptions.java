@@ -37,7 +37,7 @@ import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
-import org.n52.sta.utils.QueryOptions;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 
 public abstract class ElementWithQueryOptions<P extends IdEntity> {
 
@@ -50,6 +50,15 @@ public abstract class ElementWithQueryOptions<P extends IdEntity> {
 
     public P getEntity() {
         return entity;
+    }
+
+    //TODO: implement
+    public static ElementWithQueryOptions from(Object entity, QueryOptions queryOptions) {
+        switch (entity.getClass().getSimpleName()) {
+            default:
+                System.out.println(entity.getClass().getSimpleName());
+                return new ThingWithQueryOptions((PlatformEntity) entity, queryOptions);
+        }
     }
 
     public static class ThingWithQueryOptions extends ElementWithQueryOptions<PlatformEntity> {

@@ -31,39 +31,58 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.n52.sta.mqtt.core;
+package org.n52.sta.mqtt.core.subscription;
 
-import org.apache.olingo.commons.api.data.Entity;
-import org.apache.olingo.commons.api.edm.EdmEntitySet;
-import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.n52.series.db.beans.HibernateRelations;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
 
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Matcher;
+
+import static org.n52.sta.service.STARequestUtils.GROUPNAME_SOURCE_NAME;
+import static org.n52.sta.service.STARequestUtils.GROUPNAME_SOURCE_IDENTIFIER;
+import static org.n52.sta.service.STARequestUtils.GROUPNAME_WANTED_NAME;
 
 /**
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
+ * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 public class MqttEntityCollectionSubscription extends AbstractMqttSubscription {
 
-    private EdmEntityType sourceEntityType;
+    private final static Logger LOGGER = LoggerFactory.getLogger(MqttEntityCollectionSubscription.class);
 
-    private String sourceId;
+    public MqttEntityCollectionSubscription(String topic, Matcher mt) {
+        super(topic, mt);
 
-    public MqttEntityCollectionSubscription(String topic,
-                                            EdmEntityType sourceEntityType,
-                                            String sourceId,
-                                            EdmEntitySet targetEntitySet,
-                                            EdmEntityType entityType) {
-        super(topic, entityType, targetEntitySet);
-        this.sourceEntityType = sourceEntityType;
-        this.sourceId = sourceId;
+        // Root collection
+        // E.g. /Things
+        if (mt.group(2) == null) {
+            wantedEntityType = mt.group(0);
+        } else {
+            // Related collection
+            // E.g. /Things(52)/Datastreams
+            sourceEntityType = mt.group(GROUPNAME_SOURCE_NAME);
+            sourceId = mt.group(GROUPNAME_SOURCE_IDENTIFIER);
+            wantedEntityType = mt.group(GROUPNAME_WANTED_NAME);
+            Assert.notNull(sourceEntityType, "Unable to parse topic. Could not extract sourceEntityType");
+            Assert.notNull(sourceId, "Unable to parse topic. Could not extract sourceId");
+        }
+
+        Assert.notNull(wantedEntityType, "Unable to parse topic. Could not extract wantedEntityType");
+        LOGGER.debug(this.toString());
     }
 
     @Override
-    public boolean matches(Entity entity, Map<String, Set<String>> collections, Set<String> differenceMap) {
+    public boolean matches(HibernateRelations.HasIdentifier entity,
+                           String realEntityType,
+                           Map<String, Set<String>> collections,
+                           Set<String> differenceMap) {
         // Check type and fail-fast on type mismatch
-        if (!(entity.getType().equals(entityTypeName))) {
+        if (!(wantedEntityType.equals(realEntityType))) {
             return false;
         }
 
@@ -74,9 +93,10 @@ public class MqttEntityCollectionSubscription extends AbstractMqttSubscription {
         }
 
         // Check if Entity belongs to collection of this Subscription
+        //TODO(specki): check if this acutally works as names have changed
         if (collections != null) {
             for (Entry<String, Set<String>> collection : collections.entrySet()) {
-                if (collection.getKey().equals(sourceEntityType.getName())) {
+                if (collection.getKey().equals(sourceEntityType)) {
                     for (String id : collection.getValue()) {
                         if (id.equals(sourceId)) {
                             return true;
