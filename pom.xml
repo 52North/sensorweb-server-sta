@@ -274,7 +274,7 @@
                     <configuration>
                         <noticeTemplate>etc/NOTICE.template</noticeTemplate>
                         <licenseMapping>
-                            <param>http://52north.github.io/cdn/licenses/license-mappings.xml</param>
+                            <param>https://52north.github.io/cdn/licenses/license-mappings.xml</param>
                             <param>etc/license-mappings.xml</param>
                         </licenseMapping>
                     </configuration>
