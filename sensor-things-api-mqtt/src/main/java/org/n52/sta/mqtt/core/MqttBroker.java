@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -44,7 +44,6 @@ import io.moquette.interception.messages.InterceptUnsubscribeMessage;
 import org.h2.mvstore.Cursor;
 import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
-import org.n52.sta.mqtt.handler.MqttMessageHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +55,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Properties;
 
@@ -93,10 +92,10 @@ public class MqttBroker {
     private String MOQUETTE_PLAINTCP_PORT;
 
     @Autowired
-    private MqttEventHandler handler;
+    private MqttSubscriptionEventHandler handler;
 
     @Autowired
-    private MqttMessageHandler publishHandler;
+    private MqttPublishMessageHandler publishHandler;
 
     private IConfig brokerConfig;
 
@@ -169,10 +168,10 @@ public class MqttBroker {
 
             @Override
             public void onPublish(InterceptPublishMessage msg) {
-                if (!msg.getClientID().equals(MqttEventHandler.INTERNAL_CLIENT_ID)) {
+                if (!msg.getClientID().equals(MqttSubscriptionEventHandler.INTERNAL_CLIENT_ID)) {
                     LOGGER.debug("Received publication for topic: {}", msg.getTopicName());
                     LOGGER.debug("with publication message content: {}",
-                            msg.getPayload().toString(Charset.forName("UTF-8")));
+                            msg.getPayload().toString(StandardCharsets.UTF_8));
                     try {
                         publishHandler.processPublishMessage(msg);
                     } catch (Exception e) {

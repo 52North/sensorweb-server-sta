@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -28,13 +28,13 @@
  */
 package org.n52.sta.data.query;
 
-import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
-import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
+import org.n52.sta.utils.ComparisonOperator;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -82,9 +82,9 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
     @Override
     public Specification<PlatformEntity> getFilterForProperty(String propertyName,
                                                               Object propertyValue,
-                                                              BinaryOperatorKind operator,
+                                                              ComparisonOperator operator,
                                                               boolean switched)
-            throws ExpressionVisitException {
+            throws STAInvalidFilterExpressionException {
         if (propertyName.equals(DATASTREAMS) || propertyName.equals(LOCATIONS)
                 || propertyName.equals(HISTORICAL_LOCATIONS)) {
             return handleRelatedPropertyFilter(propertyName, (Subquery<String>) propertyValue);
@@ -93,7 +93,7 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
                 try {
                     return handleDirectStringPropertyFilter(root.get(PlatformEntity.PROPERTY_IDENTIFIER),
                             propertyValue.toString(), operator, builder, false);
-                } catch (ExpressionVisitException e) {
+                } catch (STAInvalidFilterExpressionException e) {
                     throw new RuntimeException(e);
                 }
                 //
@@ -138,10 +138,10 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
                         // return
                         // qPlatform.historicalLocationEntities.any().id.eqAny(propertyValue);
                     default:
-                        throw new ExpressionVisitException(
+                        throw new STAInvalidFilterExpressionException(
                                 "Filtering by Related Properties with cardinality >1 is currently not supported!");
                 }
-            } catch (ExpressionVisitException e) {
+            } catch (STAInvalidFilterExpressionException e) {
                 throw new RuntimeException(e);
             }
         };
@@ -149,7 +149,7 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
 
     private Specification<PlatformEntity> handleDirectPropertyFilter(String propertyName,
                                                                      Object propertyValue,
-                                                                     BinaryOperatorKind operator,
+                                                                     ComparisonOperator operator,
                                                                      boolean switched) {
         return new Specification<PlatformEntity>() {
             @Override
@@ -157,11 +157,11 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
                 try {
                     switch (propertyName) {
                         case "name":
-                            return handleDirectStringPropertyFilter(root.<String>get(DescribableEntity.PROPERTY_NAME),
+                            return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
                                     propertyValue.toString(), operator, builder, switched);
                         case "description":
                             return handleDirectStringPropertyFilter(
-                                    root.<String>get(DescribableEntity.PROPERTY_DESCRIPTION),
+                                    root.get(DescribableEntity.PROPERTY_DESCRIPTION),
                                     propertyValue.toString(),
                                     operator,
                                     builder,
@@ -170,7 +170,7 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
                             // TODO
                             // qPlatform.parameters.any().name.eq("properties")
                             return handleDirectStringPropertyFilter(
-                                    root.<String>get(PlatformEntity.PROPERTY_PROPERTIES),
+                                    root.get(PlatformEntity.PROPERTY_PROPERTIES),
                                     propertyValue.toString(),
                                     operator,
                                     builder,
@@ -179,7 +179,7 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
                             throw new RuntimeException("Error getting filter for Property: \"" + propertyName
                                     + "\". No such property in Entity.");
                     }
-                } catch (ExpressionVisitException e) {
+                } catch (STAInvalidFilterExpressionException e) {
                     throw new RuntimeException(e);
                 }
             }

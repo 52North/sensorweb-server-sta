@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -28,9 +28,16 @@
  */
 package org.n52.sta.data.repositories;
 
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.Optional;
 
-public interface IdentifierRepository<T> {
+@NoRepositoryBean
+@Transactional
+public interface IdentifierRepository<T> extends JpaSpecificationExecutor<T> {
 
     boolean existsByIdentifier(String identifier);
 
@@ -39,4 +46,6 @@ public interface IdentifierRepository<T> {
     void deleteByIdentifier(String identifier);
 
     T getOneByIdentifier(String identifier);
+
+    Optional<String> identifier(Specification<T> spec, String columnName);
 }

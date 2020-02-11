@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -43,8 +43,8 @@ public class SpringApplicationContext implements ApplicationContextAware {
 
     private static ApplicationContext CONTEXT;
 
-    public static Object getBean(String beanName) {
-        return CONTEXT.getBean(beanName);
+    public static Object getBean(Class<?> bean) {
+        return CONTEXT.getBean(bean);
     }
 
     @Override

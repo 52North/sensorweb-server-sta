@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -31,9 +31,11 @@ package org.n52.sta.data.repositories;
 import org.n52.series.db.beans.DataEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Transactional
 public interface DataRepository<T extends DataEntity<?>>
         extends IdentifierRepository<T>, JpaRepository<T, Long>, JpaSpecificationExecutor<T> {
 

@@ -10,7 +10,7 @@ server:
 # Database Configuration
 database:
   jpa:
-    persistence-location: classpath:META-INF/persistence.xml
+    persistence-location: classpath:META-INF/sensorthings-persistence.xml
 spring:
   datasource:
     platform: postgres
@@ -41,13 +41,11 @@ spring:
           lob.non_contextual_creation: true
         format_sql: true
         dialect: org.hibernate.spatial.dialect.postgis.PostgisPG95Dialect
-
         # disable driver's feature detection
         # see https://stackoverflow.com/questions/46493500/hibernate-with-c3p0-createclob-is-not-yet-implemented
         temp.use_jdbc_metadata_defaults: false
   jmx:
     enabled: false
-
 
 # HTTP Configuration
 http:

@@ -39,9 +39,8 @@
         <java.version>1.8</java.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <odata.version>4.6.0-STA-SNAPSHOT</odata.version>
-        <series-hbm.version>2.0.0-alpha.3</series-hbm.version>
-        <arctic-sea.version>6.0.0</arctic-sea.version>
+        <series-hbm.version>2.0.0-SNAPSHOT</series-hbm.version>
+        <arctic-sea.version>7.3.0-SNAPSHOT</arctic-sea.version>
         <spring-boot.version>2.2.1.RELEASE</spring-boot.version>
         <geolatte-geom.version>1.4.0</geolatte-geom.version>
         <hibernate.version>5.4.2.Final</hibernate.version>
@@ -87,19 +86,9 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>org.apache.olingo</groupId>
-                <artifactId>odata-server-api</artifactId>
-                <version>${odata.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.olingo</groupId>
-                <artifactId>odata-server-core</artifactId>
-                <version>${odata.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>javax</groupId>
                 <artifactId>javaee-api</artifactId>
-                <version>7.0</version>
+                <version>8.0.1</version>
                 <scope>provided</scope>
             </dependency>
 
@@ -130,6 +119,11 @@
                 <artifactId>jackson-core</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.module</groupId>
+                <artifactId>jackson-module-afterburner</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.geolatte</groupId>
@@ -147,6 +141,11 @@
                 <artifactId>jts-core</artifactId>
                 <version>${locationtech-jts.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.locationtech.jts.io</groupId>
+                <artifactId>jts-io-common</artifactId>
+                <version>${locationtech-jts.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.hibernate</groupId>
@@ -157,18 +156,6 @@
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-spatial</artifactId>
                 <version>${hibernate.version}</version>
-            </dependency>
-
-            <!-- Olingo -->
-            <dependency>
-                <groupId>org.apache.olingo</groupId>
-                <artifactId>odata-commons-api</artifactId>
-                <version>${odata.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.olingo</groupId>
-                <artifactId>odata-commons-core</artifactId>
-                <version>${odata.version}</version>
             </dependency>
 
             <dependency>
@@ -264,7 +251,7 @@
                     <configuration>
                         <noticeTemplate>etc/NOTICE.template</noticeTemplate>
                         <licenseMapping>
-                            <param>http://52north.github.io/cdn/licenses/license-mappings.xml</param>
+                            <param>https://52north.github.io/cdn/licenses/license-mappings.xml</param>
                             <param>etc/license-mappings.xml</param>
                         </licenseMapping>
                     </configuration>
@@ -334,9 +321,9 @@
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
+                    <aggregate>true</aggregate>
                     <header>etc/52N_GPLv2_License.xt</header>
-                    <properties>
-                    </properties>
+                    
                     <includes>
                         <include>**/src/**/*.java</include>
                     </includes>
@@ -346,6 +333,12 @@
                         <exclude>etc/**</exclude>
                     </excludes>
                     <strictCheck>true</strictCheck>
+                    <properties>
+                      <year>${project.inceptionYear}-${currentYearDynamic}</year>
+                    </properties>
+                    <mapping>
+                        <java>SLASHSTAR_STYLE</java>
+                    </mapping>
                 </configuration>
             </plugin>
         </plugins>

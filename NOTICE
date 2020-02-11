@@ -4,12 +4,12 @@ Licensed under GNU General Public License, Version 2.0
 
 This project includes: 
 
+  "Java Concurrency in Practice" book annotations under Creative Commons Attribution License, http://creativecommons.org/licenses/by/2.5
   'Bugsnag' under MIT
   52°North Faroe Annotations under The Apache Software License, Version 2.0
   52°North Jan Mayen under The Apache Software License, Version 2.0
   52°North Sensor Things API under The Apache Software License, Version 2.0
   52°North Shetland under The Apache Software License, Version 2.0
-  Animal Sniffer Annotations under MIT license
   AntLR Parser Generator under BSD License
   Apache Commons Codec under Apache License, Version 2.0
   Apache HttpClient under Apache License, Version 2.0
@@ -19,19 +19,19 @@ This project includes:
   AspectJ runtime under Eclipse Public License - v 1.0
   AspectJ weaver under Eclipse Public License - v 1.0
   Bean Validation API under Apache License 2.0
-  Byte Buddy (without dependencies) under The Apache Software License, Version 2.0
+  Byte Buddy (without dependencies) under Apache License, Version 2.0
   Checker Qual under The MIT License
-  ClassMate under The Apache Software License, Version 2.0
+  ClassMate under Apache License, Version 2.0
   Commons Lang under The Apache Software License, Version 2.0
   dom4j under BSD 3-clause New License
   error-prone annotations under Apache 2.0
-  Extended StAX API under Dual license consisting of the CDDL v1.1 and GPL v2
-  fastinfoset under Apache License, Version 2.0
+  Extended StAX API under Eclipse Distribution License - v 1.0
+  fastinfoset under Apache License, Version 2.0 or Eclipse Distribution License - v 1.0
   FindBugs-jsr305 under The Apache Software License, Version 2.0
   geolatte-geom under LGPL 3.0
   Guava InternalFutureFailureAccess and InternalFutures under The Apache Software License, Version 2.0
   Guava ListenableFuture only under The Apache Software License, Version 2.0
-  Guava: Google Core Libraries for Java under The Apache Software License, Version 2.0
+  Guava: Google Core Libraries for Java under Apache License, Version 2.0
   H2 MVStore under MPL 2.0 or EPL 1.0
   Hibernate Commons Annotations under GNU Library General Public License v2.1 or later
   Hibernate ORM - hibernate-core under GNU Library General Public License v2.1 or later
@@ -39,35 +39,41 @@ This project includes:
   Hibernate Validator Engine under Apache License 2.0
   HikariCP under The Apache Software License, Version 2.0
   io.moquette:moquette-broker under The Apache Software License, Version 2.0
-  istack common utility code runtime under CDDL 1.1 or GPL2 w/ CPE
+  istack common utility code runtime under Eclipse Distribution License - v 1.0
   J2ObjC Annotations under The Apache Software License, Version 2.0
   Jackson datatype: jdk8 under The Apache Software License, Version 2.0
   Jackson datatype: JSR310 under The Apache Software License, Version 2.0
+  Jackson module: Afterburner under The Apache Software License, Version 2.0
   Jackson-annotations under The Apache Software License, Version 2.0
   Jackson-core under The Apache Software License, Version 2.0
   jackson-databind under The Apache Software License, Version 2.0
   Jackson-module-parameter-names under The Apache Software License, Version 2.0
+  Jakarta Annotations API under EPL 2.0 or GPL2 w/ CPE
+  Jakarta Persistence API under Eclipse Public License v. 2.0 or Eclipse Distribution License v. 1.0
+  jakarta.xml.bind-api under Eclipse Distribution License - v 1.0
   Java Annotation Indexer under Apache License, Version 2.0
-  Java Persistence API, Version 2.1 under Eclipse Public License (EPL), Version 1.0 or Eclipse Distribution License (EDL), Version 1.0
+  Java Servlet API under CDDL + GPLv2 with classpath exception
   Java Transaction API under Common Development and Distribution License or GNU General Public License, Version 2 with the Classpath Exception
   JavaBeans Activation Framework API jar under CDDL/GPLv2+CE
   Javassist under MPL 1.1 or LGPL 2.1 or Apache License 2.0
-  javax.annotation API under CDDL + GPLv2 with classpath exception
   javax.inject under The Apache Software License, Version 2.0
   javax.persistence-api under Eclipse Public License v1.0 or Eclipse Distribution License v. 1.0
-  javax.transaction API under CDDL + GPLv2 with classpath exception
-  JAXB Runtime under CDDL+GPL License
+  javax.transaction API under EPL 2.0 or GPL2 w/ CPE
+  JAXB Runtime under Eclipse Distribution License - v 1.0
   jaxb-api under CDDL 1.1 or GPL2 w/ CPE
   JBoss Logging 3 under Apache License, version 2.0
-  JCL 1.2 implemented over SLF4J under MIT License
-  Joda-Time under Apache 2
+  JCL 1.2 implemented over SLF4J under Apache License, Version 2.0
+  Joda-Time under Apache License, Version 2.0
+  JSON.simple under The Apache Software License, Version 2.0
   JUL to SLF4J bridge under MIT License
+  JUnit under Eclipse Public License 1.0
   JVM Integration for Metrics under Apache License 2.0
   Librato Metrics API Java Library under Apache License 2.0
   Logback Classic Module under Eclipse Public License - v 1.0 or GNU Lesser General Public License
   Logback Core Module under Eclipse Public License - v 1.0 or GNU Lesser General Public License
   Metrics Core under Apache License 2.0
   Metrics Librato Support under Apache License 2.0
+  Neo Visionaries Internationalization Package under The Apache Software License, Version 2.0
   Netty/Buffer under Apache License, Version 2.0
   Netty/Codec under Apache License, Version 2.0
   Netty/Codec/HTTP under Apache License, Version 2.0
@@ -78,15 +84,13 @@ This project includes:
   Netty/Transport under Apache License, Version 2.0
   Netty/Transport/Native/Epoll under Apache License, Version 2.0
   Netty/Transport/Native/Unix/Common under Apache License, Version 2.0
-  Non-Blocking Reactive Foundation for the JVM under The Apache Software License, Version 2.0
   odata-commons-api under The Apache Software License, Version 2.0
   odata-commons-core under The Apache Software License, Version 2.0
   odata-server-api under The Apache Software License, Version 2.0
   odata-server-core under The Apache Software License, Version 2.0
-  org.eclipse.paho.client.mqttv3 under Eclipse Public License - Version 1.0
+  org.locationtech.jts.io:jts-io-common under Eclipse Publish License, Version 1.0 or Eclipse Distribution License - v 1.0
   org.locationtech.jts:jts-core under Eclipse Publish License, Version 1.0 or Eclipse Distribution License - v 1.0
   PostgreSQL JDBC Driver - JDBC 4.2 under BSD-2-Clause
-  reactive-streams under CC0
   sensor-things-api-app under The Apache Software License, Version 2.0
   sensor-things-api-core under The Apache Software License, Version 2.0
   sensor-things-api-http under The Apache Software License, Version 2.0
@@ -97,6 +101,7 @@ This project includes:
   Series Database Model - Mappings under The Apache Software License, Version 2.0
   SLF4J API Module under MIT License
   SnakeYAML under Apache License, Version 2.0
+  SpotBugs Annotations under GNU LESSER GENERAL PUBLIC LICENSE, Version 2.1
   Spring AOP under Apache License, Version 2.0
   Spring Aspects under Apache License, Version 2.0
   Spring Beans under Apache License, Version 2.0
@@ -109,6 +114,7 @@ This project includes:
   Spring Boot Logging Starter under Apache License, Version 2.0
   Spring Boot Starter under Apache License, Version 2.0
   Spring Boot Tomcat Starter under Apache License, Version 2.0
+  Spring Boot Validation Starter under Apache License, Version 2.0
   Spring Boot Web Starter under Apache License, Version 2.0
   Spring Commons Logging Bridge under Apache License, Version 2.0
   Spring Context under Apache License, Version 2.0
@@ -116,17 +122,13 @@ This project includes:
   Spring Data Core under Apache License, Version 2.0
   Spring Data JPA under Apache License, Version 2.0
   Spring Expression Language (SpEL) under Apache License, Version 2.0
-  Spring Integration Core under The Apache Software License, Version 2.0
-  Spring Integration MQTT Support under The Apache Software License, Version 2.0
   Spring JDBC under Apache License, Version 2.0
-  Spring Messaging under Apache License, Version 2.0
   Spring Object/Relational Mapping under Apache License, Version 2.0
-  Spring Retry under Apache 2.0
   Spring Transaction under Apache License, Version 2.0
   Spring Web under Apache License, Version 2.0
   Spring Web MVC under Apache License, Version 2.0
   tomcat-embed-core under Apache License, Version 2.0
   tomcat-embed-el under Apache License, Version 2.0
   tomcat-embed-websocket under Apache License, Version 2.0
-  TXW2 Runtime under CDDL+GPL License
+  TXW2 Runtime under Eclipse Distribution License - v 1.0
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -28,17 +28,12 @@
  */
 package org.n52.sta.data.query;
 
-import org.apache.olingo.commons.api.http.HttpStatusCode;
-import org.apache.olingo.server.api.ODataApplicationException;
-
-import java.util.Locale;
-
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 public class QuerySpecificationRepository {
 
-    public static EntityQuerySpecifications getSpecification(String name) throws ODataApplicationException {
+    public static EntityQuerySpecifications getSpecification(String name) {
         switch (name) {
             case "PlatformEntity":
             case "Thing":
@@ -82,9 +77,7 @@ public class QuerySpecificationRepository {
                 return new ObservedPropertyQuerySpecifications();
             }
             default:
-                throw new ODataApplicationException("Could not find QuerySpecifications for Type\"" + name + "\"",
-                        HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(),
-                        Locale.ENGLISH);
+                return null;
         }
     }
 

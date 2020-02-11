@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -28,8 +28,6 @@
  */
 package org.n52.sta.data.query;
 
-import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
-import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
@@ -38,6 +36,8 @@ import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
+import org.n52.sta.utils.ComparisonOperator;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.Join;
@@ -99,19 +99,19 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
         };
     }
 
-    public Specification<DatastreamEntity> withDatasetIdentifier(final String datasetId) {
+    public Specification<DatastreamEntity> withDatasetId(final long datasetId) {
         return (root, query, builder) -> {
             final Join<DatastreamEntity, DatasetEntity> join =
                     root.join(DatastreamEntity.PROPERTY_DATASETS, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), datasetId);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), datasetId);
         };
     }
 
-    public Specification<DatastreamEntity> withDatasetIdentifiers(final Collection<String> datasetIds) {
+    public Specification<DatastreamEntity> withDatasetIds(final Collection<Long> datasetIds) {
         return (root, query, builder) -> {
             final Join<DatastreamEntity, DatasetEntity> join =
                     root.join(DatastreamEntity.PROPERTY_DATASETS, JoinType.INNER);
-            return join.get(DescribableEntity.PROPERTY_IDENTIFIER).in(datasetIds);
+            return join.get(DescribableEntity.PROPERTY_ID).in(datasetIds);
         };
     }
 
@@ -134,9 +134,9 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
     @Override
     public Specification<DatastreamEntity> getFilterForProperty(String propertyName,
                                                                 Object propertyValue,
-                                                                BinaryOperatorKind operator,
+                                                                ComparisonOperator operator,
                                                                 boolean switched)
-            throws ExpressionVisitException {
+            throws STAInvalidFilterExpressionException {
         if (propertyName.equals(SENSOR) || propertyName.equals(OBSERVED_PROPERTY) || propertyName.equals(THING)
                 || propertyName.equals(OBSERVATIONS)) {
             return handleRelatedPropertyFilter(propertyName, propertyValue, switched);
@@ -145,7 +145,7 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
                 try {
                     return handleDirectStringPropertyFilter(root.get(DatastreamEntity.PROPERTY_IDENTIFIER),
                             propertyValue.toString(), operator, builder, false);
-                } catch (ExpressionVisitException e) {
+                } catch (STAInvalidFilterExpressionException e) {
                     throw new RuntimeException(e);
                 }
                 //
@@ -156,27 +156,27 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
     }
 
     private Specification<DatastreamEntity> handleDirectPropertyFilter(String propertyName, Object propertyValue,
-                                                                       BinaryOperatorKind operator, boolean switched) {
+                                                                       ComparisonOperator operator, boolean switched) {
         return (Specification<DatastreamEntity>) (root, query, builder) -> {
             try {
                 switch (propertyName) {
                     case "name":
-                        return handleDirectStringPropertyFilter(root.<String>get(DescribableEntity.PROPERTY_NAME),
+                        return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
                                 propertyValue.toString(), operator, builder, switched);
                     case "description":
                         return handleDirectStringPropertyFilter(
-                                root.<String>get(DescribableEntity.PROPERTY_DESCRIPTION), propertyValue.toString(),
+                                root.get(DescribableEntity.PROPERTY_DESCRIPTION), propertyValue.toString(),
                                 operator, builder, switched);
                     case "observationType":
                         Join<DatastreamEntity, FormatEntity> join =
                                 root.join(DatastreamEntity.PROPERTY_OBSERVATION_TYPE);
-                        return handleDirectStringPropertyFilter(join.<String>get(FormatEntity.FORMAT),
+                        return handleDirectStringPropertyFilter(join.get(FormatEntity.FORMAT),
                                 propertyValue.toString(), operator, builder, switched);
                     default:
                         throw new RuntimeException("Error getting filter for Property: \"" + propertyName
                                 + "\". No such property in Entity.");
                 }
-            } catch (ExpressionVisitException e) {
+            } catch (STAInvalidFilterExpressionException e) {
                 throw new RuntimeException(e);
             }
         };
@@ -222,7 +222,7 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
                         return builder.in(join.get(DatasetEntity.PROPERTY_IDENTIFIER)).value(sq);
                     }
                     default:
-                        throw new ExpressionVisitException(
+                        throw new STAInvalidFilterExpressionException(
                                 "Error getting filter for Property \"" + propertyName + "\". No such related Entity.");
                 }
             } catch (Exception e) {

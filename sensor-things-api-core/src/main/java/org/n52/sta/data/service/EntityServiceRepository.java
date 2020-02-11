@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -26,11 +26,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.n52.sta.data.service;
 
 import org.springframework.stereotype.Component;
@@ -53,7 +48,9 @@ public class EntityServiceRepository {
     }
 
     public void addEntityService(AbstractSensorThingsEntityService<?, ?> entityService) {
-        entityServices.put(entityService.getType(), entityService);
+        for (EntityTypes entityType : entityService.getTypes()) {
+            entityServices.put(entityType, entityService);
+        }
     }
 
     /**
@@ -73,12 +70,13 @@ public class EntityServiceRepository {
      * @return the requested entity data service
      */
     public AbstractSensorThingsEntityService<?, ?> getEntityService(EntityTypes entityTypeName) {
-
         return entityServices.get(entityTypeName);
     }
 
     public enum EntityTypes {
-        Thing, Location, HistoricalLocation, Sensor, Datastream, Observation, ObservedProperty, FeatureOfInterest
+        Thing, Location, HistoricalLocation, Sensor, Datastream, Observation, ObservedProperty, FeatureOfInterest,
+        Things, Locations, HistoricalLocations, Sensors, Datastreams, Observations, ObservedProperties,
+        FeaturesOfInterest
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -40,10 +40,15 @@ public interface STAEventHandler {
     /**
      * Handles a Create/Update Event emitted by the Database.
      *
-     * @param event         base entity
+     * @param entity        base entity
+     * @param entityType    java class name of entity
      * @param differenceMap names of properties that changed. null if all properties changed (e.g. new entity)
      */
-    void handleEvent(Object event, Set<String> differenceMap);
+    void handleEvent(Object entity, String entityType, Set<String> differenceMap);
 
+    /**
+     * Lists all Entity types that are monitored by this Handler. Directly matched with getJavaType().getName().
+     * @return Set of all watched Entity Types. Empty if Handler is inactive.
+     */
     Set<String> getWatchedEntityTypes();
 }

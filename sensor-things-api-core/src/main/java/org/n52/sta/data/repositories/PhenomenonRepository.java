@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -28,8 +28,8 @@
  */
 package org.n52.sta.data.repositories;
 
-
 import org.n52.series.db.beans.PhenomenonEntity;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
@@ -42,4 +42,6 @@ public interface PhenomenonRepository extends ParameterDataRepository<Phenomenon
     void deleteByStaIdentifier(String identifier);
 
     boolean existsByStaIdentifier(String id);
+
+    Optional<String> identifier(Specification<PhenomenonEntity> spec, String columnName);
 }

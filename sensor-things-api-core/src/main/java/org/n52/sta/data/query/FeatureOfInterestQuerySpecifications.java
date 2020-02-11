@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -28,12 +28,12 @@
  */
 package org.n52.sta.data.query;
 
-import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
-import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
+import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
+import org.n52.sta.utils.ComparisonOperator;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -73,9 +73,9 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
     @Override
     public Specification<AbstractFeatureEntity<?>> getFilterForProperty(String propertyName,
                                                                         Object propertyValue,
-                                                                        BinaryOperatorKind operator,
+                                                                        ComparisonOperator operator,
                                                                         boolean switched)
-            throws ExpressionVisitException {
+            throws STAInvalidFilterExpressionException {
         if (propertyName.equals(OBSERVATIONS)) {
             return handleRelatedPropertyFilter(propertyName, (Subquery<Long>) propertyValue, switched);
         } else if (propertyName.equals("id")) {
@@ -83,7 +83,7 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
                 try {
                     return handleDirectStringPropertyFilter(root.get(AbstractFeatureEntity.PROPERTY_IDENTIFIER),
                             propertyValue.toString(), operator, builder, false);
-                } catch (ExpressionVisitException e) {
+                } catch (STAInvalidFilterExpressionException e) {
                     throw new RuntimeException(e);
                 }
                 //
@@ -96,7 +96,7 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
     private Specification<AbstractFeatureEntity<?>> handleRelatedPropertyFilter(String propertyName,
                                                                                 Subquery<Long> propertyValue,
                                                                                 boolean switched)
-            throws ExpressionVisitException {
+            throws STAInvalidFilterExpressionException {
         return (root, query, builder) -> {
             // TODO ???
             Subquery<Long> sqFeature = query.subquery(Long.class);
@@ -112,7 +112,7 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
 
     private Specification<AbstractFeatureEntity<?>> handleDirectPropertyFilter(String propertyName,
                                                                                Object propertyValue,
-                                                                               BinaryOperatorKind operator,
+                                                                               ComparisonOperator operator,
                                                                                boolean switched) {
         return new Specification<AbstractFeatureEntity<?>>() {
             @Override
@@ -122,18 +122,18 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
                 try {
                     switch (propertyName) {
                         case "name":
-                            return handleDirectStringPropertyFilter(root.<String>get(DescribableEntity.PROPERTY_NAME),
+                            return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
                                     propertyValue.toString(), operator, builder, switched);
                         case "description":
                             return handleDirectStringPropertyFilter(
-                                    root.<String>get(DescribableEntity.PROPERTY_DESCRIPTION),
+                                    root.get(DescribableEntity.PROPERTY_DESCRIPTION),
                                     propertyValue.toString(),
                                     operator,
                                     builder,
                                     switched);
                         case "encodingType":
                         case "featureType":
-                            if (operator.equals(BinaryOperatorKind.EQ)
+                            if (operator.equals(ComparisonOperator.EQ)
                                     && ("application/vnd.geo+json".equals(propertyValue)
                                         || "application/vnd.geo json".equals(propertyValue))) {
                                 return builder.isNotNull(root.get(DescribableEntity.PROPERTY_IDENTIFIER));
@@ -143,7 +143,7 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
                             throw new RuntimeException("Error getting filter for Property: \"" + propertyName
                                     + "\". No such property in Entity.");
                     }
-                } catch (ExpressionVisitException e) {
+                } catch (STAInvalidFilterExpressionException e) {
                     throw new RuntimeException(e);
                 }
             }

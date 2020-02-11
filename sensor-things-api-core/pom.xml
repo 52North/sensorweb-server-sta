@@ -25,6 +25,10 @@
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
         </dependency>
         <dependency>
@@ -38,14 +42,6 @@
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-commons</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.olingo</groupId>
-            <artifactId>odata-server-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.olingo</groupId>
-            <artifactId>odata-server-core</artifactId>
         </dependency>
         <dependency>
             <groupId>javax</groupId>
@@ -85,6 +81,10 @@
             <artifactId>jts-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.locationtech.jts.io</groupId>
+            <artifactId>jts-io-common</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-spatial</artifactId>
         </dependency>
@@ -100,6 +100,10 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-afterburner</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.n52.arctic-sea</groupId>
@@ -109,15 +113,6 @@
             <groupId>org.n52.arctic-sea</groupId>
             <artifactId>janmayen</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>org.apache.olingo</groupId>
-            <artifactId>odata-commons-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.olingo</groupId>
-            <artifactId>odata-commons-core</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -126,7 +121,6 @@
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
         </dependency>
-
         <dependency>
             <groupId>net.jcip</groupId>
             <artifactId>jcip-annotations</artifactId>
@@ -138,22 +132,6 @@
             <artifactId>spotbugs-annotations</artifactId>
             <version>3.1.12</version>
             <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <!--<dependency>-->
-        <!--<groupId>org.hamcrest</groupId>-->
-        <!--<artifactId>hamcrest-core</artifactId>-->
-        <!--<scope>test</scope>-->
-        <!--</dependency>-->
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest</artifactId>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 

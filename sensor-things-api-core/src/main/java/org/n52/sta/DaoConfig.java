@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -42,7 +42,6 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,12 +52,11 @@ import java.util.Map;
 @Configuration
 public class DaoConfig {
 
-    @Value("META-INF/persistence.xml")
+    @Value("${database.jpa.persistence-location}")
     private String persistenceXmlLocation;
 
     @Bean
-    public EntityManagerFactory entityManagerFactory(DataSource datasource, JpaProperties properties)
-            throws IOException {
+    public EntityManagerFactory entityManagerFactory(DataSource datasource, JpaProperties properties) {
         LocalContainerEntityManagerFactoryBean emf = new LocalContainerEntityManagerFactoryBean();
         emf.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         emf.setJpaPropertyMap(addCustomTypes(properties));

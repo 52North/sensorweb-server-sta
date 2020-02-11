@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -28,9 +28,9 @@
  */
 package org.n52.sta.data.query;
 
-import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
-import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.n52.series.db.beans.DescribableEntity;
+import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
+import org.n52.sta.utils.ComparisonOperator;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -78,13 +78,13 @@ public abstract class EntityQuerySpecifications<T> {
      * @param switched      true if Expression adheres to template: value, operator, name. False otherwise (Template
      *                      name, operator, value)
      * @return Specification evaluating to true if Entity is not to be filtered out
-     * @throws ExpressionVisitException if an error occurs
+     * @throws STAInvalidFilterExpressionException if an error occurs
      */
     public abstract Specification<T> getFilterForProperty(String propertyName,
                                                           Object propertyValue,
-                                                          BinaryOperatorKind operator,
+                                                          ComparisonOperator operator,
                                                           boolean switched)
-            throws ExpressionVisitException;
+            throws STAInvalidFilterExpressionException;
 
     public Specification<T> withName(final String name) {
         return (root, query, builder) -> {
@@ -110,52 +110,52 @@ public abstract class EntityQuerySpecifications<T> {
     // Wrapper
     protected Predicate handleDirectStringPropertyFilter(Path<String> stringPath,
                                                          String propertyValue,
-                                                         BinaryOperatorKind operator,
+                                                         ComparisonOperator operator,
                                                          CriteriaBuilder builder,
                                                          boolean switched)
-            throws ExpressionVisitException {
+            throws STAInvalidFilterExpressionException {
         return this.handleStringFilter(stringPath, propertyValue, operator, builder, switched);
     }
 
     protected Predicate handleDirectNumberPropertyFilter(Path<Double> numberPath,
                                                          Double propertyValue,
-                                                         BinaryOperatorKind operator,
+                                                         ComparisonOperator operator,
                                                          CriteriaBuilder builder)
-            throws ExpressionVisitException {
+            throws STAInvalidFilterExpressionException {
         return this.handleNumberFilter(numberPath, propertyValue, operator, builder);
     }
 
     protected Predicate handleDirectNumberPropertyFilter(Path<Long> numberPath,
                                                          Long propertyValue,
-                                                         BinaryOperatorKind operator,
+                                                         ComparisonOperator operator,
                                                          CriteriaBuilder builder)
-            throws ExpressionVisitException {
+            throws STAInvalidFilterExpressionException {
         return this.handleNumberFilter(numberPath, propertyValue, operator, builder);
     }
 
     protected Predicate handleDirectNumberPropertyFilter(Path<Integer> numberPath,
                                                          Integer propertyValue,
-                                                         BinaryOperatorKind operator,
+                                                         ComparisonOperator operator,
                                                          CriteriaBuilder builder)
-            throws ExpressionVisitException {
+            throws STAInvalidFilterExpressionException {
         return this.handleNumberFilter(numberPath, propertyValue, operator, builder);
     }
 
     protected Predicate handleDirectDateTimePropertyFilter(Path<Date> time,
                                                            Date propertyValue,
-                                                           BinaryOperatorKind operator,
+                                                           ComparisonOperator operator,
                                                            CriteriaBuilder builder)
-            throws ExpressionVisitException {
+            throws STAInvalidFilterExpressionException {
         return this.handleDateFilter(time, propertyValue, operator, builder);
     }
 
     public Predicate handleStringFilter(Path<String> left,
                                         String right,
-                                        BinaryOperatorKind operatorKind,
+                                        ComparisonOperator operatorKind,
                                         CriteriaBuilder builder,
                                         boolean switched)
-            throws ExpressionVisitException {
-        BinaryOperatorKind operator = switched ? reverseOperator(operatorKind) : operatorKind;
+            throws STAInvalidFilterExpressionException {
+        ComparisonOperator operator = switched ? reverseOperator(operatorKind) : operatorKind;
 
         switch (operator) {
             case EQ:
@@ -171,15 +171,15 @@ public abstract class EntityQuerySpecifications<T> {
             case GE:
                 return builder.greaterThanOrEqualTo(left, right);
             default:
-                throw new ExpressionVisitException("Error getting filter. Invalid Operator");
+                throw new STAInvalidFilterExpressionException("Error getting filter. Invalid Operator");
         }
     }
 
     public Predicate handleNumberFilter(Expression<Double> left,
                                         Double right,
-                                        BinaryOperatorKind operator,
+                                        ComparisonOperator operator,
                                         CriteriaBuilder builder)
-            throws ExpressionVisitException {
+            throws STAInvalidFilterExpressionException {
 
         switch (operator) {
             case EQ:
@@ -205,16 +205,16 @@ public abstract class EntityQuerySpecifications<T> {
             // case SUB:
             //    return builder.diff(leftExpr, rightExpr);
             default:
-                throw new ExpressionVisitException(
+                throw new STAInvalidFilterExpressionException(
                         String.format(ERROR_TEMPLATE, operator.toString()));
         }
     }
 
     public Predicate handleNumberFilter(Expression<Long> left,
                                         Long right,
-                                        BinaryOperatorKind operator,
+                                        ComparisonOperator operator,
                                         CriteriaBuilder builder)
-            throws ExpressionVisitException {
+            throws STAInvalidFilterExpressionException {
 
         switch (operator) {
             case EQ:
@@ -241,16 +241,16 @@ public abstract class EntityQuerySpecifications<T> {
             // case SUB:
             // return builder.diff(leftExpr, rightExpr);
             default:
-                throw new ExpressionVisitException(
+                throw new STAInvalidFilterExpressionException(
                         String.format(ERROR_TEMPLATE, operator.toString()));
         }
     }
 
     public Predicate handleNumberFilter(Expression<Integer> left,
                                         Integer right,
-                                        BinaryOperatorKind operator,
+                                        ComparisonOperator operator,
                                         CriteriaBuilder builder)
-            throws ExpressionVisitException {
+            throws STAInvalidFilterExpressionException {
 
         switch (operator) {
             case EQ:
@@ -277,16 +277,16 @@ public abstract class EntityQuerySpecifications<T> {
             // case SUB:
             // return builder.diff(leftExpr, rightExpr);
             default:
-                throw new ExpressionVisitException(
+                throw new STAInvalidFilterExpressionException(
                         String.format(ERROR_TEMPLATE, operator.toString()));
         }
     }
 
     public Predicate handleDateFilter(Expression<Date> left,
                                       Date right,
-                                      BinaryOperatorKind operator,
+                                      ComparisonOperator operator,
                                       CriteriaBuilder builder)
-            throws ExpressionVisitException {
+            throws STAInvalidFilterExpressionException {
 
         switch (operator) {
             case EQ:
@@ -302,7 +302,7 @@ public abstract class EntityQuerySpecifications<T> {
             case GE:
                 return builder.greaterThanOrEqualTo(left, right);
             default:
-                throw new ExpressionVisitException(
+                throw new STAInvalidFilterExpressionException(
                         String.format(ERROR_TEMPLATE, operator.toString()));
         }
     }
@@ -313,16 +313,16 @@ public abstract class EntityQuerySpecifications<T> {
      * @param operator to be reversed
      * @return String representation of reversed Operator
      */
-    private BinaryOperatorKind reverseOperator(BinaryOperatorKind operator) {
+    private ComparisonOperator reverseOperator(ComparisonOperator operator) {
         switch (operator) {
             case LT:
-                return BinaryOperatorKind.GE;
+                return ComparisonOperator.GE;
             case LE:
-                return BinaryOperatorKind.GT;
+                return ComparisonOperator.GT;
             case GT:
-                return BinaryOperatorKind.LE;
+                return ComparisonOperator.LE;
             case GE:
-                return BinaryOperatorKind.LT;
+                return ComparisonOperator.LT;
             default:
                 return operator;
         }
