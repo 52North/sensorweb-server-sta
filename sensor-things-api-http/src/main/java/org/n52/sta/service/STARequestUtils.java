@@ -247,7 +247,7 @@ public interface STARequestUtils extends StaConstants {
     String COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH_VARIABLE =
             PATH_ENTITY + FEATURES_OF_INTEREST + IDENTIFIER_REGEX + PATH_TARGET + OBSERVATIONS + CURLY_BRACKET_CLOSE;
 
-    String BASE_COLLECTION_REGEX =
+    String BASE_COLLECTION_REGEX_NAMED_GROUPS =
             WANTED_NAME_GROUP_START
                     + OBSERVATIONS + OR
                     + DATASTREAMS + OR
@@ -258,6 +258,16 @@ public interface STARequestUtils extends StaConstants {
                     + FEATURES_OF_INTEREST + OR
                     + OBSERVED_PROPERTIES
                     + WANTED_NAME_GROUP_END;
+
+    String BASE_COLLECTION_REGEX =
+            OBSERVATIONS + OR
+                    + DATASTREAMS + OR
+                    + THINGS + OR
+                    + SENSORS + OR
+                    + LOCATIONS + OR
+                    + HISTORICAL_LOCATIONS + OR
+                    + FEATURES_OF_INTEREST + OR
+                    + OBSERVED_PROPERTIES;
 
     String SELECT_REGEX_NAMED_GROUPS =
             BACKSLASH + QUESTIONMARK + BACKSLASH + DOLLAR + "select=" +
@@ -271,15 +281,15 @@ public interface STARequestUtils extends StaConstants {
     // Patterns used for matching Paths in mqtt with named groups
     // Java does not support duplicate names so patterns are handled separately
     // OGC-15-078r6 14.2.1
-   Pattern CP_BASE = Pattern.compile(BASE_COLLECTION_REGEX + DOLLAR);
-   Pattern CP_IDENT_BY_DATASTREAM = Pattern.compile(COLLECTION_IDENTIFIED_BY_DATASTREAM + DOLLAR);
-   Pattern CP_IDENT_BY_FOI = Pattern.compile(COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST + DOLLAR);
-   Pattern CP_IDENT_BY_LOCATION = Pattern.compile(COLLECTION_IDENTIFIED_BY_LOCATION + DOLLAR);
-   Pattern CP_IDENT_BY_OBS_PROP = Pattern.compile(COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY + DOLLAR);
-   Pattern CP_IDENT_BY_SENSOR = Pattern.compile(COLLECTION_IDENTIFIED_BY_SENSOR + DOLLAR);
-   Pattern CP_IDENT_BY_THING = Pattern.compile(COLLECTION_IDENTIFIED_BY_THING + DOLLAR);
+    Pattern CP_BASE = Pattern.compile(BASE_COLLECTION_REGEX_NAMED_GROUPS + DOLLAR);
+    Pattern CP_IDENT_BY_DATASTREAM = Pattern.compile(COLLECTION_IDENTIFIED_BY_DATASTREAM + DOLLAR);
+    Pattern CP_IDENT_BY_FOI = Pattern.compile(COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST + DOLLAR);
+    Pattern CP_IDENT_BY_LOCATION = Pattern.compile(COLLECTION_IDENTIFIED_BY_LOCATION + DOLLAR);
+    Pattern CP_IDENT_BY_OBS_PROP = Pattern.compile(COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY + DOLLAR);
+    Pattern CP_IDENT_BY_SENSOR = Pattern.compile(COLLECTION_IDENTIFIED_BY_SENSOR + DOLLAR);
+    Pattern CP_IDENT_BY_THING = Pattern.compile(COLLECTION_IDENTIFIED_BY_THING + DOLLAR);
 
-   Pattern[] NAMED_COLL_PATTERNS =
+    Pattern[] NAMED_COLL_PATTERNS =
             new Pattern[] {
                     CP_BASE,
                     CP_IDENT_BY_DATASTREAM,
@@ -291,13 +301,14 @@ public interface STARequestUtils extends StaConstants {
             };
 
     // OGC-15-078r6 14.2.2
-   Pattern EP_BASE = Pattern.compile(
-            BASE_COLLECTION_REGEX + WANTED_ID_GROUP_START + IDENTIFIER_REGEX + WANTED_ID_GROUP_END + DOLLAR);
-   Pattern EP_IDENT_BY_DATASTREAM = Pattern.compile(ENTITY_IDENTIFIED_BY_DATASTREAM + DOLLAR);
-   Pattern EP_IDENT_BY_HIST_LOC = Pattern.compile(ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION + DOLLAR);
-   Pattern EP_IDENT_BY_OBSERVATION = Pattern.compile(ENTITY_IDENTIFIED_BY_OBSERVATION + DOLLAR);
+    Pattern EP_BASE = Pattern.compile(
+            BASE_COLLECTION_REGEX_NAMED_GROUPS + WANTED_ID_GROUP_START + IDENTIFIER_REGEX + WANTED_ID_GROUP_END +
+                    DOLLAR);
+    Pattern EP_IDENT_BY_DATASTREAM = Pattern.compile(ENTITY_IDENTIFIED_BY_DATASTREAM + DOLLAR);
+    Pattern EP_IDENT_BY_HIST_LOC = Pattern.compile(ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION + DOLLAR);
+    Pattern EP_IDENT_BY_OBSERVATION = Pattern.compile(ENTITY_IDENTIFIED_BY_OBSERVATION + DOLLAR);
 
-   Pattern[] NAMED_ENTITY_PATTERNS =
+    Pattern[] NAMED_ENTITY_PATTERNS =
             new Pattern[] {
                     EP_BASE,
                     EP_IDENT_BY_DATASTREAM,
@@ -306,17 +317,17 @@ public interface STARequestUtils extends StaConstants {
             };
 
     // OGC-15-078r6 14.2.3
-   Pattern PROP_PATTERN_BASE = Pattern.compile(
-            BASE_COLLECTION_REGEX + WANTED_ID_GROUP_START + IDENTIFIER_REGEX + WANTED_ID_GROUP_END +
+    Pattern PROP_PATTERN_BASE = Pattern.compile(
+            BASE_COLLECTION_REGEX_NAMED_GROUPS + WANTED_ID_GROUP_START + IDENTIFIER_REGEX + WANTED_ID_GROUP_END +
                     PROPERTY_REGEX_NAMED_GROUPS + DOLLAR);
-   Pattern PROP_PATTERN_IDENT_BY_DATASTREAM =
+    Pattern PROP_PATTERN_IDENT_BY_DATASTREAM =
             Pattern.compile(ENTITY_IDENTIFIED_BY_DATASTREAM + PROPERTY_REGEX_NAMED_GROUPS + DOLLAR);
-   Pattern PROP_PATTERN_IDENT_BY_HIST_LOC =
+    Pattern PROP_PATTERN_IDENT_BY_HIST_LOC =
             Pattern.compile(ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION + PROPERTY_REGEX_NAMED_GROUPS + DOLLAR);
-   Pattern PROP_PATTERN_IDENT_BY_OBSERVATION =
+    Pattern PROP_PATTERN_IDENT_BY_OBSERVATION =
             Pattern.compile(ENTITY_IDENTIFIED_BY_OBSERVATION + PROPERTY_REGEX_NAMED_GROUPS + DOLLAR);
 
-   Pattern[] NAMED_PROP_PATTERNS =
+    Pattern[] NAMED_PROP_PATTERNS =
             new Pattern[] {
                     PROP_PATTERN_BASE,
                     PROP_PATTERN_IDENT_BY_DATASTREAM,
@@ -325,22 +336,22 @@ public interface STARequestUtils extends StaConstants {
             };
 
     // OGC-15-078r6 14.2.4
-   Pattern NAMED_SELECT_PATTER_BASE =
-            Pattern.compile(BASE_COLLECTION_REGEX + SELECT_REGEX_NAMED_GROUPS + DOLLAR);
-   Pattern NAMED_SELECT_PATTER_IDENT_BY_DATASTREAM =
+    Pattern NAMED_SELECT_PATTER_BASE =
+            Pattern.compile(BASE_COLLECTION_REGEX_NAMED_GROUPS + SELECT_REGEX_NAMED_GROUPS + DOLLAR);
+    Pattern NAMED_SELECT_PATTER_IDENT_BY_DATASTREAM =
             Pattern.compile(COLLECTION_IDENTIFIED_BY_DATASTREAM + SELECT_REGEX_NAMED_GROUPS + DOLLAR);
-   Pattern NAMED_SELECT_PATTER_IDENT_BY_FOI =
+    Pattern NAMED_SELECT_PATTER_IDENT_BY_FOI =
             Pattern.compile(COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST + SELECT_REGEX_NAMED_GROUPS + DOLLAR);
-   Pattern NAMED_SELECT_PATTER_IDENT_BY_LOCATION =
+    Pattern NAMED_SELECT_PATTER_IDENT_BY_LOCATION =
             Pattern.compile(COLLECTION_IDENTIFIED_BY_LOCATION + SELECT_REGEX_NAMED_GROUPS + DOLLAR);
-   Pattern NAMED_SELECT_PATTER_IDENT_BY_OBS_PROP =
+    Pattern NAMED_SELECT_PATTER_IDENT_BY_OBS_PROP =
             Pattern.compile(COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY + SELECT_REGEX_NAMED_GROUPS + DOLLAR);
-   Pattern NAMED_SELECT_PATTER_IDENT_BY_SENSOR =
+    Pattern NAMED_SELECT_PATTER_IDENT_BY_SENSOR =
             Pattern.compile(COLLECTION_IDENTIFIED_BY_SENSOR + SELECT_REGEX_NAMED_GROUPS + DOLLAR);
-   Pattern NAMED_SELECT_PATTER_IDENT_BY_THING =
+    Pattern NAMED_SELECT_PATTER_IDENT_BY_THING =
             Pattern.compile(COLLECTION_IDENTIFIED_BY_THING + SELECT_REGEX_NAMED_GROUPS + DOLLAR);
 
-   Pattern[] NAMED_SELECT_PATTERNS =
+    Pattern[] NAMED_SELECT_PATTERNS =
             new Pattern[] {
                     NAMED_SELECT_PATTER_BASE,
                     NAMED_SELECT_PATTER_IDENT_BY_DATASTREAM,
@@ -351,17 +362,17 @@ public interface STARequestUtils extends StaConstants {
                     NAMED_SELECT_PATTER_IDENT_BY_THING,
             };
 
-   Pattern BY_ID_PATTERN =
-            Pattern.compile(ROUND_BRACKET_OPEN + BASE_COLLECTION_REGEX + ROUND_BRACKET_CLOSE + IDENTIFIER_REGEX);
-   Pattern BY_DATASTREAM_PATTERN = Pattern.compile(IDENTIFIED_BY_DATASTREAM_REGEX);
-   Pattern BY_OBSERVATION_PATTERN = Pattern.compile(IDENTIFIED_BY_OBSERVATION_REGEX);
-   Pattern BY_HIST_LOC_PATTERN = Pattern.compile(IDENTIFIED_BY_HISTORICAL_LOCATION_REGEX);
-   Pattern BY_LOCATION_PATTERN = Pattern.compile(IDENTIFIED_BY_LOCATION_REGEX);
-   Pattern BY_THING_PATTERN = Pattern.compile(IDENTIFIED_BY_THING_REGEX);
-   Pattern BY_SENSOR_PATTERN = Pattern.compile(IDENTIFIED_BY_SENSOR_REGEX);
-   Pattern BY_OBSER_PROP_PATTERN = Pattern.compile(IDENTIFIED_BY_OBSERVED_PROPERTY_REGEX);
-   Pattern BY_FOI_PATTERN = Pattern.compile(IDENTIFIED_BY_FEATURE_OF_INTEREST_REGEX);
-
+    Pattern BY_ID_PATTERN =
+            Pattern.compile(
+                    ROUND_BRACKET_OPEN + BASE_COLLECTION_REGEX_NAMED_GROUPS + ROUND_BRACKET_CLOSE + IDENTIFIER_REGEX);
+    Pattern BY_DATASTREAM_PATTERN = Pattern.compile(IDENTIFIED_BY_DATASTREAM_REGEX);
+    Pattern BY_OBSERVATION_PATTERN = Pattern.compile(IDENTIFIED_BY_OBSERVATION_REGEX);
+    Pattern BY_HIST_LOC_PATTERN = Pattern.compile(IDENTIFIED_BY_HISTORICAL_LOCATION_REGEX);
+    Pattern BY_LOCATION_PATTERN = Pattern.compile(IDENTIFIED_BY_LOCATION_REGEX);
+    Pattern BY_THING_PATTERN = Pattern.compile(IDENTIFIED_BY_THING_REGEX);
+    Pattern BY_SENSOR_PATTERN = Pattern.compile(IDENTIFIED_BY_SENSOR_REGEX);
+    Pattern BY_OBSER_PROP_PATTERN = Pattern.compile(IDENTIFIED_BY_OBSERVED_PROPERTY_REGEX);
+    Pattern BY_FOI_PATTERN = Pattern.compile(IDENTIFIED_BY_FEATURE_OF_INTEREST_REGEX);
 
     default Class collectionNameToClass(String collectionName) {
         switch (collectionName) {
@@ -418,8 +429,8 @@ public interface STARequestUtils extends StaConstants {
     }
 
     default STAInvalidUrlThrowable validateURL(StringBuffer requestURL,
-                                              EntityServiceRepository serviceRepository,
-                                              int rootUrlLength) throws STAInvalidUrlThrowable {
+                                               EntityServiceRepository serviceRepository,
+                                               int rootUrlLength) throws STAInvalidUrlThrowable {
         String[] uriResources = requestURL.substring(rootUrlLength).split(SLASH);
 
         STAInvalidUrlThrowable ex;
