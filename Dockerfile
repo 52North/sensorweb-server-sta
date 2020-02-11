@@ -5,11 +5,11 @@ WORKDIR /app
 
 RUN git clone https://github.com/speckij/olingo-odata4 \
     && cd olingo-odata4 \
-    && git checkout v4.6.0-STA-alpha.1/fix/AnyTypeParsing
+    && git checkout v4.6.0-STA
 
 RUN git clone https://github.com/52North/sensor-things \
     && cd sensor-things \
-    && git checkout master
+    && git checkout v1.0.0
 
 RUN git clone https://github.com/52North/series-hibernate \
     && cd series-hibernate \
@@ -26,7 +26,6 @@ RUN cd series-hibernate \
     && mvn install
 
 RUN cd sensor-things \
-    && sed -i 's/<odata.version>4.6.0-STA-alpha.2/<odata.version>4.6.0-STA-SNAPSHOT/g' pom.xml \
     && mvn package
 
 FROM openjdk:8-jre-alpine as runstage
