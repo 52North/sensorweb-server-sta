@@ -1011,7 +1011,7 @@ public class Conformance2 {
         checkExisting(entityTypes);
 
         //Datastream
-        entitiesForDelete = createEntitiesForDelete();;
+        entitiesForDelete = createEntitiesForDelete();
         deleteEntity(EntityType.DATASTREAM, entitiesForDelete.get(EntityType.DATASTREAM)[0], false);
         entityTypes.clear();
         entityTypes.add(EntityType.DATASTREAM);
