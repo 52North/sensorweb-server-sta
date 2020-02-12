@@ -88,7 +88,7 @@
             <dependency>
                 <groupId>org.apache.olingo</groupId>
                 <artifactId>odata-server-api</artifactId>
-                <version>4.6.0-STA</version>
+                <version>4.7.1</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.olingo</groupId>
