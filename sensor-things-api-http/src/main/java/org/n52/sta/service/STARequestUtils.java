@@ -48,10 +48,13 @@ import org.n52.sta.serdes.ObservationSerDes;
 import org.n52.sta.serdes.ObservedPropertySerDes;
 import org.n52.sta.serdes.SensorSerDes;
 import org.n52.sta.serdes.ThingSerDes;
+import org.n52.svalbard.odata.QueryOptionsFactory;
 
 import java.util.regex.Pattern;
 
 public interface STARequestUtils extends StaConstants {
+
+    QueryOptionsFactory QUERY_OPTIONS_FACTORY = new QueryOptionsFactory();
 
     // Used for identifying/referencing source Entity Type
     // e.g. "Datastreams" in /Datastreams(52)/Thing

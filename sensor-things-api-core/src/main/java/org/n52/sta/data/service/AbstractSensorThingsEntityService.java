@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.service;
 
 import org.n52.janmayen.http.HTTPStatus;
@@ -36,12 +37,15 @@ import org.n52.series.db.beans.HibernateRelations.HasName;
 import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.shetland.filter.FilterFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
+import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.data.OffsetLimitBasedPageRequest;
 import org.n52.sta.data.repositories.IdentifierRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
+import org.n52.svalbard.odata.expr.Expr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
@@ -50,6 +54,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Predicate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -69,7 +75,6 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
 
     @Autowired
     private EntityServiceRepository serviceRepository;
-
 
     private Class entityClass;
 
@@ -103,7 +108,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      * @param id the id of the Entity
      * @return
      */
-    public ElementWithQueryOptions getEntity(String id , QueryOptions queryOptions) throws STACRUDException {
+    public ElementWithQueryOptions getEntity(String id, QueryOptions queryOptions) throws STACRUDException {
         try {
             return this.createWrapper(getRepository().findByIdentifier(id).get(), queryOptions);
         } catch (RuntimeException e) {
@@ -132,7 +137,8 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
 
     /**
      * Wraps the raw Entity into a Wrapper object to associate with QueryOptions used for this request
-     * @param entity entity
+     *
+     * @param entity       entity
      * @param queryOptions query options
      * @return instance of ElementWithQueryOptions
      */
@@ -156,16 +162,16 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
     /**
      * Requests the Entity with given ownId that is related to a single Entity with given relatedId and relatedType
      *
-     * @param relatedId   ID of the related Entity
-     * @param relatedType EntityType of the related Entity
-     * @param ownId       ID of the requested Entity. Can be null.
+     * @param relatedId    ID of the related Entity
+     * @param relatedType  EntityType of the related Entity
+     * @param ownId        ID of the requested Entity. Can be null.
      * @param queryOptions {@link QueryOptions} used for serialization
      * @return Entity that matches
      */
     public ElementWithQueryOptions<?> getEntityByRelatedEntity(String relatedId,
-                                                            String relatedType,
-                                                            String ownId,
-                                                            QueryOptions queryOptions)
+                                                               String relatedType,
+                                                               String ownId,
+                                                               QueryOptions queryOptions)
             throws STACRUDException {
         try {
             Optional<S> elem = getRepository().findOne(byRelatedEntityFilter(relatedId, relatedType, ownId));
@@ -213,7 +219,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
         try {
             return getRepository()
                     .findAll(byRelatedEntityFilter(relatedId, relatedType, null),
-                            createPageableRequest(queryOptions))
+                             createPageableRequest(queryOptions))
                     .map((S e) -> createWrapper(e, queryOptions))
                     .getContent();
 
@@ -246,7 +252,6 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
     // public long getEntityCollectionCountByRelatedEntity(String relatedId, String relatedType) {
     //    return 0;
     //}
-
 
     /**
      * Requests the ID for the Entity that is related to a single Entity with a
@@ -294,9 +299,8 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
         return getRepository().count(getFilterPredicate(entityClass, queryOptions));
     }
 
-
     /**
-     * Constructs QueryDSL FilterPredicate based on given queryOptions.
+     * Constructs FilterPredicate based on given queryOptions.
      *
      * @param entityClass  Class of the requested Entity
      * @param queryOptions QueryOptions Object
@@ -304,42 +308,55 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      */
     public Specification<S> getFilterPredicate(Class entityClass, QueryOptions queryOptions) {
         return (root, query, builder) -> {
-            return null;
-//            try {
-//                //if (queryOptions.hasOrderByOption()) {
-//                //    TODO: add orderby option for observation.result here?
-//                //}
-//                if (!queryOptions.hasFilterOption()) {
-//                    return null;
-//                } else {
-//                    Expression filterExpression = queryOptions.getFilterOption().getExpression();
-//
-//                    FilterExpressionVisitor visitor = new FilterExpressionVisitor(
-//                            entityClass,
-//                            this,
-//                            builder, root);
-//                    try {
-//                        Object accept = filterExpression.accept(visitor);
-//                        if (accept instanceof Specification) {
-//                            return ((Specification<S>) accept).toPredicate(root, query, builder);
-//                        } else if (accept instanceof Predicate) {
-//                            return (Predicate) accept;
-//                        } else {
-//                            throw new ODataApplicationException(
-//                                    "Received invalid FilterExpression.",
-//                                    HttpStatusCode.INTERNAL_SERVER_ERROR.getStatusCode(),
-//                                    Locale.ENGLISH);
-//                        }
-//                    } catch (ExpressionVisitException e) {
-//                        throw new ODataApplicationException(
-//                                e.getMessage(),
-//                                HttpStatusCode.BAD_REQUEST.getStatusCode(),
-//                                Locale.ENGLISH);
-//                    }
-//                }
-//            } catch (ODataApplicationException e) {
-//                throw new RuntimeException(e);
-//            }
+            if (!queryOptions.hasFilterOption()) {
+                return null;
+            } else {
+                FilterFilter filterOption = (FilterFilter) queryOptions.getFilterOption();
+                Expr filter = (Expr) filterOption.getFilter();
+                try {
+                    Expression<?> accept = filter.accept(new FilterExprVisitor(builder));
+                    //TODO: check this typecast as it looks wierd
+                    return (Predicate) accept;
+                } catch (STAInvalidQueryException e) {
+                    e.printStackTrace();
+                    return null;
+                    }
+            }
+            //            try {
+            //                //if (queryOptions.hasOrderByOption()) {
+            //                //    TODO: add orderby option for observation.result here?
+            //                //}
+            //                if (!queryOptions.hasFilterOption()) {
+            //                    return null;
+            //                } else {
+            //                    Expression filterExpression = queryOptions.getFilterOption().getExpression();
+            //
+            //                    FilterExpressionVisitor visitor = new FilterExpressionVisitor(
+            //                            entityClass,
+            //                            this,
+            //                            builder, root);
+            //                    try {
+            //                        Object accept = filterExpression.accept(visitor);
+            //                        if (accept instanceof Specification) {
+            //                            return ((Specification<S>) accept).toPredicate(root, query, builder);
+            //                        } else if (accept instanceof Predicate) {
+            //                            return (Predicate) accept;
+            //                        } else {
+            //                            throw new ODataApplicationException(
+            //                                    "Received invalid FilterExpression.",
+            //                                    HttpStatusCode.INTERNAL_SERVER_ERROR.getStatusCode(),
+            //                                    Locale.ENGLISH);
+            //                        }
+            //                    } catch (ExpressionVisitException e) {
+            //                        throw new ODataApplicationException(
+            //                                e.getMessage(),
+            //                                HttpStatusCode.BAD_REQUEST.getStatusCode(),
+            //                                Locale.ENGLISH);
+            //                    }
+            //                }
+            //            } catch (ODataApplicationException e) {
+            //                throw new RuntimeException(e);
+            //            }
         };
     }
 
@@ -388,14 +405,14 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
                 || datastream.isSetDescription()
                 || datastream.isSetUnit()) {
             throw new STACRUDException("Inlined datastream entities are not allowed for updates!",
-                    HTTPStatus.BAD_REQUEST);
+                                       HTTPStatus.BAD_REQUEST);
         }
     }
 
     protected void checkInlineLocation(LocationEntity location) throws STACRUDException {
         if (location.getIdentifier() == null || location.isSetName() || location.isSetDescription()) {
             throw new STACRUDException("Inlined location entities are not allowed for updates!",
-                    HTTPStatus.BAD_REQUEST);
+                                       HTTPStatus.BAD_REQUEST);
         }
     }
 
@@ -403,37 +420,36 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
         return serviceRepository.getEntityService(type);
     }
 
-
     /**
      * Create {@link PageRequest}
      *
-     * @param queryOptions {@link QueryOptions} to create {@link PageRequest}
+     * @param queryOptions           {@link QueryOptions} to create {@link PageRequest}
      * @param defaultSortingProperty Teh defualt sorting property
      * @return {@link PageRequest} of type {@link OffsetLimitBasedPageRequest}
      */
     protected OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions,
                                                                 String defaultSortingProperty) {
         //TODO(specki): implement
-//        int offset = queryOptions.hasSkipOption() ? queryOptions.getSkipOption().getValue() : 0;
-//        Sort sort = Sort.by(Direction.ASC, defaultSortingProperty);
-//        if (queryOptions.hasOrderByOption()) {
-//            boolean first = true;
-//            try {
-//                for (OrderByItem orderByItem : queryOptions.getOrderByOption().getOrders()) {
-//                    if (first) {
-//                        sort = Sort.by(orderByItem.isDescending() ? Direction.DESC : Direction.ASC,
-//                                orderByItem.getExpression().accept(new ExpressionGenerator(this)));
-//                        first = false;
-//                    } else {
-//                        sort.and(Sort.by(orderByItem.isDescending() ? Direction.DESC : Direction.ASC,
-//                                orderByItem.getExpression().accept(new ExpressionGenerator(this))));
-//                    }
-//                }
-//            } catch (ExpressionVisitException | ODataApplicationException e) {
-//                // use default sort
-//            }
-//        }
-//        return new OffsetLimitBasedPageRequest(offset, queryOptions.getTopOption().getValue(), sort);
+        //        int offset = queryOptions.hasSkipOption() ? queryOptions.getSkipOption().getValue() : 0;
+        //        Sort sort = Sort.by(Direction.ASC, defaultSortingProperty);
+        //        if (queryOptions.hasOrderByOption()) {
+        //            boolean first = true;
+        //            try {
+        //                for (OrderByItem orderByItem : queryOptions.getOrderByOption().getOrders()) {
+        //                    if (first) {
+        //                        sort = Sort.by(orderByItem.isDescending() ? Direction.DESC : Direction.ASC,
+        //                                orderByItem.getExpression().accept(new ExpressionGenerator(this)));
+        //                        first = false;
+        //                    } else {
+        //                        sort.and(Sort.by(orderByItem.isDescending() ? Direction.DESC : Direction.ASC,
+        //                                orderByItem.getExpression().accept(new ExpressionGenerator(this))));
+        //                    }
+        //                }
+        //            } catch (ExpressionVisitException | ODataApplicationException e) {
+        //                // use default sort
+        //            }
+        //        }
+        //        return new OffsetLimitBasedPageRequest(offset, queryOptions.getTopOption().getValue(), sort);
         return new OffsetLimitBasedPageRequest(0, 100);
     }
 

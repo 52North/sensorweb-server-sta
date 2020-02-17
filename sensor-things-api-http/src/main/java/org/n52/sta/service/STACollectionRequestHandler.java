@@ -29,21 +29,19 @@
 
 package org.n52.sta.service;
 
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
-import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlThrowable;
 import org.n52.sta.data.service.EntityServiceRepository;
+import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.net.URLDecoder;
 import java.util.List;
-import java.util.Map;
 
 @RequestMapping("/${server.contextPath}")
 @RestController
@@ -63,19 +61,19 @@ public class STACollectionRequestHandler implements STARequestUtils {
      * e.g. /Datastreams
      *
      * @param collectionName name of the collection. Automatically set by Spring via @PathVariable
-     * @param queryOptions   query options. Automatically set by Spring via @RequestParam
+     * @param request        Full request
      */
     @GetMapping(
             value = "/{collectionName:" + BASE_COLLECTION_REGEX + "}",
             produces = "application/json"
     )
     public List<ElementWithQueryOptions> readCollectionDirect(@PathVariable String collectionName,
-                                                              @RequestParam Map<String, String> queryOptions,
                                                               HttpServletRequest request)
             throws STACRUDException {
         return serviceRepository
                 .getEntityService(collectionName)
-                .getEntityCollection(new QueryOptions(request.getRequestURL().toString()));
+                .getEntityCollection(QUERY_OPTIONS_FACTORY.createQueryOptions(
+                        URLDecoder.decode(request.getQueryString())));
     }
 
     /**
@@ -99,10 +97,9 @@ public class STACollectionRequestHandler implements STARequestUtils {
     )
     public Object readRelatedCollection(@PathVariable String entity,
                                         @PathVariable String target,
-                                        @RequestParam Map<String, String> queryOptions,
-                                        HttpServletRequest request) throws STACRUDException, STAInvalidUrlThrowable {
+                                        HttpServletRequest request)
+            throws STACRUDException, STAInvalidUrlThrowable {
 
-        // TODO(specki): check if something needs to be cut from the front like rootUrl
         // TODO(specki): short-circuit if url is only one element as spring already validated that when the path matched
         // TODO(specki): Error serialization for nice output
 
@@ -115,7 +112,9 @@ public class STACollectionRequestHandler implements STARequestUtils {
         return serviceRepository.getEntityService(target)
                                 .getEntityCollectionByRelatedEntity(sourceId,
                                                                     sourceType,
-                                                                    new QueryOptions(request.getRequestURL()
-                                                                                            .toString()));
+                                                                    QUERY_OPTIONS_FACTORY.createQueryOptions(
+                                                                            URLDecoder.decode(request.getQueryString())
+                                                                    )
+                                );
     }
 }

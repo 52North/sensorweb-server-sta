@@ -29,7 +29,6 @@
 
 package org.n52.sta.service;
 
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlThrowable;
 import org.n52.sta.data.service.EntityServiceRepository;
@@ -37,11 +36,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Map;
+import java.net.URLDecoder;
 
 @RestController
 @RequestMapping("/${server.contextPath}")
@@ -70,7 +68,6 @@ public class STAEntityRequestHandler implements STARequestUtils {
     )
     public Object readEntityDirect(@PathVariable String entity,
                                    @PathVariable String id,
-                                   @RequestParam Map<String, String> queryOptions,
                                    HttpServletRequest request) throws STACRUDException, STAInvalidUrlThrowable {
 
         // TODO(specki): check if something needs to be cut from the front like rootUrl
@@ -81,7 +78,8 @@ public class STAEntityRequestHandler implements STARequestUtils {
 
         String entityId = id.substring(1, id.length() - 1);
         return serviceRepository.getEntityService(entity)
-                                .getEntity(entityId, new QueryOptions(request.getRequestURL().toString()));
+                                .getEntity(entityId, QUERY_OPTIONS_FACTORY.createQueryOptions(
+                                        URLDecoder.decode(request.getQueryString())));
     }
 
     /**
@@ -102,8 +100,8 @@ public class STAEntityRequestHandler implements STARequestUtils {
     )
     public Object readRelatedEntity(@PathVariable String entity,
                                     @PathVariable String target,
-                                    @RequestParam Map<String, String> queryOptions,
-                                    HttpServletRequest request) throws STACRUDException, STAInvalidUrlThrowable {
+                                    HttpServletRequest request)
+            throws STACRUDException, STAInvalidUrlThrowable {
 
         // TODO(specki): check if something needs to be cut from the front like rootUrl
         // TODO(specki): short-circuit if url is only one element as spring already validated that when the path matched
@@ -118,6 +116,7 @@ public class STAEntityRequestHandler implements STARequestUtils {
                                 .getEntityByRelatedEntity(sourceId,
                                                           sourceType,
                                                           null,
-                                                          new QueryOptions(request.getRequestURL().toString()));
+                                                          QUERY_OPTIONS_FACTORY.createQueryOptions(
+                                                                  URLDecoder.decode(request.getQueryString())));
     }
 }
