@@ -44,6 +44,9 @@ import javax.persistence.criteria.Predicate;
  */
 final class FilterExprVisitor implements ExprVisitor<Expression<?>, STAInvalidQueryException> {
 
+    private final String ERROR_NOT_IMPLEMENTED = "not implemented yet!";
+    private final String ERROR_NOT_EVALUATABLE = "Could not evaluate Methodcall to :";
+
     private CriteriaBuilder builder;
 
     FilterExprVisitor(CriteriaBuilder builder) {
@@ -136,7 +139,7 @@ final class FilterExprVisitor implements ExprVisitor<Expression<?>, STAInvalidQu
         case 3:
             return visitMethodCallTernary(expr);
         default:
-            throw new STAInvalidQueryException("Could not evaluate Methodcall to :" + expr.getName());
+            throw new STAInvalidQueryException(ERROR_NOT_EVALUATABLE + expr.getName());
         }
     }
 
@@ -147,9 +150,9 @@ final class FilterExprVisitor implements ExprVisitor<Expression<?>, STAInvalidQu
         case ODataConstants.DateAndTimeFunctions.MINDATETIME:
             // fallthru
         case ODataConstants.DateAndTimeFunctions.MAXDATETIME:
-            throw new STAInvalidQueryException("not implemented yet!");
+            throw new STAInvalidQueryException(ERROR_NOT_IMPLEMENTED);
         default:
-            throw new STAInvalidQueryException("Could not evaluate Methodcall to :" + expr.getName());
+            throw new STAInvalidQueryException(ERROR_NOT_EVALUATABLE + expr.getName());
         }
     }
 
@@ -184,7 +187,7 @@ final class FilterExprVisitor implements ExprVisitor<Expression<?>, STAInvalidQu
         case ODataConstants.DateAndTimeFunctions.DATE:
             // fallthru
         case ODataConstants.DateAndTimeFunctions.TIME:
-            throw new STAInvalidQueryException("not implemented yet!");
+            throw new STAInvalidQueryException(ERROR_NOT_IMPLEMENTED);
             // Math Functions
         case ODataConstants.ArithmeticFunctions.ROUND:
             return builder.function("ROUND", Integer.class, param);
@@ -193,7 +196,7 @@ final class FilterExprVisitor implements ExprVisitor<Expression<?>, STAInvalidQu
         case ODataConstants.ArithmeticFunctions.CEILING:
             return builder.function("CEIL", Integer.class, param);
         default:
-            throw new STAInvalidQueryException("Could not evaluate Methodcall to :" + expr.getName());
+            throw new STAInvalidQueryException(ERROR_NOT_EVALUATABLE + expr.getName());
         }
     }
 
@@ -208,7 +211,7 @@ final class FilterExprVisitor implements ExprVisitor<Expression<?>, STAInvalidQu
         case ODataConstants.StringFunctions.STARTSWITH:
             //TODO: Check how we can append/prepend the DOLLAR to the second param
             // return builder.like((Expression<String>) firstParam, "%" + secondParam);
-            throw new STAInvalidQueryException("not implemented yet!");
+            throw new STAInvalidQueryException(ERROR_NOT_IMPLEMENTED);
         case ODataConstants.StringFunctions.SUBSTRINGOF:
             return builder.function(
                     "CONTAINS",
@@ -248,18 +251,18 @@ final class FilterExprVisitor implements ExprVisitor<Expression<?>, STAInvalidQu
         case ODataConstants.SpatialFunctions.ST_INTERSECTS:
             // fallthru
         case ODataConstants.SpatialFunctions.ST_CONTAINS:
-            throw new STAInvalidQueryException("not implemented yet!");
+            throw new STAInvalidQueryException(ERROR_NOT_IMPLEMENTED);
         default:
-            throw new STAInvalidQueryException("Could not evaluate Methodcall to :" + expr.getName());
+            throw new STAInvalidQueryException(ERROR_NOT_EVALUATABLE + expr.getName());
         }
     }
 
     private Expression<?> visitMethodCallTernary(MethodCallExpr expr) throws STAInvalidQueryException {
         switch (expr.getName()) {
         case ODataConstants.SpatialFunctions.ST_RELATE:
-            throw new STAInvalidQueryException("not implemented yet!");
+            throw new STAInvalidQueryException(ERROR_NOT_IMPLEMENTED);
         default:
-            throw new STAInvalidQueryException("Could not evaluate Methodcall to :" + expr.getName());
+            throw new STAInvalidQueryException(ERROR_NOT_EVALUATABLE + expr.getName());
         }
     }
 

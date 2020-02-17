@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
+import java.net.URLDecoder;
 import java.util.regex.Matcher;
 
 /**
@@ -42,6 +43,8 @@ import java.util.regex.Matcher;
 public class MqttSelectSubscription extends MqttEntityCollectionSubscription {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttSelectSubscription.class);
+
+
 
     private String selectOption;
 
@@ -53,7 +56,9 @@ public class MqttSelectSubscription extends MqttEntityCollectionSubscription {
         selectOption = mt.group(STARequestUtils.GROUPNAME_SELECT);
         Assert.notNull(selectOption, "Unable to parse topic. Could not extract selectOption");
 
-        queryOptions = new QueryOptions(getTopic());
+        //TODO: check if this is stable
+        queryOptions = queryOptionsFactory.createQueryOptions(
+                URLDecoder.decode(getTopic().split("\\?")[0]));
         LOGGER.debug(this.toString());
     }
 
