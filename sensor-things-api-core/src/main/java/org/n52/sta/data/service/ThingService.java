@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.service;
 
 import org.joda.time.DateTime;
@@ -88,20 +89,20 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
                                                                   String ownId) {
         Specification<PlatformEntity> filter;
         switch (relatedType) {
-            case STAEntityDefinition.HISTORICAL_LOCATIONS: {
-                filter = tQS.withRelatedHistoricalLocationIdentifier(relatedId);
-                break;
-            }
-            case STAEntityDefinition.DATASTREAMS: {
-                filter = tQS.withRelatedDatastreamIdentifier(relatedId);
-                break;
-            }
-            case STAEntityDefinition.LOCATIONS: {
-                filter = tQS.withRelatedLocationIdentifier(relatedId);
-                break;
-            }
-            default:
-                return null;
+        case STAEntityDefinition.HISTORICAL_LOCATIONS: {
+            filter = tQS.withRelatedHistoricalLocationIdentifier(relatedId);
+            break;
+        }
+        case STAEntityDefinition.DATASTREAMS: {
+            filter = tQS.withRelatedDatastreamIdentifier(relatedId);
+            break;
+        }
+        case STAEntityDefinition.LOCATIONS: {
+            filter = tQS.withRelatedLocationIdentifier(relatedId);
+            break;
+        }
+        default:
+            return null;
         }
 
         if (ownId != null) {
@@ -303,26 +304,26 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
             collections.put(
                     STAEntityDefinition.LOCATION,
                     entity.getLocations()
-                            .stream()
-                            .map(LocationEntity::getIdentifier)
-                            .collect(Collectors.toSet()));
+                          .stream()
+                          .map(LocationEntity::getIdentifier)
+                          .collect(Collectors.toSet()));
         }
 
         if (entity.hasHistoricalLocations()) {
             collections.put(
                     STAEntityDefinition.HISTORICAL_LOCATION,
                     entity.getHistoricalLocations()
-                            .stream()
-                            .map(HistoricalLocationEntity::getIdentifier)
-                            .collect(Collectors.toSet()));
+                          .stream()
+                          .map(HistoricalLocationEntity::getIdentifier)
+                          .collect(Collectors.toSet()));
         }
 
         if (entity.hasDatastreams()) {
             collections.put(STAEntityDefinition.DATASTREAM,
-                    entity.getDatastreams()
-                            .stream()
-                            .map(DatastreamEntity::getIdentifier)
-                            .collect(Collectors.toSet()));
+                            entity.getDatastreams()
+                                  .stream()
+                                  .map(DatastreamEntity::getIdentifier)
+                                  .collect(Collectors.toSet()));
         }
         return collections;
     }

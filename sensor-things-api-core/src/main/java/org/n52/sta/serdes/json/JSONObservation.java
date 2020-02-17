@@ -26,16 +26,25 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.serdes.json;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.joda.time.DateTime;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.PrecisionModel;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.geojson.GeoJsonReader;
+import org.n52.series.db.beans.GeometryEntity;
+import org.n52.series.db.beans.parameter.ParameterJsonEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
+import org.n52.shetland.ogc.sos.Sos2Constants;
 import org.springframework.util.Assert;
 
 import java.util.Date;
@@ -50,7 +59,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> impl
     public String result;
     public Object resultQuality;
     public String validTime;
-    public JsonNode parameters;
+    public ArrayNode parameters;
 
     @JsonManagedReference
     public JSONFeatureOfInterest FeatureOfInterest;
@@ -64,23 +73,23 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> impl
     @Override
     public StaDataEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
-            case FULL:
-                Assert.notNull(result, INVALID_INLINE_ENTITY + "result");
-                return createPostEntity();
-            case PATCH:
-                return createPatchEntity();
-            case REFERENCE:
-                Assert.isNull(phenomenonTime, INVALID_REFERENCED_ENTITY);
-                Assert.isNull(resultTime, INVALID_REFERENCED_ENTITY);
-                Assert.isNull(result, INVALID_REFERENCED_ENTITY);
-                Assert.isNull(resultTime, INVALID_REFERENCED_ENTITY);
-                Assert.isNull(resultQuality, INVALID_REFERENCED_ENTITY);
-                Assert.isNull(parameters, INVALID_REFERENCED_ENTITY);
+        case FULL:
+            Assert.notNull(result, INVALID_INLINE_ENTITY + "result");
+            return createPostEntity();
+        case PATCH:
+            return createPatchEntity();
+        case REFERENCE:
+            Assert.isNull(phenomenonTime, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(resultTime, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(result, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(resultTime, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(resultQuality, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(parameters, INVALID_REFERENCED_ENTITY);
 
-                self.setIdentifier(identifier);
-                return self;
-            default:
-                return null;
+            self.setIdentifier(identifier);
+            return self;
+        default:
+            return null;
         }
     }
 
@@ -172,11 +181,28 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> impl
         }
 
         // parameters
-//            if (parameters != null) {
-//                //TODO: handle parameters
-//                //observation.setParameters();
-//                //throw new NotImplementedException();
-//            }
+        if (parameters != null) {
+            final String NAME = "name";
+            final String VALUE = "value";
+            for (JsonNode param : parameters) {
+                if (param.get(NAME).asText().equals(Sos2Constants.HREF_PARAMETER_SPATIAL_FILTERING_PROFILE)) {
+                    // Add as samplingGeometry to enable interoperability with SOS
+                    GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
+                    JsonNode jsonNode = param.get(VALUE);
+                    GeoJsonReader reader = new GeoJsonReader(factory);
+                    try {
+                        GeometryEntity geometryEntity = new GeometryEntity();
+                        geometryEntity.setGeometry(reader.read(jsonNode.toString()));
+                        self.setGeometryEntity(geometryEntity);
+                    } catch (ParseException e) {
+                        Assert.notNull(null, "Could not parse" + e.getMessage());
+                    }
+                }
+                ParameterJsonEntity parameterJsonEntity = new ParameterJsonEntity();
+                parameterJsonEntity.setName(param.get(NAME).asText());
+                parameterJsonEntity.setName(param.get(VALUE).toString());
+            }
+        }
         // result
         self.setValue(result);
 

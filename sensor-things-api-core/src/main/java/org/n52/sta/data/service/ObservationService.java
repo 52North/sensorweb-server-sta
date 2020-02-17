@@ -569,6 +569,8 @@ public class ObservationService extends
             }
             data.setValidTimeStart(observation.getValidTimeStart());
             data.setValidTimeEnd(observation.getValidTimeEnd());
+
+            data.setGeometryEntity(observation.getGeometryEntity());
         }
         return data;
     }

@@ -26,8 +26,15 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.service;
 
+import com.google.common.collect.Lists;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.Point;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DatasetEntity;
@@ -58,6 +65,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -112,12 +120,12 @@ public class FeatureOfInterestService
                                                                             String ownId) {
         Specification<AbstractFeatureEntity<?>> filter;
         switch (relatedType) {
-            case STAEntityDefinition.OBSERVATIONS: {
-                filter = foiQS.withObservationIdentifier(relatedId);
-                break;
-            }
-            default:
-                return null;
+        case STAEntityDefinition.OBSERVATIONS: {
+            filter = foiQS.withObservationIdentifier(relatedId);
+            break;
+        }
+        default:
+            return null;
         }
 
         if (ownId != null) {
@@ -129,10 +137,10 @@ public class FeatureOfInterestService
     @Override
     public String checkPropertyName(String property) {
         switch (property) {
-            case "encodingType":
-                return AbstractFeatureEntity.PROPERTY_FEATURE_TYPE;
-            default:
-                return property;
+        case "encodingType":
+            return AbstractFeatureEntity.PROPERTY_FEATURE_TYPE;
+        default:
+            return property;
         }
     }
 
@@ -299,6 +307,41 @@ public class FeatureOfInterestService
         return collections;
     }
 
+    /**
+     * Extends the geometry of the FOI with given id by geom. Used for automatically expanding FOIs e.g. for
+     * Observations along a track.
+     * Used for non-standard feature 'updateFOI'.
+     * @param id id of the FOI
+     * @param geom geom to expand the existing Geometry
+     */
+    public void updateFeatureOfInterestGeometry(String id, Geometry geom) {
+        Optional<AbstractFeatureEntity<?>> existing = getRepository().findByIdentifier(id);
+        if (existing.isPresent()) {
+            AbstractFeatureEntity<?> featureOfInterest = existing.get();
+            if (featureOfInterest.isSetGeometry()) {
+                if (geom instanceof Point) {
+                    List<Coordinate> coords = Lists.newArrayList();
+                    Geometry convert = featureOfInterest.getGeometry();
+                    if (convert instanceof Point) {
+                        coords.add(convert.getCoordinate());
+                    } else if (convert instanceof LineString) {
+                        coords.addAll(Lists.newArrayList(convert.getCoordinates()));
+                    }
+                    if (!coords.isEmpty()) {
+                        coords.add(geom.getCoordinate());
+                        Geometry newGeometry =
+                                new GeometryFactory().createLineString(coords.toArray(new Coordinate[coords.size()]));
+                        newGeometry.setSRID(featureOfInterest.getGeometry().getSRID());
+                        featureOfInterest.setGeometry(newGeometry);
+                    }
+                }
+            } else {
+                featureOfInterest.setGeometry(geom);
+            }
+            getRepository().save(featureOfInterest);
+        }
+    }
+
     @Override
     public AbstractFeatureEntity<?> merge(AbstractFeatureEntity<?> existing, AbstractFeatureEntity<?> toMerge) {
         mergeIdentifierNameDescription(existing, toMerge);
@@ -315,6 +358,5 @@ public class FeatureOfInterestService
             existing.setFeatureType(featureType);
         }
     }
-
 
 }

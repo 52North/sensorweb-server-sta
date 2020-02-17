@@ -29,8 +29,10 @@
 package org.n52.sta.data.service;
 
 import org.n52.janmayen.http.HTTPStatus;
+import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PlatformEntity;
+import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
@@ -242,6 +244,15 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
                 thing.setLocations(set);
                 PlatformEntity optionalThing = getThingService().createOrUpdate(thing);
                 things.add(optionalThing != null ? optionalThing : thing);
+
+                // non-standard feature 'updateFOI'
+                // Somewhat hacky but we know about the structure of Parameters as it is not used in STA anywhere
+                // else but for this purpose.
+                if (thing.hasParameters()) {
+                    String foiId = thing.getParameters().toArray(new ParameterEntity<?>[0])[0].getValueAsString();
+                    FeatureOfInterestService foiService = (FeatureOfInterestService) getFOIService();
+                    foiService.updateFeatureOfInterestGeometry(foiId, location.getGeometry());
+                }
             }
             location.setThings(things);
         }
@@ -264,6 +275,13 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
         return (AbstractSensorThingsEntityService<?, HistoricalLocationEntity>)
                 getEntityService(EntityTypes.HistoricalLocation);
     }
+
+    @SuppressWarnings("unchecked")
+    private AbstractSensorThingsEntityService<?, AbstractFeatureEntity<?>> getFOIService() {
+        return (AbstractSensorThingsEntityService<?, AbstractFeatureEntity<?>>) getEntityService(
+                EntityTypes.FeatureOfInterest);
+    }
+
 
     /* (non-Javadoc)
      * @see org.n52.sta.mapping.AbstractMapper#getRelatedCollections(java.lang.Object)

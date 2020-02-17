@@ -45,6 +45,7 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
         implements AbstractJSONEntity {
 
     private static final String COULD_NOT_PARSE = "Could not parse feature to GeoJSON. Error was: ";
+
     // JSON Properties. Matched by Annotation or variable name
     public String encodingType;
 
@@ -56,6 +57,10 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
     private final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
 
     private final GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
+
+    private final String TYPE = "type";
+    private final String GEOMETRY = "geometry";
+    private final String FEATURE = "Feature";
 
     public JSONFeatureOfInterest() {
         self = new FeatureEntity();
@@ -78,15 +83,16 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
             self.setDescription(description);
 
             if (feature != null) {
+                Assert.isTrue(FEATURE.equals(feature.get(TYPE).asText()));
+                Assert.notNull(feature.get(GEOMETRY));
                 GeoJsonReader reader = new GeoJsonReader(factory);
                 try {
-                    self.setGeometry(reader.read(feature.toString()));
+                    self.setGeometry(reader.read(feature.get(GEOMETRY).toString()));
                 } catch (ParseException e) {
                     Assert.notNull(null, COULD_NOT_PARSE + e.getMessage());
                 }
                 self.setFeatureType(ServiceUtils.createFeatureType(self.getGeometry()));
             }
-
             // TODO: handle nested observations
             // if (backReference != null) {
             // TODO: link feature to observations?
@@ -101,9 +107,11 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
             self.setDescription(description);
 
             if (feature != null) {
+                Assert.isTrue(FEATURE.equals(feature.get(TYPE).asText()));
+                Assert.notNull(feature.get(GEOMETRY));
                 GeoJsonReader reader = new GeoJsonReader(factory);
                 try {
-                    self.setGeometry(reader.read(feature.toString()));
+                    self.setGeometry(reader.read(feature.get(GEOMETRY).toString()));
                 } catch (ParseException e) {
                     Assert.notNull(null, COULD_NOT_PARSE + e.getMessage());
                 }

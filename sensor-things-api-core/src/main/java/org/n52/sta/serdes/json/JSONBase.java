@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.serdes.json;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -52,7 +53,8 @@ public class JSONBase {
         REFERENCE
     }
 
-    abstract static class JSONwithId <T> {
+
+    abstract static class JSONwithId<T> {
 
         private static Logger LOGGER = LoggerFactory.getLogger(JSONwithId.class);
 
@@ -75,6 +77,7 @@ public class JSONBase {
 
         /**
          * Returns a reference to the result of this classes toEntity() method
+         *
          * @return reference to created database entity
          */
         public T getEntity() {
@@ -85,11 +88,13 @@ public class JSONBase {
         /**
          * Creates and validates the Database Entity to conform to invariants defined in standard.
          * What is validated is dictated by given type parameter
+         *
          * @return created Entity
          */
         public abstract T toEntity(EntityType type);
 
-        /** Used when multiple Entity Types are allowed.
+        /**
+         * Used when multiple Entity Types are allowed.
          *
          * @param type1 first type to check
          * @param type2 second type to check
@@ -99,10 +104,16 @@ public class JSONBase {
             try {
                 return toEntity(type1);
             } catch (IllegalStateException | IllegalArgumentException ex) {
-                return toEntity(type2);
+                try {
+                    return toEntity(type2);
+                } catch (IllegalStateException | IllegalArgumentException secondEx) {
+                    throw new IllegalStateException(
+                            type1.name() + ex.getMessage() + type2.name() + secondEx.getMessage());
+                }
             }
         }
     }
+
 
     @SuppressFBWarnings("UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD")
     abstract static class JSONwithIdNameDescription<T> extends JSONwithId<T> {
@@ -110,11 +121,13 @@ public class JSONBase {
         public String description;
     }
 
+
     @SuppressFBWarnings("UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD")
     abstract static class JSONwithIdNameDescriptionTime<T> extends JSONwithIdTime<T> {
         public String name;
         public String description;
     }
+
 
     abstract static class JSONwithIdTime<T> extends JSONwithId<T> {
 
@@ -141,15 +154,12 @@ public class JSONBase {
             if (input.contains("/")) {
                 String[] split = input.split("/");
                 return createTime(DateTime.parse(split[0]),
-                        DateTime.parse(split[1]));
+                                  DateTime.parse(split[1]));
             } else {
                 return new TimeInstant(DateTime.parse(input));
             }
         }
 
     }
-
-
-
 
 }
