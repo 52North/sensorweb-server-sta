@@ -4,11 +4,11 @@
     <parent>
         <groupId>org.n52</groupId>
         <artifactId>parent</artifactId>
-        <version>16</version>
+        <version>18</version>
     </parent>
 
-    <groupId>org.n52.sta</groupId>
-    <artifactId>sensor-things-api</artifactId>
+    <groupId>org.n52.sensorweb-server.sta</groupId>
+    <artifactId>sta-parent</artifactId>
     <version>2.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
@@ -25,11 +25,11 @@
     </scm>
 
     <modules>
-        <module>sensor-things-api-core</module>
-        <module>sensor-things-api-app</module>
-        <module>sensor-things-api-http</module>
-        <module>sensor-things-api-mqtt</module>
-        <module>sensor-things-api-webapp</module>
+        <module>core</module>
+        <module>app</module>
+        <module>http</module>
+        <module>mqtt</module>
+        <module>webapp</module>
     </modules>
 
     <properties>
@@ -38,7 +38,7 @@
         <java.version>1.8</java.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <series-hbm.version>2.0.0-SNAPSHOT</series-hbm.version>
+        <db-model.version>2.0.0-SNAPSHOT</db-model.version>
         <arctic-sea.version>7.4.0-SNAPSHOT</arctic-sea.version>
         <spring-boot.version>2.2.1.RELEASE</spring-boot.version>
         <geolatte-geom.version>1.4.0</geolatte-geom.version>
@@ -53,27 +53,27 @@
         <dependencies>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>sensor-things-api-core</artifactId>
+                <artifactId>sta-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>sensor-things-api-http</artifactId>
+                <artifactId>sta-http</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>sensor-things-api-mqtt</artifactId>
+                <artifactId>sta-mqtt</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>sensor-things-api-app</artifactId>
+                <artifactId>sta-app</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>sensor-things-api-webapp</artifactId>
+                <artifactId>sta-webapp</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -92,19 +92,19 @@
             </dependency>
 
             <dependency>
-                <groupId>org.n52.series.db</groupId>
-                <artifactId>entities</artifactId>
-                <version>${series-hbm.version}</version>
+                <groupId>org.n52.sensorweb-server.db-model</groupId>
+                <artifactId>db-model-entities</artifactId>
+                <version>${db-model.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.n52.series.db</groupId>
-                <artifactId>mappings</artifactId>
-                <version>${series-hbm.version}</version>
+                <groupId>org.n52.sensorweb-server.db-model</groupId>
+                <artifactId>db-model-mappings</artifactId>
+                <version>${db-model.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.n52.series.db</groupId>
-                <artifactId>types</artifactId>
-                <version>${series-hbm.version}</version>
+                <groupId>org.n52.sensorweb-server.db-model</groupId>
+                <artifactId>db-model-types</artifactId>
+                <version>${db-model.version}</version>
             </dependency>
 
             <dependency>
