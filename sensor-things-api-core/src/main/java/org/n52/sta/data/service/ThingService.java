@@ -111,11 +111,6 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     }
 
     @Override
-    public long getCount(QueryOptions queryOptions) {
-        return getRepository().count(getFilterPredicate(PlatformEntity.class, queryOptions));
-    }
-
-    @Override
     public PlatformEntity createEntity(PlatformEntity newThing) throws STACRUDException {
         PlatformEntity thing = newThing;
         if (!thing.isProcesssed()) {
