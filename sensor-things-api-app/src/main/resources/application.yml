@@ -6,6 +6,7 @@ trace: false
 server:
   port: 8081
   rootUrl: example.xyz:80
+  contextPath: "v2"
 
 # Database Configuration
 database:

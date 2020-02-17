@@ -43,8 +43,8 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
-@RequestMapping("/v2")
 @RestController
+@RequestMapping("/${server.contextPath}")
 public class STAEntityRequestHandler implements STARequestUtils {
 
     private final EntityServiceRepository serviceRepository;

@@ -45,7 +45,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
-@RequestMapping("/v2")
+@RequestMapping("/${server.contextPath}")
 @RestController
 public class STACollectionRequestHandler implements STARequestUtils {
 

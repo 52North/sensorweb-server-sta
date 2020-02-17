@@ -53,7 +53,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 @RestController
-@RequestMapping("/v2")
+@RequestMapping("/${server.contextPath}")
 public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtils {
 
     private static final String COULD_NOT_FIND_RELATED_ENTITY = "Could not find related Entity!";
@@ -75,7 +75,8 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
             produces = "application/json")
     @SuppressWarnings("unchecked")
     public ElementWithQueryOptions handlePost(@PathVariable String collectionName,
-                                              @RequestBody String body) throws IOException, STACRUDException {
+                                              @RequestBody String body)
+            throws IOException, STACRUDException {
 
         Class<T> clazz = collectionNameToClass(collectionName);
         return ((AbstractSensorThingsEntityService<?, T>) serviceRepository.getEntityService(collectionName))
