@@ -44,6 +44,7 @@ import org.n52.series.db.beans.TextDataEntity;
 import org.n52.series.db.beans.dataset.DatasetType;
 import org.n52.series.db.beans.dataset.ObservationType;
 import org.n52.series.db.beans.dataset.ValueType;
+import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
@@ -58,6 +59,7 @@ import org.n52.sta.data.repositories.DataRepository;
 import org.n52.sta.data.repositories.DatasetRepository;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.OfferingRepository;
+import org.n52.sta.data.repositories.ParameterRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.n52.sta.serdes.model.ElementWithQueryOptions.ObservationWithQueryOptions;
@@ -103,18 +105,21 @@ public class ObservationService extends
     private final OfferingRepository offeringRepository;
     private final DatastreamRepository datastreamRepository;
     private final DatasetRepository datasetRepository;
+    private final ParameterRepository parameterRepository;
 
     @Autowired
     public ObservationService(DataRepository<DataEntity<?>> repository,
                               CategoryRepository categoryRepository,
                               OfferingRepository offeringRepository,
                               DatastreamRepository datastreamRepository,
-                              DatasetRepository datasetRepository) {
+                              DatasetRepository datasetRepository,
+                              ParameterRepository parameterRepository) {
         super(repository, DataEntity.class);
         this.categoryRepository = categoryRepository;
         this.offeringRepository = offeringRepository;
         this.datastreamRepository = datastreamRepository;
         this.datasetRepository = datasetRepository;
+        this.parameterRepository = parameterRepository;
     }
 
     @Override
@@ -571,6 +576,11 @@ public class ObservationService extends
             data.setValidTimeEnd(observation.getValidTimeEnd());
 
             data.setGeometryEntity(observation.getGeometryEntity());
+
+            if (observation.getParameters() != null) {
+                parameterRepository.saveAll(observation.getParameters());
+                data.setParameters(observation.getParameters());
+            }
         }
         return data;
     }

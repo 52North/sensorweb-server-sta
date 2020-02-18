@@ -49,6 +49,7 @@ import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.ReferencedDataEntity;
 import org.n52.series.db.beans.TextDataEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
+import org.n52.series.db.beans.parameter.ParameterJsonEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.gml.time.Time;
@@ -156,7 +157,10 @@ public class ObservationSerDes {
                 if (observation.hasParameters()) {
                     gen.writeArrayFieldStart(STAEntityDefinition.PROP_PARAMETERS);
                     for (ParameterEntity<?> parameter : observation.getParameters()) {
-                        gen.writeStringField(parameter.getName(), parameter.getValueAsString());
+                        gen.writeStartObject();
+                        gen.writeStringField("name", parameter.getName());
+                        gen.writeStringField("value", parameter.getValueAsString());
+                        gen.writeEndObject();
                     }
                     gen.writeEndArray();
                 }

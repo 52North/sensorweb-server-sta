@@ -39,6 +39,7 @@ import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.geojson.GeoJsonReader;
 import org.n52.series.db.beans.GeometryEntity;
+import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.parameter.ParameterJsonEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.shetland.ogc.gml.time.Time;
@@ -48,6 +49,7 @@ import org.n52.shetland.ogc.sos.Sos2Constants;
 import org.springframework.util.Assert;
 
 import java.util.Date;
+import java.util.HashSet;
 
 @SuppressWarnings("VisibilityModifier")
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
@@ -184,6 +186,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> impl
         if (parameters != null) {
             final String NAME = "name";
             final String VALUE = "value";
+            HashSet<ParameterEntity<?>> parameterJsonEntities = new HashSet<>();
             for (JsonNode param : parameters) {
                 if (param.get(NAME).asText().equals(Sos2Constants.HREF_PARAMETER_SPATIAL_FILTERING_PROFILE)) {
                     // Add as samplingGeometry to enable interoperability with SOS
@@ -198,11 +201,14 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> impl
                         Assert.notNull(null, "Could not parse" + e.getMessage());
                     }
                 }
-                ParameterJsonEntity parameterJsonEntity = new ParameterJsonEntity();
-                parameterJsonEntity.setName(param.get(NAME).asText());
-                parameterJsonEntity.setName(param.get(VALUE).toString());
+                ParameterJsonEntity parameterEntity = new ParameterJsonEntity();
+                parameterEntity.setName(param.get(NAME).asText());
+                parameterEntity.setValue(param.get(VALUE).toString());
+                parameterJsonEntities.add(parameterEntity);
             }
+            self.setParameters(parameterJsonEntities);
         }
+
         // result
         self.setValue(result);
 

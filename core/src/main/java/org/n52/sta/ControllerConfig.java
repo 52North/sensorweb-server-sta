@@ -30,6 +30,7 @@ package org.n52.sta;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.exception.DataException;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
@@ -64,6 +65,8 @@ public class ControllerConfig {
         String msg = "";
         if (exception.getCause() instanceof DataException) {
             msg = ((DataException) exception.getCause()).getSQLException().toString();
+        } else if (exception.getCause() instanceof ConstraintViolationException) {
+            msg = exception.getCause().getCause().getMessage();
         } else {
             msg = exception.getMessage();
         }
