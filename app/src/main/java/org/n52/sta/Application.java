@@ -40,12 +40,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
 @EnableJpaRepositories(repositoryBaseClass = MessageBusRepository.class,
-        basePackages = {"org.n52.series.db", "org.n52.sta.data.repositories"},
-        excludeFilters = @Filter(type = FilterType.REGEX, pattern = "org\\.n52\\.series\\.db\\.old\\..*"))
-@ComponentScan(basePackages = {"org.n52.series.db", "org.n52.sta"},
-        excludeFilters = {@Filter(type = FilterType.REGEX, pattern = "org\\.n52\\.series\\.db\\.old\\..*"),
-                @Filter(type = FilterType.REGEX, pattern = "org\\.n52\\.series\\.srv\\..*"),
-                @Filter(type = FilterType.REGEX, pattern = "org\\.n52\\.series\\.db\\.assembler\\..*")})
+        basePackages = {"org.n52.sta.data.repositories"})
 @EnableConfigurationProperties
 @EnableTransactionManagement
 @SuppressWarnings("uncommentedmain")
