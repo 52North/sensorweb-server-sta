@@ -26,13 +26,13 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.mqtt.core;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.moquette.interception.messages.InterceptPublishMessage;
 import org.n52.series.db.beans.DataEntity;
-import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlThrowable;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
@@ -40,7 +40,12 @@ import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.service.STARequestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
@@ -50,13 +55,17 @@ public class MqttPublishMessageHandler implements STARequestUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttPublishMessageHandler.class);
 
-    private EntityServiceRepository serviceRepository;
-    private ObjectMapper mapper;
+    private final EntityServiceRepository serviceRepository;
+    private final ObjectMapper mapper;
+    private final Set<String> publishTopics;
 
-    public MqttPublishMessageHandler(EntityServiceRepository serviceRepository,
-                                     ObjectMapper mapper) {
+    public MqttPublishMessageHandler(
+            @Value("${server.feature.mqttPublishTopics:Observations}") List<String> publishTopics,
+            EntityServiceRepository serviceRepository,
+            ObjectMapper mapper) {
         this.serviceRepository = serviceRepository;
         this.mapper = mapper;
+        this.publishTopics = new HashSet<>(publishTopics);
     }
 
     public void processPublishMessage(InterceptPublishMessage msg) {
@@ -68,18 +77,25 @@ public class MqttPublishMessageHandler implements STARequestUtils {
             // Check topic for syntax+semantics
             validateURL(new StringBuffer(topic), serviceRepository, 0);
 
-            // Check if topic references Observation Collection
-            if (!topic.endsWith("/" + StaConstants.OBSERVATIONS)) {
-                throw new STAInvalidUrlThrowable("Topic does not reference an Observation Collection");
+            // Check if topic references valid Collection
+            boolean valid = false;
+            for (String publishTopic : publishTopics) {
+                if (topic.endsWith("/" + publishTopic)) {
+                    valid = true;
+                    break;
+                }
             }
-
-            ((AbstractSensorThingsEntityService<?, DataEntity>) serviceRepository.getEntityService(OBSERVATIONS))
-                    .create(mapper.readValue(msg.getPayload().toString(), DataEntity.class));
+            if (valid) {
+                ((AbstractSensorThingsEntityService<?, DataEntity>) serviceRepository.getEntityService(OBSERVATIONS))
+                        .create(mapper.readValue(msg.getPayload().toString(), DataEntity.class));
+            } else {
+                throw new STAInvalidUrlThrowable("Topic does not reference a Collection allowed for POSTing via mqtt");
+            }
         } catch (STACRUDException | JsonProcessingException | STAInvalidUrlThrowable e) {
             LOGGER.error("Creation of Entity {} on topic {} failed with Exception {}!",
-                    msg.getPayload().toString(),
-                    msg.getTopicName(),
-                    e.getMessage());
+                         msg.getPayload().toString(),
+                         msg.getTopicName(),
+                         e.getMessage());
         }
     }
 }

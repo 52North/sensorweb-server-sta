@@ -10,7 +10,13 @@ server:
 
   ## Used for enabling/disabling custom 52N-STA Features
   feature:
+    ## Automatically updates a FeatureOfInterest linked in Thing->properties under
+    ## key "updateFOI" with new Locations of the Thing
     updateFOI: true
+
+    ## Defines all Collections that accept POSTing via MQTT.
+    ## Default (defined by standard): "Observations" only
+    mqttPublishTopics: Things, Observations
 
 # Database Configuration
 database:
