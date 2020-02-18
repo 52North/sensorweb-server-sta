@@ -129,7 +129,13 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
         LocationEntity location = newLocation;
         if (!location.isProcesssed()) {
             if (location.getIdentifier() != null && !location.isSetName()) {
-                return getRepository().findByIdentifier(location.getIdentifier()).get();
+                Optional<LocationEntity> optionalEntity =
+                        getRepository().findByIdentifier(location.getIdentifier());
+                if (optionalEntity.isPresent()) {
+                    return optionalEntity.get();
+                } else {
+                    throw new STACRUDException("No Location with id '" + location.getIdentifier() + "' found");
+                }
             }
             if (location.getIdentifier() == null) {
                 if (getRepository().existsByName(location.getName())) {

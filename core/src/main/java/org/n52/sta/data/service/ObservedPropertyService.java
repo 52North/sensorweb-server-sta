@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.service;
 
 import org.n52.janmayen.http.HTTPStatus;
@@ -120,15 +121,14 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
         return entity.isPresent() ? entity.get() : null;
     }
 
-
     @Override
     public boolean existsEntityByRelatedEntity(String relatedId, String relatedType, String ownId) {
         switch (relatedType) {
-            case STAEntityDefinition.DATASTREAMS: {
-                return getRepository().findOne(byRelatedEntityFilter(relatedId, relatedType, ownId)).isPresent();
-            }
-            default:
-                return false;
+        case STAEntityDefinition.DATASTREAMS: {
+            return getRepository().findOne(byRelatedEntityFilter(relatedId, relatedType, ownId)).isPresent();
+        }
+        default:
+            return false;
         }
     }
 
@@ -137,41 +137,48 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
                                                                  String relatedType,
                                                                  String ownId) {
         switch (relatedType) {
-            case STAEntityDefinition.DATASTREAMS: {
-                return (root, query, builder) -> {
-                    Subquery<PhenomenonEntity> sq = query.subquery(PhenomenonEntity.class);
-                    Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
-                    Join<DatastreamEntity, PhenomenonEntity> join =
-                            datastream.join(DatastreamEntity.PROPERTY_OBSERVABLE_PROPERTY);
-                    sq.select(join)
-                            .where(builder.equal(datastream.get(DescribableEntity.PROPERTY_IDENTIFIER), relatedId));
-                    if (ownId != null) {
-                        return builder.and(builder.in(root).value(sq), builder.equal(root.get(STAIDENTIFIER), ownId));
-                    }
-                    return builder.in(root).value(sq);
-                };
-            }
-            default:
-                return null;
+        case STAEntityDefinition.DATASTREAMS: {
+            return (root, query, builder) -> {
+                Subquery<PhenomenonEntity> sq = query.subquery(PhenomenonEntity.class);
+                Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
+                Join<DatastreamEntity, PhenomenonEntity> join =
+                        datastream.join(DatastreamEntity.PROPERTY_OBSERVABLE_PROPERTY);
+                sq.select(join)
+                  .where(builder.equal(datastream.get(DescribableEntity.PROPERTY_IDENTIFIER), relatedId));
+                if (ownId != null) {
+                    return builder.and(builder.in(root).value(sq), builder.equal(root.get(STAIDENTIFIER), ownId));
+                }
+                return builder.in(root).value(sq);
+            };
+        }
+        default:
+            return null;
         }
     }
 
     @Override
     public String checkPropertyName(String property) {
         switch (property) {
-            case "definition":
-                return DataEntity.PROPERTY_IDENTIFIER;
-            case "identifier":
-                return STAIDENTIFIER;
-            default:
-                return super.checkPropertyName(property);
+        case "definition":
+            return DataEntity.PROPERTY_IDENTIFIER;
+        case "identifier":
+            return STAIDENTIFIER;
+        default:
+            return super.checkPropertyName(property);
         }
     }
 
     @Override
     public PhenomenonEntity createEntity(PhenomenonEntity observableProperty) throws STACRUDException {
         if (observableProperty.getStaIdentifier() != null && !observableProperty.isSetName()) {
-            return getRepository().findByStaIdentifier(observableProperty.getStaIdentifier()).get();
+            Optional<PhenomenonEntity> optionalEntity =
+                    getRepository().findByIdentifier(observableProperty.getStaIdentifier());
+            if (optionalEntity.isPresent()) {
+                return optionalEntity.get();
+            } else {
+                throw new STACRUDException("No ObservedProperty with id '" + observableProperty.getStaIdentifier() +
+                                                   "' found");
+            }
         }
         if (observableProperty.getStaIdentifier() == null) {
             if (getRepository().existsByName(observableProperty.getName())) {

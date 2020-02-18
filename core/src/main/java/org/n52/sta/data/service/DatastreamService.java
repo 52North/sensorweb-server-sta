@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.service;
 
 import org.n52.janmayen.http.HTTPStatus;
@@ -112,24 +113,24 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
                                                                     String ownId) {
         Specification<DatastreamEntity> filter;
         switch (relatedType) {
-            case STAEntityDefinition.THINGS: {
-                filter = dQS.withThingIdentifier(relatedId);
-                break;
-            }
-            case STAEntityDefinition.SENSORS: {
-                filter = dQS.withSensorIdentifier(relatedId);
-                break;
-            }
-            case STAEntityDefinition.OBSERVED_PROPERTIES: {
-                filter = dQS.withObservedPropertyIdentifier(relatedId);
-                break;
-            }
-            case STAEntityDefinition.OBSERVATIONS: {
-                filter = dQS.withObservationIdentifier(relatedId);
-                break;
-            }
-            default:
-                return null;
+        case STAEntityDefinition.THINGS: {
+            filter = dQS.withThingIdentifier(relatedId);
+            break;
+        }
+        case STAEntityDefinition.SENSORS: {
+            filter = dQS.withSensorIdentifier(relatedId);
+            break;
+        }
+        case STAEntityDefinition.OBSERVED_PROPERTIES: {
+            filter = dQS.withObservedPropertyIdentifier(relatedId);
+            break;
+        }
+        case STAEntityDefinition.OBSERVATIONS: {
+            filter = dQS.withObservationIdentifier(relatedId);
+            break;
+        }
+        default:
+            return null;
         }
 
         if (ownId != null) {
@@ -141,12 +142,12 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     @Override
     public String checkPropertyName(String property) {
         switch (property) {
-            case "phenomenonTime":
-                return DatastreamEntity.PROPERTY_SAMPLING_TIME_START;
-            case "resultTime":
-                return DatastreamEntity.PROPERTY_RESULT_TIME_START;
-            default:
-                return super.checkPropertyName(property);
+        case "phenomenonTime":
+            return DatastreamEntity.PROPERTY_SAMPLING_TIME_START;
+        case "resultTime":
+            return DatastreamEntity.PROPERTY_RESULT_TIME_START;
+        default:
+            return super.checkPropertyName(property);
         }
     }
 
@@ -154,8 +155,15 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     public DatastreamEntity createEntity(DatastreamEntity datastream) throws STACRUDException {
         DatastreamEntity entity = datastream;
         if (!datastream.isProcesssed()) {
+            // Getting by reference
             if (datastream.getIdentifier() != null && !datastream.isSetName()) {
-                return getRepository().findOne(dQS.withIdentifier(datastream.getIdentifier())).get();
+                Optional<DatastreamEntity> optionalEntity =
+                        getRepository().findOne(dQS.withIdentifier(datastream.getIdentifier()));
+                if (optionalEntity.isPresent()) {
+                    return optionalEntity.get();
+                } else {
+                    throw new STACRUDException("No Datastream with id '" + datastream.getIdentifier() + "' found");
+                }
             }
             check(datastream);
             //Specification<DatastreamEntity> predicate = createQuery(datastream);
@@ -168,7 +176,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
             checkObservationType(datastream);
             checkUnit(datastream);
             datastream.setObservableProperty(getObservedPropertyService()
-                    .createEntity(datastream.getObservableProperty()));
+                                                     .createEntity(datastream.getObservableProperty()));
             datastream.setProcedure(getSensorService().createEntity(datastream.getProcedure()));
             datastream.setThing(getThingService().createEntity(datastream.getThing()));
             if (datastream.getIdentifier() != null) {
@@ -200,9 +208,9 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
             expression = expression.and(dQS.withSensorName(datastream.getProcedure().getName()));
         }
         if (datastream.getObservableProperty().getIdentifier() != null && !datastream.getObservableProperty()
-                .isSetName()) {
+                                                                                     .isSetName()) {
             expression = expression.and(dQS.withObservedPropertyIdentifier(datastream.getObservableProperty()
-                    .getIdentifier()));
+                                                                                     .getIdentifier()));
         } else {
             expression = expression.and(dQS.withObservedPropertyName(datastream.getObservableProperty().getName()));
         }
@@ -356,8 +364,8 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     private void checkObservationType(DatastreamEntity existing, DatastreamEntity toMerge)
             throws STACRUDException {
         if (toMerge.isSetObservationType() && !toMerge.getObservationType()
-                .getFormat()
-                .equalsIgnoreCase(UNKNOWN)
+                                                      .getFormat()
+                                                      .equalsIgnoreCase(UNKNOWN)
                 && !existing.getObservationType().getFormat().equals(toMerge.getObservationType().getFormat())) {
             throw new STACRUDException(
                     String.format(
@@ -416,17 +424,17 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
 
         if (entity.hasThing()) {
             collections.put(STAEntityDefinition.THING,
-                    Collections.singleton(entity.getThing().getIdentifier()));
+                            Collections.singleton(entity.getThing().getIdentifier()));
         }
 
         if (entity.hasProcedure()) {
             collections.put(STAEntityDefinition.SENSOR,
-                    Collections.singleton(entity.getProcedure().getIdentifier()));
+                            Collections.singleton(entity.getProcedure().getIdentifier()));
         }
 
         if (entity.hasObservableProperty()) {
             collections.put(STAEntityDefinition.OBSERVED_PROPERTY,
-                    Collections.singleton(entity.getObservableProperty().getIdentifier()));
+                            Collections.singleton(entity.getObservableProperty().getIdentifier()));
         }
 
         //Iterable<DataEntity<?>> observations = dataRepository.findAll(dQS.withId(entity.getId()));

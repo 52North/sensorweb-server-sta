@@ -33,6 +33,7 @@ import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
@@ -170,7 +171,13 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     @Override
     public ProcedureEntity createEntity(ProcedureEntity sensor) throws STACRUDException {
         if (sensor.getIdentifier() != null && !sensor.isSetName()) {
-            return getRepository().findByIdentifier(sensor.getIdentifier()).get();
+            Optional<ProcedureEntity> optionalEntity =
+                    getRepository().findByIdentifier(sensor.getIdentifier());
+            if (optionalEntity.isPresent()) {
+                return optionalEntity.get();
+            } else {
+                throw new STACRUDException("No Sensor with id '" + sensor.getIdentifier() + "' found");
+            }
         }
         if (sensor.getIdentifier() == null) {
             if (getRepository().existsByName(sensor.getName())) {

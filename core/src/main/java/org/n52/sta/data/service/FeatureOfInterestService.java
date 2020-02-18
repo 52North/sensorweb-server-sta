@@ -146,8 +146,15 @@ public class FeatureOfInterestService
 
     @Override
     public AbstractFeatureEntity<?> createEntity(AbstractFeatureEntity<?> feature) throws STACRUDException {
+        // Get by reference
         if (feature.getIdentifier() != null && !feature.isSetName()) {
-            return getRepository().findByIdentifier(feature.getIdentifier()).get();
+            Optional<AbstractFeatureEntity<?>> optionalEntity =
+                    getRepository().findByIdentifier(feature.getIdentifier());
+            if (optionalEntity.isPresent()) {
+                return optionalEntity.get();
+            } else {
+                throw new STACRUDException("No FeatureOfInterest with id '" + feature.getIdentifier() + "' found");
+            }
         }
         if (feature.getIdentifier() == null) {
             if (getRepository().existsByName(feature.getName())) {

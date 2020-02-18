@@ -32,6 +32,7 @@ package org.n52.sta.data.service;
 import org.joda.time.DateTime;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.PlatformEntity;
+import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
@@ -116,7 +117,13 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
         PlatformEntity thing = newThing;
         if (!thing.isProcesssed()) {
             if (thing.getIdentifier() != null && !thing.isSetName()) {
-                return getRepository().findByIdentifier(thing.getIdentifier()).get();
+                Optional<PlatformEntity> optionalEntity =
+                        getRepository().findByIdentifier(thing.getIdentifier());
+                if (optionalEntity.isPresent()) {
+                    return optionalEntity.get();
+                } else {
+                    throw new STACRUDException("No Thing with id '" + thing.getIdentifier() + "' found");
+                }
             }
             if (thing.getIdentifier() == null) {
                 if (getRepository().existsByName(thing.getName())) {
