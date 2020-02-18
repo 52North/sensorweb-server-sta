@@ -311,10 +311,11 @@ public class FeatureOfInterestService
      * Extends the geometry of the FOI with given id by geom. Used for automatically expanding FOIs e.g. for
      * Observations along a track.
      * Used for non-standard feature 'updateFOI'.
-     * @param id id of the FOI
+     *
+     * @param id   id of the FOI
      * @param geom geom to expand the existing Geometry
      */
-    public void updateFeatureOfInterestGeometry(String id, Geometry geom) {
+    public void updateFeatureOfInterestGeometry(String id, Geometry geom) throws STACRUDException {
         Optional<AbstractFeatureEntity<?>> existing = getRepository().findByIdentifier(id);
         if (existing.isPresent()) {
             AbstractFeatureEntity<?> featureOfInterest = existing.get();
@@ -339,6 +340,9 @@ public class FeatureOfInterestService
                 featureOfInterest.setGeometry(geom);
             }
             getRepository().save(featureOfInterest);
+        } else {
+            throw new STACRUDException("Could not update FeatureOfInterest. No FeatureOfInterest with id \"" + id +
+                                               "\" found!");
         }
     }
 

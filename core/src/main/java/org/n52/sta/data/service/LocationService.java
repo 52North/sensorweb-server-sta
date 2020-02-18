@@ -26,13 +26,13 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.service;
 
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PlatformEntity;
-import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
@@ -46,6 +46,7 @@ import org.n52.sta.serdes.model.ElementWithQueryOptions.LocationWithQueryOptions
 import org.n52.sta.serdes.model.STAEntityDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
@@ -61,6 +62,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -76,10 +79,15 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
 
     private final LocationEncodingRepository locationEncodingRepository;
 
-    public LocationService(LocationRepository repository,
+    private final boolean updateFOIFeatureEnabled;
+    private Pattern updateFOIPattern = Pattern.compile("(?:.*updateFOI\":\")([0-9A-z'\\+%]+)(?:\".*)");
+
+    public LocationService(@Value("${server.feature.updateFOI}") boolean updateFOI,
+                           LocationRepository repository,
                            LocationEncodingRepository locationEncodingRepository) {
         super(repository, LocationEntity.class);
         this.locationEncodingRepository = locationEncodingRepository;
+        this.updateFOIFeatureEnabled = updateFOI;
     }
 
     @Override
@@ -98,16 +106,16 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
                                                                String ownId) {
         Specification<LocationEntity> filter;
         switch (relatedType) {
-            case STAEntityDefinition.HISTORICAL_LOCATIONS: {
-                filter = lQS.withRelatedHistoricalLocationIdentifier(relatedId);
-                break;
-            }
-            case STAEntityDefinition.THINGS: {
-                filter = lQS.withRelatedThingIdentifier(relatedId);
-                break;
-            }
-            default:
-                return null;
+        case STAEntityDefinition.HISTORICAL_LOCATIONS: {
+            filter = lQS.withRelatedHistoricalLocationIdentifier(relatedId);
+            break;
+        }
+        case STAEntityDefinition.THINGS: {
+            filter = lQS.withRelatedThingIdentifier(relatedId);
+            break;
+        }
+        default:
+            return null;
         }
 
         if (ownId != null) {
@@ -238,20 +246,24 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     private void processThings(LocationEntity location) throws STACRUDException {
         if (location.hasThings()) {
             Set<PlatformEntity> things = new LinkedHashSet<>();
-            for (PlatformEntity thing : location.getThings()) {
+            for (PlatformEntity newThing : location.getThings()) {
                 HashSet<LocationEntity> set = new HashSet<>();
                 set.add(createReferencedLocation(location));
-                thing.setLocations(set);
-                PlatformEntity optionalThing = getThingService().createOrUpdate(thing);
-                things.add(optionalThing != null ? optionalThing : thing);
+                newThing.setLocations(set);
+                PlatformEntity oldThing = getThingService().createOrUpdate(newThing);
+                things.add(oldThing);
 
                 // non-standard feature 'updateFOI'
-                // Somewhat hacky but we know about the structure of Parameters as it is not used in STA anywhere
-                // else but for this purpose.
-                if (thing.hasParameters()) {
-                    String foiId = thing.getParameters().toArray(new ParameterEntity<?>[0])[0].getValueAsString();
-                    FeatureOfInterestService foiService = (FeatureOfInterestService) getFOIService();
-                    foiService.updateFeatureOfInterestGeometry(foiId, location.getGeometry());
+                if (updateFOIFeatureEnabled && oldThing.getProperties().contains("updateFOI")) {
+                    // Try to be more performant and not deserialize whole properties but only grep relevant parts
+                    // via simple regex
+                    Matcher matcher = updateFOIPattern.matcher(oldThing.getProperties());
+                    if (matcher.matches()) {
+                        FeatureOfInterestService foiService = (FeatureOfInterestService) getFOIService();
+                        foiService.updateFeatureOfInterestGeometry(matcher.group(1), location.getGeometry());
+                    } else {
+                        throw new STACRUDException("Could not extract FeatureOfInterest ID from Thing->properties!");
+                    }
                 }
             }
             location.setThings(things);
@@ -282,7 +294,6 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
                 EntityTypes.FeatureOfInterest);
     }
 
-
     /* (non-Javadoc)
      * @see org.n52.sta.mapping.AbstractMapper#getRelatedCollections(java.lang.Object)
      */
@@ -293,18 +304,18 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
 
         if (entity.hasHistoricalLocations()) {
             collections.put(STAEntityDefinition.HISTORICAL_LOCATION,
-                    entity.getHistoricalLocations()
-                            .stream()
-                            .map(HistoricalLocationEntity::getIdentifier)
-                            .collect(Collectors.toSet()));
+                            entity.getHistoricalLocations()
+                                  .stream()
+                                  .map(HistoricalLocationEntity::getIdentifier)
+                                  .collect(Collectors.toSet()));
         }
 
         if (entity.hasThings()) {
             collections.put(STAEntityDefinition.THING,
-                    entity.getThings()
-                            .stream()
-                            .map(PlatformEntity::getIdentifier)
-                            .collect(Collectors.toSet()));
+                            entity.getThings()
+                                  .stream()
+                                  .map(PlatformEntity::getIdentifier)
+                                  .collect(Collectors.toSet()));
         }
         return collections;
     }

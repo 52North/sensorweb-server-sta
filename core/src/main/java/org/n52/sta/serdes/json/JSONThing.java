@@ -46,9 +46,6 @@ import java.util.stream.Collectors;
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
 public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity> implements AbstractJSONEntity {
 
-    // Eurofleets
-    public String updateFOI;
-
     // JSON Properties. Matched by Annotation or variable name
     public JsonNode properties;
     @JsonManagedReference
@@ -138,18 +135,6 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
             Assert.isNull(Datastreams, INVALID_REFERENCED_ENTITY);
 
             self.setIdentifier(identifier);
-
-            // non-standard feature 'updateFOI'
-            // if updateFOI is set, FeatureOfInterest with given id is automatically expanded by the location of the
-            // Location currently related to this Thing. Only used if Thing is given as reference inside Location.
-            if (updateFOI != null) {
-                ParameterTextEntity param = new ParameterTextEntity();
-                param.setValue(updateFOI);
-                self.setParameters(new HashSet<ParameterEntity<?>>() {{
-                    add(param);
-                }});
-            }
-
             return self;
         default:
             return null;

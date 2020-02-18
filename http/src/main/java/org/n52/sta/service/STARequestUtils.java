@@ -82,6 +82,7 @@ public interface STARequestUtils extends StaConstants {
 
     String MAPPING_PREFIX = "**/";
     String IDENTIFIER_REGEX = "(?:\\()['\\-0-9a-zA-Z]+(?:\\))";
+    // Note: This is duplicated in LocationService to allow for non-standard 'updateFOI'-feature.
 
     String URL_INVALID = "Url is invalid. ";
 

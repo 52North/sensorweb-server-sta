@@ -8,6 +8,10 @@ server:
   rootUrl: "http://localhost:8081/v2/"
   contextPath: "v2"
 
+  ## Used for enabling/disabling custom 52N-STA Features
+  feature:
+    updateFOI: true
+
 # Database Configuration
 database:
   jpa:
