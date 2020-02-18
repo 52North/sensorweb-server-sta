@@ -123,7 +123,7 @@ public class MqttSubscriptionEventHandler implements STARequestUtils, STAEventHa
                 // As Entity does not change the related collections are cached
                 if (collections == null && subscrip instanceof MqttEntityCollectionSubscription) {
                     AbstractSensorThingsEntityService<?, ?> responseService
-                            = serviceRepository.getEntityService(MqttUtil.TYPEMAP.get(entityType));
+                            = serviceRepository.getEntityService(entityType);
                     collections = responseService.getRelatedCollections(rawObject);
                 }
 
@@ -183,11 +183,9 @@ public class MqttSubscriptionEventHandler implements STARequestUtils, STAEventHa
         removeSubscription(createMqttSubscription(msg.getTopicFilter()), msg.getClientID());
     }
 
-    private AbstractMqttSubscription createMqttSubscription(String rawTopic) throws MqttHandlerException {
+    private AbstractMqttSubscription createMqttSubscription(String topic) throws MqttHandlerException {
         try {
             Matcher mt;
-            // Remove leading slash if present
-            String topic = (rawTopic.startsWith("/")) ? rawTopic.substring(1) : rawTopic;
 
             // Check topic for syntax+semantics
             validateURL(new StringBuffer(topic), serviceRepository, 0);

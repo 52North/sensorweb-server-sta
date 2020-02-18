@@ -85,7 +85,7 @@ public abstract class AbstractMqttSubscription {
     }
 
     public String getEntityType() {
-        return null;
+        return wantedEntityType;
     }
 
     @Override

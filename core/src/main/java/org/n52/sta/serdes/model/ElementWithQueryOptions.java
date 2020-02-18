@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.serdes.model;
 
 import org.n52.series.db.beans.AbstractFeatureEntity;
@@ -55,9 +56,25 @@ public abstract class ElementWithQueryOptions<P extends IdEntity> {
     //TODO: implement
     public static ElementWithQueryOptions from(Object entity, QueryOptions queryOptions) {
         switch (entity.getClass().getSimpleName()) {
-            default:
-                System.out.println(entity.getClass().getSimpleName());
-                return new ThingWithQueryOptions((PlatformEntity) entity, queryOptions);
+        case "PlatformEntity":
+            return new ThingWithQueryOptions((PlatformEntity) entity, queryOptions);
+        case "ProcedureEntity":
+            return new SensorWithQueryOptions((ProcedureEntity) entity, queryOptions);
+        case "PhenomenonEntity":
+            return new ObservedPropertyWithQueryOptions((PhenomenonEntity) entity, queryOptions);
+        case "DataEntity":
+            return new ObservationWithQueryOptions((DataEntity<?>) entity, queryOptions);
+        case "LocationEntity":
+            return new LocationWithQueryOptions((LocationEntity) entity, queryOptions);
+        case "HistoricalLocationEntity":
+            return new HistoricalLocationWithQueryOptions((HistoricalLocationEntity) entity, queryOptions);
+        case "AbstractFeatureEntity":
+            return new FeatureOfInterestWithQueryOptions((AbstractFeatureEntity<?>) entity, queryOptions);
+        case "DatastreamEntity":
+            return new DatastreamWithQueryOptions((DatastreamEntity) entity, queryOptions);
+        default:
+            // This should never happen!
+            return null;
         }
     }
 
@@ -69,6 +86,7 @@ public abstract class ElementWithQueryOptions<P extends IdEntity> {
         }
     }
 
+
     public static class SensorWithQueryOptions extends ElementWithQueryOptions<ProcedureEntity> {
 
         public SensorWithQueryOptions(ProcedureEntity thing, QueryOptions queryOptions) {
@@ -76,6 +94,7 @@ public abstract class ElementWithQueryOptions<P extends IdEntity> {
             this.queryOptions = queryOptions;
         }
     }
+
 
     public static class ObservedPropertyWithQueryOptions extends ElementWithQueryOptions<PhenomenonEntity> {
 
@@ -85,6 +104,7 @@ public abstract class ElementWithQueryOptions<P extends IdEntity> {
         }
     }
 
+
     public static class ObservationWithQueryOptions extends ElementWithQueryOptions<DataEntity<?>> {
 
         public ObservationWithQueryOptions(DataEntity<?> thing, QueryOptions queryOptions) {
@@ -92,6 +112,7 @@ public abstract class ElementWithQueryOptions<P extends IdEntity> {
             this.queryOptions = queryOptions;
         }
     }
+
 
     public static class LocationWithQueryOptions extends ElementWithQueryOptions<LocationEntity> {
 
@@ -101,6 +122,7 @@ public abstract class ElementWithQueryOptions<P extends IdEntity> {
         }
     }
 
+
     public static class HistoricalLocationWithQueryOptions extends ElementWithQueryOptions<HistoricalLocationEntity> {
 
         public HistoricalLocationWithQueryOptions(HistoricalLocationEntity thing, QueryOptions queryOptions) {
@@ -109,6 +131,7 @@ public abstract class ElementWithQueryOptions<P extends IdEntity> {
         }
     }
 
+
     public static class FeatureOfInterestWithQueryOptions extends ElementWithQueryOptions<AbstractFeatureEntity<?>> {
 
         public FeatureOfInterestWithQueryOptions(AbstractFeatureEntity<?> thing, QueryOptions queryOptions) {
@@ -116,6 +139,7 @@ public abstract class ElementWithQueryOptions<P extends IdEntity> {
             this.queryOptions = queryOptions;
         }
     }
+
 
     public static class DatastreamWithQueryOptions extends ElementWithQueryOptions<DatastreamEntity> {
 
