@@ -60,7 +60,7 @@ public class CORSFilter implements Filter {
     private String CORSHeaders;
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) {
 
     }
 
