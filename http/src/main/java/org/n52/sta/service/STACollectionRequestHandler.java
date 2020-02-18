@@ -36,14 +36,12 @@ import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.net.URLDecoder;
 import java.util.List;
 
-@RequestMapping("/${server.contextPath}")
 @RestController
 public class STACollectionRequestHandler implements STARequestUtils {
 
@@ -70,10 +68,17 @@ public class STACollectionRequestHandler implements STARequestUtils {
     public List<ElementWithQueryOptions> readCollectionDirect(@PathVariable String collectionName,
                                                               HttpServletRequest request)
             throws STACRUDException {
-        return serviceRepository
-                .getEntityService(collectionName)
-                .getEntityCollection(QUERY_OPTIONS_FACTORY.createQueryOptions(
-                        URLDecoder.decode(request.getQueryString())));
+        String queryString = request.getQueryString();
+        if (queryString != null) {
+            return serviceRepository
+                    .getEntityService(collectionName)
+                    .getEntityCollection(QUERY_OPTIONS_FACTORY.createQueryOptions(
+                            URLDecoder.decode(request.getQueryString())));
+        } else {
+            return serviceRepository
+                    .getEntityService(collectionName)
+                    .getEntityCollection(null);
+        }
     }
 
     /**
@@ -100,21 +105,27 @@ public class STACollectionRequestHandler implements STARequestUtils {
                                         HttpServletRequest request)
             throws STACRUDException, STAInvalidUrlThrowable {
 
-        // TODO(specki): short-circuit if url is only one element as spring already validated that when the path matched
-        // TODO(specki): Error serialization for nice output
-
         validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
 
         String[] split = splitId(entity);
         String sourceType = split[0];
         String sourceId = split[1].replace(")", "");
 
-        return serviceRepository.getEntityService(target)
-                                .getEntityCollectionByRelatedEntity(sourceId,
-                                                                    sourceType,
-                                                                    QUERY_OPTIONS_FACTORY.createQueryOptions(
-                                                                            URLDecoder.decode(request.getQueryString())
-                                                                    )
-                                );
+        String queryString = request.getQueryString();
+        if (queryString != null) {
+            return serviceRepository.getEntityService(target)
+                                    .getEntityCollectionByRelatedEntity(sourceId,
+                                                                        sourceType,
+                                                                        QUERY_OPTIONS_FACTORY.createQueryOptions(
+                                                                                URLDecoder.decode(
+                                                                                        request.getQueryString())
+                                                                        ));
+        } else {
+            return serviceRepository.getEntityService(target)
+                                    .getEntityCollectionByRelatedEntity(sourceId,
+                                                                        sourceType,
+                                                                        null);
+        }
+
     }
 }

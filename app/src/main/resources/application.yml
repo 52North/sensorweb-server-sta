@@ -5,8 +5,10 @@ trace: false
 # General Server Configuration
 server:
   port: 8081
+  ## Used for response serialization + url parsing. Must be set correctly!
   rootUrl: "http://localhost:8081/v2/"
-  contextPath: "v2"
+  servlet:
+    context-path: "/v2"
 
   ## Used for enabling/disabling custom 52N-STA Features
   feature:
@@ -17,6 +19,7 @@ server:
     ## Defines all Collections that accept POSTing via MQTT.
     ## Default (defined by standard): "Observations" only
     mqttPublishTopics: Things, Observations
+
 
 # Database Configuration
 database:
@@ -60,7 +63,7 @@ http:
 mqtt:
   broker:
     plaintcp:
-      enabled: false
+      enabled: true
       port: 1883
     websocket:
       enabled: false

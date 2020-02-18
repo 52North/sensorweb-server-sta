@@ -35,14 +35,12 @@ import org.n52.sta.data.service.EntityServiceRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.net.URLDecoder;
 
 @RestController
-@RequestMapping("/${server.contextPath}")
 public class STAEntityRequestHandler implements STARequestUtils {
 
     private final EntityServiceRepository serviceRepository;
@@ -69,17 +67,19 @@ public class STAEntityRequestHandler implements STARequestUtils {
     public Object readEntityDirect(@PathVariable String entity,
                                    @PathVariable String id,
                                    HttpServletRequest request) throws STACRUDException, STAInvalidUrlThrowable {
-
-        // TODO(specki): check if something needs to be cut from the front like rootUrl
-        // TODO(specki): short-circuit if url is only one element as spring already validated that
-        //TODO(specki): Error serialization for nice output
-
         validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
 
         String entityId = id.substring(1, id.length() - 1);
-        return serviceRepository.getEntityService(entity)
-                                .getEntity(entityId, QUERY_OPTIONS_FACTORY.createQueryOptions(
-                                        URLDecoder.decode(request.getQueryString())));
+        String queryString = request.getQueryString();
+        if (queryString != null) {
+            return serviceRepository.getEntityService(entity)
+                                    .getEntity(entityId, QUERY_OPTIONS_FACTORY.createQueryOptions(
+                                            URLDecoder.decode(queryString)));
+        } else {
+            return serviceRepository.getEntityService(entity)
+                                    .getEntity(entityId, null);
+        }
+
     }
 
     /**
@@ -103,20 +103,25 @@ public class STAEntityRequestHandler implements STARequestUtils {
                                     HttpServletRequest request)
             throws STACRUDException, STAInvalidUrlThrowable {
 
-        // TODO(specki): check if something needs to be cut from the front like rootUrl
-        // TODO(specki): short-circuit if url is only one element as spring already validated that when the path matched
-        // TODO(specki): Error serialization for nice output
-
         validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
 
         String sourceType = entity.substring(0, entity.indexOf("("));
         String sourceId = entity.substring(sourceType.length() + 1, entity.length() - 1);
 
-        return serviceRepository.getEntityService(target)
-                                .getEntityByRelatedEntity(sourceId,
-                                                          sourceType,
-                                                          null,
-                                                          QUERY_OPTIONS_FACTORY.createQueryOptions(
-                                                                  URLDecoder.decode(request.getQueryString())));
+        String queryString = request.getQueryString();
+        if (queryString != null) {
+            return serviceRepository.getEntityService(target)
+                                    .getEntityByRelatedEntity(sourceId,
+                                                              sourceType,
+                                                              null,
+                                                              QUERY_OPTIONS_FACTORY.createQueryOptions(
+                                                                      URLDecoder.decode(queryString)));
+        } else {
+            return serviceRepository.getEntityService(target)
+                                    .getEntityByRelatedEntity(sourceId,
+                                                              sourceType,
+                                                              null,
+                                                              null);
+        }
     }
 }

@@ -53,7 +53,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 @RestController
-@RequestMapping("/${server.contextPath}")
 public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtils {
 
     private static final String COULD_NOT_FIND_RELATED_ENTITY = "Could not find related Entity!";

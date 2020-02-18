@@ -81,8 +81,10 @@ public interface STARequestUtils extends StaConstants {
     String GROUPNAME_PROPERTY = "property";
 
     String MAPPING_PREFIX = "**/";
-    String IDENTIFIER_REGEX = "(?:\\()['\\-0-9a-zA-Z]+(?:\\))";
+
     // Note: This is duplicated in LocationService to allow for non-standard 'updateFOI'-feature.
+    //TODO: Check if this coveras all identifiers
+    String IDENTIFIER_REGEX = "(?:\\()[0-9A-z'\\+%]+(?:\\))";
 
     String URL_INVALID = "Url is invalid. ";
 
@@ -432,9 +434,10 @@ public interface STARequestUtils extends StaConstants {
         }
     }
 
-    default STAInvalidUrlThrowable validateURL(StringBuffer requestURL,
-                                               EntityServiceRepository serviceRepository,
-                                               int rootUrlLength) throws STAInvalidUrlThrowable {
+    default void validateURL(StringBuffer requestURL,
+                             EntityServiceRepository serviceRepository,
+                             int rootUrlLength)
+            throws STAInvalidUrlThrowable {
         String[] uriResources = requestURL.substring(rootUrlLength).split(SLASH);
 
         STAInvalidUrlThrowable ex;
@@ -446,7 +449,6 @@ public interface STARequestUtils extends StaConstants {
         if (ex != null) {
             throw ex;
         }
-        return null;
     }
 
     /**

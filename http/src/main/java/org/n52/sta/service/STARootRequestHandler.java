@@ -38,7 +38,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/${server.contextPath}")
 public class STARootRequestHandler {
 
     private final String rootUrl;
