@@ -77,7 +77,7 @@ public class STACollectionRequestHandler implements STARequestUtils {
         } else {
             return serviceRepository
                     .getEntityService(collectionName)
-                    .getEntityCollection(null);
+                    .getEntityCollection(QUERY_OPTIONS_FACTORY.createDummy());
         }
     }
 
@@ -124,7 +124,7 @@ public class STACollectionRequestHandler implements STARequestUtils {
             return serviceRepository.getEntityService(target)
                                     .getEntityCollectionByRelatedEntity(sourceId,
                                                                         sourceType,
-                                                                        null);
+                                                                        QUERY_OPTIONS_FACTORY.createDummy());
         }
 
     }

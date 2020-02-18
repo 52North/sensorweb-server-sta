@@ -77,7 +77,7 @@ public class STAEntityRequestHandler implements STARequestUtils {
                                             URLDecoder.decode(queryString)));
         } else {
             return serviceRepository.getEntityService(entity)
-                                    .getEntity(entityId, null);
+                                    .getEntity(entityId, QUERY_OPTIONS_FACTORY.createDummy());
         }
 
     }
@@ -121,7 +121,7 @@ public class STAEntityRequestHandler implements STARequestUtils {
                                     .getEntityByRelatedEntity(sourceId,
                                                               sourceType,
                                                               null,
-                                                              null);
+                                                              QUERY_OPTIONS_FACTORY.createDummy());
         }
     }
 }
