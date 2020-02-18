@@ -27,10 +27,11 @@
  * Public License for more details.
  */
 
-package org.n52.sta.service;
+package org.n52.sta.utils;
 
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
@@ -84,7 +85,7 @@ public interface STARequestUtils extends StaConstants {
 
     // Note: This is duplicated in LocationService to allow for non-standard 'updateFOI'-feature.
     //TODO: Check if this coveras all identifiers
-    String IDENTIFIER_REGEX = "(?:\\()[0-9A-z'\\+%]+(?:\\))";
+    String IDENTIFIER_REGEX = "(?:\\()[0-9A-z'+%]+(?:\\))";
 
     String URL_INVALID = "Url is invalid. ";
 

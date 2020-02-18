@@ -53,7 +53,7 @@ import org.n52.sta.mqtt.core.subscription.MqttEntitySubscription;
 import org.n52.sta.mqtt.core.subscription.MqttPropertySubscription;
 import org.n52.sta.mqtt.core.subscription.MqttSelectSubscription;
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
-import org.n52.sta.service.STARequestUtils;
+import org.n52.sta.utils.STARequestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

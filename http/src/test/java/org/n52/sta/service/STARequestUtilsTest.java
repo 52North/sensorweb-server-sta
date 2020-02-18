@@ -31,13 +31,14 @@ package org.n52.sta.service;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+import org.n52.sta.utils.STARequestUtils;
 
 public class STARequestUtilsTest {
 
     @Test
     public void identifiedByDatastreamRegex() {
         assertEquals("Datastreams(?:\\()['\\-0-9a-zA-Z]+(?:\\))/(Sensor|ObservedProperty|Thing|Observations)",
-                STARequestUtils.IDENTIFIED_BY_DATASTREAM_REGEX);
+                     STARequestUtils.IDENTIFIED_BY_DATASTREAM_REGEX);
     }
 
     @Test

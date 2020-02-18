@@ -158,12 +158,12 @@ public class MqttBroker {
 
             @Override
             public void onDisconnect(InterceptDisconnectMessage msg) {
-                LOGGER.debug("Client with ID: {} has disconnected" + msg.getClientID());
+                LOGGER.debug("Client with ID: {} has disconnected", msg.getClientID());
             }
 
             @Override
             public void onConnectionLost(InterceptConnectionLostMessage msg) {
-                LOGGER.debug("Client with ID: {} has lost connection" + msg.getClientID());
+                LOGGER.debug("Client with ID: {} has lost connection", msg.getClientID());
             }
 
             @Override

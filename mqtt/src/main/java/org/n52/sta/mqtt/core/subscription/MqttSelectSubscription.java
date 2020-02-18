@@ -29,7 +29,7 @@
 package org.n52.sta.mqtt.core.subscription;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
-import org.n52.sta.service.STARequestUtils;
+import org.n52.sta.utils.STARequestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
