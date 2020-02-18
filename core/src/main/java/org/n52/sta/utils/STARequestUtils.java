@@ -31,7 +31,6 @@ package org.n52.sta.utils;
 
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DataEntity;
-import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;

@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,7 +35,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.n52.sta.serdes.model.STAEntityDefinition;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -76,6 +76,5 @@ public class STARootRequestHandler {
         node.put("value", arrayNode);
         return node.toString();
     }
-
 
 }

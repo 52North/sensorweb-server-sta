@@ -32,7 +32,6 @@ package org.n52.sta.data.service;
 import org.joda.time.DateTime;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.PlatformEntity;
-import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;

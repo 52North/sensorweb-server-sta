@@ -26,21 +26,19 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta;
 
 import org.n52.sta.data.repositories.MessageBusRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.ComponentScan.Filter;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
 @EnableJpaRepositories(repositoryBaseClass = MessageBusRepository.class,
-        basePackages = {"org.n52.sta.data.repositories"})
+                       basePackages = {"org.n52.sta.data.repositories"})
 @EnableConfigurationProperties
 @EnableTransactionManagement
 @SuppressWarnings("uncommentedmain")

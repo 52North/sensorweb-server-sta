@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.service;
 
 import org.n52.janmayen.http.HTTPStatus;
@@ -33,7 +34,6 @@ import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
-import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
@@ -110,12 +110,12 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
                                                                    String ownId) {
         Specification<ProcedureEntity> filter;
         switch (relatedType) {
-            case STAEntityDefinition.DATASTREAMS: {
-                filter = sQS.withDatastreamIdentifier(relatedId);
-                break;
-            }
-            default:
-                return null;
+        case STAEntityDefinition.DATASTREAMS: {
+            filter = sQS.withDatastreamIdentifier(relatedId);
+            break;
+        }
+        default:
+            return null;
         }
 
         if (ownId != null) {
@@ -127,16 +127,15 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     @Override
     public String checkPropertyName(String property) {
         switch (property) {
-            case "encodingType":
-                return ProcedureEntity.PROPERTY_PROCEDURE_DESCRIPTION_FORMAT;
-            case "metadata":
-                // TODO: Add sorting by HistoricalLocation that replaces Description if it is not present
-                return "descriptionFile";
-            default:
-                return super.checkPropertyName(property);
+        case "encodingType":
+            return ProcedureEntity.PROPERTY_PROCEDURE_DESCRIPTION_FORMAT;
+        case "metadata":
+            // TODO: Add sorting by HistoricalLocation that replaces Description if it is not present
+            return "descriptionFile";
+        default:
+            return super.checkPropertyName(property);
         }
     }
-
 
     private ProcedureEntity getAsProcedureEntity(ProcedureEntity sensor) {
         return sensor instanceof SensorEntity
@@ -160,10 +159,10 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
 
         if (entity.hasDatastreams()) {
             collections.put(STAEntityDefinition.DATASTREAM,
-                    entity.getDatastreams()
-                            .stream()
-                            .map(DatastreamEntity::getIdentifier)
-                            .collect(Collectors.toSet()));
+                            entity.getDatastreams()
+                                  .stream()
+                                  .map(DatastreamEntity::getIdentifier)
+                                  .collect(Collectors.toSet()));
         }
         return collections;
     }
@@ -190,7 +189,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
             }
         } else if (getRepository().existsByIdentifier(sensor.getIdentifier())) {
             throw new STACRUDException("Identifier already exists!",
-                    HTTPStatus.BAD_REQUEST);
+                                       HTTPStatus.BAD_REQUEST);
         }
         checkFormat(sensor);
         ProcedureEntity procedure = getAsProcedureEntity(sensor);

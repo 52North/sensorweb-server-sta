@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.service;
 
 import org.n52.janmayen.http.HTTPStatus;
@@ -44,7 +45,6 @@ import org.n52.series.db.beans.TextDataEntity;
 import org.n52.series.db.beans.dataset.DatasetType;
 import org.n52.series.db.beans.dataset.ObservationType;
 import org.n52.series.db.beans.dataset.ValueType;
-import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
@@ -100,7 +100,6 @@ public class ObservationService extends
 
     private static final String STA = "STA";
 
-
     private final CategoryRepository categoryRepository;
     private final OfferingRepository offeringRepository;
     private final DatastreamRepository datastreamRepository;
@@ -138,16 +137,16 @@ public class ObservationService extends
                                                               String ownId) {
         Specification<DataEntity<?>> filter;
         switch (relatedType) {
-            case STAEntityDefinition.DATASTREAMS: {
-                filter = oQS.withDatastreamIdentifier(relatedId);
-                break;
-            }
-            case STAEntityDefinition.FEATURES_OF_INTEREST: {
-                filter = oQS.withFeatureOfInterestIdentifier(relatedId);
-                break;
-            }
-            default:
-                return null;
+        case STAEntityDefinition.DATASTREAMS: {
+            filter = oQS.withDatastreamIdentifier(relatedId);
+            break;
+        }
+        case STAEntityDefinition.FEATURES_OF_INTEREST: {
+            filter = oQS.withFeatureOfInterestIdentifier(relatedId);
+            break;
+        }
+        default:
+            return null;
         }
         if (ownId != null) {
             filter = filter.and(oQS.withIdentifier(ownId));
@@ -158,13 +157,13 @@ public class ObservationService extends
     @Override
     public String checkPropertyName(String property) {
         switch (property) {
-            case "phenomenonTime":
-                // TODO: proper ISO8601 comparison
-                return DataEntity.PROPERTY_SAMPLING_TIME_END;
-            case "result":
-                return DataEntity.PROPERTY_VALUE;
-            default:
-                return super.checkPropertyName(property);
+        case "phenomenonTime":
+            // TODO: proper ISO8601 comparison
+            return DataEntity.PROPERTY_SAMPLING_TIME_END;
+        case "result":
+            return DataEntity.PROPERTY_VALUE;
+        default:
+            return super.checkPropertyName(property);
         }
     }
 
@@ -200,7 +199,7 @@ public class ObservationService extends
     private void check(StaDataEntity observation) throws STACRUDException {
         if (observation.getDatastream() == null) {
             throw new STACRUDException("The observation to create is invalid. Missing datastream!",
-                    HTTPStatus.BAD_REQUEST);
+                                       HTTPStatus.BAD_REQUEST);
         }
     }
 
@@ -212,9 +211,9 @@ public class ObservationService extends
             List<DatastreamEntity> datastreams, DataEntity<?> observation) {
         for (DatastreamEntity datastreamEntity : datastreams) {
             if (datastreamEntity.getPhenomenonTimeStart() == null ||
-                datastreamEntity.getPhenomenonTimeEnd() == null ||
-                observation.getPhenomenonTimeStart().compareTo(datastreamEntity.getPhenomenonTimeStart()) != 1 ||
-                observation.getPhenomenonTimeEnd().compareTo(datastreamEntity.getPhenomenonTimeEnd()) != -1
+                    datastreamEntity.getPhenomenonTimeEnd() == null ||
+                    observation.getPhenomenonTimeStart().compareTo(datastreamEntity.getPhenomenonTimeStart()) != 1 ||
+                    observation.getPhenomenonTimeEnd().compareTo(datastreamEntity.getPhenomenonTimeEnd()) != -1
             ) {
                 List<Long> datasetIds = datastreamEntity
                         .getDatasets()
@@ -316,8 +315,8 @@ public class ObservationService extends
             dataset.setFirstValueAt(null);
         }
         if (dataset.getLastObservation() != null && dataset.getLastObservation()
-                .getIdentifier()
-                .equals(observation.getIdentifier())) {
+                                                           .getIdentifier()
+                                                           .equals(observation.getIdentifier())) {
             dataset.setLastObservation(null);
             dataset.setLastQuantityValue(null);
             dataset.setLastValueAt(null);
@@ -339,9 +338,10 @@ public class ObservationService extends
         dataset.setUnit(datastream.getUnit());
         dataset.setOmObservationType(datastream.getObservationType());
         Specification<DatasetEntity> query = dQS.matchProcedures(datastream.getProcedure().getIdentifier())
-                .and(dQS.matchPhenomena(datastream.getObservableProperty().getIdentifier())
-                        .and(dQS.matchFeatures(feature.getIdentifier()))
-                        .and(dQS.matchOfferings(offering.getIdentifier())));
+                                                .and(dQS.matchPhenomena(datastream.getObservableProperty()
+                                                                                  .getIdentifier())
+                                                        .and(dQS.matchFeatures(feature.getIdentifier()))
+                                                        .and(dQS.matchOfferings(offering.getIdentifier())));
         Optional<DatasetEntity> queried = datasetRepository.findOne(query);
         if (queried.isPresent()) {
             return queried.get();
@@ -372,7 +372,7 @@ public class ObservationService extends
             }
             if (feature == null) {
                 throw new STACRUDException("The observation to create is invalid." +
-                        " Missing feature or thing.location!", HTTPStatus.BAD_REQUEST);
+                                                   " Missing feature or thing.location!", HTTPStatus.BAD_REQUEST);
             }
             observation.setFeatureOfInterest(feature);
         }
@@ -490,20 +490,20 @@ public class ObservationService extends
 
     private DatasetEntity getDatasetEntity(String observationType) {
         DatasetEntity dataset = new DatasetEntity().setObservationType(ObservationType.simple)
-                .setDatasetType(DatasetType.timeseries);
+                                                   .setDatasetType(DatasetType.timeseries);
         switch (observationType) {
-            case OmConstants.OBS_TYPE_MEASUREMENT:
-                return dataset.setValueType(ValueType.quantity);
-            case OmConstants.OBS_TYPE_CATEGORY_OBSERVATION:
-                return dataset.setValueType(ValueType.category);
-            case OmConstants.OBS_TYPE_COUNT_OBSERVATION:
-                return dataset.setValueType(ValueType.count);
-            case OmConstants.OBS_TYPE_TEXT_OBSERVATION:
-                return dataset.setValueType(ValueType.text);
-            case OmConstants.OBS_TYPE_TRUTH_OBSERVATION:
-                return dataset.setValueType(ValueType.bool);
-            default:
-                return dataset;
+        case OmConstants.OBS_TYPE_MEASUREMENT:
+            return dataset.setValueType(ValueType.quantity);
+        case OmConstants.OBS_TYPE_CATEGORY_OBSERVATION:
+            return dataset.setValueType(ValueType.category);
+        case OmConstants.OBS_TYPE_COUNT_OBSERVATION:
+            return dataset.setValueType(ValueType.count);
+        case OmConstants.OBS_TYPE_TEXT_OBSERVATION:
+            return dataset.setValueType(ValueType.text);
+        case OmConstants.OBS_TYPE_TRUTH_OBSERVATION:
+            return dataset.setValueType(ValueType.bool);
+        default:
+            return dataset;
         }
     }
 
@@ -511,48 +511,48 @@ public class ObservationService extends
             throws STACRUDException {
         DataEntity<?> data = null;
         switch (dataset.getOmObservationType().getFormat()) {
-            case OmConstants.OBS_TYPE_MEASUREMENT:
-                QuantityDataEntity quantityDataEntity = new QuantityDataEntity();
-                if (observation.hasValue()) {
-                    String obs = observation.getValue();
-                    if (obs.equals("NaN") || obs.equals("Inf") || obs.equals("-Inf")) {
-                        quantityDataEntity.setValue(null);
-                    } else {
-                        quantityDataEntity.setValue(BigDecimal.valueOf(Double.parseDouble(observation.getValue())));
-                    }
+        case OmConstants.OBS_TYPE_MEASUREMENT:
+            QuantityDataEntity quantityDataEntity = new QuantityDataEntity();
+            if (observation.hasValue()) {
+                String obs = observation.getValue();
+                if (obs.equals("NaN") || obs.equals("Inf") || obs.equals("-Inf")) {
+                    quantityDataEntity.setValue(null);
+                } else {
+                    quantityDataEntity.setValue(BigDecimal.valueOf(Double.parseDouble(observation.getValue())));
                 }
-                data = quantityDataEntity;
-                break;
-            case OmConstants.OBS_TYPE_CATEGORY_OBSERVATION:
-                CategoryDataEntity categoryDataEntity = new CategoryDataEntity();
-                if (observation.hasValue()) {
-                    categoryDataEntity.setValue(observation.getValue());
-                }
-                data = categoryDataEntity;
-                break;
-            case OmConstants.OBS_TYPE_COUNT_OBSERVATION:
-                CountDataEntity countDataEntity = new CountDataEntity();
-                if (observation.hasValue()) {
-                    countDataEntity.setValue(Integer.parseInt(observation.getValue()));
-                }
-                data = countDataEntity;
-                break;
-            case OmConstants.OBS_TYPE_TEXT_OBSERVATION:
-                TextDataEntity textDataEntity = new TextDataEntity();
-                if (observation.hasValue()) {
-                    textDataEntity.setValue(observation.getValue());
-                }
-                data = textDataEntity;
-                break;
-            case OmConstants.OBS_TYPE_TRUTH_OBSERVATION:
-                BooleanDataEntity booleanDataEntity = new BooleanDataEntity();
-                if (observation.hasValue()) {
-                    booleanDataEntity.setValue(Boolean.parseBoolean(observation.getValue()));
-                }
-                data = booleanDataEntity;
-                break;
-            default:
-                break;
+            }
+            data = quantityDataEntity;
+            break;
+        case OmConstants.OBS_TYPE_CATEGORY_OBSERVATION:
+            CategoryDataEntity categoryDataEntity = new CategoryDataEntity();
+            if (observation.hasValue()) {
+                categoryDataEntity.setValue(observation.getValue());
+            }
+            data = categoryDataEntity;
+            break;
+        case OmConstants.OBS_TYPE_COUNT_OBSERVATION:
+            CountDataEntity countDataEntity = new CountDataEntity();
+            if (observation.hasValue()) {
+                countDataEntity.setValue(Integer.parseInt(observation.getValue()));
+            }
+            data = countDataEntity;
+            break;
+        case OmConstants.OBS_TYPE_TEXT_OBSERVATION:
+            TextDataEntity textDataEntity = new TextDataEntity();
+            if (observation.hasValue()) {
+                textDataEntity.setValue(observation.getValue());
+            }
+            data = textDataEntity;
+            break;
+        case OmConstants.OBS_TYPE_TRUTH_OBSERVATION:
+            BooleanDataEntity booleanDataEntity = new BooleanDataEntity();
+            if (observation.hasValue()) {
+                booleanDataEntity.setValue(Boolean.parseBoolean(observation.getValue()));
+            }
+            data = booleanDataEntity;
+            break;
+        default:
+            break;
         }
         if (data != null) {
             data.setDataset(dataset);
@@ -597,14 +597,14 @@ public class ObservationService extends
 
         if (entity.getDataset() != null && entity.getDataset().getFeature() != null) {
             collections.put(STAEntityDefinition.FEATURE_OF_INTEREST,
-                    Collections.singleton(entity.getDataset().getFeature().getIdentifier()));
+                            Collections.singleton(entity.getDataset().getFeature().getIdentifier()));
         }
 
         Optional<DatastreamEntity> datastreamEntity =
                 datastreamRepository.findOne(dsQS.withObservationIdentifier(entity.getIdentifier()));
         if (datastreamEntity.isPresent()) {
             collections.put(STAEntityDefinition.DATASTREAM,
-                    Collections.singleton(datastreamEntity.get().getIdentifier()));
+                            Collections.singleton(datastreamEntity.get().getIdentifier()));
         } else {
             logger.debug("No Datastream associated with this Entity {}", entity.getIdentifier());
         }

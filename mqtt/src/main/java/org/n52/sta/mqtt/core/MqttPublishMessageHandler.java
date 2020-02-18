@@ -83,7 +83,7 @@ public class MqttPublishMessageHandler implements STARequestUtils {
 
     /**
      * Validates that topics only include STA collections
-     * @param topics
+     * @param topics list of wanted topics
      */
     private boolean validateTopics(Set<String> topics) {
         boolean valid = true;

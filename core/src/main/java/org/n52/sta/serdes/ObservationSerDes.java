@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.serdes;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -49,7 +50,6 @@ import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.ReferencedDataEntity;
 import org.n52.series.db.beans.TextDataEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
-import org.n52.series.db.beans.parameter.ParameterJsonEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.gml.time.Time;
@@ -73,13 +73,14 @@ public class ObservationSerDes {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ObservationSerDes.class);
 
+
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     public static class StaDataEntityPatch extends StaDataEntity implements EntityPatch<DataEntity> {
 
         private static final long serialVersionUID = 7385044376634149048L;
         private final StaDataEntity entity;
 
-        StaDataEntityPatch (StaDataEntity entity) {
+        StaDataEntityPatch(StaDataEntity entity) {
             this.entity = entity;
         }
 
@@ -87,6 +88,7 @@ public class ObservationSerDes {
             return entity;
         }
     }
+
 
     public static class ObservationSerializer extends AbstractSTASerializer<ObservationWithQueryOptions> {
 
@@ -142,14 +144,14 @@ public class ObservationSerDes {
                 String phenomenonTime = DateTimeHelper.format(createPhenomenonTime(observation));
                 gen.writeStringField(STAEntityDefinition.PROP_PHENOMENON_TIME, phenomenonTime);
             }
-//            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_RESULT_QUALITY)) {
-//                //TODO: implement
-//                //throw new NotImplementedException();
-//            }
+            //            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_RESULT_QUALITY)) {
+            //                //TODO: implement
+            //                //throw new NotImplementedException();
+            //            }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_VALID_TIME)) {
                 if (observation.isSetValidTime()) {
                     gen.writeStringField(STAEntityDefinition.PROP_VALID_TIME,
-                            DateTimeHelper.format(createValidTime(observation)));
+                                         DateTimeHelper.format(createValidTime(observation)));
                 }
             }
 
@@ -209,7 +211,7 @@ public class ObservationSerDes {
         private String getResult(DataEntity o) {
             if (o instanceof QuantityDataEntity) {
                 if ((((QuantityDataEntity) o).getValue().doubleValue() - ((QuantityDataEntity) o).getValue()
-                        .intValue()) == 0.0) {
+                                                                                                 .intValue()) == 0.0) {
                     return Integer.toString(((QuantityDataEntity) o).getValue().intValue());
                 }
                 return ((QuantityDataEntity) o).getValue().toString();
@@ -255,6 +257,7 @@ public class ObservationSerDes {
 
     }
 
+
     public static class ObservationDeserializer extends StdDeserializer<StaDataEntity> {
 
         private static final long serialVersionUID = 2731654401126762133L;
@@ -268,6 +271,7 @@ public class ObservationSerDes {
             return p.readValueAs(JSONObservation.class).toEntity(JSONBase.EntityType.FULL);
         }
     }
+
 
     public static class ObservationPatchDeserializer extends StdDeserializer<StaDataEntityPatch> {
 
