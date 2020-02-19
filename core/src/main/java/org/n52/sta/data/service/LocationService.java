@@ -54,6 +54,7 @@ import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -71,6 +72,7 @@ import java.util.stream.Collectors;
  */
 @Component
 @DependsOn({"springApplicationContext"})
+@Transactional
 public class LocationService extends AbstractSensorThingsEntityService<LocationRepository, LocationEntity> {
 
     private static final Logger logger = LoggerFactory.getLogger(LocationService.class);
@@ -256,14 +258,16 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
                 HashSet<LocationEntity> set = new HashSet<>();
                 set.add(createReferencedLocation(location));
                 newThing.setLocations(set);
-                PlatformEntity oldThing = getThingService().createOrUpdate(newThing);
-                things.add(oldThing);
+                PlatformEntity updated = getThingService().createOrUpdate(newThing);
+                things.add(updated);
 
                 // non-standard feature 'updateFOI'
-                if (updateFOIFeatureEnabled && oldThing.getProperties().contains("updateFOI")) {
+                if (updateFOIFeatureEnabled
+                        && updated.getProperties() != null
+                        && updated.getProperties().contains("updateFOI")){
                     // Try to be more performant and not deserialize whole properties but only grep relevant parts
                     // via simple regex
-                    Matcher matcher = updateFOIPattern.matcher(oldThing.getProperties());
+                    Matcher matcher = updateFOIPattern.matcher(updated.getProperties());
                     if (matcher.matches()) {
                         FeatureOfInterestService foiService = (FeatureOfInterestService) getFOIService();
                         foiService.updateFeatureOfInterestGeometry(matcher.group(1), location.getGeometry());
