@@ -32,8 +32,10 @@ import org.n52.series.db.beans.DescribableEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.transaction.annotation.Transactional;
 
 @NoRepositoryBean
+@Transactional
 public interface ParameterDataRepository<T extends DescribableEntity>
         extends IdentifierRepository<T>, JpaRepository<T, Long>, JpaSpecificationExecutor<T> {
 
