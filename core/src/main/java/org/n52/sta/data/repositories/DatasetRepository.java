@@ -32,7 +32,7 @@ import org.n52.series.db.beans.DatasetEntity;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
-public interface DatasetRepository extends ParameterDataRepository<DatasetEntity> {
+public interface DatasetRepository extends IdentifierNameRepository<DatasetEntity> {
 
 //    /**
 //     * Qualifies a 'not_initialized' dataset with the given value type. Once set, no update is possible

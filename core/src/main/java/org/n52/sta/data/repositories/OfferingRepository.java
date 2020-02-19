@@ -35,6 +35,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 @Transactional
-public interface OfferingRepository extends ParameterDataRepository<OfferingEntity> {
+public interface OfferingRepository extends IdentifierNameRepository<OfferingEntity> {
 
 }

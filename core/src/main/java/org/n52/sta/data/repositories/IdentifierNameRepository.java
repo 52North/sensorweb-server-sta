@@ -36,7 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @NoRepositoryBean
 @Transactional
-public interface ParameterDataRepository<T extends DescribableEntity>
+public interface IdentifierNameRepository<T extends DescribableEntity>
         extends IdentifierRepository<T>, JpaRepository<T, Long>, JpaSpecificationExecutor<T> {
 
     boolean existsByName(String name);
