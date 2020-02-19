@@ -37,6 +37,7 @@ import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.ObservablePropertyEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
+import org.n52.sta.data.OffsetLimitBasedPageRequest;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.ObservedPropertyQuerySpecifications;
 import org.n52.sta.data.repositories.DatastreamRepository;
@@ -52,6 +53,7 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
@@ -69,6 +71,7 @@ import java.util.stream.Collectors;
  */
 @Component
 @DependsOn({"springApplicationContext"})
+@Transactional
 public class ObservedPropertyService extends AbstractSensorThingsEntityService<PhenomenonRepository, PhenomenonEntity> {
 
     private static final Logger logger = LoggerFactory.getLogger(ObservedPropertyService.class);
@@ -119,6 +122,17 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
                 this.byRelatedEntityFilter(relatedId, relatedType, null),
                 STAIDENTIFIER);
         return entity.isPresent() ? entity.get() : null;
+    }
+
+    /**
+     * Overrides the default method as different field is used to store identifier
+     *
+     * @param queryOptions QueryOptions to be used
+     * @return OffsetLimitBasedPageRequest
+     */
+    @Override
+    protected OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions) {
+        return this.createPageableRequest(queryOptions, STAIDENTIFIER);
     }
 
     @Override

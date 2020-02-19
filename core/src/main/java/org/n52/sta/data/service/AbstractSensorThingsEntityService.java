@@ -38,7 +38,10 @@ import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.filter.FilterFilter;
+import org.n52.shetland.filter.OrderByFilter;
+import org.n52.shetland.filter.OrderProperty;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.data.OffsetLimitBasedPageRequest;
@@ -48,6 +51,7 @@ import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.n52.svalbard.odata.expr.Expr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpMethod;
@@ -67,6 +71,7 @@ import java.util.Set;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
+@Transactional
 public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepository<S>, S extends IdEntity> {
 
     static final String IDENTIFIER = "identifier";
@@ -320,7 +325,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
                 } catch (STAInvalidQueryException e) {
                     e.printStackTrace();
                     return null;
-                    }
+                }
             }
             //            try {
             //                //if (queryOptions.hasOrderByOption()) {
@@ -429,28 +434,27 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      */
     protected OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions,
                                                                 String defaultSortingProperty) {
-        //TODO(specki): implement
-        //        int offset = queryOptions.hasSkipOption() ? queryOptions.getSkipOption().getValue() : 0;
-        //        Sort sort = Sort.by(Direction.ASC, defaultSortingProperty);
-        //        if (queryOptions.hasOrderByOption()) {
-        //            boolean first = true;
-        //            try {
-        //                for (OrderByItem orderByItem : queryOptions.getOrderByOption().getOrders()) {
-        //                    if (first) {
-        //                        sort = Sort.by(orderByItem.isDescending() ? Direction.DESC : Direction.ASC,
-        //                                orderByItem.getExpression().accept(new ExpressionGenerator(this)));
-        //                        first = false;
-        //                    } else {
-        //                        sort.and(Sort.by(orderByItem.isDescending() ? Direction.DESC : Direction.ASC,
-        //                                orderByItem.getExpression().accept(new ExpressionGenerator(this))));
-        //                    }
-        //                }
-        //            } catch (ExpressionVisitException | ODataApplicationException e) {
-        //                // use default sort
-        //            }
-        //        }
-        //        return new OffsetLimitBasedPageRequest(offset, queryOptions.getTopOption().getValue(), sort);
-        return new OffsetLimitBasedPageRequest(0, 100);
+        long offset = queryOptions.hasSkipOption() ? queryOptions.getSkipOption().getValue() : 0;
+        Sort sort = Sort.by(Sort.Direction.ASC, defaultSortingProperty);
+        if (queryOptions.hasOrderByOption()) {
+            boolean first = true;
+            for (OrderProperty sortProperty :
+                    ((OrderByFilter) queryOptions.getOrderByOption()).getSortProperties()) {
+                if (first) {
+                    sort = Sort.by(sortProperty.getSortOrder().equals(FilterConstants.SortOrder.DESC) ?
+                                           Sort.Direction.DESC : Sort.Direction.ASC,
+                                   sortProperty.getValueReference());
+                    first = false;
+                } else {
+                    sort = sort.and(Sort.by(sortProperty.getSortOrder().equals(FilterConstants.SortOrder.DESC) ?
+                                                    Sort.Direction.DESC : Sort.Direction.ASC,
+                                            sortProperty.getValueReference()));
+                }
+            }
+        }
+        return new OffsetLimitBasedPageRequest((int) offset,
+                                               queryOptions.getTopOption().getValue().intValue(),
+                                               sort);
     }
 
     //TODO(specki): check if this needs to be overridden by observedproperty that uses different field
@@ -503,76 +507,4 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
             existing.setSamplingTimeEnd(toMerge.getSamplingTimeEnd());
         }
     }
-
-    /**
-     * {@link ExpressionVisitor} to get property name from {@link OrderByOption}
-     */
-    /*
-    private static final class ExpressionGenerator implements ExpressionVisitor<String> {
-
-        private AbstractSensorThingsEntityService<?, ?> service;
-
-        ExpressionGenerator(AbstractSensorThingsEntityService<?, ?> service) {
-            this.service = service;
-        }
-
-        @Override
-        public String visitLiteral(Literal literal) throws ExpressionVisitException {
-            throw new ExpressionVisitException("Literal expressions are not supported");
-        }
-
-        @Override
-        public String visitLambdaExpression(String fun, String var, Expression expr) throws ExpressionVisitException {
-            throw new ExpressionVisitException("Lambda expressions are not supported");
-        }
-
-        @Override
-        public String visitMember(Member member) throws ExpressionVisitException {
-            return service.checkPropertyName(visitMember(member.getResourcePath()));
-        }
-
-        public String visitMember(UriInfoResource member) throws ExpressionVisitException {
-            return member.getUriResourceParts().stream().map(UriResource::getSegmentValue)
-                    .collect(Collectors.joining("/"));
-        }
-
-        @Override
-        public String visitAlias(String aliasName) throws ExpressionVisitException {
-            throw new ExpressionVisitException("aliases are not supported");
-        }
-
-        @Override
-        public String visitTypeLiteral(EdmType type) throws ExpressionVisitException {
-            throw new ExpressionVisitException("type literals are not supported");
-        }
-
-        @Override
-        public String visitLambdaReference(String variableName) throws ExpressionVisitException {
-            throw new ExpressionVisitException("Lambda references are not supported");
-        }
-
-        @Override
-        public String visitEnum(EdmEnumType type, List<String> enumValues) throws ExpressionVisitException {
-            throw new ExpressionVisitException("enums are not supported");
-        }
-
-        @Override
-        public String visitBinaryOperator(BinaryOperatorKind operator, String left, String right)
-                throws ExpressionVisitException, ODataApplicationException {
-            throw new ExpressionVisitException("BinaryOperatorKind expressions are not supported");
-        }
-
-        @Override
-        public String visitUnaryOperator(UnaryOperatorKind operator, String operand)
-                throws ExpressionVisitException, ODataApplicationException {
-            throw new ExpressionVisitException("UnaryOperatorKind expressions are not supported");
-        }
-
-        @Override
-        public String visitMethodCall(MethodKind methodCall, List<String> parameters)
-                throws ExpressionVisitException, ODataApplicationException {
-            throw new ExpressionVisitException("MethodKind expressions are not supported");
-        }
-    }
-*/
 }
