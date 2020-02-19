@@ -57,6 +57,7 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -72,6 +73,7 @@ import java.util.UUID;
  */
 @Component
 @DependsOn({"springApplicationContext"})
+@Transactional
 public class DatastreamService extends AbstractSensorThingsEntityService<DatastreamRepository, DatastreamEntity> {
 
     //private static final Logger logger = LoggerFactory.getLogger(DatastreamService.class);
@@ -279,9 +281,9 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     @Override
     public void delete(String id) throws STACRUDException {
         if (getRepository().existsByIdentifier(id)) {
-            DatastreamEntity datastream = getRepository().getOneByIdentifier(id);
+            Optional<DatastreamEntity> datastream = getRepository().findByIdentifier(id);
             // check datasets
-            deleteRelatedDatasetsAndObservations(datastream);
+            deleteRelatedDatasetsAndObservations(datastream.get());
             // check observations
             getRepository().deleteByIdentifier(id);
         } else {

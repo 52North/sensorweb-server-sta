@@ -33,6 +33,7 @@ spring:
     url: jdbc:postgresql://localhost:5000/sta
     initialization-mode: always
   jpa:
+    openInView: false
     properties:
       hibernate: 
         hbm2ddl:

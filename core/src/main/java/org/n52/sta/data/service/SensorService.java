@@ -54,6 +54,7 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -67,6 +68,7 @@ import java.util.stream.Collectors;
  */
 @Component
 @DependsOn({"springApplicationContext"})
+@Transactional
 public class SensorService extends AbstractSensorThingsEntityService<ProcedureRepository, ProcedureEntity> {
 
     private static final Logger logger = LoggerFactory.getLogger(SensorService.class);

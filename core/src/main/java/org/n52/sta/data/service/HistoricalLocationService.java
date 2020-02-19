@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.service;
 
 import org.n52.janmayen.http.HTTPStatus;
@@ -48,6 +49,7 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -62,6 +64,7 @@ import java.util.stream.Collectors;
  */
 @Component
 @DependsOn({"springApplicationContext"})
+@Transactional
 public class HistoricalLocationService
         extends AbstractSensorThingsEntityService<HistoricalLocationRepository, HistoricalLocationEntity> {
 
@@ -94,16 +97,16 @@ public class HistoricalLocationService
                                                                             String ownId) {
         Specification<HistoricalLocationEntity> filter;
         switch (relatedType) {
-            case STAEntityDefinition.LOCATIONS: {
-                filter = hlQS.withRelatedLocationIdentifier(relatedId);
-                break;
-            }
-            case STAEntityDefinition.THINGS: {
-                filter = hlQS.withRelatedThingIdentifier(relatedId);
-                break;
-            }
-            default:
-                return null;
+        case STAEntityDefinition.LOCATIONS: {
+            filter = hlQS.withRelatedLocationIdentifier(relatedId);
+            break;
+        }
+        case STAEntityDefinition.THINGS: {
+            filter = hlQS.withRelatedThingIdentifier(relatedId);
+            break;
+        }
+        default:
+            return null;
         }
 
         if (ownId != null) {
@@ -143,9 +146,10 @@ public class HistoricalLocationService
     private void processLocations(HistoricalLocationEntity historicalLocation) throws STACRUDException {
         Set<LocationEntity> locations = new LinkedHashSet<>();
         for (LocationEntity l : historicalLocation.getLocations()) {
-            LocationEntity location = locationRepository.getOneByIdentifier(l.getIdentifier());
-            location.addHistoricalLocation(historicalLocation);
-            locations.add(getLocationService().createOrUpdate(location));
+            Optional<LocationEntity> location =
+                    locationRepository.findByIdentifier(l.getIdentifier());
+            location.get().addHistoricalLocation(historicalLocation);
+            locations.add(getLocationService().createOrUpdate(location.get()));
         }
         historicalLocation.setLocations(locations);
     }
@@ -174,7 +178,7 @@ public class HistoricalLocationService
     @Override
     public void delete(String id) throws STACRUDException {
         if (getRepository().existsByIdentifier(id)) {
-            HistoricalLocationEntity historicalLocation = getRepository().getOneByIdentifier(id);
+            HistoricalLocationEntity historicalLocation = getRepository().findByIdentifier(id).get();
             updateLocations(historicalLocation);
             updateThing(historicalLocation);
             getRepository().deleteByIdentifier(id);
@@ -239,15 +243,15 @@ public class HistoricalLocationService
 
         if (entity.hasThing()) {
             collections.put(STAEntityDefinition.THING,
-                    Collections.singleton(entity.getThing().getIdentifier()));
+                            Collections.singleton(entity.getThing().getIdentifier()));
         }
 
         if (entity.hasLocationEntities()) {
             collections.put(STAEntityDefinition.LOCATION,
-                    entity.getLocations()
-                            .stream()
-                            .map(LocationEntity::getIdentifier)
-                            .collect(Collectors.toSet()));
+                            entity.getLocations()
+                                  .stream()
+                                  .map(LocationEntity::getIdentifier)
+                                  .collect(Collectors.toSet()));
         }
         return collections;
     }

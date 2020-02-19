@@ -30,10 +30,12 @@ package org.n52.sta.data.repositories;
 
 import org.n52.series.db.beans.sta.AbstractStaEntity;
 import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @NoRepositoryBean
+@Transactional
 public interface NameRepository<T extends AbstractStaEntity> extends AbstractStaRepository<T> {
 
     boolean existsByName(String name);

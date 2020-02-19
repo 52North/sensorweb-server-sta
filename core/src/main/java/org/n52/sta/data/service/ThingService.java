@@ -49,6 +49,7 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -64,6 +65,7 @@ import java.util.stream.Collectors;
  */
 @Component
 @DependsOn({"springApplicationContext"})
+@Transactional
 public class ThingService extends AbstractSensorThingsEntityService<ThingRepository, PlatformEntity> {
 
     private static final Logger logger = LoggerFactory.getLogger(ThingService.class);
@@ -147,6 +149,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     }
 
     @Override
+    @Transactional
     public PlatformEntity updateEntity(String id, PlatformEntity entity, HttpMethod method) throws STACRUDException {
         checkUpdate(entity);
         if (HttpMethod.PATCH.equals(method)) {
@@ -199,7 +202,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     @Override
     public void delete(String identifier) throws STACRUDException {
         if (getRepository().existsByIdentifier(identifier)) {
-            PlatformEntity thing = getRepository().getOneByIdentifier(identifier);
+            PlatformEntity thing = getRepository().findByIdentifier(identifier).get();
             // delete datastreams
             thing.getDatastreams().forEach(d -> {
                 try {

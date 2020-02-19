@@ -29,6 +29,10 @@
 
 package org.n52.sta.data.repositories;
 
+import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.graph.EntityGraphs;
+import org.hibernate.graph.GraphParser;
+import org.hibernate.graph.RootGraph;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
@@ -48,10 +52,15 @@ import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.io.Serializable;
@@ -62,7 +71,7 @@ import java.util.Optional;
 import java.util.Set;
 
 public class MessageBusRepository<T, I extends Serializable>
-        extends SimpleJpaRepository<T, I> implements RepositoryConstants {
+        extends SimpleJpaRepository<T, I> implements RepositoryConstants, IdentifierRepository<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(MessageBusRepository.class);
 
@@ -71,28 +80,44 @@ public class MessageBusRepository<T, I extends Serializable>
     private final JpaEntityInformation entityInformation;
     private final STAEventHandler mqttHandler;
     private final EntityManager em;
+    private final Class<T> entityClass;
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    MessageBusRepository(JpaEntityInformation entityInformation,
+    MessageBusRepository(JpaEntityInformation<T, Long> entityInformation,
                          EntityManager entityManager) {
         super(entityInformation, entityManager);
         this.em = entityManager;
         this.entityInformation = entityInformation;
+        this.entityClass = entityInformation.getJavaType();
+        this.entityTypeToStaType = this.createEntityTypeToStaTypeMapping();
 
         this.mqttHandler = (STAEventHandler) SpringApplicationContext.getBean(STAEventHandler.class);
         Assert.notNull(this.mqttHandler, "Could not autowire Mqtt handler!");
-
-        entityTypeToStaType = new HashMap<>(11);
-        entityTypeToStaType.put(ENTITYNAME_OBSERVATION, StaConstants.OBSERVATIONS);
-        entityTypeToStaType.put(ENTITYNAME_DATASTREAM, StaConstants.DATASTREAMS);
-        entityTypeToStaType.put(ENTITYNAME_FEATURE_OF_INTEREST, StaConstants.FEATURES_OF_INTEREST);
-        entityTypeToStaType.put(ENTITYNAME_HIST_LOCATION, StaConstants.HISTORICAL_LOCATIONS);
-        entityTypeToStaType.put(ENTITYNAME_LOCATION, StaConstants.LOCATIONS);
-        entityTypeToStaType.put(ENTITYNAME_OBSERVED_PROPERTY, StaConstants.OBSERVED_PROPERTIES);
-        entityTypeToStaType.put(ENTITYNAME_SENSOR, StaConstants.SENSORS);
-        entityTypeToStaType.put(ENTITYNAME_THING, StaConstants.THINGS);
     }
 
+
+    private TypedQuery<T> createIdentifierQuery(String identifier) {
+        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+        CriteriaQuery<T> criteriaQuery = criteriaBuilder.createQuery(entityClass);
+        Root<T> root = criteriaQuery.from(entityClass);
+
+        ParameterExpression<String> params = criteriaBuilder.parameter(String.class);
+        criteriaQuery.where(criteriaBuilder.equal(root.get("identifier"), params));
+        return em.createQuery(criteriaQuery).setParameter(params, identifier);
+    }
+
+    private HashMap<String, String> createEntityTypeToStaTypeMapping() {
+        HashMap<String, String> map = new HashMap<>(11);
+        map.put(ENTITYNAME_OBSERVATION, StaConstants.OBSERVATIONS);
+        map.put(ENTITYNAME_DATASTREAM, StaConstants.DATASTREAMS);
+        map.put(ENTITYNAME_FEATURE_OF_INTEREST, StaConstants.FEATURES_OF_INTEREST);
+        map.put(ENTITYNAME_HIST_LOCATION, StaConstants.HISTORICAL_LOCATIONS);
+        map.put(ENTITYNAME_LOCATION, StaConstants.LOCATIONS);
+        map.put(ENTITYNAME_OBSERVED_PROPERTY, StaConstants.OBSERVED_PROPERTIES);
+        map.put(ENTITYNAME_SENSOR, StaConstants.SENSORS);
+        map.put(ENTITYNAME_THING, StaConstants.THINGS);
+        return map;
+    }
     @Transactional(readOnly = true)
     public Optional<String> identifier(Specification<T> spec, String columnName) {
         CriteriaBuilder builder = em.getCriteriaBuilder();
@@ -114,10 +139,66 @@ public class MessageBusRepository<T, I extends Serializable>
         }
     }
 
+    @Override
+    @Transactional
+    public Optional<T> findByIdentifier(String identifier, String... entityGraphs) {
+        TypedQuery<T> query = createIdentifierQuery(identifier);
+        if (entityGraphs.length > 0) {
+            Set<RootGraph<T>> roots = new HashSet<>();
+            for (String entityGraph : entityGraphs) {
+                roots.add(GraphParser.parse(entityClass,
+                                            entityGraph,
+                                            (SessionImplementor) em.getDelegate()));
+            }
+            // Set EntityGraphs
+            query.setHint("javax.persistence.fetchgraph", EntityGraphs.merge(
+                    (EntityManager) em.getDelegate(),
+                    entityClass,
+                    roots.toArray(new RootGraph[]{})));
+
+        }
+        try {
+            return Optional.of(query.getSingleResult());
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    @Transactional
+    public boolean existsByIdentifier(String identifier) {
+        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+        CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
+        Root<T> root = criteriaQuery.from(entityClass);
+
+        criteriaQuery.select(criteriaBuilder.count(root));
+        ParameterExpression<String> params = criteriaBuilder.parameter(String.class);
+        criteriaQuery.where(criteriaBuilder.equal(root.get("identifier"), params));
+        TypedQuery<Long> query = em.createQuery(criteriaQuery).setParameter(params, identifier);
+
+        return query.getSingleResult() > 0;
+    }
+
+    @Transactional
+    public Optional<T> findByIdentifier(String identifier) {
+        return findByIdentifier(identifier, "id");
+    }
+
+    @Override
+    @Transactional
+    public void deleteByIdentifier(String identifier) {
+        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+        CriteriaDelete<T> criteriaQuery = criteriaBuilder.createCriteriaDelete(entityClass);
+        Root<T> root = criteriaQuery.from(entityClass);
+
+        ParameterExpression<String> params = criteriaBuilder.parameter(String.class);
+        criteriaQuery.where(criteriaBuilder.equal(root.get("identifier"), params));
+        em.createQuery(criteriaQuery).setParameter(params, identifier).executeUpdate();
+    }
+
     @Transactional
     @Override
     public <S extends T> S save(S newEntity) {
-
         String entityType = entityTypeToStaType.get(entityInformation.getEntityName());
         boolean intercept =
                 mqttHandler.getWatchedEntityTypes().contains(entityType);

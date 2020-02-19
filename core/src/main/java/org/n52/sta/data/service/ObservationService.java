@@ -71,6 +71,7 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -89,6 +90,7 @@ import java.util.stream.Collectors;
  */
 @Component
 @DependsOn({"springApplicationContext"})
+@Transactional
 public class ObservationService extends
         AbstractSensorThingsEntityService<DataRepository<DataEntity<?>>, DataEntity<?>> {
 
@@ -278,7 +280,7 @@ public class ObservationService extends
     @Override
     public void delete(String identifier) throws STACRUDException {
         if (getRepository().existsByIdentifier(identifier)) {
-            DataEntity<?> observation = getRepository().getOneByIdentifier(identifier);
+            DataEntity<?> observation = getRepository().findByIdentifier(identifier).get();
             checkDataset(observation);
             delete(observation);
         } else {

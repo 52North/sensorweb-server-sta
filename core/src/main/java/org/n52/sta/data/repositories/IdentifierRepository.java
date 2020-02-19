@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.repositories;
 
 import org.springframework.data.jpa.domain.Specification;
@@ -39,13 +40,46 @@ import java.util.Optional;
 @Transactional
 public interface IdentifierRepository<T> extends JpaSpecificationExecutor<T> {
 
+    /**
+     * Checks whether Entity with given id exists.
+     *
+     * @param identifier Identifier of the Entity
+     * @return true if Entity exists. false otherwise
+     */
     boolean existsByIdentifier(String identifier);
 
+    /**
+     * Finds Entity by identifier. Fetches Entity and all related Entities given by EntityGraphs
+     *
+     * @param identifier      Identifier of the wanted Entity
+     * @param relatedEntities EntityGraphs describing related Entities to be fetched. All graphs are merged into one
+     *                        graph internally.
+     * @return Entity found in Database. Optional.empty() otherwise
+     */
+    Optional<T> findByIdentifier(String identifier, String... relatedEntities);
+
+    /**
+     * Finds Entity by identifier. Fetches only Entity itself
+     *
+     * @param identifier Identifier of the wanted Entity
+     * @return Entity found in Database. Optional.empty() otherwise
+     */
     Optional<T> findByIdentifier(String identifier);
 
+    /**
+     * Deletes Entity with given Identifier
+     *
+     * @param identifier Identifier of the Entity
+     */
     void deleteByIdentifier(String identifier);
 
-    T getOneByIdentifier(String identifier);
-
+    /**
+     * Gets content of columnName of entity that is specified by spec. Used for fetching only identifier instead of
+     * whole Entity
+     *
+     * @param spec       Specification of Entity
+     * @param columnName Name of Column
+     * @return Content of the column with columnName if spec matches. Optional.empty() otherwise
+     */
     Optional<String> identifier(Specification<T> spec, String columnName);
 }

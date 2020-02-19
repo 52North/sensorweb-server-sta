@@ -179,7 +179,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     @Override
     public void delete(String id) throws STACRUDException {
         if (getRepository().existsByIdentifier(id)) {
-            LocationEntity location = getRepository().getOneByIdentifier(id);
+            LocationEntity location = getRepository().findByIdentifier(id).get();
             // delete all historical locations
             for (HistoricalLocationEntity historicalLocation : location.getHistoricalLocations()) {
                 getHistoricalLocationService().delete(historicalLocation);
