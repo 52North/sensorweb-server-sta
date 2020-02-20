@@ -26,8 +26,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data.repositories;
 
+package org.n52.sta.data.repositories;
 
 import org.n52.series.db.beans.FormatEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -35,7 +35,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
-public interface FormatRepository extends JpaRepository<FormatEntity, Long>, JpaSpecificationExecutor<FormatEntity> {
+public interface FormatRepository extends EntityGraphRepository<FormatEntity, Long> {
 
     boolean existsByFormat(String format);
 

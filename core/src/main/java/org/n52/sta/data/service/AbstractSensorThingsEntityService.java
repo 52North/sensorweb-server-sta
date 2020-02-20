@@ -45,6 +45,7 @@ import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.data.OffsetLimitBasedPageRequest;
+import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.IdentifierRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
@@ -72,7 +73,7 @@ import java.util.Set;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Transactional
-public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepository<S>, S extends IdEntity> {
+public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepository<S, Long>, S extends IdEntity> {
 
     static final String IDENTIFIER = "identifier";
     static final String STAIDENTIFIER = "staIdentifier";
@@ -81,13 +82,17 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
     @Autowired
     private EntityServiceRepository serviceRepository;
 
-    private Class entityClass;
+    private final Class<S> entityClass;
+    private final EntityGraphRepository.FetchGraph[] defaultFetchGraphs;
 
     private T repository;
 
-    public AbstractSensorThingsEntityService(T repository, Class entityClass) {
+    public AbstractSensorThingsEntityService(T repository,
+                                             Class entityClass,
+                                             EntityGraphRepository.FetchGraph... defaultFetchGraphs) {
         this.entityClass = entityClass;
         this.repository = repository;
+        this.defaultFetchGraphs = defaultFetchGraphs;
     }
 
     @PostConstruct
@@ -115,7 +120,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      */
     public ElementWithQueryOptions getEntity(String id, QueryOptions queryOptions) throws STACRUDException {
         try {
-            return this.createWrapper(getRepository().findByIdentifier(id).get(), queryOptions);
+            return this.createWrapper(getRepository().findByIdentifier(id, defaultFetchGraphs).get(), queryOptions);
         } catch (RuntimeException e) {
             throw new STACRUDException(e.getMessage());
         }
@@ -132,7 +137,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
         try {
             Specification<S> filter = getFilterPredicate(entityClass, queryOptions);
             return getRepository()
-                    .findAll(filter, createPageableRequest(queryOptions))
+                    .findAll(filter, createPageableRequest(queryOptions), defaultFetchGraphs)
                     .map((S e) -> createWrapper(e, queryOptions))
                     .getContent();
         } catch (RuntimeException e) {
@@ -179,7 +184,8 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
                                                                QueryOptions queryOptions)
             throws STACRUDException {
         try {
-            Optional<S> elem = getRepository().findOne(byRelatedEntityFilter(relatedId, relatedType, ownId));
+            Optional<S> elem =
+                    getRepository().findOne(byRelatedEntityFilter(relatedId, relatedType, ownId), defaultFetchGraphs);
             if (elem.isPresent()) {
                 return this.createWrapper(
                         elem.get(),
@@ -224,7 +230,8 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
         try {
             return getRepository()
                     .findAll(byRelatedEntityFilter(relatedId, relatedType, null),
-                             createPageableRequest(queryOptions))
+                             createPageableRequest(queryOptions),
+                             defaultFetchGraphs)
                     .map((S e) -> createWrapper(e, queryOptions))
                     .getContent();
 

@@ -40,6 +40,7 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.SensorQuerySpecifications;
 import org.n52.sta.data.repositories.DatastreamRepository;
+import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.FormatRepository;
 import org.n52.sta.data.repositories.ProcedureHistoryRepository;
 import org.n52.sta.data.repositories.ProcedureRepository;
@@ -85,7 +86,9 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
                          FormatRepository formatRepository,
                          ProcedureHistoryRepository procedureHistoryRepository,
                          DatastreamRepository datastreamRepository) {
-        super(repository, ProcedureEntity.class);
+        super(repository,
+              ProcedureEntity.class,
+              EntityGraphRepository.FetchGraph.FetchGraph_FORMAT);
         this.formatRepository = formatRepository;
         this.procedureHistoryRepository = procedureHistoryRepository;
         this.datastreamRepository = datastreamRepository;

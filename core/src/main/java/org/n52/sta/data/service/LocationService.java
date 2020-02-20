@@ -82,7 +82,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     private final LocationEncodingRepository locationEncodingRepository;
 
     private final boolean updateFOIFeatureEnabled;
-    private Pattern updateFOIPattern = Pattern.compile("(?:.*updateFOI\":\")([0-9A-z'\\+%]+)(?:\".*)");
+    private Pattern updateFOIPattern = Pattern.compile("(?:.*updateFOI\":\")([0-9A-z'+%-]+)(?:\".*)");
 
     public LocationService(@Value("${server.feature.updateFOI}") boolean updateFOI,
                            LocationRepository repository,

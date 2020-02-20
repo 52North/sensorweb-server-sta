@@ -124,6 +124,15 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
         return entity.isPresent() ? entity.get() : null;
     }
 
+    @Override
+    public ElementWithQueryOptions getEntity(String id, QueryOptions queryOptions) throws STACRUDException {
+        try {
+            return this.createWrapper(getRepository().findByStaIdentifier(id).get(), queryOptions);
+        } catch (RuntimeException e) {
+            throw new STACRUDException(e.getMessage());
+        }
+    }
+
     /**
      * Overrides the default method as different field is used to store identifier
      *
@@ -186,7 +195,7 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
     public PhenomenonEntity createEntity(PhenomenonEntity observableProperty) throws STACRUDException {
         if (observableProperty.getStaIdentifier() != null && !observableProperty.isSetName()) {
             Optional<PhenomenonEntity> optionalEntity =
-                    getRepository().findByIdentifier(observableProperty.getStaIdentifier());
+                    getRepository().findByStaIdentifier(observableProperty.getStaIdentifier());
             if (optionalEntity.isPresent()) {
                 return optionalEntity.get();
             } else {

@@ -58,6 +58,7 @@ import org.n52.sta.data.repositories.CategoryRepository;
 import org.n52.sta.data.repositories.DataRepository;
 import org.n52.sta.data.repositories.DatasetRepository;
 import org.n52.sta.data.repositories.DatastreamRepository;
+import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.OfferingRepository;
 import org.n52.sta.data.repositories.ParameterRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
@@ -115,7 +116,9 @@ public class ObservationService extends
                               DatastreamRepository datastreamRepository,
                               DatasetRepository datasetRepository,
                               ParameterRepository parameterRepository) {
-        super(repository, DataEntity.class);
+        super(repository,
+              DataEntity.class,
+              EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
         this.categoryRepository = categoryRepository;
         this.offeringRepository = offeringRepository;
         this.datastreamRepository = datastreamRepository;

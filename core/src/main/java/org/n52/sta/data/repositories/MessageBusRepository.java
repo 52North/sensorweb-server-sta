@@ -46,16 +46,20 @@ import org.n52.sta.SpringApplicationContext;
 import org.n52.sta.data.STAEventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaDelete;
@@ -66,16 +70,20 @@ import javax.persistence.criteria.Root;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.springframework.data.jpa.repository.query.QueryUtils.toOrders;
+
 public class MessageBusRepository<T, I extends Serializable>
-        extends SimpleJpaRepository<T, I> implements RepositoryConstants, IdentifierRepository<T> {
+        extends SimpleJpaRepository<T, I> implements RepositoryConstants, IdentifierRepository<T, I> {
 
     private static final Logger logger = LoggerFactory.getLogger(MessageBusRepository.class);
 
     private final Map<String, String> entityTypeToStaType;
+    private final String FETCHGRAPH_HINT = "javax.persistence.fetchgraph";
 
     private final JpaEntityInformation entityInformation;
     private final STAEventHandler mqttHandler;
@@ -94,7 +102,6 @@ public class MessageBusRepository<T, I extends Serializable>
         this.mqttHandler = (STAEventHandler) SpringApplicationContext.getBean(STAEventHandler.class);
         Assert.notNull(this.mqttHandler, "Could not autowire Mqtt handler!");
     }
-
 
     private TypedQuery<T> createIdentifierQuery(String identifier) {
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
@@ -118,6 +125,7 @@ public class MessageBusRepository<T, I extends Serializable>
         map.put(ENTITYNAME_THING, StaConstants.THINGS);
         return map;
     }
+
     @Transactional(readOnly = true)
     public Optional<String> identifier(Specification<T> spec, String columnName) {
         CriteriaBuilder builder = em.getCriteriaBuilder();
@@ -141,20 +149,20 @@ public class MessageBusRepository<T, I extends Serializable>
 
     @Override
     @Transactional
-    public Optional<T> findByIdentifier(String identifier, String... entityGraphs) {
+    public Optional<T> findByIdentifier(String identifier, FetchGraph... entityGraphs) {
         TypedQuery<T> query = createIdentifierQuery(identifier);
         if (entityGraphs.length > 0) {
             Set<RootGraph<T>> roots = new HashSet<>();
-            for (String entityGraph : entityGraphs) {
+            for (FetchGraph entityGraph : entityGraphs) {
                 roots.add(GraphParser.parse(entityClass,
-                                            entityGraph,
+                                            entityGraph.value(),
                                             (SessionImplementor) em.getDelegate()));
             }
             // Set EntityGraphs
-            query.setHint("javax.persistence.fetchgraph", EntityGraphs.merge(
+            query.setHint(FETCHGRAPH_HINT, EntityGraphs.merge(
                     (EntityManager) em.getDelegate(),
                     entityClass,
-                    roots.toArray(new RootGraph[]{})));
+                    roots.toArray(new RootGraph[] {})));
 
         }
         try {
@@ -181,7 +189,7 @@ public class MessageBusRepository<T, I extends Serializable>
 
     @Transactional
     public Optional<T> findByIdentifier(String identifier) {
-        return findByIdentifier(identifier, "id");
+        return findByIdentifier(identifier, FetchGraph.FETCHGRAPH_DEFAULT);
     }
 
     @Override
@@ -225,6 +233,120 @@ public class MessageBusRepository<T, I extends Serializable>
         }
 
         return newEntity;
+    }
+
+    private EntityGraph<T> createFetchGraph(FetchGraph... fetchGraphs) {
+        if (fetchGraphs != null) {
+            Set<RootGraph<T>> roots = new HashSet<>();
+            for (FetchGraph entityGraph : fetchGraphs) {
+                roots.add(GraphParser.parse(entityClass,
+                                            entityGraph.value(),
+                                            (SessionImplementor) em.getDelegate()));
+            }
+            return EntityGraphs.merge(
+                    (EntityManager) em.getDelegate(),
+                    entityClass,
+                    roots.toArray(new RootGraph[] {}));
+        } else {
+            return null;
+        }
+    }
+
+    @Override public Optional<T> findOne(Specification<T> spec, FetchGraph... fetchGraphs) {
+        try {
+            return Optional.of(getQuery(spec, Sort.unsorted(), createFetchGraph(fetchGraphs)).getSingleResult());
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
+    }
+
+    @Override public List<T> findAll(Specification<T> spec, FetchGraph... fetchGraphs) {
+        return getQuery(spec, Sort.unsorted(), createFetchGraph(fetchGraphs)).getResultList();
+    }
+
+    @Override public Page<T> findAll(Specification<T> spec, Pageable pageable, FetchGraph... fetchGraphs) {
+        TypedQuery<T> query = getQuery(spec, pageable, createFetchGraph(fetchGraphs));
+        return pageable.isUnpaged() ? new PageImpl<T>(query.getResultList())
+                : readPage(query, getDomainClass(), pageable, spec);
+    }
+
+    @Override public List<T> findAll(Specification<T> spec, Sort sort, FetchGraph... fetchGraphs) {
+        return getQuery(spec, sort, createFetchGraph(fetchGraphs)).getResultList();
+    }
+
+    protected TypedQuery<T> getQuery(@Nullable Specification<T> spec,
+                                     Pageable pageable,
+                                     EntityGraph<T> entityGraph) {
+
+        Sort sort = pageable.isPaged() ? pageable.getSort() : Sort.unsorted();
+        return getQuery(spec, getDomainClass(), sort, entityGraph);
+    }
+
+    private <S extends T> TypedQuery<S> getQuery(@Nullable Specification<S> spec,
+                                                 Class<S> domainClass,
+                                                 Pageable pageable,
+                                                 EntityGraph<S> entityGraph) {
+
+        Sort sort = pageable.isPaged() ? pageable.getSort() : Sort.unsorted();
+        return getQuery(spec, domainClass, sort, entityGraph);
+    }
+
+    private TypedQuery<T> getQuery(@Nullable Specification<T> spec,
+                                   Sort sort,
+                                   EntityGraph<T> entityGraph) {
+        return getQuery(spec, getDomainClass(), sort, entityGraph);
+    }
+
+    private <S extends T> TypedQuery<S> getQuery(@Nullable Specification<S> spec,
+                                                 Class<S> domainClass,
+                                                 Sort sort,
+                                                 EntityGraph<S> entityGraph) {
+
+        CriteriaBuilder builder = em.getCriteriaBuilder();
+        CriteriaQuery<S> query = builder.createQuery(domainClass);
+
+        Root<S> root = query.from(domainClass);
+
+        if (spec != null) {
+            Predicate predicate = spec.toPredicate(root, query, builder);
+            if (predicate != null) {
+                query.where(predicate);
+            }
+        }
+        query.select(root);
+
+        if (sort.isSorted()) {
+            query.orderBy(toOrders(sort, root, builder));
+        }
+
+        TypedQuery<S> typedQuery = em.createQuery(query);
+        if (entityGraph != null) {
+            typedQuery.setHint(FETCHGRAPH_HINT, entityGraph);
+        }
+        return typedQuery;
+    }
+
+    @Transactional
+    public <S extends T> S save(S newEntity, FetchGraph... fetchGraphs) {
+        S entity = save(newEntity);
+        if (fetchGraphs.length > 0) {
+            Set<RootGraph<T>> roots = new HashSet<>();
+            for (FetchGraph entityGraph : fetchGraphs) {
+                roots.add(GraphParser.parse(entityClass,
+                                            entityGraph.value(),
+                                            (SessionImplementor) em.getDelegate()));
+            }
+            Map<String, Object> properties = new HashMap<>();
+            properties.put("javax.persistence.fetchgraph", EntityGraphs.merge(
+                    (EntityManager) em.getDelegate(),
+                    entityClass,
+                    roots.toArray(new RootGraph[] {})));
+
+            em.refresh(entity, properties);
+            return entity;
+        } else {
+            return entity;
+        }
     }
 
     /**

@@ -38,6 +38,7 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.query.ThingQuerySpecifications;
+import org.n52.sta.data.repositories.IdentifierRepository;
 import org.n52.sta.data.repositories.ThingRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
@@ -128,8 +129,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
             }
             if (thing.getIdentifier() == null) {
                 if (getRepository().existsByName(thing.getName())) {
-                    Optional<PlatformEntity> optional = getRepository().findByName(thing.getName());
-                    return optional.orElse(null);
+                    return getRepository().findByName(thing.getName()).orElse(null);
                 } else {
                     // Autogenerate Identifier
                     thing.setIdentifier(UUID.randomUUID().toString());
@@ -153,7 +153,10 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     public PlatformEntity updateEntity(String id, PlatformEntity entity, HttpMethod method) throws STACRUDException {
         checkUpdate(entity);
         if (HttpMethod.PATCH.equals(method)) {
-            Optional<PlatformEntity> existing = getRepository().findByIdentifier(id);
+            Optional<PlatformEntity> existing =
+                    getRepository().findByIdentifier(id,
+                                                     IdentifierRepository.FetchGraph.FETCHGRAPH_LOCATION,
+                                                     IdentifierRepository.FetchGraph.FETCHGRAPH_HIST_LOCATION);
             if (existing.isPresent()) {
                 PlatformEntity merged = merge(existing.get(), entity);
                 if (entity.hasLocationEntities()) {

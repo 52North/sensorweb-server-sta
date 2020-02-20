@@ -34,7 +34,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
-public interface UnitRepository extends JpaRepository<UnitEntity, Long>, JpaSpecificationExecutor<UnitEntity> {
+public interface UnitRepository extends JpaRepository<UnitEntity, Long>, EntityGraphRepository<UnitEntity, Long> {
 
     boolean existsByIdentifier(String identifier);
 

@@ -26,18 +26,17 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.repositories;
 
 import org.n52.series.db.beans.DataEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Transactional
 public interface DataRepository<T extends DataEntity<?>>
-        extends IdentifierRepository<T>, JpaRepository<T, Long>, JpaSpecificationExecutor<T> {
+        extends IdentifierRepository<T, Long> {
 
     DataEntity<?> findFirstByDataset_idInOrderBySamplingTimeStartAsc(List<Long> datasetIdentifiers);
 

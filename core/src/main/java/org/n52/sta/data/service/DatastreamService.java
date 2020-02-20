@@ -46,7 +46,9 @@ import org.n52.sta.data.query.ObservationQuerySpecifications;
 import org.n52.sta.data.repositories.DataRepository;
 import org.n52.sta.data.repositories.DatasetRepository;
 import org.n52.sta.data.repositories.DatastreamRepository;
+import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.FormatRepository;
+import org.n52.sta.data.repositories.IdentifierRepository;
 import org.n52.sta.data.repositories.UnitRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
@@ -92,7 +94,10 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
                              FormatRepository formatRepository,
                              DataRepository dataRepository,
                              DatasetRepository datasetRepository) {
-        super(repository, DatastreamEntity.class);
+        super(repository,
+              DatastreamEntity.class,
+              EntityGraphRepository.FetchGraph.FETCHGRAPH_OBS_TYPE,
+              EntityGraphRepository.FetchGraph.FETCHGRAPH_UOM);
         this.unitRepository = unitRepository;
         this.formatRepository = formatRepository;
         this.dataRepository = dataRepository;
@@ -105,7 +110,7 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     }
 
     @Override
-    protected ElementWithQueryOptions<?> createWrapper(Object entity, QueryOptions queryOptions) {
+    protected ElementWithQueryOptions createWrapper(Object entity, QueryOptions queryOptions) {
         return new DatastreamWithQueryOptions((DatastreamEntity) entity, queryOptions);
     }
 
@@ -192,7 +197,9 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
             }
             entity = getRepository().intermediateSave(datastream);
             processObservation(entity, entity.getObservations());
-            entity = getRepository().save(entity);
+            entity = getRepository().save(entity,
+                                          IdentifierRepository.FetchGraph.FETCHGRAPH_OBS_TYPE,
+                                          IdentifierRepository.FetchGraph.FETCHGRAPH_UOM);
         }
         return entity;
     }

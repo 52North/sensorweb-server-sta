@@ -30,7 +30,6 @@
 package org.n52.sta.data.repositories;
 
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,7 +37,7 @@ import java.util.Optional;
 
 @NoRepositoryBean
 @Transactional
-public interface IdentifierRepository<T> extends JpaSpecificationExecutor<T> {
+public interface IdentifierRepository<T, ID> extends EntityGraphRepository<T, ID> {
 
     /**
      * Checks whether Entity with given id exists.
@@ -56,7 +55,7 @@ public interface IdentifierRepository<T> extends JpaSpecificationExecutor<T> {
      *                        graph internally.
      * @return Entity found in Database. Optional.empty() otherwise
      */
-    Optional<T> findByIdentifier(String identifier, String... relatedEntities);
+    Optional<T> findByIdentifier(String identifier, FetchGraph... relatedEntities);
 
     /**
      * Finds Entity by identifier. Fetches only Entity itself
