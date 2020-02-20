@@ -65,6 +65,7 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
 
     private final String TYPE = "type";
     private final String GEOMETRY = "geometry";
+    private final String COORDINATES = "coordinates";
 
     public JSONLocation() {
         self = new LocationEntity();
@@ -78,14 +79,20 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
             Assert.notNull(name, INVALID_INLINE_ENTITY + "name");
             Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
             Assert.notNull(encodingType, INVALID_INLINE_ENTITY + "encodingType");
-            Assert.notNull(location, INVALID_INLINE_ENTITY + "location");
             final String INVALID_ENCODINGTYPE =
                     "Invalid encodingType supplied. Only GeoJSON (application/vnd.geo+json) is supported!";
             Assert.notNull(encodingType, INVALID_ENCODINGTYPE);
             Assert.state(encodingType.equals(ENCODINGTYPE_GEOJSON), INVALID_ENCODINGTYPE);
-            Assert.isTrue("Feature".equals(location.get(TYPE).asText()), INVALID_INLINE_ENTITY + "location->type");
-            Assert.notNull(location.get(GEOMETRY), INVALID_INLINE_ENTITY + "location->geometry");
 
+            Assert.notNull(location, INVALID_INLINE_ENTITY + "location");
+            //TODO: check what is actually allowed here.
+            if (location.has(GEOMETRY)) {
+                Assert.isTrue("Feature".equals(location.get(TYPE).asText()), INVALID_INLINE_ENTITY + "location->type");
+                Assert.notNull(location.get(GEOMETRY), INVALID_INLINE_ENTITY + "location->geometry");
+            } else {
+                Assert.isTrue("Point".equals(location.get(TYPE).asText()), INVALID_INLINE_ENTITY + "location->type");
+                Assert.notNull(location.get(COORDINATES), INVALID_INLINE_ENTITY + "location->geometry");
+            }
             self.setIdentifier(identifier);
             self.setName(name);
             self.setDescription(description);
@@ -93,7 +100,11 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
 
             reader = new GeoJsonReader(factory);
             try {
-                self.setGeometry(reader.read(location.get(GEOMETRY).toString()));
+                if (location.has(GEOMETRY)) {
+                    self.setGeometry(reader.read(location.get(GEOMETRY).toString()));
+                } else {
+                    self.setGeometry(reader.read(location.toString()));
+                }
             } catch (ParseException e) {
                 Assert.notNull(null, COULD_NOT_PARSE + e.getMessage());
             }
@@ -133,7 +144,11 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
             if (location != null) {
                 reader = new GeoJsonReader(factory);
                 try {
-                    self.setGeometry(reader.read(location.get(GEOMETRY).toString()));
+                    if (location.has(GEOMETRY)) {
+                        self.setGeometry(reader.read(location.get(GEOMETRY).toString()));
+                    } else {
+                        self.setGeometry(reader.read(location.toString()));
+                    }
                 } catch (ParseException e) {
                     Assert.notNull(null, COULD_NOT_PARSE + e.getMessage());
                 }

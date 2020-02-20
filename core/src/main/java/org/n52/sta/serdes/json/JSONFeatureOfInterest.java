@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.serdes.json;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -61,6 +62,8 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
     private final String TYPE = "type";
     private final String GEOMETRY = "geometry";
     private final String FEATURE = "Feature";
+    private final String COORDINATES = "coordinates";
+    private final String POINT = "Point";
 
     public JSONFeatureOfInterest() {
         self = new FeatureEntity();
@@ -73,6 +76,7 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
             Assert.notNull(name, INVALID_INLINE_ENTITY + "name");
             Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
             Assert.notNull(feature, INVALID_INLINE_ENTITY + "feature");
+            Assert.notNull(feature.get(TYPE), INVALID_INLINE_ENTITY + "feature->type");
             final String INVALID_ENCODINGTYPE =
                     "Invalid encodingType supplied. Only GeoJSON (application/vnd.geo+json) is supported!";
             Assert.notNull(encodingType, INVALID_ENCODINGTYPE);
@@ -83,11 +87,19 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
             self.setDescription(description);
 
             if (feature != null) {
-                Assert.isTrue(FEATURE.equals(feature.get(TYPE).asText()));
-                Assert.notNull(feature.get(GEOMETRY));
+                //TODO: check what is actually allowed here
                 GeoJsonReader reader = new GeoJsonReader(factory);
+                String geo;
+                if (FEATURE.equals(feature.get(TYPE).asText())) {
+                    Assert.notNull(feature.get(GEOMETRY), INVALID_INLINE_ENTITY + "feature->geometry");
+                    geo = feature.get(GEOMETRY).toString();
+                } else {
+                    Assert.isTrue(POINT.equals(feature.get(TYPE).asText()), INVALID_INLINE_ENTITY + "feature->type");
+                    Assert.isTrue(feature.has(COORDINATES), INVALID_INLINE_ENTITY + "feature->coordinates");
+                    geo = feature.toString();
+                }
                 try {
-                    self.setGeometry(reader.read(feature.get(GEOMETRY).toString()));
+                    self.setGeometry(reader.read(geo));
                 } catch (ParseException e) {
                     Assert.notNull(null, COULD_NOT_PARSE + e.getMessage());
                 }
