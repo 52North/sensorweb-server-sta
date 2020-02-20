@@ -134,7 +134,8 @@ public interface STARequestUtils extends StaConstants {
                     ROUND_BRACKET_CLOSE;
 
     String IDENTIFIED_BY_HISTORICAL_LOCATION_REGEX =
-            HISTORICAL_LOCATIONS + IDENTIFIER_REGEX + SLASH + THING;
+            HISTORICAL_LOCATIONS + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN + THING + OR + LOCATIONS +
+                    ROUND_BRACKET_CLOSE;
 
     String IDENTIFIED_BY_THING_REGEX =
             THINGS + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN + DATASTREAMS
@@ -253,6 +254,16 @@ public interface STARequestUtils extends StaConstants {
     String COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH_VARIABLE =
             PATH_ENTITY + FEATURES_OF_INTEREST + IDENTIFIER_REGEX + PATH_TARGET + OBSERVATIONS + CURLY_BRACKET_CLOSE;
 
+    // /FeaturesOfInterest(52)/Observations
+    String COLLECTION_IDENTIFIED_BY_HIST_LOCATION =
+            SOURCE_NAME_GROUP_START + HISTORICAL_LOCATIONS + SOURCE_NAME_GROUP_END
+                    + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
+                    + SLASH
+                    + WANTED_NAME_GROUP_START + LOCATIONS + WANTED_NAME_GROUP_END;
+
+    String COLLECTION_IDENTIFIED_BY_HIST_LOCATION_PATH_VARIABLE =
+            PATH_ENTITY + HISTORICAL_LOCATIONS + IDENTIFIER_REGEX + PATH_TARGET + LOCATIONS + CURLY_BRACKET_CLOSE;
+
     String BASE_COLLECTION_REGEX_NAMED_GROUPS =
             WANTED_NAME_GROUP_START
                     + OBSERVATIONS + OR
@@ -294,6 +305,7 @@ public interface STARequestUtils extends StaConstants {
     Pattern CP_IDENT_BY_OBS_PROP = Pattern.compile(COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY + DOLLAR);
     Pattern CP_IDENT_BY_SENSOR = Pattern.compile(COLLECTION_IDENTIFIED_BY_SENSOR + DOLLAR);
     Pattern CP_IDENT_BY_THING = Pattern.compile(COLLECTION_IDENTIFIED_BY_THING + DOLLAR);
+    Pattern CP_IDENT_BY_HIST_LOCATION = Pattern.compile(COLLECTION_IDENTIFIED_BY_HIST_LOCATION + DOLLAR);
 
     Pattern[] NAMED_COLL_PATTERNS =
             new Pattern[] {
@@ -304,6 +316,7 @@ public interface STARequestUtils extends StaConstants {
                     CP_IDENT_BY_OBS_PROP,
                     CP_IDENT_BY_SENSOR,
                     CP_IDENT_BY_THING,
+                    CP_IDENT_BY_HIST_LOCATION
             };
 
     // OGC-15-078r6 14.2.2
@@ -474,6 +487,7 @@ public interface STARequestUtils extends StaConstants {
                                 || BY_LOCATION_PATTERN.matcher(resource).matches()
                                 || BY_THING_PATTERN.matcher(resource).matches()
                                 || BY_FOI_PATTERN.matcher(resource).matches()
+                                || BY_OBSERVATION_PATTERN.matcher(resource).matches()
                                 || BY_OBSER_PROP_PATTERN.matcher(resource).matches()
                                 || BY_SENSOR_PATTERN.matcher(resource).matches()
                                 || BY_OBSER_PROP_PATTERN.matcher(resource).matches())) {
@@ -515,11 +529,11 @@ public interface STARequestUtils extends StaConstants {
         String sourceType = sourceEntity[0];
 
         if (!serviceRepository.getEntityService(sourceType).existsEntity(sourceId)) {
-            return createInvalidUrlExceptionNoEntit(uriResources[0]);
+            return createInvalidUrlExceptionNoEntity(uriResources[0]);
         }
 
         // Iterate over the rest of the uri validating each resource
-        for (int i = 1, uriResourcesLength = uriResources.length; i < uriResourcesLength; i++) {
+        for (int i = 1, uriResourcesLength = uriResources.length; i < uriResourcesLength-1; i++) {
             String[] targetEntity = splitId(uriResources[i]);
             String targetType = targetEntity[0];
             String targetId = null;
@@ -551,12 +565,12 @@ public interface STARequestUtils extends StaConstants {
         return null;
     }
 
-    default STAInvalidUrlThrowable createInvalidUrlExceptionNoEntit(String entity) {
+    default STAInvalidUrlThrowable createInvalidUrlExceptionNoEntity(String entity) {
         return new STAInvalidUrlThrowable("No Entity: " + entity + " found!");
     }
 
     default STAInvalidUrlThrowable createInvalidUrlExceptionNoEntitAssociated(String first, String last) {
-        return createInvalidUrlExceptionNoEntit(first + " associated with " + last);
+        return createInvalidUrlExceptionNoEntity(first + " associated with " + last);
     }
 
     default String[] splitId(String entity) {

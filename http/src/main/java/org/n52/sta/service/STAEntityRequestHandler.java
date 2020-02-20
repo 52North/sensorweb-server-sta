@@ -29,6 +29,7 @@
 
 package org.n52.sta.service;
 
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlThrowable;
 import org.n52.sta.data.service.EntityServiceRepository;
@@ -72,15 +73,14 @@ public class STAEntityRequestHandler implements STARequestUtils {
 
         String entityId = id.substring(1, id.length() - 1);
         String queryString = request.getQueryString();
+        QueryOptions options;
         if (queryString != null) {
-            return serviceRepository.getEntityService(entity)
-                                    .getEntity(entityId, QUERY_OPTIONS_FACTORY.createQueryOptions(
-                                            URLDecoder.decode(queryString)));
+            options = QUERY_OPTIONS_FACTORY.createQueryOptions(URLDecoder.decode(request.getQueryString()));
         } else {
-            return serviceRepository.getEntityService(entity)
-                                    .getEntity(entityId, QUERY_OPTIONS_FACTORY.createDummy());
+            options = QUERY_OPTIONS_FACTORY.createDummy();
         }
-
+        return serviceRepository.getEntityService(entity)
+                                .getEntity(entityId, options);
     }
 
     /**
@@ -110,19 +110,16 @@ public class STAEntityRequestHandler implements STARequestUtils {
         String sourceId = entity.substring(sourceType.length() + 1, entity.length() - 1);
 
         String queryString = request.getQueryString();
+        QueryOptions options;
         if (queryString != null) {
-            return serviceRepository.getEntityService(target)
-                                    .getEntityByRelatedEntity(sourceId,
-                                                              sourceType,
-                                                              null,
-                                                              QUERY_OPTIONS_FACTORY.createQueryOptions(
-                                                                      URLDecoder.decode(queryString)));
+            options = QUERY_OPTIONS_FACTORY.createQueryOptions(URLDecoder.decode(request.getQueryString()));
         } else {
-            return serviceRepository.getEntityService(target)
-                                    .getEntityByRelatedEntity(sourceId,
-                                                              sourceType,
-                                                              null,
-                                                              QUERY_OPTIONS_FACTORY.createDummy());
+            options = QUERY_OPTIONS_FACTORY.createDummy();
         }
+        return serviceRepository.getEntityService(target)
+                                .getEntityByRelatedEntity(sourceId,
+                                                          sourceType,
+                                                          null,
+                                                          options);
     }
 }

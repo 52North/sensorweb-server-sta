@@ -29,6 +29,7 @@
 
 package org.n52.sta.service;
 
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlThrowable;
 import org.n52.sta.data.service.EntityServiceRepository;
@@ -70,16 +71,15 @@ public class STACollectionRequestHandler implements STARequestUtils {
                                                               HttpServletRequest request)
             throws STACRUDException {
         String queryString = request.getQueryString();
+        QueryOptions options;
         if (queryString != null) {
-            return serviceRepository
-                    .getEntityService(collectionName)
-                    .getEntityCollection(QUERY_OPTIONS_FACTORY.createQueryOptions(
-                            URLDecoder.decode(request.getQueryString())));
+            options = QUERY_OPTIONS_FACTORY.createQueryOptions(URLDecoder.decode(request.getQueryString()));
         } else {
-            return serviceRepository
-                    .getEntityService(collectionName)
-                    .getEntityCollection(QUERY_OPTIONS_FACTORY.createDummy());
+            options = QUERY_OPTIONS_FACTORY.createDummy();
         }
+        return serviceRepository
+                .getEntityService(collectionName)
+                .getEntityCollection(options);
     }
 
     /**
@@ -97,7 +97,8 @@ public class STACollectionRequestHandler implements STARequestUtils {
                     MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH_VARIABLE,
                     MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH_VARIABLE,
                     MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_SENSOR_PATH_VARIABLE,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE
+                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
+                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_HIST_LOCATION_PATH_VARIABLE
             },
             produces = "application/json"
     )
@@ -113,20 +114,15 @@ public class STACollectionRequestHandler implements STARequestUtils {
         String sourceId = split[1].replace(")", "");
 
         String queryString = request.getQueryString();
+        QueryOptions options;
         if (queryString != null) {
-            return serviceRepository.getEntityService(target)
-                                    .getEntityCollectionByRelatedEntity(sourceId,
-                                                                        sourceType,
-                                                                        QUERY_OPTIONS_FACTORY.createQueryOptions(
-                                                                                URLDecoder.decode(
-                                                                                        request.getQueryString())
-                                                                        ));
+            options = QUERY_OPTIONS_FACTORY.createQueryOptions(URLDecoder.decode(request.getQueryString()));
         } else {
-            return serviceRepository.getEntityService(target)
-                                    .getEntityCollectionByRelatedEntity(sourceId,
-                                                                        sourceType,
-                                                                        QUERY_OPTIONS_FACTORY.createDummy());
+            options = QUERY_OPTIONS_FACTORY.createDummy();
         }
-
+        return serviceRepository.getEntityService(target)
+                                .getEntityCollectionByRelatedEntity(sourceId,
+                                                                    sourceType,
+                                                                    options);
     }
 }
