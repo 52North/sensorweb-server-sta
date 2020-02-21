@@ -35,7 +35,7 @@ import java.util.Optional;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @NoRepositoryBean
-public interface EntityGraphRepository<T, ID> extends JpaSpecificationExecutor<T>, JpaRepository<T, ID> {
+public interface EntityGraphRepository<T, I> extends JpaSpecificationExecutor<T>, JpaRepository<T, I> {
 
     /**
      * Returns a single entity matching the given {@link Specification} or {@link Optional#empty()} if none found.

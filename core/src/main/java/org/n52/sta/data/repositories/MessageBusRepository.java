@@ -51,6 +51,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.query.QueryUtils;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.lang.Nullable;
@@ -62,7 +63,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Predicate;
@@ -75,8 +75,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.springframework.data.jpa.repository.query.QueryUtils.toOrders;
-
 public class MessageBusRepository<T, I extends Serializable>
         extends SimpleJpaRepository<T, I> implements RepositoryConstants {
 
@@ -84,6 +82,8 @@ public class MessageBusRepository<T, I extends Serializable>
 
     private final Map<String, String> entityTypeToStaType;
     private final String FETCHGRAPH_HINT = "javax.persistence.fetchgraph";
+    private final String IDENTIFIER = "identifier";
+
 
     private final JpaEntityInformation entityInformation;
     private final STAEventHandler mqttHandler;
@@ -110,7 +110,7 @@ public class MessageBusRepository<T, I extends Serializable>
         Root<T> root = criteriaQuery.from(entityClass);
 
         ParameterExpression<String> params = criteriaBuilder.parameter(String.class);
-        criteriaQuery.where(criteriaBuilder.equal(root.get("identifier"), params));
+        criteriaQuery.where(criteriaBuilder.equal(root.get(IDENTIFIER), params));
         return em.createQuery(criteriaQuery).setParameter(params, identifier);
     }
 
@@ -168,7 +168,7 @@ public class MessageBusRepository<T, I extends Serializable>
 
         criteriaQuery.select(criteriaBuilder.count(root));
         ParameterExpression<String> params = criteriaBuilder.parameter(String.class);
-        criteriaQuery.where(criteriaBuilder.equal(root.get("identifier"), params));
+        criteriaQuery.where(criteriaBuilder.equal(root.get(IDENTIFIER), params));
         TypedQuery<Long> query = em.createQuery(criteriaQuery).setParameter(params, identifier);
 
         return query.getSingleResult() > 0;
@@ -282,7 +282,7 @@ public class MessageBusRepository<T, I extends Serializable>
         query.select(root);
 
         if (sort.isSorted()) {
-            query.orderBy(toOrders(sort, root, criteriaBuilder));
+            query.orderBy(QueryUtils.toOrders(sort, root, criteriaBuilder));
         }
 
         TypedQuery<S> typedQuery = em.createQuery(query);

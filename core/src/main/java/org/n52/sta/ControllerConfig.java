@@ -55,7 +55,7 @@ import javax.persistence.PersistenceException;
 @ControllerAdvice
 public class ControllerConfig {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(ControllerConfig.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ControllerConfig.class);
 
     private final ObjectMapper mapper;
     private final HttpHeaders headers;

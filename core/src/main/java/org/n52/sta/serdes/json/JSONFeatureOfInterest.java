@@ -64,6 +64,9 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
     private final String FEATURE = "Feature";
     private final String COORDINATES = "coordinates";
     private final String POINT = "Point";
+    private final String FEATURE_TYPE = "feature->type";
+    private final String FEATURE_COORDS = "feature->coordinates";
+    private final String FEATURE_GEOM = "feature->geometry";
 
     public JSONFeatureOfInterest() {
         self = new FeatureEntity();
@@ -76,7 +79,7 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
             Assert.notNull(name, INVALID_INLINE_ENTITY + "name");
             Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
             Assert.notNull(feature, INVALID_INLINE_ENTITY + "feature");
-            Assert.notNull(feature.get(TYPE), INVALID_INLINE_ENTITY + "feature->type");
+            Assert.notNull(feature.get(TYPE), INVALID_INLINE_ENTITY + FEATURE_TYPE);
             final String INVALID_ENCODINGTYPE =
                     "Invalid encodingType supplied. Only GeoJSON (application/vnd.geo+json) is supported!";
             Assert.notNull(encodingType, INVALID_ENCODINGTYPE);
@@ -91,11 +94,11 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
                 GeoJsonReader reader = new GeoJsonReader(factory);
                 String geo;
                 if (FEATURE.equals(feature.get(TYPE).asText())) {
-                    Assert.notNull(feature.get(GEOMETRY), INVALID_INLINE_ENTITY + "feature->geometry");
+                    Assert.notNull(feature.get(GEOMETRY), INVALID_INLINE_ENTITY + FEATURE_GEOM);
                     geo = feature.get(GEOMETRY).toString();
                 } else {
-                    Assert.isTrue(POINT.equals(feature.get(TYPE).asText()), INVALID_INLINE_ENTITY + "feature->type");
-                    Assert.isTrue(feature.has(COORDINATES), INVALID_INLINE_ENTITY + "feature->coordinates");
+                    Assert.isTrue(POINT.equals(feature.get(TYPE).asText()), INVALID_INLINE_ENTITY + FEATURE_TYPE);
+                    Assert.isTrue(feature.has(COORDINATES), INVALID_INLINE_ENTITY + FEATURE_COORDS);
                     geo = feature.toString();
                 }
                 try {
@@ -123,11 +126,11 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
                 GeoJsonReader reader = new GeoJsonReader(factory);
                 String geo;
                 if (FEATURE.equals(feature.get(TYPE).asText())) {
-                    Assert.notNull(feature.get(GEOMETRY), INVALID_INLINE_ENTITY + "feature->geometry");
+                    Assert.notNull(feature.get(GEOMETRY), INVALID_INLINE_ENTITY + FEATURE_GEOM);
                     geo = feature.get(GEOMETRY).toString();
                 } else {
-                    Assert.isTrue(POINT.equals(feature.get(TYPE).asText()), INVALID_INLINE_ENTITY + "feature->type");
-                    Assert.isTrue(feature.has(COORDINATES), INVALID_INLINE_ENTITY + "feature->coordinates");
+                    Assert.isTrue(POINT.equals(feature.get(TYPE).asText()), INVALID_INLINE_ENTITY + FEATURE_TYPE);
+                    Assert.isTrue(feature.has(COORDINATES), INVALID_INLINE_ENTITY + FEATURE_COORDS);
                     geo = feature.toString();
                 }
                 try {

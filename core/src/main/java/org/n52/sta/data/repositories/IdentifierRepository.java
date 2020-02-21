@@ -37,7 +37,7 @@ import java.util.Optional;
 
 @NoRepositoryBean
 @Transactional
-public interface IdentifierRepository<T, ID> extends EntityGraphRepository<T, ID> {
+public interface IdentifierRepository<T, I> extends EntityGraphRepository<T, I> {
 
     /**
      * Checks whether Entity with given id exists.

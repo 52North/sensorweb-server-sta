@@ -184,14 +184,15 @@ public class ObservationService extends
                 observation.setDatastream(datastream);
 
                 // Fetch with all needed associations
-                datastream = datastreamRepository.findByIdentifier(datastream.getIdentifier(),
-                                                                   EntityGraphRepository.FetchGraph.FETCHGRAPH_THINGLOCATION,
-                                                                   EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDURE,
-                                                                   EntityGraphRepository.FetchGraph.FETCHGRAPH_UOM,
-                                                                   EntityGraphRepository.FetchGraph.FETCHGRAPH_OBS_TYPE,
-                                                                   EntityGraphRepository.FetchGraph.FETCHGRAPH_OBSERVABLE_PROP,
-                                                                   EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS
-                ).get();
+                datastream = datastreamRepository
+                        .findByIdentifier(datastream.getIdentifier(),
+                                          EntityGraphRepository.FetchGraph.FETCHGRAPH_THINGLOCATION,
+                                          EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDURE,
+                                          EntityGraphRepository.FetchGraph.FETCHGRAPH_UOM,
+                                          EntityGraphRepository.FetchGraph.FETCHGRAPH_OBS_TYPE,
+                                          EntityGraphRepository.FetchGraph.FETCHGRAPH_OBSERVABLE_PROP,
+                                          EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS
+                        ).get();
 
                 AbstractFeatureEntity<?> feature = checkFeature(observation, datastream);
                 // category (obdProp)
@@ -366,8 +367,9 @@ public class ObservationService extends
                                                                                   .getIdentifier())
                                                         .and(dQS.matchFeatures(feature.getIdentifier()))
                                                         .and(dQS.matchOfferings(offering.getIdentifier())));
-        Optional<DatasetEntity> queried = datasetRepository.findOne(query,
-                                                                    EntityGraphRepository.FetchGraph.FETCHGRAPH_OM_OBS_TYPE);
+        Optional<DatasetEntity> queried =
+                datasetRepository.findOne(query,
+                                          EntityGraphRepository.FetchGraph.FETCHGRAPH_OM_OBS_TYPE);
         if (queried.isPresent()) {
             return queried.get();
         } else {

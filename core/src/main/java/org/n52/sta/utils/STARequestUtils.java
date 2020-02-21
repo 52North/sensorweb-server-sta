@@ -533,7 +533,7 @@ public interface STARequestUtils extends StaConstants {
         }
 
         // Iterate over the rest of the uri validating each resource
-        for (int i = 1, uriResourcesLength = uriResources.length; i < uriResourcesLength-1; i++) {
+        for (int i = 1, uriResourcesLength = uriResources.length; i < uriResourcesLength - 1; i++) {
             String[] targetEntity = splitId(uriResources[i]);
             String targetType = targetEntity[0];
             String targetId = null;

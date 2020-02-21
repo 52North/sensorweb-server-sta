@@ -67,6 +67,9 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
     private final String GEOMETRY = "geometry";
     private final String COORDINATES = "coordinates";
 
+    private final String LOCATION_TYPE = "feature->type";
+    private final String LOCATION_GEOM = "location->geometry";
+
     public JSONLocation() {
         self = new LocationEntity();
     }
@@ -87,11 +90,11 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
             Assert.notNull(location, INVALID_INLINE_ENTITY + "location");
             //TODO: check what is actually allowed here.
             if (location.has(GEOMETRY)) {
-                Assert.isTrue("Feature".equals(location.get(TYPE).asText()), INVALID_INLINE_ENTITY + "location->type");
-                Assert.notNull(location.get(GEOMETRY), INVALID_INLINE_ENTITY + "location->geometry");
+                Assert.isTrue("Feature".equals(location.get(TYPE).asText()), INVALID_INLINE_ENTITY + LOCATION_TYPE);
+                Assert.notNull(location.get(GEOMETRY), INVALID_INLINE_ENTITY + LOCATION_GEOM);
             } else {
-                Assert.isTrue("Point".equals(location.get(TYPE).asText()), INVALID_INLINE_ENTITY + "location->type");
-                Assert.notNull(location.get(COORDINATES), INVALID_INLINE_ENTITY + "location->geometry");
+                Assert.isTrue("Point".equals(location.get(TYPE).asText()), INVALID_INLINE_ENTITY + LOCATION_TYPE);
+                Assert.notNull(location.get(COORDINATES), INVALID_INLINE_ENTITY + LOCATION_GEOM);
             }
             self.setIdentifier(identifier);
             self.setName(name);
