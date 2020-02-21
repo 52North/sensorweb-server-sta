@@ -61,16 +61,17 @@
             </exclusions>
         </dependency>
 
+        <!-- We som-->
+        <!--
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-runtime</artifactId>
         </dependency>
-        <!--<dependency>-->
-        <!--<groupId>org.hamcrest</groupId>-->
-        <!--<artifactId>hamcrest-core</artifactId>-->
-        <!--<scope>test</scope>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4</artifactId>
+        </dependency>
+        -->
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest</artifactId>
@@ -113,14 +114,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <configuration>
-                    <usedDependencies>
-                        <dependency>${project.groupId}:sensor-things-api-http</dependency>
-                        <dependency>${project.groupId}:sensor-things-api-mqtt</dependency>
-                        <dependency>org.springframework.boot:spring-boot-starter-web</dependency>
-                        <dependency>org.springframework.boot:spring-boot-starter-data-jpa</dependency>
-                    </usedDependencies>
-                </configuration>
                 <executions>
                     <execution>
                         <id>unpack</id>

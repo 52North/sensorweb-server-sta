@@ -87,6 +87,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
+                <!--
                 <configuration>
                     <usedDependencies>
                         <dependency>org.springframework.boot:spring-boot-starter-web</dependency>
@@ -99,6 +100,7 @@
                         <dependency>org.geolatte:geolatte-geom</dependency>
                     </usedDependencies>
                 </configuration>
+                -->
             </plugin>
             <plugin>
                 <artifactId>maven-war-plugin</artifactId>
