@@ -48,7 +48,6 @@ import org.n52.sta.data.repositories.DatasetRepository;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.FormatRepository;
-import org.n52.sta.data.repositories.IdentifierRepository;
 import org.n52.sta.data.repositories.UnitRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
@@ -197,11 +196,11 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
             }
             entity = getRepository().intermediateSave(datastream);
             processObservation(entity, entity.getObservations());
-            entity = getRepository().save(entity,
-                                          IdentifierRepository.FetchGraph.FETCHGRAPH_OBS_TYPE,
-                                          IdentifierRepository.FetchGraph.FETCHGRAPH_UOM);
+            entity = getRepository().save(entity);
         }
-        return entity;
+        return getRepository().findByIdentifier(entity.getIdentifier(),
+                                                EntityGraphRepository.FetchGraph.FETCHGRAPH_UOM,
+                                                EntityGraphRepository.FetchGraph.FETCHGRAPH_OBS_TYPE).get();
     }
 
     private Specification<DatastreamEntity> createQuery(DatastreamEntity datastream) {
@@ -243,7 +242,11 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
             throws STACRUDException {
         checkUpdate(entity);
         if (HttpMethod.PATCH.equals(method)) {
-            Optional<DatastreamEntity> existing = getRepository().findOne(dQS.withIdentifier(id));
+            Optional<DatastreamEntity> existing =
+                    getRepository().findOne(dQS.withIdentifier(id),
+                                            EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS,
+                                            EntityGraphRepository.FetchGraph.FETCHGRAPH_UOM,
+                                            EntityGraphRepository.FetchGraph.FETCHGRAPH_OBS_TYPE);
             if (existing.isPresent()) {
                 DatastreamEntity merged = merge(existing.get(), entity);
                 checkUnit(merged, entity);
@@ -253,7 +256,8 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
                         datasetRepository.saveAndFlush(d);
                     });
                 }
-                return getRepository().save(merged);
+                getRepository().save(merged);
+                return merged;
             }
             throw new STACRUDException("Unable to update. Entity not found.", HTTPStatus.NOT_FOUND);
         } else if (HttpMethod.PUT.equals(method)) {
@@ -288,7 +292,9 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     @Override
     public void delete(String id) throws STACRUDException {
         if (getRepository().existsByIdentifier(id)) {
-            Optional<DatastreamEntity> datastream = getRepository().findByIdentifier(id);
+            Optional<DatastreamEntity> datastream =
+                    getRepository().findByIdentifier(id,
+                                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS);
             // check datasets
             deleteRelatedDatasetsAndObservations(datastream.get());
             // check observations

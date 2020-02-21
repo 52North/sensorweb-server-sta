@@ -42,7 +42,7 @@ public interface EntityGraphRepository<T, ID> extends JpaSpecificationExecutor<T
      * Additionally fetches all related entities given by the provided EntityGraph. All provided Graphs are merged
      * internally.
      *
-     * @param spec can be {@literal null}.
+     * @param spec        can be {@literal null}.
      * @param fetchGraphs string representation of EntityGraph.
      * @return never {@literal null}.
      * @throws org.springframework.dao.IncorrectResultSizeDataAccessException if more than one entity found.
@@ -64,7 +64,7 @@ public interface EntityGraphRepository<T, ID> extends JpaSpecificationExecutor<T
      * Additionally fetches all related entities given by the provided EntityGraph. All provided Graphs are merged
      * internally.
      *
-     * @param spec can be {@literal null}.
+     * @param spec     can be {@literal null}.
      * @param pageable must not be {@literal null}.
      * @return never {@literal null}.
      */
@@ -80,28 +80,27 @@ public interface EntityGraphRepository<T, ID> extends JpaSpecificationExecutor<T
      */
     List<T> findAll(@Nullable Specification<T> spec, Sort sort, FetchGraph... fetchGraphs);
 
-    /**
-     * Saves a given entity. Use the returned instance for further operations as the save operation might have
-     * changed the
-     * entity instance completely. Additionally fetches the given relationShips
-     *
-     * @param entity must not be {@literal null}.
-     * @return the saved entity; will never be {@literal null}.
-     * @throws IllegalArgumentException in case the given {@literal entity} is {@literal null}.
-     */
-    <S extends T> S save(S entity, FetchGraph... fetchGraphs);
-
     //TODO: expand if necessary
     enum FetchGraph {
         FETCHGRAPH_DEFAULT("identifier"),
-        FETCHGRAPH_THING("things"),
+        FETCHGRAPH_THINGS("things"),
+        FETCHGRAPH_THING("thing"),
+        FETCHGRAPH_THINGLOCATION("thing(locations)"),
+        FETCHGRAPH_THINGSHISTLOCATION("things(historicalLocations)"),
         FETCHGRAPH_LOCATION("locations"),
+        FETCHGRAPH_LOCATIONHISTLOCATION("locations(historicalLocations)"),
         FETCHGRAPH_HIST_LOCATION("historicalLocations"),
         FETCHGRAPH_DATASTREAMS("datastreams"),
         FETCHGRAPH_UOM("unitOfMeasurement"),
         FETCHGRAPH_OBS_TYPE("observationType"),
         FETCHGRAPH_PARAMETERS("parameters"),
-        FetchGraph_FORMAT("format");
+        FETCHGRAPH_FORMAT("format"),
+        FETCHGRAPH_FEATURETYPE("featureType"),
+        FETCHGRAPH_PROCEDURE("procedure"),
+        FETCHGRAPH_OBSERVABLE_PROP("observableProperty"),
+        FETCHGRAPH_OM_OBS_TYPE("omObservationType"),
+        FETCHGRAPH_DATASETS("datasets"),
+        FETCHGRAPH_DATASET("dataset");
 
         private String val;
 

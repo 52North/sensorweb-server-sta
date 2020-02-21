@@ -36,6 +36,7 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.query.HistoricalLocationQuerySpecifications;
+import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.HistoricalLocationRepository;
 import org.n52.sta.data.repositories.LocationRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
@@ -147,7 +148,8 @@ public class HistoricalLocationService
         Set<LocationEntity> locations = new LinkedHashSet<>();
         for (LocationEntity l : historicalLocation.getLocations()) {
             Optional<LocationEntity> location =
-                    locationRepository.findByIdentifier(l.getIdentifier());
+                    locationRepository.findByIdentifier(l.getIdentifier(),
+                                                        EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATION);
             location.get().addHistoricalLocation(historicalLocation);
             locations.add(getLocationService().createOrUpdate(location.get()));
         }
@@ -178,7 +180,11 @@ public class HistoricalLocationService
     @Override
     public void delete(String id) throws STACRUDException {
         if (getRepository().existsByIdentifier(id)) {
-            HistoricalLocationEntity historicalLocation = getRepository().findByIdentifier(id).get();
+            HistoricalLocationEntity historicalLocation =
+                    getRepository().findByIdentifier(id,
+                                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_LOCATIONHISTLOCATION,
+                                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_THING)
+                                   .get();
             updateLocations(historicalLocation);
             updateThing(historicalLocation);
             getRepository().deleteByIdentifier(id);
@@ -190,17 +196,22 @@ public class HistoricalLocationService
     @Override
     public void delete(HistoricalLocationEntity entity) {
         // delete historicalLocation
-        entity.getLocations().forEach(l -> {
-            try {
-                l.getHistoricalLocations().remove(entity);
-                getLocationService().updateEntity(l);
-            } catch (STACRUDException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        });
-        getRepository().saveAndFlush(entity);
-        getRepository().deleteByIdentifier(entity.getIdentifier());
+        Optional<HistoricalLocationEntity> fetched =
+                getRepository().findByIdentifier(entity.getIdentifier(),
+                                                 EntityGraphRepository.FetchGraph.FETCHGRAPH_LOCATIONHISTLOCATION);
+        if (fetched.isPresent()) {
+            fetched.get().getLocations().forEach(l -> {
+                try {
+                    l.getHistoricalLocations().remove(fetched.get());
+                    getLocationService().updateEntity(l);
+                } catch (STACRUDException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            });
+            getRepository().saveAndFlush(fetched.get());
+            getRepository().deleteByIdentifier(fetched.get().getIdentifier());
+        }
     }
 
     @Override

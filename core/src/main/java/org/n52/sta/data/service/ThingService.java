@@ -38,6 +38,7 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.query.ThingQuerySpecifications;
+import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.IdentifierRepository;
 import org.n52.sta.data.repositories.ThingRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
@@ -205,7 +206,11 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     @Override
     public void delete(String identifier) throws STACRUDException {
         if (getRepository().existsByIdentifier(identifier)) {
-            PlatformEntity thing = getRepository().findByIdentifier(identifier).get();
+            PlatformEntity thing =
+                    getRepository().findByIdentifier(identifier,
+                                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASTREAMS,
+                                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATION)
+                                   .get();
             // delete datastreams
             thing.getDatastreams().forEach(d -> {
                 try {

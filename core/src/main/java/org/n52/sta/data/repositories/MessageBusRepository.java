@@ -78,7 +78,7 @@ import java.util.Set;
 import static org.springframework.data.jpa.repository.query.QueryUtils.toOrders;
 
 public class MessageBusRepository<T, I extends Serializable>
-        extends SimpleJpaRepository<T, I> implements RepositoryConstants, IdentifierRepository<T, I> {
+        extends SimpleJpaRepository<T, I> implements RepositoryConstants {
 
     private static final Logger logger = LoggerFactory.getLogger(MessageBusRepository.class);
 
@@ -89,6 +89,7 @@ public class MessageBusRepository<T, I extends Serializable>
     private final STAEventHandler mqttHandler;
     private final EntityManager em;
     private final Class<T> entityClass;
+    private final CriteriaBuilder criteriaBuilder;
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     MessageBusRepository(JpaEntityInformation<T, Long> entityInformation,
@@ -98,13 +99,13 @@ public class MessageBusRepository<T, I extends Serializable>
         this.entityInformation = entityInformation;
         this.entityClass = entityInformation.getJavaType();
         this.entityTypeToStaType = this.createEntityTypeToStaTypeMapping();
+        this.criteriaBuilder = em.getCriteriaBuilder();
 
         this.mqttHandler = (STAEventHandler) SpringApplicationContext.getBean(STAEventHandler.class);
         Assert.notNull(this.mqttHandler, "Could not autowire Mqtt handler!");
     }
 
     private TypedQuery<T> createIdentifierQuery(String identifier) {
-        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<T> criteriaQuery = criteriaBuilder.createQuery(entityClass);
         Root<T> root = criteriaQuery.from(entityClass);
 
@@ -128,11 +129,10 @@ public class MessageBusRepository<T, I extends Serializable>
 
     @Transactional(readOnly = true)
     public Optional<String> identifier(Specification<T> spec, String columnName) {
-        CriteriaBuilder builder = em.getCriteriaBuilder();
-        CriteriaQuery<Object> query = builder.createQuery(Object.class);
+        CriteriaQuery<Object> query = criteriaBuilder.createQuery(Object.class);
         Root<T> root = query.from(getDomainClass());
         if (spec != null) {
-            Predicate predicate = spec.toPredicate(root, query, builder);
+            Predicate predicate = spec.toPredicate(root, query, criteriaBuilder);
             if (predicate != null) {
                 query.where(predicate);
             }
@@ -147,23 +147,12 @@ public class MessageBusRepository<T, I extends Serializable>
         }
     }
 
-    @Override
     @Transactional
-    public Optional<T> findByIdentifier(String identifier, FetchGraph... entityGraphs) {
+    public Optional<T> findByIdentifier(String identifier, EntityGraphRepository.FetchGraph... entityGraphs) {
         TypedQuery<T> query = createIdentifierQuery(identifier);
-        if (entityGraphs.length > 0) {
-            Set<RootGraph<T>> roots = new HashSet<>();
-            for (FetchGraph entityGraph : entityGraphs) {
-                roots.add(GraphParser.parse(entityClass,
-                                            entityGraph.value(),
-                                            (SessionImplementor) em.getDelegate()));
-            }
-            // Set EntityGraphs
-            query.setHint(FETCHGRAPH_HINT, EntityGraphs.merge(
-                    (EntityManager) em.getDelegate(),
-                    entityClass,
-                    roots.toArray(new RootGraph[] {})));
-
+        EntityGraph<T> fetchGraph = createFetchGraph(entityGraphs);
+        if (fetchGraph != null) {
+            query.setHint(FETCHGRAPH_HINT, fetchGraph);
         }
         try {
             return Optional.of(query.getSingleResult());
@@ -172,10 +161,8 @@ public class MessageBusRepository<T, I extends Serializable>
         }
     }
 
-    @Override
     @Transactional
     public boolean existsByIdentifier(String identifier) {
-        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
         Root<T> root = criteriaQuery.from(entityClass);
 
@@ -185,23 +172,6 @@ public class MessageBusRepository<T, I extends Serializable>
         TypedQuery<Long> query = em.createQuery(criteriaQuery).setParameter(params, identifier);
 
         return query.getSingleResult() > 0;
-    }
-
-    @Transactional
-    public Optional<T> findByIdentifier(String identifier) {
-        return findByIdentifier(identifier, FetchGraph.FETCHGRAPH_DEFAULT);
-    }
-
-    @Override
-    @Transactional
-    public void deleteByIdentifier(String identifier) {
-        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-        CriteriaDelete<T> criteriaQuery = criteriaBuilder.createCriteriaDelete(entityClass);
-        Root<T> root = criteriaQuery.from(entityClass);
-
-        ParameterExpression<String> params = criteriaBuilder.parameter(String.class);
-        criteriaQuery.where(criteriaBuilder.equal(root.get("identifier"), params));
-        em.createQuery(criteriaQuery).setParameter(params, identifier).executeUpdate();
     }
 
     @Transactional
@@ -235,10 +205,10 @@ public class MessageBusRepository<T, I extends Serializable>
         return newEntity;
     }
 
-    private EntityGraph<T> createFetchGraph(FetchGraph... fetchGraphs) {
-        if (fetchGraphs != null) {
+    private EntityGraph<T> createFetchGraph(EntityGraphRepository.FetchGraph... fetchGraphs) {
+        if (fetchGraphs != null && fetchGraphs.length != 0) {
             Set<RootGraph<T>> roots = new HashSet<>();
-            for (FetchGraph entityGraph : fetchGraphs) {
+            for (EntityGraphRepository.FetchGraph entityGraph : fetchGraphs) {
                 roots.add(GraphParser.parse(entityClass,
                                             entityGraph.value(),
                                             (SessionImplementor) em.getDelegate()));
@@ -252,7 +222,7 @@ public class MessageBusRepository<T, I extends Serializable>
         }
     }
 
-    @Override public Optional<T> findOne(Specification<T> spec, FetchGraph... fetchGraphs) {
+    public Optional<T> findOne(Specification<T> spec, EntityGraphRepository.FetchGraph... fetchGraphs) {
         try {
             return Optional.of(getQuery(spec, Sort.unsorted(), createFetchGraph(fetchGraphs)).getSingleResult());
         } catch (NoResultException e) {
@@ -260,17 +230,17 @@ public class MessageBusRepository<T, I extends Serializable>
         }
     }
 
-    @Override public List<T> findAll(Specification<T> spec, FetchGraph... fetchGraphs) {
+    public List<T> findAll(Specification<T> spec, EntityGraphRepository.FetchGraph... fetchGraphs) {
         return getQuery(spec, Sort.unsorted(), createFetchGraph(fetchGraphs)).getResultList();
     }
 
-    @Override public Page<T> findAll(Specification<T> spec, Pageable pageable, FetchGraph... fetchGraphs) {
+    public Page<T> findAll(Specification<T> spec, Pageable pageable, EntityGraphRepository.FetchGraph... fetchGraphs) {
         TypedQuery<T> query = getQuery(spec, pageable, createFetchGraph(fetchGraphs));
         return pageable.isUnpaged() ? new PageImpl<T>(query.getResultList())
                 : readPage(query, getDomainClass(), pageable, spec);
     }
 
-    @Override public List<T> findAll(Specification<T> spec, Sort sort, FetchGraph... fetchGraphs) {
+    public List<T> findAll(Specification<T> spec, Sort sort, EntityGraphRepository.FetchGraph... fetchGraphs) {
         return getQuery(spec, sort, createFetchGraph(fetchGraphs)).getResultList();
     }
 
@@ -301,14 +271,10 @@ public class MessageBusRepository<T, I extends Serializable>
                                                  Class<S> domainClass,
                                                  Sort sort,
                                                  EntityGraph<S> entityGraph) {
-
-        CriteriaBuilder builder = em.getCriteriaBuilder();
-        CriteriaQuery<S> query = builder.createQuery(domainClass);
-
+        CriteriaQuery<S> query = criteriaBuilder.createQuery(domainClass);
         Root<S> root = query.from(domainClass);
-
         if (spec != null) {
-            Predicate predicate = spec.toPredicate(root, query, builder);
+            Predicate predicate = spec.toPredicate(root, query, criteriaBuilder);
             if (predicate != null) {
                 query.where(predicate);
             }
@@ -316,7 +282,7 @@ public class MessageBusRepository<T, I extends Serializable>
         query.select(root);
 
         if (sort.isSorted()) {
-            query.orderBy(toOrders(sort, root, builder));
+            query.orderBy(toOrders(sort, root, criteriaBuilder));
         }
 
         TypedQuery<S> typedQuery = em.createQuery(query);
@@ -324,29 +290,6 @@ public class MessageBusRepository<T, I extends Serializable>
             typedQuery.setHint(FETCHGRAPH_HINT, entityGraph);
         }
         return typedQuery;
-    }
-
-    @Transactional
-    public <S extends T> S save(S newEntity, FetchGraph... fetchGraphs) {
-        S entity = save(newEntity);
-        if (fetchGraphs.length > 0) {
-            Set<RootGraph<T>> roots = new HashSet<>();
-            for (FetchGraph entityGraph : fetchGraphs) {
-                roots.add(GraphParser.parse(entityClass,
-                                            entityGraph.value(),
-                                            (SessionImplementor) em.getDelegate()));
-            }
-            Map<String, Object> properties = new HashMap<>();
-            properties.put("javax.persistence.fetchgraph", EntityGraphs.merge(
-                    (EntityManager) em.getDelegate(),
-                    entityClass,
-                    roots.toArray(new RootGraph[] {})));
-
-            em.refresh(entity, properties);
-            return entity;
-        } else {
-            return entity;
-        }
     }
 
     /**

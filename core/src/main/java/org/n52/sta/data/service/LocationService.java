@@ -38,6 +38,7 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.query.LocationQuerySpecifications;
+import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.LocationEncodingRepository;
 import org.n52.sta.data.repositories.LocationRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
@@ -181,19 +182,21 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
     @Override
     public void delete(String id) throws STACRUDException {
         if (getRepository().existsByIdentifier(id)) {
-            LocationEntity location = getRepository().findByIdentifier(id).get();
-            // delete all historical locations
-            for (HistoricalLocationEntity historicalLocation : location.getHistoricalLocations()) {
-                getHistoricalLocationService().delete(historicalLocation);
-            }
-            location.setHistoricalLocations(null);
-            getRepository().save(location);
+            LocationEntity location =
+                    getRepository().findByIdentifier(id,
+                                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATION,
+                                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_THINGSHISTLOCATION)
+                                   .get();
             for (PlatformEntity thing : location.getThings()) {
                 thing.setLocations(null);
                 if (location.getHistoricalLocations() != null) {
                     thing.getHistoricalLocations().removeAll(location.getHistoricalLocations());
                 }
                 getThingService().updateEntity(thing);
+            }
+            // delete all historical locations
+            for (HistoricalLocationEntity historicalLocation : location.getHistoricalLocations()) {
+                getHistoricalLocationService().delete(historicalLocation);
             }
             getRepository().deleteByIdentifier(id);
         } else {
@@ -264,7 +267,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
                 // non-standard feature 'updateFOI'
                 if (updateFOIFeatureEnabled
                         && updated.getProperties() != null
-                        && updated.getProperties().contains("updateFOI")){
+                        && updated.getProperties().contains("updateFOI")) {
                     // Try to be more performant and not deserialize whole properties but only grep relevant parts
                     // via simple regex
                     Matcher matcher = updateFOIPattern.matcher(updated.getProperties());
@@ -336,6 +339,9 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
         mergeDescription(existing, toMerge);
         if (toMerge.hasLocation()) {
             existing.setLocation(toMerge.getLocation());
+        }
+        if (toMerge.hasHistoricalLocations()) {
+            existing.setHistoricalLocations(toMerge.getHistoricalLocations());
         }
         if (toMerge.isSetGeometry()) {
             existing.setGeometryEntity(toMerge.getGeometryEntity());

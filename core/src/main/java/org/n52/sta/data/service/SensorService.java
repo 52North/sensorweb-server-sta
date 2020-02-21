@@ -88,7 +88,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
                          DatastreamRepository datastreamRepository) {
         super(repository,
               ProcedureEntity.class,
-              EntityGraphRepository.FetchGraph.FetchGraph_FORMAT);
+              EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT);
         this.formatRepository = formatRepository;
         this.procedureHistoryRepository = procedureHistoryRepository;
         this.datastreamRepository = datastreamRepository;
@@ -176,7 +176,8 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     public ProcedureEntity createEntity(ProcedureEntity sensor) throws STACRUDException {
         if (sensor.getIdentifier() != null && !sensor.isSetName()) {
             Optional<ProcedureEntity> optionalEntity =
-                    getRepository().findByIdentifier(sensor.getIdentifier());
+                    getRepository().findByIdentifier(sensor.getIdentifier(),
+                                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT);
             if (optionalEntity.isPresent()) {
                 return optionalEntity.get();
             } else {
@@ -206,14 +207,16 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     public ProcedureEntity updateEntity(String id, ProcedureEntity entity, HttpMethod method) throws STACRUDException {
         checkUpdate(entity);
         if (HttpMethod.PATCH.equals(method)) {
-            Optional<ProcedureEntity> existing = getRepository().findByIdentifier(id);
+            Optional<ProcedureEntity> existing =
+                    getRepository().findByIdentifier(id, EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT);
             if (existing.isPresent()) {
                 ProcedureEntity merged = merge(existing.get(), entity);
                 if (entity instanceof SensorEntity) {
                     // TODO insert datastream
                     logger.trace("TODO: insert datastream.");
                 }
-                return getRepository().save(getAsProcedureEntity(merged));
+                getRepository().save(getAsProcedureEntity(merged));
+                return merged;
             }
             throw new STACRUDException("Unable to update. Entity not found.", HTTPStatus.NOT_FOUND);
         } else if (HttpMethod.PUT.equals(method)) {

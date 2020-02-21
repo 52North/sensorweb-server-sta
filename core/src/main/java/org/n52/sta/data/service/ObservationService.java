@@ -179,7 +179,19 @@ public class ObservationService extends
             if (!observation.isProcesssed()) {
                 observation.setProcesssed(true);
                 check(observation);
-                DatastreamEntity datastream = checkDatastream(observation);
+
+                DatastreamEntity datastream = getDatastreamService().createEntity(observation.getDatastream());
+                observation.setDatastream(datastream);
+
+                // Fetch with all needed associations
+                datastream = datastreamRepository.findByIdentifier(datastream.getIdentifier(),
+                                                                   EntityGraphRepository.FetchGraph.FETCHGRAPH_THINGLOCATION,
+                                                                   EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDURE,
+                                                                   EntityGraphRepository.FetchGraph.FETCHGRAPH_UOM,
+                                                                   EntityGraphRepository.FetchGraph.FETCHGRAPH_OBS_TYPE,
+                                                                   EntityGraphRepository.FetchGraph.FETCHGRAPH_OBSERVABLE_PROP,
+                                                                   EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS
+                ).get();
 
                 AbstractFeatureEntity<?> feature = checkFeature(observation, datastream);
                 // category (obdProp)
@@ -256,13 +268,16 @@ public class ObservationService extends
     @Override
     public DataEntity<?> updateEntity(String id, DataEntity<?> entity, HttpMethod method) throws STACRUDException {
         if (HttpMethod.PATCH.equals(method)) {
-            Optional<DataEntity<?>> existing = getRepository().findByIdentifier(id);
+            Optional<DataEntity<?>> existing =
+                    getRepository().findByIdentifier(id,
+                                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
             if (existing.isPresent()) {
                 DataEntity<?> merged = merge(existing.get(), entity);
                 DataEntity<?> saved = getRepository().save(merged);
 
                 List<DatastreamEntity> datastreamEntity =
-                        datastreamRepository.findAll(dsQS.withObservationIdentifier(saved.getIdentifier()));
+                        datastreamRepository.findAll(dsQS.withObservationIdentifier(saved.getIdentifier()),
+                                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS);
                 if (!datastreamEntity.isEmpty()) {
                     updateDatastreamPhenomenonTimeOnObservationUpdate(datastreamEntity, saved);
                 }
@@ -283,7 +298,10 @@ public class ObservationService extends
     @Override
     public void delete(String identifier) throws STACRUDException {
         if (getRepository().existsByIdentifier(identifier)) {
-            DataEntity<?> observation = getRepository().findByIdentifier(identifier).get();
+            DataEntity<?> observation =
+                    getRepository().findByIdentifier(identifier,
+                                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASET)
+                                   .get();
             checkDataset(observation);
             delete(observation);
         } else {
@@ -294,7 +312,8 @@ public class ObservationService extends
     @Override
     public void delete(DataEntity<?> entity) {
         List<DatastreamEntity> datastreamEntity =
-                datastreamRepository.findAll(dsQS.withObservationIdentifier(entity.getIdentifier()));
+                datastreamRepository.findAll(dsQS.withObservationIdentifier(entity.getIdentifier()),
+                                             EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS);
         // Important! Delete first and then update else we find ourselves again in search for new latest/earliest obs.
         getRepository().deleteByIdentifier(entity.getIdentifier());
         if (!datastreamEntity.isEmpty()) {
@@ -347,7 +366,8 @@ public class ObservationService extends
                                                                                   .getIdentifier())
                                                         .and(dQS.matchFeatures(feature.getIdentifier()))
                                                         .and(dQS.matchOfferings(offering.getIdentifier())));
-        Optional<DatasetEntity> queried = datasetRepository.findOne(query);
+        Optional<DatasetEntity> queried = datasetRepository.findOne(query,
+                                                                    EntityGraphRepository.FetchGraph.FETCHGRAPH_OM_OBS_TYPE);
         if (queried.isPresent()) {
             return queried.get();
         } else {
