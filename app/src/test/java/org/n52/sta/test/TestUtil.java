@@ -29,6 +29,15 @@
 package org.n52.sta.test;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPatch;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 import org.junit.Assert;
@@ -38,69 +47,85 @@ import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.geojson.GeoJsonReader;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public class TestUtil {
+public interface TestUtil {
 
-    private static final GeometryFactory factory =
+    enum EntityType {
+        THING,
+        LOCATION,
+        HISTORICAL_LOCATION,
+        DATASTREAM,
+        SENSOR,
+        FEATURE_OF_INTEREST,
+        OBSERVATION,
+        OBSERVED_PROPERTY
+    }
+
+    String jsonMimeType = "application/json";
+    String idKey = "@iot.id";
+
+    GeometryFactory factory =
             new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
 
-    private static HashMap<String, String> relatedEntityEndpoints = new HashMap<String, String>() {{
-        put(Conformance2.EntityType.THING.toString() + Conformance2.EntityType.DATASTREAM.toString(),
+    HashMap<String, String> relatedEntityEndpoints = new HashMap<String, String>() {{
+        put(EntityType.THING.toString() + EntityType.DATASTREAM.toString(),
                 "Things(%s)/Datastreams");
-        put(Conformance2.EntityType.THING.toString() + Conformance2.EntityType.LOCATION.toString(),
+        put(EntityType.THING.toString() + EntityType.LOCATION.toString(),
                 "Things(%s)/Locations");
-        put(Conformance2.EntityType.THING.toString() + Conformance2.EntityType.HISTORICAL_LOCATION.toString(),
+        put(EntityType.THING.toString() + EntityType.HISTORICAL_LOCATION.toString(),
                 "Things(%s)/HistoricalLocations");
 
-        put(Conformance2.EntityType.LOCATION.toString() + Conformance2.EntityType.HISTORICAL_LOCATION.toString(),
+        put(EntityType.LOCATION.toString() + EntityType.HISTORICAL_LOCATION.toString(),
                 "Locations(%s)/HistoricalLocations");
-        put(Conformance2.EntityType.LOCATION.toString() + Conformance2.EntityType.THING.toString(),
+        put(EntityType.LOCATION.toString() + EntityType.THING.toString(),
                 "Locations(%s)/Things");
 
-        put(Conformance2.EntityType.HISTORICAL_LOCATION.toString() + Conformance2.EntityType.THING.toString(),
+        put(EntityType.HISTORICAL_LOCATION.toString() + EntityType.THING.toString(),
                 "HistoricalLocations(%s)/Thing");
-        put(Conformance2.EntityType.HISTORICAL_LOCATION.toString() + Conformance2.EntityType.LOCATION.toString(),
+        put(EntityType.HISTORICAL_LOCATION.toString() + EntityType.LOCATION.toString(),
                 "HistoricalLocations(%s)/Locations");
 
-        put(Conformance2.EntityType.DATASTREAM.toString() + Conformance2.EntityType.THING.toString(),
+        put(EntityType.DATASTREAM.toString() + EntityType.THING.toString(),
                 "Datastreams(%s)/Thing");
-        put(Conformance2.EntityType.DATASTREAM.toString() + Conformance2.EntityType.SENSOR.toString(),
+        put(EntityType.DATASTREAM.toString() + EntityType.SENSOR.toString(),
                 "Datastreams(%s)/Sensor");
-        put(Conformance2.EntityType.DATASTREAM.toString() + Conformance2.EntityType.OBSERVED_PROPERTY.toString(),
+        put(EntityType.DATASTREAM.toString() + EntityType.OBSERVED_PROPERTY.toString(),
                 "Datastreams(%s)/ObservedProperty");
-        put(Conformance2.EntityType.DATASTREAM.toString() + Conformance2.EntityType.OBSERVATION.toString(),
+        put(EntityType.DATASTREAM.toString() + EntityType.OBSERVATION.toString(),
                 "Datastreams(%s)/Observations");
 
-        put(Conformance2.EntityType.SENSOR.toString() + Conformance2.EntityType.DATASTREAM.toString(),
+        put(EntityType.SENSOR.toString() + EntityType.DATASTREAM.toString(),
                 "Sensors(%s)/Datastreams");
 
-        put(Conformance2.EntityType.OBSERVED_PROPERTY.toString() + Conformance2.EntityType.DATASTREAM.toString(),
+        put(EntityType.OBSERVED_PROPERTY.toString() + EntityType.DATASTREAM.toString(),
                 "ObservedProperties(%s)/Datastreams");
 
-        put(Conformance2.EntityType.OBSERVATION.toString() + Conformance2.EntityType.DATASTREAM.toString(),
+        put(EntityType.OBSERVATION.toString() + EntityType.DATASTREAM.toString(),
                 "Observations(%s)/Datastream");
-        put(Conformance2.EntityType.OBSERVATION.toString() + Conformance2.EntityType.FEATURE_OF_INTEREST.toString(),
+        put(EntityType.OBSERVATION.toString() + EntityType.FEATURE_OF_INTEREST.toString(),
                 "Observations(%s)/FeatureOfInterest");
 
-        put(Conformance2.EntityType.FEATURE_OF_INTEREST.toString() + Conformance2.EntityType.OBSERVATION.toString(),
+        put(EntityType.FEATURE_OF_INTEREST.toString() + EntityType.OBSERVATION.toString(),
                 "FeaturesOfInterest(%s)/Observations");
 
     }};
 
-    public static String getRelatedEntityEndpoint(Conformance2.EntityType source, Conformance2.EntityType target) {
+    default String getRelatedEntityEndpoint(EntityType source, EntityType target) {
         return relatedEntityEndpoints.get(source.toString() + target.toString());
     }
 
-    public static void compareJsonNodes(JsonNode reference, JsonNode actual) {
+    default void compareJsonNodes(JsonNode reference, JsonNode actual) {
         for (Iterator<Map.Entry<String, JsonNode>> it = reference.fields(); it.hasNext(); ) {
             Map.Entry<String, JsonNode> next = it.next();
-            System.out.println(next.getKey());
             switch (next.getKey()) {
                 case "feature":
                 case "location":
@@ -123,7 +148,7 @@ public class TestUtil {
         }
     }
 
-    public static void compareJsonNodesGeo(String fieldname, JsonNode referenceValue, JsonNode actualValue) {
+    default void compareJsonNodesGeo(String fieldname, JsonNode referenceValue, JsonNode actualValue) {
         Assert.assertNotNull(
                 "Reference Entity is nonexistent!",
                 referenceValue);
@@ -147,7 +172,7 @@ public class TestUtil {
         }
     }
 
-    public static void compareJsonNodesTime(String fieldname, JsonNode reference, JsonNode actual) {
+    default void compareJsonNodesTime(String fieldname, JsonNode reference, JsonNode actual) {
         Assert.assertNotNull(
                 "Reference Entity is nonexistent!",
                 reference);
@@ -182,7 +207,7 @@ public class TestUtil {
         }
     }
 
-    public static void compareJsonNodesString(String fieldname, JsonNode reference, JsonNode actual) {
+    default void compareJsonNodesString(String fieldname, JsonNode reference, JsonNode actual) {
         Assert.assertNotNull(
                 "Reference Entity is nonexistent!",
                 reference);
@@ -198,4 +223,10 @@ public class TestUtil {
                 referenceValue,
                 actualValue);
     }
+
+    default String escape(String val) {
+        return "\"" + val + "\"";
+    }
+
+
 }

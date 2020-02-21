@@ -26,31 +26,19 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPatch;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Profile;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -58,57 +46,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.n52.sta.test.TestUtil.compareJsonNodes;
-import static org.n52.sta.test.TestUtil.compareJsonNodesTime;
-import static org.n52.sta.test.TestUtil.getRelatedEntityEndpoint;
-
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@Profile("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class Conformance2 {
-
-    protected final static String jsonMimeType = "application/json";
+public class Conformance2 extends ConformanceTests implements TestUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(Conformance2.class);
 
-    @Value("${server.rootUrl}")
-    private String rootUrl;
-
-    enum EntityType {
-        THING,
-        LOCATION,
-        HISTORICAL_LOCATION,
-        DATASTREAM,
-        SENSOR,
-        FEATURE_OF_INTEREST,
-        OBSERVATION,
-        OBSERVED_PROPERTY
+    public Conformance2(@Value("${server.rootUrl}") String rootUrl) {
+        super(rootUrl);
     }
-
-    private final HashMap<EntityType, String> endpoints;
-
-    private ObjectMapper mapper = new ObjectMapper();
-
-    public Conformance2() {
-        HashMap<EntityType, String> map = new HashMap<>();
-        map.put(EntityType.THING, "Things");
-        map.put(EntityType.LOCATION, "Locations");
-        map.put(EntityType.HISTORICAL_LOCATION, "HistoricalLocations");
-        map.put(EntityType.DATASTREAM, "Datastreams");
-        map.put(EntityType.SENSOR, "Sensors");
-        map.put(EntityType.FEATURE_OF_INTEREST, "FeaturesOfInterest");
-        map.put(EntityType.OBSERVATION, "Observations");
-        map.put(EntityType.OBSERVED_PROPERTY, "ObservedProperties");
-        endpoints = map;
-    }
-
-    private final String idKey = "@iot.id";
 
     @Test
     public void createEntities() throws IOException {
@@ -147,7 +97,10 @@ public class Conformance2 {
         urlParameters = "{\n"
                 + "  \"name\": \"DewPoint Temperature\",\n"
                 + "  \"definition\": \"http://dbpedia.org/page/Dew_point\",\n"
-                + "  \"description\": \"The dewpoint temperature is the temperature to which the air must be cooled, at constant pressure, for dew to form. As the grass and other objects near the ground cool to the dewpoint, some of the water vapor in the atmosphere condenses into liquid water on the objects.\"\n"
+                +
+                "  \"description\": \"The dewpoint temperature is the temperature to which the air must be cooled, at" +
+                " constant pressure, for dew to form. As the grass and other objects near the ground cool to the " +
+                "dewpoint, some of the water vapor in the atmosphere condenses into liquid water on the objects.\"\n"
                 + "}";
         entity = postEntity(EntityType.OBSERVED_PROPERTY, urlParameters);
         String obsPropId = entity.get(idKey).asText();
@@ -261,10 +214,10 @@ public class Conformance2 {
         entity = postEntity(EntityType.OBSERVATION, urlParameters);
         String obsId4 = entity.get(idKey).asText();
         String automatedFOI2Id = checkAutomaticInsertionOfFOI(obsId4, location2Entity, null);
-        Assert.assertNotEquals(
-                "A new FoI should have been created, since the Thing moved.",
+        Assertions.assertNotEquals(
                 automatedFOIId,
-                automatedFOI2Id
+                automatedFOI2Id,
+                "A new FoI should have been created, since the Thing moved."
         );
 
         // Create a new Thing with the same Location, create a new
@@ -305,10 +258,10 @@ public class Conformance2 {
         entity = postEntity(EntityType.OBSERVATION, urlParameters);
         String obsId5 = entity.get(idKey).asText();
         String automatedFOI3Id = checkAutomaticInsertionOfFOI(obsId5, locationEntity, null);
-        Assert.assertEquals(
-                "The generated FoI should be the same as the first generated FoI, since Thing2 has the same Location.",
+        Assertions.assertEquals(
                 automatedFOIId,
-                automatedFOI3Id
+                automatedFOI3Id,
+                "The generated FoI should be the same as the first generated FoI, since Thing2 has the same Location."
         );
 
         /* HistoricalLocation */
@@ -353,11 +306,15 @@ public class Conformance2 {
                 + "      },\n"
                 + "      \"name\": \"Light exposure.\",\n"
                 + "      \"description\": \"Light exposure.\",\n"
-                + "      \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
+                +
+                "      \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
                 + "      \"ObservedProperty\": {\n"
                 + "        \"name\": \"Luminous Flux\",\n"
-                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
-                + "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light.\"\n"
+                +
+                "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
+                +
+                "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of " +
+                "light.\"\n"
                 + "      },\n"
                 + "      \"Sensor\": {        \n"
                 + "        \"name\": \"Acme Fluxomatic 1000\",\n"
@@ -372,38 +329,48 @@ public class Conformance2 {
         String thingId = entity.get(idKey).asText();
         //Check Datastream
         JsonNode deepInsertedObj = mapper.readTree("{\n"
-                + "      \"unitOfMeasurement\": {\n"
-                + "        \"name\": \"Lumen\",\n"
-                + "        \"symbol\": \"lm\",\n"
-                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Lumen\"\n"
-                + "      },\n"
-                + "      \"name\": \"Light exposure.\",\n"
-                + "      \"description\": \"Light exposure.\",\n"
-                + "      \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\"\n"
-                + "    }\n");
+                                                           + "      \"unitOfMeasurement\": {\n"
+                                                           + "        \"name\": \"Lumen\",\n"
+                                                           + "        \"symbol\": \"lm\",\n"
+                                                           +
+                                                           "        \"definition\": \"http://www.qudt.org/qudt/owl/1" +
+                                                           ".0.0/unit/Instances.html#Lumen\"\n"
+                                                           + "      },\n"
+                                                           + "      \"name\": \"Light exposure.\",\n"
+                                                           + "      \"description\": \"Light exposure.\",\n"
+                                                           +
+                                                           "      \"observationType\": \"http://www.opengis" +
+                                                           ".net/def/observationType/OGC-OM/2.0/OM_Measurement\"\n"
+                                                           + "    }\n");
         String datastreamId = checkRelatedEntity(EntityType.THING, thingId, EntityType.DATASTREAM, deepInsertedObj);
         //Check Location
         deepInsertedObj = mapper.readTree("{\n"
-                + "      \"name\": \"West Roof\",\n"
-                + "      \"description\": \"West Roof\",\n"
-                + "      \"location\": { \"type\": \"Point\", \"coordinates\": [-117.05, 51.05] },\n"
-                + "      \"encodingType\": \"application/vnd.geo+json\"\n"
-                + "    }\n");
+                                                  + "      \"name\": \"West Roof\",\n"
+                                                  + "      \"description\": \"West Roof\",\n"
+                                                  +
+                                                  "      \"location\": { \"type\": \"Point\", \"coordinates\": [-117" +
+                                                  ".05, 51.05] },\n"
+                                                  + "      \"encodingType\": \"application/vnd.geo+json\"\n"
+                                                  + "    }\n");
         checkRelatedEntity(EntityType.THING, thingId, EntityType.LOCATION, deepInsertedObj);
         //Check Sensor
         deepInsertedObj = mapper.readTree("{\n"
-                + "        \"name\": \"Acme Fluxomatic 1000\",\n"
-                + "        \"description\": \"Acme Fluxomatic 1000\",\n"
-                + "        \"encodingType\": \"application/pdf\",\n"
-                + "        \"metadata\": \"Light flux sensor\"\n"
-                + "      }\n");
+                                                  + "        \"name\": \"Acme Fluxomatic 1000\",\n"
+                                                  + "        \"description\": \"Acme Fluxomatic 1000\",\n"
+                                                  + "        \"encodingType\": \"application/pdf\",\n"
+                                                  + "        \"metadata\": \"Light flux sensor\"\n"
+                                                  + "      }\n");
         checkRelatedEntity(EntityType.DATASTREAM, datastreamId, EntityType.SENSOR, deepInsertedObj);
         //Check ObservedProperty
         deepInsertedObj = mapper.readTree("{\n"
-                + "        \"name\": \"Luminous Flux\",\n"
-                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
-                + "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light.\"\n"
-                + "      },\n");
+                                                  + "        \"name\": \"Luminous Flux\",\n"
+                                                  +
+                                                  "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0" +
+                                                  ".0/quantity/Instances.html#LuminousFlux\",\n"
+                                                  +
+                                                  "        \"description\": \"Luminous Flux or Luminous Power is the " +
+                                                  "measure of the perceived power of light.\"\n"
+                                                  + "      },\n");
         checkRelatedEntity(EntityType.DATASTREAM, datastreamId, EntityType.OBSERVED_PROPERTY, deepInsertedObj);
 
         /* Datastream */
@@ -419,8 +386,12 @@ public class Conformance2 {
                 + "  \"Thing\": { \"@iot.id\": " + escape(thingId) + " },\n"
                 + "   \"ObservedProperty\": {\n"
                 + "        \"name\": \"More Luminous Flux\",\n"
-                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFluxWithMorePower\",\n"
-                + "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light. This has even more power than regular flux.\"\n"
+                +
+                "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances" +
+                ".html#LuminousFluxWithMorePower\",\n"
+                +
+                "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of " +
+                "light. This has even more power than regular flux.\"\n"
                 + "   },\n"
                 + "   \"Sensor\": {        \n"
                 + "        \"name\": \"Acme Fluxomatic 1000\",\n"
@@ -439,24 +410,29 @@ public class Conformance2 {
         datastreamId = entity.get(idKey).asText();
         //Check Sensor
         deepInsertedObj = mapper.readTree("{\n"
-                + "        \"name\": \"Acme Fluxomatic 1000\",\n"
-                + "        \"description\": \"Acme Fluxomatic 1000\",\n"
-                + "        \"encodingType\": \"application/pdf\",\n"
-                + "        \"metadata\": \"Light flux sensor\"\n"
-                + "      }\n");
+                                                  + "        \"name\": \"Acme Fluxomatic 1000\",\n"
+                                                  + "        \"description\": \"Acme Fluxomatic 1000\",\n"
+                                                  + "        \"encodingType\": \"application/pdf\",\n"
+                                                  + "        \"metadata\": \"Light flux sensor\"\n"
+                                                  + "      }\n");
         checkRelatedEntity(EntityType.DATASTREAM, datastreamId, EntityType.SENSOR, deepInsertedObj);
         //Check ObservedProperty
         deepInsertedObj = mapper.readTree("{\n"
-                + "\"name\": \"More Luminous Flux\",\n"
-                + "\"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFluxWithMorePower\",\n"
-                + "\"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light. This has even more power than regular flux.\"\n"
-                + "}\n");
+                                                  + "\"name\": \"More Luminous Flux\",\n"
+                                                  +
+                                                  "\"definition\": \"http://www.qudt.org/qudt/owl/1.0" +
+                                                  ".0/quantity/Instances.html#LuminousFluxWithMorePower\",\n"
+                                                  +
+                                                  "\"description\": \"Luminous Flux or Luminous Power is the measure " +
+                                                  "of the perceived power of light. This has even more power than " +
+                                                  "regular flux.\"\n"
+                                                  + "}\n");
         checkRelatedEntity(EntityType.DATASTREAM, datastreamId, EntityType.OBSERVED_PROPERTY, deepInsertedObj);
         //Check Observation
         deepInsertedObj = mapper.readTree("{\n"
-                + "          \"phenomenonTime\": \"2015-03-01T00:10:00.000Z\",\n"
-                + "          \"result\": 10\n"
-                + "        }\n");
+                                                  + "          \"phenomenonTime\": \"2015-03-01T00:10:00.000Z\",\n"
+                                                  + "          \"result\": 10\n"
+                                                  + "        }\n");
         checkRelatedEntity(EntityType.DATASTREAM, datastreamId, EntityType.OBSERVATION, deepInsertedObj);
 
         /* Observation */
@@ -481,17 +457,17 @@ public class Conformance2 {
         String obsId1 = entity.get(idKey).asText();
         //Check FeaturOfInterest
         deepInsertedObj = mapper.readTree("{\n"
-                + "  \"name\": \"A weather station.\",\n"
-                + "  \"description\": \"A weather station.\",\n"
-                + "  \"encodingType\": \"application/vnd.geo+json\",\n"
-                + "    \"feature\": {\n"
-                + "      \"type\": \"Point\",\n"
-                + "      \"coordinates\": [\n"
-                + "        -114.05,\n"
-                + "        51.05\n"
-                + "      ]\n"
-                + "    }\n"
-                + "  }\n");
+                                                  + "  \"name\": \"A weather station.\",\n"
+                                                  + "  \"description\": \"A weather station.\",\n"
+                                                  + "  \"encodingType\": \"application/vnd.geo+json\",\n"
+                                                  + "    \"feature\": {\n"
+                                                  + "      \"type\": \"Point\",\n"
+                                                  + "      \"coordinates\": [\n"
+                                                  + "        -114.05,\n"
+                                                  + "        51.05\n"
+                                                  + "      ]\n"
+                                                  + "    }\n"
+                                                  + "  }\n");
         checkRelatedEntity(EntityType.OBSERVATION, obsId1, EntityType.FEATURE_OF_INTEREST, deepInsertedObj);
     }
 
@@ -520,11 +496,16 @@ public class Conformance2 {
                 + "      },\n"
                 + "      \"name\": \"Light exposure.\",\n"
                 + "      \"description\": \"Light exposure.\",\n"
-                + "      \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
+                +
+                "      \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
                 + "      \"ObservedProperty\": {\n"
                 + "        \"name\": \"Luminous Flux\",\n"
-                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFluxWithEvenMorePower\",\n"
-                + "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light.\"\n"
+                +
+                "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances" +
+                ".html#LuminousFluxWithEvenMorePower\",\n"
+                +
+                "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of " +
+                "light.\"\n"
                 + "      }\n"
                 + "    }\n"
                 + "  ]\n"
@@ -557,8 +538,11 @@ public class Conformance2 {
                 + "  \"Thing\": { \"@iot.id\": " + escape(thingId) + " },\n"
                 + "   \"ObservedProperty\": {\n"
                 + "        \"name\": \"Luminous Flux\",\n"
-                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
-                + "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light.\"\n"
+                +
+                "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
+                +
+                "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of " +
+                "light.\"\n"
                 + "   },\n"
                 + "      \"Observations\": [\n"
                 + "        {\n"
@@ -605,8 +589,11 @@ public class Conformance2 {
                 + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
                 + "   \"ObservedProperty\": {\n"
                 + "        \"name\": \"Luminous Flux\",\n"
-                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
-                + "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light.\"\n"
+                +
+                "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
+                +
+                "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of " +
+                "light.\"\n"
                 + "   },\n"
                 + "   \"Sensor\": {        \n"
                 + "        \"name\": \"Acme Fluxomatic 1000\",\n"
@@ -644,8 +631,11 @@ public class Conformance2 {
                 + "  \"Thing\": { \"@iot.id\": " + escape(thingId) + " },\n"
                 + "   \"ObservedProperty\": {\n"
                 + "        \"name\": \"Luminous Flux\",\n"
-                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
-                + "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light.\"\n"
+                +
+                "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
+                +
+                "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of " +
+                "light.\"\n"
                 + "   },\n"
                 + "   \"Sensor\": {        \n"
                 + "        \"name\": \"Acme Fluxomatic 1000\",\n"
@@ -712,7 +702,10 @@ public class Conformance2 {
         urlParameters = "{\n"
                 + "  \"name\": \"DewPoint Temperature\",\n"
                 + "  \"definition\": \"http://dbpedia.org/page/Dew_point\",\n"
-                + "  \"description\": \"The dewpoint temperature is the temperature to which the air must be cooled, at constant pressure, for dew to form. As the grass and other objects near the ground cool to the dewpoint, some of the water vapor in the atmosphere condenses into liquid water on the objects.\"\n"
+                +
+                "  \"description\": \"The dewpoint temperature is the temperature to which the air must be cooled, at" +
+                " constant pressure, for dew to form. As the grass and other objects near the ground cool to the " +
+                "dewpoint, some of the water vapor in the atmosphere condenses into liquid water on the objects.\"\n"
                 + "}";
         entity = postEntity(EntityType.OBSERVED_PROPERTY, urlParameters);
         String obsPropId = entity.get(idKey).asText();
@@ -860,7 +853,10 @@ public class Conformance2 {
         urlParameters = "{\n"
                 + "  \"name\": \"DewPoint Temperature\",\n"
                 + "  \"definition\": \"http://dbpedia.org/page/Dew_point\",\n"
-                + "  \"description\": \"The dewpoint temperature is the temperature to which the air must be cooled, at constant pressure, for dew to form. As the grass and other objects near the ground cool to the dewpoint, some of the water vapor in the atmosphere condenses into liquid water on the objects.\"\n"
+                +
+                "  \"description\": \"The dewpoint temperature is the temperature to which the air must be cooled, at" +
+                " constant pressure, for dew to form. As the grass and other objects near the ground cool to the " +
+                "dewpoint, some of the water vapor in the atmosphere condenses into liquid water on the objects.\"\n"
                 + "}";
         JsonNode obsPropEntity = postEntity(EntityType.OBSERVED_PROPERTY, urlParameters);
         String obsPropId = obsPropEntity.get(idKey).asText();
@@ -976,7 +972,9 @@ public class Conformance2 {
                 + "    \"definition\": \"http://qudt.org/vocab/unit#Entropy2\"\n"
                 + "  } }";
         diffs = new HashMap<>();
-        diffs.put("unitOfMeasurement", "{\"name\": \"Entropy2\",\"symbol\": \"S2\",\"definition\": \"http://qudt.org/vocab/unit#Entropy2\"}");
+        diffs.put("unitOfMeasurement",
+                  "{\"name\": \"Entropy2\",\"symbol\": \"S2\",\"definition\": \"http://qudt" +
+                          ".org/vocab/unit#Entropy2\"}");
         updatedEntity = patchEntity(EntityType.DATASTREAM, urlParameters, datastreamId);
         checkPatch(EntityType.DATASTREAM, patchedDatastream, updatedEntity, diffs);
 
@@ -1158,16 +1156,16 @@ public class Conformance2 {
                 + "      }}]}";
         patchInvalidEntity(EntityType.THING, urlParameters, thingId);
 
-//        /** Location **/
-//        long locationId = locationIds.get(0);
-//        urlParameters = "{\"Things\":[{\"description\":\"Orange\"}]}";
-//        invalidPatchEntity(EntityType.LOCATION, urlParameters, locationId);
-//
-//        /** HistoricalLocation **/
-//        long histLocId = historicalLocationIds.get(0);
-//        urlParameters = "{\"time\": \"2015-07-01T00:00:00.000Z\"}";
-//        invalidPatchEntity(EntityType.HISTORICAL_LOCATION, urlParameters, histLocId);
-//
+        //        /** Location **/
+        //        long locationId = locationIds.get(0);
+        //        urlParameters = "{\"Things\":[{\"description\":\"Orange\"}]}";
+        //        invalidPatchEntity(EntityType.LOCATION, urlParameters, locationId);
+        //
+        //        /** HistoricalLocation **/
+        //        long histLocId = historicalLocationIds.get(0);
+        //        urlParameters = "{\"time\": \"2015-07-01T00:00:00.000Z\"}";
+        //        invalidPatchEntity(EntityType.HISTORICAL_LOCATION, urlParameters, histLocId);
+        //
         /**
          * Sensor *
          */
@@ -1196,7 +1194,10 @@ public class Conformance2 {
         urlParameters = "{\n"
                 + "  \"name\": \"DewPoint Temperature\",\n"
                 + "  \"definition\": \"http://dbpedia.org/page/Dew_point\",\n"
-                + "  \"description\": \"The dewpoint temperature is the temperature to which the air must be cooled, at constant pressure, for dew to form. As the grass and other objects near the ground cool to the dewpoint, some of the water vapor in the atmosphere condenses into liquid water on the objects.\"\n"
+                +
+                "  \"description\": \"The dewpoint temperature is the temperature to which the air must be cooled, at" +
+                " constant pressure, for dew to form. As the grass and other objects near the ground cool to the " +
+                "dewpoint, some of the water vapor in the atmosphere condenses into liquid water on the objects.\"\n"
                 + "}";
         JsonNode obsPropEntity = postEntity(EntityType.OBSERVED_PROPERTY, urlParameters);
         String obsPropId = obsPropEntity.get(idKey).asText();
@@ -1210,10 +1211,10 @@ public class Conformance2 {
                 + "      }]}";
         patchInvalidEntity(EntityType.OBSERVED_PROPERTY, urlParameters, obsPropId);
 
-//        /** FeatureOfInterest **/
-//        long foiId = foiIds.get(0);
-//        urlParameters = "{\"feature\":{ \"type\": \"Point\", \"coordinates\": [114.05, -51.05] }}";
-//        invalidPatchEntity(EntityType.FEATURE_OF_INTEREST, urlParameters, foiId);
+        //        /** FeatureOfInterest **/
+        //        long foiId = foiIds.get(0);
+        //        urlParameters = "{\"feature\":{ \"type\": \"Point\", \"coordinates\": [114.05, -51.05] }}";
+        //        invalidPatchEntity(EntityType.FEATURE_OF_INTEREST, urlParameters, foiId);
         /**
          * Datastream *
          */
@@ -1263,10 +1264,10 @@ public class Conformance2 {
                 + "  ]}";
         patchInvalidEntity(EntityType.DATASTREAM, urlParameters, datastreamId);
 
-//        /** Observation **/
-//        long obsId1 = observationIds.get(0);
-//        urlParameters = "{\"phenomenonTime\": \"2015-07-01T00:40:00.000Z\"}";
-//        invalidPatchEntity(EntityType.OBSERVATION, urlParameters, obsId1);
+        //        /** Observation **/
+        //        long obsId1 = observationIds.get(0);
+        //        urlParameters = "{\"phenomenonTime\": \"2015-07-01T00:40:00.000Z\"}";
+        //        invalidPatchEntity(EntityType.OBSERVATION, urlParameters, obsId1);
     }
 
     /**
@@ -1285,326 +1286,108 @@ public class Conformance2 {
         deleteNonexistentEntity(EntityType.FEATURE_OF_INTEREST);
     }
 
-    private String escape(String val) {
-        return "\"" + val + "\"";
-    }
-
-    private JsonNode postEntity(EntityType type, String body) throws IOException {
-        HttpPost request = new HttpPost(rootUrl + endpoints.get(type));
-        request.setEntity(new StringEntity(body));
-        request.setHeader("Content-Type", "application/json");
-
-        if (logger.isTraceEnabled()) {
-            System.out.printf("POSTed to URL: %s\n", request.getURI());
-            System.out.println(body);
-        }
-
-        HttpResponse response = HttpClientBuilder.create().build().execute(request);
-
-        // Check Response MIME Type
-        String mimeType = ContentType.getOrDefault(response.getEntity()).getMimeType();
-        Assert.assertEquals(
-                "Response has invalid MIME Type",
-                jsonMimeType,
-                mimeType);
-
-        JsonNode result = mapper.readTree(response.getEntity().getContent());
-        if (logger.isTraceEnabled()) {
-            System.out.printf("RETURNED by Server: %s\n", request.getURI());
-            System.out.println(result.toPrettyString());
-        }
-        return result;
-    }
-
-    private JsonNode postInvalidEntity(EntityType type, String body) throws IOException {
-        HttpPost request = new HttpPost(rootUrl + endpoints.get(type));
-        request.setEntity(new StringEntity(body));
-        request.setHeader("Content-Type", "application/json");
-
-        if (logger.isTraceEnabled()) {
-            System.out.printf("POSTed to URL: %s\n", request.getURI());
-            System.out.println(body);
-        }
-
-        HttpResponse response = HttpClientBuilder.create().build().execute(request);
-        Assert.assertTrue(
-                "Entity " + rootUrl + endpoints.get(type) + " should not have been created but response Code  is: " +
-                        response.getStatusLine().getStatusCode(),
-                response.getStatusLine().getStatusCode() == 400 || response.getStatusLine().getStatusCode() == 409
-        );
-
-        JsonNode result = mapper.readTree(response.getEntity().getContent());
-        if (logger.isTraceEnabled()) {
-            System.out.printf("RETURNED by Server: %s\n", request.getURI());
-            System.out.println(result.toPrettyString());
-        }
-        return result;
-    }
-
-    private JsonNode patchEntity(EntityType type, String body, String id) throws IOException {
-        HttpPatch request = new HttpPatch(rootUrl
-                + endpoints.get(type)
-                + "("
-                + id
-                + ")");
-        request.setHeader("Content-Type", "application/json");
-        request.setEntity(new StringEntity(body));
-
-        HttpResponse response = HttpClientBuilder.create().build().execute(request);
-
-        if (logger.isTraceEnabled()) {
-            System.out.printf("PATCHed to URL: %s\n", request.getURI());
-            System.out.println(body);
-        }
-
-        // Check Response MIME Type
-        String mimeType = ContentType.getOrDefault(response.getEntity()).getMimeType();
-        assertEquals(jsonMimeType, mimeType);
-
-        JsonNode result = mapper.readTree(response.getEntity().getContent());
-        if (logger.isTraceEnabled()) {
-            System.out.printf("RETURNED by Server: %s\n", request.getURI());
-            System.out.println(result.toPrettyString());
-        }
-        int statusCode = response.getStatusLine().getStatusCode();
-        Assert.assertEquals("Error: PATCH does not work properly for " + request.getURI(),
-                200,
-                statusCode);
-        return result;
-    }
-
-    /**
-     * This method created the URL string for the entity with specific id and
-     * then PATCH invalid entity with urlParameters to that URL and confirms
-     * that the response is correct based on specification.
-     *
-     * @param type Entity type in from EntityType enum
-     * @param body The PATCH body (invalid)
-     * @param id   The id of requested entity
-     */
-    private void patchInvalidEntity(EntityType type, String body, String id) throws IOException {
-        HttpPatch request = new HttpPatch(rootUrl
-                + endpoints.get(type)
-                + "("
-                + id
-                + ")");
-        request.setHeader("Content-Type", "application/json");
-        request.setEntity(new StringEntity(body));
-
-        HttpResponse response = HttpClientBuilder.create().build().execute(request);
-
-        if (logger.isTraceEnabled()) {
-            System.out.printf("PATCHed to URL: %s\n", request.getURI());
-            System.out.println(body);
-        }
-
-        int statusCode = response.getStatusLine().getStatusCode();
-
-        if (logger.isTraceEnabled()) {
-            System.out.printf("RETURNED by Server: %s\n", request.getURI());
-            System.out.println("Statuscode:" + statusCode);
-        }
-        Assert.assertEquals("Error: Patching related entities inline must be illegal for " + request.getURI(),
-                400,
-                statusCode);
-    }
-
-    /**
-     * This method create the URL string for a nonexistent entity and send the
-     * DELETE request to that URL and confirm that the response is correct based
-     * on specification.
-     *
-     * @param type Entity type in from EntityType enum
-     */
-    private void deleteNonexistentEntity(EntityType type) throws IOException {
-        HttpDelete request = new HttpDelete(rootUrl
-                + endpoints.get(type)
-                + "("
-                + "aaaaaa"
-                + ")");
-        request.setHeader("Content-Type", "application/json");
-
-        HttpResponse response = HttpClientBuilder.create().build().execute(request);
-
-        if (logger.isTraceEnabled()) {
-            System.out.printf("DELETEd to URL: %s\n", request.getURI());
-        }
-
-        int statusCode = response.getStatusLine().getStatusCode();
-
-        if (logger.isTraceEnabled()) {
-            System.out.printf("RETURNED by Server: %s\n", request.getURI());
-            System.out.println("Statuscode:" + statusCode);
-        }
-        Assert.assertEquals("DELETE does not work properly for nonexistent " + request.getURI(),
-                400,
-                statusCode);
-    }
-
-    private void deleteEverythings() throws IOException {
-        for (EntityType type : EntityType.values()) {
-            for (JsonNode elem : getCollection(type)) {
-                deleteEntity(type, elem.get(idKey).asText(), false);
-            }
-        }
-    }
-
-    private void deleteEntity(EntityType type, String id, boolean canError) throws IOException {
-        HttpDelete request = new HttpDelete(rootUrl
-                + endpoints.get(type)
-                + "("
-                + id
-                + ")");
-        request.setHeader("Content-Type", "application/json");
-
-        HttpResponse response = HttpClientBuilder.create().build().execute(request);
-
-        if (logger.isTraceEnabled()) {
-            System.out.printf("DELETEd to URL: %s\n", request.getURI());
-        }
-
-        int statusCode = response.getStatusLine().getStatusCode();
-
-        if (logger.isTraceEnabled()) {
-            System.out.printf("RETURNED by Server: %s\n", request.getURI());
-            System.out.println("Statuscode:" + statusCode);
-        }
-        if (!canError) {
-            Assert.assertEquals("DELETE does not work properly for nonexistent " + request.getURI(),
-                    200,
-                    statusCode);
-        }
-    }
-
-    private JsonNode getEntity(String path) throws IOException {
-        HttpGet request = new HttpGet(rootUrl + path);
-        HttpResponse response = HttpClientBuilder.create().build().execute(request);
-
-        // Check Response MIME Type
-        String mimeType = ContentType.getOrDefault(response.getEntity()).getMimeType();
-        assertEquals(jsonMimeType, mimeType);
-
-        Assert.assertTrue(
-                "ERROR: Did not receive 200 OK for path: " + path
-                        + " Instead received Status Code: " + response.getStatusLine().getStatusCode(),
-                response.getStatusLine().getStatusCode() == 200);
-        return mapper.readTree(response.getEntity().getContent());
-    }
-
-    private ArrayNode getCollection(EntityType type) throws IOException {
-        HttpGet request = new HttpGet(rootUrl + endpoints.get(type));
-        HttpResponse response = HttpClientBuilder.create().build().execute(request);
-
-        // Check Response MIME Type
-        String mimeType = ContentType.getOrDefault(response.getEntity()).getMimeType();
-        assertEquals(jsonMimeType, mimeType);
-
-        Assert.assertTrue(
-                "ERROR: Did not receive 200 OK for path: " + rootUrl + endpoints.get(type)
-                        + " Instead received Status Code: " + response.getStatusLine().getStatusCode(),
-                response.getStatusLine().getStatusCode() == 200);
-        return (ArrayNode) mapper.readTree(response.getEntity().getContent());
-    }
-
-
-
     /**
      * Create entities as a pre-process for testing DELETE.
      */
     private Map<EntityType, String[]> createEntitiesForDelete() throws IOException {
-            deleteEverythings();
+        deleteEverythings();
 
-            //First Thing
-            String urlParameters = "{\n"
-                    + "    \"name\": \"thing 1\",\n"
-                    + "    \"description\": \"thing 1\",\n"
-                    + "    \"properties\": {\n"
-                    + "        \"reference\": \"first\"\n"
-                    + "    },\n"
-                    + "    \"Locations\": [\n"
-                    + "        {\n"
-                    + "            \"name\": \"location 1\",\n"
-                    + "            \"description\": \"location 1\",\n"
-                    + "            \"location\": {\n"
-                    + "                \"type\": \"Point\",\n"
-                    + "                \"coordinates\": [\n"
-                    + "                    -117.05,\n"
-                    + "                    51.05\n"
-                    + "                ]\n"
-                    + "            },\n"
-                    + "            \"encodingType\": \"application/vnd.geo+json\"\n"
-                    + "        }\n"
-                    + "    ],\n"
-                    + "    \"Datastreams\": [\n"
-                    + "        {\n"
-                    + "            \"unitOfMeasurement\": {\n"
-                    + "                \"name\": \"Lumen\",\n"
-                    + "                \"symbol\": \"lm\",\n"
-                    + "                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Lumen\"\n"
-                    + "            },\n"
-                    + "            \"name\": \"datastream 1\",\n"
-                    + "            \"description\": \"datastream 1\",\n"
-                    + "            \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                    + "            \"ObservedProperty\": {\n"
-                    + "                \"name\": \"Luminous Flux\",\n"
-                    + "                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
-                    + "                \"description\": \"observedProperty 1\"\n"
-                    + "            },\n"
-                    + "            \"Sensor\": {\n"
-                    + "                \"name\": \"sensor 1\",\n"
-                    + "                \"description\": \"sensor 1\",\n"
-                    + "                \"encodingType\": \"application/pdf\",\n"
-                    + "                \"metadata\": \"Light flux sensor\"\n"
-                    + "            },\n"
-                    + "            \"Observations\": [{\n"
-                    + "                  \"phenomenonTime\": \"2015-03-01T00:00:00Z\",\n"
-                    + "                  \"result\": 1 \n"
-                    + "             }]"
-                    + "        }\n"
-                    + "    ]\n"
-                    + "}";
-            postEntity(EntityType.THING, urlParameters);
+        //First Thing
+        String urlParameters = "{\n"
+                + "    \"name\": \"thing 1\",\n"
+                + "    \"description\": \"thing 1\",\n"
+                + "    \"properties\": {\n"
+                + "        \"reference\": \"first\"\n"
+                + "    },\n"
+                + "    \"Locations\": [\n"
+                + "        {\n"
+                + "            \"name\": \"location 1\",\n"
+                + "            \"description\": \"location 1\",\n"
+                + "            \"location\": {\n"
+                + "                \"type\": \"Point\",\n"
+                + "                \"coordinates\": [\n"
+                + "                    -117.05,\n"
+                + "                    51.05\n"
+                + "                ]\n"
+                + "            },\n"
+                + "            \"encodingType\": \"application/vnd.geo+json\"\n"
+                + "        }\n"
+                + "    ],\n"
+                + "    \"Datastreams\": [\n"
+                + "        {\n"
+                + "            \"unitOfMeasurement\": {\n"
+                + "                \"name\": \"Lumen\",\n"
+                + "                \"symbol\": \"lm\",\n"
+                + "                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Lumen\"\n"
+                + "            },\n"
+                + "            \"name\": \"datastream 1\",\n"
+                + "            \"description\": \"datastream 1\",\n"
+                +
+                "            \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2" +
+                ".0/OM_Measurement\",\n"
+                + "            \"ObservedProperty\": {\n"
+                + "                \"name\": \"Luminous Flux\",\n"
+                +
+                "                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances" +
+                ".html#LuminousFlux\",\n"
+                + "                \"description\": \"observedProperty 1\"\n"
+                + "            },\n"
+                + "            \"Sensor\": {\n"
+                + "                \"name\": \"sensor 1\",\n"
+                + "                \"description\": \"sensor 1\",\n"
+                + "                \"encodingType\": \"application/pdf\",\n"
+                + "                \"metadata\": \"Light flux sensor\"\n"
+                + "            },\n"
+                + "            \"Observations\": [{\n"
+                + "                  \"phenomenonTime\": \"2015-03-01T00:00:00Z\",\n"
+                + "                  \"result\": 1 \n"
+                + "             }]"
+                + "        }\n"
+                + "    ]\n"
+                + "}";
+        postEntity(EntityType.THING, urlParameters);
 
-            HashMap<EntityType, String[]> map = new HashMap<>();
-            for (EntityType type : EntityType.values()) {
-                List<String> ids = new ArrayList<>();
-                getCollection(type).forEach(elem -> {
-                    ids.add(elem.get(idKey).asText());
-                });
-                map.put(type, ids.toArray(new String[]{}));
-            }
-            return map;
+        HashMap<EntityType, String[]> map = new HashMap<>();
+        for (EntityType type : EntityType.values()) {
+            List<String> ids = new ArrayList<>();
+            getCollection(type).forEach(elem -> {
+                ids.add(elem.get(idKey).asText());
+            });
+            map.put(type, ids.toArray(new String[] {}));
         }
+        return map;
+    }
 
     /**
-         * Check the FeatureOfInterest is created automatically correctly if not
-         * inserted in Observation
-         *
-         * @param obsId         The observation id
-         * @param locationObj   The Location object that the FOI is supposed to be
-         *                      created based on that
-         * @param expectedFOIId The id of the FOI linked to the Observation
-         * @return The id of FOI
-         */
-    private String checkAutomaticInsertionOfFOI(String obsId, JsonNode locationObj, String expectedFOIId) throws IOException {
+     * Check the FeatureOfInterest is created automatically correctly if not
+     * inserted in Observation
+     *
+     * @param obsId         The observation id
+     * @param locationObj   The Location object that the FOI is supposed to be
+     *                      created based on that
+     * @param expectedFOIId The id of the FOI linked to the Observation
+     * @return The id of FOI
+     */
+    private String checkAutomaticInsertionOfFOI(String obsId, JsonNode locationObj, String expectedFOIId)
+            throws IOException {
         String urlString = "Observations(" + obsId + ")/FeatureOfInterest";
         JsonNode result = getEntity(urlString);
         String id = result.get(idKey).asText();
         if (expectedFOIId != null) {
-            assertEquals(
+            Assertions.assertEquals(
+                    id,
+                    expectedFOIId,
                     "ERROR: the Observation should have linked to FeatureOfInterest with ID: "
                             + expectedFOIId
                             + " , but it is linked for FeatureOfInterest with Id: "
                             + id
-                            + ".",
-                    id,
-                    expectedFOIId
+                            + "."
             );
         }
-        assertEquals(
-                "ERROR: Automatic created FeatureOfInterest does not match last Location of that Thing.",
+        Assertions.assertEquals(
                 result.get("feature").toString(),
-                locationObj.get("location").toString()
+                locationObj.get("location").toString(),
+                "ERROR: Automatic created FeatureOfInterest does not match last Location of that Thing."
         );
         return id;
     }
@@ -1655,10 +1438,10 @@ public class Conformance2 {
         oldEntity.fieldNames().forEachRemaining(field -> {
             if (diffs.containsKey(field)) {
                 if (newEntity.get(field).isTextual()) {
-                    Assert.assertEquals(
-                            "PATCH was not applied correctly for " + entityType + "'s " + field + ".",
+                    Assertions.assertEquals(
                             diffs.get(field),
-                            newEntity.get(field).asText()
+                            newEntity.get(field).asText(),
+                            "PATCH was not applied correctly for " + entityType + "'s " + field + "."
                     );
                 } else {
                     // Ignore crs field
@@ -1666,22 +1449,18 @@ public class Conformance2 {
                         ((ObjectNode) newEntity.get(field)).remove("crs");
                     }
                     try {
-                        Assert.assertTrue(
-                                "PATCH was not applied correctly for " + entityType + "'s " + field + ".",
-                                newEntity.get(field).equals(mapper.readTree(diffs.get(field)))
+                        Assertions.assertTrue(
+                                newEntity.get(field).equals(mapper.readTree(diffs.get(field))),
+                                "PATCH was not applied correctly for " + entityType + "'s " + field + "."
                         );
                     } catch (JsonProcessingException e) {
-                        Assert.assertTrue(
-                                "Error parsing test value!",
-                                false
-                        );
+                        Assertions.assertTrue(false, "Error parsing test value!");
                     }
                 }
             } else {
-                Assert.assertTrue(
-                        "PATCH was not applied correctly for " + entityType + "'s " + field + ".",
-                        oldEntity.get(field).equals(newEntity.get(field))
-                );
+                Assertions.assertTrue(
+                        oldEntity.get(field).equals(newEntity.get(field)),
+                        "PATCH was not applied correctly for " + entityType + "'s " + field + ".");
             }
         });
     }
@@ -1694,9 +1473,9 @@ public class Conformance2 {
     private void checkNotExisting(List<EntityType> entityTypes) throws IOException {
         for (EntityType entityType : entityTypes) {
             JsonNode response = getEntity(endpoints.get(entityType));
-            Assert.assertTrue(
-                    "Entity with type: " + entityType.name() + " is created although it shouldn't",
-                    response.isEmpty()
+            Assertions.assertTrue(
+                    response.isEmpty(),
+                    "Entity with type: " + entityType.name() + " is created although it shouldn't"
             );
         }
     }
@@ -1704,9 +1483,9 @@ public class Conformance2 {
     private void checkExisting(List<EntityType> entityTypes) throws IOException {
         for (EntityType entityType : entityTypes) {
             JsonNode response = getEntity(endpoints.get(entityType));
-            Assert.assertTrue(
-                    "No Entity with type: " + entityType.name() + " is present",
-                    response.isArray() && !response.isEmpty()
+            Assertions.assertTrue(
+                    response.isArray() && !response.isEmpty(),
+                    "No Entity with type: " + entityType.name() + " is present"
             );
         }
     }
