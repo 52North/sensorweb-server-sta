@@ -52,18 +52,10 @@ public interface IdentifierRepository<T, ID> extends EntityGraphRepository<T, ID
      *
      * @param identifier      Identifier of the wanted Entity
      * @param relatedEntities EntityGraphs describing related Entities to be fetched. All graphs are merged into one
-     *                        graph internally.
+     *                        graph internally. may be null.
      * @return Entity found in Database. Optional.empty() otherwise
      */
     Optional<T> findByIdentifier(String identifier, FetchGraph... relatedEntities);
-
-    /**
-     * Finds Entity by identifier. Fetches only Entity itself
-     *
-     * @param identifier Identifier of the wanted Entity
-     * @return Entity found in Database. Optional.empty() otherwise
-     */
-    Optional<T> findByIdentifier(String identifier);
 
     /**
      * Deletes Entity with given Identifier
