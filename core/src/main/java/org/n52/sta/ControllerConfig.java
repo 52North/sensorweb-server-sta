@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,6 +37,8 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlThrowable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,10 +49,13 @@ import javax.persistence.PersistenceException;
 
 /**
  * Class used to customize Exception serialization to json.
+ *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @ControllerAdvice
 public class ControllerConfig {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(ControllerConfig.class);
 
     private final ObjectMapper mapper;
     private final HttpHeaders headers;
@@ -71,6 +77,7 @@ public class ControllerConfig {
             msg = exception.getMessage();
         }
 
+        LOGGER.debug(msg, exception);
         return new ResponseEntity<>(
                 createErrorMessage(exception.getClass().getName(), msg),
                 headers,
@@ -79,55 +86,57 @@ public class ControllerConfig {
 
     @ExceptionHandler(value = STACRUDException.class)
     public ResponseEntity<Object> staCrudException(STACRUDException exception) {
-        return new ResponseEntity<>(
-                createErrorMessage(exception.getClass().getName(), exception.getMessage()),
-                headers,
-                HttpStatus.BAD_REQUEST);
+        String msg = createErrorMessage(exception.getClass().getName(), exception.getMessage());
+        LOGGER.debug(msg, exception);
+        return new ResponseEntity<>(msg,
+                                    headers,
+                                    HttpStatus.BAD_REQUEST);
     }
-
 
     @ExceptionHandler(value = STAInvalidUrlThrowable.class)
     public ResponseEntity<Object> staInvalidUrlException(STAInvalidUrlThrowable exception) {
-        return new ResponseEntity<>(
-                createErrorMessage(exception.getClass().getName(), exception.getMessage()),
-                headers,
-                HttpStatus.BAD_REQUEST);
+        String msg = createErrorMessage(exception.getClass().getName(), exception.getMessage());
+        LOGGER.debug(msg, exception);
+        return new ResponseEntity<>(msg,
+                                    headers,
+                                    HttpStatus.BAD_REQUEST);
     }
-
 
     @ExceptionHandler(value = STAInvalidQueryException.class)
     public ResponseEntity<Object> staInvalidQuery(STAInvalidQueryException exception) {
-        return new ResponseEntity<>(
-                createErrorMessage(exception.getClass().getName(), exception.getMessage()),
-                headers,
-                HttpStatus.BAD_REQUEST);
+        String msg = createErrorMessage(exception.getClass().getName(), exception.getMessage());
+        LOGGER.debug(msg, exception);
+        return new ResponseEntity<>(msg,
+                                    headers,
+                                    HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = STAInvalidFilterExpressionException.class)
     public ResponseEntity<Object> staInvalidFilterExpressionException(STAInvalidFilterExpressionException exception) {
-        return new ResponseEntity<>(
-                createErrorMessage(exception.getClass().getName(), exception.getMessage()),
-                headers,
-                HttpStatus.BAD_REQUEST);
+        String msg = createErrorMessage(exception.getClass().getName(), exception.getMessage());
+        LOGGER.debug(msg, exception);
+        return new ResponseEntity<>(msg,
+                                    headers,
+                                    HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = IllegalArgumentException.class)
     public ResponseEntity<Object> staIllegalArgumentException(IllegalArgumentException exception) {
-        return new ResponseEntity<>(
-                createErrorMessage(exception.getClass().getName(), exception.getMessage()),
-                headers,
-                HttpStatus.BAD_REQUEST);
+        String msg = createErrorMessage(exception.getClass().getName(), exception.getMessage());
+        LOGGER.debug(msg, exception);
+        return new ResponseEntity<>(msg,
+                                    headers,
+                                    HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = IllegalStateException.class)
     public ResponseEntity<Object> staIllegalStateException(IllegalStateException exception) {
-        return new ResponseEntity<>(
-                createErrorMessage(exception.getClass().getName(), exception.getMessage()),
-                headers,
-                HttpStatus.BAD_REQUEST);
+        String msg = createErrorMessage(exception.getClass().getName(), exception.getMessage());
+        LOGGER.debug(msg, exception);
+        return new ResponseEntity<>(msg,
+                                    headers,
+                                    HttpStatus.BAD_REQUEST);
     }
-
-
 
     private String createErrorMessage(String error, String message) {
         ObjectNode root = mapper.createObjectNode();
