@@ -311,6 +311,102 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
         return getRepository().count(getFilterPredicate(entityClass, queryOptions));
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    public ElementWithQueryOptions create(S entity) throws STACRUDException {
+        return this.createWrapper(createEntity(entity), null);
+    }
+
+    protected abstract S createEntity(S entity) throws STACRUDException;
+
+    @Transactional(rollbackFor = Exception.class)
+    public ElementWithQueryOptions update(String id, S entity, HttpMethod method) throws STACRUDException {
+        return this.createWrapper(updateEntity(id, entity, method), null);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    protected abstract S updateEntity(String id, S entity, HttpMethod method) throws STACRUDException;
+
+    protected abstract S updateEntity(S entity) throws STACRUDException;
+
+    @Transactional(rollbackFor = Exception.class)
+    public abstract void delete(String id) throws STACRUDException;
+
+    protected abstract void delete(S entity) throws STACRUDException;
+
+    /**
+     * Must be implemented by each Service individually as S is not known to have identifier here.
+     * Example Code to be pasted into each Service below
+     *
+     * @param entity entity to be persisted or updated
+     * @return updated entity
+     * @throws STACRUDException if an error occurred
+     */
+
+    protected abstract S createOrUpdate(S entity) throws STACRUDException;
+
+    //protected S createOrUpdate(S entity) throws ODataApplicationException {
+    //    if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
+    //        return update(entity, HttpMethod.PATCH);
+    //    }
+    //    return create(entity);
+    //}
+    protected void checkInlineDatastream(DatastreamEntity datastream) throws STACRUDException {
+        if (datastream.getIdentifier() == null
+                || datastream.isSetName()
+                || datastream.isSetDescription()
+                || datastream.isSetUnit()) {
+            throw new STACRUDException("Inlined datastream entities are not allowed for updates!",
+                                       HTTPStatus.BAD_REQUEST);
+        }
+    }
+
+    protected void checkInlineLocation(LocationEntity location) throws STACRUDException {
+        if (location.getIdentifier() == null || location.isSetName() || location.isSetDescription()) {
+            throw new STACRUDException("Inlined location entities are not allowed for updates!",
+                                       HTTPStatus.BAD_REQUEST);
+        }
+    }
+
+    protected AbstractSensorThingsEntityService<?, ?> getEntityService(EntityTypes type) {
+        return serviceRepository.getEntityService(type);
+    }
+
+    /**
+     * Create {@link PageRequest}
+     *
+     * @param queryOptions           {@link QueryOptions} to create {@link PageRequest}
+     * @param defaultSortingProperty Teh defualt sorting property
+     * @return {@link PageRequest} of type {@link OffsetLimitBasedPageRequest}
+     */
+    OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions,
+                                                      String defaultSortingProperty) {
+        long offset = queryOptions.hasSkipOption() ? queryOptions.getSkipOption().getValue() : 0;
+        Sort sort = Sort.by(Sort.Direction.ASC, defaultSortingProperty);
+        if (queryOptions.hasOrderByOption()) {
+            boolean first = true;
+            for (OrderProperty sortProperty :
+                    ((OrderByFilter) queryOptions.getOrderByOption()).getSortProperties()) {
+                if (first) {
+                    sort = Sort.by(sortProperty.getSortOrder().equals(FilterConstants.SortOrder.DESC) ?
+                                           Sort.Direction.DESC : Sort.Direction.ASC,
+                                   sortProperty.getValueReference());
+                    first = false;
+                } else {
+                    sort = sort.and(Sort.by(sortProperty.getSortOrder().equals(FilterConstants.SortOrder.DESC) ?
+                                                    Sort.Direction.DESC : Sort.Direction.ASC,
+                                            sortProperty.getValueReference()));
+                }
+            }
+        }
+        return new OffsetLimitBasedPageRequest((int) offset,
+                                               queryOptions.getTopOption().getValue().intValue(),
+                                               sort);
+    }
+
+    protected OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions) {
+        return this.createPageableRequest(queryOptions, IDENTIFIER);
+    }
+
     /**
      * Constructs FilterPredicate based on given queryOptions.
      *
@@ -371,103 +467,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
             //            }
         };
     }
-
-    @Transactional(rollbackFor = Exception.class)
-    public ElementWithQueryOptions create(S entity) throws STACRUDException {
-        return this.createWrapper(createEntity(entity), null);
-    }
-
-    protected abstract S createEntity(S entity) throws STACRUDException;
-
-    @Transactional(rollbackFor = Exception.class)
-    public ElementWithQueryOptions update(String id, S entity, HttpMethod method) throws STACRUDException {
-        return this.createWrapper(updateEntity(id, entity, method), null);
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    protected abstract S updateEntity(String id, S entity, HttpMethod method) throws STACRUDException;
-
-    protected abstract S updateEntity(S entity) throws STACRUDException;
-
-    @Transactional(rollbackFor = Exception.class)
-    public abstract void delete(String id) throws STACRUDException;
-
-    protected abstract void delete(S entity) throws STACRUDException;
-
-    /**
-     * Must be implemented by each Service individually as S is not known to have identifier here.
-     * Example Code to be pasted into each Service below
-     *
-     * @param entity entity to be persisted or updated
-     * @return updated entity
-     * @throws STACRUDException if an error occurred
-     */
-
-    protected abstract S createOrUpdate(S entity) throws STACRUDException;
-    //protected S createOrUpdate(S entity) throws ODataApplicationException {
-    //    if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
-    //        return update(entity, HttpMethod.PATCH);
-    //    }
-    //    return create(entity);
-    //}
-
-    protected void checkInlineDatastream(DatastreamEntity datastream) throws STACRUDException {
-        if (datastream.getIdentifier() == null
-                || datastream.isSetName()
-                || datastream.isSetDescription()
-                || datastream.isSetUnit()) {
-            throw new STACRUDException("Inlined datastream entities are not allowed for updates!",
-                                       HTTPStatus.BAD_REQUEST);
-        }
-    }
-
-    protected void checkInlineLocation(LocationEntity location) throws STACRUDException {
-        if (location.getIdentifier() == null || location.isSetName() || location.isSetDescription()) {
-            throw new STACRUDException("Inlined location entities are not allowed for updates!",
-                                       HTTPStatus.BAD_REQUEST);
-        }
-    }
-
-    protected AbstractSensorThingsEntityService<?, ?> getEntityService(EntityTypes type) {
-        return serviceRepository.getEntityService(type);
-    }
-
-    /**
-     * Create {@link PageRequest}
-     *
-     * @param queryOptions           {@link QueryOptions} to create {@link PageRequest}
-     * @param defaultSortingProperty Teh defualt sorting property
-     * @return {@link PageRequest} of type {@link OffsetLimitBasedPageRequest}
-     */
-    protected OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions,
-                                                                String defaultSortingProperty) {
-        long offset = queryOptions.hasSkipOption() ? queryOptions.getSkipOption().getValue() : 0;
-        Sort sort = Sort.by(Sort.Direction.ASC, defaultSortingProperty);
-        if (queryOptions.hasOrderByOption()) {
-            boolean first = true;
-            for (OrderProperty sortProperty :
-                    ((OrderByFilter) queryOptions.getOrderByOption()).getSortProperties()) {
-                if (first) {
-                    sort = Sort.by(sortProperty.getSortOrder().equals(FilterConstants.SortOrder.DESC) ?
-                                           Sort.Direction.DESC : Sort.Direction.ASC,
-                                   sortProperty.getValueReference());
-                    first = false;
-                } else {
-                    sort = sort.and(Sort.by(sortProperty.getSortOrder().equals(FilterConstants.SortOrder.DESC) ?
-                                                    Sort.Direction.DESC : Sort.Direction.ASC,
-                                            sortProperty.getValueReference()));
-                }
-            }
-        }
-        return new OffsetLimitBasedPageRequest((int) offset,
-                                               queryOptions.getTopOption().getValue().intValue(),
-                                               sort);
-    }
-
     //TODO(specki): check if this needs to be overridden by observedproperty that uses different field
-    protected OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions) {
-        return this.createPageableRequest(queryOptions, IDENTIFIER);
-    }
 
     /**
      * Translate STA property name to Database property name
