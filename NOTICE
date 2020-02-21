@@ -5,11 +5,17 @@ Licensed under GNU General Public License, Version 2.0
 This project includes: 
 
   "Java Concurrency in Practice" book annotations under Creative Commons Attribution License, http://creativecommons.org/licenses/by/2.5
-  'Bugsnag' under MIT
   52°North Faroe Annotations under The Apache Software License, Version 2.0
+  52°North Faroe Utilities under The Apache Software License, Version 2.0
   52°North Jan Mayen under The Apache Software License, Version 2.0
   52°North Sensor Things API under The Apache Software License, Version 2.0
   52°North Shetland under The Apache Software License, Version 2.0
+  52°North Svalbard Core under The Apache Software License, Version 2.0
+  52°North Svalbard OData under The Apache Software License, Version 2.0
+  abego TreeLayout Core under BSD 3-Clause "New" or "Revised" License (BSD-3-Clause)
+  ANTLR 3 Runtime under BSD licence
+  ANTLR 4 Runtime under The BSD License
+  ANTLR 4 Tool under The BSD License
   AntLR Parser Generator under BSD License
   Apache Commons Codec under Apache License, Version 2.0
   Apache HttpClient under Apache License, Version 2.0
@@ -38,6 +44,7 @@ This project includes:
   Hibernate ORM - hibernate-spatial under GNU Library General Public License v2.1 or later
   Hibernate Validator Engine under Apache License 2.0
   HikariCP under The Apache Software License, Version 2.0
+  ICU4J under Unicode/ICU License
   io.moquette:moquette-broker under The Apache Software License, Version 2.0
   istack common utility code runtime under Eclipse Distribution License - v 1.0
   J2ObjC Annotations under The Apache Software License, Version 2.0
@@ -65,6 +72,7 @@ This project includes:
   JCL 1.2 implemented over SLF4J under Apache License, Version 2.0
   Joda-Time under Apache License, Version 2.0
   JSON.simple under The Apache Software License, Version 2.0
+  JSR 353 (JSON Processing) Default Provider under Dual license consisting of the CDDL v1.1 and GPL v2
   JUL to SLF4J bridge under MIT License
   JUnit under Eclipse Public License 1.0
   JVM Integration for Metrics under Apache License 2.0
@@ -91,14 +99,9 @@ This project includes:
   org.locationtech.jts.io:jts-io-common under Eclipse Publish License, Version 1.0 or Eclipse Distribution License - v 1.0
   org.locationtech.jts:jts-core under Eclipse Publish License, Version 1.0 or Eclipse Distribution License - v 1.0
   PostgreSQL JDBC Driver - JDBC 4.2 under BSD-2-Clause
-  sensor-things-api-app under The Apache Software License, Version 2.0
-  sensor-things-api-core under The Apache Software License, Version 2.0
-  sensor-things-api-http under The Apache Software License, Version 2.0
-  sensor-things-api-mqtt under The Apache Software License, Version 2.0
-  sensor-things-api-webapp under The Apache Software License, Version 2.0
-  Series Database Model - Entities under The Apache Software License, Version 2.0
-  Series Database Model - Hibernate Types under The Apache Software License, Version 2.0
-  Series Database Model - Mappings under The Apache Software License, Version 2.0
+  Sensor Web Server Database Model - Entities under The Apache Software License, Version 2.0
+  Sensor Web Server Database Model - Hibernate Types under The Apache Software License, Version 2.0
+  Sensor Web Server Database Model - Mappings under The Apache Software License, Version 2.0
   SLF4J API Module under MIT License
   SnakeYAML under Apache License, Version 2.0
   SpotBugs Annotations under GNU LESSER GENERAL PUBLIC LICENSE, Version 2.1
@@ -127,8 +130,15 @@ This project includes:
   Spring Transaction under Apache License, Version 2.0
   Spring Web under Apache License, Version 2.0
   Spring Web MVC under Apache License, Version 2.0
+  sta-app under The Apache Software License, Version 2.0
+  sta-core under The Apache Software License, Version 2.0
+  sta-http under The Apache Software License, Version 2.0
+  sta-mqtt under The Apache Software License, Version 2.0
+  sta-webapp under The Apache Software License, Version 2.0
+  StringTemplate 4 under BSD License
   tomcat-embed-core under Apache License, Version 2.0
   tomcat-embed-el under Apache License, Version 2.0
   tomcat-embed-websocket under Apache License, Version 2.0
   TXW2 Runtime under Eclipse Distribution License - v 1.0
+  XmlBeans under The Apache Software License, Version 2.0
 
