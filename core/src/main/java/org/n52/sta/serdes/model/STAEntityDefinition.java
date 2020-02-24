@@ -37,7 +37,6 @@ import java.util.Set;
 @SuppressWarnings("VisibilityModifier")
 public abstract class STAEntityDefinition implements StaConstants {
 
-
     public static String[] ALLCOLLECTIONS = new String[] {
             DATASTREAMS,
             OBSERVATIONS,
@@ -71,6 +70,12 @@ public abstract class STAEntityDefinition implements StaConstants {
     public static String PROP_VALID_TIME = "validTime";
     public static String PROP_METADATA = "metadata";
     public static String PROP_SYMBOL = "symbol";
+
+    private final Set<String> navPropsOptional;
+    private final Set<String> navPropsMandatory;
+    private final Set<String> entityPropsOptional;
+    private final Set<String> entityPropsMandatory;
+
     protected STAEntityDefinition(Set<String> navPropOptional,
                                   Set<String> navPropMandatory,
                                   Set<String> entityPropOptional,
@@ -79,19 +84,6 @@ public abstract class STAEntityDefinition implements StaConstants {
         this.navPropsMandatory = navPropMandatory;
         this.entityPropsOptional = entityPropOptional;
         this.entityPropsMandatory = entityPropMandatory;
-    }
-
-    private final Set<String> navPropsOptional;
-    private final Set<String> navPropsMandatory;
-    private final Set<String> entityPropsOptional;
-    private final Set<String> entityPropsMandatory;
-
-    static Set<String> combineSets(Set<String>... sets) {
-        HashSet<String> result = new HashSet<>();
-        for (Set<String> set : sets) {
-            result.addAll(set);
-        }
-        return result;
     }
 
     public Set<String> getNavPropsOptional() {
@@ -108,5 +100,13 @@ public abstract class STAEntityDefinition implements StaConstants {
 
     public Set<String> getEntityPropsMandatory() {
         return entityPropsMandatory;
+    }
+
+    static Set<String> combineSets(Set<String>... sets) {
+        HashSet<String> result = new HashSet<>();
+        for (Set<String> set : sets) {
+            result.addAll(set);
+        }
+        return result;
     }
 }

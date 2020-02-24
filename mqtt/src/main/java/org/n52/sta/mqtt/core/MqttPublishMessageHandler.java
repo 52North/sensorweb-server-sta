@@ -29,11 +29,9 @@
 
 package org.n52.sta.mqtt.core;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.moquette.interception.messages.InterceptPublishMessage;
 import org.n52.series.db.beans.IdEntity;
-import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
