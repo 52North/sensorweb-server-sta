@@ -34,7 +34,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.moquette.interception.messages.InterceptPublishMessage;
 import org.n52.series.db.beans.IdEntity;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
-import org.n52.shetland.ogc.sta.exception.STAInvalidUrlThrowable;
+import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.serdes.model.STAEntityDefinition;
@@ -83,6 +83,7 @@ public class MqttPublishMessageHandler implements STARequestUtils {
 
     /**
      * Validates that topics only include STA collections
+     *
      * @param topics list of wanted topics
      */
     private boolean validateTopics(Set<String> topics) {
@@ -115,9 +116,9 @@ public class MqttPublishMessageHandler implements STARequestUtils {
                 ((AbstractSensorThingsEntityService<?, T>) serviceRepository.getEntityService(topic))
                         .create(mapper.readValue(msg.getPayload().toString(Charset.defaultCharset()), clazz));
             } else {
-                throw new STAInvalidUrlThrowable("Topic does not reference a Collection allowed for POSTing via mqtt");
+                throw new STAInvalidUrlException("Topic does not reference a Collection allowed for POSTing via mqtt");
             }
-        } catch (STACRUDException | JsonProcessingException | STAInvalidUrlThrowable e) {
+        } catch (Exception e) {
             LOGGER.error("Creation of Entity {} on topic {} failed with Exception {}!",
                          msg.getPayload().toString(),
                          msg.getTopicName(),

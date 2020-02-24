@@ -42,7 +42,6 @@ import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import io.netty.handler.codec.mqtt.MqttPublishVariableHeader;
 import io.netty.handler.codec.mqtt.MqttQoS;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
-import org.n52.shetland.ogc.sta.exception.STAInvalidUrlThrowable;
 import org.n52.sta.data.STAEventHandler;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
@@ -223,7 +222,7 @@ public class MqttSubscriptionEventHandler implements STARequestUtils, STAEventHa
             }
 
             throw new MqttHandlerException("Error while parsing MQTT topic. Could not identify subscription type!");
-        } catch (Exception | STAInvalidUrlThrowable ex) {
+        } catch (Exception ex) {
             throw new MqttHandlerException("Error while parsing MQTT topic.", ex);
         }
     }

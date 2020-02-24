@@ -33,7 +33,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.n52.series.db.beans.IdEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
-import org.n52.shetland.ogc.sta.exception.STAInvalidUrlThrowable;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.serdes.EntityPatch;
@@ -99,7 +98,7 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
                                     @PathVariable String id,
                                     @RequestBody String body,
                                     HttpServletRequest request)
-            throws STACRUDException, IOException, STAInvalidUrlThrowable {
+            throws Exception {
         validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
         Class<EntityPatch> clazz = collectionNameToPatchClass(collectionName);
         ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
@@ -131,7 +130,7 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
                                      @PathVariable String target,
                                      @RequestBody String body,
                                      HttpServletRequest request)
-            throws STACRUDException, IOException, STAInvalidUrlThrowable {
+            throws Exception {
         validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
 
         String sourceType = entity.substring(0, entity.indexOf("("));
@@ -172,7 +171,7 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
     public Object handleDelete(@PathVariable String collectionName,
                                @PathVariable String id,
                                HttpServletRequest request)
-            throws STACRUDException, STAInvalidUrlThrowable {
+            throws Exception {
         validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
         serviceRepository.getEntityService(collectionName).delete(id.substring(1, id.length() - 1));
         return null;
@@ -198,7 +197,7 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
                                       @PathVariable String target,
                                       @RequestBody String body,
                                       HttpServletRequest request)
-            throws STACRUDException, STAInvalidUrlThrowable {
+            throws Exception {
         validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
 
         String sourceType = entity.substring(0, entity.indexOf("("));

@@ -38,7 +38,8 @@ import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
-import org.n52.shetland.ogc.sta.exception.STAInvalidUrlThrowable;
+import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
+import org.n52.shetland.ogc.sta.exception.STANotFoundException;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.serdes.DatastreamSerDes;
 import org.n52.sta.serdes.FeatureOfInterestSerDes;
@@ -450,10 +451,10 @@ public interface STARequestUtils extends StaConstants {
     default void validateURL(StringBuffer requestURL,
                              EntityServiceRepository serviceRepository,
                              int rootUrlLength)
-            throws STAInvalidUrlThrowable {
+            throws Exception {
         String[] uriResources = requestURL.substring(rootUrlLength).split(SLASH);
 
-        STAInvalidUrlThrowable ex;
+        Exception ex;
         ex = validateURISyntax(uriResources);
         if (ex != null) {
             throw ex;
@@ -470,7 +471,7 @@ public interface STARequestUtils extends StaConstants {
      * @param uriResources URI of the Request split by SLASH
      * @return STAInvalidUrlException if URI is malformed
      */
-    default STAInvalidUrlThrowable validateURISyntax(String[] uriResources) {
+    default STAInvalidUrlException validateURISyntax(String[] uriResources) {
         // Validate URL syntax via Regex
         // Skip validation if no navigationPath is provided as Spring already validated syntax
         if (uriResources.length > 1) {
@@ -491,14 +492,14 @@ public interface STARequestUtils extends StaConstants {
                                 || BY_OBSER_PROP_PATTERN.matcher(resource).matches()
                                 || BY_SENSOR_PATTERN.matcher(resource).matches()
                                 || BY_OBSER_PROP_PATTERN.matcher(resource).matches())) {
-                            return new STAInvalidUrlThrowable(URL_INVALID
+                            return new STAInvalidUrlException(URL_INVALID
                                                                       + uriResources[i - 1]
                                                                       + SLASH + uriResources[i]
                                                                       + " is not a valid resource path.");
 
                         }
                     } else {
-                        return new STAInvalidUrlThrowable(URL_INVALID
+                        return new STAInvalidUrlException(URL_INVALID
                                                                   + uriResources[i]
                                                                   + " is not a valid resource.");
                     }
@@ -517,7 +518,7 @@ public interface STARequestUtils extends StaConstants {
      * @param uriResources URI of the Request split by SLASH
      * @return STAInvalidUrlException if URI is malformed
      */
-    default STAInvalidUrlThrowable validateURISemantic(String[] uriResources,
+    default Exception validateURISemantic(String[] uriResources,
                                                        EntityServiceRepository serviceRepository) {
         // Check if this is Request to root collection. They are always valid
         if (uriResources.length == 1 && !uriResources[0].contains(ROUND_BRACKET_OPEN)) {
@@ -529,7 +530,7 @@ public interface STARequestUtils extends StaConstants {
         String sourceType = sourceEntity[0];
 
         if (!serviceRepository.getEntityService(sourceType).existsEntity(sourceId)) {
-            return createInvalidUrlExceptionNoEntity(uriResources[0]);
+            return createNotFoundExceptionNoEntity(uriResources[0]);
         }
 
         // Iterate over the rest of the uri validating each resource
@@ -544,7 +545,7 @@ public interface STARequestUtils extends StaConstants {
                 targetId = serviceRepository.getEntityService(targetType)
                                             .getEntityIdByRelatedEntity(sourceId, sourceType);
                 if (targetId == null) {
-                    return createInvalidUrlExceptionNoEntitAssociated(uriResources[i], uriResources[i - 1]);
+                    return createInvalidUrlExceptionNoEntityAssociated(uriResources[i], uriResources[i - 1]);
                 }
             } else {
                 // Resource is addressed by Id directly
@@ -553,7 +554,7 @@ public interface STARequestUtils extends StaConstants {
                 targetId = targetEntity[1].replace(ROUND_BRACKET_CLOSE, "");
                 if (!serviceRepository.getEntityService(targetType)
                                       .existsEntityByRelatedEntity(sourceId, sourceType, targetId)) {
-                    return createInvalidUrlExceptionNoEntitAssociated(uriResources[i], uriResources[i - 1]);
+                    return createInvalidUrlExceptionNoEntityAssociated(uriResources[i], uriResources[i - 1]);
                 }
             }
 
@@ -565,12 +566,12 @@ public interface STARequestUtils extends StaConstants {
         return null;
     }
 
-    default STAInvalidUrlThrowable createInvalidUrlExceptionNoEntity(String entity) {
-        return new STAInvalidUrlThrowable("No Entity: " + entity + " found!");
+    default STANotFoundException createNotFoundExceptionNoEntity(String entity) {
+        return new STANotFoundException("No Entity: " + entity + " found!");
     }
 
-    default STAInvalidUrlThrowable createInvalidUrlExceptionNoEntitAssociated(String first, String last) {
-        return createInvalidUrlExceptionNoEntity(first + " associated with " + last);
+    default STAInvalidUrlException createInvalidUrlExceptionNoEntityAssociated(String first, String last) {
+        return new STAInvalidUrlException(first + " associated with " + last);
     }
 
     default String[] splitId(String entity) {

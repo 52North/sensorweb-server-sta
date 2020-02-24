@@ -30,8 +30,6 @@
 package org.n52.sta.service;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
-import org.n52.shetland.ogc.sta.exception.STACRUDException;
-import org.n52.shetland.ogc.sta.exception.STAInvalidUrlThrowable;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.utils.STARequestUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -68,7 +66,7 @@ public class STAEntityRequestHandler implements STARequestUtils {
     )
     public Object readEntityDirect(@PathVariable String entity,
                                    @PathVariable String id,
-                                   HttpServletRequest request) throws STACRUDException, STAInvalidUrlThrowable {
+                                   HttpServletRequest request) throws Exception {
         validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
 
         String entityId = id.substring(1, id.length() - 1);
@@ -102,7 +100,7 @@ public class STAEntityRequestHandler implements STARequestUtils {
     public Object readRelatedEntity(@PathVariable String entity,
                                     @PathVariable String target,
                                     HttpServletRequest request)
-            throws STACRUDException, STAInvalidUrlThrowable {
+            throws Exception {
 
         validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
 

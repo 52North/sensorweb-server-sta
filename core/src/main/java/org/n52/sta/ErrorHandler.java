@@ -36,7 +36,8 @@ import org.hibernate.exception.DataException;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
-import org.n52.shetland.ogc.sta.exception.STAInvalidUrlThrowable;
+import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
+import org.n52.shetland.ogc.sta.exception.STANotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -53,14 +54,14 @@ import javax.persistence.PersistenceException;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @ControllerAdvice
-public class ControllerConfig {
+public class ErrorHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ControllerConfig.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ErrorHandler.class);
 
     private final ObjectMapper mapper;
     private final HttpHeaders headers;
 
-    public ControllerConfig(ObjectMapper mapper) {
+    public ErrorHandler(ObjectMapper mapper) {
         this.mapper = mapper;
         headers = new HttpHeaders();
         headers.add("Content-Type", "application/json");
@@ -93,8 +94,17 @@ public class ControllerConfig {
                                     HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(value = STAInvalidUrlThrowable.class)
-    public ResponseEntity<Object> staInvalidUrlException(STAInvalidUrlThrowable exception) {
+    @ExceptionHandler(value = STANotFoundException.class)
+    public ResponseEntity<Object> staNotFoundException(STANotFoundException exception) {
+        String msg = createErrorMessage(exception.getClass().getName(), exception.getMessage());
+        LOGGER.debug(msg, exception);
+        return new ResponseEntity<>(msg,
+                                    headers,
+                                    HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(value = STAInvalidUrlException.class)
+    public ResponseEntity<Object> staInvalidUrlException(STAInvalidUrlException exception) {
         String msg = createErrorMessage(exception.getClass().getName(), exception.getMessage());
         LOGGER.debug(msg, exception);
         return new ResponseEntity<>(msg,

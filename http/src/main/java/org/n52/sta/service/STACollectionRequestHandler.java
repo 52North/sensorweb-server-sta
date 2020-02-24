@@ -31,7 +31,7 @@ package org.n52.sta.service;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
-import org.n52.shetland.ogc.sta.exception.STAInvalidUrlThrowable;
+import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.n52.sta.utils.STARequestUtils;
@@ -105,7 +105,7 @@ public class STACollectionRequestHandler implements STARequestUtils {
     public Object readRelatedCollection(@PathVariable String entity,
                                         @PathVariable String target,
                                         HttpServletRequest request)
-            throws STACRUDException, STAInvalidUrlThrowable {
+            throws Exception {
 
         validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
 
