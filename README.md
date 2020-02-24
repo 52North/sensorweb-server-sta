@@ -6,14 +6,14 @@ Implementation of the [OGC SensorThings API Part I: Sensing](https://github.com/
 
 | Conformance Class                     | Reference | Implemented |Test Status |
 |:--------------------------------------|:---------:|:-----------:|-----------:|
-| Sensing Core                          | A.1       | Yes         |   0 / 6    |
-| Create-Update-Delete                  | A.2       | Yes         |   8 / 8    |
-| Filtering Extension                   | A.3       | No          |   0 / 8    |
+| Sensing Core                          | A.1       | Partial     |   4 / 6    |
+| Filtering Extension                   | A.2       | Partial     |   0 / 8    |
+| Create-Update-Delete                  | A.3       | Yes         |   8 / 8    |
 | Batch Requests                        | A.4       | No          |   0 / ?    |
 | MultiDatastream Extension             | A.5       | No          |   0 / ?    |
 | DataArray Extension                   | A.6       | No          |   0 / ?    |
 | Observation Creation via MQTT         | A.7       | Yes         |   0 / 1    |
-| Receiving Updates via MQTT            | A.8       | Yes          |   0 / 5    |
+| Receiving Updates via MQTT            | A.8       | Yes         |   0 / 5    |
 
 ## Docker 
 A dockerfile for building the App is provided in the root directory.

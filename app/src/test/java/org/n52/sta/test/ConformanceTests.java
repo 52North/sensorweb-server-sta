@@ -20,6 +20,7 @@ package org.n52.sta.test;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -256,6 +257,10 @@ abstract class ConformanceTests implements TestUtil {
         }
     }
 
+    protected JsonNode getEntity(Conformance2.EntityType type, String id) throws IOException {
+        return getEntity(endpoints.get(type) + "(" + id + ")");
+    }
+
     protected JsonNode getEntity(String path) throws IOException {
         HttpGet request = new HttpGet(rootUrl + path);
         HttpResponse response = HttpClientBuilder.create().build().execute(request);
@@ -271,7 +276,40 @@ abstract class ConformanceTests implements TestUtil {
         return mapper.readTree(response.getEntity().getContent());
     }
 
-    protected ArrayNode getCollection(Conformance2.EntityType type) throws IOException {
+    protected JsonNode getRootResponse() throws IOException {
+        HttpGet request = new HttpGet(rootUrl);
+        HttpResponse response = HttpClientBuilder.create().build().execute(request);
+
+        // Check Response MIME Type
+        String mimeType = ContentType.getOrDefault(response.getEntity()).getMimeType();
+        Assertions.assertEquals(jsonMimeType, mimeType);
+
+        Assertions.assertEquals(200,
+                                response.getStatusLine().getStatusCode(),
+                                "ERROR: Did not receive 200 OK for path: " + rootUrl
+                                        + " Instead received Status Code: " + response.getStatusLine().getStatusCode());
+        return mapper.readTree(response.getEntity().getContent());
+    }
+
+    protected void getNonExistentEntity(EntityType type) throws IOException {
+        HttpGet request = new HttpGet(rootUrl
+                                              + endpoints.get(type)
+                                              + "(aaaaaa)");
+        HttpResponse response = HttpClientBuilder.create().build().execute(request);
+
+        // Check Response MIME Type
+        String mimeType = ContentType.getOrDefault(response.getEntity()).getMimeType();
+        Assertions.assertEquals(jsonMimeType, mimeType);
+
+        Assertions.assertEquals(404,
+                                response.getStatusLine().getStatusCode(),
+                                "ERROR: Did not receive 404 NOT FOUND for path: "
+                                        + endpoints.get(type)
+                                        + "(aaaaaa)"
+                                        + " Instead received Status Code: " + response.getStatusLine().getStatusCode());
+    }
+
+    protected JsonNode getCollection(Conformance2.EntityType type) throws IOException {
         HttpGet request = new HttpGet(rootUrl + endpoints.get(type));
         HttpResponse response = HttpClientBuilder.create().build().execute(request);
 
@@ -283,7 +321,7 @@ abstract class ConformanceTests implements TestUtil {
                                 response.getStatusLine().getStatusCode(),
                                 "ERROR: Did not receive 200 OK for path: " + rootUrl + endpoints.get(type)
                                         + " Instead received Status Code: " + response.getStatusLine().getStatusCode());
-        return (ArrayNode) mapper.readTree(response.getEntity().getContent());
+        return mapper.readTree(response.getEntity().getContent());
     }
 
 }
