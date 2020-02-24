@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.serdes.model;
 
 import java.util.Arrays;
@@ -34,24 +35,42 @@ import java.util.HashSet;
 import java.util.Set;
 
 @SuppressWarnings("VisibilityModifier")
-public class HistoricalLocationEntityDefinition extends STAEntityDefinition {
+public class HistoricalLocationEntityDefinition implements STAEntityDefinition {
 
     public static final String ENTITY_NAME = HISTORICAL_LOCATION;
 
     public static final String ENTITY_SET_NAME = HISTORICAL_LOCATIONS;
 
-    private static final String[] NAV_PROPS = new String[] {
+    private static final String[] NAV_PROPS_MANDATORY = new String[] {
             THING,
             LOCATIONS
     };
 
-    private static final String[] ENTITY_PROPS = new String[] {
+    private static final String[] NAV_PROPS_OPTIONAL = new String[] {};
+
+    private static final String[] ENTITY_PROPS_MANDATORY = new String[] {
             PROP_TIME
     };
 
+    private static final String[] ENTITY_PROPS_OPTIONAL = new String[] {};
+
+    public static final Set<String> NAVIGATION_PROPERTIES_OPTIONAL =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(NAV_PROPS_OPTIONAL)));
+
+    public static final Set<String> NAVIGATION_PROPERTIES_MANDATORY =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(NAV_PROPS_MANDATORY)));
+
     public static final Set<String> NAVIGATION_PROPERTIES =
-            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(NAV_PROPS)));
+            Collections.unmodifiableSet(STAEntityDefinition.combineSets(NAVIGATION_PROPERTIES_OPTIONAL,
+                                                                        NAVIGATION_PROPERTIES_MANDATORY));
+
+    public static final Set<String> ENTITY_PROPERTIES_OPTIONAL =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(ENTITY_PROPS_OPTIONAL)));
+
+    public static final Set<String> ENTITY_PROPERTIES_MANDATORY =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(ENTITY_PROPS_MANDATORY)));
 
     public static final Set<String> ENTITY_PROPERTIES =
-            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(ENTITY_PROPS)));
+            Collections.unmodifiableSet(STAEntityDefinition.combineSets(ENTITY_PROPERTIES_OPTIONAL,
+                                                                        ENTITY_PROPERTIES_MANDATORY));
 }

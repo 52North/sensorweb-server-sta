@@ -26,14 +26,18 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.serdes.model;
 
 import org.n52.shetland.ogc.sta.StaConstants;
 
-@SuppressWarnings("VisibilityModifier")
-public abstract class STAEntityDefinition implements StaConstants {
+import java.util.HashSet;
+import java.util.Set;
 
-    public static final String[] ALLCOLLECTIONS = new String[] {
+@SuppressWarnings("VisibilityModifier")
+public interface STAEntityDefinition extends StaConstants {
+
+     String[] ALLCOLLECTIONS = new String[] {
             DATASTREAMS,
             OBSERVATIONS,
             THINGS,
@@ -45,25 +49,33 @@ public abstract class STAEntityDefinition implements StaConstants {
     };
 
     // Entity Property Names
-    public static final String PROP_ID = "id";
-    public static final String PROP_SELF_LINK = "selfLink";
-    public static final String PROP_DEFINITION = "definition";
-    public static final String PROP_DESCRIPTION = "description";
-    public static final String PROP_ENCODINGTYPE = "encodingType";
-    public static final String PROP_FEATURE = "feature";
-    public static final String PROP_LOCATION = "location";
-    public static final String PROP_NAME = "name";
-    public static final String PROP_OBSERVATION_TYPE = "observationType";
-    public static final String PROP_OBSERVED_AREA = "observedArea";
-    public static final String PROP_PARAMETERS = "parameters";
-    public static final String PROP_PHENOMENON_TIME = "phenomenonTime";
-    public static final String PROP_PROPERTIES = "properties";
-    public static final String PROP_RESULT = "result";
-    public static final String PROP_RESULT_QUALITY = "resultQuality";
-    public static final String PROP_RESULT_TIME = "resultTime";
-    public static final String PROP_TIME = "time";
-    public static final String PROP_UOM = "unitOfMeasurement";
-    public static final String PROP_VALID_TIME = "validTime";
-    public static final String PROP_METADATA = "metadata";
-    public static final String PROP_SYMBOL = "symbol";
+     String PROP_ID = "id";
+     String PROP_SELF_LINK = "selfLink";
+     String PROP_DEFINITION = "definition";
+     String PROP_DESCRIPTION = "description";
+     String PROP_ENCODINGTYPE = "encodingType";
+     String PROP_FEATURE = "feature";
+     String PROP_LOCATION = "location";
+     String PROP_NAME = "name";
+     String PROP_OBSERVATION_TYPE = "observationType";
+     String PROP_OBSERVED_AREA = "observedArea";
+     String PROP_PARAMETERS = "parameters";
+     String PROP_PHENOMENON_TIME = "phenomenonTime";
+     String PROP_PROPERTIES = "properties";
+     String PROP_RESULT = "result";
+     String PROP_RESULT_QUALITY = "resultQuality";
+     String PROP_RESULT_TIME = "resultTime";
+     String PROP_TIME = "time";
+     String PROP_UOM = "unitOfMeasurement";
+     String PROP_VALID_TIME = "validTime";
+     String PROP_METADATA = "metadata";
+     String PROP_SYMBOL = "symbol";
+
+    static Set<String> combineSets(Set<String>... sets) {
+        HashSet<String> result = new HashSet<>();
+        for (Set<String> set : sets) {
+            result.addAll(set);
+        }
+        return result;
+    }
 }
