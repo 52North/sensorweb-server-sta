@@ -31,9 +31,8 @@ package org.n52.sta.service;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
-import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
+import org.n52.sta.data.service.CollectionWrapper;
 import org.n52.sta.data.service.EntityServiceRepository;
-import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.n52.sta.utils.STARequestUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,7 +41,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.net.URLDecoder;
-import java.util.List;
 
 @RestController
 public class STACollectionRequestHandler implements STARequestUtils {
@@ -62,13 +60,14 @@ public class STACollectionRequestHandler implements STARequestUtils {
      *
      * @param collectionName name of the collection. Automatically set by Spring via @PathVariable
      * @param request        Full request
+     * @return
      */
     @GetMapping(
             value = "/{collectionName:" + BASE_COLLECTION_REGEX + "}",
             produces = "application/json"
     )
-    public List<ElementWithQueryOptions> readCollectionDirect(@PathVariable String collectionName,
-                                                              HttpServletRequest request)
+    public CollectionWrapper readCollectionDirect(@PathVariable String collectionName,
+                                                  HttpServletRequest request)
             throws STACRUDException {
         String queryString = request.getQueryString();
         QueryOptions options;
@@ -79,7 +78,8 @@ public class STACollectionRequestHandler implements STARequestUtils {
         }
         return serviceRepository
                 .getEntityService(collectionName)
-                .getEntityCollection(options);
+                .getEntityCollection(options)
+                .setRequestURL(request.getRequestURL().toString());
     }
 
     /**
@@ -102,9 +102,9 @@ public class STACollectionRequestHandler implements STARequestUtils {
             },
             produces = "application/json"
     )
-    public Object readRelatedCollection(@PathVariable String entity,
-                                        @PathVariable String target,
-                                        HttpServletRequest request)
+    public CollectionWrapper readRelatedCollection(@PathVariable String entity,
+                                                   @PathVariable String target,
+                                                   HttpServletRequest request)
             throws Exception {
 
         validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
@@ -123,6 +123,7 @@ public class STACollectionRequestHandler implements STARequestUtils {
         return serviceRepository.getEntityService(target)
                                 .getEntityCollectionByRelatedEntity(sourceId,
                                                                     sourceType,
-                                                                    options);
+                                                                    options)
+                                .setRequestURL(request.getRequestURL().toString());
     }
 }

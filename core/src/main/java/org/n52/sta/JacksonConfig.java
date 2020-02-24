@@ -42,6 +42,8 @@ import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
+import org.n52.sta.data.service.CollectionWrapper;
+import org.n52.sta.serdes.CollectionSer;
 import org.n52.sta.serdes.DatastreamSerDes;
 import org.n52.sta.serdes.FeatureOfInterestSerDes;
 import org.n52.sta.serdes.HistoricalLocationSerDes;
@@ -64,11 +66,12 @@ public class JacksonConfig {
     public ObjectMapper customMapper(@Value("${server.rootUrl}") String rootUrl) {
         ArrayList<Module> modules = new ArrayList<>();
 
-        //CollectionType Serialization
         SimpleModule module = new SimpleModule();
+
 
         // Register Serializers/Deserializers for all custom types
         SimpleSerializers serializers = new SimpleSerializers();
+        serializers.addSerializer(new CollectionSer(CollectionWrapper.class));
         serializers.addSerializer(new ThingSerDes.ThingSerializer(rootUrl));
         serializers.addSerializer(new LocationSerDes.LocationSerializer(rootUrl));
         serializers.addSerializer(new SensorSerDes.SensorSerializer(rootUrl));

@@ -51,6 +51,7 @@ import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.serdes.model.ElementWithQueryOptions;
 import org.n52.svalbard.odata.expr.Expr;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -61,7 +62,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.PostConstruct;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -133,13 +133,15 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      * @return the full EntityCollection
      * @throws STACRUDException if the queryOptions are invalid
      */
-    public List<ElementWithQueryOptions> getEntityCollection(QueryOptions queryOptions) throws STACRUDException {
+    public CollectionWrapper getEntityCollection(QueryOptions queryOptions) throws STACRUDException {
         try {
-            Specification<S> filter = getFilterPredicate(entityClass, queryOptions);
-            return getRepository()
-                    .findAll(filter, createPageableRequest(queryOptions), defaultFetchGraphs)
-                    .map((S e) -> createWrapper(e, queryOptions))
-                    .getContent();
+            Page<S> pages = getRepository().findAll(getFilterPredicate(entityClass, queryOptions),
+                                                    createPageableRequest(queryOptions),
+                                                    defaultFetchGraphs);
+            return new CollectionWrapper(pages.getTotalElements(),
+                                         pages.map((S e) -> createWrapper(e, queryOptions))
+                                              .getContent(),
+                                         pages.hasNext());
         } catch (RuntimeException e) {
             throw new STACRUDException(e.getMessage());
         }
@@ -223,17 +225,19 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      * @return List of Entities that match
      * @throws STACRUDException if the queryOptions are invalid
      */
-    public List<ElementWithQueryOptions> getEntityCollectionByRelatedEntity(String relatedId,
-                                                                            String relatedType,
-                                                                            QueryOptions queryOptions)
+    public CollectionWrapper getEntityCollectionByRelatedEntity(String relatedId,
+                                                                String relatedType,
+                                                                QueryOptions queryOptions)
             throws STACRUDException {
         try {
-            return getRepository()
+            Page<S> pages = getRepository()
                     .findAll(byRelatedEntityFilter(relatedId, relatedType, null),
                              createPageableRequest(queryOptions),
-                             defaultFetchGraphs)
-                    .map((S e) -> createWrapper(e, queryOptions))
-                    .getContent();
+                             defaultFetchGraphs);
+            return new CollectionWrapper(pages.getTotalElements(),
+                                         pages.map((S e) -> createWrapper(e, queryOptions))
+                                              .getContent(),
+                                         pages.hasNext());
 
         } catch (RuntimeException e) {
             throw new STACRUDException(e.getMessage());
