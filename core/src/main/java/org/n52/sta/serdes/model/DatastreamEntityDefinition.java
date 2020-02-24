@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.serdes.model;
 
 import java.util.Arrays;
@@ -34,7 +35,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @SuppressWarnings("VisibilityModifier")
-public class DatastreamEntityDefinition implements STAEntityDefinition {
+public class DatastreamEntityDefinition extends STAEntityDefinition {
 
     public static final String ENTITY_NAME = DATASTREAM;
 
@@ -82,4 +83,11 @@ public class DatastreamEntityDefinition implements STAEntityDefinition {
     public static final Set<String> ENTITY_PROPERTIES =
             Collections.unmodifiableSet(STAEntityDefinition.combineSets(ENTITY_PROPERTIES_OPTIONAL,
                                                                         ENTITY_PROPERTIES_MANDATORY));
+
+    public DatastreamEntityDefinition() {
+        super(NAVIGATION_PROPERTIES_OPTIONAL,
+              NAVIGATION_PROPERTIES_MANDATORY,
+              ENTITY_PROPERTIES_OPTIONAL,
+              ENTITY_PROPERTIES_MANDATORY);
+    }
 }

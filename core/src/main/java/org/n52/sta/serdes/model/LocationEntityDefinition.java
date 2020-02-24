@@ -35,7 +35,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @SuppressWarnings("VisibilityModifier")
-public class LocationEntityDefinition implements STAEntityDefinition {
+public class LocationEntityDefinition extends STAEntityDefinition {
 
     public static final String ENTITY_NAME = LOCATION;
 
@@ -76,4 +76,11 @@ public class LocationEntityDefinition implements STAEntityDefinition {
     public static final Set<String> ENTITY_PROPERTIES =
             Collections.unmodifiableSet(STAEntityDefinition.combineSets(ENTITY_PROPERTIES_OPTIONAL,
                                                                         ENTITY_PROPERTIES_MANDATORY));
+
+    public LocationEntityDefinition() {
+        super(NAVIGATION_PROPERTIES_OPTIONAL,
+              NAVIGATION_PROPERTIES_MANDATORY,
+              ENTITY_PROPERTIES_OPTIONAL,
+              ENTITY_PROPERTIES_MANDATORY);
+    }
 }

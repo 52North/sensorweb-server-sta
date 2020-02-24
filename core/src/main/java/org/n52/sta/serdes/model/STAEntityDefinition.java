@@ -35,9 +35,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 @SuppressWarnings("VisibilityModifier")
-public interface STAEntityDefinition extends StaConstants {
+public abstract class STAEntityDefinition implements StaConstants {
 
-     String[] ALLCOLLECTIONS = new String[] {
+
+    public static String[] ALLCOLLECTIONS = new String[] {
             DATASTREAMS,
             OBSERVATIONS,
             THINGS,
@@ -49,27 +50,41 @@ public interface STAEntityDefinition extends StaConstants {
     };
 
     // Entity Property Names
-     String PROP_ID = "id";
-     String PROP_SELF_LINK = "selfLink";
-     String PROP_DEFINITION = "definition";
-     String PROP_DESCRIPTION = "description";
-     String PROP_ENCODINGTYPE = "encodingType";
-     String PROP_FEATURE = "feature";
-     String PROP_LOCATION = "location";
-     String PROP_NAME = "name";
-     String PROP_OBSERVATION_TYPE = "observationType";
-     String PROP_OBSERVED_AREA = "observedArea";
-     String PROP_PARAMETERS = "parameters";
-     String PROP_PHENOMENON_TIME = "phenomenonTime";
-     String PROP_PROPERTIES = "properties";
-     String PROP_RESULT = "result";
-     String PROP_RESULT_QUALITY = "resultQuality";
-     String PROP_RESULT_TIME = "resultTime";
-     String PROP_TIME = "time";
-     String PROP_UOM = "unitOfMeasurement";
-     String PROP_VALID_TIME = "validTime";
-     String PROP_METADATA = "metadata";
-     String PROP_SYMBOL = "symbol";
+    public static String PROP_ID = "id";
+    public static String PROP_SELF_LINK = "selfLink";
+    public static String PROP_DEFINITION = "definition";
+    public static String PROP_DESCRIPTION = "description";
+    public static String PROP_ENCODINGTYPE = "encodingType";
+    public static String PROP_FEATURE = "feature";
+    public static String PROP_LOCATION = "location";
+    public static String PROP_NAME = "name";
+    public static String PROP_OBSERVATION_TYPE = "observationType";
+    public static String PROP_OBSERVED_AREA = "observedArea";
+    public static String PROP_PARAMETERS = "parameters";
+    public static String PROP_PHENOMENON_TIME = "phenomenonTime";
+    public static String PROP_PROPERTIES = "properties";
+    public static String PROP_RESULT = "result";
+    public static String PROP_RESULT_QUALITY = "resultQuality";
+    public static String PROP_RESULT_TIME = "resultTime";
+    public static String PROP_TIME = "time";
+    public static String PROP_UOM = "unitOfMeasurement";
+    public static String PROP_VALID_TIME = "validTime";
+    public static String PROP_METADATA = "metadata";
+    public static String PROP_SYMBOL = "symbol";
+    protected STAEntityDefinition(Set<String> navPropOptional,
+                                  Set<String> navPropMandatory,
+                                  Set<String> entityPropOptional,
+                                  Set<String> entityPropMandatory) {
+        this.navPropsOptional = navPropOptional;
+        this.navPropsMandatory = navPropMandatory;
+        this.entityPropsOptional = entityPropOptional;
+        this.entityPropsMandatory = entityPropMandatory;
+    }
+
+    private final Set<String> navPropsOptional;
+    private final Set<String> navPropsMandatory;
+    private final Set<String> entityPropsOptional;
+    private final Set<String> entityPropsMandatory;
 
     static Set<String> combineSets(Set<String>... sets) {
         HashSet<String> result = new HashSet<>();
@@ -77,5 +92,21 @@ public interface STAEntityDefinition extends StaConstants {
             result.addAll(set);
         }
         return result;
+    }
+
+    public Set<String> getNavPropsOptional() {
+        return navPropsOptional;
+    }
+
+    public Set<String> getNavPropsMandatory() {
+        return navPropsMandatory;
+    }
+
+    public Set<String> getEntityPropsOptional() {
+        return entityPropsOptional;
+    }
+
+    public Set<String> getEntityPropsMandatory() {
+        return entityPropsMandatory;
     }
 }

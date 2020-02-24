@@ -35,7 +35,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @SuppressWarnings("VisibilityModifier")
-public class ThingEntityDefinition implements STAEntityDefinition {
+public class ThingEntityDefinition extends STAEntityDefinition {
 
     public static final String ENTITY_NAME = THING;
 
@@ -81,4 +81,12 @@ public class ThingEntityDefinition implements STAEntityDefinition {
     public static final Set<String> ENTITY_PROPERTIES =
             Collections.unmodifiableSet(STAEntityDefinition.combineSets(ENTITY_PROPERTIES_OPTIONAL,
                                                                         ENTITY_PROPERTIES_MANDATORY));
+
+    public ThingEntityDefinition() {
+        super(NAVIGATION_PROPERTIES_OPTIONAL,
+              NAVIGATION_PROPERTIES_MANDATORY,
+              ENTITY_PROPERTIES_OPTIONAL,
+              ENTITY_PROPERTIES_MANDATORY);
+    }
+
 }

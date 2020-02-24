@@ -35,7 +35,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @SuppressWarnings("VisibilityModifier")
-public class SensorEntityDefinition implements STAEntityDefinition {
+public class SensorEntityDefinition extends STAEntityDefinition {
 
     public static final String ENTITY_NAME = SENSOR;
 
@@ -75,4 +75,11 @@ public class SensorEntityDefinition implements STAEntityDefinition {
     public static final Set<String> ENTITY_PROPERTIES =
             Collections.unmodifiableSet(STAEntityDefinition.combineSets(ENTITY_PROPERTIES_OPTIONAL,
                                                                         ENTITY_PROPERTIES_MANDATORY));
+
+    public SensorEntityDefinition() {
+        super(NAVIGATION_PROPERTIES_OPTIONAL,
+              NAVIGATION_PROPERTIES_MANDATORY,
+              ENTITY_PROPERTIES_OPTIONAL,
+              ENTITY_PROPERTIES_MANDATORY);
+    }
 }
