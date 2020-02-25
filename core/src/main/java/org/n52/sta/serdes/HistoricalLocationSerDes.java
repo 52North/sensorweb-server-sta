@@ -36,6 +36,8 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
+import org.n52.shetland.filter.AbstractPathFilter;
+import org.n52.shetland.filter.PathFilterItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.model.HistoricalLocationEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
@@ -49,6 +51,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class HistoricalLocationSerDes {
 
@@ -93,12 +96,13 @@ public class HistoricalLocationSerDes {
             Set<String> fieldsToSerialize = null;
             boolean hasSelectOption = false;
             if (options != null) {
-                hasSelectOption = options.hasSelectOption();
-                if (hasSelectOption) {
-                    //TODO: Implement
-                    // fieldsToSerialize = options.getSelectOption();
-                    fieldsToSerialize = new HashSet<>();
-                    LOGGER.error("not implemented!");
+                if (options.hasSelectOption()) {
+                    hasSelectOption = true;
+                    fieldsToSerialize = ((AbstractPathFilter) options.getSelectOption())
+                            .getItems()
+                            .stream()
+                            .map(PathFilterItem::getPath)
+                            .collect(Collectors.toSet());
                 }
             }
             // olingo @iot links

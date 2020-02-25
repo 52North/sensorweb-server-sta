@@ -51,6 +51,8 @@ import org.n52.series.db.beans.ReferencedDataEntity;
 import org.n52.series.db.beans.TextDataEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
+import org.n52.shetland.filter.AbstractPathFilter;
+import org.n52.shetland.filter.PathFilterItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
@@ -69,6 +71,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ObservationSerDes {
 
@@ -111,12 +114,13 @@ public class ObservationSerDes {
             Set<String> fieldsToSerialize = null;
             boolean hasSelectOption = false;
             if (options != null) {
-                hasSelectOption = options.hasSelectOption();
-                if (hasSelectOption) {
-                    //TODO: Implement
-                    // fieldsToSerialize = options.getSelectOption();
-                    fieldsToSerialize = new HashSet<>();
-                    LOGGER.error("not implemented!");
+                if (options.hasSelectOption()) {
+                    hasSelectOption = true;
+                    fieldsToSerialize = ((AbstractPathFilter) options.getSelectOption())
+                            .getItems()
+                            .stream()
+                            .map(PathFilterItem::getPath)
+                            .collect(Collectors.toSet());
                 }
             }
             // olingo @iot links

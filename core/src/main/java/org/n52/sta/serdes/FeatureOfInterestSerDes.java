@@ -38,6 +38,8 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.FeatureEntity;
+import org.n52.shetland.filter.AbstractPathFilter;
+import org.n52.shetland.filter.PathFilterItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.model.FeatureOfInterestEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
@@ -51,6 +53,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class FeatureOfInterestSerDes {
 
@@ -99,12 +102,13 @@ public class FeatureOfInterestSerDes {
             Set<String> fieldsToSerialize = null;
             boolean hasSelectOption = false;
             if (options != null) {
-                hasSelectOption = options.hasSelectOption();
-                if (hasSelectOption) {
-                    //TODO: Implement
-                    // fieldsToSerialize = options.getSelectOption();
-                    fieldsToSerialize = new HashSet<>();
-                    LOGGER.error("not implemented!");
+                if (options.hasSelectOption()) {
+                    hasSelectOption = true;
+                    fieldsToSerialize = ((AbstractPathFilter) options.getSelectOption())
+                            .getItems()
+                            .stream()
+                            .map(PathFilterItem::getPath)
+                            .collect(Collectors.toSet());
                 }
             }
             // olingo @iot links
