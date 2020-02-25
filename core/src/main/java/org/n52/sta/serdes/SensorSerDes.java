@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.serdes;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -38,11 +39,12 @@ import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.shetland.ogc.sta.model.SensorEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONSensor;
-import org.n52.sta.serdes.model.ElementWithQueryOptions.SensorWithQueryOptions;
-import org.n52.sta.serdes.model.STAEntityDefinition;
-import org.n52.sta.serdes.model.SensorEntityDefinition;
+import org.n52.sta.serdes.util.ElementWithQueryOptions.SensorWithQueryOptions;
+import org.n52.sta.serdes.util.EntityPatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,13 +57,14 @@ public class SensorSerDes {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SensorSerDes.class);
 
+
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     public static class SensorEntityPatch extends SensorEntity implements EntityPatch<SensorEntity> {
 
         private static final long serialVersionUID = 2966462269307558981L;
         private final SensorEntity entity;
 
-        SensorEntityPatch (SensorEntity entity) {
+        SensorEntityPatch(SensorEntity entity) {
             this.entity = entity;
         }
 
@@ -69,6 +72,7 @@ public class SensorSerDes {
             return entity;
         }
     }
+
 
     public static class SensorSerializer extends AbstractSTASerializer<SensorWithQueryOptions> {
 
@@ -148,6 +152,7 @@ public class SensorSerDes {
         }
     }
 
+
     public static class SensorDeserializer extends StdDeserializer<SensorEntity> {
 
         private static final long serialVersionUID = -6513819346703020350L;
@@ -161,6 +166,7 @@ public class SensorSerDes {
             return p.readValueAs(JSONSensor.class).toEntity(JSONBase.EntityType.FULL);
         }
     }
+
 
     public static class SensorPatchDeserializer extends StdDeserializer<SensorEntityPatch> {
 

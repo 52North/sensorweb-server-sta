@@ -19,20 +19,18 @@ package org.n52.sta.test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.n52.janmayen.http.HTTPMethods;
 import org.n52.shetland.ogc.sta.StaConstants;
-import org.n52.sta.serdes.model.DatastreamEntityDefinition;
-import org.n52.sta.serdes.model.FeatureOfInterestEntityDefinition;
-import org.n52.sta.serdes.model.HistoricalLocationEntityDefinition;
-import org.n52.sta.serdes.model.LocationEntityDefinition;
-import org.n52.sta.serdes.model.ObservationEntityDefinition;
-import org.n52.sta.serdes.model.ObservedPropertyEntityDefinition;
-import org.n52.sta.serdes.model.STAEntityDefinition;
-import org.n52.sta.serdes.model.SensorEntityDefinition;
-import org.n52.sta.serdes.model.ThingEntityDefinition;
+import org.n52.shetland.ogc.sta.model.DatastreamEntityDefinition;
+import org.n52.shetland.ogc.sta.model.FeatureOfInterestEntityDefinition;
+import org.n52.shetland.ogc.sta.model.HistoricalLocationEntityDefinition;
+import org.n52.shetland.ogc.sta.model.LocationEntityDefinition;
+import org.n52.shetland.ogc.sta.model.ObservationEntityDefinition;
+import org.n52.shetland.ogc.sta.model.ObservedPropertyEntityDefinition;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.shetland.ogc.sta.model.SensorEntityDefinition;
+import org.n52.shetland.ogc.sta.model.ThingEntityDefinition;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
@@ -301,49 +299,50 @@ public class Conformance1 extends ConformanceTests implements TestUtil {
      * @param ids         List of ids for teh chain
      */
     private void readRelatedEntity(List<String> entityTypes, List<String> ids) {
-//        if (entityTypes.size() > resourcePathLevel) {
-//            return;
-//        }
-//        try {
-//
-//            getEntity()
-//            String urlString = ServiceURLBuilder.buildURLString(rootUri, entityTypes, ids, null);
-//            Map<String, Object> responseMap = HTTPMethods.doGet(urlString);
-//            Assert.assertEquals(responseMap.get("response-code"),
-//                                200,
-//                                "Reading relation of the entity failed: " + entityTypes.toString());
-//            String response = responseMap.get("response").toString();
-//            if (!entityTypes.get(entityTypes.size() - 1).toLowerCase().equals("featuresofinterest") &&
-//                    !entityTypes.get(entityTypes.size() - 1).endsWith("s")) {
-//                return;
-//            }
-//            Long id = new JSONObject(response.toString()).getJSONArray("value")
-//                                                         .getJSONObject(0)
-//                                                         .getLong(ControlInformation.ID);
-//
-//            //check $ref
-//            urlString = ServiceURLBuilder.buildURLString(rootUri, entityTypes, ids, "$ref");
-//            responseMap = HTTPMethods.doGet(urlString);
-//            Assert.assertEquals(responseMap.get("response-code"),
-//                                200,
-//                                "Reading relation of the entity failed: " + entityTypes.toString());
-//            response = responseMap.get("response").toString();
-//            checkAssociationLinks(response, entityTypes, ids);
-//
-//            if (entityTypes.size() == resourcePathLevel) {
-//                return;
-//            }
-//            ids.add(id);
-//            for (String relation : EntityRelations.getRelationsListFor(entityTypes.get(entityTypes.size() - 1))) {
-//                entityTypes.add(relation);
-//                readRelatedEntity(entityTypes, ids);
-//                entityTypes.remove(entityTypes.size() - 1);
-//            }
-//            ids.remove(ids.size() - 1);
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
-//        }
+        //        if (entityTypes.size() > resourcePathLevel) {
+        //            return;
+        //        }
+        //        try {
+        //
+        //            getEntity()
+        //            String urlString = ServiceURLBuilder.buildURLString(rootUri, entityTypes, ids, null);
+        //            Map<String, Object> responseMap = HTTPMethods.doGet(urlString);
+        //            Assert.assertEquals(responseMap.get("response-code"),
+        //                                200,
+        //                                "Reading relation of the entity failed: " + entityTypes.toString());
+        //            String response = responseMap.get("response").toString();
+        //            if (!entityTypes.get(entityTypes.size() - 1).toLowerCase().equals("featuresofinterest") &&
+        //                    !entityTypes.get(entityTypes.size() - 1).endsWith("s")) {
+        //                return;
+        //            }
+        //            Long id = new JSONObject(response.toString()).getJSONArray("value")
+        //                                                         .getJSONObject(0)
+        //                                                         .getLong(ControlInformation.ID);
+        //
+        //            //check $ref
+        //            urlString = ServiceURLBuilder.buildURLString(rootUri, entityTypes, ids, "$ref");
+        //            responseMap = HTTPMethods.doGet(urlString);
+        //            Assert.assertEquals(responseMap.get("response-code"),
+        //                                200,
+        //                                "Reading relation of the entity failed: " + entityTypes.toString());
+        //            response = responseMap.get("response").toString();
+        //            checkAssociationLinks(response, entityTypes, ids);
+        //
+        //            if (entityTypes.size() == resourcePathLevel) {
+        //                return;
+        //            }
+        //            ids.add(id);
+        //            for (String relation : EntityRelations.getRelationsListFor(entityTypes.get(entityTypes.size() -
+        //            1))) {
+        //                entityTypes.add(relation);
+        //                readRelatedEntity(entityTypes, ids);
+        //                entityTypes.remove(entityTypes.size() - 1);
+        //            }
+        //            ids.remove(ids.size() - 1);
+        //        } catch (JSONException e) {
+        //            e.printStackTrace();
+        //            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+        //        }
 
     }
 

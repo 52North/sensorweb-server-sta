@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.serdes;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -36,11 +37,12 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.sta.model.ObservedPropertyEntityDefinition;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONObservedProperty;
-import org.n52.sta.serdes.model.ElementWithQueryOptions.ObservedPropertyWithQueryOptions;
-import org.n52.sta.serdes.model.ObservedPropertyEntityDefinition;
-import org.n52.sta.serdes.model.STAEntityDefinition;
+import org.n52.sta.serdes.util.ElementWithQueryOptions.ObservedPropertyWithQueryOptions;
+import org.n52.sta.serdes.util.EntityPatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +53,7 @@ import java.util.Set;
 public class ObservedPropertySerDes {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ObservedPropertySerDes.class);
+
 
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     public static class PhenomenonEntityPatch extends PhenomenonEntity implements EntityPatch<PhenomenonEntity> {
@@ -127,6 +130,7 @@ public class ObservedPropertySerDes {
         }
     }
 
+
     public static class ObservedPropertyDeserializer extends StdDeserializer<PhenomenonEntity> {
 
         private static final long serialVersionUID = -1880043109904466341L;
@@ -141,6 +145,7 @@ public class ObservedPropertySerDes {
         }
     }
 
+
     public static class ObservedPropertyPatchDeserializer extends StdDeserializer<PhenomenonEntityPatch> {
 
         private static final long serialVersionUID = 574088735297768175L;
@@ -152,7 +157,7 @@ public class ObservedPropertySerDes {
         @Override
         public PhenomenonEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return new PhenomenonEntityPatch(p.readValueAs(JSONObservedProperty.class)
-                    .toEntity(JSONBase.EntityType.PATCH));
+                                              .toEntity(JSONBase.EntityType.PATCH));
         }
     }
 }

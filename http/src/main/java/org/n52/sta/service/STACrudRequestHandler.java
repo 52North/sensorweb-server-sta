@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,8 +36,8 @@ import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
-import org.n52.sta.serdes.EntityPatch;
-import org.n52.sta.serdes.model.ElementWithQueryOptions;
+import org.n52.sta.serdes.util.ElementWithQueryOptions;
+import org.n52.sta.serdes.util.EntityPatch;
 import org.n52.sta.utils.STARequestUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
@@ -94,10 +95,10 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
             produces = "application/json"
     )
     @SuppressWarnings("unchecked")
-    public Object handleDirectPatch(@PathVariable String collectionName,
-                                    @PathVariable String id,
-                                    @RequestBody String body,
-                                    HttpServletRequest request)
+    public ElementWithQueryOptions handleDirectPatch(@PathVariable String collectionName,
+                                                     @PathVariable String id,
+                                                     @RequestBody String body,
+                                                     HttpServletRequest request)
             throws Exception {
         validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
         Class<EntityPatch> clazz = collectionNameToPatchClass(collectionName);
@@ -119,17 +120,18 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
      * @param request full request
      */
     @PatchMapping(
-            value = {MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
+            value = {
+                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
                     MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE,
                     MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE
             },
             produces = "application/json"
     )
     @SuppressWarnings("unchecked")
-    public Object handleRelatedPatch(@PathVariable String entity,
-                                     @PathVariable String target,
-                                     @RequestBody String body,
-                                     HttpServletRequest request)
+    public ElementWithQueryOptions handleRelatedPatch(@PathVariable String entity,
+                                                      @PathVariable String target,
+                                                      @RequestBody String body,
+                                                      HttpServletRequest request)
             throws Exception {
         validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
 
@@ -151,10 +153,9 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
 
         // Do update
         return entityService.update(entityId,
-                (T) ((mapper.readValue(jsonBody.toString(), clazz))).getEntity(),
-                HttpMethod.PATCH);
+                                    (T) ((mapper.readValue(jsonBody.toString(), clazz))).getEntity(),
+                                    HttpMethod.PATCH);
     }
-
 
     /**
      * Matches all DELETE requests on Entities referenced directly via id
@@ -186,7 +187,8 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
      * @param request full request
      */
     @DeleteMapping(
-            value = {MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
+            value = {
+                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
                     MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE,
                     MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE
             },

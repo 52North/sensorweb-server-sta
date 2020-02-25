@@ -48,7 +48,7 @@ import org.n52.sta.data.OffsetLimitBasedPageRequest;
 import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.IdentifierRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
-import org.n52.sta.serdes.model.ElementWithQueryOptions;
+import org.n52.sta.serdes.util.ElementWithQueryOptions;
 import org.n52.svalbard.odata.expr.Expr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

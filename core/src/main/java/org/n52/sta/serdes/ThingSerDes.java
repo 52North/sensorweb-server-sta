@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.serdes;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -36,11 +37,12 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.shetland.ogc.sta.model.ThingEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONThing;
-import org.n52.sta.serdes.model.ElementWithQueryOptions.ThingWithQueryOptions;
-import org.n52.sta.serdes.model.STAEntityDefinition;
-import org.n52.sta.serdes.model.ThingEntityDefinition;
+import org.n52.sta.serdes.util.ElementWithQueryOptions.ThingWithQueryOptions;
+import org.n52.sta.serdes.util.EntityPatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,13 +54,14 @@ public class ThingSerDes {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SensorSerDes.class);
 
+
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     public static class PlatformEntityPatch extends PlatformEntity implements EntityPatch<PlatformEntity> {
 
         private static final long serialVersionUID = -2233037380407692718L;
         private final PlatformEntity entity;
 
-        PlatformEntityPatch (PlatformEntity entity) {
+        PlatformEntityPatch(PlatformEntity entity) {
             this.entity = entity;
         }
 
@@ -66,6 +69,7 @@ public class ThingSerDes {
             return entity;
         }
     }
+
 
     public static class ThingSerializer extends AbstractSTASerializer<ThingWithQueryOptions> {
 
@@ -126,6 +130,7 @@ public class ThingSerDes {
 
     }
 
+
     public static class ThingDeserializer extends StdDeserializer<PlatformEntity> {
 
         private static final long serialVersionUID = 3942005672394573517L;
@@ -139,6 +144,7 @@ public class ThingSerDes {
             return p.readValueAs(JSONThing.class).toEntity(JSONBase.EntityType.FULL);
         }
     }
+
 
     public static class ThingPatchDeserializer extends StdDeserializer<PlatformEntityPatch> {
 

@@ -55,12 +55,13 @@ import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
+import org.n52.shetland.ogc.sta.model.ObservationEntityDefinition;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.shetland.util.DateTimeHelper;
 import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONObservation;
-import org.n52.sta.serdes.model.ElementWithQueryOptions.ObservationWithQueryOptions;
-import org.n52.sta.serdes.model.ObservationEntityDefinition;
-import org.n52.sta.serdes.model.STAEntityDefinition;
+import org.n52.sta.serdes.util.ElementWithQueryOptions.ObservationWithQueryOptions;
+import org.n52.sta.serdes.util.EntityPatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

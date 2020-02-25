@@ -27,9 +27,9 @@
  * Public License for more details.
  */
 
-package org.n52.sta.data.service;
+package org.n52.sta.serdes.util;
 
-import org.n52.sta.serdes.util.ElementWithQueryOptions;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 
 import java.util.List;
 
@@ -40,25 +40,28 @@ public class CollectionWrapper {
 
     private final long totalEntityCount;
 
-    private final List<ElementWithQueryOptions> entities;
+    private final List<?> entities;
 
     private final boolean hasNextPage;
+
+    private final QueryOptions queryOptions;
 
     private String requestURL;
 
     public CollectionWrapper(long entityCount,
                              List<ElementWithQueryOptions> entity,
-                             boolean hasNextPage) {
+                             boolean hasNextPage, QueryOptions queryOptions) {
         this.totalEntityCount = entityCount;
         this.entities = entity;
         this.hasNextPage = hasNextPage;
+        this.queryOptions = queryOptions;
     }
 
     public long getTotalEntityCount() {
         return totalEntityCount;
     }
 
-    public List<ElementWithQueryOptions> getEntities() {
+    public List<?> getEntities() {
         return entities;
     }
 
@@ -73,5 +76,9 @@ public class CollectionWrapper {
     public CollectionWrapper setRequestURL(String requestURL) {
         this.requestURL = requestURL;
         return this;
+    }
+
+    public QueryOptions getQueryOptions() {
+        return queryOptions;
     }
 }

@@ -32,7 +32,7 @@ package org.n52.sta.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.n52.sta.serdes.model.STAEntityDefinition;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;

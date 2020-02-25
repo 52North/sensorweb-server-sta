@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.serdes;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -37,11 +38,12 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.sta.model.LocationEntityDefinition;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONLocation;
-import org.n52.sta.serdes.model.ElementWithQueryOptions.LocationWithQueryOptions;
-import org.n52.sta.serdes.model.LocationEntityDefinition;
-import org.n52.sta.serdes.model.STAEntityDefinition;
+import org.n52.sta.serdes.util.ElementWithQueryOptions.LocationWithQueryOptions;
+import org.n52.sta.serdes.util.EntityPatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,13 +55,14 @@ public class LocationSerDes {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LocationSerDes.class);
 
+
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     public static class LocationEntityPatch extends LocationEntity implements EntityPatch<LocationEntity> {
 
         private static final long serialVersionUID = -8421752856535036959L;
         private final LocationEntity entity;
 
-        LocationEntityPatch (LocationEntity entity) {
+        LocationEntityPatch(LocationEntity entity) {
             this.entity = entity;
         }
 
@@ -137,6 +140,7 @@ public class LocationSerDes {
         }
     }
 
+
     public static class LocationDeserializer extends StdDeserializer<LocationEntity> {
 
         private static final long serialVersionUID = -5978576540306282111L;
@@ -150,6 +154,7 @@ public class LocationSerDes {
             return p.readValueAs(JSONLocation.class).toEntity(JSONBase.EntityType.FULL);
         }
     }
+
 
     public static class LocationPatchDeserializer extends StdDeserializer<LocationEntityPatch> {
 

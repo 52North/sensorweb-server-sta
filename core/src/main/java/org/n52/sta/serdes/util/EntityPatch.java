@@ -26,7 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.serdes;
+package org.n52.sta.serdes.util;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>

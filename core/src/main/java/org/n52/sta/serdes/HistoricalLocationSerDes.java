@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.serdes;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -36,11 +37,12 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.sta.model.HistoricalLocationEntityDefinition;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONHistoricalLocation;
-import org.n52.sta.serdes.model.ElementWithQueryOptions.HistoricalLocationWithQueryOptions;
-import org.n52.sta.serdes.model.HistoricalLocationEntityDefinition;
-import org.n52.sta.serdes.model.STAEntityDefinition;
+import org.n52.sta.serdes.util.ElementWithQueryOptions.HistoricalLocationWithQueryOptions;
+import org.n52.sta.serdes.util.EntityPatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +54,7 @@ public class HistoricalLocationSerDes {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HistoricalLocationSerDes.class);
 
+
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     public static class HistoricalLocationEntityPatch extends HistoricalLocationEntity
             implements EntityPatch<HistoricalLocationEntity> {
@@ -59,7 +62,7 @@ public class HistoricalLocationSerDes {
         private static final long serialVersionUID = -154825501303466727L;
         private final HistoricalLocationEntity entity;
 
-        HistoricalLocationEntityPatch (HistoricalLocationEntity entity) {
+        HistoricalLocationEntityPatch(HistoricalLocationEntity entity) {
             this.entity = entity;
         }
 
@@ -67,6 +70,7 @@ public class HistoricalLocationSerDes {
             return entity;
         }
     }
+
 
     public static class HistoricalLocationSerializer extends AbstractSTASerializer<HistoricalLocationWithQueryOptions> {
 
@@ -121,6 +125,7 @@ public class HistoricalLocationSerDes {
         }
     }
 
+
     public static class HistoricalLocationDeserializer extends StdDeserializer<HistoricalLocationEntity> {
 
         private static final long serialVersionUID = -7462598674289427663L;
@@ -135,6 +140,7 @@ public class HistoricalLocationSerDes {
         }
     }
 
+
     public static class HistoricalLocationPatchDeserializer extends StdDeserializer<HistoricalLocationEntityPatch> {
 
         private static final long serialVersionUID = 8354140158937306874L;
@@ -146,7 +152,7 @@ public class HistoricalLocationSerDes {
         @Override
         public HistoricalLocationEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return new HistoricalLocationEntityPatch(p.readValueAs(JSONHistoricalLocation.class)
-                    .toEntity(JSONBase.EntityType.PATCH));
+                                                      .toEntity(JSONBase.EntityType.PATCH));
         }
     }
 }

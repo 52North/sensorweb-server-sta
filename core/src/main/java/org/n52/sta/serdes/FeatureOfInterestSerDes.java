@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.serdes;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -38,11 +39,12 @@ import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.FeatureEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.sta.model.FeatureOfInterestEntityDefinition;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONFeatureOfInterest;
-import org.n52.sta.serdes.model.ElementWithQueryOptions.FeatureOfInterestWithQueryOptions;
-import org.n52.sta.serdes.model.FeatureOfInterestEntityDefinition;
-import org.n52.sta.serdes.model.STAEntityDefinition;
+import org.n52.sta.serdes.util.ElementWithQueryOptions.FeatureOfInterestWithQueryOptions;
+import org.n52.sta.serdes.util.EntityPatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +55,7 @@ import java.util.Set;
 public class FeatureOfInterestSerDes {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FeatureOfInterestSerDes.class);
+
 
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     public static class AbstractFeatureEntityPatch extends AbstractFeatureEntity
@@ -70,6 +73,7 @@ public class FeatureOfInterestSerDes {
             return entity;
         }
     }
+
 
     public static class FeatureOfInterestSerializer extends AbstractSTASerializer<FeatureOfInterestWithQueryOptions> {
 
@@ -140,6 +144,7 @@ public class FeatureOfInterestSerDes {
         }
     }
 
+
     public static class FeatureOfInterestDeserializer extends StdDeserializer<AbstractFeatureEntity<?>> {
 
         private static final long serialVersionUID = 2394467109279839681L;
@@ -154,6 +159,7 @@ public class FeatureOfInterestSerDes {
         }
     }
 
+
     public static class FeatureOfInterestPatchDeserializer extends StdDeserializer<AbstractFeatureEntityPatch> {
 
         private static final long serialVersionUID = 7273345348512569187L;
@@ -165,7 +171,7 @@ public class FeatureOfInterestSerDes {
         @Override
         public AbstractFeatureEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return new AbstractFeatureEntityPatch(p.readValueAs(JSONFeatureOfInterest.class)
-                    .toEntity(JSONBase.EntityType.PATCH));
+                                                   .toEntity(JSONBase.EntityType.PATCH));
         }
     }
 }

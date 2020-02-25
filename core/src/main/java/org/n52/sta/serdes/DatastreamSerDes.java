@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.serdes;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -37,12 +38,14 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.sta.model.DatastreamEntityDefinition;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.shetland.util.DateTimeHelper;
 import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONDatastream;
-import org.n52.sta.serdes.model.DatastreamEntityDefinition;
-import org.n52.sta.serdes.model.ElementWithQueryOptions.DatastreamWithQueryOptions;
-import org.n52.sta.serdes.model.STAEntityDefinition;
+import org.n52.sta.serdes.util.ElementWithQueryOptions;
+import org.n52.sta.serdes.util.ElementWithQueryOptions.DatastreamWithQueryOptions;
+import org.n52.sta.serdes.util.EntityPatch;
 import org.n52.sta.utils.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,13 +58,14 @@ public class DatastreamSerDes {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatastreamSerDes.class);
 
+
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     public static class DatastreamEntityPatch extends DatastreamEntity implements EntityPatch<DatastreamEntity> {
 
         private static final long serialVersionUID = -8968753678464145994L;
         private final DatastreamEntity entity;
 
-        DatastreamEntityPatch (DatastreamEntity entity) {
+        DatastreamEntityPatch(DatastreamEntity entity) {
             this.entity = entity;
         }
 
@@ -71,7 +75,9 @@ public class DatastreamSerDes {
         }
     }
 
-    public static class DatastreamSerializer extends AbstractSTASerializer<DatastreamWithQueryOptions> {
+
+    public static class DatastreamSerializer
+            extends AbstractSTASerializer<DatastreamWithQueryOptions> {
 
         private static final GeoJsonWriter GEO_JSON_WRITER = new GeoJsonWriter();
         private static final long serialVersionUID = -6555417490577181829L;
@@ -83,7 +89,9 @@ public class DatastreamSerDes {
         }
 
         @Override
-        public void serialize(DatastreamWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers)
+        public void serialize(DatastreamWithQueryOptions value,
+                              JsonGenerator gen,
+                              SerializerProvider serializers)
                 throws IOException {
             gen.writeStartObject();
             DatastreamEntity datastream = value.getEntity();
@@ -118,7 +126,7 @@ public class DatastreamSerDes {
 
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_OBSERVATION_TYPE)) {
                 gen.writeObjectField(STAEntityDefinition.PROP_OBSERVATION_TYPE,
-                        datastream.getObservationType().getFormat());
+                                     datastream.getObservationType().getFormat());
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_UOM)) {
                 gen.writeObjectFieldStart(STAEntityDefinition.PROP_UOM);
@@ -140,17 +148,17 @@ public class DatastreamSerDes {
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_RESULT_TIME)) {
                 if (datastream.getResultTimeStart() != null) {
                     gen.writeStringField(STAEntityDefinition.PROP_RESULT_TIME,
-                            DateTimeHelper.format(
-                                    TimeUtil.createTime(TimeUtil.createDateTime(datastream.getResultTimeStart()),
-                                            TimeUtil.createDateTime(datastream.getResultTimeEnd()))));
+                                         DateTimeHelper.format(
+                                                 TimeUtil.createTime(TimeUtil.createDateTime(datastream.getResultTimeStart()),
+                                                                     TimeUtil.createDateTime(datastream.getResultTimeEnd()))));
                 }
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_PHENOMENON_TIME)) {
                 if (datastream.getSamplingTimeStart() != null) {
                     gen.writeStringField(STAEntityDefinition.PROP_PHENOMENON_TIME,
-                            DateTimeHelper.format(
-                                    TimeUtil.createTime(TimeUtil.createDateTime(datastream.getSamplingTimeStart()),
-                                            TimeUtil.createDateTime(datastream.getSamplingTimeEnd()))));
+                                         DateTimeHelper.format(
+                                                 TimeUtil.createTime(TimeUtil.createDateTime(datastream.getSamplingTimeStart()),
+                                                                     TimeUtil.createDateTime(datastream.getSamplingTimeEnd()))));
                 }
             }
 
@@ -165,6 +173,7 @@ public class DatastreamSerDes {
         }
     }
 
+
     public static class DatastreamDeserializer extends StdDeserializer<DatastreamEntity> {
 
         private static final long serialVersionUID = 7491123624385588769L;
@@ -178,6 +187,7 @@ public class DatastreamSerDes {
             return p.readValueAs(JSONDatastream.class).toEntity(JSONBase.EntityType.FULL);
         }
     }
+
 
     public static class DatastreamPatchDeserializer extends StdDeserializer<DatastreamEntityPatch> {
 
