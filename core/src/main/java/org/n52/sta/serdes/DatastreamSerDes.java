@@ -38,12 +38,12 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.sta.model.DatastreamEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.shetland.util.DateTimeHelper;
 import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONDatastream;
-import org.n52.sta.serdes.util.ElementWithQueryOptions;
 import org.n52.sta.serdes.util.ElementWithQueryOptions.DatastreamWithQueryOptions;
 import org.n52.sta.serdes.util.EntityPatch;
 import org.n52.sta.utils.TimeUtil;
@@ -147,18 +147,18 @@ public class DatastreamSerDes {
 
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_RESULT_TIME)) {
                 if (datastream.getResultTimeStart() != null) {
+                    Time time = TimeUtil.createTime(TimeUtil.createDateTime(datastream.getResultTimeStart()),
+                                                    TimeUtil.createDateTime(datastream.getResultTimeEnd()));
                     gen.writeStringField(STAEntityDefinition.PROP_RESULT_TIME,
-                                         DateTimeHelper.format(
-                                                 TimeUtil.createTime(TimeUtil.createDateTime(datastream.getResultTimeStart()),
-                                                                     TimeUtil.createDateTime(datastream.getResultTimeEnd()))));
+                                         DateTimeHelper.format(time));
                 }
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_PHENOMENON_TIME)) {
                 if (datastream.getSamplingTimeStart() != null) {
+                    Time time = TimeUtil.createTime(TimeUtil.createDateTime(datastream.getSamplingTimeStart()),
+                                                    TimeUtil.createDateTime(datastream.getSamplingTimeEnd()));
                     gen.writeStringField(STAEntityDefinition.PROP_PHENOMENON_TIME,
-                                         DateTimeHelper.format(
-                                                 TimeUtil.createTime(TimeUtil.createDateTime(datastream.getSamplingTimeStart()),
-                                                                     TimeUtil.createDateTime(datastream.getSamplingTimeEnd()))));
+                                         DateTimeHelper.format(time));
                 }
             }
 
