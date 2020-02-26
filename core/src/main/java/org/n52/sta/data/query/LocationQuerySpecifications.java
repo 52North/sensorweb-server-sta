@@ -38,6 +38,7 @@ import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.springframework.data.jpa.domain.Specification;
 
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
@@ -78,20 +79,22 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
 
     @Override
     public Specification<LocationEntity> getFilterForProperty(String propertyName,
-                                                              Object propertyValue,
+                                                              Expression<?> propertyValue,
                                                               FilterConstants.ComparisonOperator operator,
                                                               boolean switched) {
         if (propertyName.equals(THINGS) || propertyName.equals(HISTORICAL_LOCATIONS)) {
-            return handleRelatedPropertyFilter(propertyName, (Specification<String>) propertyValue);
+            return handleRelatedPropertyFilter(propertyName, propertyValue);
         } else if (propertyName.equals("id")) {
             return (root, query, builder) -> {
                 try {
                     return handleDirectStringPropertyFilter(root.get(LocationEntity.PROPERTY_IDENTIFIER),
-                                                            propertyValue.toString(), operator, builder, false);
+                                                            propertyValue,
+                                                            operator,
+                                                            builder,
+                                                            false);
                 } catch (STAInvalidFilterExpressionException e) {
                     throw new RuntimeException(e);
                 }
-                //
             };
         } else {
             return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
@@ -99,7 +102,7 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
     }
 
     private Specification<LocationEntity> handleRelatedPropertyFilter(String propertyName,
-                                                                      Specification<String> propertyValue) {
+                                                                      Expression<?> propertyValue) {
         return (root, query, builder) -> {
             if (propertyName.equals(THINGS)) {
                 Subquery<LocationEntity> sq = query.subquery(LocationEntity.class);
@@ -121,7 +124,7 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
     }
 
     private Specification<LocationEntity> handleDirectPropertyFilter(String propertyName,
-                                                                     Object propertyValue,
+                                                                     Expression<?> propertyValue,
                                                                      FilterConstants.ComparisonOperator operator,
                                                                      boolean switched) {
         return (Specification<LocationEntity>) (root, query, builder) -> {
@@ -129,17 +132,17 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
                 switch (propertyName) {
                 case "name":
                     return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
-                                                            propertyValue.toString(), operator, builder, switched);
+                                                            propertyValue, operator, builder, switched);
                 case "description":
                     return handleDirectStringPropertyFilter(
-                            root.get(DescribableEntity.PROPERTY_DESCRIPTION), propertyValue.toString(),
+                            root.get(DescribableEntity.PROPERTY_DESCRIPTION), propertyValue,
                             operator, builder, switched);
                 case "encodingType":
                     Join<LocationEntity, FormatEntity> join =
                             root.join(LocationEntity.PROPERTY_LOCATION_ENCODINT);
                     return handleDirectStringPropertyFilter(
                             join.get(FormatEntity.FORMAT),
-                            propertyValue.toString(), operator, builder, switched);
+                            propertyValue, operator, builder, switched);
                 default:
                     throw new RuntimeException("Error getting filter for Property: \"" + propertyName
                                                        + "\". No such property in Entity.");

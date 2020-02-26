@@ -60,6 +60,7 @@ public abstract class EntityQuerySpecifications<T> {
     protected static final String OBSERVATIONS = "Observations";
 
     private static final String ERROR_TEMPLATE = "Operator \"%s\" is not supported for given arguments.";
+    private static final String INVALID_DATATYPE_CANNOT_CAST = "Invalid Datatypes found. Cannot cast ";
 
     /**
      * Gets Subquery returning the IDs of the Entities
@@ -82,7 +83,7 @@ public abstract class EntityQuerySpecifications<T> {
      * @throws STAInvalidFilterExpressionException if an error occurs
      */
     public abstract Specification<T> getFilterForProperty(String propertyName,
-                                                          Object propertyValue,
+                                                          Expression<?> propertyValue,
                                                           FilterConstants.ComparisonOperator operator,
                                                           boolean switched)
             throws STAInvalidFilterExpressionException;
@@ -109,173 +110,64 @@ public abstract class EntityQuerySpecifications<T> {
     }
 
     // Wrapper
+    @SuppressWarnings("unchecked")
     protected Predicate handleDirectStringPropertyFilter(Path<String> stringPath,
-                                                         String propertyValue,
+                                                         Expression<?> propertyValue,
                                                          FilterConstants.ComparisonOperator operator,
                                                          CriteriaBuilder builder,
                                                          boolean switched)
             throws STAInvalidFilterExpressionException {
-        return this.handleStringFilter(stringPath, propertyValue, operator, builder, switched);
+        if (propertyValue.getJavaType().equals(String.class)) {
+            return this.handleStringFilter(stringPath, (Expression<String>) propertyValue, operator, builder, switched);
+        } else {
+            throw new STAInvalidFilterExpressionException(
+                    INVALID_DATATYPE_CANNOT_CAST + propertyValue.getJavaType() + " to String.class");
+        }
     }
 
+    @SuppressWarnings("unchecked")
     protected Predicate handleDirectNumberPropertyFilter(Path<Double> numberPath,
-                                                         Double propertyValue,
+                                                         Expression<?> propertyValue,
                                                          FilterConstants.ComparisonOperator operator,
                                                          CriteriaBuilder builder)
             throws STAInvalidFilterExpressionException {
-        return this.handleNumberFilter(numberPath, propertyValue, operator, builder);
+        if (propertyValue.getJavaType().equals(Double.class)) {
+            return this.handleComparableFilter(numberPath, (Expression<Double>) propertyValue, operator, builder);
+        } else {
+            throw new STAInvalidFilterExpressionException(
+                    INVALID_DATATYPE_CANNOT_CAST + propertyValue.getJavaType() + " to Double.class");
+        }
     }
 
-    protected Predicate handleDirectNumberPropertyFilter(Path<Long> numberPath,
-                                                         Long propertyValue,
-                                                         FilterConstants.ComparisonOperator operator,
-                                                         CriteriaBuilder builder)
-            throws STAInvalidFilterExpressionException {
-        return this.handleNumberFilter(numberPath, propertyValue, operator, builder);
-    }
-
-    protected Predicate handleDirectNumberPropertyFilter(Path<Integer> numberPath,
-                                                         Integer propertyValue,
-                                                         FilterConstants.ComparisonOperator operator,
-                                                         CriteriaBuilder builder)
-            throws STAInvalidFilterExpressionException {
-        return this.handleNumberFilter(numberPath, propertyValue, operator, builder);
-    }
-
+    @SuppressWarnings("unchecked")
     protected Predicate handleDirectDateTimePropertyFilter(Path<Date> time,
-                                                           Date propertyValue,
+                                                           Expression<?> propertyValue,
                                                            FilterConstants.ComparisonOperator operator,
                                                            CriteriaBuilder builder)
             throws STAInvalidFilterExpressionException {
-        return this.handleDateFilter(time, propertyValue, operator, builder);
+        if (propertyValue.getJavaType().equals(Date.class)) {
+            return this.handleComparableFilter(time, (Expression<Date>) propertyValue, operator, builder);
+        } else {
+            throw new STAInvalidFilterExpressionException(
+                    INVALID_DATATYPE_CANNOT_CAST + propertyValue.getJavaType() + " to Date.class");
+        }
     }
 
-    public Predicate handleStringFilter(Path<String> left,
-                                        String right,
-                                        FilterConstants.ComparisonOperator operatorKind,
-                                        CriteriaBuilder builder,
-                                        boolean switched)
+    private Predicate handleStringFilter(Path<String> left,
+                                         Expression<String> right,
+                                         FilterConstants.ComparisonOperator operatorKind,
+                                         CriteriaBuilder builder,
+                                         boolean switched)
             throws STAInvalidFilterExpressionException {
         FilterConstants.ComparisonOperator operator = switched ? reverseOperator(operatorKind) : operatorKind;
-
-        switch (operator) {
-        case PropertyIsEqualTo:
-            return builder.equal(left, right);
-        case PropertyIsNotEqualTo:
-            return builder.notEqual(left, right);
-        case PropertyIsLessThan:
-            return builder.lessThan(left, right);
-        case PropertyIsLessThanOrEqualTo:
-            return builder.lessThanOrEqualTo(left, right);
-        case PropertyIsGreaterThan:
-            return builder.greaterThan(left, right);
-        case PropertyIsGreaterThanOrEqualTo:
-            return builder.greaterThanOrEqualTo(left, right);
-        default:
-            throw new STAInvalidFilterExpressionException("Error getting filter. Invalid Operator");
-        }
+        return handleComparableFilter(left, right, operator, builder);
     }
 
-    public Predicate handleNumberFilter(Expression<Double> left,
-                                        Double right,
-                                        FilterConstants.ComparisonOperator operator,
-                                        CriteriaBuilder builder)
-            throws STAInvalidFilterExpressionException {
-
-        switch (operator) {
-        case PropertyIsEqualTo:
-            return builder.equal(left, right);
-        case PropertyIsNotEqualTo:
-            return builder.notEqual(left, right);
-        case PropertyIsLessThan:
-            return builder.lessThan(left, right);
-        case PropertyIsLessThanOrEqualTo:
-            return builder.lessThanOrEqualTo(left, right);
-        case PropertyIsGreaterThan:
-            return builder.greaterThan(left, right);
-        case PropertyIsGreaterThanOrEqualTo:
-            return builder.greaterThanOrEqualTo(left, right);
-        // case ADD:
-        //    return builder.sum(leftExpr, rightExpr);
-        // case DIV:
-        //    return builder.quot(leftExpr, rightExpr);
-        // case MOD:
-        //    return builder.mod(leftExpr.as(Integer.class), rightExpr.as(Integer.class));
-        // case MUL:
-        //    return builder.prod(leftExpr, rightExpr);
-        // case SUB:
-        //    return builder.diff(leftExpr, rightExpr);
-        default:
-            throw new STAInvalidFilterExpressionException(
-                    String.format(ERROR_TEMPLATE, operator.toString()));
-        }
-    }
-
-    public Predicate handleNumberFilter(Expression<Long> left,
-                                        Long right,
-                                        FilterConstants.ComparisonOperator operator,
-                                        CriteriaBuilder builder)
-            throws STAInvalidFilterExpressionException {
-
-        switch (operator) {
-        case PropertyIsEqualTo:
-            return builder.equal(left, right);
-        case PropertyIsNotEqualTo:
-            return builder.notEqual(left, right);
-        case PropertyIsLessThan:
-            return builder.lessThan(left, right);
-        case PropertyIsLessThanOrEqualTo:
-            return builder.lessThanOrEqualTo(left, right);
-        case PropertyIsGreaterThan:
-            return builder.greaterThan(left, right);
-        case PropertyIsGreaterThanOrEqualTo:
-            return builder.greaterThanOrEqualTo(left, right);
-        // case ADD:
-        // return builder.sum(leftExpr, rightExpr);
-        // case DIV:
-        // return builder.quot(leftExpr, rightExpr);
-        // case MOD:
-        // return builder.mod(leftExpr.as(Integer.class),
-        // rightExpr.as(Integer.class));
-        // case MUL:
-        // return builder.prod(leftExpr, rightExpr);
-        // case SUB:
-        // return builder.diff(leftExpr, rightExpr);
-        default:
-            throw new STAInvalidFilterExpressionException(
-                    String.format(ERROR_TEMPLATE, operator.toString()));
-        }
-    }
-
-    public Predicate handleNumberFilter(Expression<Integer> left,
-                                        Integer right,
-                                        FilterConstants.ComparisonOperator operator,
-                                        CriteriaBuilder builder)
-            throws STAInvalidFilterExpressionException {
-
-        switch (operator) {
-        case PropertyIsEqualTo:
-            return builder.equal(left, right);
-        case PropertyIsNotEqualTo:
-            return builder.notEqual(left, right);
-        case PropertyIsLessThan:
-            return builder.lessThan(left, right);
-        case PropertyIsLessThanOrEqualTo:
-            return builder.lessThanOrEqualTo(left, right);
-        case PropertyIsGreaterThan:
-            return builder.greaterThan(left, right);
-        case PropertyIsGreaterThanOrEqualTo:
-            return builder.greaterThanOrEqualTo(left, right);
-        default:
-            throw new STAInvalidFilterExpressionException(
-                    String.format(ERROR_TEMPLATE, operator.toString()));
-        }
-    }
-
-    public Predicate handleDateFilter(Expression<Date> left,
-                                      Date right,
-                                      FilterConstants.ComparisonOperator operator,
-                                      CriteriaBuilder builder)
+    private <K extends Comparable<? super K>> Predicate
+    handleComparableFilter(Expression<K> left,
+                           Expression<K> right,
+                           FilterConstants.ComparisonOperator operator,
+                           CriteriaBuilder builder)
             throws STAInvalidFilterExpressionException {
 
         switch (operator) {

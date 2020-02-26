@@ -38,6 +38,7 @@ import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.springframework.data.jpa.domain.Specification;
 
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Root;
@@ -79,22 +80,20 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
 
     @Override
     public Specification<PlatformEntity> getFilterForProperty(String propertyName,
-                                                              Object propertyValue,
+                                                              Expression<?> propertyValue,
                                                               FilterConstants.ComparisonOperator operator,
-                                                              boolean switched)
-            throws STAInvalidFilterExpressionException {
+                                                              boolean switched) {
         if (propertyName.equals(DATASTREAMS) || propertyName.equals(LOCATIONS)
                 || propertyName.equals(HISTORICAL_LOCATIONS)) {
-            return handleRelatedPropertyFilter(propertyName, (Subquery<String>) propertyValue);
+            return handleRelatedPropertyFilter(propertyName, propertyValue);
         } else if (propertyName.equals("id")) {
             return (root, query, builder) -> {
                 try {
                     return handleDirectStringPropertyFilter(root.get(PlatformEntity.PROPERTY_IDENTIFIER),
-                                                            propertyValue.toString(), operator, builder, false);
+                                                            propertyValue, operator, builder, false);
                 } catch (STAInvalidFilterExpressionException e) {
                     throw new RuntimeException(e);
                 }
-                //
             };
         } else {
             return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
@@ -102,7 +101,7 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
     }
 
     private Specification<PlatformEntity> handleRelatedPropertyFilter(String propertyName,
-                                                                      Subquery<String> propertyValue) {
+                                                                      Expression<?> propertyValue) {
         return (root, query, builder) -> {
             try {
                 switch (propertyName) {
@@ -146,7 +145,7 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
     }
 
     private Specification<PlatformEntity> handleDirectPropertyFilter(String propertyName,
-                                                                     Object propertyValue,
+                                                                     Expression<?> propertyValue,
                                                                      FilterConstants.ComparisonOperator operator,
                                                                      boolean switched) {
         return (Specification<PlatformEntity>) (root, query, builder) -> {
@@ -154,11 +153,11 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
                 switch (propertyName) {
                 case "name":
                     return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
-                                                            propertyValue.toString(), operator, builder, switched);
+                                                            propertyValue, operator, builder, switched);
                 case "description":
                     return handleDirectStringPropertyFilter(
                             root.get(DescribableEntity.PROPERTY_DESCRIPTION),
-                            propertyValue.toString(),
+                            propertyValue,
                             operator,
                             builder,
                             switched);
@@ -167,7 +166,7 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
                     // qPlatform.parameters.any().name.eq("properties")
                     return handleDirectStringPropertyFilter(
                             root.get(PlatformEntity.PROPERTY_PROPERTIES),
-                            propertyValue.toString(),
+                            propertyValue,
                             operator,
                             builder,
                             switched);

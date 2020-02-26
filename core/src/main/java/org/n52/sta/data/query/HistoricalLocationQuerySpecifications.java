@@ -38,6 +38,7 @@ import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.springframework.data.jpa.domain.Specification;
 
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 
@@ -69,21 +70,23 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
 
     @Override
     public Specification<HistoricalLocationEntity> getFilterForProperty(String propertyName,
-                                                                        Object propertyValue,
+                                                                        Expression<?> propertyValue,
                                                                         FilterConstants.ComparisonOperator operator,
                                                                         boolean switched)
             throws STAInvalidFilterExpressionException {
         if (propertyName.equals(THING) || propertyName.equals(LOCATIONS)) {
-            return handleRelatedPropertyFilter(propertyName, (Specification<Long>) propertyValue, switched);
+            return handleRelatedPropertyFilter(propertyName, propertyValue, switched);
         } else if (propertyName.equals("id")) {
             return (root, query, builder) -> {
                 try {
                     return handleDirectStringPropertyFilter(root.get(HistoricalLocationEntity.PROPERTY_IDENTIFIER),
-                                                            propertyValue.toString(), operator, builder, false);
+                                                            propertyValue,
+                                                            operator,
+                                                            builder,
+                                                            false);
                 } catch (STAInvalidFilterExpressionException e) {
                     throw new RuntimeException(e);
                 }
-                //
             };
         } else {
             return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
@@ -91,7 +94,7 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
     }
 
     private Specification<HistoricalLocationEntity> handleRelatedPropertyFilter(String propertyName,
-                                                                                Specification<Long> propertyValue,
+                                                                                Expression<?> propertyValue,
                                                                                 boolean switched) {
         return (root, query, builder) -> {
             if (propertyName.equals(THING)) {
@@ -107,7 +110,7 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
     }
 
     private Specification<HistoricalLocationEntity> handleDirectPropertyFilter(String propertyName,
-                                                                               Object propertyValue,
+                                                                               Expression<?> propertyValue,
                                                                                FilterConstants.ComparisonOperator operator,
                                                                                boolean switched) {
         return (Specification<HistoricalLocationEntity>) (root, query, builder) -> {
@@ -116,7 +119,7 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
                 case "time":
                     return handleDirectDateTimePropertyFilter(
                             root.get(HistoricalLocationEntity.PROPERTY_TIME),
-                            new DateTime(propertyValue).toDate(),
+                            propertyValue,
                             operator,
                             builder);
                 default:

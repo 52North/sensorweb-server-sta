@@ -60,7 +60,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import java.util.Map;
 import java.util.Optional;
@@ -122,7 +121,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
         try {
             return this.createWrapper(getRepository().findByIdentifier(id, defaultFetchGraphs).get(), queryOptions);
         } catch (RuntimeException e) {
-            throw new STACRUDException(e.getMessage());
+            throw new STACRUDException(e.getMessage(), e);
         }
     }
 
@@ -143,7 +142,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
                                               .getContent(),
                                          pages.hasNext());
         } catch (RuntimeException e) {
-            throw new STACRUDException(e.getMessage());
+            throw new STACRUDException(e.getMessage(), e);
         }
     }
 
@@ -196,7 +195,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
                 return null;
             }
         } catch (RuntimeException e) {
-            throw new STACRUDException(e.getMessage());
+            throw new STACRUDException(e.getMessage(), e);
         }
     }
 
@@ -240,7 +239,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
                                          pages.hasNext());
 
         } catch (RuntimeException e) {
-            throw new STACRUDException(e.getMessage());
+            throw new STACRUDException(e.getMessage(), e);
         }
     }
 
@@ -359,15 +358,13 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
                 || datastream.isSetName()
                 || datastream.isSetDescription()
                 || datastream.isSetUnit()) {
-            throw new STACRUDException("Inlined datastream entities are not allowed for updates!",
-                                       HTTPStatus.BAD_REQUEST);
+            throw new STACRUDException("Inlined datastream entities are not allowed for updates!");
         }
     }
 
     protected void checkInlineLocation(LocationEntity location) throws STACRUDException {
         if (location.getIdentifier() == null || location.isSetName() || location.isSetDescription()) {
-            throw new STACRUDException("Inlined location entities are not allowed for updates!",
-                                       HTTPStatus.BAD_REQUEST);
+            throw new STACRUDException("Inlined location entities are not allowed for updates!");
         }
     }
 
@@ -426,12 +423,9 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
                 FilterFilter filterOption = (FilterFilter) queryOptions.getFilterOption();
                 Expr filter = (Expr) filterOption.getFilter();
                 try {
-                    Expression<?> accept = filter.accept(new FilterExprVisitor(builder));
-                    //TODO: check this typecast as it looks wierd
-                    return (Predicate) accept;
+                    return (Predicate) filter.accept(new FilterExprVisitor<S>(root, query, builder));
                 } catch (STAInvalidQueryException e) {
-                    e.printStackTrace();
-                    return null;
+                    throw new RuntimeException(e);
                 }
             }
             //            try {

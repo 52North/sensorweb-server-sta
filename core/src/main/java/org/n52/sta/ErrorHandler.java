@@ -91,7 +91,7 @@ public class ErrorHandler {
         LOGGER.debug(msg, exception);
         return new ResponseEntity<>(msg,
                                     headers,
-                                    HttpStatus.BAD_REQUEST);
+                                    HttpStatus.valueOf(exception.getResponseStatus().getCode()));
     }
 
     @ExceptionHandler(value = STANotFoundException.class)

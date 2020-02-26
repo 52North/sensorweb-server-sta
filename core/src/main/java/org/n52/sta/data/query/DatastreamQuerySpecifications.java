@@ -41,6 +41,7 @@ import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.springframework.data.jpa.domain.Specification;
 
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Root;
@@ -134,22 +135,26 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
 
     @Override
     public Specification<DatastreamEntity> getFilterForProperty(String propertyName,
-                                                                Object propertyValue,
+                                                                Expression<?> propertyValue,
                                                                 FilterConstants.ComparisonOperator operator,
                                                                 boolean switched)
             throws STAInvalidFilterExpressionException {
-        if (propertyName.equals(SENSOR) || propertyName.equals(OBSERVED_PROPERTY) || propertyName.equals(THING)
+        if (propertyName.equals(SENSOR)
+                || propertyName.equals(OBSERVED_PROPERTY)
+                || propertyName.equals(THING)
                 || propertyName.equals(OBSERVATIONS)) {
             return handleRelatedPropertyFilter(propertyName, propertyValue, switched);
         } else if (propertyName.equals("id")) {
             return (root, query, builder) -> {
                 try {
                     return handleDirectStringPropertyFilter(root.get(DatastreamEntity.PROPERTY_IDENTIFIER),
-                                                            propertyValue.toString(), operator, builder, false);
+                                                            propertyValue,
+                                                            operator,
+                                                            builder,
+                                                            false);
                 } catch (STAInvalidFilterExpressionException e) {
                     throw new RuntimeException(e);
                 }
-                //
             };
         } else {
             return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
@@ -157,7 +162,7 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
     }
 
     private Specification<DatastreamEntity> handleDirectPropertyFilter(String propertyName,
-                                                                       Object propertyValue,
+                                                                       Expression<?> propertyValue,
                                                                        FilterConstants.ComparisonOperator operator,
                                                                        boolean switched) {
         return (Specification<DatastreamEntity>) (root, query, builder) -> {
@@ -165,16 +170,25 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
                 switch (propertyName) {
                 case "name":
                     return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
-                                                            propertyValue.toString(), operator, builder, switched);
+                                                            propertyValue,
+                                                            operator,
+                                                            builder,
+                                                            switched);
                 case "description":
                     return handleDirectStringPropertyFilter(
-                            root.get(DescribableEntity.PROPERTY_DESCRIPTION), propertyValue.toString(),
-                            operator, builder, switched);
+                            root.get(DescribableEntity.PROPERTY_DESCRIPTION),
+                            propertyValue,
+                            operator,
+                            builder,
+                            switched);
                 case "observationType":
                     Join<DatastreamEntity, FormatEntity> join =
                             root.join(DatastreamEntity.PROPERTY_OBSERVATION_TYPE);
                     return handleDirectStringPropertyFilter(join.get(FormatEntity.FORMAT),
-                                                            propertyValue.toString(), operator, builder, switched);
+                                                            propertyValue,
+                                                            operator,
+                                                            builder,
+                                                            switched);
                 default:
                     throw new RuntimeException("Error getting filter for Property: \"" + propertyName
                                                        + "\". No such property in Entity.");

@@ -36,6 +36,7 @@ import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.springframework.data.jpa.domain.Specification;
 
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 
@@ -59,17 +60,20 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
 
     @Override
     public Specification<PhenomenonEntity> getFilterForProperty(String propertyName,
-                                                                Object propertyValue,
+                                                                Expression<?> propertyValue,
                                                                 FilterConstants.ComparisonOperator operator,
                                                                 boolean switched)
             throws STAInvalidFilterExpressionException {
         if (propertyName.equals(DATASTREAMS)) {
-            return handleRelatedPropertyFilter(propertyName, (Specification<String>) propertyValue);
+            return handleRelatedPropertyFilter(propertyName, propertyValue);
         } else if (propertyName.equals("id")) {
             return (root, query, builder) -> {
                 try {
                     return handleDirectStringPropertyFilter(root.get(PhenomenonEntity.PROPERTY_IDENTIFIER),
-                                                            propertyValue.toString(), operator, builder, false);
+                                                            propertyValue,
+                                                            operator,
+                                                            builder,
+                                                            false);
                 } catch (STAInvalidFilterExpressionException e) {
                     throw new RuntimeException(e);
                 }
@@ -81,7 +85,7 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
     }
 
     private Specification<PhenomenonEntity> handleRelatedPropertyFilter(String propertyName,
-                                                                        Specification<String> propertyValue) {
+                                                                        Expression<?> propertyValue) {
         return (root, query, builder) -> {
             final Join<PhenomenonEntity, DatastreamEntity> join =
                     root.join(DatastreamEntity.PROPERTY_OBSERVABLE_PROPERTY, JoinType.INNER);
@@ -90,7 +94,7 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
     }
 
     private Specification<PhenomenonEntity> handleDirectPropertyFilter(String propertyName,
-                                                                       Object propertyValue,
+                                                                       Expression<?> propertyValue,
                                                                        FilterConstants.ComparisonOperator operator,
                                                                        boolean switched) {
         return (Specification<PhenomenonEntity>) (root, query, builder) -> {
@@ -98,11 +102,11 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
                 switch (propertyName) {
                 case "name":
                     return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
-                                                            propertyValue.toString(), operator, builder, switched);
+                                                            propertyValue, operator, builder, switched);
                 case "description":
                     return handleDirectStringPropertyFilter(
                             root.get(DescribableEntity.PROPERTY_DESCRIPTION),
-                            propertyValue.toString(),
+                            propertyValue,
                             operator,
                             builder,
                             switched);
@@ -110,7 +114,7 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
                 case "identifier":
                     return handleDirectStringPropertyFilter(
                             root.get(DescribableEntity.PROPERTY_IDENTIFIER),
-                            propertyValue.toString(),
+                            propertyValue,
                             operator,
                             builder,
                             switched);

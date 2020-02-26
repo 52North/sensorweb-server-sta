@@ -37,6 +37,7 @@ import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.springframework.data.jpa.domain.Specification;
 
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
@@ -70,17 +71,20 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
 
     @Override
     public Specification<AbstractFeatureEntity<?>> getFilterForProperty(String propertyName,
-                                                                        Object propertyValue,
+                                                                        Expression<?> propertyValue,
                                                                         FilterConstants.ComparisonOperator operator,
                                                                         boolean switched)
             throws STAInvalidFilterExpressionException {
         if (propertyName.equals(OBSERVATIONS)) {
-            return handleRelatedPropertyFilter(propertyName, (Subquery<Long>) propertyValue, switched);
+            return handleRelatedPropertyFilter(propertyName, propertyValue, switched);
         } else if (propertyName.equals("id")) {
             return (root, query, builder) -> {
                 try {
                     return handleDirectStringPropertyFilter(root.get(AbstractFeatureEntity.PROPERTY_IDENTIFIER),
-                                                            propertyValue.toString(), operator, builder, false);
+                                                            propertyValue,
+                                                            operator,
+                                                            builder,
+                                                            false);
                 } catch (STAInvalidFilterExpressionException e) {
                     throw new RuntimeException(e);
                 }
@@ -92,7 +96,7 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
     }
 
     private Specification<AbstractFeatureEntity<?>> handleRelatedPropertyFilter(String propertyName,
-                                                                                Subquery<Long> propertyValue,
+                                                                                Expression<?> propertyValue,
                                                                                 boolean switched)
             throws STAInvalidFilterExpressionException {
         return (root, query, builder) -> {
@@ -109,7 +113,7 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
     }
 
     private Specification<AbstractFeatureEntity<?>> handleDirectPropertyFilter(String propertyName,
-                                                                               Object propertyValue,
+                                                                               Expression<?> propertyValue,
                                                                                FilterConstants.ComparisonOperator operator,
                                                                                boolean switched) {
         return (Specification<AbstractFeatureEntity<?>>) (root, query, builder) -> {
@@ -117,22 +121,25 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
                 switch (propertyName) {
                 case "name":
                     return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
-                                                            propertyValue.toString(), operator, builder, switched);
+                                                            propertyValue,
+                                                            operator,
+                                                            builder,
+                                                            switched);
                 case "description":
                     return handleDirectStringPropertyFilter(
                             root.get(DescribableEntity.PROPERTY_DESCRIPTION),
-                            propertyValue.toString(),
+                            propertyValue,
                             operator,
                             builder,
                             switched);
                 case "encodingType":
                 case "featureType":
-                    if (operator.equals(FilterConstants.ComparisonOperator.PropertyIsEqualTo)
-                            && ("application/vnd.geo+json".equals(propertyValue)
-                            || "application/vnd.geo json".equals(propertyValue))) {
-                        return builder.isNotNull(root.get(DescribableEntity.PROPERTY_IDENTIFIER));
+                    //TODO: check if this works correctly
+                    if (operator.equals(FilterConstants.ComparisonOperator.PropertyIsEqualTo)) {
+                        return builder.or(builder.equal(propertyValue, "application/vnd.geo+json"),
+                                          builder.equal(propertyValue, "application/vnd.geo json"));
                     }
-                    return builder.isNull(root.get(DescribableEntity.PROPERTY_IDENTIFIER));
+                    return builder.isNotNull(root.get(DescribableEntity.PROPERTY_IDENTIFIER));
                 default:
                     throw new RuntimeException("Error getting filter for Property: \"" + propertyName
                                                        + "\". No such property in Entity.");
@@ -140,6 +147,8 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
             } catch (STAInvalidFilterExpressionException e) {
                 throw new RuntimeException(e);
             }
-        };
+        }
+
+                ;
     }
 }
