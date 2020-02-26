@@ -35,9 +35,13 @@ import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.shetland.filter.ExpandFilter;
+import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
+import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.shetland.ogc.sta.model.ThingEntityDefinition;
 import org.n52.sta.data.query.ThingQuerySpecifications;
 import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.IdentifierRepository;
@@ -80,6 +84,53 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     @Override
     public EntityTypes[] getTypes() {
         return new EntityTypes[] {EntityTypes.Thing, EntityTypes.Things};
+    }
+
+    @Override protected PlatformEntity fetchExpandEntities(PlatformEntity entity, ExpandFilter expandOption)
+            throws STACRUDException, STAInvalidQueryException {
+        for (ExpandItem expandItem : expandOption.getItems()) {
+            String expandProperty = expandItem.getPath();
+            if (ThingEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
+                CollectionWrapper expandedEntities;
+                switch (expandProperty) {
+                case STAEntityDefinition.HISTORICAL_LOCATIONS:
+                    expandedEntities =
+                            getHistoricalLocationService()
+                                    .getEntityCollectionByRelatedEntity(entity.getIdentifier(),
+                                                                        PlatformEntity.class.getSimpleName(),
+                                                                        expandItem.getQueryOptions());
+                    return entity.setHistoricalLocations(
+                            expandedEntities.getEntities()
+                                            .stream()
+                                            .map(s -> (HistoricalLocationEntity) s.getEntity())
+                                            .collect(Collectors.toSet()));
+                case STAEntityDefinition.DATASTREAMS:
+                    expandedEntities = getDatastreamService()
+                            .getEntityCollectionByRelatedEntity(entity.getIdentifier(),
+                                                                PlatformEntity.class.getSimpleName(),
+                                                                expandItem.getQueryOptions());
+                    return entity.setDatastreams(
+                            expandedEntities.getEntities()
+                                            .stream()
+                                            .map(s -> (DatastreamEntity) s.getEntity())
+                                            .collect(Collectors.toSet()));
+                case STAEntityDefinition.LOCATIONS:
+                    expandedEntities = getLocationService()
+                            .getEntityCollectionByRelatedEntity(entity.getIdentifier(),
+                                                                PlatformEntity.class.getSimpleName(),
+                                                                expandItem.getQueryOptions());
+                    return entity.setLocations(
+                            expandedEntities.getEntities()
+                                            .stream()
+                                            .map(s -> (LocationEntity) s.getEntity())
+                                            .collect(Collectors.toSet()));
+                }
+            } else {
+                throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty +
+                                                           "on Entity of type 'Thing'");
+            }
+        }
+        return entity;
     }
 
     @Override
@@ -260,7 +311,8 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
         }
     }
 
-    private void processLocations(PlatformEntity thing, Set<LocationEntity> oldLocations) throws STACRUDException {
+    private void processLocations(PlatformEntity thing, Set<LocationEntity> oldLocations) throws
+            STACRUDException {
         if (oldLocations != null) {
             Set<LocationEntity> locations = new HashSet<>();
             thing.setLocations(new HashSet<>());

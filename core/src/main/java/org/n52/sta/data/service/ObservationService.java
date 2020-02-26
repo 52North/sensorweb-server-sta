@@ -48,9 +48,11 @@ import org.n52.series.db.beans.dataset.ValueType;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
+import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.om.OmConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
+import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.DatasetQuerySpecifications;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
@@ -129,6 +131,11 @@ public class ObservationService extends
     @Override
     public EntityTypes[] getTypes() {
         return new EntityTypes[] {EntityTypes.Observation, EntityTypes.Observations};
+    }
+
+    @Override protected DataEntity<?> fetchExpandEntities(DataEntity<?> entity, ExpandFilter expandOption)
+            throws STACRUDException, STAInvalidQueryException {
+        return entity;
     }
 
     @Override

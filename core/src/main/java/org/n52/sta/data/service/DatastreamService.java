@@ -39,8 +39,10 @@ import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.UnitEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
+import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
+import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
@@ -106,6 +108,11 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
     @Override
     public EntityTypes[] getTypes() {
         return new EntityTypes[] {EntityTypes.Datastream, EntityTypes.Datastreams};
+    }
+
+    @Override protected DatastreamEntity fetchExpandEntities(DatastreamEntity entity, ExpandFilter expandOption)
+            throws STACRUDException, STAInvalidQueryException {
+        return null;
     }
 
     @Override

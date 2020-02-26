@@ -39,19 +39,25 @@ import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.FeatureEntity;
 import org.n52.shetland.filter.AbstractPathFilter;
+import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.filter.PathFilterItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.model.FeatureOfInterestEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.shetland.ogc.sta.model.ThingEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONFeatureOfInterest;
+import org.n52.sta.serdes.util.ElementWithQueryOptions;
 import org.n52.sta.serdes.util.ElementWithQueryOptions.FeatureOfInterestWithQueryOptions;
 import org.n52.sta.serdes.util.EntityPatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -100,17 +106,22 @@ public class FeatureOfInterestSerDes {
             QueryOptions options = value.getQueryOptions();
 
             Set<String> fieldsToSerialize = null;
+            Map<String, QueryOptions> fieldsToExpand = new HashMap<>();
             boolean hasSelectOption = false;
+            boolean hasExpandOption = false;
             if (options != null) {
                 if (options.hasSelectOption()) {
                     hasSelectOption = true;
-                    fieldsToSerialize = ((AbstractPathFilter) options.getSelectOption())
-                            .getItems()
-                            .stream()
-                            .map(PathFilterItem::getPath)
-                            .collect(Collectors.toSet());
+                    fieldsToSerialize = options.getSelectOption().getItems();
+                }
+                if (options.hasExpandOption()) {
+                    hasExpandOption = true;
+                    for (ExpandItem item : options.getExpandOption().getItems()) {
+                        fieldsToExpand.put(item.getPath(), item.getQueryOptions());
+                    }
                 }
             }
+
             // olingo @iot links
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
                 writeId(gen, feature.getIdentifier());
@@ -140,10 +151,34 @@ public class FeatureOfInterestSerDes {
             // navigation properties
             for (String navigationProperty : FeatureOfInterestEntityDefinition.NAVIGATION_PROPERTIES) {
                 if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
-                    writeNavigationProp(gen, navigationProperty, feature.getIdentifier());
+                    if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
+                        writeNavigationProp(gen, navigationProperty, feature.getIdentifier());
+                    } else {
+                        Set<Object> expandedElements;
+                        switch (navigationProperty) {
+                        case STAEntityDefinition.OBSERVATIONS:
+                            expandedElements = Collections.unmodifiableSet(feature.getMappedParameters().getDatastreams());
+                            break;
+                        case STAEntityDefinition.HISTORICAL_LOCATIONS:
+                            expandedElements = Collections.unmodifiableSet(thing.getHistoricalLocations());
+                            break;
+                        case STAEntityDefinition.LOCATIONS:
+                            expandedElements = Collections.unmodifiableSet(thing.getLocations());
+                            break;
+                        default:
+                            throw new IllegalStateException("Unexpected value: " + navigationProperty);
+                        }
+                        gen.writeArrayFieldStart(navigationProperty);
+                        serializers.defaultSerializeValue(
+                                expandedElements
+                                        .stream()
+                                        .map(d -> ElementWithQueryOptions.from(d,
+                                                                               fieldsToExpand.get(navigationProperty)))
+                                        .collect(Collectors.toSet()), gen);
+                        gen.writeEndArray();
+                    }
                 }
             }
-            //TODO: Deal with $expand
             gen.writeEndObject();
         }
     }

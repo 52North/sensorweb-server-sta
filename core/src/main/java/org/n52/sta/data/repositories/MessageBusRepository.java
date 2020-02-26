@@ -150,7 +150,7 @@ public class MessageBusRepository<T, I extends Serializable>
     @Transactional
     public Optional<T> findByIdentifier(String identifier, EntityGraphRepository.FetchGraph... entityGraphs) {
         TypedQuery<T> query = createIdentifierQuery(identifier);
-        EntityGraph<T> fetchGraph = createFetchGraph(entityGraphs);
+        EntityGraph<T> fetchGraph = createEntityGraph(entityGraphs);
         if (fetchGraph != null) {
             query.setHint(FETCHGRAPH_HINT, fetchGraph);
         }
@@ -205,7 +205,7 @@ public class MessageBusRepository<T, I extends Serializable>
         return newEntity;
     }
 
-    private EntityGraph<T> createFetchGraph(EntityGraphRepository.FetchGraph... fetchGraphs) {
+    private EntityGraph<T> createEntityGraph(EntityGraphRepository.FetchGraph... fetchGraphs) {
         if (fetchGraphs != null && fetchGraphs.length != 0) {
             Set<RootGraph<T>> roots = new HashSet<>();
             for (EntityGraphRepository.FetchGraph entityGraph : fetchGraphs) {
@@ -224,24 +224,24 @@ public class MessageBusRepository<T, I extends Serializable>
 
     public Optional<T> findOne(Specification<T> spec, EntityGraphRepository.FetchGraph... fetchGraphs) {
         try {
-            return Optional.of(getQuery(spec, Sort.unsorted(), createFetchGraph(fetchGraphs)).getSingleResult());
+            return Optional.of(getQuery(spec, Sort.unsorted(), createEntityGraph(fetchGraphs)).getSingleResult());
         } catch (NoResultException e) {
             return Optional.empty();
         }
     }
 
     public List<T> findAll(Specification<T> spec, EntityGraphRepository.FetchGraph... fetchGraphs) {
-        return getQuery(spec, Sort.unsorted(), createFetchGraph(fetchGraphs)).getResultList();
+        return getQuery(spec, Sort.unsorted(), createEntityGraph(fetchGraphs)).getResultList();
     }
 
     public Page<T> findAll(Specification<T> spec, Pageable pageable, EntityGraphRepository.FetchGraph... fetchGraphs) {
-        TypedQuery<T> query = getQuery(spec, pageable, createFetchGraph(fetchGraphs));
+        TypedQuery<T> query = getQuery(spec, pageable, createEntityGraph(fetchGraphs));
         return pageable.isUnpaged() ? new PageImpl<T>(query.getResultList())
                 : readPage(query, getDomainClass(), pageable, spec);
     }
 
     public List<T> findAll(Specification<T> spec, Sort sort, EntityGraphRepository.FetchGraph... fetchGraphs) {
-        return getQuery(spec, sort, createFetchGraph(fetchGraphs)).getResultList();
+        return getQuery(spec, sort, createEntityGraph(fetchGraphs)).getResultList();
     }
 
     protected TypedQuery<T> getQuery(@Nullable Specification<T> spec,

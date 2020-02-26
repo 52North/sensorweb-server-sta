@@ -40,8 +40,10 @@ import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
+import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.shetland.util.IdGenerator;
 import org.n52.sta.data.query.DatasetQuerySpecifications;
@@ -112,6 +114,12 @@ public class FeatureOfInterestService
     @Override
     public EntityTypes[] getTypes() {
         return new EntityTypes[] {EntityTypes.FeatureOfInterest, EntityTypes.FeaturesOfInterest};
+    }
+
+    @Override
+    protected AbstractFeatureEntity<?> fetchExpandEntities(AbstractFeatureEntity<?> entity, ExpandFilter expandOption)
+            throws STACRUDException, STAInvalidQueryException {
+        return null;
     }
 
     @Override

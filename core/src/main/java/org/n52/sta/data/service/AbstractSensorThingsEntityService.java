@@ -29,7 +29,6 @@
 
 package org.n52.sta.data.service;
 
-import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.HibernateRelations;
 import org.n52.series.db.beans.HibernateRelations.HasDescription;
@@ -37,6 +36,8 @@ import org.n52.series.db.beans.HibernateRelations.HasName;
 import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.shetland.filter.ExpandFilter;
+import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.filter.FilterFilter;
 import org.n52.shetland.filter.OrderByFilter;
 import org.n52.shetland.filter.OrderProperty;
@@ -119,11 +120,18 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      */
     public ElementWithQueryOptions getEntity(String id, QueryOptions queryOptions) throws STACRUDException {
         try {
-            return this.createWrapper(getRepository().findByIdentifier(id, defaultFetchGraphs).get(), queryOptions);
-        } catch (RuntimeException e) {
+            S entity = getRepository().findByIdentifier(id, defaultFetchGraphs).get();
+            if (queryOptions.hasExpandOption()) {
+                this.fetchExpandEntities(entity, (ExpandFilter) queryOptions.getExpandOption());
+            }
+            return this.createWrapper(entity, queryOptions);
+        } catch (RuntimeException | STAInvalidQueryException e) {
             throw new STACRUDException(e.getMessage(), e);
         }
     }
+
+    protected abstract S fetchExpandEntities(S entity, ExpandFilter expandOption)
+            throws STACRUDException, STAInvalidQueryException;
 
     /**
      * Requests the full EntityCollection
@@ -188,9 +196,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
             Optional<S> elem =
                     getRepository().findOne(byRelatedEntityFilter(relatedId, relatedType, ownId), defaultFetchGraphs);
             if (elem.isPresent()) {
-                return this.createWrapper(
-                        elem.get(),
-                        queryOptions);
+                return this.createWrapper(elem.get(), queryOptions);
             } else {
                 return null;
             }
@@ -386,7 +392,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
         if (queryOptions.hasOrderByOption()) {
             boolean first = true;
             for (OrderProperty sortProperty :
-                    ((OrderByFilter) queryOptions.getOrderByOption()).getSortProperties()) {
+                    queryOptions.getOrderByOption().getSortProperties()) {
                 if (first) {
                     sort = Sort.by(sortProperty.getSortOrder().equals(FilterConstants.SortOrder.DESC) ?
                                            Sort.Direction.DESC : Sort.Direction.ASC,

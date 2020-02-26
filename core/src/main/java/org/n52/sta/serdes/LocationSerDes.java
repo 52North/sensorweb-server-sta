@@ -38,6 +38,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.filter.AbstractPathFilter;
+import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.filter.PathFilterItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.model.LocationEntityDefinition;
@@ -50,7 +51,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -96,17 +99,22 @@ public class LocationSerDes {
             QueryOptions options = value.getQueryOptions();
 
             Set<String> fieldsToSerialize = null;
+            Map<String, QueryOptions> fieldsToExpand = new HashMap<>();
             boolean hasSelectOption = false;
+            boolean hasExpandOption = false;
             if (options != null) {
                 if (options.hasSelectOption()) {
                     hasSelectOption = true;
-                    fieldsToSerialize = ((AbstractPathFilter) options.getSelectOption())
-                            .getItems()
-                            .stream()
-                            .map(PathFilterItem::getPath)
-                            .collect(Collectors.toSet());
+                    fieldsToSerialize = options.getSelectOption().getItems();
+                }
+                if (options.hasExpandOption()) {
+                    hasExpandOption = true;
+                    for (ExpandItem item : options.getExpandOption().getItems()) {
+                        fieldsToExpand.put(item.getPath(), item.getQueryOptions());
+                    }
                 }
             }
+
             // olingo @iot links
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
                 writeId(gen, location.getIdentifier());

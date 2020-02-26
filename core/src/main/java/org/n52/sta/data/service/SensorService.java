@@ -31,13 +31,18 @@ package org.n52.sta.data.service;
 
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.FormatEntity;
+import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
+import org.n52.shetland.filter.ExpandFilter;
+import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
+import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.shetland.ogc.sta.model.SensorEntityDefinition;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.SensorQuerySpecifications;
 import org.n52.sta.data.repositories.DatastreamRepository;
@@ -102,6 +107,32 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
     @Override
     public EntityTypes[] getTypes() {
         return new EntityTypes[] {EntityTypes.Sensor, EntityTypes.Sensors};
+    }
+
+    @Override protected ProcedureEntity fetchExpandEntities(ProcedureEntity entity, ExpandFilter expandOption)
+            throws STACRUDException, STAInvalidQueryException {
+        for (ExpandItem expandItem : expandOption.getItems()) {
+            String expandProperty = expandItem.getPath().split("/")[0];
+            if (SensorEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
+                CollectionWrapper expandedEntities;
+                switch (expandProperty) {
+                case STAEntityDefinition.DATASTREAMS:
+                    expandedEntities = getDatastreamService()
+                            .getEntityCollectionByRelatedEntity(entity.getIdentifier(),
+                                                                PlatformEntity.class.getSimpleName(),
+                                                                expandItem.getQueryOptions());
+                    return entity.set.setDatastreams(
+                            expandedEntities.getEntities()
+                                            .stream()
+                                            .map(s -> (DatastreamEntity) s.getEntity())
+                                            .collect(Collectors.toSet()));
+                }
+            } else {
+                throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty +
+                                                           "on Entity of type 'Sensor'");
+            }
+        }
+        return entity;
     }
 
     @Override

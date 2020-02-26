@@ -35,8 +35,10 @@ import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.ObservablePropertyEntity;
+import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
+import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.OffsetLimitBasedPageRequest;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
@@ -131,6 +133,12 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
         } catch (RuntimeException e) {
             throw new STACRUDException(e.getMessage());
         }
+    }
+
+    @Override protected PhenomenonEntity fetchExpandEntities(PhenomenonEntity entity, ExpandFilter expandOption)
+            throws STACRUDException, STAInvalidQueryException {
+        entity.setParameters();
+        return entity;
     }
 
     /**

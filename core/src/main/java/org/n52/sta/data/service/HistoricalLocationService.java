@@ -33,8 +33,10 @@ import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
+import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.HistoricalLocationQuerySpecifications;
 import org.n52.sta.data.repositories.EntityGraphRepository;
@@ -85,6 +87,12 @@ public class HistoricalLocationService
     @Override
     public EntityTypes[] getTypes() {
         return new EntityTypes[] {EntityTypes.HistoricalLocation, EntityTypes.HistoricalLocations};
+    }
+
+    @Override
+    protected HistoricalLocationEntity fetchExpandEntities(HistoricalLocationEntity entity, ExpandFilter expandOption)
+            throws STACRUDException, STAInvalidQueryException {
+        return null;
     }
 
     @Override

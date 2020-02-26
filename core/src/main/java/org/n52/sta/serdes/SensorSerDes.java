@@ -39,19 +39,25 @@ import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.shetland.filter.AbstractPathFilter;
+import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.filter.PathFilterItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.shetland.ogc.sta.model.SensorEntityDefinition;
+import org.n52.shetland.ogc.sta.model.ThingEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONSensor;
+import org.n52.sta.serdes.util.ElementWithQueryOptions;
 import org.n52.sta.serdes.util.ElementWithQueryOptions.SensorWithQueryOptions;
 import org.n52.sta.serdes.util.EntityPatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -97,17 +103,22 @@ public class SensorSerDes {
             QueryOptions options = value.getQueryOptions();
 
             Set<String> fieldsToSerialize = null;
+            Map<String, QueryOptions> fieldsToExpand = new HashMap<>();
             boolean hasSelectOption = false;
+            boolean hasExpandOption = false;
             if (options != null) {
                 if (options.hasSelectOption()) {
                     hasSelectOption = true;
-                    fieldsToSerialize = ((AbstractPathFilter) options.getSelectOption())
-                            .getItems()
-                            .stream()
-                            .map(PathFilterItem::getPath)
-                            .collect(Collectors.toSet());
+                    fieldsToSerialize = options.getSelectOption().getItems();
+                }
+                if (options.hasExpandOption()) {
+                    hasExpandOption = true;
+                    for (ExpandItem item : options.getExpandOption().getItems()) {
+                        fieldsToExpand.put(item.getPath(), item.getQueryOptions());
+                    }
                 }
             }
+
             // olingo @iot links
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
                 writeId(gen, sensor.getIdentifier());
@@ -151,6 +162,32 @@ public class SensorSerDes {
                     writeNavigationProp(gen, navigationProperty, sensor.getIdentifier());
                 }
             }
+            // navigation properties
+            for (String navigationProperty : SensorEntityDefinition.NAVIGATION_PROPERTIES) {
+                if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
+                    if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
+                        writeNavigationProp(gen, navigationProperty, sensor.getIdentifier());
+                    } else {
+                        Set<Object> expandedElements;
+                        switch (navigationProperty) {
+                        case SensorEntityDefinition.DATASTREAMS:
+                            expandedElements = Collections.unmodifiableSet(sensor.getPa.getDatastreams());
+                            break;
+                        default:
+                            throw new IllegalStateException("Unexpected value: " + navigationProperty);
+                        }
+                        gen.writeArrayFieldStart(navigationProperty);
+                        provider.defaultSerializeValue(
+                                expandedElements
+                                        .stream()
+                                        .map(d -> ElementWithQueryOptions.from(d,
+                                                                               fieldsToExpand.get(navigationProperty)))
+                                        .collect(Collectors.toSet()), gen);
+                        gen.writeEndArray();
+                    }
+                }
+            }
+
             //TODO: Deal with $expand
             gen.writeEndObject();
         }
