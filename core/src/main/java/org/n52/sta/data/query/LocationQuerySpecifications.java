@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.query;
 
 import org.n52.series.db.beans.DescribableEntity;
@@ -33,8 +34,8 @@ import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
-import org.n52.sta.utils.ComparisonOperator;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.Join;
@@ -53,8 +54,8 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
             Join<HistoricalLocationEntity, LocationEntity> joinFeature =
                     historicalLoc.join(HistoricalLocationEntity.PROPERTY_LOCATIONS);
             sq.select(joinFeature)
-                .where(builder.equal(historicalLoc.get(DescribableEntity.PROPERTY_IDENTIFIER),
-                                     historicalLocationIdentifier));
+              .where(builder.equal(historicalLoc.get(DescribableEntity.PROPERTY_IDENTIFIER),
+                                   historicalLocationIdentifier));
             return builder.in(root).value(sq);
         };
     }
@@ -65,7 +66,7 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
             Root<PlatformEntity> platform = sq.from(PlatformEntity.class);
             Join<PlatformEntity, LocationEntity> joinFeature = platform.join(PlatformEntity.PROPERTY_LOCATIONS);
             sq.select(joinFeature)
-                .where(builder.equal(platform.get(DescribableEntity.PROPERTY_IDENTIFIER), thingIdentifier));
+              .where(builder.equal(platform.get(DescribableEntity.PROPERTY_IDENTIFIER), thingIdentifier));
             return builder.in(root).value(sq);
         };
     }
@@ -78,7 +79,7 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
     @Override
     public Specification<LocationEntity> getFilterForProperty(String propertyName,
                                                               Object propertyValue,
-                                                              ComparisonOperator operator,
+                                                              FilterConstants.ComparisonOperator operator,
                                                               boolean switched) {
         if (propertyName.equals(THINGS) || propertyName.equals(HISTORICAL_LOCATIONS)) {
             return handleRelatedPropertyFilter(propertyName, (Specification<String>) propertyValue);
@@ -86,7 +87,7 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
             return (root, query, builder) -> {
                 try {
                     return handleDirectStringPropertyFilter(root.get(LocationEntity.PROPERTY_IDENTIFIER),
-                            propertyValue.toString(), operator, builder, false);
+                                                            propertyValue.toString(), operator, builder, false);
                 } catch (STAInvalidFilterExpressionException e) {
                     throw new RuntimeException(e);
                 }
@@ -105,7 +106,7 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
                 Root<PlatformEntity> dataset = sq.from(PlatformEntity.class);
                 Join<PlatformEntity, LocationEntity> joinFeature = dataset.join(PlatformEntity.PROPERTY_LOCATIONS);
                 sq.select(joinFeature)
-                    .where(builder.equal(dataset.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue));
+                  .where(builder.equal(dataset.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue));
                 return builder.in(root).value(sq);
             } else {
                 Subquery<LocationEntity> sq = query.subquery(LocationEntity.class);
@@ -113,33 +114,35 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
                 Join<HistoricalLocationEntity, LocationEntity> joinFeature =
                         dataset.join(HistoricalLocationEntity.PROPERTY_LOCATIONS);
                 sq.select(joinFeature)
-                    .where(builder.equal(dataset.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue));
+                  .where(builder.equal(dataset.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue));
                 return builder.in(root).value(sq);
             }
         };
     }
 
-    private Specification<LocationEntity> handleDirectPropertyFilter(String propertyName, Object propertyValue,
-                                                                     ComparisonOperator operator, boolean switched) {
+    private Specification<LocationEntity> handleDirectPropertyFilter(String propertyName,
+                                                                     Object propertyValue,
+                                                                     FilterConstants.ComparisonOperator operator,
+                                                                     boolean switched) {
         return (Specification<LocationEntity>) (root, query, builder) -> {
             try {
                 switch (propertyName) {
-                    case "name":
-                        return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
-                                propertyValue.toString(), operator, builder, switched);
-                    case "description":
-                        return handleDirectStringPropertyFilter(
-                                root.get(DescribableEntity.PROPERTY_DESCRIPTION), propertyValue.toString(),
-                                operator, builder, switched);
-                    case "encodingType":
-                        Join<LocationEntity, FormatEntity> join =
-                                root.join(LocationEntity.PROPERTY_LOCATION_ENCODINT);
-                        return handleDirectStringPropertyFilter(
-                                join.get(FormatEntity.FORMAT),
-                                propertyValue.toString(), operator, builder, switched);
-                    default:
-                        throw new RuntimeException("Error getting filter for Property: \"" + propertyName
-                                + "\". No such property in Entity.");
+                case "name":
+                    return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
+                                                            propertyValue.toString(), operator, builder, switched);
+                case "description":
+                    return handleDirectStringPropertyFilter(
+                            root.get(DescribableEntity.PROPERTY_DESCRIPTION), propertyValue.toString(),
+                            operator, builder, switched);
+                case "encodingType":
+                    Join<LocationEntity, FormatEntity> join =
+                            root.join(LocationEntity.PROPERTY_LOCATION_ENCODINT);
+                    return handleDirectStringPropertyFilter(
+                            join.get(FormatEntity.FORMAT),
+                            propertyValue.toString(), operator, builder, switched);
+                default:
+                    throw new RuntimeException("Error getting filter for Property: \"" + propertyName
+                                                       + "\". No such property in Entity.");
                 }
             } catch (STAInvalidFilterExpressionException e) {
                 throw new RuntimeException(e);

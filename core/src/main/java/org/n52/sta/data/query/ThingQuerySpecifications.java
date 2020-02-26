@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.query;
 
 import org.n52.series.db.beans.DescribableEntity;
@@ -33,15 +34,12 @@ import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
-import org.n52.sta.utils.ComparisonOperator;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
@@ -82,7 +80,7 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
     @Override
     public Specification<PlatformEntity> getFilterForProperty(String propertyName,
                                                               Object propertyValue,
-                                                              ComparisonOperator operator,
+                                                              FilterConstants.ComparisonOperator operator,
                                                               boolean switched)
             throws STAInvalidFilterExpressionException {
         if (propertyName.equals(DATASTREAMS) || propertyName.equals(LOCATIONS)
@@ -92,7 +90,7 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
             return (root, query, builder) -> {
                 try {
                     return handleDirectStringPropertyFilter(root.get(PlatformEntity.PROPERTY_IDENTIFIER),
-                            propertyValue.toString(), operator, builder, false);
+                                                            propertyValue.toString(), operator, builder, false);
                 } catch (STAInvalidFilterExpressionException e) {
                     throw new RuntimeException(e);
                 }
@@ -108,38 +106,38 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
         return (root, query, builder) -> {
             try {
                 switch (propertyName) {
-                    case DATASTREAMS: {
-                        Subquery<DatastreamEntity> subquery = query.subquery(DatastreamEntity.class);
-                        Root<DatastreamEntity> datastream = subquery.from(DatastreamEntity.class);
-                        subquery.select(datastream.get(DatastreamEntity.PROPERTY_ID))
+                case DATASTREAMS: {
+                    Subquery<DatastreamEntity> subquery = query.subquery(DatastreamEntity.class);
+                    Root<DatastreamEntity> datastream = subquery.from(DatastreamEntity.class);
+                    subquery.select(datastream.get(DatastreamEntity.PROPERTY_ID))
                             .where(builder.equal(datastream.get(DatastreamEntity.PROPERTY_IDENTIFIER), propertyValue));
-                        return builder.in(root.get(PlatformEntity.PROPERTY_DATASTREAMS)).value(subquery);
-                        // return
-                        // qPlatform.datastreamEntities.any().id.eqAny(propertyValue);
-                    }
-                    case LOCATIONS: {
-                        Subquery<LocationEntity> subquery = query.subquery(LocationEntity.class);
-                        Root<LocationEntity> location = subquery.from(LocationEntity.class);
-                        subquery.select(location.get(LocationEntity.PROPERTY_ID))
-                                .where(builder.equal(location.get(LocationEntity.PROPERTY_IDENTIFIER), propertyValue));
-                        return builder.in(root.get(PlatformEntity.PROPERTY_LOCATIONS)).value(subquery);
-                        // return
-                        // qPlatform.locationEntities.any().id.eqAny(propertyValue);
-                    }
-                    case HISTORICAL_LOCATIONS:
-                        Subquery<HistoricalLocationEntity> subquery = query.subquery(HistoricalLocationEntity.class);
-                        Root<HistoricalLocationEntity> historicalLocation =
-                                subquery.from(HistoricalLocationEntity.class);
-                        subquery.select(historicalLocation.get(HistoricalLocationEntity.PROPERTY_ID))
-                                .where(builder.equal(
-                                        historicalLocation.get(HistoricalLocationEntity.PROPERTY_IDENTIFIER),
-                                        propertyValue));
-                        return builder.in(root.get(PlatformEntity.PROPERTY_HISTORICAL_LOCATIONS)).value(subquery);
-                        // return
-                        // qPlatform.historicalLocationEntities.any().id.eqAny(propertyValue);
-                    default:
-                        throw new STAInvalidFilterExpressionException(
-                                "Filtering by Related Properties with cardinality >1 is currently not supported!");
+                    return builder.in(root.get(PlatformEntity.PROPERTY_DATASTREAMS)).value(subquery);
+                    // return
+                    // qPlatform.datastreamEntities.any().id.eqAny(propertyValue);
+                }
+                case LOCATIONS: {
+                    Subquery<LocationEntity> subquery = query.subquery(LocationEntity.class);
+                    Root<LocationEntity> location = subquery.from(LocationEntity.class);
+                    subquery.select(location.get(LocationEntity.PROPERTY_ID))
+                            .where(builder.equal(location.get(LocationEntity.PROPERTY_IDENTIFIER), propertyValue));
+                    return builder.in(root.get(PlatformEntity.PROPERTY_LOCATIONS)).value(subquery);
+                    // return
+                    // qPlatform.locationEntities.any().id.eqAny(propertyValue);
+                }
+                case HISTORICAL_LOCATIONS:
+                    Subquery<HistoricalLocationEntity> subquery = query.subquery(HistoricalLocationEntity.class);
+                    Root<HistoricalLocationEntity> historicalLocation =
+                            subquery.from(HistoricalLocationEntity.class);
+                    subquery.select(historicalLocation.get(HistoricalLocationEntity.PROPERTY_ID))
+                            .where(builder.equal(
+                                    historicalLocation.get(HistoricalLocationEntity.PROPERTY_IDENTIFIER),
+                                    propertyValue));
+                    return builder.in(root.get(PlatformEntity.PROPERTY_HISTORICAL_LOCATIONS)).value(subquery);
+                // return
+                // qPlatform.historicalLocationEntities.any().id.eqAny(propertyValue);
+                default:
+                    throw new STAInvalidFilterExpressionException(
+                            "Filtering by Related Properties with cardinality >1 is currently not supported!");
                 }
             } catch (STAInvalidFilterExpressionException e) {
                 throw new RuntimeException(e);
@@ -149,39 +147,36 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
 
     private Specification<PlatformEntity> handleDirectPropertyFilter(String propertyName,
                                                                      Object propertyValue,
-                                                                     ComparisonOperator operator,
+                                                                     FilterConstants.ComparisonOperator operator,
                                                                      boolean switched) {
-        return new Specification<PlatformEntity>() {
-            @Override
-            public Predicate toPredicate(Root<PlatformEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
-                try {
-                    switch (propertyName) {
-                        case "name":
-                            return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
-                                    propertyValue.toString(), operator, builder, switched);
-                        case "description":
-                            return handleDirectStringPropertyFilter(
-                                    root.get(DescribableEntity.PROPERTY_DESCRIPTION),
-                                    propertyValue.toString(),
-                                    operator,
-                                    builder,
-                                    switched);
-                        case "properties":
-                            // TODO
-                            // qPlatform.parameters.any().name.eq("properties")
-                            return handleDirectStringPropertyFilter(
-                                    root.get(PlatformEntity.PROPERTY_PROPERTIES),
-                                    propertyValue.toString(),
-                                    operator,
-                                    builder,
-                                    switched);
-                        default:
-                            throw new RuntimeException("Error getting filter for Property: \"" + propertyName
-                                    + "\". No such property in Entity.");
-                    }
-                } catch (STAInvalidFilterExpressionException e) {
-                    throw new RuntimeException(e);
+        return (Specification<PlatformEntity>) (root, query, builder) -> {
+            try {
+                switch (propertyName) {
+                case "name":
+                    return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
+                                                            propertyValue.toString(), operator, builder, switched);
+                case "description":
+                    return handleDirectStringPropertyFilter(
+                            root.get(DescribableEntity.PROPERTY_DESCRIPTION),
+                            propertyValue.toString(),
+                            operator,
+                            builder,
+                            switched);
+                case "properties":
+                    // TODO
+                    // qPlatform.parameters.any().name.eq("properties")
+                    return handleDirectStringPropertyFilter(
+                            root.get(PlatformEntity.PROPERTY_PROPERTIES),
+                            propertyValue.toString(),
+                            operator,
+                            builder,
+                            switched);
+                default:
+                    throw new RuntimeException("Error getting filter for Property: \"" + propertyName
+                                                       + "\". No such property in Entity.");
                 }
+            } catch (STAInvalidFilterExpressionException e) {
+                throw new RuntimeException(e);
             }
         };
     }

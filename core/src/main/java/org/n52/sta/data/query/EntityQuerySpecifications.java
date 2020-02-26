@@ -26,11 +26,12 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.query;
 
 import org.n52.series.db.beans.DescribableEntity;
+import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
-import org.n52.sta.utils.ComparisonOperator;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -82,7 +83,7 @@ public abstract class EntityQuerySpecifications<T> {
      */
     public abstract Specification<T> getFilterForProperty(String propertyName,
                                                           Object propertyValue,
-                                                          ComparisonOperator operator,
+                                                          FilterConstants.ComparisonOperator operator,
                                                           boolean switched)
             throws STAInvalidFilterExpressionException;
 
@@ -110,7 +111,7 @@ public abstract class EntityQuerySpecifications<T> {
     // Wrapper
     protected Predicate handleDirectStringPropertyFilter(Path<String> stringPath,
                                                          String propertyValue,
-                                                         ComparisonOperator operator,
+                                                         FilterConstants.ComparisonOperator operator,
                                                          CriteriaBuilder builder,
                                                          boolean switched)
             throws STAInvalidFilterExpressionException {
@@ -119,7 +120,7 @@ public abstract class EntityQuerySpecifications<T> {
 
     protected Predicate handleDirectNumberPropertyFilter(Path<Double> numberPath,
                                                          Double propertyValue,
-                                                         ComparisonOperator operator,
+                                                         FilterConstants.ComparisonOperator operator,
                                                          CriteriaBuilder builder)
             throws STAInvalidFilterExpressionException {
         return this.handleNumberFilter(numberPath, propertyValue, operator, builder);
@@ -127,7 +128,7 @@ public abstract class EntityQuerySpecifications<T> {
 
     protected Predicate handleDirectNumberPropertyFilter(Path<Long> numberPath,
                                                          Long propertyValue,
-                                                         ComparisonOperator operator,
+                                                         FilterConstants.ComparisonOperator operator,
                                                          CriteriaBuilder builder)
             throws STAInvalidFilterExpressionException {
         return this.handleNumberFilter(numberPath, propertyValue, operator, builder);
@@ -135,7 +136,7 @@ public abstract class EntityQuerySpecifications<T> {
 
     protected Predicate handleDirectNumberPropertyFilter(Path<Integer> numberPath,
                                                          Integer propertyValue,
-                                                         ComparisonOperator operator,
+                                                         FilterConstants.ComparisonOperator operator,
                                                          CriteriaBuilder builder)
             throws STAInvalidFilterExpressionException {
         return this.handleNumberFilter(numberPath, propertyValue, operator, builder);
@@ -143,7 +144,7 @@ public abstract class EntityQuerySpecifications<T> {
 
     protected Predicate handleDirectDateTimePropertyFilter(Path<Date> time,
                                                            Date propertyValue,
-                                                           ComparisonOperator operator,
+                                                           FilterConstants.ComparisonOperator operator,
                                                            CriteriaBuilder builder)
             throws STAInvalidFilterExpressionException {
         return this.handleDateFilter(time, propertyValue, operator, builder);
@@ -151,159 +152,148 @@ public abstract class EntityQuerySpecifications<T> {
 
     public Predicate handleStringFilter(Path<String> left,
                                         String right,
-                                        ComparisonOperator operatorKind,
+                                        FilterConstants.ComparisonOperator operatorKind,
                                         CriteriaBuilder builder,
                                         boolean switched)
             throws STAInvalidFilterExpressionException {
-        ComparisonOperator operator = switched ? reverseOperator(operatorKind) : operatorKind;
+        FilterConstants.ComparisonOperator operator = switched ? reverseOperator(operatorKind) : operatorKind;
 
         switch (operator) {
-            case EQ:
-                return builder.equal(left, right);
-            case NE:
-                return builder.notEqual(left, right);
-            case LT:
-                return builder.lessThan(left, right);
-            case LE:
-                return builder.lessThanOrEqualTo(left, right);
-            case GT:
-                return builder.greaterThan(left, right);
-            case GE:
-                return builder.greaterThanOrEqualTo(left, right);
-            default:
-                throw new STAInvalidFilterExpressionException("Error getting filter. Invalid Operator");
+        case PropertyIsEqualTo:
+            return builder.equal(left, right);
+        case PropertyIsNotEqualTo:
+            return builder.notEqual(left, right);
+        case PropertyIsLessThan:
+            return builder.lessThan(left, right);
+        case PropertyIsLessThanOrEqualTo:
+            return builder.lessThanOrEqualTo(left, right);
+        case PropertyIsGreaterThan:
+            return builder.greaterThan(left, right);
+        case PropertyIsGreaterThanOrEqualTo:
+            return builder.greaterThanOrEqualTo(left, right);
+        default:
+            throw new STAInvalidFilterExpressionException("Error getting filter. Invalid Operator");
         }
     }
 
     public Predicate handleNumberFilter(Expression<Double> left,
                                         Double right,
-                                        ComparisonOperator operator,
+                                        FilterConstants.ComparisonOperator operator,
                                         CriteriaBuilder builder)
             throws STAInvalidFilterExpressionException {
 
         switch (operator) {
-            case EQ:
-                return builder.equal(left, right);
-            case NE:
-                return builder.notEqual(left, right);
-            case LT:
-                return builder.lessThan(left, right);
-            case LE:
-                return builder.lessThanOrEqualTo(left, right);
-            case GT:
-                return builder.greaterThan(left, right);
-            case GE:
-                return builder.greaterThanOrEqualTo(left, right);
-            // case ADD:
-            //    return builder.sum(leftExpr, rightExpr);
-            // case DIV:
-            //    return builder.quot(leftExpr, rightExpr);
-            // case MOD:
-            //    return builder.mod(leftExpr.as(Integer.class), rightExpr.as(Integer.class));
-            // case MUL:
-            //    return builder.prod(leftExpr, rightExpr);
-            // case SUB:
-            //    return builder.diff(leftExpr, rightExpr);
-            default:
-                throw new STAInvalidFilterExpressionException(
-                        String.format(ERROR_TEMPLATE, operator.toString()));
+        case PropertyIsEqualTo:
+            return builder.equal(left, right);
+        case PropertyIsNotEqualTo:
+            return builder.notEqual(left, right);
+        case PropertyIsLessThan:
+            return builder.lessThan(left, right);
+        case PropertyIsLessThanOrEqualTo:
+            return builder.lessThanOrEqualTo(left, right);
+        case PropertyIsGreaterThan:
+            return builder.greaterThan(left, right);
+        case PropertyIsGreaterThanOrEqualTo:
+            return builder.greaterThanOrEqualTo(left, right);
+        // case ADD:
+        //    return builder.sum(leftExpr, rightExpr);
+        // case DIV:
+        //    return builder.quot(leftExpr, rightExpr);
+        // case MOD:
+        //    return builder.mod(leftExpr.as(Integer.class), rightExpr.as(Integer.class));
+        // case MUL:
+        //    return builder.prod(leftExpr, rightExpr);
+        // case SUB:
+        //    return builder.diff(leftExpr, rightExpr);
+        default:
+            throw new STAInvalidFilterExpressionException(
+                    String.format(ERROR_TEMPLATE, operator.toString()));
         }
     }
 
     public Predicate handleNumberFilter(Expression<Long> left,
                                         Long right,
-                                        ComparisonOperator operator,
+                                        FilterConstants.ComparisonOperator operator,
                                         CriteriaBuilder builder)
             throws STAInvalidFilterExpressionException {
 
         switch (operator) {
-            case EQ:
-                return builder.equal(left, right);
-            case NE:
-                return builder.notEqual(left, right);
-            case LT:
-                return builder.lessThan(left, right);
-            case LE:
-                return builder.lessThanOrEqualTo(left, right);
-            case GT:
-                return builder.greaterThan(left, right);
-            case GE:
-                return builder.greaterThanOrEqualTo(left, right);
-            // case ADD:
-            // return builder.sum(leftExpr, rightExpr);
-            // case DIV:
-            // return builder.quot(leftExpr, rightExpr);
-            // case MOD:
-            // return builder.mod(leftExpr.as(Integer.class),
-            // rightExpr.as(Integer.class));
-            // case MUL:
-            // return builder.prod(leftExpr, rightExpr);
-            // case SUB:
-            // return builder.diff(leftExpr, rightExpr);
-            default:
-                throw new STAInvalidFilterExpressionException(
-                        String.format(ERROR_TEMPLATE, operator.toString()));
+        case PropertyIsEqualTo:
+            return builder.equal(left, right);
+        case PropertyIsNotEqualTo:
+            return builder.notEqual(left, right);
+        case PropertyIsLessThan:
+            return builder.lessThan(left, right);
+        case PropertyIsLessThanOrEqualTo:
+            return builder.lessThanOrEqualTo(left, right);
+        case PropertyIsGreaterThan:
+            return builder.greaterThan(left, right);
+        case PropertyIsGreaterThanOrEqualTo:
+            return builder.greaterThanOrEqualTo(left, right);
+        // case ADD:
+        // return builder.sum(leftExpr, rightExpr);
+        // case DIV:
+        // return builder.quot(leftExpr, rightExpr);
+        // case MOD:
+        // return builder.mod(leftExpr.as(Integer.class),
+        // rightExpr.as(Integer.class));
+        // case MUL:
+        // return builder.prod(leftExpr, rightExpr);
+        // case SUB:
+        // return builder.diff(leftExpr, rightExpr);
+        default:
+            throw new STAInvalidFilterExpressionException(
+                    String.format(ERROR_TEMPLATE, operator.toString()));
         }
     }
 
     public Predicate handleNumberFilter(Expression<Integer> left,
                                         Integer right,
-                                        ComparisonOperator operator,
+                                        FilterConstants.ComparisonOperator operator,
                                         CriteriaBuilder builder)
             throws STAInvalidFilterExpressionException {
 
         switch (operator) {
-            case EQ:
-                return builder.equal(left, right);
-            case NE:
-                return builder.notEqual(left, right);
-            case LT:
-                return builder.lessThan(left, right);
-            case LE:
-                return builder.lessThanOrEqualTo(left, right);
-            case GT:
-                return builder.greaterThan(left, right);
-            case GE:
-                return builder.greaterThanOrEqualTo(left, right);
-            // case ADD:
-            // return builder.sum(leftExpr, rightExpr);
-            // case DIV:
-            // return builder.quot(leftExpr, rightExpr);
-            // case MOD:
-            // return builder.mod(leftExpr.as(Integer.class),
-            // rightExpr.as(Integer.class));
-            // case MUL:
-            // return builder.prod(leftExpr, rightExpr);
-            // case SUB:
-            // return builder.diff(leftExpr, rightExpr);
-            default:
-                throw new STAInvalidFilterExpressionException(
-                        String.format(ERROR_TEMPLATE, operator.toString()));
+        case PropertyIsEqualTo:
+            return builder.equal(left, right);
+        case PropertyIsNotEqualTo:
+            return builder.notEqual(left, right);
+        case PropertyIsLessThan:
+            return builder.lessThan(left, right);
+        case PropertyIsLessThanOrEqualTo:
+            return builder.lessThanOrEqualTo(left, right);
+        case PropertyIsGreaterThan:
+            return builder.greaterThan(left, right);
+        case PropertyIsGreaterThanOrEqualTo:
+            return builder.greaterThanOrEqualTo(left, right);
+        default:
+            throw new STAInvalidFilterExpressionException(
+                    String.format(ERROR_TEMPLATE, operator.toString()));
         }
     }
 
     public Predicate handleDateFilter(Expression<Date> left,
                                       Date right,
-                                      ComparisonOperator operator,
+                                      FilterConstants.ComparisonOperator operator,
                                       CriteriaBuilder builder)
             throws STAInvalidFilterExpressionException {
 
         switch (operator) {
-            case EQ:
-                return builder.equal(left, right);
-            case NE:
-                return builder.notEqual(left, right);
-            case LT:
-                return builder.lessThan(left, right);
-            case LE:
-                return builder.lessThanOrEqualTo(left, right);
-            case GT:
-                return builder.greaterThan(left, right);
-            case GE:
-                return builder.greaterThanOrEqualTo(left, right);
-            default:
-                throw new STAInvalidFilterExpressionException(
-                        String.format(ERROR_TEMPLATE, operator.toString()));
+        case PropertyIsEqualTo:
+            return builder.equal(left, right);
+        case PropertyIsNotEqualTo:
+            return builder.notEqual(left, right);
+        case PropertyIsLessThan:
+            return builder.lessThan(left, right);
+        case PropertyIsLessThanOrEqualTo:
+            return builder.lessThanOrEqualTo(left, right);
+        case PropertyIsGreaterThan:
+            return builder.greaterThan(left, right);
+        case PropertyIsGreaterThanOrEqualTo:
+            return builder.greaterThanOrEqualTo(left, right);
+        default:
+            throw new STAInvalidFilterExpressionException(
+                    String.format(ERROR_TEMPLATE, operator.toString()));
         }
     }
 
@@ -313,18 +303,18 @@ public abstract class EntityQuerySpecifications<T> {
      * @param operator to be reversed
      * @return String representation of reversed Operator
      */
-    private ComparisonOperator reverseOperator(ComparisonOperator operator) {
+    private FilterConstants.ComparisonOperator reverseOperator(FilterConstants.ComparisonOperator operator) {
         switch (operator) {
-            case LT:
-                return ComparisonOperator.GE;
-            case LE:
-                return ComparisonOperator.GT;
-            case GT:
-                return ComparisonOperator.LE;
-            case GE:
-                return ComparisonOperator.LT;
-            default:
-                return operator;
+        case PropertyIsLessThan:
+            return FilterConstants.ComparisonOperator.PropertyIsGreaterThanOrEqualTo;
+        case PropertyIsLessThanOrEqualTo:
+            return FilterConstants.ComparisonOperator.PropertyIsGreaterThan;
+        case PropertyIsGreaterThan:
+            return FilterConstants.ComparisonOperator.PropertyIsLessThanOrEqualTo;
+        case PropertyIsGreaterThanOrEqualTo:
+            return FilterConstants.ComparisonOperator.PropertyIsLessThan;
+        default:
+            return operator;
         }
     }
 }

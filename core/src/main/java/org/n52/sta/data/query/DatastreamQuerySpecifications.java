@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.query;
 
 import org.n52.series.db.beans.DataEntity;
@@ -36,8 +37,8 @@ import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
-import org.n52.sta.utils.ComparisonOperator;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.Join;
@@ -120,7 +121,7 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
             Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
             Root<DataEntity> data = sq.from(DataEntity.class);
             sq.select(data.get(DataEntity.PROPERTY_DATASET))
-                    .where(builder.equal(data.get(DescribableEntity.PROPERTY_IDENTIFIER), observationIdentifier));
+              .where(builder.equal(data.get(DescribableEntity.PROPERTY_IDENTIFIER), observationIdentifier));
             Join<DatastreamEntity, DatasetEntity> join = root.join(DatastreamEntity.PROPERTY_DATASETS);
             return builder.in(join.get(DatasetEntity.PROPERTY_ID)).value(sq);
         };
@@ -134,7 +135,7 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
     @Override
     public Specification<DatastreamEntity> getFilterForProperty(String propertyName,
                                                                 Object propertyValue,
-                                                                ComparisonOperator operator,
+                                                                FilterConstants.ComparisonOperator operator,
                                                                 boolean switched)
             throws STAInvalidFilterExpressionException {
         if (propertyName.equals(SENSOR) || propertyName.equals(OBSERVED_PROPERTY) || propertyName.equals(THING)
@@ -144,7 +145,7 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
             return (root, query, builder) -> {
                 try {
                     return handleDirectStringPropertyFilter(root.get(DatastreamEntity.PROPERTY_IDENTIFIER),
-                            propertyValue.toString(), operator, builder, false);
+                                                            propertyValue.toString(), operator, builder, false);
                 } catch (STAInvalidFilterExpressionException e) {
                     throw new RuntimeException(e);
                 }
@@ -155,33 +156,34 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
         }
     }
 
-    private Specification<DatastreamEntity> handleDirectPropertyFilter(String propertyName, Object propertyValue,
-                                                                       ComparisonOperator operator, boolean switched) {
+    private Specification<DatastreamEntity> handleDirectPropertyFilter(String propertyName,
+                                                                       Object propertyValue,
+                                                                       FilterConstants.ComparisonOperator operator,
+                                                                       boolean switched) {
         return (Specification<DatastreamEntity>) (root, query, builder) -> {
             try {
                 switch (propertyName) {
-                    case "name":
-                        return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
-                                propertyValue.toString(), operator, builder, switched);
-                    case "description":
-                        return handleDirectStringPropertyFilter(
-                                root.get(DescribableEntity.PROPERTY_DESCRIPTION), propertyValue.toString(),
-                                operator, builder, switched);
-                    case "observationType":
-                        Join<DatastreamEntity, FormatEntity> join =
-                                root.join(DatastreamEntity.PROPERTY_OBSERVATION_TYPE);
-                        return handleDirectStringPropertyFilter(join.get(FormatEntity.FORMAT),
-                                propertyValue.toString(), operator, builder, switched);
-                    default:
-                        throw new RuntimeException("Error getting filter for Property: \"" + propertyName
-                                + "\". No such property in Entity.");
+                case "name":
+                    return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
+                                                            propertyValue.toString(), operator, builder, switched);
+                case "description":
+                    return handleDirectStringPropertyFilter(
+                            root.get(DescribableEntity.PROPERTY_DESCRIPTION), propertyValue.toString(),
+                            operator, builder, switched);
+                case "observationType":
+                    Join<DatastreamEntity, FormatEntity> join =
+                            root.join(DatastreamEntity.PROPERTY_OBSERVATION_TYPE);
+                    return handleDirectStringPropertyFilter(join.get(FormatEntity.FORMAT),
+                                                            propertyValue.toString(), operator, builder, switched);
+                default:
+                    throw new RuntimeException("Error getting filter for Property: \"" + propertyName
+                                                       + "\". No such property in Entity.");
                 }
             } catch (STAInvalidFilterExpressionException e) {
                 throw new RuntimeException(e);
             }
         };
     }
-
 
     /**
      * Handles filtering of properties in related Entities.
@@ -197,33 +199,33 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
             try {
                 // TODO: handle switched Parameter
                 switch (propertyName) {
-                    case SENSOR: {
-                        final Join<DatastreamEntity, ProcedureEntity> join =
-                                root.join(DatastreamEntity.PROPERTY_SENSOR, JoinType.INNER);
-                        return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue);
+                case SENSOR: {
+                    final Join<DatastreamEntity, ProcedureEntity> join =
+                            root.join(DatastreamEntity.PROPERTY_SENSOR, JoinType.INNER);
+                    return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue);
 
-                    }
-                    case OBSERVED_PROPERTY: {
-                        final Join<DatastreamEntity, PhenomenonEntity> join =
-                                root.join(DatastreamEntity.PROPERTY_OBSERVABLE_PROPERTY, JoinType.INNER);
-                        return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue);
-                    }
-                    case THING: {
-                        final Join<DatastreamEntity, PlatformEntity> join =
-                                root.join(DatastreamEntity.PROPERTY_THING, JoinType.INNER);
-                        return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue);
-                    }
-                    case OBSERVATIONS: {
-                        Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
-                        Root<DataEntity> data = sq.from(DataEntity.class);
-                        sq.select(data.get(DataEntity.PROPERTY_DATASET))
-                                .where(builder.equal(data.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue));
-                        Join<DatastreamEntity, DatasetEntity> join = root.join(DatastreamEntity.PROPERTY_DATASETS);
-                        return builder.in(join.get(DatasetEntity.PROPERTY_IDENTIFIER)).value(sq);
-                    }
-                    default:
-                        throw new STAInvalidFilterExpressionException(
-                                "Error getting filter for Property \"" + propertyName + "\". No such related Entity.");
+                }
+                case OBSERVED_PROPERTY: {
+                    final Join<DatastreamEntity, PhenomenonEntity> join =
+                            root.join(DatastreamEntity.PROPERTY_OBSERVABLE_PROPERTY, JoinType.INNER);
+                    return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue);
+                }
+                case THING: {
+                    final Join<DatastreamEntity, PlatformEntity> join =
+                            root.join(DatastreamEntity.PROPERTY_THING, JoinType.INNER);
+                    return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue);
+                }
+                case OBSERVATIONS: {
+                    Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
+                    Root<DataEntity> data = sq.from(DataEntity.class);
+                    sq.select(data.get(DataEntity.PROPERTY_DATASET))
+                      .where(builder.equal(data.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue));
+                    Join<DatastreamEntity, DatasetEntity> join = root.join(DatastreamEntity.PROPERTY_DATASETS);
+                    return builder.in(join.get(DatasetEntity.PROPERTY_IDENTIFIER)).value(sq);
+                }
+                default:
+                    throw new STAInvalidFilterExpressionException(
+                            "Error getting filter for Property \"" + propertyName + "\". No such related Entity.");
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);

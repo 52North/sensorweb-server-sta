@@ -26,14 +26,15 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.query;
 
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
-import org.n52.sta.utils.ComparisonOperator;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -54,11 +55,10 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications<Procedu
             Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
             Join<DatastreamEntity, ProcedureEntity> join = datastream.join(DatastreamEntity.PROPERTY_SENSOR);
             sq.select(join)
-                .where(builder.equal(datastream.get(DescribableEntity.PROPERTY_IDENTIFIER), datastreamIdentifier));
+              .where(builder.equal(datastream.get(DescribableEntity.PROPERTY_IDENTIFIER), datastreamIdentifier));
             return builder.in(root).value(sq);
         };
     }
-
 
     @Override
     public Specification<String> getIdSubqueryWithFilter(Specification filter) {
@@ -68,7 +68,7 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications<Procedu
     @Override
     public Specification<ProcedureEntity> getFilterForProperty(String propertyName,
                                                                Object propertyValue,
-                                                               ComparisonOperator operator,
+                                                               FilterConstants.ComparisonOperator operator,
                                                                boolean switched) {
         if (propertyName.equals(DATASTREAMS)) {
             return handleRelatedPropertyFilter(propertyName, (Specification<String>) propertyValue);
@@ -76,7 +76,7 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications<Procedu
             return (root, query, builder) -> {
                 try {
                     return handleDirectStringPropertyFilter(root.get(ProcedureEntity.PROPERTY_IDENTIFIER),
-                            propertyValue.toString(), operator, builder, false);
+                                                            propertyValue.toString(), operator, builder, false);
                 } catch (STAInvalidFilterExpressionException e) {
                     throw new RuntimeException(e);
                 }
@@ -104,37 +104,34 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications<Procedu
 
     private Specification<ProcedureEntity> handleDirectPropertyFilter(String propertyName,
                                                                       Object propertyValue,
-                                                                      ComparisonOperator operator,
+                                                                      FilterConstants.ComparisonOperator operator,
                                                                       boolean switched) {
-        return new Specification<ProcedureEntity>() {
-            @Override
-            public Predicate toPredicate(Root<ProcedureEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
-                try {
-                    switch (propertyName) {
-                        case "name":
-                            return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
-                                    propertyValue.toString(), operator, builder, switched);
-                        case "description":
-                            return handleDirectStringPropertyFilter(
-                                    root.get(DescribableEntity.PROPERTY_DESCRIPTION), propertyValue.toString(),
-                                    operator, builder, switched);
-                        case "format":
-                        case "encodingType":
-                            Join<ProcedureEntity, FormatEntity> join =
-                                    root.join(ProcedureEntity.PROPERTY_PROCEDURE_DESCRIPTION_FORMAT);
-                            return handleDirectStringPropertyFilter(join.get(FormatEntity.FORMAT),
-                                    propertyValue.toString(), operator, builder, switched);
-                        case "metadata":
-                            return handleDirectStringPropertyFilter(
-                                    root.get(ProcedureEntity.PROPERTY_DESCRIPTION_FILE), propertyValue.toString(),
-                                    operator, builder, switched);
-                        default:
-                            throw new RuntimeException("Error getting filter for Property: \"" + propertyName
-                                    + "\". No such property in Entity.");
-                    }
-                } catch (STAInvalidFilterExpressionException e) {
-                    throw new RuntimeException(e);
+        return (Specification<ProcedureEntity>) (root, query, builder) -> {
+            try {
+                switch (propertyName) {
+                case "name":
+                    return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
+                                                            propertyValue.toString(), operator, builder, switched);
+                case "description":
+                    return handleDirectStringPropertyFilter(
+                            root.get(DescribableEntity.PROPERTY_DESCRIPTION), propertyValue.toString(),
+                            operator, builder, switched);
+                case "format":
+                case "encodingType":
+                    Join<ProcedureEntity, FormatEntity> join =
+                            root.join(ProcedureEntity.PROPERTY_PROCEDURE_DESCRIPTION_FORMAT);
+                    return handleDirectStringPropertyFilter(join.get(FormatEntity.FORMAT),
+                                                            propertyValue.toString(), operator, builder, switched);
+                case "metadata":
+                    return handleDirectStringPropertyFilter(
+                            root.get(ProcedureEntity.PROPERTY_DESCRIPTION_FILE), propertyValue.toString(),
+                            operator, builder, switched);
+                default:
+                    throw new RuntimeException("Error getting filter for Property: \"" + propertyName
+                                                       + "\". No such property in Entity.");
                 }
+            } catch (STAInvalidFilterExpressionException e) {
+                throw new RuntimeException(e);
             }
         };
     }

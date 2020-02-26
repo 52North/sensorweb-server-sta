@@ -26,21 +26,18 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.query;
 
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
-import org.n52.sta.utils.ComparisonOperator;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -63,7 +60,7 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
     @Override
     public Specification<PhenomenonEntity> getFilterForProperty(String propertyName,
                                                                 Object propertyValue,
-                                                                ComparisonOperator operator,
+                                                                FilterConstants.ComparisonOperator operator,
                                                                 boolean switched)
             throws STAInvalidFilterExpressionException {
         if (propertyName.equals(DATASTREAMS)) {
@@ -72,7 +69,7 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
             return (root, query, builder) -> {
                 try {
                     return handleDirectStringPropertyFilter(root.get(PhenomenonEntity.PROPERTY_IDENTIFIER),
-                            propertyValue.toString(), operator, builder, false);
+                                                            propertyValue.toString(), operator, builder, false);
                 } catch (STAInvalidFilterExpressionException e) {
                     throw new RuntimeException(e);
                 }
@@ -94,38 +91,35 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
 
     private Specification<PhenomenonEntity> handleDirectPropertyFilter(String propertyName,
                                                                        Object propertyValue,
-                                                                       ComparisonOperator operator,
+                                                                       FilterConstants.ComparisonOperator operator,
                                                                        boolean switched) {
-        return new Specification<PhenomenonEntity>() {
-            @Override
-            public Predicate toPredicate(Root<PhenomenonEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
-                try {
-                    switch (propertyName) {
-                        case "name":
-                            return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
-                                    propertyValue.toString(), operator, builder, switched);
-                        case "description":
-                            return handleDirectStringPropertyFilter(
-                                    root.get(DescribableEntity.PROPERTY_DESCRIPTION),
-                                    propertyValue.toString(),
-                                    operator,
-                                    builder,
-                                    switched);
-                        case "definition":
-                        case "identifier":
-                            return handleDirectStringPropertyFilter(
-                                    root.get(DescribableEntity.PROPERTY_IDENTIFIER),
-                                    propertyValue.toString(),
-                                    operator,
-                                    builder,
-                                    switched);
-                        default:
-                            throw new RuntimeException("Error getting filter for Property: \"" + propertyName
-                                    + "\". No such property in Entity.");
-                    }
-                } catch (STAInvalidFilterExpressionException e) {
-                    throw new RuntimeException(e);
+        return (Specification<PhenomenonEntity>) (root, query, builder) -> {
+            try {
+                switch (propertyName) {
+                case "name":
+                    return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
+                                                            propertyValue.toString(), operator, builder, switched);
+                case "description":
+                    return handleDirectStringPropertyFilter(
+                            root.get(DescribableEntity.PROPERTY_DESCRIPTION),
+                            propertyValue.toString(),
+                            operator,
+                            builder,
+                            switched);
+                case "definition":
+                case "identifier":
+                    return handleDirectStringPropertyFilter(
+                            root.get(DescribableEntity.PROPERTY_IDENTIFIER),
+                            propertyValue.toString(),
+                            operator,
+                            builder,
+                            switched);
+                default:
+                    throw new RuntimeException("Error getting filter for Property: \"" + propertyName
+                                                       + "\". No such property in Entity.");
                 }
+            } catch (STAInvalidFilterExpressionException e) {
+                throw new RuntimeException(e);
             }
         };
     }

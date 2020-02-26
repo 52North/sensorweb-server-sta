@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.query;
 
 import org.joda.time.DateTime;
@@ -33,16 +34,12 @@ import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
-import org.n52.sta.utils.ComparisonOperator;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -73,7 +70,7 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
     @Override
     public Specification<HistoricalLocationEntity> getFilterForProperty(String propertyName,
                                                                         Object propertyValue,
-                                                                        ComparisonOperator operator,
+                                                                        FilterConstants.ComparisonOperator operator,
                                                                         boolean switched)
             throws STAInvalidFilterExpressionException {
         if (propertyName.equals(THING) || propertyName.equals(LOCATIONS)) {
@@ -82,7 +79,7 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
             return (root, query, builder) -> {
                 try {
                     return handleDirectStringPropertyFilter(root.get(HistoricalLocationEntity.PROPERTY_IDENTIFIER),
-                            propertyValue.toString(), operator, builder, false);
+                                                            propertyValue.toString(), operator, builder, false);
                 } catch (STAInvalidFilterExpressionException e) {
                     throw new RuntimeException(e);
                 }
@@ -111,28 +108,23 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
 
     private Specification<HistoricalLocationEntity> handleDirectPropertyFilter(String propertyName,
                                                                                Object propertyValue,
-                                                                               ComparisonOperator operator,
+                                                                               FilterConstants.ComparisonOperator operator,
                                                                                boolean switched) {
-        return new Specification<HistoricalLocationEntity>() {
-            @Override
-            public Predicate toPredicate(Root<HistoricalLocationEntity> root,
-                                         CriteriaQuery<?> query,
-                                         CriteriaBuilder builder) {
-                try {
-                    switch (propertyName) {
-                        case "time":
-                            return handleDirectDateTimePropertyFilter(
-                                    root.get(HistoricalLocationEntity.PROPERTY_TIME),
-                                    new DateTime(propertyValue).toDate(),
-                                    operator,
-                                    builder);
-                        default:
-                            throw new RuntimeException("Error getting filter for Property: \"" + propertyName
-                                    + "\". No such property in Entity.");
-                    }
-                } catch (STAInvalidFilterExpressionException e) {
-                    throw new RuntimeException(e);
+        return (Specification<HistoricalLocationEntity>) (root, query, builder) -> {
+            try {
+                switch (propertyName) {
+                case "time":
+                    return handleDirectDateTimePropertyFilter(
+                            root.get(HistoricalLocationEntity.PROPERTY_TIME),
+                            new DateTime(propertyValue).toDate(),
+                            operator,
+                            builder);
+                default:
+                    throw new RuntimeException("Error getting filter for Property: \"" + propertyName
+                                                       + "\". No such property in Entity.");
                 }
+            } catch (STAInvalidFilterExpressionException e) {
+                throw new RuntimeException(e);
             }
         };
     }
