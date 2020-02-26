@@ -20,6 +20,8 @@ package org.n52.sta.data.service;
 import org.n52.shetland.oasis.odata.ODataConstants;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
+import org.n52.sta.data.query.EntityQuerySpecifications;
+import org.n52.sta.data.query.QuerySpecificationRepository;
 import org.n52.svalbard.odata.expr.Expr;
 import org.n52.svalbard.odata.expr.ExprVisitor;
 import org.n52.svalbard.odata.expr.GeoValueExpr;
@@ -34,23 +36,32 @@ import org.n52.svalbard.odata.expr.binary.ComparisonExpr;
 import org.n52.svalbard.odata.expr.temporal.TimeValueExpr;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 /**
  * Visitor visiting svalbard.odata.Expr and parsing it into javax.expression to be used in database access.
+ * Not all methods return predicate (e.g. internal ones return concrete types) so abstract Expression<?> is used.
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-final class FilterExprVisitor implements ExprVisitor<Expression<?>, STAInvalidQueryException> {
+final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, STAInvalidQueryException> {
 
     private final String ERROR_NOT_IMPLEMENTED = "not implemented yet!";
-    private final String ERROR_NOT_EVALUATABLE = "Could not evaluate Methodcall to :";
+    private final String ERROR_NOT_EVALUABLE = "Could not evaluate Methodcall to :";
 
     private CriteriaBuilder builder;
+    private EntityQuerySpecifications<T> rootQS;
+    private Root root;
+    private CriteriaQuery query;
 
-    FilterExprVisitor(CriteriaBuilder builder) {
+    FilterExprVisitor(Root root, CriteriaQuery query, CriteriaBuilder builder) {
         this.builder = builder;
+        this.query = query;
+        this.root = root;
+        this.rootQS = QuerySpecificationRepository.getSpecification(root.getJavaType().getSimpleName());
     }
 
     /**
@@ -100,24 +111,53 @@ final class FilterExprVisitor implements ExprVisitor<Expression<?>, STAInvalidQu
     @SuppressWarnings("unchecked")
     private <Y extends Comparable<? super Y>> Predicate visitComparisonExpr(ComparisonExpr expr)
             throws STAInvalidQueryException {
-        //TODO: check if these typecasts are even possible
-        Expression<? extends Y> left = (Expression<? extends Y>) expr.getLeft().accept(this);
-        Expression<? extends Y> right = (Expression<? extends Y>) expr.getRight().accept(this);
-        switch (expr.getOperator()) {
-        case PropertyIsEqualTo:
-            return builder.equal(left, right);
-        case PropertyIsNotEqualTo:
-            return builder.notEqual(left, right);
-        case PropertyIsLessThan:
-            return builder.lessThan(left, right);
-        case PropertyIsGreaterThan:
-            return builder.greaterThan(left, right);
-        case PropertyIsLessThanOrEqualTo:
-            return builder.lessThanOrEqualTo(left, right);
-        case PropertyIsGreaterThanOrEqualTo:
-            return builder.greaterThanOrEqualTo(left, right);
-        default:
-            throw new STAInvalidQueryException("Invalid Operator. Could not parse: " + expr.getOperator().name());
+
+        // Let Queryspecifications handle Expressions involving members
+        if (expr.getRight().isMember() || expr.getLeft().isMember()) {
+            return evaluateMemberComparison(expr, expr.getOperator());
+        } else {
+            // Handle abstract + literal expression (everything not involving members) ourselves
+            Expression<? extends Y> left = (Expression<? extends Y>) expr.getLeft().accept(this);
+            Expression<? extends Y> right = (Expression<? extends Y>) expr.getRight().accept(this);
+            switch (expr.getOperator()) {
+            case PropertyIsEqualTo:
+                return builder.equal(left, right);
+            case PropertyIsNotEqualTo:
+                return builder.notEqual(left, right);
+            case PropertyIsLessThan:
+                return builder.lessThan(left, right);
+            case PropertyIsGreaterThan:
+                return builder.greaterThan(left, right);
+            case PropertyIsLessThanOrEqualTo:
+                return builder.lessThanOrEqualTo(left, right);
+            case PropertyIsGreaterThanOrEqualTo:
+                return builder.greaterThanOrEqualTo(left, right);
+            default:
+                throw new STAInvalidQueryException("Invalid Operator. Could not parse: " + expr.getOperator().name());
+            }
+        }
+    }
+
+    private Predicate evaluateMemberComparison(ComparisonExpr expr, FilterConstants.ComparisonOperator operator)
+            throws STAInvalidQueryException {
+        if (expr.getRight().isMember() && expr.getLeft().isMember()) {
+            throw new STAInvalidQueryException("comparison of two member variables not implemented yet");
+        } else if (expr.getRight().isMember()) {
+            return rootQS.getFilterForProperty(expr.getRight().asMember().get().getValue(),
+                                               expr.getLeft().accept(this),
+                                               operator,
+                                               false)
+                         .toPredicate(root, query, builder);
+        } else if (expr.getLeft().isMember()) {
+            return rootQS.getFilterForProperty(expr.getLeft().asMember().get().getValue(),
+                                               expr.getRight().accept(this),
+                                               operator,
+                                               false)
+                         .toPredicate(root, query, builder);
+        } else {
+            // This should never happen!
+            throw new STAInvalidQueryException("[This should never happen!] Tried to evaluate member comparison " +
+                                                       "without members being involved!");
         }
     }
 
@@ -139,7 +179,7 @@ final class FilterExprVisitor implements ExprVisitor<Expression<?>, STAInvalidQu
         case 3:
             return visitMethodCallTernary(expr);
         default:
-            throw new STAInvalidQueryException(ERROR_NOT_EVALUATABLE + expr.getName());
+            throw new STAInvalidQueryException(ERROR_NOT_EVALUABLE + expr.getName());
         }
     }
 
@@ -152,7 +192,7 @@ final class FilterExprVisitor implements ExprVisitor<Expression<?>, STAInvalidQu
         case ODataConstants.DateAndTimeFunctions.MAXDATETIME:
             throw new STAInvalidQueryException(ERROR_NOT_IMPLEMENTED);
         default:
-            throw new STAInvalidQueryException(ERROR_NOT_EVALUATABLE + expr.getName());
+            throw new STAInvalidQueryException(ERROR_NOT_EVALUABLE + expr.getName());
         }
     }
 
@@ -196,7 +236,7 @@ final class FilterExprVisitor implements ExprVisitor<Expression<?>, STAInvalidQu
         case ODataConstants.ArithmeticFunctions.CEILING:
             return builder.function("CEIL", Integer.class, param);
         default:
-            throw new STAInvalidQueryException(ERROR_NOT_EVALUATABLE + expr.getName());
+            throw new STAInvalidQueryException(ERROR_NOT_EVALUABLE + expr.getName());
         }
     }
 
@@ -253,7 +293,7 @@ final class FilterExprVisitor implements ExprVisitor<Expression<?>, STAInvalidQu
         case ODataConstants.SpatialFunctions.ST_CONTAINS:
             throw new STAInvalidQueryException(ERROR_NOT_IMPLEMENTED);
         default:
-            throw new STAInvalidQueryException(ERROR_NOT_EVALUATABLE + expr.getName());
+            throw new STAInvalidQueryException(ERROR_NOT_EVALUABLE + expr.getName());
         }
     }
 
@@ -262,7 +302,7 @@ final class FilterExprVisitor implements ExprVisitor<Expression<?>, STAInvalidQu
         case ODataConstants.SpatialFunctions.ST_RELATE:
             throw new STAInvalidQueryException(ERROR_NOT_IMPLEMENTED);
         default:
-            throw new STAInvalidQueryException(ERROR_NOT_EVALUATABLE + expr.getName());
+            throw new STAInvalidQueryException(ERROR_NOT_EVALUABLE + expr.getName());
         }
     }
 
