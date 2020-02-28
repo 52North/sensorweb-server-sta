@@ -1,6 +1,17 @@
 # 52°North Sensor Things API (STA)
 
-Implementation of the [OGC SensorThings API Part I: Sensing](https://github.com/opengeospatial/sensorthings).
+## Documentation
+* Standard: [OGC SensorThings API Part I: Sensing](https://github.com/opengeospatial/sensorthings)
+* Additional Features: [STA Github Wiki](https://github.com/52North/sensorweb-server-sta/wiki)
+
+## Setup
+### Docker 
+A dockerfile for building the App is provided in the root directory.
+A complete demo setup is provided via a [docker-compose file](https://github.com/52North/sensor-things/docker-compose.yml)
+
+## Testing
+A [Postman](https://www.getpostman.com/) Collection with a multitude of demo requests is provided in the `etc` subdirectory.
+
 
 ## Conformance Test Suite Status:
 
@@ -14,13 +25,6 @@ Implementation of the [OGC SensorThings API Part I: Sensing](https://github.com/
 | DataArray Extension                   | A.6       | No          |   0 / ?    |
 | Observation Creation via MQTT         | A.7       | Yes         |   0 / 1    |
 | Receiving Updates via MQTT            | A.8       | Yes         |   0 / 5    |
-
-## Docker 
-A dockerfile for building the App is provided in the root directory.
-A complete demo setup is provided via a [docker-compose file](https://github.com/52North/sensor-things/docker-compose.yml)
-
-## Testing
-A [Postman ](https://www.getpostman.com/) Collection with a multitude of demo requests is provided in the `etc` subdirectory.
 
 ## Notes:
 #### MQTT Extension
