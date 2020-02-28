@@ -29,7 +29,9 @@
 
 package org.n52.sta.service;
 
+import org.n52.shetland.filter.SelectFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.filter.FilterClause;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.service.CollectionWrapper;
 import org.n52.sta.data.service.EntityServiceRepository;
@@ -41,6 +43,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.net.URLDecoder;
+import java.util.HashSet;
 
 @RestController
 public class STACollectionRequestHandler implements STARequestUtils {
@@ -72,13 +75,46 @@ public class STACollectionRequestHandler implements STARequestUtils {
         String queryString = request.getQueryString();
         QueryOptions options;
         if (queryString != null) {
-            options = QUERY_OPTIONS_FACTORY.createQueryOptions(URLDecoder.decode(request.getQueryString()));
+            options = QUERY_OPTIONS_FACTORY.createQueryOptions(URLDecoder.decode(queryString));
         } else {
             options = QUERY_OPTIONS_FACTORY.createDummy();
         }
         return serviceRepository
                 .getEntityService(collectionName)
                 .getEntityCollection(options)
+                .setRequestURL(request.getRequestURL().toString());
+    }
+
+    /**
+     * Matches all requests on Collections referenced directly and addressing an association link
+     * e.g. /Datastreams/$ref
+     *
+     * @param collectionName name of the collection. Automatically set by Spring via @PathVariable
+     * @param request        Full request
+     * @return
+     */
+    @GetMapping(
+            value = "/{collectionName:" + BASE_COLLECTION_REGEX + "}" + SLASHREF,
+            produces = "application/json"
+    )
+    public CollectionWrapper readCollectionRefDirect(@PathVariable String collectionName,
+                                                     HttpServletRequest request)
+            throws STACRUDException {
+        HashSet<FilterClause> filters = new HashSet<>();
+        String queryString = request.getQueryString();
+        if (queryString != null) {
+            // Parse QueryString normally and extract relevant Filters
+            QueryOptions options = QUERY_OPTIONS_FACTORY.createQueryOptions(URLDecoder.decode(queryString));
+            filters.add(options.getSkipOption());
+            filters.add(options.getTopOption());
+            filters.add(options.getCountOption());
+            filters.add(options.getFilterOption());
+        }
+        // Overwrite select filter with filter only returning id
+        filters.add(new SelectFilter("id"));
+        return serviceRepository
+                .getEntityService(collectionName)
+                .getEntityCollection(QUERY_OPTIONS_FACTORY.createQueryOptions(filters))
                 .setRequestURL(request.getRequestURL().toString());
     }
 
@@ -102,7 +138,7 @@ public class STACollectionRequestHandler implements STARequestUtils {
             },
             produces = "application/json"
     )
-    public CollectionWrapper readRelatedCollection(@PathVariable String entity,
+    public CollectionWrapper readCollectionRelated(@PathVariable String entity,
                                                    @PathVariable String target,
                                                    HttpServletRequest request)
             throws Exception {
@@ -124,6 +160,58 @@ public class STACollectionRequestHandler implements STARequestUtils {
                                 .getEntityCollectionByRelatedEntity(sourceId,
                                                                     sourceType,
                                                                     options)
+                                .setRequestURL(request.getRequestURL().toString());
+    }
+
+    /**
+     * Matches all requests on Entities not referenced directly via id but via referenced entity and addressing an
+     * association link
+     * e.g. /Datastreams(52)/Thing/$ref
+     *
+     * @param entity  composite of entity and referenced entity. Automatically set by Spring via @PathVariable
+     * @param request full request
+     * @return JSON String representing Entity
+     */
+    @GetMapping(
+            value = {
+                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_THING_PATH_VARIABLE + SLASHREF,
+                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_LOCATION_PATH_VARIABLE + SLASHREF,
+                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH_VARIABLE + SLASHREF,
+                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH_VARIABLE + SLASHREF,
+                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_SENSOR_PATH_VARIABLE + SLASHREF,
+                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE + SLASHREF,
+                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_HIST_LOCATION_PATH_VARIABLE + SLASHREF
+            },
+            produces = "application/json"
+    )
+    public CollectionWrapper readCollectionRelatedRef(@PathVariable String entity,
+                                                      @PathVariable String target,
+                                                      HttpServletRequest request)
+            throws Exception {
+
+        String requestUrl = request.getRequestURL().toString();
+        validateURL(requestUrl.substring(0, requestUrl.length() - 5), serviceRepository, rootUrlLength);
+
+        String[] split = splitId(entity);
+        String sourceType = split[0];
+        String sourceId = split[1].replace(")", "");
+
+        HashSet<FilterClause> filters = new HashSet<>();
+        String queryString = request.getQueryString();
+        if (queryString != null) {
+            // Parse QueryString normally and extract relevant Filters
+            QueryOptions options = QUERY_OPTIONS_FACTORY.createQueryOptions(URLDecoder.decode(queryString));
+            filters.add(options.getSkipOption());
+            filters.add(options.getTopOption());
+            filters.add(options.getCountOption());
+            filters.add(options.getFilterOption());
+        }
+        // Overwrite select filter with filter only returning id
+        filters.add(new SelectFilter("id"));
+        return serviceRepository.getEntityService(target)
+                                .getEntityCollectionByRelatedEntity(sourceId,
+                                                                    sourceType,
+                                                                    QUERY_OPTIONS_FACTORY.createQueryOptions(filters))
                                 .setRequestURL(request.getRequestURL().toString());
     }
 }

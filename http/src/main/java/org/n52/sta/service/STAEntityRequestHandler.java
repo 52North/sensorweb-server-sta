@@ -29,7 +29,9 @@
 
 package org.n52.sta.service;
 
+import org.n52.shetland.filter.SelectFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.filter.FilterClause;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.utils.STARequestUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,6 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.net.URLDecoder;
+import java.util.HashSet;
 
 @RestController
 public class STAEntityRequestHandler implements STARequestUtils {
@@ -82,7 +85,40 @@ public class STAEntityRequestHandler implements STARequestUtils {
     }
 
     /**
-     * Matches all requests on Entities not referenced directly via id but via referenced entity.
+     * Matches all requests on Entities referenced directly via id and addressing an association link
+     * e.g. /Datastreams(52)/$ref
+     *
+     * @param entity  name of entity. Automatically set by Spring via @PathVariable
+     * @param id      id of entity. Automatically set by Spring via @PathVariable
+     * @param request full request
+     */
+    @GetMapping(
+            value = MAPPING_PREFIX + "{entity:" + BASE_COLLECTION_REGEX + "}{id:" + IDENTIFIER_REGEX + "$}" + SLASHREF,
+            produces = "application/json"
+    )
+    public Object readEntityRefDirect(@PathVariable String entity,
+                                      @PathVariable String id,
+                                      HttpServletRequest request) throws Exception {
+        String requestUrl = request.getRequestURL().toString();
+        validateURL(requestUrl.substring(0, requestUrl.length() - 5), serviceRepository, rootUrlLength);
+
+        String entityId = id.substring(1, id.length() - 1);
+        String queryString = request.getQueryString();
+        HashSet<FilterClause> filters = new HashSet<>();
+        if (queryString != null) {
+            // Parse QueryString normally and extract relevant Filters
+            QueryOptions options = QUERY_OPTIONS_FACTORY.createQueryOptions(URLDecoder.decode(queryString));
+            filters.add(options.getSkipOption());
+            filters.add(options.getTopOption());
+            filters.add(options.getCountOption());
+            filters.add(options.getFilterOption());
+        }
+        return serviceRepository.getEntityService(entity)
+                                .getEntity(entityId, QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
+    }
+
+    /**
+     * Matches all requests on Entities not referenced directly via id but via referenced entity
      * e.g. /Datastreams(52)/Thing
      *
      * @param entity  composite of entity and referenced entity. Automatically set by Spring via @PathVariable
@@ -119,5 +155,51 @@ public class STAEntityRequestHandler implements STARequestUtils {
                                                           sourceType,
                                                           null,
                                                           options);
+    }
+
+    /**
+     * Matches all requests on Entities not referenced directly via id but via referenced entity and addressing an
+     * association link
+     * e.g. /Datastreams(52)/Thing/$ref
+     *
+     * @param entity  composite of entity and referenced entity. Automatically set by Spring via @PathVariable
+     * @param request full request
+     * @return JSON String representing Entity
+     */
+    @GetMapping(
+            value = {
+                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE + SLASHREF,
+                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE + SLASHREF,
+                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE + SLASHREF
+            },
+            produces = "application/json"
+    )
+    public Object readRelatedEntityRef(@PathVariable String entity,
+                                       @PathVariable String target,
+                                       HttpServletRequest request)
+            throws Exception {
+        String requestUrl = request.getRequestURL().toString();
+        validateURL(requestUrl.substring(0, requestUrl.length() - 5), serviceRepository, rootUrlLength);
+
+        String sourceType = entity.substring(0, entity.indexOf("("));
+        String sourceId = entity.substring(sourceType.length() + 1, entity.length() - 1);
+
+        HashSet<FilterClause> filters = new HashSet<>();
+        String queryString = request.getQueryString();
+        if (queryString != null) {
+            // Parse QueryString normally and extract relevant Filters
+            QueryOptions options = QUERY_OPTIONS_FACTORY.createQueryOptions(URLDecoder.decode(queryString));
+            filters.add(options.getSkipOption());
+            filters.add(options.getTopOption());
+            filters.add(options.getCountOption());
+            filters.add(options.getFilterOption());
+        }
+        // Overwrite select filter with filter only returning id
+        filters.add(new SelectFilter("id"));
+        return serviceRepository.getEntityService(target)
+                                .getEntityByRelatedEntity(sourceId,
+                                                          sourceType,
+                                                          null,
+                                                          QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
     }
 }

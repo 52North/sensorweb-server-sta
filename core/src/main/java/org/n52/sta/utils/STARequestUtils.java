@@ -105,6 +105,7 @@ public interface STARequestUtils extends StaConstants {
     String SQUARE_BRACKET_OPEN = "[";
     String CURLY_BRACKET_OPEN = "{";
     String CURLY_BRACKET_CLOSE = "}";
+    String SLASHREF = SLASH + "$ref";
 
     // Used to mark start and end of named capturing groups
     String SOURCE_NAME_GROUP_START =
@@ -452,6 +453,13 @@ public interface STARequestUtils extends StaConstants {
                              EntityServiceRepository serviceRepository,
                              int rootUrlLength)
             throws Exception {
+        validateURL(requestURL.toString(), serviceRepository, rootUrlLength);
+    }
+
+    default void validateURL(String requestURL,
+                             EntityServiceRepository serviceRepository,
+                             int rootUrlLength)
+            throws Exception {
         String[] uriResources = requestURL.substring(rootUrlLength).split(SLASH);
 
         Exception ex;
@@ -519,7 +527,7 @@ public interface STARequestUtils extends StaConstants {
      * @return STAInvalidUrlException if URI is malformed
      */
     default Exception validateURISemantic(String[] uriResources,
-                                                       EntityServiceRepository serviceRepository) {
+                                          EntityServiceRepository serviceRepository) {
         // Check if this is Request to root collection. They are always valid
         if (uriResources.length == 1 && !uriResources[0].contains(ROUND_BRACKET_OPEN)) {
             return null;
