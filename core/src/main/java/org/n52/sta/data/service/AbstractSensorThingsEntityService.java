@@ -45,6 +45,7 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ObservablePropertyEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
+import org.n52.series.db.beans.sta.StaFeatureEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.FilterFilter;
 import org.n52.shetland.filter.OrderProperty;
@@ -523,9 +524,9 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
     }
 
     @SuppressWarnings("unchecked")
-    protected AbstractSensorThingsEntityService<?, AbstractFeatureEntity<?>, AbstractFeatureEntity<?>>
+    protected AbstractSensorThingsEntityService<?, AbstractFeatureEntity<?>, StaFeatureEntity<?>>
     getFeatureOfInterestService() {
-        return (AbstractSensorThingsEntityService<?, AbstractFeatureEntity<?>, AbstractFeatureEntity<?>>)
+        return (AbstractSensorThingsEntityService<?, AbstractFeatureEntity<?>, StaFeatureEntity<?>>)
                 getEntityService(EntityTypes.FeatureOfInterest);
     }
 

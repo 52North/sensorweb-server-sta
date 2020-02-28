@@ -17,8 +17,8 @@
 
 package org.n52.sta.serdes.util;
 
-import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
@@ -29,6 +29,7 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ObservablePropertyEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
+import org.n52.series.db.beans.sta.StaFeatureEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 
 public abstract class ElementWithQueryOptions<P extends IdEntity> {
@@ -50,35 +51,32 @@ public abstract class ElementWithQueryOptions<P extends IdEntity> {
         case "PlatformEntity":
             return new ThingWithQueryOptions((PlatformEntity) entity, queryOptions);
         case "ProcedureEntity":
-            if (entity instanceof SensorEntity) {
-                return new SensorWithQueryOptions((SensorEntity) entity, queryOptions);
-            } else {
-                return new SensorWithQueryOptions(new SensorEntity((ProcedureEntity) entity), queryOptions);
-            }
+            return new SensorWithQueryOptions(new SensorEntity((ProcedureEntity) entity), queryOptions);
+        case "SensorEntity":
+            return new SensorWithQueryOptions((SensorEntity) entity, queryOptions);
         case "PhenomenonEntity":
-            if (entity instanceof ObservablePropertyEntity) {
-                return new ObservedPropertyWithQueryOptions((ObservablePropertyEntity) entity, queryOptions);
-            } else {
-                return new ObservedPropertyWithQueryOptions(new ObservablePropertyEntity((PhenomenonEntity) entity),
-                                                            queryOptions);
-            }
-        case "DataEntity":
-            if (entity instanceof StaDataEntity) {
-                return new ObservationWithQueryOptions((StaDataEntity<?>) entity, queryOptions);
-            } else {
-                return new ObservationWithQueryOptions(new StaDataEntity<>((DataEntity<?>) entity), queryOptions);
-            }
+            return new ObservedPropertyWithQueryOptions(new ObservablePropertyEntity((PhenomenonEntity) entity),
+                                                        queryOptions);
+        case "ObservablePropertyEntity":
+            return new ObservedPropertyWithQueryOptions((ObservablePropertyEntity) entity, queryOptions);
+        case "QuantityDataEntity":
+            return new ObservationWithQueryOptions(new StaDataEntity<>((DataEntity<?>) entity), queryOptions);
+        case "StaDataEntity":
+            return new ObservationWithQueryOptions((StaDataEntity<?>) entity, queryOptions);
         case "LocationEntity":
             return new LocationWithQueryOptions((LocationEntity) entity, queryOptions);
         case "HistoricalLocationEntity":
             return new HistoricalLocationWithQueryOptions((HistoricalLocationEntity) entity, queryOptions);
-        case "AbstractFeatureEntity":
+        case "StaFeatureEntity":
+            return new FeatureOfInterestWithQueryOptions((StaFeatureEntity<?>) entity, queryOptions);
         case "FeatureEntity":
-            return new FeatureOfInterestWithQueryOptions((AbstractFeatureEntity<?>) entity, queryOptions);
+            return new FeatureOfInterestWithQueryOptions(
+                    new StaFeatureEntity<>((FeatureEntity) entity), queryOptions);
         case "DatastreamEntity":
             return new DatastreamWithQueryOptions((DatastreamEntity) entity, queryOptions);
         default:
-            throw new RuntimeException("THIS SHOULD NOT HAPPEN!");
+            throw new RuntimeException("Error wrapping object with queryOptions. Could not find Wrapper for class: " +
+                                               entity.getClass().getSimpleName());
         }
     }
 
@@ -136,9 +134,9 @@ public abstract class ElementWithQueryOptions<P extends IdEntity> {
     }
 
 
-    public static class FeatureOfInterestWithQueryOptions extends ElementWithQueryOptions<AbstractFeatureEntity<?>> {
+    public static class FeatureOfInterestWithQueryOptions extends ElementWithQueryOptions<StaFeatureEntity<?>> {
 
-        FeatureOfInterestWithQueryOptions(AbstractFeatureEntity<?> thing, QueryOptions queryOptions) {
+        FeatureOfInterestWithQueryOptions(StaFeatureEntity<?> thing, QueryOptions queryOptions) {
             this.entity = thing;
             this.queryOptions = queryOptions;
         }

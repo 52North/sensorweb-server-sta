@@ -39,6 +39,8 @@ import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
+import org.n52.series.db.beans.sta.StaDataEntity;
+import org.n52.series.db.beans.sta.StaFeatureEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
@@ -72,6 +74,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -81,7 +84,7 @@ import java.util.UUID;
 @Transactional
 public class FeatureOfInterestService
         extends AbstractSensorThingsEntityService<FeatureOfInterestRepository, AbstractFeatureEntity<?>,
-        AbstractFeatureEntity<?>> {
+        StaFeatureEntity<?>> {
 
     private static final Logger logger = LoggerFactory.getLogger(FeatureOfInterestService.class);
 
@@ -116,8 +119,9 @@ public class FeatureOfInterestService
     }
 
     @Override
-    protected AbstractFeatureEntity<?> fetchExpandEntities(AbstractFeatureEntity<?> entity, ExpandFilter expandOption)
+    protected StaFeatureEntity<?> fetchExpandEntities(AbstractFeatureEntity<?> entity, ExpandFilter expandOption)
             throws STACRUDException, STAInvalidQueryException {
+        StaFeatureEntity<?> foi = new StaFeatureEntity<>(entity);
         for (ExpandItem expandItem : expandOption.getItems()) {
             String expandProperty = expandItem.getPath();
             if (FeatureOfInterestEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
@@ -128,23 +132,18 @@ public class FeatureOfInterestService
                             .getEntityCollectionByRelatedEntity(entity.getIdentifier(),
                                                                 AbstractFeatureEntity.class.getSimpleName(),
                                                                 expandItem.getQueryOptions());
-
-                    //TODO: implement
-                    throw new STAInvalidQueryException("not implemented yet!");
-                    /*entity.setD
-                    return sensor.setDatastreams(
+                    return foi.setObservations(
                             expandedEntities.getEntities()
                                             .stream()
-                                            .map(s -> (DatastreamEntity) s.getEntity())
+                                            .map(s -> (StaDataEntity<?>) s.getEntity())
                                             .collect(Collectors.toSet()));
-                    */
                 }
             } else {
                 throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty +
-                                                           "on Entity of type 'Sensor'");
+                                                           " on Entity of type 'FeatureOfInterest'");
             }
         }
-        return entity;
+        return foi;
     }
 
     @Override

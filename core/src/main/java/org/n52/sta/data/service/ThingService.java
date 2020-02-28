@@ -127,7 +127,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
                 }
             } else {
                 throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty +
-                                                           "on Entity of type 'Thing'");
+                                                           " on Entity of type 'Thing'");
             }
         }
         return entity;

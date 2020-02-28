@@ -153,7 +153,7 @@ public class ObservedPropertyService
                 }
             } else {
                 throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty +
-                                                           "on Entity of type 'ObservableProperty'");
+                                                           " on Entity of type 'ObservableProperty'");
             }
         }
         return new ObservablePropertyEntity(entity);

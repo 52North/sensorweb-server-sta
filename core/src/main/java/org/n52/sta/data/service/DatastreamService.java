@@ -159,7 +159,7 @@ public class DatastreamService
                 }
             } else {
                 throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty +
-                                                           "on Entity of type 'Thing'");
+                                                           " on Entity of type 'Datastream'");
             }
         }
         return entity;

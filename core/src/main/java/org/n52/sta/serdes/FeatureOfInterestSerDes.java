@@ -38,21 +38,25 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.FeatureEntity;
+import org.n52.series.db.beans.sta.StaFeatureEntity;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.model.FeatureOfInterestEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONFeatureOfInterest;
+import org.n52.sta.serdes.util.ElementWithQueryOptions;
 import org.n52.sta.serdes.util.ElementWithQueryOptions.FeatureOfInterestWithQueryOptions;
 import org.n52.sta.serdes.util.EntityPatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class FeatureOfInterestSerDes {
 
@@ -95,7 +99,7 @@ public class FeatureOfInterestSerDes {
                               JsonGenerator gen,
                               SerializerProvider serializers) throws IOException {
             gen.writeStartObject();
-            AbstractFeatureEntity feature = value.getEntity();
+            StaFeatureEntity<?> feature = value.getEntity();
             QueryOptions options = value.getQueryOptions();
 
             Set<String> fieldsToSerialize = null;
@@ -147,25 +151,17 @@ public class FeatureOfInterestSerDes {
                     if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
                         writeNavigationProp(gen, navigationProperty, feature.getIdentifier());
                     } else {
-                        //TODO: implement!
-                        /*
-                        Set<Object> expandedElements;
+                        gen.writeFieldName(navigationProperty);
                         switch (navigationProperty) {
                         case STAEntityDefinition.OBSERVATIONS:
-                            expandedElements = Collections.unmodifiableSet(feature.getO);
+                            writeNestedCollection(Collections.unmodifiableSet(feature.getObservations()),
+                                                  fieldsToExpand.get(navigationProperty),
+                                                  gen,
+                                                  serializers);
                             break;
                         default:
                             throw new IllegalStateException("Unexpected value: " + navigationProperty);
                         }
-                        gen.writeArrayFieldStart(navigationProperty);
-                        serializers.defaultSerializeValue(
-                                expandedElements
-                                        .stream()
-                                        .map(d -> ElementWithQueryOptions.from(d,
-                                                                               fieldsToExpand.get(navigationProperty)))
-                                        .collect(Collectors.toSet()), gen);
-                        gen.writeEndArray();
-                        */
                     }
                 }
             }

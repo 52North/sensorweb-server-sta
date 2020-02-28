@@ -37,18 +37,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.n52.series.db.beans.BlobDataEntity;
-import org.n52.series.db.beans.BooleanDataEntity;
-import org.n52.series.db.beans.CategoryDataEntity;
-import org.n52.series.db.beans.ComplexDataEntity;
-import org.n52.series.db.beans.CountDataEntity;
-import org.n52.series.db.beans.DataArrayDataEntity;
 import org.n52.series.db.beans.DataEntity;
-import org.n52.series.db.beans.GeometryDataEntity;
-import org.n52.series.db.beans.ProfileDataEntity;
-import org.n52.series.db.beans.QuantityDataEntity;
-import org.n52.series.db.beans.ReferencedDataEntity;
-import org.n52.series.db.beans.TextDataEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.shetland.filter.ExpandItem;
@@ -137,7 +126,7 @@ public class ObservationSerDes {
 
             // actual properties
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_RESULT)) {
-                gen.writeStringField(STAEntityDefinition.PROP_RESULT, getResult(observation));
+                gen.writeStringField(STAEntityDefinition.PROP_RESULT, observation.getValue().toString());
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_RESULT_TIME)) {
                 Date resultTime = observation.getResultTime();
@@ -235,54 +224,6 @@ public class ObservationSerDes {
                 return new TimePeriod(start, end);
             }
         }
-
-        private String getResult(DataEntity o) {
-            if (o instanceof QuantityDataEntity) {
-                if ((((QuantityDataEntity) o).getValue().doubleValue() - ((QuantityDataEntity) o).getValue()
-                                                                                                 .intValue()) == 0.0) {
-                    return Integer.toString(((QuantityDataEntity) o).getValue().intValue());
-                }
-                return ((QuantityDataEntity) o).getValue().toString();
-            } else if (o instanceof BlobDataEntity) {
-                // TODO: check if Object.tostring is what we want here
-                return o.getValue().toString();
-            } else if (o instanceof BooleanDataEntity) {
-                return ((BooleanDataEntity) o).getValue().toString();
-            } else if (o instanceof CategoryDataEntity) {
-                return ((CategoryDataEntity) o).getValue();
-            } else if (o instanceof ComplexDataEntity) {
-
-                // TODO: implement
-                // return ((ComplexDataEntity)o).getValue();
-                return null;
-
-            } else if (o instanceof CountDataEntity) {
-                return ((CountDataEntity) o).getValue().toString();
-            } else if (o instanceof GeometryDataEntity) {
-
-                // TODO: check if we want WKT here
-                return ((GeometryDataEntity) o).getValue().getGeometry().toText();
-
-            } else if (o instanceof TextDataEntity) {
-                return ((TextDataEntity) o).getValue();
-            } else if (o instanceof DataArrayDataEntity) {
-
-                // TODO: implement
-                // return ((DataArrayDataEntity)o).getValue();
-                return null;
-
-            } else if (o instanceof ProfileDataEntity) {
-
-                // TODO: implement
-                // return ((ProfileDataEntity)o).getValue();
-                return null;
-
-            } else if (o instanceof ReferencedDataEntity) {
-                return ((ReferencedDataEntity) o).getValue();
-            }
-            return "";
-        }
-
     }
 
 

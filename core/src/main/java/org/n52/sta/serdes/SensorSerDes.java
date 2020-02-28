@@ -152,12 +152,6 @@ public class SensorSerDes {
             // navigation properties
             for (String navigationProperty : SensorEntityDefinition.NAVIGATION_PROPERTIES) {
                 if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
-                    writeNavigationProp(gen, navigationProperty, sensor.getIdentifier());
-                }
-            }
-            // navigation properties
-            for (String navigationProperty : SensorEntityDefinition.NAVIGATION_PROPERTIES) {
-                if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
                     if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
                         writeNavigationProp(gen, navigationProperty, sensor.getIdentifier());
                     } else {
