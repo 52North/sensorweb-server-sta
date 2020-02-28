@@ -82,6 +82,7 @@ public interface STARequestUtils extends StaConstants {
     String GROUPNAME_PROPERTY = "property";
 
     String MAPPING_PREFIX = "**/";
+    String ID = "id";
 
     // Note: This is duplicated in LocationService to allow for non-standard 'updateFOI'-feature.
     //TODO: Check if this coveras all identifiers

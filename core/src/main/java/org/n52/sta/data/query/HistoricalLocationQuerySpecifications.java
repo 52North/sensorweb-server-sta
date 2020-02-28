@@ -29,7 +29,6 @@
 
 package org.n52.sta.data.query;
 
-import org.joda.time.DateTime;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
@@ -109,10 +108,11 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
         };
     }
 
-    private Specification<HistoricalLocationEntity> handleDirectPropertyFilter(String propertyName,
-                                                                               Expression<?> propertyValue,
-                                                                               FilterConstants.ComparisonOperator operator,
-                                                                               boolean switched) {
+    private Specification<HistoricalLocationEntity> handleDirectPropertyFilter(
+            String propertyName,
+            Expression<?> propertyValue,
+            FilterConstants.ComparisonOperator operator,
+            boolean switched) {
         return (Specification<HistoricalLocationEntity>) (root, query, builder) -> {
             try {
                 switch (propertyName) {

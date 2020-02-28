@@ -129,6 +129,8 @@ public class LocationService
                                             .map(s -> (PlatformEntity) s.getEntity())
                                             .collect(Collectors.toSet()));
                     break;
+                default:
+                    throw new RuntimeException("This can never happen!");
                 }
             } else {
                 throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty +

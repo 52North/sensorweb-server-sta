@@ -38,7 +38,6 @@ import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.UnitEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
-import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
@@ -156,6 +155,8 @@ public class DatastreamService
                                             .map(s -> (StaDataEntity<?>) s.getEntity())
                                             .collect(Collectors.toSet()));
                     break;
+                default:
+                    throw new RuntimeException("This can never happen!");
                 }
             } else {
                 throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty +

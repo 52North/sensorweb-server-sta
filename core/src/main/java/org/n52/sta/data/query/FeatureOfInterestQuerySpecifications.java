@@ -112,10 +112,11 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
         };
     }
 
-    private Specification<AbstractFeatureEntity<?>> handleDirectPropertyFilter(String propertyName,
-                                                                               Expression<?> propertyValue,
-                                                                               FilterConstants.ComparisonOperator operator,
-                                                                               boolean switched) {
+    private Specification<AbstractFeatureEntity<?>> handleDirectPropertyFilter(
+            String propertyName,
+            Expression<?> propertyValue,
+            FilterConstants.ComparisonOperator operator,
+            boolean switched) {
         return (Specification<AbstractFeatureEntity<?>>) (root, query, builder) -> {
             try {
                 switch (propertyName) {

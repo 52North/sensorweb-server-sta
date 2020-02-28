@@ -138,19 +138,16 @@ public class ObservedPropertyService
             String expandProperty = expandItem.getPath();
             if (ObservedPropertyEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
                 CollectionWrapper expandedEntities;
-                switch (expandProperty) {
-                case STAEntityDefinition.DATASTREAMS:
-                    expandedEntities = getDatastreamService()
-                            .getEntityCollectionByRelatedEntity(entity.getIdentifier(),
-                                                                PhenomenonEntity.class.getSimpleName(),
-                                                                expandItem.getQueryOptions());
-                    ObservablePropertyEntity obsProp = new ObservablePropertyEntity(entity);
-                    return obsProp.setDatastreams(
-                            expandedEntities.getEntities()
-                                            .stream()
-                                            .map(s -> (DatastreamEntity) s.getEntity())
-                                            .collect(Collectors.toSet()));
-                }
+                expandedEntities = getDatastreamService()
+                        .getEntityCollectionByRelatedEntity(entity.getIdentifier(),
+                                                            PhenomenonEntity.class.getSimpleName(),
+                                                            expandItem.getQueryOptions());
+                ObservablePropertyEntity obsProp = new ObservablePropertyEntity(entity);
+                return obsProp.setDatastreams(
+                        expandedEntities.getEntities()
+                                        .stream()
+                                        .map(s -> (DatastreamEntity) s.getEntity())
+                                        .collect(Collectors.toSet()));
             } else {
                 throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty +
                                                            " on Entity of type 'ObservableProperty'");

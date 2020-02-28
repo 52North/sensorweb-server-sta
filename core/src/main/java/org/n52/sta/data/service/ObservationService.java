@@ -159,6 +159,8 @@ public class ObservationService extends
                                                       expandItem.getQueryOptions());
                     returned.setFeatureOfInterest((AbstractFeatureEntity<?>) expandedEntity.getEntity());
                     break;
+                default:
+                    throw new RuntimeException("This can never happen!");
                 }
             } else {
                 throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty +

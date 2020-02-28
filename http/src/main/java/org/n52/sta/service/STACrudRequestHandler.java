@@ -78,8 +78,8 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
             throws IOException, STACRUDException {
 
         Class<T> clazz = collectionNameToClass(collectionName);
-        return ((AbstractSensorThingsEntityService<?, T, ? extends T>) serviceRepository.getEntityService(collectionName))
-                .create(mapper.readValue(body, clazz));
+        return ((AbstractSensorThingsEntityService<?, T, ? extends T>)
+                serviceRepository.getEntityService(collectionName)).create(mapper.readValue(body, clazz));
     }
 
     /**
@@ -105,10 +105,11 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
         ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
         String strippedId = id.substring(1, id.length() - 1);
         jsonBody.put(StaConstants.AT_IOT_ID, strippedId);
-        return ((AbstractSensorThingsEntityService<?, T, ? extends T>) serviceRepository.getEntityService(collectionName))
-                .update(strippedId,
-                        (T) ((mapper.readValue(jsonBody.toString(), clazz))).getEntity(),
-                        HttpMethod.PATCH);
+        return ((AbstractSensorThingsEntityService<?, T, ? extends T>)
+                serviceRepository.getEntityService(collectionName)).update(strippedId,
+                                                                           (T) ((mapper.readValue(jsonBody.toString(),
+                                                                                                  clazz))).getEntity(),
+                                                                           HttpMethod.PATCH);
     }
 
     /**

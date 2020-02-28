@@ -111,7 +111,7 @@ public class STACollectionRequestHandler implements STARequestUtils {
             filters.add(options.getFilterOption());
         }
         // Overwrite select filter with filter only returning id
-        filters.add(new SelectFilter("id"));
+        filters.add(new SelectFilter(ID));
         return serviceRepository
                 .getEntityService(collectionName)
                 .getEntityCollection(QUERY_OPTIONS_FACTORY.createQueryOptions(filters))
@@ -207,7 +207,7 @@ public class STACollectionRequestHandler implements STARequestUtils {
             filters.add(options.getFilterOption());
         }
         // Overwrite select filter with filter only returning id
-        filters.add(new SelectFilter("id"));
+        filters.add(new SelectFilter(ID));
         return serviceRepository.getEntityService(target)
                                 .getEntityCollectionByRelatedEntity(sourceId,
                                                                     sourceType,

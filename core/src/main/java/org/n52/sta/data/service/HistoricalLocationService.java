@@ -118,6 +118,8 @@ public class HistoricalLocationService
                                                       expandItem.getQueryOptions());
                     entity.setThing((PlatformEntity) expandedEntity.getEntity());
                     break;
+                default:
+                    throw new RuntimeException("This can never happen!");
                 }
             } else {
                 throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty +

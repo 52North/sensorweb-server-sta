@@ -113,6 +113,8 @@ public class STAEntityRequestHandler implements STARequestUtils {
             filters.add(options.getCountOption());
             filters.add(options.getFilterOption());
         }
+        // Overwrite select filter with filter only returning id
+        filters.add(new SelectFilter(ID));
         return serviceRepository.getEntityService(entity)
                                 .getEntity(entityId, QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
     }
@@ -195,7 +197,7 @@ public class STAEntityRequestHandler implements STARequestUtils {
             filters.add(options.getFilterOption());
         }
         // Overwrite select filter with filter only returning id
-        filters.add(new SelectFilter("id"));
+        filters.add(new SelectFilter(ID));
         return serviceRepository.getEntityService(target)
                                 .getEntityByRelatedEntity(sourceId,
                                                           sourceType,

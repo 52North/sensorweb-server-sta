@@ -112,19 +112,16 @@ public class SensorService
             String expandProperty = expandItem.getPath();
             if (SensorEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
                 CollectionWrapper expandedEntities;
-                switch (expandProperty) {
-                case STAEntityDefinition.DATASTREAMS:
-                    expandedEntities = getDatastreamService()
-                            .getEntityCollectionByRelatedEntity(entity.getIdentifier(),
-                                                                ProcedureEntity.class.getSimpleName(),
-                                                                expandItem.getQueryOptions());
-                    SensorEntity sensor = new SensorEntity(entity);
-                    return sensor.setDatastreams(
-                            expandedEntities.getEntities()
-                                            .stream()
-                                            .map(s -> (DatastreamEntity) s.getEntity())
-                                            .collect(Collectors.toSet()));
-                }
+                expandedEntities = getDatastreamService()
+                        .getEntityCollectionByRelatedEntity(entity.getIdentifier(),
+                                                            ProcedureEntity.class.getSimpleName(),
+                                                            expandItem.getQueryOptions());
+                SensorEntity sensor = new SensorEntity(entity);
+                return sensor.setDatastreams(
+                        expandedEntities.getEntities()
+                                        .stream()
+                                        .map(s -> (DatastreamEntity) s.getEntity())
+                                        .collect(Collectors.toSet()));
             } else {
                 throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty +
                                                            " on Entity of type 'Sensor'");
