@@ -214,7 +214,7 @@ abstract class ConformanceTests implements TestUtil {
             System.out.println("Statuscode:" + statusCode);
         }
         Assertions.assertEquals(
-                400,
+                404,
                 statusCode,
                 "DELETE does not work properly for nonexistent " + request.getURI()
         );
@@ -222,7 +222,7 @@ abstract class ConformanceTests implements TestUtil {
 
     protected void deleteEverythings() throws IOException {
         for (Conformance2.EntityType type : Conformance2.EntityType.values()) {
-            for (JsonNode elem : getCollection(type)) {
+            for (JsonNode elem : getCollection(type).get("value")) {
                 deleteEntity(type, elem.get(idKey).asText(), false);
             }
         }

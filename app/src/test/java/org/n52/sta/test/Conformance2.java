@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -1350,7 +1351,7 @@ public class Conformance2 extends ConformanceTests implements TestUtil {
         HashMap<EntityType, String[]> map = new HashMap<>();
         for (EntityType type : EntityType.values()) {
             List<String> ids = new ArrayList<>();
-            getCollection(type).forEach(elem -> {
+            getCollection(type).get("value").forEach(elem -> {
                 ids.add(elem.get(idKey).asText());
             });
             map.put(type, ids.toArray(new String[] {}));
@@ -1408,8 +1409,8 @@ public class Conformance2 extends ConformanceTests implements TestUtil {
 
         String url = String.format(getRelatedEntityEndpoint(sourceType, targetType), sourceId);
         JsonNode result = getEntity(url);
-        if (result.isArray()) {
-            result = result.get(0);
+        if (result.has("@iot.count")) {
+            result = result.get("value").get(0);
         }
 
         if (logger.isTraceEnabled()) {
@@ -1458,9 +1459,15 @@ public class Conformance2 extends ConformanceTests implements TestUtil {
                     }
                 }
             } else {
-                Assertions.assertTrue(
-                        oldEntity.get(field).equals(newEntity.get(field)),
-                        "PATCH was not applied correctly for " + entityType + "'s " + field + ".");
+                if (Objects.equals(field, "result")) {
+                    Assertions.assertTrue(
+                            oldEntity.get(field).asDouble() == (newEntity.get(field).asDouble()),
+                            "PATCH was not applied correctly for " + entityType + "'s " + field + ".");
+                } else {
+                    Assertions.assertTrue(
+                            oldEntity.get(field).equals(newEntity.get(field)),
+                            "PATCH was not applied correctly for " + entityType + "'s " + field + ".");
+                }
             }
         });
     }
@@ -1474,7 +1481,7 @@ public class Conformance2 extends ConformanceTests implements TestUtil {
         for (EntityType entityType : entityTypes) {
             JsonNode response = getEntity(endpoints.get(entityType));
             Assertions.assertTrue(
-                    response.isEmpty(),
+                    response.get("value").isEmpty(),
                     "Entity with type: " + entityType.name() + " is created although it shouldn't"
             );
         }
@@ -1484,7 +1491,7 @@ public class Conformance2 extends ConformanceTests implements TestUtil {
         for (EntityType entityType : entityTypes) {
             JsonNode response = getEntity(endpoints.get(entityType));
             Assertions.assertTrue(
-                    response.isArray() && !response.isEmpty(),
+                    !response.get("value").isEmpty(),
                     "No Entity with type: " + entityType.name() + " is present"
             );
         }
