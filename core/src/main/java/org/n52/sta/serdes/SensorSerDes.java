@@ -169,8 +169,6 @@ public class SensorSerDes {
                     }
                 }
             }
-
-            //TODO: Deal with $expand
             gen.writeEndObject();
         }
     }

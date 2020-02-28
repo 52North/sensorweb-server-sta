@@ -51,31 +51,27 @@ public class CollectionSer extends StdSerializer<CollectionWrapper> {
             throws IOException {
         gen.writeStartObject();
 
-        if (value.getEntities().size() > 0) {
-            gen.writeNumberField("@iot.count", value.getTotalEntityCount());
+        gen.writeNumberField("@iot.count", value.getTotalEntityCount());
 
-            // We have multiple pages
-            if (value.hasNextPage()) {
-                QueryOptions queryOptions = value.getEntities().get(0).getQueryOptions();
-                Long oldTop = queryOptions.getTopOption().getValue();
-                Long oldSkip = queryOptions.hasSkipOption() ? queryOptions.getSkipOption().getValue() : 0;
-                gen.writeStringField("@iot.nextLink",
-                                     value.getRequestURL()
-                                             + "?$top="
-                                             + oldTop
-                                             + "&$skip="
-                                             + (oldTop + oldSkip)
-                );
-            }
-
-            gen.writeArrayFieldStart("value");
-            for (ElementWithQueryOptions element : value.getEntities()) {
-                provider.defaultSerializeValue(element, gen);
-            }
-            gen.writeEndArray();
-            gen.writeEndObject();
-        } else {
-            gen.writeEndObject();
+        // We have multiple pages
+        if (value.hasNextPage()) {
+            QueryOptions queryOptions = value.getEntities().get(0).getQueryOptions();
+            Long oldTop = queryOptions.getTopOption().getValue();
+            Long oldSkip = queryOptions.hasSkipOption() ? queryOptions.getSkipOption().getValue() : 0;
+            gen.writeStringField("@iot.nextLink",
+                                 value.getRequestURL()
+                                         + "?$top="
+                                         + oldTop
+                                         + "&$skip="
+                                         + (oldTop + oldSkip)
+            );
         }
+
+        gen.writeArrayFieldStart("value");
+        for (ElementWithQueryOptions element : value.getEntities()) {
+            provider.defaultSerializeValue(element, gen);
+        }
+        gen.writeEndArray();
+        gen.writeEndObject();
     }
 }

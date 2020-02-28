@@ -138,7 +138,7 @@ public class HistoricalLocationSerDes {
                     } else {
                         gen.writeFieldName(navigationProperty);
                         switch (navigationProperty) {
-                        case HistoricalLocationEntityDefinition.THINGS:
+                        case HistoricalLocationEntityDefinition.THING:
                             writeNestedEntity(histLoc.getThing(),
                                               fieldsToExpand.get(navigationProperty),
                                               gen,
@@ -156,6 +156,7 @@ public class HistoricalLocationSerDes {
                     }
                 }
             }
+            gen.writeEndObject();
         }
     }
 

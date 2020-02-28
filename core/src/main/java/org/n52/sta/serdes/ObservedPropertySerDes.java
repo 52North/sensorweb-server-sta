@@ -147,7 +147,6 @@ public class ObservedPropertySerDes {
                     }
                 }
             }
-
             gen.writeEndObject();
         }
     }
