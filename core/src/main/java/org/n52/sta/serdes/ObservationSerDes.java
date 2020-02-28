@@ -51,9 +51,7 @@ import org.n52.series.db.beans.ReferencedDataEntity;
 import org.n52.series.db.beans.TextDataEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
-import org.n52.shetland.filter.AbstractPathFilter;
 import org.n52.shetland.filter.ExpandItem;
-import org.n52.shetland.filter.PathFilterItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
@@ -71,10 +69,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class ObservationSerDes {
 
@@ -111,7 +107,7 @@ public class ObservationSerDes {
         public void serialize(ObservationWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers)
                 throws IOException {
             gen.writeStartObject();
-            DataEntity<?> observation = value.getEntity();
+            StaDataEntity<?> observation = value.getEntity();
             QueryOptions options = value.getQueryOptions();
 
             Set<String> fieldsToSerialize = null;
@@ -184,10 +180,29 @@ public class ObservationSerDes {
             // navigation properties
             for (String navigationProperty : ObservationEntityDefinition.NAVIGATION_PROPERTIES) {
                 if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
-                    writeNavigationProp(gen, navigationProperty, observation.getIdentifier());
+                    if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
+                        writeNavigationProp(gen, navigationProperty, observation.getIdentifier());
+                    } else {
+                        gen.writeFieldName(navigationProperty);
+                        switch (navigationProperty) {
+                        case ObservationEntityDefinition.DATASTREAM:
+                            writeNestedEntity(observation.getDatastream(),
+                                              fieldsToExpand.get(navigationProperty),
+                                              gen,
+                                              serializers);
+                            break;
+                        case ObservationEntityDefinition.FEATURE_OF_INTEREST:
+                            writeNestedEntity(observation.getFeatureOfInterest(),
+                                              fieldsToExpand.get(navigationProperty),
+                                              gen,
+                                              serializers);
+                            break;
+                        default:
+                            throw new IllegalStateException("Unexpected value: " + navigationProperty);
+                        }
+                    }
                 }
             }
-            //TODO: Deal with $expand
             gen.writeEndObject();
         }
 

@@ -34,9 +34,10 @@ import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.filter.ExpandFilter;
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
+import org.n52.shetland.ogc.sta.model.HistoricalLocationEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.HistoricalLocationQuerySpecifications;
 import org.n52.sta.data.repositories.EntityGraphRepository;
@@ -44,7 +45,6 @@ import org.n52.sta.data.repositories.HistoricalLocationRepository;
 import org.n52.sta.data.repositories.LocationRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
-import org.n52.sta.serdes.util.ElementWithQueryOptions.HistoricalLocationWithQueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +69,8 @@ import java.util.stream.Collectors;
 @DependsOn({"springApplicationContext"})
 @Transactional
 public class HistoricalLocationService
-        extends AbstractSensorThingsEntityService<HistoricalLocationRepository, HistoricalLocationEntity> {
+        extends AbstractSensorThingsEntityService<HistoricalLocationRepository, HistoricalLocationEntity,
+        HistoricalLocationEntity> {
 
     private static final Logger logger = LoggerFactory.getLogger(HistoricalLocationService.class);
 
@@ -90,14 +91,40 @@ public class HistoricalLocationService
     }
 
     @Override
-    protected HistoricalLocationEntity fetchExpandEntities(HistoricalLocationEntity entity, ExpandFilter expandOption)
+    protected HistoricalLocationEntity fetchExpandEntities(HistoricalLocationEntity entity,
+                                                           ExpandFilter expandOption)
             throws STACRUDException, STAInvalidQueryException {
-        return null;
-    }
-
-    @Override
-    protected ElementWithQueryOptions createWrapper(Object entity, QueryOptions queryOptions) {
-        return new HistoricalLocationWithQueryOptions((HistoricalLocationEntity) entity, queryOptions);
+        for (ExpandItem expandItem : expandOption.getItems()) {
+            String expandProperty = expandItem.getPath();
+            if (HistoricalLocationEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
+                switch (expandProperty) {
+                case STAEntityDefinition.LOCATIONS:
+                    CollectionWrapper expandedEntities =
+                            getLocationService()
+                                    .getEntityCollectionByRelatedEntity(entity.getIdentifier(),
+                                                                        HistoricalLocationEntity.class.getSimpleName(),
+                                                                        expandItem.getQueryOptions());
+                    entity.setLocations(
+                            expandedEntities.getEntities()
+                                            .stream()
+                                            .map(s -> (LocationEntity) s.getEntity())
+                                            .collect(Collectors.toSet()));
+                    break;
+                case STAEntityDefinition.THINGS:
+                    ElementWithQueryOptions<?> expandedEntity = getThingService()
+                            .getEntityByRelatedEntity(entity.getIdentifier(),
+                                                      HistoricalLocationEntity.class.getSimpleName(),
+                                                      null,
+                                                      expandItem.getQueryOptions());
+                    entity.setThing((PlatformEntity) expandedEntity.getEntity());
+                    break;
+                }
+            } else {
+                throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty +
+                                                           "on Entity of type 'Thing'");
+            }
+        }
+        return entity;
     }
 
     @Override
@@ -240,16 +267,6 @@ public class HistoricalLocationService
 
     private void updateThing(HistoricalLocationEntity historicalLocation) throws STACRUDException {
         getThingService().updateEntity(historicalLocation.getThing().setHistoricalLocations(null));
-    }
-
-    @SuppressWarnings("unchecked")
-    private AbstractSensorThingsEntityService<?, PlatformEntity> getThingService() {
-        return (AbstractSensorThingsEntityService<?, PlatformEntity>) getEntityService(EntityTypes.Thing);
-    }
-
-    @SuppressWarnings("unchecked")
-    private AbstractSensorThingsEntityService<?, LocationEntity> getLocationService() {
-        return (AbstractSensorThingsEntityService<?, LocationEntity>) getEntityService(EntityTypes.Location);
     }
 
     /* (non-Javadoc)

@@ -45,7 +45,6 @@ import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.shetland.util.DateTimeHelper;
 import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONDatastream;
-import org.n52.sta.serdes.util.ElementWithQueryOptions;
 import org.n52.sta.serdes.util.ElementWithQueryOptions.DatastreamWithQueryOptions;
 import org.n52.sta.serdes.util.EntityPatch;
 import org.n52.sta.utils.TimeUtil;
@@ -57,7 +56,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class DatastreamSerDes {
 
@@ -179,38 +177,41 @@ public class DatastreamSerDes {
                     if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
                         writeNavigationProp(gen, navigationProperty, datastream.getIdentifier());
                     } else {
-                        Set<Object> expandedElements;
+                        gen.writeFieldName(navigationProperty);
                         switch (navigationProperty) {
                         case STAEntityDefinition.OBSERVATIONS:
-                            expandedElements = Collections.unmodifiableSet(datastream.getObservations());
+                            writeNestedCollection(Collections.unmodifiableSet(datastream.getObservations()),
+                                                  fieldsToExpand.get(navigationProperty),
+                                                  gen,
+                                                  serializers);
                             break;
-                        case STAEntityDefinition.OBSERVED_PROPERTIES:
-                            expandedElements = Collections.singleton(datastream.getObservableProperty());
+                        case STAEntityDefinition.OBSERVED_PROPERTY:
+                            writeNestedEntity(datastream.getObservableProperty(),
+                                              fieldsToExpand.get(navigationProperty),
+                                              gen,
+                                              serializers);
                             break;
                         case STAEntityDefinition.THING:
-                            expandedElements = Collections.singleton(datastream.getThing());
+                            writeNestedEntity(datastream.getThing(),
+                                              fieldsToExpand.get(navigationProperty),
+                                              gen,
+                                              serializers);
                             break;
                         case STAEntityDefinition.SENSOR:
-                            expandedElements = Collections.singleton(datastream.getProcedure());
+                            writeNestedEntity(datastream.getProcedure(),
+                                              fieldsToExpand.get(navigationProperty),
+                                              gen,
+                                              serializers);
                             break;
                         default:
                             throw new IllegalStateException("Unexpected value: " + navigationProperty);
                         }
-                        gen.writeArrayFieldStart(navigationProperty);
-                        serializers.defaultSerializeValue(
-                                expandedElements
-                                        .stream()
-                                        .map(d -> ElementWithQueryOptions.from(d,
-                                                                               fieldsToExpand.get(navigationProperty)))
-                                        .collect(Collectors.toSet()), gen);
-                        gen.writeEndArray();
                     }
                 }
             }
             gen.writeEndObject();
         }
     }
-
 
     public static class DatastreamDeserializer extends StdDeserializer<DatastreamEntity> {
 

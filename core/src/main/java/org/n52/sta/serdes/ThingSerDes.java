@@ -134,28 +134,29 @@ public class ThingSerDes {
                     if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
                         writeNavigationProp(gen, navigationProperty, thing.getIdentifier());
                     } else {
-                        Set<Object> expandedElements;
+                        gen.writeFieldName(navigationProperty);
                         switch (navigationProperty) {
                         case ThingEntityDefinition.DATASTREAMS:
-                            expandedElements = Collections.unmodifiableSet(thing.getDatastreams());
+                            writeNestedCollection(Collections.unmodifiableSet(thing.getDatastreams()),
+                                                  fieldsToExpand.get(navigationProperty),
+                                                  gen,
+                                                  serializers);
                             break;
                         case ThingEntityDefinition.HISTORICAL_LOCATIONS:
-                            expandedElements = Collections.unmodifiableSet(thing.getHistoricalLocations());
+                            writeNestedCollection(Collections.unmodifiableSet(thing.getHistoricalLocations()),
+                                                  fieldsToExpand.get(navigationProperty),
+                                                  gen,
+                                                  serializers);
                             break;
                         case ThingEntityDefinition.LOCATIONS:
-                            expandedElements = Collections.unmodifiableSet(thing.getLocations());
+                            writeNestedCollection(Collections.unmodifiableSet(thing.getLocations()),
+                                                  fieldsToExpand.get(navigationProperty),
+                                                  gen,
+                                                  serializers);
                             break;
                         default:
                             throw new IllegalStateException("Unexpected value: " + navigationProperty);
                         }
-                        gen.writeArrayFieldStart(navigationProperty);
-                        serializers.defaultSerializeValue(
-                                expandedElements
-                                        .stream()
-                                        .map(d -> ElementWithQueryOptions.from(d,
-                                                                               fieldsToExpand.get(navigationProperty)))
-                                        .collect(Collectors.toSet()), gen);
-                        gen.writeEndArray();
                     }
                 }
             }

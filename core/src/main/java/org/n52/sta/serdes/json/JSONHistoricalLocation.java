@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.serdes.json;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -34,7 +35,7 @@ import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
-import org.n52.shetland.ogc.sta.exception.ParsingException;
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.utils.TimeUtil;
 import org.springframework.util.Assert;
 
@@ -64,55 +65,56 @@ public class JSONHistoricalLocation extends JSONBase.JSONwithIdTime<HistoricalLo
     @Override
     public HistoricalLocationEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
-            case FULL:
-                Assert.notNull(date, INVALID_INLINE_ENTITY + "time");
+        case FULL:
+            Assert.notNull(date, INVALID_INLINE_ENTITY + "time");
 
-                self.setIdentifier(identifier);
-                self.setTime(date);
+            self.setIdentifier(identifier);
+            self.setTime(date);
 
-                if (Thing != null) {
-                    self.setThing(Thing.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
-                } else if (backReference instanceof JSONThing) {
-                    self.setThing(((JSONThing) backReference).getEntity());
-                } else {
-                    Assert.notNull(null, INVALID_INLINE_ENTITY + "Thing");
-                }
+            if (Thing != null) {
+                self.setThing(Thing.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+            } else if (backReference instanceof JSONThing) {
+                self.setThing(((JSONThing) backReference).getEntity());
+            } else {
+                Assert.notNull(null, INVALID_INLINE_ENTITY + "Thing");
+            }
 
-                if (Locations != null) {
-                    self.setLocations(Arrays.stream(Locations)
-                            .map(loc -> loc.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE))
-                            .collect(Collectors.toSet()));
-                } else if (backReference instanceof JSONLocation) {
-                    self.setLocations(Collections.singleton(((JSONLocation) backReference).getEntity()));
-                } else {
-                    Assert.notNull(null, INVALID_INLINE_ENTITY + "Location");
-                }
+            if (Locations != null) {
+                self.setLocations(Arrays.stream(Locations)
+                                        .map(loc -> loc.toEntity(JSONBase.EntityType.FULL,
+                                                                 JSONBase.EntityType.REFERENCE))
+                                        .collect(Collectors.toSet()));
+            } else if (backReference instanceof JSONLocation) {
+                self.setLocations(Collections.singleton(((JSONLocation) backReference).getEntity()));
+            } else {
+                Assert.notNull(null, INVALID_INLINE_ENTITY + "Location");
+            }
 
-                return self;
-            case PATCH:
-                self.setIdentifier(identifier);
-                self.setTime(date);
+            return self;
+        case PATCH:
+            self.setIdentifier(identifier);
+            self.setTime(date);
 
-                if (Thing != null) {
-                    self.setThing(Thing.toEntity(JSONBase.EntityType.REFERENCE));
-                }
+            if (Thing != null) {
+                self.setThing(Thing.toEntity(JSONBase.EntityType.REFERENCE));
+            }
 
-                if (Locations != null) {
-                    self.setLocations(Arrays.stream(Locations)
-                            .map(loc -> loc.toEntity(JSONBase.EntityType.REFERENCE))
-                            .collect(Collectors.toSet()));
-                }
+            if (Locations != null) {
+                self.setLocations(Arrays.stream(Locations)
+                                        .map(loc -> loc.toEntity(JSONBase.EntityType.REFERENCE))
+                                        .collect(Collectors.toSet()));
+            }
 
-                return self;
-            case REFERENCE:
-                Assert.isNull(time, INVALID_REFERENCED_ENTITY);
-                Assert.isNull(Thing, INVALID_REFERENCED_ENTITY);
-                Assert.isNull(Locations, INVALID_REFERENCED_ENTITY);
+            return self;
+        case REFERENCE:
+            Assert.isNull(time, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(Thing, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(Locations, INVALID_REFERENCED_ENTITY);
 
-                self.setIdentifier(identifier);
-                return self;
-            default:
-                return null;
+            self.setIdentifier(identifier);
+            return self;
+        default:
+            return null;
         }
     }
 
@@ -121,7 +123,7 @@ public class JSONHistoricalLocation extends JSONBase.JSONwithIdTime<HistoricalLo
      *
      * @param rawTime raw Time
      */
-    public void setTime(Object rawTime) throws ParsingException {
+    public void setTime(Object rawTime) throws STACRUDException {
         Time parsed = TimeUtil.parseTime(rawTime);
         if (parsed instanceof TimeInstant) {
             date = ((TimeInstant) parsed).getValue().toDate();
@@ -129,7 +131,7 @@ public class JSONHistoricalLocation extends JSONBase.JSONwithIdTime<HistoricalLo
             date = ((TimePeriod) parsed).getEnd().toDate();
         } else {
             //TODO: refine error message
-            throw new ParsingException("Invalid parsed format.");
+            throw new STACRUDException("Invalid parsed format.");
         }
     }
 }

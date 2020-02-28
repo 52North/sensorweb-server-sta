@@ -78,7 +78,7 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
             throws IOException, STACRUDException {
 
         Class<T> clazz = collectionNameToClass(collectionName);
-        return ((AbstractSensorThingsEntityService<?, T>) serviceRepository.getEntityService(collectionName))
+        return ((AbstractSensorThingsEntityService<?, T, ? extends T>) serviceRepository.getEntityService(collectionName))
                 .create(mapper.readValue(body, clazz));
     }
 
@@ -105,7 +105,7 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
         ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
         String strippedId = id.substring(1, id.length() - 1);
         jsonBody.put(StaConstants.AT_IOT_ID, strippedId);
-        return ((AbstractSensorThingsEntityService<?, T>) serviceRepository.getEntityService(collectionName))
+        return ((AbstractSensorThingsEntityService<?, T, ? extends T>) serviceRepository.getEntityService(collectionName))
                 .update(strippedId,
                         (T) ((mapper.readValue(jsonBody.toString(), clazz))).getEntity(),
                         HttpMethod.PATCH);
@@ -137,8 +137,8 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
 
         String sourceType = entity.substring(0, entity.indexOf("("));
         String sourceId = entity.substring(sourceType.length() + 1, entity.length() - 1);
-        AbstractSensorThingsEntityService<?, T> entityService =
-                (AbstractSensorThingsEntityService<?, T>) serviceRepository.getEntityService(target);
+        AbstractSensorThingsEntityService<?, T, ? extends T> entityService =
+                (AbstractSensorThingsEntityService<?, T, ? extends T>) serviceRepository.getEntityService(target);
 
         // Get Id from datastore
         String entityId = entityService.getEntityIdByRelatedEntity(sourceId, sourceType);
@@ -204,8 +204,8 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
 
         String sourceType = entity.substring(0, entity.indexOf("("));
         String sourceId = entity.substring(sourceType.length() + 1, entity.length() - 1);
-        AbstractSensorThingsEntityService<?, T> entityService =
-                (AbstractSensorThingsEntityService<?, T>) serviceRepository.getEntityService(target);
+        AbstractSensorThingsEntityService<?, T, ? extends T> entityService =
+                (AbstractSensorThingsEntityService<?, T, ? extends T>) serviceRepository.getEntityService(target);
 
         // Get Id from datastore
         String entityId = entityService.getEntityIdByRelatedEntity(sourceId, sourceType);

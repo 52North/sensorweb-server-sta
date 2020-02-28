@@ -49,10 +49,11 @@ import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.shetland.filter.ExpandFilter;
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.ogc.om.OmConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
+import org.n52.shetland.ogc.sta.model.ObservationEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.DatasetQuerySpecifications;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
@@ -66,7 +67,6 @@ import org.n52.sta.data.repositories.OfferingRepository;
 import org.n52.sta.data.repositories.ParameterRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
-import org.n52.sta.serdes.util.ElementWithQueryOptions.ObservationWithQueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,7 +95,7 @@ import java.util.stream.Collectors;
 @DependsOn({"springApplicationContext"})
 @Transactional
 public class ObservationService extends
-        AbstractSensorThingsEntityService<DataRepository<DataEntity<?>>, DataEntity<?>> {
+        AbstractSensorThingsEntityService<DataRepository<DataEntity<?>>, DataEntity<?>, StaDataEntity<?>> {
 
     private static final Logger logger = LoggerFactory.getLogger(ObservationService.class);
 
@@ -133,14 +133,39 @@ public class ObservationService extends
         return new EntityTypes[] {EntityTypes.Observation, EntityTypes.Observations};
     }
 
-    @Override protected DataEntity<?> fetchExpandEntities(DataEntity<?> entity, ExpandFilter expandOption)
-            throws STACRUDException, STAInvalidQueryException {
-        return entity;
-    }
-
     @Override
-    protected ElementWithQueryOptions createWrapper(Object entity, QueryOptions queryOptions) {
-        return new ObservationWithQueryOptions((DataEntity<?>) entity, queryOptions);
+    protected StaDataEntity<?> fetchExpandEntities(DataEntity<?> entity,
+                                                   ExpandFilter expandOption)
+            throws STACRUDException, STAInvalidQueryException {
+        StaDataEntity<?> returned = new StaDataEntity(entity);
+        for (ExpandItem expandItem : expandOption.getItems()) {
+            String expandProperty = expandItem.getPath();
+            if (ObservationEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
+                ElementWithQueryOptions<?> expandedEntity;
+                switch (expandProperty) {
+                case STAEntityDefinition.DATASTREAM:
+                    expandedEntity = getDatastreamService()
+                            .getEntityByRelatedEntity(entity.getIdentifier(),
+                                                      DataEntity.class.getSimpleName(),
+                                                      null,
+                                                      expandItem.getQueryOptions());
+                    returned.setDatastream((DatastreamEntity) expandedEntity.getEntity());
+                    break;
+                case STAEntityDefinition.FEATURE_OF_INTEREST:
+                    expandedEntity = getFeatureOfInterestService()
+                            .getEntityByRelatedEntity(entity.getIdentifier(),
+                                                      DataEntity.class.getSimpleName(),
+                                                      null,
+                                                      expandItem.getQueryOptions());
+                    returned.setFeatureOfInterest((AbstractFeatureEntity<?>) expandedEntity.getEntity());
+                    break;
+                }
+            } else {
+                throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty +
+                                                           "on Entity of type 'Sensor'");
+            }
+        }
+        return returned;
     }
 
     @Override
@@ -183,8 +208,8 @@ public class ObservationService extends
     public DataEntity<?> createEntity(DataEntity<?> entity) throws STACRUDException {
         if (entity instanceof StaDataEntity) {
             StaDataEntity observation = (StaDataEntity) entity;
-            if (!observation.isProcesssed()) {
-                observation.setProcesssed(true);
+            if (!observation.isProcessed()) {
+                observation.setProcessed(true);
                 check(observation);
 
                 DatastreamEntity datastream = getDatastreamService().createEntity(observation.getDatastream());
@@ -511,17 +536,6 @@ public class ObservationService extends
         }
     }
 
-    @SuppressWarnings("unchecked")
-    AbstractSensorThingsEntityService<?, DatastreamEntity> getDatastreamService() {
-        return (AbstractSensorThingsEntityService<?, DatastreamEntity>) getEntityService(EntityTypes.Datastream);
-    }
-
-    @SuppressWarnings("unchecked")
-    private AbstractSensorThingsEntityService<?, AbstractFeatureEntity<?>> getFeatureOfInterestService() {
-        return (AbstractSensorThingsEntityService<?, AbstractFeatureEntity<?>>)
-                getEntityService(EntityTypes.FeatureOfInterest);
-    }
-
     private DatasetEntity getDatasetEntity(String observationType) {
         DatasetEntity dataset = new DatasetEntity().setObservationType(ObservationType.simple)
                                                    .setDatasetType(DatasetType.timeseries);
@@ -544,15 +558,15 @@ public class ObservationService extends
     private DataEntity<?> getDataEntity(StaDataEntity observation, DatasetEntity dataset)
             throws STACRUDException {
         DataEntity<?> data = null;
+        String value = (String) observation.getValue();
         switch (dataset.getOmObservationType().getFormat()) {
         case OmConstants.OBS_TYPE_MEASUREMENT:
             QuantityDataEntity quantityDataEntity = new QuantityDataEntity();
             if (observation.hasValue()) {
-                String obs = observation.getValue();
-                if (obs.equals("NaN") || obs.equals("Inf") || obs.equals("-Inf")) {
+                if (value.equals("NaN") || value.equals("Inf") || value.equals("-Inf")) {
                     quantityDataEntity.setValue(null);
                 } else {
-                    quantityDataEntity.setValue(BigDecimal.valueOf(Double.parseDouble(observation.getValue())));
+                    quantityDataEntity.setValue(BigDecimal.valueOf(Double.parseDouble(value)));
                 }
             }
             data = quantityDataEntity;
@@ -560,28 +574,28 @@ public class ObservationService extends
         case OmConstants.OBS_TYPE_CATEGORY_OBSERVATION:
             CategoryDataEntity categoryDataEntity = new CategoryDataEntity();
             if (observation.hasValue()) {
-                categoryDataEntity.setValue(observation.getValue());
+                categoryDataEntity.setValue(value);
             }
             data = categoryDataEntity;
             break;
         case OmConstants.OBS_TYPE_COUNT_OBSERVATION:
             CountDataEntity countDataEntity = new CountDataEntity();
             if (observation.hasValue()) {
-                countDataEntity.setValue(Integer.parseInt(observation.getValue()));
+                countDataEntity.setValue(Integer.parseInt(value));
             }
             data = countDataEntity;
             break;
         case OmConstants.OBS_TYPE_TEXT_OBSERVATION:
             TextDataEntity textDataEntity = new TextDataEntity();
             if (observation.hasValue()) {
-                textDataEntity.setValue(observation.getValue());
+                textDataEntity.setValue(value);
             }
             data = textDataEntity;
             break;
         case OmConstants.OBS_TYPE_TRUTH_OBSERVATION:
             BooleanDataEntity booleanDataEntity = new BooleanDataEntity();
             if (observation.hasValue()) {
-                booleanDataEntity.setValue(Boolean.parseBoolean(observation.getValue()));
+                booleanDataEntity.setValue(Boolean.parseBoolean(value));
             }
             data = booleanDataEntity;
             break;

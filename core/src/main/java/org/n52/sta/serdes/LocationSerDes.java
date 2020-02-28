@@ -37,9 +37,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.series.db.beans.sta.LocationEntity;
-import org.n52.shetland.filter.AbstractPathFilter;
 import org.n52.shetland.filter.ExpandItem;
-import org.n52.shetland.filter.PathFilterItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.model.LocationEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
@@ -51,11 +49,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class LocationSerDes {
 
@@ -144,10 +141,29 @@ public class LocationSerDes {
             // navigation properties
             for (String navigationProperty : LocationEntityDefinition.NAVIGATION_PROPERTIES) {
                 if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
-                    writeNavigationProp(gen, navigationProperty, location.getIdentifier());
+                    if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
+                        writeNavigationProp(gen, navigationProperty, location.getIdentifier());
+                    } else {
+                        gen.writeFieldName(navigationProperty);
+                        switch (navigationProperty) {
+                        case LocationEntityDefinition.THINGS:
+                            writeNestedCollection(Collections.unmodifiableSet(location.getThings()),
+                                                  fieldsToExpand.get(navigationProperty),
+                                                  gen,
+                                                  serializers);
+                            break;
+                        case LocationEntityDefinition.HISTORICAL_LOCATIONS:
+                            writeNestedCollection(Collections.unmodifiableSet(location.getHistoricalLocations()),
+                                                  fieldsToExpand.get(navigationProperty),
+                                                  gen,
+                                                  serializers);
+                            break;
+                        default:
+                            throw new IllegalStateException("Unexpected value: " + navigationProperty);
+                        }
+                    }
                 }
             }
-            //TODO: Deal with $expand
             gen.writeEndObject();
         }
     }

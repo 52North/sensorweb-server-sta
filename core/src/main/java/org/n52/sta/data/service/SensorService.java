@@ -31,14 +31,12 @@ package org.n52.sta.data.service;
 
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.FormatEntity;
-import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
@@ -51,8 +49,6 @@ import org.n52.sta.data.repositories.FormatRepository;
 import org.n52.sta.data.repositories.ProcedureHistoryRepository;
 import org.n52.sta.data.repositories.ProcedureRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
-import org.n52.sta.serdes.util.ElementWithQueryOptions;
-import org.n52.sta.serdes.util.ElementWithQueryOptions.SensorWithQueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,7 +71,8 @@ import java.util.stream.Collectors;
 @Component
 @DependsOn({"springApplicationContext"})
 @Transactional
-public class SensorService extends AbstractSensorThingsEntityService<ProcedureRepository, ProcedureEntity> {
+public class SensorService
+        extends AbstractSensorThingsEntityService<ProcedureRepository, ProcedureEntity, SensorEntity> {
 
     private static final Logger logger = LoggerFactory.getLogger(SensorService.class);
 
@@ -109,19 +106,20 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
         return new EntityTypes[] {EntityTypes.Sensor, EntityTypes.Sensors};
     }
 
-    @Override protected ProcedureEntity fetchExpandEntities(ProcedureEntity entity, ExpandFilter expandOption)
+    @Override protected SensorEntity fetchExpandEntities(ProcedureEntity entity, ExpandFilter expandOption)
             throws STACRUDException, STAInvalidQueryException {
         for (ExpandItem expandItem : expandOption.getItems()) {
-            String expandProperty = expandItem.getPath().split("/")[0];
+            String expandProperty = expandItem.getPath();
             if (SensorEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
                 CollectionWrapper expandedEntities;
                 switch (expandProperty) {
                 case STAEntityDefinition.DATASTREAMS:
                     expandedEntities = getDatastreamService()
                             .getEntityCollectionByRelatedEntity(entity.getIdentifier(),
-                                                                PlatformEntity.class.getSimpleName(),
+                                                                ProcedureEntity.class.getSimpleName(),
                                                                 expandItem.getQueryOptions());
-                    return entity.set.setDatastreams(
+                    SensorEntity sensor = new SensorEntity(entity);
+                    return sensor.setDatastreams(
                             expandedEntities.getEntities()
                                             .stream()
                                             .map(s -> (DatastreamEntity) s.getEntity())
@@ -132,12 +130,7 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
                                                            "on Entity of type 'Sensor'");
             }
         }
-        return entity;
-    }
-
-    @Override
-    protected ElementWithQueryOptions createWrapper(Object entity, QueryOptions queryOptions) {
-        return new SensorWithQueryOptions((ProcedureEntity) entity, queryOptions);
+        return new SensorEntity(entity);
     }
 
     @Override
@@ -177,12 +170,6 @@ public class SensorService extends AbstractSensorThingsEntityService<ProcedureRe
         return sensor instanceof SensorEntity
                 ? ((SensorEntity) sensor).asProcedureEntity()
                 : sensor;
-    }
-
-    @SuppressWarnings("unchecked")
-    private AbstractSensorThingsEntityService<?, DatastreamEntity> getDatastreamService() {
-        return (AbstractSensorThingsEntityService<?, DatastreamEntity>) getEntityService(
-                EntityTypes.Datastream);
     }
 
     /* (non-Javadoc)

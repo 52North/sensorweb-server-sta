@@ -38,28 +38,21 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.FeatureEntity;
-import org.n52.shetland.filter.AbstractPathFilter;
 import org.n52.shetland.filter.ExpandItem;
-import org.n52.shetland.filter.PathFilterItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.model.FeatureOfInterestEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.shetland.ogc.sta.model.ThingEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONFeatureOfInterest;
-import org.n52.sta.serdes.util.ElementWithQueryOptions;
 import org.n52.sta.serdes.util.ElementWithQueryOptions.FeatureOfInterestWithQueryOptions;
 import org.n52.sta.serdes.util.EntityPatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class FeatureOfInterestSerDes {
 
@@ -154,16 +147,12 @@ public class FeatureOfInterestSerDes {
                     if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
                         writeNavigationProp(gen, navigationProperty, feature.getIdentifier());
                     } else {
+                        //TODO: implement!
+                        /*
                         Set<Object> expandedElements;
                         switch (navigationProperty) {
                         case STAEntityDefinition.OBSERVATIONS:
-                            expandedElements = Collections.unmodifiableSet(feature.getMappedParameters().getDatastreams());
-                            break;
-                        case STAEntityDefinition.HISTORICAL_LOCATIONS:
-                            expandedElements = Collections.unmodifiableSet(thing.getHistoricalLocations());
-                            break;
-                        case STAEntityDefinition.LOCATIONS:
-                            expandedElements = Collections.unmodifiableSet(thing.getLocations());
+                            expandedElements = Collections.unmodifiableSet(feature.getO);
                             break;
                         default:
                             throw new IllegalStateException("Unexpected value: " + navigationProperty);
@@ -176,6 +165,7 @@ public class FeatureOfInterestSerDes {
                                                                                fieldsToExpand.get(navigationProperty)))
                                         .collect(Collectors.toSet()), gen);
                         gen.writeEndArray();
+                        */
                     }
                 }
             }

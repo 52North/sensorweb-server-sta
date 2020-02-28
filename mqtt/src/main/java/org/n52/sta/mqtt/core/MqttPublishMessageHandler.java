@@ -111,7 +111,7 @@ public class MqttPublishMessageHandler implements STARequestUtils {
             }
             if (valid) {
                 Class<T> clazz = collectionNameToClass(topic);
-                ((AbstractSensorThingsEntityService<?, T>) serviceRepository.getEntityService(topic))
+                ((AbstractSensorThingsEntityService<?, T, ? extends T>) serviceRepository.getEntityService(topic))
                         .create(mapper.readValue(msg.getPayload().toString(Charset.defaultCharset()), clazz));
             } else {
                 throw new STAInvalidUrlException("Topic does not reference a Collection allowed for POSTing via mqtt");

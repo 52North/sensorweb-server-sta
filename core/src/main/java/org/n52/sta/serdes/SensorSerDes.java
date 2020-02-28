@@ -35,19 +35,14 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
-import org.n52.shetland.filter.AbstractPathFilter;
 import org.n52.shetland.filter.ExpandItem;
-import org.n52.shetland.filter.PathFilterItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.shetland.ogc.sta.model.SensorEntityDefinition;
-import org.n52.shetland.ogc.sta.model.ThingEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONSensor;
-import org.n52.sta.serdes.util.ElementWithQueryOptions;
 import org.n52.sta.serdes.util.ElementWithQueryOptions.SensorWithQueryOptions;
 import org.n52.sta.serdes.util.EntityPatch;
 import org.slf4j.Logger;
@@ -56,11 +51,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class SensorSerDes {
 
@@ -96,10 +89,10 @@ public class SensorSerDes {
         }
 
         @Override
-        public void serialize(SensorWithQueryOptions value, JsonGenerator gen, SerializerProvider provider)
+        public void serialize(SensorWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers)
                 throws IOException {
             gen.writeStartObject();
-            ProcedureEntity sensor = value.getEntity();
+            SensorEntity sensor = value.getEntity();
             QueryOptions options = value.getQueryOptions();
 
             Set<String> fieldsToSerialize = null;
@@ -168,22 +161,17 @@ public class SensorSerDes {
                     if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
                         writeNavigationProp(gen, navigationProperty, sensor.getIdentifier());
                     } else {
-                        Set<Object> expandedElements;
+                        gen.writeFieldName(navigationProperty);
                         switch (navigationProperty) {
                         case SensorEntityDefinition.DATASTREAMS:
-                            expandedElements = Collections.unmodifiableSet(sensor.getPa.getDatastreams());
+                            writeNestedCollection(Collections.unmodifiableSet(sensor.getDatastreams()),
+                                                  fieldsToExpand.get(navigationProperty),
+                                                  gen,
+                                                  serializers);
                             break;
                         default:
                             throw new IllegalStateException("Unexpected value: " + navigationProperty);
                         }
-                        gen.writeArrayFieldStart(navigationProperty);
-                        provider.defaultSerializeValue(
-                                expandedElements
-                                        .stream()
-                                        .map(d -> ElementWithQueryOptions.from(d,
-                                                                               fieldsToExpand.get(navigationProperty)))
-                                        .collect(Collectors.toSet()), gen);
-                        gen.writeEndArray();
                     }
                 }
             }

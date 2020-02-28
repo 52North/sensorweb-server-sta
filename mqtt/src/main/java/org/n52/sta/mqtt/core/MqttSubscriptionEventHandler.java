@@ -121,7 +121,7 @@ public class MqttSubscriptionEventHandler implements STARequestUtils, STAEventHa
 
                 // As Entity does not change the related collections are cached
                 if (collections == null && subscrip instanceof MqttEntityCollectionSubscription) {
-                    AbstractSensorThingsEntityService<?, ?> responseService
+                    AbstractSensorThingsEntityService<?, ?, ?> responseService
                             = serviceRepository.getEntityService(entityType);
                     collections = responseService.getRelatedCollections(rawObject);
                 }

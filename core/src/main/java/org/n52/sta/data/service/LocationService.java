@@ -30,23 +30,21 @@
 package org.n52.sta.data.service;
 
 import org.n52.janmayen.http.HTTPStatus;
-import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.filter.ExpandFilter;
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
+import org.n52.shetland.ogc.sta.model.LocationEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.LocationQuerySpecifications;
 import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.LocationEncodingRepository;
 import org.n52.sta.data.repositories.LocationRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
-import org.n52.sta.serdes.util.ElementWithQueryOptions;
-import org.n52.sta.serdes.util.ElementWithQueryOptions.LocationWithQueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -76,7 +74,8 @@ import java.util.stream.Collectors;
 @Component
 @DependsOn({"springApplicationContext"})
 @Transactional
-public class LocationService extends AbstractSensorThingsEntityService<LocationRepository, LocationEntity> {
+public class LocationService
+        extends AbstractSensorThingsEntityService<LocationRepository, LocationEntity, LocationEntity> {
 
     private static final Logger logger = LoggerFactory.getLogger(LocationService.class);
     private static final LocationQuerySpecifications lQS = new LocationQuerySpecifications();
@@ -102,12 +101,41 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
 
     @Override protected LocationEntity fetchExpandEntities(LocationEntity entity, ExpandFilter expandOption)
             throws STACRUDException, STAInvalidQueryException {
+        for (ExpandItem expandItem : expandOption.getItems()) {
+            String expandProperty = expandItem.getPath();
+            if (LocationEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
+                CollectionWrapper expandedEntities;
+                switch (expandProperty) {
+                case STAEntityDefinition.HISTORICAL_LOCATIONS:
+                    expandedEntities =
+                            getHistoricalLocationService()
+                                    .getEntityCollectionByRelatedEntity(entity.getIdentifier(),
+                                                                        LocationEntity.class.getSimpleName(),
+                                                                        expandItem.getQueryOptions());
+                    entity.setHistoricalLocations(
+                            expandedEntities.getEntities()
+                                            .stream()
+                                            .map(s -> (HistoricalLocationEntity) s.getEntity())
+                                            .collect(Collectors.toSet()));
+                    break;
+                case STAEntityDefinition.THINGS:
+                    expandedEntities = getThingService()
+                            .getEntityCollectionByRelatedEntity(entity.getIdentifier(),
+                                                                LocationEntity.class.getSimpleName(),
+                                                                expandItem.getQueryOptions());
+                    entity.setThings(
+                            expandedEntities.getEntities()
+                                            .stream()
+                                            .map(s -> (PlatformEntity) s.getEntity())
+                                            .collect(Collectors.toSet()));
+                    break;
+                }
+            } else {
+                throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty +
+                                                           "on Entity of type 'Thing'");
+            }
+        }
         return entity;
-    }
-
-    @Override
-    protected ElementWithQueryOptions<?> createWrapper(Object entity, QueryOptions queryOptions) {
-        return new LocationWithQueryOptions((LocationEntity) entity, queryOptions);
     }
 
     @Override
@@ -268,7 +296,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
                 HashSet<LocationEntity> set = new HashSet<>();
                 set.add(createReferencedLocation(location));
                 newThing.setLocations(set);
-                PlatformEntity updated = getThingService().createOrUpdate(newThing);
+                PlatformEntity updated = (PlatformEntity) getThingService().createOrUpdate(newThing);
                 things.add(updated);
 
                 // non-standard feature 'updateFOI'
@@ -279,7 +307,7 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
                     // via simple regex
                     Matcher matcher = updateFOIPattern.matcher(updated.getProperties());
                     if (matcher.matches()) {
-                        FeatureOfInterestService foiService = (FeatureOfInterestService) getFOIService();
+                        FeatureOfInterestService foiService = (FeatureOfInterestService) getFeatureOfInterestService();
                         foiService.updateFeatureOfInterestGeometry(matcher.group(1), location.getGeometry());
                     } else {
                         throw new STACRUDException("Could not extract FeatureOfInterest ID from Thing->properties!");
@@ -295,23 +323,6 @@ public class LocationService extends AbstractSensorThingsEntityService<LocationR
         referenced.setIdentifier(location.getIdentifier());
         referenced.setId(location.getId());
         return referenced;
-    }
-
-    @SuppressWarnings("unchecked")
-    private AbstractSensorThingsEntityService<?, PlatformEntity> getThingService() {
-        return (AbstractSensorThingsEntityService<?, PlatformEntity>) getEntityService(EntityTypes.Thing);
-    }
-
-    @SuppressWarnings("unchecked")
-    private AbstractSensorThingsEntityService<?, HistoricalLocationEntity> getHistoricalLocationService() {
-        return (AbstractSensorThingsEntityService<?, HistoricalLocationEntity>)
-                getEntityService(EntityTypes.HistoricalLocation);
-    }
-
-    @SuppressWarnings("unchecked")
-    private AbstractSensorThingsEntityService<?, AbstractFeatureEntity<?>> getFOIService() {
-        return (AbstractSensorThingsEntityService<?, AbstractFeatureEntity<?>>) getEntityService(
-                EntityTypes.FeatureOfInterest);
     }
 
     /* (non-Javadoc)

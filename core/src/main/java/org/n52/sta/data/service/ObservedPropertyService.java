@@ -36,9 +36,11 @@ import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.ObservablePropertyEntity;
 import org.n52.shetland.filter.ExpandFilter;
+import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
+import org.n52.shetland.ogc.sta.model.ObservedPropertyEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.OffsetLimitBasedPageRequest;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
@@ -47,7 +49,6 @@ import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.PhenomenonRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
-import org.n52.sta.serdes.util.ElementWithQueryOptions.ObservedPropertyWithQueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,7 +75,8 @@ import java.util.stream.Collectors;
 @Component
 @DependsOn({"springApplicationContext"})
 @Transactional
-public class ObservedPropertyService extends AbstractSensorThingsEntityService<PhenomenonRepository, PhenomenonEntity> {
+public class ObservedPropertyService
+        extends AbstractSensorThingsEntityService<PhenomenonRepository, PhenomenonEntity, ObservablePropertyEntity> {
 
     private static final Logger logger = LoggerFactory.getLogger(ObservedPropertyService.class);
 
@@ -93,11 +95,6 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
     @Override
     public EntityTypes[] getTypes() {
         return new EntityTypes[] {EntityTypes.ObservedProperty, EntityTypes.ObservedProperties};
-    }
-
-    @Override
-    protected ElementWithQueryOptions createWrapper(Object entity, QueryOptions queryOptions) {
-        return new ObservedPropertyWithQueryOptions((PhenomenonEntity) entity, queryOptions);
     }
 
     /**
@@ -135,10 +132,31 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
         }
     }
 
-    @Override protected PhenomenonEntity fetchExpandEntities(PhenomenonEntity entity, ExpandFilter expandOption)
+    @Override protected ObservablePropertyEntity fetchExpandEntities(PhenomenonEntity entity, ExpandFilter expandOption)
             throws STACRUDException, STAInvalidQueryException {
-        entity.setParameters();
-        return entity;
+        for (ExpandItem expandItem : expandOption.getItems()) {
+            String expandProperty = expandItem.getPath();
+            if (ObservedPropertyEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
+                CollectionWrapper expandedEntities;
+                switch (expandProperty) {
+                case STAEntityDefinition.DATASTREAMS:
+                    expandedEntities = getDatastreamService()
+                            .getEntityCollectionByRelatedEntity(entity.getIdentifier(),
+                                                                PhenomenonEntity.class.getSimpleName(),
+                                                                expandItem.getQueryOptions());
+                    ObservablePropertyEntity obsProp = new ObservablePropertyEntity(entity);
+                    return obsProp.setDatastreams(
+                            expandedEntities.getEntities()
+                                            .stream()
+                                            .map(s -> (DatastreamEntity) s.getEntity())
+                                            .collect(Collectors.toSet()));
+                }
+            } else {
+                throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty +
+                                                           "on Entity of type 'ObservableProperty'");
+            }
+        }
+        return new ObservablePropertyEntity(entity);
     }
 
     /**
@@ -295,12 +313,6 @@ public class ObservedPropertyService extends AbstractSensorThingsEntityService<P
         return observableProperty instanceof ObservablePropertyEntity
                 ? ((ObservablePropertyEntity) observableProperty).asPhenomenonEntity()
                 : observableProperty;
-    }
-
-    @SuppressWarnings("unchecked")
-    private AbstractSensorThingsEntityService<?, DatastreamEntity> getDatastreamService() {
-        return (AbstractSensorThingsEntityService<?, DatastreamEntity>) getEntityService(
-                EntityTypes.Datastream);
     }
 
     /* (non-Javadoc)

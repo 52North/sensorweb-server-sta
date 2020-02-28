@@ -38,11 +38,13 @@ import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.UnitEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.shetland.filter.ExpandFilter;
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
+import org.n52.shetland.ogc.sta.model.DatastreamEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
@@ -54,7 +56,6 @@ import org.n52.sta.data.repositories.FormatRepository;
 import org.n52.sta.data.repositories.UnitRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
-import org.n52.sta.serdes.util.ElementWithQueryOptions.DatastreamWithQueryOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
@@ -70,6 +71,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -77,7 +79,8 @@ import java.util.UUID;
 @Component
 @DependsOn({"springApplicationContext"})
 @Transactional
-public class DatastreamService extends AbstractSensorThingsEntityService<DatastreamRepository, DatastreamEntity> {
+public class DatastreamService
+        extends AbstractSensorThingsEntityService<DatastreamRepository, DatastreamEntity, DatastreamEntity> {
 
     //private static final Logger logger = LoggerFactory.getLogger(DatastreamService.class);
     private static final DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
@@ -112,12 +115,54 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
 
     @Override protected DatastreamEntity fetchExpandEntities(DatastreamEntity entity, ExpandFilter expandOption)
             throws STACRUDException, STAInvalidQueryException {
-        return null;
-    }
-
-    @Override
-    protected ElementWithQueryOptions createWrapper(Object entity, QueryOptions queryOptions) {
-        return new DatastreamWithQueryOptions((DatastreamEntity) entity, queryOptions);
+        for (ExpandItem expandItem : expandOption.getItems()) {
+            String expandProperty = expandItem.getPath();
+            if (DatastreamEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
+                CollectionWrapper expandedEntities;
+                ElementWithQueryOptions<?> expandedEntity;
+                switch (expandProperty) {
+                case STAEntityDefinition.SENSOR:
+                    expandedEntity = getSensorService()
+                            .getEntityByRelatedEntity(entity.getIdentifier(),
+                                                      DatastreamEntity.class.getSimpleName(),
+                                                      null,
+                                                      expandItem.getQueryOptions());
+                    entity.setProcedure((ProcedureEntity) expandedEntity.getEntity());
+                    break;
+                case STAEntityDefinition.THING:
+                    expandedEntity = getThingService()
+                            .getEntityByRelatedEntity(entity.getIdentifier(),
+                                                      DatastreamEntity.class.getSimpleName(),
+                                                      null,
+                                                      expandItem.getQueryOptions());
+                    entity.setThing((PlatformEntity) expandedEntity.getEntity());
+                    break;
+                case STAEntityDefinition.OBSERVED_PROPERTY:
+                    expandedEntity = getObservedPropertyService()
+                            .getEntityByRelatedEntity(entity.getIdentifier(),
+                                                      DatastreamEntity.class.getSimpleName(),
+                                                      null,
+                                                      expandItem.getQueryOptions());
+                    entity.setObservableProperty((PhenomenonEntity) expandedEntity.getEntity());
+                    break;
+                case STAEntityDefinition.OBSERVATIONS:
+                    expandedEntities = getObservationService()
+                            .getEntityCollectionByRelatedEntity(entity.getIdentifier(),
+                                                                DatastreamEntity.class.getSimpleName(),
+                                                                expandItem.getQueryOptions());
+                    entity.setObservations(
+                            expandedEntities.getEntities()
+                                            .stream()
+                                            .map(s -> (StaDataEntity<?>) s.getEntity())
+                                            .collect(Collectors.toSet()));
+                    break;
+                }
+            } else {
+                throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty +
+                                                           "on Entity of type 'Thing'");
+            }
+        }
+        return entity;
     }
 
     @Override
@@ -414,26 +459,6 @@ public class DatastreamService extends AbstractSensorThingsEntityService<Datastr
             datastream.setDatasets(datasets);
         }
         return datastream;
-    }
-
-    @SuppressWarnings("unchecked")
-    private AbstractSensorThingsEntityService<?, PlatformEntity> getThingService() {
-        return (AbstractSensorThingsEntityService<?, PlatformEntity>) getEntityService(EntityTypes.Thing);
-    }
-
-    @SuppressWarnings("unchecked")
-    private AbstractSensorThingsEntityService<?, ProcedureEntity> getSensorService() {
-        return (AbstractSensorThingsEntityService<?, ProcedureEntity>) getEntityService(EntityTypes.Sensor);
-    }
-
-    @SuppressWarnings("unchecked")
-    private AbstractSensorThingsEntityService<?, PhenomenonEntity> getObservedPropertyService() {
-        return (AbstractSensorThingsEntityService<?, PhenomenonEntity>) getEntityService(EntityTypes.ObservedProperty);
-    }
-
-    @SuppressWarnings("unchecked")
-    private AbstractSensorThingsEntityService<?, DataEntity<?>> getObservationService() {
-        return (AbstractSensorThingsEntityService<?, DataEntity<?>>) getEntityService(EntityTypes.Observation);
     }
 
     @Override

@@ -26,12 +26,18 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.serdes;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.sta.serdes.util.ElementWithQueryOptions;
 
 import java.io.IOException;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public abstract class AbstractSTASerializer<T> extends StdSerializer<T> {
 
@@ -52,6 +58,24 @@ public abstract class AbstractSTASerializer<T> extends StdSerializer<T> {
 
     public void writeNavigationProp(JsonGenerator gen, String navigationProperty, String id) throws IOException {
         gen.writeStringField(navigationProperty + "@iot.navigationLink",
-                rootUrl + entitySetName + "(" + id + ")/" + navigationProperty);
+                             rootUrl + entitySetName + "(" + id + ")/" + navigationProperty);
+    }
+
+    protected static void writeNestedEntity(Object expandedElement,
+                                            QueryOptions queryOptions,
+                                            JsonGenerator gen,
+                                            SerializerProvider serializers) throws IOException {
+        serializers.defaultSerializeValue(ElementWithQueryOptions.from(expandedElement, queryOptions), gen);
+    }
+
+    protected static void writeNestedCollection(Set<Object> expandedElements,
+                                                QueryOptions queryOptions,
+                                                JsonGenerator gen,
+                                                SerializerProvider serializers) throws IOException {
+        serializers.defaultSerializeValue(
+                expandedElements
+                        .stream()
+                        .map(d -> ElementWithQueryOptions.from(d, queryOptions))
+                        .collect(Collectors.toSet()), gen);
     }
 }

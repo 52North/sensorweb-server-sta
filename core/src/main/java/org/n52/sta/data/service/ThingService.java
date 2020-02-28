@@ -37,7 +37,6 @@ import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
@@ -47,8 +46,6 @@ import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.IdentifierRepository;
 import org.n52.sta.data.repositories.ThingRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
-import org.n52.sta.serdes.util.ElementWithQueryOptions;
-import org.n52.sta.serdes.util.ElementWithQueryOptions.ThingWithQueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.DependsOn;
@@ -72,7 +69,7 @@ import java.util.stream.Collectors;
 @Component
 @DependsOn({"springApplicationContext"})
 @Transactional
-public class ThingService extends AbstractSensorThingsEntityService<ThingRepository, PlatformEntity> {
+public class ThingService extends AbstractSensorThingsEntityService<ThingRepository, PlatformEntity, PlatformEntity> {
 
     private static final Logger logger = LoggerFactory.getLogger(ThingService.class);
     private static final ThingQuerySpecifications tQS = new ThingQuerySpecifications();
@@ -99,31 +96,34 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
                                     .getEntityCollectionByRelatedEntity(entity.getIdentifier(),
                                                                         PlatformEntity.class.getSimpleName(),
                                                                         expandItem.getQueryOptions());
-                    return entity.setHistoricalLocations(
+                    entity.setHistoricalLocations(
                             expandedEntities.getEntities()
                                             .stream()
                                             .map(s -> (HistoricalLocationEntity) s.getEntity())
                                             .collect(Collectors.toSet()));
+                    break;
                 case STAEntityDefinition.DATASTREAMS:
                     expandedEntities = getDatastreamService()
                             .getEntityCollectionByRelatedEntity(entity.getIdentifier(),
                                                                 PlatformEntity.class.getSimpleName(),
                                                                 expandItem.getQueryOptions());
-                    return entity.setDatastreams(
+                    entity.setDatastreams(
                             expandedEntities.getEntities()
                                             .stream()
                                             .map(s -> (DatastreamEntity) s.getEntity())
                                             .collect(Collectors.toSet()));
+                    break;
                 case STAEntityDefinition.LOCATIONS:
                     expandedEntities = getLocationService()
                             .getEntityCollectionByRelatedEntity(entity.getIdentifier(),
                                                                 PlatformEntity.class.getSimpleName(),
                                                                 expandItem.getQueryOptions());
-                    return entity.setLocations(
+                    entity.setLocations(
                             expandedEntities.getEntities()
                                             .stream()
                                             .map(s -> (LocationEntity) s.getEntity())
                                             .collect(Collectors.toSet()));
+                    break;
                 }
             } else {
                 throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty +
@@ -131,11 +131,6 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
             }
         }
         return entity;
-    }
-
-    @Override
-    protected ElementWithQueryOptions createWrapper(Object entity, QueryOptions queryOptions) {
-        return new ThingWithQueryOptions((PlatformEntity) entity, queryOptions);
     }
 
     @Override
@@ -345,23 +340,6 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
             }
             thing.setHistoricalLocations(historicalLocations);
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private AbstractSensorThingsEntityService<?, LocationEntity> getLocationService() {
-        return (AbstractSensorThingsEntityService<?, LocationEntity>) getEntityService(EntityTypes.Location);
-    }
-
-    @SuppressWarnings("unchecked")
-    private AbstractSensorThingsEntityService<?, HistoricalLocationEntity> getHistoricalLocationService() {
-        return (AbstractSensorThingsEntityService<?, HistoricalLocationEntity>) getEntityService(
-                EntityTypes.HistoricalLocation);
-    }
-
-    @SuppressWarnings("unchecked")
-    private AbstractSensorThingsEntityService<?, DatastreamEntity> getDatastreamService() {
-        return (AbstractSensorThingsEntityService<?, DatastreamEntity>) getEntityService(
-                EntityTypes.Datastream);
     }
 
     @Override
