@@ -52,6 +52,12 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
+/**
+ *
+ * Handles all CUD requests (POST, PUT, DELETE)
+ *
+ * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
+ */
 @RestController
 public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtils {
 
@@ -73,7 +79,7 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
             value = "/{collectionName:" + BASE_COLLECTION_REGEX + "$}",
             produces = "application/json")
     @SuppressWarnings("unchecked")
-    public ElementWithQueryOptions handlePost(@PathVariable String collectionName,
+    public ElementWithQueryOptions<?> handlePost(@PathVariable String collectionName,
                                               @RequestBody String body)
             throws IOException, STACRUDException {
 
@@ -95,7 +101,7 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
             produces = "application/json"
     )
     @SuppressWarnings("unchecked")
-    public ElementWithQueryOptions handleDirectPatch(@PathVariable String collectionName,
+    public ElementWithQueryOptions<?> handleDirectPatch(@PathVariable String collectionName,
                                                      @PathVariable String id,
                                                      @RequestBody String body,
                                                      HttpServletRequest request)
@@ -129,7 +135,7 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
             produces = "application/json"
     )
     @SuppressWarnings("unchecked")
-    public ElementWithQueryOptions handleRelatedPatch(@PathVariable String entity,
+    public ElementWithQueryOptions<?> handleRelatedPatch(@PathVariable String entity,
                                                       @PathVariable String target,
                                                       @RequestBody String body,
                                                       HttpServletRequest request)

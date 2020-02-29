@@ -34,6 +34,8 @@ import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import java.util.List;
 
 /**
+ * Wrapper used for serialization of collections to JSON.
+ *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 public class CollectionWrapper {

@@ -33,6 +33,7 @@ import org.n52.shetland.filter.SelectFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.filter.FilterClause;
 import org.n52.sta.data.service.EntityServiceRepository;
+import org.n52.sta.serdes.util.ElementWithQueryOptions;
 import org.n52.sta.utils.STARequestUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,6 +44,15 @@ import javax.servlet.http.HttpServletRequest;
 import java.net.URLDecoder;
 import java.util.HashSet;
 
+/**
+ * Handles all requests to Entities and to Entity association links
+ * e.g. /Things(52)
+ * e.g. /Datastreams(52)/Thing
+ * e.g. /Things(52)/$ref
+ * e.g. /Datastreams(52)/Thing/$ref
+ *
+ * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
+ */
 @RestController
 public class STAEntityRequestHandler implements STARequestUtils {
 
@@ -67,9 +77,9 @@ public class STAEntityRequestHandler implements STARequestUtils {
             value = MAPPING_PREFIX + ENTITY_IDENTIFIED_DIRECTLY,
             produces = "application/json"
     )
-    public Object readEntityDirect(@PathVariable String entity,
-                                   @PathVariable String id,
-                                   HttpServletRequest request) throws Exception {
+    public ElementWithQueryOptions<?> readEntityDirect(@PathVariable String entity,
+                                                       @PathVariable String id,
+                                                       HttpServletRequest request) throws Exception {
         validateResource(request.getRequestURL(), serviceRepository, rootUrlLength);
 
         String entityId = id.substring(1, id.length() - 1);
@@ -96,9 +106,9 @@ public class STAEntityRequestHandler implements STARequestUtils {
             value = MAPPING_PREFIX + ENTITY_IDENTIFIED_DIRECTLY + SLASHREF,
             produces = "application/json"
     )
-    public Object readEntityRefDirect(@PathVariable String entity,
-                                      @PathVariable String id,
-                                      HttpServletRequest request) throws Exception {
+    public ElementWithQueryOptions<?> readEntityRefDirect(@PathVariable String entity,
+                                                          @PathVariable String id,
+                                                          HttpServletRequest request) throws Exception {
         String requestUrl = request.getRequestURL().toString();
         validateResource(requestUrl.substring(0, requestUrl.length() - 5), serviceRepository, rootUrlLength);
 
@@ -126,9 +136,9 @@ public class STAEntityRequestHandler implements STARequestUtils {
             },
             produces = "application/json"
     )
-    public Object readRelatedEntity(@PathVariable String entity,
-                                    @PathVariable String target,
-                                    HttpServletRequest request)
+    public ElementWithQueryOptions<?> readRelatedEntity(@PathVariable String entity,
+                                                        @PathVariable String target,
+                                                        HttpServletRequest request)
             throws Exception {
 
         validateResource(request.getRequestURL(), serviceRepository, rootUrlLength);
@@ -167,9 +177,9 @@ public class STAEntityRequestHandler implements STARequestUtils {
             },
             produces = "application/json"
     )
-    public Object readRelatedEntityRef(@PathVariable String entity,
-                                       @PathVariable String target,
-                                       HttpServletRequest request)
+    public ElementWithQueryOptions<?> readRelatedEntityRef(@PathVariable String entity,
+                                                           @PathVariable String target,
+                                                           HttpServletRequest request)
             throws Exception {
         String requestUrl = request.getRequestURL().toString();
         validateResource(requestUrl.substring(0, requestUrl.length() - 5), serviceRepository, rootUrlLength);

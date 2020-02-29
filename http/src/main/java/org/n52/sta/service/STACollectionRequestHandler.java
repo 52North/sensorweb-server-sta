@@ -45,6 +45,15 @@ import javax.servlet.http.HttpServletRequest;
 import java.net.URLDecoder;
 import java.util.HashSet;
 
+/**
+ * Handles all requests to Entity Collections and Entity Collections association Links
+ * e.g. /Things
+ * e.g. /Datastreams(52)/Observations
+ * e.g. /Things/$ref
+ * e.g. /Datastreams(52)/Observations/$ref
+ *
+ * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
+ */
 @RestController
 public class STACollectionRequestHandler implements STARequestUtils {
 
@@ -63,7 +72,7 @@ public class STACollectionRequestHandler implements STARequestUtils {
      *
      * @param collectionName name of the collection. Automatically set by Spring via @PathVariable
      * @param request        Full request
-     * @return
+     * @return CollectionWrapper Requested collection
      */
     @GetMapping(
             value = "/{collectionName:" + BASE_COLLECTION_REGEX + "}",
@@ -91,7 +100,7 @@ public class STACollectionRequestHandler implements STARequestUtils {
      *
      * @param collectionName name of the collection. Automatically set by Spring via @PathVariable
      * @param request        Full request
-     * @return
+     * @return CollectionWrapper Requested collection
      */
     @GetMapping(
             value = "/{collectionName:" + BASE_COLLECTION_REGEX + "}" + SLASHREF,
@@ -124,7 +133,7 @@ public class STACollectionRequestHandler implements STARequestUtils {
      *
      * @param entity  composite of entity and referenced entity. Automatically set by Spring via @PathVariable
      * @param request full request
-     * @return JSON String representing Entity
+     * @return CollectionWrapper Requested collection
      */
     @GetMapping(
             value = {
@@ -170,7 +179,7 @@ public class STACollectionRequestHandler implements STARequestUtils {
      *
      * @param entity  composite of entity and referenced entity. Automatically set by Spring via @PathVariable
      * @param request full request
-     * @return JSON String representing Entity
+     * @return CollectionWrapper Requested collection
      */
     @GetMapping(
             value = {

@@ -110,6 +110,7 @@ public interface STARequestUtils extends StaConstants {
     String CURLY_BRACKET_OPEN = "{";
     String CURLY_BRACKET_CLOSE = "}";
     String SLASHREF = SLASH + "$ref";
+    String SLASHVALUE = SLASH + "$value";
 
     // Used to mark start and end of named capturing groups
     String SOURCE_NAME_GROUP_START =

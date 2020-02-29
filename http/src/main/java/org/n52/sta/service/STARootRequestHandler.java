@@ -37,6 +37,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ *
+ * Handles all requests to the root
+ * e.g. /
+ *
+ * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
+ */
 @RestController
 public class STARootRequestHandler {
 

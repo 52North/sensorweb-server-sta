@@ -29,9 +29,11 @@
 
 package org.n52.sta.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.n52.shetland.filter.SelectFilter;
 import org.n52.shetland.ogc.filter.FilterClause;
 import org.n52.sta.data.service.EntityServiceRepository;
+import org.n52.sta.serdes.util.ElementWithQueryOptions;
 import org.n52.sta.utils.STARequestUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,6 +44,12 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.HashSet;
 
 /**
+ * Handles all requests to Entity Properties
+ * e.g. /Things(52)/name
+ * e.g. /Things(52)/name/$value
+ * e.g. /Datastreams(52)/Thing/name
+ * e.g. /Datastreams(52)/Thing/name/$value
+ *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @RestController
@@ -49,31 +57,117 @@ public class STAPropertyRequestHandler implements STARequestUtils {
 
     private final EntityServiceRepository serviceRepository;
     private final int rootUrlLength;
+    private final ObjectMapper mapper;
 
     public STAPropertyRequestHandler(@Value("${server.rootUrl}") String rootUrl,
-                                     EntityServiceRepository serviceRepository) {
+                                     EntityServiceRepository serviceRepository, ObjectMapper mapper) {
         rootUrlLength = rootUrl.length();
         this.serviceRepository = serviceRepository;
+        this.mapper = mapper;
     }
 
     /**
-     * Matches all requests on Entities referenced directly via id
-     * e.g. /Datastreams(52)
+     * Matches all requests for properties on Entities referenced directly via id
+     * e.g. /Datastreams(52)/name
      *
-     * @param entity  name of entity. Automatically set by Spring via @PathVariable
-     * @param id      id of entity. Automatically set by Spring via @PathVariable
-     * @param request full request
+     * @param entity   type of entity. Automatically set by Spring via @PathVariable
+     * @param id       id of entity. Automatically set by Spring via @PathVariable
+     * @param property property to be returned. Automatically set by Spring via @PathVariable
+     * @param request  Full request object. Automatically set by Spring
      */
     @GetMapping(
             value = MAPPING_PREFIX + ENTITY_IDENTIFIED_DIRECTLY + SLASH + PATH_PROPERTY,
             produces = "application/json"
     )
-    public Object readEntityPropertyDirect(@PathVariable String entity,
-                                           @PathVariable String id,
-                                           @PathVariable String property,
-                                           HttpServletRequest request) throws Exception {
-        StringBuffer requestURL = request.getRequestURL();
-        validateResource(requestURL.substring(0, requestURL.length() - property.length() - 1),
+    public ElementWithQueryOptions<?> readEntityPropertyDirect(@PathVariable String entity,
+                                                               @PathVariable String id,
+                                                               @PathVariable String property,
+                                                               HttpServletRequest request) throws Exception {
+        return readEntityPropertyDirect(entity, id, property, request.getRequestURL().toString());
+    }
+
+    /**
+     * Matches all requests for properties on Entities not referenced directly via id but via referenced entity
+     * e.g. /Datastreams(52)/Thing/name
+     *
+     * @param entity   Source Entity. Automatically set by Spring via @PathVariable
+     * @param target   Referenced Entity. Automatically set by Spring via @PathVariable
+     * @param property Property to be returned. Automatically set by Spring via @PathVariable
+     * @param request  Full request object. Automatically set by Spring
+     * @return JSON Object with serialized property
+     */
+    @GetMapping(
+            value = {
+                    MAPPING_PREFIX + ENTITY_PROPERTY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
+                    MAPPING_PREFIX + ENTITY_PROPERTY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE,
+                    MAPPING_PREFIX + ENTITY_PROPERTY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE
+            },
+            produces = "application/json"
+    )
+    public ElementWithQueryOptions<?> readRelatedEntityProperty(@PathVariable String entity,
+                                                                @PathVariable String target,
+                                                                @PathVariable String property,
+                                                                HttpServletRequest request)
+            throws Exception {
+        return readRelatedEntityProperty(entity, target, property, request.getRequestURL().toString());
+    }
+
+    /**
+     * Matches all requests for properties on Entities referenced directly via id
+     * e.g. /Datastreams(52)/name/$value
+     *
+     * @param entity   type of entity. Automatically set by Spring via @PathVariable
+     * @param id       id of entity. Automatically set by Spring via @PathVariable
+     * @param property property to be returned. Automatically set by Spring via @PathVariable
+     * @param request  Full request object. Automatically set by Spring
+     */
+    @GetMapping(
+            value = MAPPING_PREFIX + ENTITY_IDENTIFIED_DIRECTLY + SLASH + PATH_PROPERTY + SLASHVALUE,
+            produces = "text/plain"
+    )
+    public String readEntityPropertyValueDirect(@PathVariable String entity,
+                                                @PathVariable String id,
+                                                @PathVariable String property,
+                                                HttpServletRequest request) throws Exception {
+        String url = request.getRequestURL().toString();
+        ElementWithQueryOptions<?> elementWithQueryOptions =
+                this.readEntityPropertyDirect(entity, id, property, url.substring(0, url.length() - 7));
+        return mapper.valueToTree(elementWithQueryOptions).fields().next().getValue().toString();
+    }
+
+    /**
+     * Matches all requests for properties on Entities not referenced directly via id but via referenced entity
+     * e.g. /Datastreams(52)/Thing/name/$value
+     *
+     * @param entity   Source Entity. Automatically set by Spring via @PathVariable
+     * @param target   Referenced Entity. Automatically set by Spring via @PathVariable
+     * @param property Property to be returned. Automatically set by Spring via @PathVariable
+     * @param request  Full request object. Automatically set by Spring
+     * @return JSON Object with serialized property
+     */
+    @GetMapping(
+            value = {
+                    MAPPING_PREFIX + ENTITY_PROPERTY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE + SLASHVALUE,
+                    MAPPING_PREFIX + ENTITY_PROPERTY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE + SLASHVALUE,
+                    MAPPING_PREFIX + ENTITY_PROPERTY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE + SLASHVALUE
+            },
+            produces = "text/plain"
+    )
+    public String readRelatedEntityPropertyValue(@PathVariable String entity,
+                                                 @PathVariable String target,
+                                                 @PathVariable String property,
+                                                 HttpServletRequest request) throws Exception {
+        String url = request.getRequestURL().toString();
+        ElementWithQueryOptions<?> elementWithQueryOptions =
+                this.readRelatedEntityProperty(entity, target, property, url.substring(0, url.length() - 7));
+        return mapper.valueToTree(elementWithQueryOptions).fields().next().getValue().toString();
+    }
+
+    private ElementWithQueryOptions<?> readEntityPropertyDirect(String entity,
+                                                                String id,
+                                                                String property,
+                                                                String url) throws Exception {
+        validateResource(url.substring(0, url.length() - property.length() - 1),
                          serviceRepository,
                          rootUrlLength);
         validateProperty(entity, property);
@@ -87,29 +181,11 @@ public class STAPropertyRequestHandler implements STARequestUtils {
                                 .getEntity(entityId, QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
     }
 
-    /**
-     * Matches all requests on Entities not referenced directly via id but via referenced entity
-     * e.g. /Datastreams(52)/Thing
-     *
-     * @param entity  composite of entity and referenced entity. Automatically set by Spring via @PathVariable
-     * @param request full request
-     * @return JSON String representing Entity
-     */
-    @GetMapping(
-            value = {
-                    MAPPING_PREFIX + ENTITY_PROPERTY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
-                    MAPPING_PREFIX + ENTITY_PROPERTY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE,
-                    MAPPING_PREFIX + ENTITY_PROPERTY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE
-            },
-            produces = "application/json"
-    )
-    public Object readRelatedEntity(@PathVariable String entity,
-                                    @PathVariable String target,
-                                    @PathVariable String property,
-                                    HttpServletRequest request)
-            throws Exception {
-        StringBuffer requestURL = request.getRequestURL();
-        validateResource(requestURL.substring(0, requestURL.length() - property.length() - 1),
+    private ElementWithQueryOptions readRelatedEntityProperty(String entity,
+                                                              String target,
+                                                              String property,
+                                                              String url) throws Exception {
+        validateResource(url.substring(0, url.length() - property.length() - 1),
                          serviceRepository,
                          rootUrlLength);
         String sourceType = entity.substring(0, entity.indexOf("("));

@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.service;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -40,6 +41,9 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+/**
+ * Implements a simple CORS Filter.
+ */
 @Component
 public class CORSFilter implements Filter {
 
@@ -53,10 +57,10 @@ public class CORSFilter implements Filter {
     private String CORSMaxAge;
 
     @Value("${http.cors.allowHeaders:" +
-            "Access-Control-Allow-Headers," +
-            "Content-Type, Access-Control-Allow-Headers," +
-            "Authorization," +
-            "X-Requested-With}")
+                   "Access-Control-Allow-Headers," +
+                   "Content-Type, Access-Control-Allow-Headers," +
+                   "Authorization," +
+                   "X-Requested-With}")
     private String CORSHeaders;
 
     @Override
