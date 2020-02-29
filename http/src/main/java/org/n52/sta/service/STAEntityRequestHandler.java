@@ -64,13 +64,13 @@ public class STAEntityRequestHandler implements STARequestUtils {
      * @param request full request
      */
     @GetMapping(
-            value = MAPPING_PREFIX + "{entity:" + BASE_COLLECTION_REGEX + "}{id:" + IDENTIFIER_REGEX + "$}",
+            value = MAPPING_PREFIX + ENTITY_IDENTIFIED_DIRECTLY,
             produces = "application/json"
     )
     public Object readEntityDirect(@PathVariable String entity,
                                    @PathVariable String id,
                                    HttpServletRequest request) throws Exception {
-        validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
+        validateResource(request.getRequestURL(), serviceRepository, rootUrlLength);
 
         String entityId = id.substring(1, id.length() - 1);
         String queryString = request.getQueryString();
@@ -93,26 +93,17 @@ public class STAEntityRequestHandler implements STARequestUtils {
      * @param request full request
      */
     @GetMapping(
-            value = MAPPING_PREFIX + "{entity:" + BASE_COLLECTION_REGEX + "}{id:" + IDENTIFIER_REGEX + "$}" + SLASHREF,
+            value = MAPPING_PREFIX + ENTITY_IDENTIFIED_DIRECTLY + SLASHREF,
             produces = "application/json"
     )
     public Object readEntityRefDirect(@PathVariable String entity,
                                       @PathVariable String id,
                                       HttpServletRequest request) throws Exception {
         String requestUrl = request.getRequestURL().toString();
-        validateURL(requestUrl.substring(0, requestUrl.length() - 5), serviceRepository, rootUrlLength);
+        validateResource(requestUrl.substring(0, requestUrl.length() - 5), serviceRepository, rootUrlLength);
 
         String entityId = id.substring(1, id.length() - 1);
-        String queryString = request.getQueryString();
         HashSet<FilterClause> filters = new HashSet<>();
-        if (queryString != null) {
-            // Parse QueryString normally and extract relevant Filters
-            QueryOptions options = QUERY_OPTIONS_FACTORY.createQueryOptions(URLDecoder.decode(queryString));
-            filters.add(options.getSkipOption());
-            filters.add(options.getTopOption());
-            filters.add(options.getCountOption());
-            filters.add(options.getFilterOption());
-        }
         // Overwrite select filter with filter only returning id
         filters.add(new SelectFilter(ID));
         return serviceRepository.getEntityService(entity)
@@ -140,7 +131,7 @@ public class STAEntityRequestHandler implements STARequestUtils {
                                     HttpServletRequest request)
             throws Exception {
 
-        validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
+        validateResource(request.getRequestURL(), serviceRepository, rootUrlLength);
 
         String sourceType = entity.substring(0, entity.indexOf("("));
         String sourceId = entity.substring(sourceType.length() + 1, entity.length() - 1);
@@ -181,21 +172,12 @@ public class STAEntityRequestHandler implements STARequestUtils {
                                        HttpServletRequest request)
             throws Exception {
         String requestUrl = request.getRequestURL().toString();
-        validateURL(requestUrl.substring(0, requestUrl.length() - 5), serviceRepository, rootUrlLength);
+        validateResource(requestUrl.substring(0, requestUrl.length() - 5), serviceRepository, rootUrlLength);
 
         String sourceType = entity.substring(0, entity.indexOf("("));
         String sourceId = entity.substring(sourceType.length() + 1, entity.length() - 1);
 
         HashSet<FilterClause> filters = new HashSet<>();
-        String queryString = request.getQueryString();
-        if (queryString != null) {
-            // Parse QueryString normally and extract relevant Filters
-            QueryOptions options = QUERY_OPTIONS_FACTORY.createQueryOptions(URLDecoder.decode(queryString));
-            filters.add(options.getSkipOption());
-            filters.add(options.getTopOption());
-            filters.add(options.getCountOption());
-            filters.add(options.getFilterOption());
-        }
         // Overwrite select filter with filter only returning id
         filters.add(new SelectFilter(ID));
         return serviceRepository.getEntityService(target)

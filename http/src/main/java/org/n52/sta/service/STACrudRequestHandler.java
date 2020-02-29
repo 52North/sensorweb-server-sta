@@ -100,7 +100,7 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
                                                      @RequestBody String body,
                                                      HttpServletRequest request)
             throws Exception {
-        validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
+        validateResource(request.getRequestURL(), serviceRepository, rootUrlLength);
         Class<EntityPatch> clazz = collectionNameToPatchClass(collectionName);
         ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
         String strippedId = id.substring(1, id.length() - 1);
@@ -134,7 +134,7 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
                                                       @RequestBody String body,
                                                       HttpServletRequest request)
             throws Exception {
-        validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
+        validateResource(request.getRequestURL(), serviceRepository, rootUrlLength);
 
         String sourceType = entity.substring(0, entity.indexOf("("));
         String sourceId = entity.substring(sourceType.length() + 1, entity.length() - 1);
@@ -174,7 +174,7 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
                                @PathVariable String id,
                                HttpServletRequest request)
             throws Exception {
-        validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
+        validateResource(request.getRequestURL(), serviceRepository, rootUrlLength);
         serviceRepository.getEntityService(collectionName).delete(id.substring(1, id.length() - 1));
         return null;
     }
@@ -201,7 +201,7 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
                                       @RequestBody String body,
                                       HttpServletRequest request)
             throws Exception {
-        validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
+        validateResource(request.getRequestURL(), serviceRepository, rootUrlLength);
 
         String sourceType = entity.substring(0, entity.indexOf("("));
         String sourceId = entity.substring(sourceType.length() + 1, entity.length() - 1);

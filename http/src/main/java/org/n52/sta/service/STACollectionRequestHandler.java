@@ -143,7 +143,7 @@ public class STACollectionRequestHandler implements STARequestUtils {
                                                    HttpServletRequest request)
             throws Exception {
 
-        validateURL(request.getRequestURL(), serviceRepository, rootUrlLength);
+        validateResource(request.getRequestURL(), serviceRepository, rootUrlLength);
 
         String[] split = splitId(entity);
         String sourceType = split[0];
@@ -190,7 +190,7 @@ public class STACollectionRequestHandler implements STARequestUtils {
             throws Exception {
 
         String requestUrl = request.getRequestURL().toString();
-        validateURL(requestUrl.substring(0, requestUrl.length() - 5), serviceRepository, rootUrlLength);
+        validateResource(requestUrl.substring(0, requestUrl.length() - 5), serviceRepository, rootUrlLength);
 
         String[] split = splitId(entity);
         String sourceType = split[0];

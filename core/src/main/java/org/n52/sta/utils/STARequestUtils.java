@@ -40,6 +40,7 @@ import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.shetland.ogc.sta.exception.STANotFoundException;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.serdes.DatastreamSerDes;
 import org.n52.sta.serdes.FeatureOfInterestSerDes;
@@ -91,7 +92,9 @@ public interface STARequestUtils extends StaConstants {
     String URL_INVALID = "Url is invalid. ";
 
     String PATH_ENTITY = "{entity:";
-    String PATH_TARGET = "}/{target:";
+    String PATH_TARGET = "/{target:";
+    String PATH_ID = "{id:";
+    String PATH_PROPERTY = "{property:\\w+}";
     String SLASH = "/";
     String BACKSLASH = "\\";
     String OR = "|";
@@ -128,6 +131,28 @@ public interface STARequestUtils extends StaConstants {
             ROUND_BRACKET_OPEN + QUESTIONMARK + LESS_THAN + GROUPNAME_PROPERTY + GREATER_THAN;
     String PROPERTY_GROUP_END = ROUND_BRACKET_CLOSE;
 
+    String BASE_COLLECTION_REGEX_NAMED_GROUPS =
+            WANTED_NAME_GROUP_START
+                    + OBSERVATIONS + OR
+                    + DATASTREAMS + OR
+                    + THINGS + OR
+                    + SENSORS + OR
+                    + LOCATIONS + OR
+                    + HISTORICAL_LOCATIONS + OR
+                    + FEATURES_OF_INTEREST + OR
+                    + OBSERVED_PROPERTIES
+                    + WANTED_NAME_GROUP_END;
+
+    String BASE_COLLECTION_REGEX =
+            OBSERVATIONS + OR
+                    + DATASTREAMS + OR
+                    + THINGS + OR
+                    + SENSORS + OR
+                    + LOCATIONS + OR
+                    + HISTORICAL_LOCATIONS + OR
+                    + FEATURES_OF_INTEREST + OR
+                    + OBSERVED_PROPERTIES;
+
     String IDENTIFIED_BY_DATASTREAM_REGEX =
             DATASTREAMS + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN
                     + SENSOR + OR + OBSERVED_PROPERTY + OR + THING + OR + OBSERVATIONS + ROUND_BRACKET_CLOSE;
@@ -156,6 +181,11 @@ public interface STARequestUtils extends StaConstants {
     String IDENTIFIED_BY_FEATURE_OF_INTEREST_REGEX =
             FEATURES_OF_INTEREST + IDENTIFIER_REGEX + SLASH + OBSERVATIONS;
 
+    // /Datastreams(52)
+    String ENTITY_IDENTIFIED_DIRECTLY =
+            PATH_ENTITY + BASE_COLLECTION_REGEX + CURLY_BRACKET_CLOSE + PATH_ID + IDENTIFIER_REGEX + DOLLAR +
+                    CURLY_BRACKET_CLOSE;
+
     // /Datastreams(52)/Sensor
     // /Datastreams(52)/ObservedProperty
     // /Datastreams(52)/Thing
@@ -167,7 +197,11 @@ public interface STARequestUtils extends StaConstants {
 
     String ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE =
             PATH_ENTITY + DATASTREAMS + IDENTIFIER_REGEX
-                    + PATH_TARGET + SENSOR + OR + OBSERVED_PROPERTY + OR + THING + CURLY_BRACKET_CLOSE;
+                    + CURLY_BRACKET_CLOSE + PATH_TARGET + SENSOR + OR + OBSERVED_PROPERTY + OR + THING +
+                    CURLY_BRACKET_CLOSE;
+
+    String ENTITY_PROPERTY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE =
+            ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE + SLASH + PATH_PROPERTY;
 
     // /Observations(52)/Datastream
     // /Observations(52)/FeatureOfInterest
@@ -178,8 +212,12 @@ public interface STARequestUtils extends StaConstants {
                     + WANTED_NAME_GROUP_START + DATASTREAM + OR + FEATURE_OF_INTEREST + WANTED_NAME_GROUP_END;
 
     String ENTITY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE =
-            PATH_ENTITY + OBSERVATIONS + IDENTIFIER_REGEX + PATH_TARGET + DATASTREAM + OR + FEATURE_OF_INTEREST +
+            PATH_ENTITY + OBSERVATIONS + IDENTIFIER_REGEX + CURLY_BRACKET_CLOSE + PATH_TARGET + DATASTREAM + OR +
+                    FEATURE_OF_INTEREST +
                     CURLY_BRACKET_CLOSE;
+
+    String ENTITY_PROPERTY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE =
+            ENTITY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE + SLASH + PATH_PROPERTY;
 
     // /HistoricalLocations(52)/Thing
     String ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION =
@@ -189,7 +227,11 @@ public interface STARequestUtils extends StaConstants {
                     + WANTED_NAME_GROUP_START + THING + WANTED_NAME_GROUP_END;
 
     String ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE =
-            PATH_ENTITY + HISTORICAL_LOCATIONS + IDENTIFIER_REGEX + PATH_TARGET + THING + CURLY_BRACKET_CLOSE;
+            PATH_ENTITY + HISTORICAL_LOCATIONS + IDENTIFIER_REGEX + CURLY_BRACKET_CLOSE + PATH_TARGET + THING +
+                    CURLY_BRACKET_CLOSE;
+
+    String ENTITY_PROPERTY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE =
+            ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE + SLASH + PATH_PROPERTY;
 
     // /Datastream(52)/Observations
     String COLLECTION_IDENTIFIED_BY_DATASTREAM =
@@ -199,7 +241,8 @@ public interface STARequestUtils extends StaConstants {
                     + WANTED_NAME_GROUP_START + OBSERVATIONS + WANTED_NAME_GROUP_END;
 
     String COLLECTION_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE =
-            PATH_ENTITY + DATASTREAMS + IDENTIFIER_REGEX + PATH_TARGET + OBSERVATIONS + CURLY_BRACKET_CLOSE;
+            PATH_ENTITY + DATASTREAMS + IDENTIFIER_REGEX + CURLY_BRACKET_CLOSE + PATH_TARGET + OBSERVATIONS +
+                    CURLY_BRACKET_CLOSE;
 
     // /Things(52)/Datastreams
     // /Things(52)/HistoricalLocations
@@ -212,7 +255,7 @@ public interface STARequestUtils extends StaConstants {
                     WANTED_NAME_GROUP_END;
 
     String COLLECTION_IDENTIFIED_BY_THING_PATH_VARIABLE =
-            PATH_ENTITY + THINGS + IDENTIFIER_REGEX + PATH_TARGET
+            PATH_ENTITY + THINGS + IDENTIFIER_REGEX + CURLY_BRACKET_CLOSE + PATH_TARGET
                     + DATASTREAMS + OR + HISTORICAL_LOCATIONS + OR + LOCATIONS + CURLY_BRACKET_CLOSE;
 
     // /Locations(52)/Things
@@ -224,7 +267,8 @@ public interface STARequestUtils extends StaConstants {
                     + WANTED_NAME_GROUP_START + THINGS + OR + HISTORICAL_LOCATIONS + WANTED_NAME_GROUP_END;
 
     String COLLECTION_IDENTIFIED_BY_LOCATION_PATH_VARIABLE =
-            PATH_ENTITY + LOCATIONS + IDENTIFIER_REGEX + PATH_TARGET + THINGS + OR + HISTORICAL_LOCATIONS +
+            PATH_ENTITY + LOCATIONS + IDENTIFIER_REGEX + CURLY_BRACKET_CLOSE + PATH_TARGET + THINGS + OR +
+                    HISTORICAL_LOCATIONS +
                     CURLY_BRACKET_CLOSE;
 
     // /Sensors(52)/Datastreams
@@ -235,7 +279,8 @@ public interface STARequestUtils extends StaConstants {
                     + WANTED_NAME_GROUP_START + DATASTREAMS + WANTED_NAME_GROUP_END;
 
     String COLLECTION_IDENTIFIED_BY_SENSOR_PATH_VARIABLE =
-            PATH_ENTITY + SENSORS + IDENTIFIER_REGEX + PATH_TARGET + DATASTREAMS + CURLY_BRACKET_CLOSE;
+            PATH_ENTITY + SENSORS + IDENTIFIER_REGEX + CURLY_BRACKET_CLOSE + PATH_TARGET + DATASTREAMS +
+                    CURLY_BRACKET_CLOSE;
 
     // /ObservedProperties(52)/Datastreams
     String COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY =
@@ -245,7 +290,8 @@ public interface STARequestUtils extends StaConstants {
                     + WANTED_NAME_GROUP_START + DATASTREAMS + WANTED_NAME_GROUP_END;
 
     String COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH_VARIABLE =
-            PATH_ENTITY + OBSERVED_PROPERTIES + IDENTIFIER_REGEX + PATH_TARGET + DATASTREAMS + CURLY_BRACKET_CLOSE;
+            PATH_ENTITY + OBSERVED_PROPERTIES + IDENTIFIER_REGEX + CURLY_BRACKET_CLOSE + PATH_TARGET + DATASTREAMS +
+                    CURLY_BRACKET_CLOSE;
 
     // /FeaturesOfInterest(52)/Observations
     String COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST =
@@ -255,7 +301,8 @@ public interface STARequestUtils extends StaConstants {
                     + WANTED_NAME_GROUP_START + OBSERVATIONS + WANTED_NAME_GROUP_END;
 
     String COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH_VARIABLE =
-            PATH_ENTITY + FEATURES_OF_INTEREST + IDENTIFIER_REGEX + PATH_TARGET + OBSERVATIONS + CURLY_BRACKET_CLOSE;
+            PATH_ENTITY + FEATURES_OF_INTEREST + IDENTIFIER_REGEX + CURLY_BRACKET_CLOSE + PATH_TARGET + OBSERVATIONS +
+                    CURLY_BRACKET_CLOSE;
 
     // /FeaturesOfInterest(52)/Observations
     String COLLECTION_IDENTIFIED_BY_HIST_LOCATION =
@@ -265,29 +312,8 @@ public interface STARequestUtils extends StaConstants {
                     + WANTED_NAME_GROUP_START + LOCATIONS + WANTED_NAME_GROUP_END;
 
     String COLLECTION_IDENTIFIED_BY_HIST_LOCATION_PATH_VARIABLE =
-            PATH_ENTITY + HISTORICAL_LOCATIONS + IDENTIFIER_REGEX + PATH_TARGET + LOCATIONS + CURLY_BRACKET_CLOSE;
-
-    String BASE_COLLECTION_REGEX_NAMED_GROUPS =
-            WANTED_NAME_GROUP_START
-                    + OBSERVATIONS + OR
-                    + DATASTREAMS + OR
-                    + THINGS + OR
-                    + SENSORS + OR
-                    + LOCATIONS + OR
-                    + HISTORICAL_LOCATIONS + OR
-                    + FEATURES_OF_INTEREST + OR
-                    + OBSERVED_PROPERTIES
-                    + WANTED_NAME_GROUP_END;
-
-    String BASE_COLLECTION_REGEX =
-            OBSERVATIONS + OR
-                    + DATASTREAMS + OR
-                    + THINGS + OR
-                    + SENSORS + OR
-                    + LOCATIONS + OR
-                    + HISTORICAL_LOCATIONS + OR
-                    + FEATURES_OF_INTEREST + OR
-                    + OBSERVED_PROPERTIES;
+            PATH_ENTITY + HISTORICAL_LOCATIONS + IDENTIFIER_REGEX + CURLY_BRACKET_CLOSE + PATH_TARGET + LOCATIONS +
+                    CURLY_BRACKET_CLOSE;
 
     String SELECT_REGEX_NAMED_GROUPS =
             BACKSLASH + QUESTIONMARK + BACKSLASH + DOLLAR + "select=" +
@@ -450,16 +476,32 @@ public interface STARequestUtils extends StaConstants {
         }
     }
 
-    default void validateURL(StringBuffer requestURL,
-                             EntityServiceRepository serviceRepository,
-                             int rootUrlLength)
+    /**
+     * Validates a given Resource Path. Checks Syntax + Semantics
+     *
+     * @param requestURL        URL to the Resource.
+     * @param serviceRepository Backend Repository Factory
+     * @param rootUrlLength     Length of the Root url prepended before the STA Resource Path
+     * @throws Exception if URL is not valid
+     */
+    default void validateResource(StringBuffer requestURL,
+                                  EntityServiceRepository serviceRepository,
+                                  int rootUrlLength)
             throws Exception {
-        validateURL(requestURL.toString(), serviceRepository, rootUrlLength);
+        validateResource(requestURL.toString(), serviceRepository, rootUrlLength);
     }
 
-    default void validateURL(String requestURL,
-                             EntityServiceRepository serviceRepository,
-                             int rootUrlLength)
+    /**
+     * Validates a given Resource Path. Checks Syntax + Semantics
+     *
+     * @param requestURL        URL to the Resource.
+     * @param serviceRepository Backend Repository Factory
+     * @param rootUrlLength     Length of the Root url prepended before the STA Resource Path
+     * @throws Exception if URL is not valid
+     */
+    default void validateResource(String requestURL,
+                                  EntityServiceRepository serviceRepository,
+                                  int rootUrlLength)
             throws Exception {
         String[] uriResources = requestURL.substring(rootUrlLength).split(SLASH);
 
@@ -471,6 +513,22 @@ public interface STARequestUtils extends StaConstants {
         ex = validateURISemantic(uriResources, serviceRepository);
         if (ex != null) {
             throw ex;
+        }
+    }
+
+    /**
+     * Validates whether an entity has given property.
+     *
+     * @param entity   Name of the Entity to be checked
+     * @param property Property of the Entity
+     * @throws STAInvalidUrlException when the URL is invalid
+     */
+    default void validateProperty(String entity, String property) throws STAInvalidUrlException {
+        STAEntityDefinition definition = STAEntityDefinition.definitions.get(entity);
+
+        if (!definition.getEntityPropsMandatory().contains(property) &&
+                !definition.getEntityPropsOptional().contains(property)) {
+            throw new STAInvalidUrlException("Entity: " + entity + " does not have property: " + property);
         }
     }
 
