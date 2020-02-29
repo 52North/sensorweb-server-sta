@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -192,7 +193,7 @@ public class Conformance1 extends ConformanceTests implements TestUtil {
         for (JsonNode entity : collection.get("value")) {
             Assertions.assertNotNull(entity.get("@iot.id"),
                                      "Could not read @iot.id from entity:" + entity.toPrettyString());
-            for (String mandatoryProp : definition.getEntityPropsMandatory()) {
+            for (String mandatoryProp : this.getEntityPropsMandatory(definition)) {
                 checkGetPropertyOfEntity(entityType, entity.get("@iot.id").asText(), mandatoryProp);
                 checkGetPropertyValueOfEntity(entityType, entity.get("@iot.id").asText(), mandatoryProp);
             }
@@ -208,7 +209,7 @@ public class Conformance1 extends ConformanceTests implements TestUtil {
      * @param property   The property to get requested
      */
     private void checkGetPropertyOfEntity(EntityType entityType, String id, String property) throws IOException {
-        JsonNode entity = getEntity(entityType, id);
+        JsonNode entity = getEntity(entityType, id, property);
         Assertions.assertNotNull(entity.get(property),
                                  "Reading property \"" + property + "\"of \"" + entityType + "\" fails.");
         Assertions.assertEquals(1,
@@ -226,23 +227,9 @@ public class Conformance1 extends ConformanceTests implements TestUtil {
      * @param property   The property to get requested
      */
     private void checkGetPropertyValueOfEntity(EntityType entityType, String id, String property) throws IOException {
-
-        JsonNode entity = getEntity(entityType, id);
-        Assertions.assertNotNull(entity.get(property),
+        String response = getEntityValue(entityType, id, property);
+        Assertions.assertNotNull(response,
                                  "Reading property \"" + property + "\"of \"" + entityType + "\" fails.");
-        Assertions.assertEquals(1,
-                                entity.size(),
-                                "The response for getting property " + property + " of a " + entityType +
-                                        " returns more properties!");
-        if (!property.equals("location") && !property.equals("feature") && !property.equals("unitOfMeasurement")) {
-            Assertions.assertEquals(-1,
-                                    entity.toString().indexOf("{"),
-                                    "Reading property value of \"" + property + "\"of \"" + entityType + "\" fails.");
-        } else {
-            Assertions.assertEquals(0,
-                                    entity.toString().indexOf("{"),
-                                    "Reading property value of \"" + property + "\"of \"" + entityType + "\" fails.");
-        }
     }
 
     /**
@@ -535,8 +522,19 @@ public class Conformance1 extends ConformanceTests implements TestUtil {
      */
     private void checkEntitiesAllAspectsForResponse(STAEntityDefinition entityType, JsonNode entity) {
         checkEntitiesControlInformation(entity);
-        checkEntitiesProperties(entityType.getEntityPropsMandatory(), entity);
+        checkEntitiesProperties(this.getEntityPropsMandatory(entityType), entity);
         checkEntitiesProperties(annotateNavigationProperties(entityType.getNavPropsMandatory()), entity);
+    }
+
+    private Set<String> getEntityPropsMandatory(STAEntityDefinition entityType) {
+        Set<String> entityPropsMandatoryByDefinition = entityType.getEntityPropsMandatory();
+        Set<String> entityPropsMandatoryNoId = new HashSet<>();
+        for (String s : entityPropsMandatoryByDefinition) {
+            if (!s.equals(STAEntityDefinition.PROP_ID)) {
+                entityPropsMandatoryNoId.add(s);
+            }
+        }
+        return entityPropsMandatoryNoId;
     }
 
     private Set<String> annotateNavigationProperties(Set<String> properties) {
@@ -556,7 +554,7 @@ public class Conformance1 extends ConformanceTests implements TestUtil {
      */
     private void checkEntityAllAspectsForResponse(STAEntityDefinition entityType, JsonNode entity) {
         checkEntityControlInformation(entity);
-        checkEntityProperties(entityType.getEntityPropsMandatory(), entity);
+        checkEntityProperties(this.getEntityPropsMandatory(entityType), entity);
         checkEntityProperties(annotateNavigationProperties(entityType.getNavPropsMandatory()), entity);
     }
 
@@ -570,7 +568,7 @@ public class Conformance1 extends ConformanceTests implements TestUtil {
     private void checkEntityAllAspectsForResponse(STAEntityDefinition entityType, Set<JsonNode> entitySet) {
         for (JsonNode entity : entitySet) {
             checkEntityControlInformation(entity);
-            checkEntityProperties(entityType.getEntityPropsMandatory(), entity);
+            checkEntityProperties(this.getEntityPropsMandatory(entityType), entity);
             checkEntityProperties(annotateNavigationProperties(entityType.getNavPropsMandatory()), entity);
         }
     }

@@ -26,12 +26,11 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -44,8 +43,11 @@ import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -72,7 +74,7 @@ abstract class ConformanceTests implements TestUtil {
         this.endpoints = map;
     }
 
-    JsonNode postEntity(Conformance2.EntityType type, String body) throws IOException {
+    JsonNode postEntity(EntityType type, String body) throws IOException {
         HttpPost request = new HttpPost(rootUrl + endpoints.get(type));
         request.setEntity(new StringEntity(body));
         request.setHeader("Content-Type", "application/json");
@@ -100,7 +102,7 @@ abstract class ConformanceTests implements TestUtil {
         return result;
     }
 
-    protected JsonNode postInvalidEntity(Conformance2.EntityType type, String body) throws IOException {
+    protected JsonNode postInvalidEntity(EntityType type, String body) throws IOException {
         HttpPost request = new HttpPost(rootUrl + endpoints.get(type));
         request.setEntity(new StringEntity(body));
         request.setHeader("Content-Type", "application/json");
@@ -125,7 +127,7 @@ abstract class ConformanceTests implements TestUtil {
         return result;
     }
 
-    protected JsonNode patchEntity(Conformance2.EntityType type, String body, String id) throws IOException {
+    protected JsonNode patchEntity(EntityType type, String body, String id) throws IOException {
         HttpPatch request = new HttpPatch(rootUrl
                                                   + endpoints.get(type)
                                                   + "("
@@ -168,7 +170,7 @@ abstract class ConformanceTests implements TestUtil {
      * @param body The PATCH body (invalid)
      * @param id   The id of requested entity
      */
-    protected void patchInvalidEntity(Conformance2.EntityType type, String body, String id) throws IOException {
+    protected void patchInvalidEntity(EntityType type, String body, String id) throws IOException {
         HttpPatch request = new HttpPatch(rootUrl
                                                   + endpoints.get(type)
                                                   + "("
@@ -204,7 +206,7 @@ abstract class ConformanceTests implements TestUtil {
      *
      * @param type Entity type in from EntityType enum
      */
-    protected void deleteNonexistentEntity(Conformance2.EntityType type) throws IOException {
+    protected void deleteNonexistentEntity(EntityType type) throws IOException {
         HttpDelete request = new HttpDelete(rootUrl
                                                     + endpoints.get(type)
                                                     + "("
@@ -232,14 +234,14 @@ abstract class ConformanceTests implements TestUtil {
     }
 
     protected void deleteEverythings() throws IOException {
-        for (Conformance2.EntityType type : Conformance2.EntityType.values()) {
+        for (EntityType type : EntityType.values()) {
             for (JsonNode elem : getCollection(type).get("value")) {
                 deleteEntity(type, elem.get(idKey).asText(), false);
             }
         }
     }
 
-    protected void deleteEntity(Conformance2.EntityType type, String id, boolean canError) throws IOException {
+    protected void deleteEntity(EntityType type, String id, boolean canError) throws IOException {
         HttpDelete request = new HttpDelete(rootUrl
                                                     + endpoints.get(type)
                                                     + "("
@@ -268,7 +270,11 @@ abstract class ConformanceTests implements TestUtil {
         }
     }
 
-    protected JsonNode getEntity(Conformance2.EntityType type, String id) throws IOException {
+    protected JsonNode getEntity(EntityType type, String id, String property) throws IOException {
+        return getEntity(endpoints.get(type) + "(" + id + ")" + "/" + property);
+    }
+
+    protected JsonNode getEntity(EntityType type, String id) throws IOException {
         return getEntity(endpoints.get(type) + "(" + id + ")");
     }
 
@@ -285,6 +291,23 @@ abstract class ConformanceTests implements TestUtil {
                                 "ERROR: Did not receive 200 OK for path: " + path
                                         + " Instead received Status Code: " + response.getStatusLine().getStatusCode());
         return mapper.readTree(response.getEntity().getContent());
+    }
+
+    protected String getEntityValue(EntityType type, String id, String property) throws IOException {
+        String url = endpoints.get(type) + "(" + id + ")" + "/" + property + "/$value";
+        HttpGet request = new HttpGet(rootUrl + url);
+        HttpResponse response = HttpClientBuilder.create().build().execute(request);
+
+        // Check Response MIME Type
+        String mimeType = ContentType.getOrDefault(response.getEntity()).getMimeType();
+        Assertions.assertEquals("text/plain", mimeType);
+
+        Assertions.assertEquals(200,
+                                response.getStatusLine().getStatusCode(),
+                                "ERROR: Did not receive 200 OK for path: " + url
+                                        + " Instead received Status Code: " + response.getStatusLine().getStatusCode());
+        return new BufferedReader(new InputStreamReader(response.getEntity().getContent()))
+                .lines().collect(Collectors.joining(""));
     }
 
     protected JsonNode getRootResponse() throws IOException {
@@ -320,7 +343,7 @@ abstract class ConformanceTests implements TestUtil {
                                         + " Instead received Status Code: " + response.getStatusLine().getStatusCode());
     }
 
-    protected JsonNode getCollection(Conformance2.EntityType type) throws IOException {
+    protected JsonNode getCollection(EntityType type) throws IOException {
         HttpGet request = new HttpGet(rootUrl + endpoints.get(type));
         HttpResponse response = HttpClientBuilder.create().build().execute(request);
 
