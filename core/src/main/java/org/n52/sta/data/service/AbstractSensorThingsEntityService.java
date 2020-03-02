@@ -153,26 +153,30 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
             Page<S> pages = getRepository().findAll(getFilterPredicate(entityClass, queryOptions),
                                                     createPageableRequest(queryOptions),
                                                     defaultFetchGraphs);
-            if (queryOptions.hasExpandOption()) {
-                Page<E> expanded = pages.map(e -> {
-                    try {
-                        return fetchExpandEntities(e, (ExpandFilter) queryOptions.getExpandOption());
-                    } catch (STACRUDException | STAInvalidQueryException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                });
-                return new CollectionWrapper(expanded.getTotalElements(),
-                                             expanded.map(e -> createWrapper(e, queryOptions))
-                                                     .getContent(),
-                                             expanded.hasNext());
-            } else {
-                return new CollectionWrapper(pages.getTotalElements(),
-                                             pages.map(e -> createWrapper(e, queryOptions))
-                                                  .getContent(),
-                                             pages.hasNext());
-            }
+            return getCollectionWrapper(queryOptions, pages);
         } catch (RuntimeException e) {
             throw new STACRUDException(e.getMessage(), e);
+        }
+    }
+
+    private CollectionWrapper getCollectionWrapper(QueryOptions queryOptions, Page<S> pages) {
+        if (queryOptions.hasExpandOption()) {
+            Page<E> expanded = pages.map(e -> {
+                try {
+                    return fetchExpandEntities(e, (ExpandFilter) queryOptions.getExpandOption());
+                } catch (STACRUDException | STAInvalidQueryException ex) {
+                    throw new RuntimeException(ex);
+                }
+            });
+            return new CollectionWrapper(expanded.getTotalElements(),
+                                         expanded.map(e -> createWrapper(e, queryOptions))
+                                                 .getContent(),
+                                         expanded.hasNext());
+        } else {
+            return new CollectionWrapper(pages.getTotalElements(),
+                                         pages.map(e -> createWrapper(e, queryOptions))
+                                              .getContent(),
+                                         pages.hasNext());
         }
     }
 
@@ -228,24 +232,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
                     .findAll(byRelatedEntityFilter(relatedId, relatedType, null),
                              createPageableRequest(queryOptions),
                              defaultFetchGraphs);
-            if (queryOptions.hasExpandOption()) {
-                Page<E> expanded = pages.map(e -> {
-                    try {
-                        return fetchExpandEntities(e, (ExpandFilter) queryOptions.getExpandOption());
-                    } catch (STACRUDException | STAInvalidQueryException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                });
-                return new CollectionWrapper(expanded.getTotalElements(),
-                                             expanded.map(e -> createWrapper(e, queryOptions))
-                                                     .getContent(),
-                                             expanded.hasNext());
-            } else {
-                return new CollectionWrapper(pages.getTotalElements(),
-                                             pages.map(e -> createWrapper(e, queryOptions))
-                                                  .getContent(),
-                                             pages.hasNext());
-            }
+            return getCollectionWrapper(queryOptions, (Page<S>) pages);
 
         } catch (RuntimeException e) {
             throw new STACRUDException(e.getMessage(), e);
@@ -264,7 +251,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
         Optional<String> entity = getRepository().identifier(
                 this.byRelatedEntityFilter(relatedId, relatedType, null),
                 IDENTIFIER);
-        return entity.isPresent() ? entity.get() : null;
+        return entity.orElse(null);
     }
 
     /**
