@@ -28,8 +28,10 @@
  */
 package org.n52.sta.data.service;
 
+import org.joda.time.DateTime;
 import org.n52.shetland.oasis.odata.ODataConstants;
 import org.n52.shetland.ogc.filter.FilterConstants;
+import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.data.query.EntityQuerySpecifications;
 import org.n52.sta.data.query.QuerySpecificationRepository;
@@ -51,6 +53,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.util.Date;
 
 /**
  * Visitor visiting svalbard.odata.Expr and parsing it into javax.expression to be used in database access.
@@ -380,8 +383,9 @@ final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, STAInvali
      * @return the result of the visit
      * @throws STAInvalidQueryException if the visit fails
      */
-    @Override public Expression<?> visitTime(TimeValueExpr expr) throws STAInvalidQueryException {
-        return null;
+    @Override public Expression<Date> visitTime(TimeValueExpr expr) throws STAInvalidQueryException {
+        // This is always literal as we handle member Expressions seperately
+        return builder.literal(((TimeInstant) expr.getTime()).getValue().toDate());
     }
 
     /**
