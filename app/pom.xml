@@ -53,20 +53,14 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>sta-http</artifactId>
             <scope>runtime</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>javax</groupId>
-                    <artifactId>javaee-api</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
-        <!-- We som-->
-        <!--
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-runtime</artifactId>
+            <scope>runtime</scope>
         </dependency>
+        <!--
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4</artifactId>
@@ -91,24 +85,6 @@
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
             <version>1.12.5</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>5.4.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-params</artifactId>
-            <version>5.4.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.4.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -145,6 +121,14 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
+                <configuration>
+                    <usedDependencies>
+                        <dependency>org.springframework.boot:spring-boot-starter-web</dependency>
+                        <dependency>org.springframework.boot:spring-boot-starter-data-jpa</dependency>
+                        <dependency>org.n52.sensorweb-server.sta:sta-http</dependency>
+                        <dependency>org.n52.sensorweb-server.sta:sta-mqtt</dependency>
+                    </usedDependencies>
+                </configuration>
                 <executions>
                     <execution>
                         <id>unpack</id>

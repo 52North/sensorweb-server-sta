@@ -122,6 +122,7 @@ public class JSONHistoricalLocation extends JSONBase.JSONwithIdTime<HistoricalLo
      * Wrapper around rawTime property called by jackson while deserializing.
      *
      * @param rawTime raw Time
+     * @throws STACRUDException If the Object could not be parsed
      */
     public void setTime(Object rawTime) throws STACRUDException {
         Time parsed = TimeUtil.parseTime(rawTime);

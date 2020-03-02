@@ -73,6 +73,7 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
     }
 
     @Override
+    @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE")
     public FeatureEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
         case FULL:

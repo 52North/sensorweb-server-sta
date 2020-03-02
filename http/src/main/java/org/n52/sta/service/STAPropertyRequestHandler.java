@@ -86,6 +86,24 @@ public class STAPropertyRequestHandler implements STARequestUtils {
         return readEntityPropertyDirect(entity, id, property, request.getRequestURL().toString());
     }
 
+    private ElementWithQueryOptions<?> readEntityPropertyDirect(String entity,
+                                                                String id,
+                                                                String property,
+                                                                String url) throws Exception {
+        validateResource(url.substring(0, url.length() - property.length() - 1),
+                         serviceRepository,
+                         rootUrlLength);
+        validateProperty(entity, property);
+
+        String entityId = id.substring(1, id.length() - 1);
+        HashSet<FilterClause> filters = new HashSet<>();
+
+        // Add select filter with filter only returning property
+        filters.add(new SelectFilter(property));
+        return serviceRepository.getEntityService(entity)
+                                .getEntity(entityId, QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
+    }
+
     /**
      * Matches all requests for properties on Entities not referenced directly via id but via referenced entity
      * e.g. /Datastreams(52)/Thing/name
@@ -110,6 +128,29 @@ public class STAPropertyRequestHandler implements STARequestUtils {
                                                                 HttpServletRequest request)
             throws Exception {
         return readRelatedEntityProperty(entity, target, property, request.getRequestURL().toString());
+    }
+
+    private ElementWithQueryOptions readRelatedEntityProperty(String entity,
+                                                              String target,
+                                                              String property,
+                                                              String url) throws Exception {
+        validateResource(url.substring(0, url.length() - property.length() - 1),
+                         serviceRepository,
+                         rootUrlLength);
+        String sourceType = entity.substring(0, entity.indexOf("("));
+        String sourceId = entity.substring(sourceType.length() + 1, entity.length() - 1);
+
+        validateProperty(sourceType, property);
+
+        HashSet<FilterClause> filters = new HashSet<>();
+        // Add select filter with filter only returning property
+        filters.add(new SelectFilter(property));
+
+        return serviceRepository.getEntityService(target)
+                                .getEntityByRelatedEntity(sourceId,
+                                                          sourceType,
+                                                          null,
+                                                          QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
     }
 
     /**
@@ -161,46 +202,5 @@ public class STAPropertyRequestHandler implements STARequestUtils {
         ElementWithQueryOptions<?> elementWithQueryOptions =
                 this.readRelatedEntityProperty(entity, target, property, url.substring(0, url.length() - 7));
         return mapper.valueToTree(elementWithQueryOptions).fields().next().getValue().toString();
-    }
-
-    private ElementWithQueryOptions<?> readEntityPropertyDirect(String entity,
-                                                                String id,
-                                                                String property,
-                                                                String url) throws Exception {
-        validateResource(url.substring(0, url.length() - property.length() - 1),
-                         serviceRepository,
-                         rootUrlLength);
-        validateProperty(entity, property);
-
-        String entityId = id.substring(1, id.length() - 1);
-        HashSet<FilterClause> filters = new HashSet<>();
-
-        // Add select filter with filter only returning property
-        filters.add(new SelectFilter(property));
-        return serviceRepository.getEntityService(entity)
-                                .getEntity(entityId, QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
-    }
-
-    private ElementWithQueryOptions readRelatedEntityProperty(String entity,
-                                                              String target,
-                                                              String property,
-                                                              String url) throws Exception {
-        validateResource(url.substring(0, url.length() - property.length() - 1),
-                         serviceRepository,
-                         rootUrlLength);
-        String sourceType = entity.substring(0, entity.indexOf("("));
-        String sourceId = entity.substring(sourceType.length() + 1, entity.length() - 1);
-
-        validateProperty(sourceType, property);
-
-        HashSet<FilterClause> filters = new HashSet<>();
-        // Add select filter with filter only returning property
-        filters.add(new SelectFilter(property));
-
-        return serviceRepository.getEntityService(target)
-                                .getEntityByRelatedEntity(sourceId,
-                                                          sourceType,
-                                                          null,
-                                                          QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
     }
 }

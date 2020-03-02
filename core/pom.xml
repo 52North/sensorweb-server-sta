@@ -101,10 +101,12 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-spatial</artifactId>
         </dependency>
+        <!--
         <dependency>
             <groupId>org.geolatte</groupId>
             <artifactId>geolatte-geom</artifactId>
         </dependency>
+        -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
@@ -129,12 +131,6 @@
             <artifactId>joda-time</artifactId>
         </dependency>
         <dependency>
-            <groupId>net.jcip</groupId>
-            <artifactId>jcip-annotations</artifactId>
-            <version>1.0</version>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
             <groupId>com.github.spotbugs</groupId>
             <artifactId>spotbugs-annotations</artifactId>
             <version>3.1.12</version>
@@ -142,7 +138,6 @@
         </dependency>
     </dependencies>
 
-    <!--
     <build>
         <plugins>
             <plugin>
@@ -150,12 +145,11 @@
                 <artifactId>maven-dependency-plugin</artifactId>
                 <configuration>
                     <usedDependencies>
-                        <dependency>org.n52.series.db:mappings</dependency>
+                        <dependency>org.n52.sensorweb-server.db-model:db-model-mappings</dependency>
                     </usedDependencies>
                 </configuration>
             </plugin>
         </plugins>
     </build>
-    -->
 
 </project>

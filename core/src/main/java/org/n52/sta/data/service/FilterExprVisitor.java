@@ -26,9 +26,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.service;
 
-import org.joda.time.DateTime;
 import org.n52.shetland.oasis.odata.ODataConstants;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
@@ -57,14 +57,14 @@ import java.util.Date;
 
 /**
  * Visitor visiting svalbard.odata.Expr and parsing it into javax.expression to be used in database access.
- * Not all methods return predicate (e.g. internal ones return concrete types) so abstract Expression<?> is used.
+ * Not all methods return predicate (e.g. internal ones return concrete types) so abstract Expression&lt;?&gt; is used.
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, STAInvalidQueryException> {
 
-    private final String ERROR_NOT_IMPLEMENTED = "not implemented yet!";
-    private final String ERROR_NOT_EVALUABLE = "Could not evaluate Methodcall to :";
+    private static final String ERROR_NOT_IMPLEMENTED = "not implemented yet!";
+    private static final String ERROR_NOT_EVALUABLE = "Could not evaluate Methodcall to :";
 
     private CriteriaBuilder builder;
     private EntityQuerySpecifications<T> rootQS;

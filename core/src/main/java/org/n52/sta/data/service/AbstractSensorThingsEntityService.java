@@ -125,7 +125,9 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      * Gets the Entity with given id
      *
      * @param id the id of the Entity
-     * @return
+     * @param queryOptions query Options
+     * @return ElementWithQueryOptions wrapping requested Entity
+     * @throws STACRUDException if an error occurred
      */
     public ElementWithQueryOptions getEntity(String id, QueryOptions queryOptions) throws STACRUDException {
         try {
@@ -188,6 +190,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      * @param ownId        ID of the requested Entity. Can be null.
      * @param queryOptions {@link QueryOptions} used for serialization
      * @return Entity that matches
+     * @throws STACRUDException if an error occurred
      */
     public ElementWithQueryOptions<?> getEntityByRelatedEntity(String relatedId,
                                                                String relatedType,

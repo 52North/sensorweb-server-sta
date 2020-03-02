@@ -31,6 +31,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 package org.n52.sta.mqtt.core.subscription;
 
 import org.n52.series.db.beans.HibernateRelations;
@@ -50,7 +51,7 @@ public class MqttPropertySubscription extends MqttEntitySubscription {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttPropertySubscription.class);
 
-    private String watchedProperty;
+    private String watchedProperty = "<not yet set>";
 
     public MqttPropertySubscription(String topic, Matcher mt) {
         super(topic, mt);
@@ -61,9 +62,9 @@ public class MqttPropertySubscription extends MqttEntitySubscription {
 
     @Override
     public boolean matches(HibernateRelations.HasIdentifier entity,
-                              String realEntityType,
-                              Map<String, Set<String>> collections,
-                              Set<String> differenceMap) {
+                           String realEntityType,
+                           Map<String, Set<String>> collections,
+                           Set<String> differenceMap) {
         boolean superMatches = super.matches(entity, realEntityType, collections, differenceMap);
 
         if (superMatches) {

@@ -36,7 +36,6 @@ import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
-import org.n52.shetland.ogc.sta.model.ObservationEntityDefinition;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.Expression;

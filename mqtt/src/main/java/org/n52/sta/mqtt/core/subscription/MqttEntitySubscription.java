@@ -54,7 +54,7 @@ public class MqttEntitySubscription extends AbstractMqttSubscription {
     private String wantedIdentifier;
 
     public MqttEntitySubscription(String topic, Matcher mt) {
-        super(topic, mt);
+        super(topic);
 
         // Referenced Entity
         // E.g. /Datastream(52)/Sensor
@@ -73,7 +73,7 @@ public class MqttEntitySubscription extends AbstractMqttSubscription {
         }
 
         Assert.notNull(wantedEntityType, "Unable to parse topic. Could not extract wantedEntityType");
-        LOGGER.debug(this.toString());
+        // LOGGER.debug(this.toString());
     }
 
     @Override

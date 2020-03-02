@@ -584,6 +584,7 @@ public interface STARequestUtils extends StaConstants {
      * exists. As URI is syntactically valid indices can be hard-coded.
      *
      * @param uriResources URI of the Request split by SLASH
+     * @param serviceRepository Repository for EntityServices
      * @return STAInvalidUrlException if URI is malformed
      */
     default Exception validateURISemantic(String[] uriResources,

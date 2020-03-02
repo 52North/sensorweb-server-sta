@@ -76,7 +76,7 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
 
     @Override
     public LocationEntity toEntity(JSONBase.EntityType type) {
-        GeoJsonReader reader = new GeoJsonReader(factory);
+        GeoJsonReader reader;
         switch (type) {
         case FULL:
             Assert.notNull(name, INVALID_INLINE_ENTITY + "name");

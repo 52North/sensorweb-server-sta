@@ -89,6 +89,7 @@ public class JSONBase {
          * Creates and validates the Database Entity to conform to invariants defined in standard.
          * What is validated is dictated by given type parameter
          *
+         * @param type type of the entity
          * @return created Entity
          */
         public abstract T toEntity(EntityType type);

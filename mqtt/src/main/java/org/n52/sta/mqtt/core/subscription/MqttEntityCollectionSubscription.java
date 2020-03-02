@@ -53,7 +53,7 @@ public class MqttEntityCollectionSubscription extends AbstractMqttSubscription {
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttEntityCollectionSubscription.class);
 
     public MqttEntityCollectionSubscription(String topic, Matcher mt) {
-        super(topic, mt);
+        super(topic);
 
         // Root collection
         // E.g. /Things
@@ -70,7 +70,7 @@ public class MqttEntityCollectionSubscription extends AbstractMqttSubscription {
         }
 
         Assert.notNull(wantedEntityType, "Unable to parse topic. Could not extract wantedEntityType");
-        LOGGER.debug(this.toString());
+        // LOGGER.debug(this.toString());
     }
 
     @Override

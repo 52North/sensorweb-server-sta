@@ -29,6 +29,7 @@
 
 package org.n52.sta.data.service;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.BooleanDataEntity;
@@ -383,6 +384,7 @@ public class ObservationService extends
         observation.setDataset(datasetRepository.saveAndFlush(dataset));
     }
 
+    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     private DatasetEntity checkDataset(DatastreamEntity datastream,
                                        AbstractFeatureEntity<?> feature,
                                        CategoryEntity category,

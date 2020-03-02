@@ -55,7 +55,7 @@ public interface EntityGraphRepository<T, I> extends JpaSpecificationExecutor<T>
      *
      * @param spec        can be {@literal null}.
      * @param fetchGraphs string representation of EntityGraph.
-     * @return never {@literal null}.
+     * @return Optional possibly wrapping the found entity.
      * @throws org.springframework.dao.IncorrectResultSizeDataAccessException if more than one entity found.
      */
     Optional<T> findOne(@Nullable Specification<T> spec, FetchGraph... fetchGraphs);
@@ -66,6 +66,7 @@ public interface EntityGraphRepository<T, I> extends JpaSpecificationExecutor<T>
      * internally.
      *
      * @param spec can be {@literal null}.
+     * @param fetchGraphs string representation of EntityGraph.
      * @return never {@literal null}.
      */
     List<T> findAll(@Nullable Specification<T> spec, FetchGraph... fetchGraphs);
@@ -77,6 +78,7 @@ public interface EntityGraphRepository<T, I> extends JpaSpecificationExecutor<T>
      *
      * @param spec     can be {@literal null}.
      * @param pageable must not be {@literal null}.
+     * @param fetchGraphs string representation of EntityGraph.
      * @return never {@literal null}.
      */
     Page<T> findAll(@Nullable Specification<T> spec, Pageable pageable, FetchGraph... fetchGraphs);
@@ -87,6 +89,7 @@ public interface EntityGraphRepository<T, I> extends JpaSpecificationExecutor<T>
      *
      * @param spec can be {@literal null}.
      * @param sort must not be {@literal null}.
+     * @param fetchGraphs string representation of EntityGraph.
      * @return never {@literal null}.
      */
     List<T> findAll(@Nullable Specification<T> spec, Sort sort, FetchGraph... fetchGraphs);

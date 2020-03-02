@@ -29,7 +29,6 @@
 
 package org.n52.sta.data.service;
 
-import com.google.common.collect.Lists;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -68,6 +67,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -349,6 +350,7 @@ public class FeatureOfInterestService
      *
      * @param id   id of the FOI
      * @param geom geom to expand the existing Geometry
+     * @throws STACRUDException if an error occurred
      */
     public void updateFeatureOfInterestGeometry(String id, Geometry geom) throws STACRUDException {
         Optional<AbstractFeatureEntity<?>> existing =
@@ -357,12 +359,12 @@ public class FeatureOfInterestService
             AbstractFeatureEntity<?> featureOfInterest = existing.get();
             if (featureOfInterest.isSetGeometry()) {
                 if (geom instanceof Point) {
-                    List<Coordinate> coords = Lists.newArrayList();
+                    List<Coordinate> coords = new ArrayList<>();
                     Geometry convert = featureOfInterest.getGeometry();
                     if (convert instanceof Point) {
                         coords.add(convert.getCoordinate());
                     } else if (convert instanceof LineString) {
-                        coords.addAll(Lists.newArrayList(convert.getCoordinates()));
+                        coords.addAll(Arrays.asList(convert.getCoordinates()));
                     }
                     if (!coords.isEmpty()) {
                         coords.add(geom.getCoordinate());

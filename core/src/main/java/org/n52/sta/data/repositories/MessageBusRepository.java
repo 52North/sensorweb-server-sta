@@ -78,12 +78,11 @@ import java.util.Set;
 public class MessageBusRepository<T, I extends Serializable>
         extends SimpleJpaRepository<T, I> implements RepositoryConstants {
 
-    private static final Logger logger = LoggerFactory.getLogger(MessageBusRepository.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessageBusRepository.class);
 
     private final Map<String, String> entityTypeToStaType;
     private final String FETCHGRAPH_HINT = "javax.persistence.fetchgraph";
     private final String IDENTIFIER = "identifier";
-
 
     private final JpaEntityInformation entityInformation;
     private final STAEventHandler mqttHandler;
@@ -252,6 +251,7 @@ public class MessageBusRepository<T, I extends Serializable>
         return getQuery(spec, getDomainClass(), sort, entityGraph);
     }
 
+    /*
     private <S extends T> TypedQuery<S> getQuery(@Nullable Specification<S> spec,
                                                  Class<S> domainClass,
                                                  Pageable pageable,
@@ -260,6 +260,7 @@ public class MessageBusRepository<T, I extends Serializable>
         Sort sort = pageable.isPaged() ? pageable.getSort() : Sort.unsorted();
         return getQuery(spec, domainClass, sort, entityGraph);
     }
+    */
 
     private TypedQuery<T> getQuery(@Nullable Specification<T> spec,
                                    Sort sort,
@@ -492,7 +493,7 @@ public class MessageBusRepository<T, I extends Serializable>
             }
         } catch (Exception e) {
             // Catch all errors to not interrupt processing
-            logger.error("Error while computing difference map: {}, {}", e.getMessage(), e.getStackTrace());
+            LOGGER.error("Error while computing difference map: {}, {}", e.getMessage(), e.getStackTrace());
             return map;
         }
     }

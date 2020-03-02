@@ -147,6 +147,12 @@
             </dependency>
 
             <dependency>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-runtime</artifactId>
+                <version>4.8-1</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-core</artifactId>
                 <version>${hibernate.version}</version>
@@ -338,7 +344,7 @@
                     </excludes>
                     <strictCheck>true</strictCheck>
                     <properties>
-                      <year>${project.inceptionYear}-${currentYearDynamic}</year>
+                      <year>${project.inceptionYear}-2020</year>
                     </properties>
                     <mapping>
                         <java>SLASHSTAR_STYLE</java>
