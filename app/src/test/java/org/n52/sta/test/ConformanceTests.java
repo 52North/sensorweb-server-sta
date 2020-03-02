@@ -42,6 +42,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.junit.jupiter.Container;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -53,6 +54,9 @@ import java.util.stream.Collectors;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 abstract class ConformanceTests implements TestUtil {
+
+    @Container
+    public static STAPostgresContainer POSTGIS_DB = STAPostgresContainer.instance();
 
     private static final Logger logger = LoggerFactory.getLogger(ConformanceTests.class);
 

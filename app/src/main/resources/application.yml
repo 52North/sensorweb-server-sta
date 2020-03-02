@@ -43,12 +43,15 @@ spring:
           time_zone: UTC
           # https://hibernate.atlassian.net/browse/HHH-12368
           lob.non_contextual_creation: true
-        format_sql: true
         default_schema: public
         dialect: org.hibernate.spatial.dialect.postgis.PostgisPG95Dialect
         # disable driver's feature detection
         # see https://stackoverflow.com/questions/46493500/hibernate-with-c3p0-createclob-is-not-yet-implemented
         temp.use_jdbc_metadata_defaults: false
+
+        show_sql: true
+        format_sql: true
+        use_sql_comments: true
   jmx:
     enabled: false
 

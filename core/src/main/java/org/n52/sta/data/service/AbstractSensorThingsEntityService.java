@@ -232,7 +232,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
                     .findAll(byRelatedEntityFilter(relatedId, relatedType, null),
                              createPageableRequest(queryOptions),
                              defaultFetchGraphs);
-            return getCollectionWrapper(queryOptions, (Page<S>) pages);
+            return getCollectionWrapper(queryOptions, pages);
 
         } catch (RuntimeException e) {
             throw new STACRUDException(e.getMessage(), e);
