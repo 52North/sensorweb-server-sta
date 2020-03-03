@@ -91,5 +91,5 @@ logging:
     #    org.hibernate.type: INFO
     #     org.hibernate: DEBUG
     #     io.moquette: OFF
-    org.n52: TRACE
+    # org.n52: TRACE
 #     org.springframework.transaction: TRACE

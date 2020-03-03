@@ -31,7 +31,7 @@
 //@AutoConfigureTestDatabase
 //@DataJpaTest
 
-package org.n52.sta.test;
+package org.n52.sta;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,6 +40,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.junit.experimental.categories.Category;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,7 +54,7 @@ import java.io.IOException;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Profile("test")
-public class RootResponseTest {
+public class ITRootResponseTest {
 
     protected final static String jsonMimeType = "application/json";
 

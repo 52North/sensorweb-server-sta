@@ -27,7 +27,7 @@
  * Public License for more details.
  */
 
-package org.n52.sta.test;
+package org.n52.sta;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -62,7 +62,7 @@ import java.util.Set;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Testcontainers
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-public class Conformance1 extends ConformanceTests implements TestUtil {
+public class ITConformance1 extends ConformanceTests implements TestUtil {
 
     /**
      * The variable that defines to which recursive level the resource path
@@ -70,7 +70,7 @@ public class Conformance1 extends ConformanceTests implements TestUtil {
      */
     private final int resourcePathLevel = 4;
 
-    public Conformance1(@Value("${server.rootUrl}") String rootUrl) throws IOException {
+    public ITConformance1(@Value("${server.rootUrl}") String rootUrl) throws IOException {
         super(rootUrl);
 
         // Create required test harness
@@ -104,7 +104,7 @@ public class Conformance1 extends ConformanceTests implements TestUtil {
      * properties, and mandatory related entities.
      */
     @Test
-    public void readEntitiesAndCheckResponse() throws IOException {
+    public void testReadEntitiesAndCheckResponse() throws IOException {
         JsonNode collection;
         collection = getCollection(EntityType.THING);
         checkEntitiesAllAspectsForResponse(new ThingEntityDefinition(), collection);

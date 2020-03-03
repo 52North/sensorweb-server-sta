@@ -27,7 +27,7 @@
  * Public License for more details.
  */
 
-package org.n52.sta.test;
+package org.n52.sta;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

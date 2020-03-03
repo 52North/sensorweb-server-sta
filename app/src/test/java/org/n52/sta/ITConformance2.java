@@ -27,7 +27,7 @@
  * Public License for more details.
  */
 
-package org.n52.sta.test;
+package org.n52.sta;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -55,11 +55,11 @@ import java.util.Objects;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Testcontainers
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class Conformance2 extends ConformanceTests implements TestUtil {
+public class ITConformance2 extends ConformanceTests implements TestUtil {
 
-    private static final Logger logger = LoggerFactory.getLogger(Conformance2.class);
+    private static final Logger logger = LoggerFactory.getLogger(ITConformance2.class);
 
-    public Conformance2(@Value("${server.rootUrl}") String rootUrl) {
+    public ITConformance2(@Value("${server.rootUrl}") String rootUrl) {
         super(rootUrl);
     }
 

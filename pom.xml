@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.n52</groupId>
@@ -229,14 +230,6 @@
                         </ignoredDependencies>
                     </configuration>
                 </plugin>
-                <!-- FIXME remove this once all problems are resolved -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <configuration>
-                        <testFailureIgnore>true</testFailureIgnore>
-                    </configuration>
-                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
@@ -244,7 +237,7 @@
                         <rules>
                             <requireNoRepositories>
                                 <banRepositories>false</banRepositories>
-                                <allowSnapshotRepositories>true</allowSnapshotRepositories>
+                                <allowSnapshotRepositories>false</allowSnapshotRepositories>
                                 <allowedRepositories>
                                     <id>
                                         sonatype-nexus-snapshots,edu-repo,n52-releases,n52-snapshots,refractions,hibernate-spatial,unidata-releases,
@@ -333,7 +326,7 @@
                 <configuration>
                     <aggregate>true</aggregate>
                     <header>etc/52N_GPLv2_License.xt</header>
-                    
+
                     <includes>
                         <include>**/src/**/*.java</include>
                     </includes>
@@ -344,7 +337,7 @@
                     </excludes>
                     <strictCheck>true</strictCheck>
                     <properties>
-                      <year>${project.inceptionYear}-2020</year>
+                        <year>${project.inceptionYear}-2020</year>
                     </properties>
                     <mapping>
                         <java>SLASHSTAR_STYLE</java>
