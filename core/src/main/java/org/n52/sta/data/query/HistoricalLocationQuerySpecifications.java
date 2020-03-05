@@ -62,39 +62,9 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
         };
     }
 
-    @Override
-    public Specification<String> getIdSubqueryWithFilter(Specification filter) {
-        return this.toSubquery(HistoricalLocationEntity.class, HistoricalLocationEntity.PROPERTY_IDENTIFIER, filter);
-    }
-
-    @Override
-    public Specification<HistoricalLocationEntity> getFilterForProperty(String propertyName,
-                                                                        Expression<?> propertyValue,
-                                                                        FilterConstants.ComparisonOperator operator,
-                                                                        boolean switched)
-            throws STAInvalidFilterExpressionException {
-        if (propertyName.equals(THING) || propertyName.equals(LOCATIONS)) {
-            return handleRelatedPropertyFilter(propertyName, propertyValue, switched);
-        } else if (propertyName.equals("id")) {
-            return (root, query, builder) -> {
-                try {
-                    return handleDirectStringPropertyFilter(root.get(HistoricalLocationEntity.PROPERTY_IDENTIFIER),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            false);
-                } catch (STAInvalidFilterExpressionException e) {
-                    throw new RuntimeException(e);
-                }
-            };
-        } else {
-            return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
-        }
-    }
-
-    private Specification<HistoricalLocationEntity> handleRelatedPropertyFilter(String propertyName,
-                                                                                Expression<?> propertyValue,
-                                                                                boolean switched) {
+    @Override protected Specification<HistoricalLocationEntity> handleRelatedPropertyFilter(
+            String propertyName,
+            Specification<?> propertyValue) {
         return (root, query, builder) -> {
             if (propertyName.equals(THING)) {
                 final Join<HistoricalLocationEntity, PlatformEntity> join =
@@ -108,7 +78,7 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
         };
     }
 
-    private Specification<HistoricalLocationEntity> handleDirectPropertyFilter(
+    @Override protected Specification<HistoricalLocationEntity> handleDirectPropertyFilter(
             String propertyName,
             Expression<?> propertyValue,
             FilterConstants.ComparisonOperator operator,
@@ -116,6 +86,12 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
         return (Specification<HistoricalLocationEntity>) (root, query, builder) -> {
             try {
                 switch (propertyName) {
+                case "id":
+                    return handleDirectStringPropertyFilter(root.get(HistoricalLocationEntity.PROPERTY_IDENTIFIER),
+                                                            propertyValue,
+                                                            operator,
+                                                            builder,
+                                                            false);
                 case "time":
                     return handleDirectDateTimePropertyFilter(
                             root.get(HistoricalLocationEntity.PROPERTY_TIME),

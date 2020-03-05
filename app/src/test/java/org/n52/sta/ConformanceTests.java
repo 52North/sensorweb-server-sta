@@ -347,8 +347,8 @@ abstract class ConformanceTests implements TestUtil {
                                         + " Instead received Status Code: " + response.getStatusLine().getStatusCode());
     }
 
-    protected JsonNode getCollection(EntityType type) throws IOException {
-        HttpGet request = new HttpGet(rootUrl + endpoints.get(type));
+    protected JsonNode getCollection(EntityType type, String filters) throws IOException {
+        HttpGet request = new HttpGet(rootUrl + endpoints.get(type) + "?" + filters);
         HttpResponse response = HttpClientBuilder.create().build().execute(request);
 
         // Check Response MIME Type
@@ -360,6 +360,10 @@ abstract class ConformanceTests implements TestUtil {
                                 "ERROR: Did not receive 200 OK for path: " + rootUrl + endpoints.get(type)
                                         + " Instead received Status Code: " + response.getStatusLine().getStatusCode());
         return mapper.readTree(response.getEntity().getContent());
+    }
+
+    protected JsonNode getCollection(EntityType type) throws IOException {
+        return getCollection(type, "");
     }
 
 }

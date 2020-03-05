@@ -64,55 +64,7 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
         return (root, query, builder) -> builder.equal(root.get(DescribableEntity.PROPERTY_IDENTIFIER), identifier);
     }
 
-    @Override
-    public Specification<String> getIdSubqueryWithFilter(Specification filter) {
-        return this.toSubquery(AbstractFeatureEntity.class, AbstractFeatureEntity.PROPERTY_IDENTIFIER, filter);
-    }
-
-    @Override
-    public Specification<AbstractFeatureEntity<?>> getFilterForProperty(String propertyName,
-                                                                        Expression<?> propertyValue,
-                                                                        FilterConstants.ComparisonOperator operator,
-                                                                        boolean switched)
-            throws STAInvalidFilterExpressionException {
-        if (propertyName.equals(OBSERVATIONS)) {
-            return handleRelatedPropertyFilter(propertyName, propertyValue, switched);
-        } else if (propertyName.equals("id")) {
-            return (root, query, builder) -> {
-                try {
-                    return handleDirectStringPropertyFilter(root.get(AbstractFeatureEntity.PROPERTY_IDENTIFIER),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            false);
-                } catch (STAInvalidFilterExpressionException e) {
-                    throw new RuntimeException(e);
-                }
-                //
-            };
-        } else {
-            return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
-        }
-    }
-
-    private Specification<AbstractFeatureEntity<?>> handleRelatedPropertyFilter(String propertyName,
-                                                                                Expression<?> propertyValue,
-                                                                                boolean switched)
-            throws STAInvalidFilterExpressionException {
-        return (root, query, builder) -> {
-            // TODO ???
-            Subquery<Long> sqFeature = query.subquery(Long.class);
-            Root<DatasetEntity> dataset = sqFeature.from(DatasetEntity.class);
-            Subquery<DatasetEntity> sqDataset = query.subquery(DatasetEntity.class);
-            Root<DataEntity> data = sqDataset.from(DataEntity.class);
-            sqDataset.select(data.get(DataEntity.PROPERTY_DATASET))
-                     .where(builder.equal(data.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue));
-            sqFeature.select(dataset.get(DatasetEntity.PROPERTY_FEATURE)).where(builder.in(dataset).value(sqDataset));
-            return builder.in(root.get(AbstractFeatureEntity.PROPERTY_IDENTIFIER)).value(sqFeature);
-        };
-    }
-
-    private Specification<AbstractFeatureEntity<?>> handleDirectPropertyFilter(
+    @Override protected Specification<AbstractFeatureEntity<?>> handleDirectPropertyFilter(
             String propertyName,
             Expression<?> propertyValue,
             FilterConstants.ComparisonOperator operator,
@@ -120,6 +72,12 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
         return (Specification<AbstractFeatureEntity<?>>) (root, query, builder) -> {
             try {
                 switch (propertyName) {
+                case "id":
+                    return handleDirectStringPropertyFilter(root.get(AbstractFeatureEntity.PROPERTY_IDENTIFIER),
+                                                            propertyValue,
+                                                            operator,
+                                                            builder,
+                                                            false);
                 case "name":
                     return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
                                                             propertyValue,
@@ -148,8 +106,21 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
             } catch (STAInvalidFilterExpressionException e) {
                 throw new RuntimeException(e);
             }
-        }
+        };
+    }
 
-                ;
+    @Override protected Specification<AbstractFeatureEntity<?>> handleRelatedPropertyFilter(
+            String propertyName,
+            Specification<?> propertyValue) {
+        return (root, query, builder) -> {
+            Subquery<Long> sqFeature = query.subquery(Long.class);
+            Root<DatasetEntity> dataset = sqFeature.from(DatasetEntity.class);
+            Subquery<DatasetEntity> sqDataset = query.subquery(DatasetEntity.class);
+            Root<DataEntity> data = sqDataset.from(DataEntity.class);
+            sqDataset.select(data.get(DataEntity.PROPERTY_DATASET))
+                     .where(builder.equal(data.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue));
+            sqFeature.select(dataset.get(DatasetEntity.PROPERTY_FEATURE)).where(builder.in(dataset).value(sqDataset));
+            return builder.in(root.get(AbstractFeatureEntity.PROPERTY_IDENTIFIER)).value(sqFeature);
+        };
     }
 }

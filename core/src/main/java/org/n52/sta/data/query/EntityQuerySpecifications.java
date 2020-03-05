@@ -38,8 +38,6 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
 import java.util.Date;
 
 /**
@@ -63,12 +61,18 @@ public abstract class EntityQuerySpecifications<T> {
     private static final String INVALID_DATATYPE_CANNOT_CAST = "Invalid Datatypes found. Cannot cast ";
 
     /**
-     * Gets Subquery returning the IDs of the Entities
+     * Gets Entity-specific Filter for relation with given name.
      *
-     * @param filter BooleanExpression filtering the Entites whose IDs are returned
-     * @return Specification Subquery
+     * @param propertyName  Name of the relation to be filtered on
+     * @param propertyValue supposed Value of the property
+     * @return Specification evaluating to true if Entity is not to be filtered out
+     * @throws STAInvalidFilterExpressionException if an error occurs
      */
-    public abstract Specification<String> getIdSubqueryWithFilter(Specification filter);
+    public Specification<T> getFilterForRelation(String propertyName,
+                                                 Specification<?> propertyValue)
+            throws STAInvalidFilterExpressionException {
+        return handleRelatedPropertyFilter(propertyName, propertyValue);
+    }
 
     /**
      * Gets Entity-specific Filter for property with given name. Filters may not accept all BinaryOperators,
@@ -82,11 +86,13 @@ public abstract class EntityQuerySpecifications<T> {
      * @return Specification evaluating to true if Entity is not to be filtered out
      * @throws STAInvalidFilterExpressionException if an error occurs
      */
-    public abstract Specification<T> getFilterForProperty(String propertyName,
-                                                          Expression<?> propertyValue,
-                                                          FilterConstants.ComparisonOperator operator,
-                                                          boolean switched)
-            throws STAInvalidFilterExpressionException;
+    public Specification<T> getFilterForProperty(String propertyName,
+                                                 Expression<?> propertyValue,
+                                                 FilterConstants.ComparisonOperator operator,
+                                                 boolean switched)
+            throws STAInvalidFilterExpressionException {
+        return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
+    }
 
     public Specification<T> withName(final String name) {
         return (root, query, builder) -> {
@@ -97,15 +103,6 @@ public abstract class EntityQuerySpecifications<T> {
     public Specification<T> withIdentifier(final String name) {
         return (root, query, builder) -> {
             return builder.equal(root.get(DescribableEntity.PROPERTY_IDENTIFIER), name);
-        };
-    }
-
-    protected Specification<String> toSubquery(Class<?> clazz, String property, Specification filter) {
-        return (root, query, builder) -> {
-            Subquery<?> sq = query.subquery(clazz);
-            Root<?> from = sq.from(clazz);
-            sq.select(from.get(property)).where(filter.toPredicate(root, query, builder));
-            return builder.in(root.get(DescribableEntity.PROPERTY_IDENTIFIER)).value(sq);
         };
     }
 
@@ -209,4 +206,12 @@ public abstract class EntityQuerySpecifications<T> {
             return operator;
         }
     }
+
+    protected abstract Specification<T> handleRelatedPropertyFilter(String propertyName,
+                                                                    Specification<?> propertyValue);
+
+    protected abstract Specification<T> handleDirectPropertyFilter(String propertyName,
+                                                                   Expression<?> propertyValue,
+                                                                   FilterConstants.ComparisonOperator operator,
+                                                                   boolean switched);
 }

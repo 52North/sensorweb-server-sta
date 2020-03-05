@@ -83,40 +83,8 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
         };
     }
 
-    @Override
-    public Specification<String> getIdSubqueryWithFilter(Specification filter) {
-        return this.toSubquery(DataEntity.class, DataEntity.PROPERTY_IDENTIFIER, filter);
-    }
-
-    @Override
-    public Specification<DataEntity<?>> getFilterForProperty(String propertyName,
-                                                             Expression<?> propertyValue,
-                                                             FilterConstants.ComparisonOperator operator,
-                                                             boolean switched)
-            throws STAInvalidFilterExpressionException {
-
-        if (propertyName.equals(DATASTREAM) || propertyName.equals(FEATUREOFINTEREST)) {
-            return handleRelatedPropertyFilter(propertyName, propertyValue);
-        } else if (propertyName.equals("id")) {
-            return (root, query, builder) -> {
-                try {
-                    return handleDirectStringPropertyFilter(root.get(DataEntity.PROPERTY_IDENTIFIER),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            false);
-                } catch (STAInvalidFilterExpressionException e) {
-                    throw new RuntimeException(e);
-                }
-                //
-            };
-        } else {
-            return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
-        }
-    }
-
-    private Specification<DataEntity<?>> handleRelatedPropertyFilter(String propertyName,
-                                                                     Expression<?> propertyValue) {
+    @Override protected Specification<DataEntity<?>> handleRelatedPropertyFilter(String propertyName,
+                                                                                 Specification<?> propertyValue) {
         return (root, query, builder) -> {
             try {
                 if (propertyName.equals(DATASTREAM)) {
@@ -146,13 +114,19 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private Specification<DataEntity<?>> handleDirectPropertyFilter(String propertyName,
-                                                                    Expression<?> propertyValue,
-                                                                    FilterConstants.ComparisonOperator operator,
-                                                                    boolean switched) {
+    @Override protected Specification<DataEntity<?>> handleDirectPropertyFilter(String propertyName,
+                                                                                Expression<?> propertyValue,
+                                                                                FilterConstants.ComparisonOperator operator,
+                                                                                boolean switched) {
         return (root, query, builder) -> {
             try {
                 switch (propertyName) {
+                case "id":
+                    return handleDirectStringPropertyFilter(root.get(DataEntity.PROPERTY_IDENTIFIER),
+                                                            propertyValue,
+                                                            operator,
+                                                            builder,
+                                                            false);
                 case "value":
                     // TODO: implement
                     /*

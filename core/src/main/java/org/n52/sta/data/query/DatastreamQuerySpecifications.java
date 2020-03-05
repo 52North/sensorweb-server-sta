@@ -128,46 +128,20 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
         };
     }
 
-    @Override
-    public Specification<String> getIdSubqueryWithFilter(Specification filter) {
-        return this.toSubquery(DatastreamEntity.class, DatastreamEntity.PROPERTY_IDENTIFIER, filter);
-    }
-
-    @Override
-    public Specification<DatastreamEntity> getFilterForProperty(String propertyName,
-                                                                Expression<?> propertyValue,
-                                                                FilterConstants.ComparisonOperator operator,
-                                                                boolean switched)
-            throws STAInvalidFilterExpressionException {
-        if (propertyName.equals(SENSOR)
-                || propertyName.equals(OBSERVED_PROPERTY)
-                || propertyName.equals(THING)
-                || propertyName.equals(OBSERVATIONS)) {
-            return handleRelatedPropertyFilter(propertyName, propertyValue, switched);
-        } else if (propertyName.equals("id")) {
-            return (root, query, builder) -> {
-                try {
+    @Override protected Specification<DatastreamEntity> handleDirectPropertyFilter(
+            String propertyName,
+            Expression<?> propertyValue,
+            FilterConstants.ComparisonOperator operator,
+            boolean switched) {
+        return (Specification<DatastreamEntity>) (root, query, builder) -> {
+            try {
+                switch (propertyName) {
+                case "id":
                     return handleDirectStringPropertyFilter(root.get(DatastreamEntity.PROPERTY_IDENTIFIER),
                                                             propertyValue,
                                                             operator,
                                                             builder,
                                                             false);
-                } catch (STAInvalidFilterExpressionException e) {
-                    throw new RuntimeException(e);
-                }
-            };
-        } else {
-            return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
-        }
-    }
-
-    private Specification<DatastreamEntity> handleDirectPropertyFilter(String propertyName,
-                                                                       Expression<?> propertyValue,
-                                                                       FilterConstants.ComparisonOperator operator,
-                                                                       boolean switched) {
-        return (Specification<DatastreamEntity>) (root, query, builder) -> {
-            try {
-                switch (propertyName) {
                 case "name":
                     return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
                                                             propertyValue,
@@ -206,18 +180,15 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
      * @param propertyValue Supposed value of Property
      * @return BooleanExpression evaluating to true if Entity is not filtered out
      */
-    private Specification<DatastreamEntity> handleRelatedPropertyFilter(String propertyName,
-                                                                        Object propertyValue,
-                                                                        boolean switched) {
+    @Override protected Specification<DatastreamEntity> handleRelatedPropertyFilter(String propertyName,
+                                                                                    Specification<?> propertyValue) {
         return (root, query, builder) -> {
             try {
-                // TODO: handle switched Parameter
                 switch (propertyName) {
                 case SENSOR: {
                     final Join<DatastreamEntity, ProcedureEntity> join =
                             root.join(DatastreamEntity.PROPERTY_SENSOR, JoinType.INNER);
                     return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue);
-
                 }
                 case OBSERVED_PROPERTY: {
                     final Join<DatastreamEntity, PhenomenonEntity> join =

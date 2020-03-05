@@ -31,14 +31,17 @@ package org.n52.sta.data.query;
 
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.FormatEntity;
+import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
@@ -58,58 +61,37 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications<Procedu
         };
     }
 
-    @Override
-    public Specification<String> getIdSubqueryWithFilter(Specification filter) {
-        return this.toSubquery(ProcedureEntity.class, ProcedureEntity.PROPERTY_IDENTIFIER, filter);
-    }
-
-    @Override
-    public Specification<ProcedureEntity> getFilterForProperty(String propertyName,
-                                                               Expression<?> propertyValue,
-                                                               FilterConstants.ComparisonOperator operator,
-                                                               boolean switched) {
-        if (propertyName.equals(DATASTREAMS)) {
-            return handleRelatedPropertyFilter(propertyName, propertyValue);
-        } else if (propertyName.equals("id")) {
-            return (root, query, builder) -> {
-                try {
-                    return handleDirectStringPropertyFilter(root.get(ProcedureEntity.PROPERTY_IDENTIFIER),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            false);
-                } catch (STAInvalidFilterExpressionException e) {
-                    throw new RuntimeException(e);
-                }
-                //
-            };
-        } else {
-            return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
-        }
-    }
-
-    private Specification<ProcedureEntity> handleRelatedPropertyFilter(String propertyName,
-                                                                       Expression<?> propertyValue) {
+    @Override protected Specification<ProcedureEntity> handleRelatedPropertyFilter(String propertyName,
+                                                                                   Specification<?> propertyValue) {
         return (root, query, builder) -> {
             Subquery<ProcedureEntity> sq = query.subquery(ProcedureEntity.class);
             Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
             Join<DatastreamEntity, ProcedureEntity> join = datastream.join(DatastreamEntity.PROPERTY_SENSOR);
             sq.select(join).where(builder.equal(datastream.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue));
+
+
+            final Join<PlatformEntity, HistoricalLocationEntity> join =
+                    root.join(PlatformEntity.PROPERTY_HISTORICAL_LOCATIONS, JoinType.INNER);
+            return builder.in(join.get(DescribableEntity.PROPERTY_ID)).value(subquery);
+
             return builder.in(root).value(sq);
         };
-        // throws ExpressionVisitException {
-        // return qsensor.id.in(dQS.toSubquery(qdatastream,
-        // qdatastream.procedure.id,
-        // qdatastream.id.eq(propertyValue)));
     }
 
-    private Specification<ProcedureEntity> handleDirectPropertyFilter(String propertyName,
-                                                                      Expression<?> propertyValue,
-                                                                      FilterConstants.ComparisonOperator operator,
-                                                                      boolean switched) {
+    @Override protected Specification<ProcedureEntity> handleDirectPropertyFilter(
+            String propertyName,
+            Expression<?> propertyValue,
+            FilterConstants.ComparisonOperator operator,
+            boolean switched) {
         return (Specification<ProcedureEntity>) (root, query, builder) -> {
             try {
                 switch (propertyName) {
+                case "id":
+                    return handleDirectStringPropertyFilter(root.get(ProcedureEntity.PROPERTY_IDENTIFIER),
+                                                            propertyValue,
+                                                            operator,
+                                                            builder,
+                                                            false);
                 case "name":
                     return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
                                                             propertyValue,

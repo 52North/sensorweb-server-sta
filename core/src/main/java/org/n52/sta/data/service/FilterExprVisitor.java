@@ -32,6 +32,7 @@ package org.n52.sta.data.service;
 import org.n52.shetland.oasis.odata.ODataConstants;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
+import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.data.query.EntityQuerySpecifications;
 import org.n52.sta.data.query.QuerySpecificationRepository;
@@ -47,6 +48,7 @@ import org.n52.svalbard.odata.expr.binary.BooleanBinaryExpr;
 import org.n52.svalbard.odata.expr.binary.BooleanUnaryExpr;
 import org.n52.svalbard.odata.expr.binary.ComparisonExpr;
 import org.n52.svalbard.odata.expr.temporal.TimeValueExpr;
+import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -66,12 +68,15 @@ final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, STAInvali
     private static final String ERROR_NOT_IMPLEMENTED = "not implemented yet!";
     private static final String ERROR_NOT_EVALUABLE = "Could not evaluate Methodcall to :";
 
+    private static final String SLASH = "/";
+
     private CriteriaBuilder builder;
     private EntityQuerySpecifications<T> rootQS;
     private Root root;
     private CriteriaQuery query;
 
-    FilterExprVisitor(Root root, CriteriaQuery query, CriteriaBuilder builder) {
+    FilterExprVisitor(Root root, CriteriaQuery query, CriteriaBuilder builder)
+            throws STAInvalidFilterExpressionException {
         this.builder = builder;
         this.query = query;
         this.root = root;
@@ -157,22 +162,71 @@ final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, STAInvali
         if (expr.getRight().isMember() && expr.getLeft().isMember()) {
             throw new STAInvalidQueryException("comparison of two member variables not implemented yet");
         } else if (expr.getRight().isMember()) {
-            return rootQS.getFilterForProperty(expr.getRight().asMember().get().getValue(),
-                                               expr.getLeft().accept(this),
-                                               operator,
-                                               false)
-                         .toPredicate(root, query, builder);
+            if (expr.getRight().asMember().get().getValue().contains(SLASH)) {
+                return convertToForeignExpression(expr.getRight().asMember().get().getValue(),
+                                                  expr.getLeft().accept(this),
+                                                  operator);
+            } else {
+                return rootQS.getFilterForProperty(expr.getRight().asMember().get().getValue(),
+                                                   expr.getLeft().accept(this),
+                                                   operator,
+                                                   false)
+                             .toPredicate(root, query, builder);
+            }
         } else if (expr.getLeft().isMember()) {
-            return rootQS.getFilterForProperty(expr.getLeft().asMember().get().getValue(),
-                                               expr.getRight().accept(this),
-                                               operator,
-                                               false)
-                         .toPredicate(root, query, builder);
+            if (expr.getLeft().asMember().get().getValue().contains(SLASH)) {
+                return convertToForeignExpression(expr.getLeft().asMember().get().getValue(),
+                                                  expr.getRight().accept(this),
+                                                  operator);
+            } else {
+                return rootQS.getFilterForProperty(expr.getLeft().asMember().get().getValue(),
+                                                   expr.getRight().accept(this),
+                                                   operator,
+                                                   false)
+                             .toPredicate(root, query, builder);
+            }
         } else {
             // This should never happen!
             throw new STAInvalidQueryException("[This should never happen!] Tried to evaluate member comparison " +
                                                        "without members being involved!");
         }
+    }
+
+    /**
+     * Converts a Filter on related Properties to a chain of Expressions on nested Entities
+     * e.g. Things/Datastreams/Sensor/id eq '52N'
+     *
+     * @param path     Path to the property of a related entity
+     * @param value    value of the property
+     * @param operator operator to be used
+     * @return Expression specifying the entity
+     * @throws STAInvalidFilterExpressionException if the filter is invalid
+     */
+    private Predicate convertToForeignExpression(String path,
+                                                 Expression<?> value,
+                                                 FilterConstants.ComparisonOperator operator)
+            throws STAInvalidFilterExpressionException {
+        String[] resources = path.split(SLASH);
+        String lastResource = resources[resources.length - 2];
+
+        // Get filter on Entity
+        EntityQuerySpecifications<?> stepQS = QuerySpecificationRepository.getSpecification(lastResource);
+
+        Specification<?> filter =
+                stepQS.getFilterForProperty(resources[resources.length - 1], value, operator, false);
+
+        for (int i = resources.length - 3; i > 0; i--) {
+            // Get QuerySpecifications for subQuery
+            stepQS = QuerySpecificationRepository.getSpecification(resources[i]);
+            // Get new IdQuery based on Filter
+            Specification<?> expr =
+                    stepQS.getFilterForRelation(resources[i + 1], filter);
+            filter = expr;
+        }
+
+        // Filter by Id on main Query
+        return rootQS.getFilterForRelation(resources[0], filter)
+                     .toPredicate(root, query, builder);
     }
 
     /**

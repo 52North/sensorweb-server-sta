@@ -73,35 +73,8 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
         };
     }
 
-    @Override
-    public Specification<String> getIdSubqueryWithFilter(Specification filter) {
-        return this.toSubquery(PlatformEntity.class, PlatformEntity.PROPERTY_IDENTIFIER, filter);
-    }
-
-    @Override
-    public Specification<PlatformEntity> getFilterForProperty(String propertyName,
-                                                              Expression<?> propertyValue,
-                                                              FilterConstants.ComparisonOperator operator,
-                                                              boolean switched) {
-        if (propertyName.equals(DATASTREAMS) || propertyName.equals(LOCATIONS)
-                || propertyName.equals(HISTORICAL_LOCATIONS)) {
-            return handleRelatedPropertyFilter(propertyName, propertyValue);
-        } else if (propertyName.equals("id")) {
-            return (root, query, builder) -> {
-                try {
-                    return handleDirectStringPropertyFilter(root.get(PlatformEntity.PROPERTY_IDENTIFIER),
-                                                            propertyValue, operator, builder, false);
-                } catch (STAInvalidFilterExpressionException e) {
-                    throw new RuntimeException(e);
-                }
-            };
-        } else {
-            return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
-        }
-    }
-
-    private Specification<PlatformEntity> handleRelatedPropertyFilter(String propertyName,
-                                                                      Expression<?> propertyValue) {
+    @Override protected Specification<PlatformEntity> handleRelatedPropertyFilter(String propertyName,
+                                                                                  Specification<?> propertyValue) {
         return (root, query, builder) -> {
             try {
                 switch (propertyName) {
@@ -109,31 +82,36 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
                     Subquery<DatastreamEntity> subquery = query.subquery(DatastreamEntity.class);
                     Root<DatastreamEntity> datastream = subquery.from(DatastreamEntity.class);
                     subquery.select(datastream.get(DatastreamEntity.PROPERTY_ID))
-                            .where(builder.equal(datastream.get(DatastreamEntity.PROPERTY_IDENTIFIER), propertyValue));
-                    return builder.in(root.get(PlatformEntity.PROPERTY_DATASTREAMS)).value(subquery);
-                    // return
-                    // qPlatform.datastreamEntities.any().id.eqAny(propertyValue);
+                            .where(((Specification<DatastreamEntity>) propertyValue).toPredicate(datastream,
+                                                                                                 query,
+                                                                                                 builder));
+                    final Join<PlatformEntity, DatastreamEntity> join =
+                            root.join(PlatformEntity.PROPERTY_DATASTREAMS, JoinType.INNER);
+                    return builder.in(join.get(DescribableEntity.PROPERTY_ID)).value(subquery);
                 }
                 case LOCATIONS: {
                     Subquery<LocationEntity> subquery = query.subquery(LocationEntity.class);
                     Root<LocationEntity> location = subquery.from(LocationEntity.class);
                     subquery.select(location.get(LocationEntity.PROPERTY_ID))
-                            .where(builder.equal(location.get(LocationEntity.PROPERTY_IDENTIFIER), propertyValue));
-                    return builder.in(root.get(PlatformEntity.PROPERTY_LOCATIONS)).value(subquery);
-                    // return
-                    // qPlatform.locationEntities.any().id.eqAny(propertyValue);
+                            .where(((Specification<LocationEntity>) propertyValue).toPredicate(location,
+                                                                                               query,
+                                                                                               builder));
+                    final Join<PlatformEntity, LocationEntity> join =
+                            root.join(PlatformEntity.PROPERTY_LOCATIONS, JoinType.INNER);
+                    return builder.in(join.get(DescribableEntity.PROPERTY_ID)).value(subquery);
                 }
                 case HISTORICAL_LOCATIONS:
                     Subquery<HistoricalLocationEntity> subquery = query.subquery(HistoricalLocationEntity.class);
                     Root<HistoricalLocationEntity> historicalLocation =
                             subquery.from(HistoricalLocationEntity.class);
                     subquery.select(historicalLocation.get(HistoricalLocationEntity.PROPERTY_ID))
-                            .where(builder.equal(
-                                    historicalLocation.get(HistoricalLocationEntity.PROPERTY_IDENTIFIER),
-                                    propertyValue));
-                    return builder.in(root.get(PlatformEntity.PROPERTY_HISTORICAL_LOCATIONS)).value(subquery);
-                // return
-                // qPlatform.historicalLocationEntities.any().id.eqAny(propertyValue);
+                            .where(((Specification<HistoricalLocationEntity>) propertyValue).toPredicate(
+                                    historicalLocation,
+                                    query,
+                                    builder));
+                    final Join<PlatformEntity, HistoricalLocationEntity> join =
+                            root.join(PlatformEntity.PROPERTY_HISTORICAL_LOCATIONS, JoinType.INNER);
+                    return builder.in(join.get(DescribableEntity.PROPERTY_ID)).value(subquery);
                 default:
                     throw new STAInvalidFilterExpressionException(
                             "Filtering by Related Properties with cardinality >1 is currently not supported!");
@@ -144,13 +122,16 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
         };
     }
 
-    private Specification<PlatformEntity> handleDirectPropertyFilter(String propertyName,
-                                                                     Expression<?> propertyValue,
-                                                                     FilterConstants.ComparisonOperator operator,
-                                                                     boolean switched) {
+    @Override protected Specification<PlatformEntity> handleDirectPropertyFilter(String propertyName,
+                                                                                 Expression<?> propertyValue,
+                                                                                 FilterConstants.ComparisonOperator operator,
+                                                                                 boolean switched) {
         return (Specification<PlatformEntity>) (root, query, builder) -> {
             try {
                 switch (propertyName) {
+                case "id":
+                    return handleDirectStringPropertyFilter(root.get(PlatformEntity.PROPERTY_IDENTIFIER),
+                                                            propertyValue, operator, builder, false);
                 case "name":
                     return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
                                                             propertyValue, operator, builder, switched);
@@ -162,8 +143,6 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
                             builder,
                             switched);
                 case "properties":
-                    // TODO
-                    // qPlatform.parameters.any().name.eq("properties")
                     return handleDirectStringPropertyFilter(
                             root.get(PlatformEntity.PROPERTY_PROPERTIES),
                             propertyValue,

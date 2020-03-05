@@ -53,39 +53,8 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
         };
     }
 
-    @Override
-    public Specification<String> getIdSubqueryWithFilter(Specification filter) {
-        return this.toSubquery(PhenomenonEntity.class, PhenomenonEntity.PROPERTY_IDENTIFIER, filter);
-    }
-
-    @Override
-    public Specification<PhenomenonEntity> getFilterForProperty(String propertyName,
-                                                                Expression<?> propertyValue,
-                                                                FilterConstants.ComparisonOperator operator,
-                                                                boolean switched)
-            throws STAInvalidFilterExpressionException {
-        if (propertyName.equals(DATASTREAMS)) {
-            return handleRelatedPropertyFilter(propertyName, propertyValue);
-        } else if (propertyName.equals("id")) {
-            return (root, query, builder) -> {
-                try {
-                    return handleDirectStringPropertyFilter(root.get(PhenomenonEntity.PROPERTY_IDENTIFIER),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            false);
-                } catch (STAInvalidFilterExpressionException e) {
-                    throw new RuntimeException(e);
-                }
-                //
-            };
-        } else {
-            return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
-        }
-    }
-
-    private Specification<PhenomenonEntity> handleRelatedPropertyFilter(String propertyName,
-                                                                        Expression<?> propertyValue) {
+    @Override protected Specification<PhenomenonEntity> handleRelatedPropertyFilter(String propertyName,
+                                                                                    Specification<?> propertyValue) {
         return (root, query, builder) -> {
             final Join<PhenomenonEntity, DatastreamEntity> join =
                     root.join(DatastreamEntity.PROPERTY_OBSERVABLE_PROPERTY, JoinType.INNER);
@@ -93,13 +62,19 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
         };
     }
 
-    private Specification<PhenomenonEntity> handleDirectPropertyFilter(String propertyName,
-                                                                       Expression<?> propertyValue,
-                                                                       FilterConstants.ComparisonOperator operator,
-                                                                       boolean switched) {
+    @Override protected Specification<PhenomenonEntity> handleDirectPropertyFilter(String propertyName,
+                                                                                   Expression<?> propertyValue,
+                                                                                   FilterConstants.ComparisonOperator operator,
+                                                                                   boolean switched) {
         return (Specification<PhenomenonEntity>) (root, query, builder) -> {
             try {
                 switch (propertyName) {
+                case "id":
+                    return handleDirectStringPropertyFilter(root.get(PhenomenonEntity.PROPERTY_IDENTIFIER),
+                                                            propertyValue,
+                                                            operator,
+                                                            builder,
+                                                            false);
                 case "name":
                     return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
                                                             propertyValue, operator, builder, switched);
