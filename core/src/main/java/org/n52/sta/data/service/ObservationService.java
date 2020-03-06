@@ -610,7 +610,7 @@ public class ObservationService extends
             data.setDataset(dataset);
             if (observation.getIdentifier() != null) {
                 if (getRepository().existsByIdentifier(observation.getIdentifier())) {
-                    throw new STACRUDException("Identifier already exists!", HTTPStatus.BAD_REQUEST);
+                    throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
                 } else {
                     data.setIdentifier(observation.getIdentifier());
                 }

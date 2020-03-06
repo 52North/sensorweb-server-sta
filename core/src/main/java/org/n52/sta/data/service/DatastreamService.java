@@ -240,7 +240,7 @@ public class DatastreamService
             datastream.setThing(getThingService().createEntity(datastream.getThing()));
             if (datastream.getIdentifier() != null) {
                 if (getRepository().existsByIdentifier(datastream.getIdentifier())) {
-                    throw new STACRUDException("Identifier already exists!", HTTPStatus.BAD_REQUEST);
+                    throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
                 } else {
                     datastream.setIdentifier(datastream.getIdentifier());
                 }

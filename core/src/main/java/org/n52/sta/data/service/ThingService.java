@@ -184,7 +184,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
                     thing.setIdentifier(UUID.randomUUID().toString());
                 }
             } else if (getRepository().existsByIdentifier(thing.getIdentifier())) {
-                throw new STACRUDException("Identifier already exists!", HTTPStatus.BAD_REQUEST);
+                throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
             }
             thing.setProcesssed(true);
             processLocations(thing, thing.getLocations());

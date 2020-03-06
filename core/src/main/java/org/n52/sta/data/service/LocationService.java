@@ -186,7 +186,7 @@ public class LocationService
                     location.setIdentifier(UUID.randomUUID().toString());
                 }
             } else if (getRepository().existsByIdentifier(location.getIdentifier())) {
-                throw new STACRUDException("Identifier already exists!", HTTPStatus.BAD_REQUEST);
+                throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
             }
             location.setProcesssed(true);
             checkLocationEncoding(location);

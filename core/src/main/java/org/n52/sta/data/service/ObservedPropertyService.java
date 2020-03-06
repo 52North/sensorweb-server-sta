@@ -236,7 +236,7 @@ public class ObservedPropertyService
                 observableProperty.setStaIdentifier(UUID.randomUUID().toString());
             }
         } else if (getRepository().existsByStaIdentifier(observableProperty.getStaIdentifier())) {
-            throw new STACRUDException("Identifier already exists!", HTTPStatus.BAD_REQUEST);
+            throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
         }
         return getRepository().save(getAsPhenomenonEntity(observableProperty));
     }

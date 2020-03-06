@@ -210,7 +210,7 @@ public class FeatureOfInterestService
                                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_FEATURETYPE)
                                       .orElse(null);
             } else {
-                throw new STACRUDException("Identifier already exists!", HTTPStatus.BAD_REQUEST);
+                throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
             }
         }
         feature.setXml(null);
