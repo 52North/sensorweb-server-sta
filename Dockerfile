@@ -5,7 +5,7 @@ WORKDIR /app
 
 RUN git clone https://github.com/52North/sensorweb-server-db-model \
     && cd sensorweb-server-db-model \
-    && git checkout feature/merge_v1
+    && git checkout develop
 
 RUN git clone https://github.com/speckij/arctic-sea \
     && cd arctic-sea \
