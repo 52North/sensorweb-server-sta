@@ -62,10 +62,11 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
         };
     }
 
-    @Override protected Specification<PhenomenonEntity> handleDirectPropertyFilter(String propertyName,
-                                                                                   Expression<?> propertyValue,
-                                                                                   FilterConstants.ComparisonOperator operator,
-                                                                                   boolean switched) {
+    @Override protected Specification<PhenomenonEntity> handleDirectPropertyFilter(
+            String propertyName,
+            Expression<?> propertyValue,
+            FilterConstants.ComparisonOperator operator,
+            boolean switched) {
         return (Specification<PhenomenonEntity>) (root, query, builder) -> {
             try {
                 switch (propertyName) {

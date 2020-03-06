@@ -32,7 +32,7 @@ package org.n52.sta;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * Adapted from
+ * Starts a Postgis Container to be used in IT Tests
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
@@ -54,11 +54,6 @@ public class STAPostgresContainer extends PostgreSQLContainer<STAPostgresContain
     @Override
     public void start() {
         super.start();
-
-        for (int i = 0; i < 100; i++) {
-            System.out.println("container.getJdbcUrl()");
-            System.out.println(container.getJdbcUrl());
-        }
         System.setProperty("DB_URL", container.getJdbcUrl());
         System.setProperty("DB_USERNAME", container.getUsername());
         System.setProperty("DB_PASSWORD", container.getPassword());

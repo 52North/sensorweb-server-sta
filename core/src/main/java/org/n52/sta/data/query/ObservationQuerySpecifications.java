@@ -114,10 +114,11 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    @Override protected Specification<DataEntity<?>> handleDirectPropertyFilter(String propertyName,
-                                                                                Expression<?> propertyValue,
-                                                                                FilterConstants.ComparisonOperator operator,
-                                                                                boolean switched) {
+    @Override protected Specification<DataEntity<?>> handleDirectPropertyFilter(
+            String propertyName,
+            Expression<?> propertyValue,
+            FilterConstants.ComparisonOperator operator,
+            boolean switched) {
         return (root, query, builder) -> {
             try {
                 switch (propertyName) {

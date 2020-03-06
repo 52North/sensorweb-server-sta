@@ -50,7 +50,7 @@ import org.n52.sta.serdes.ObservationSerDes;
 import org.n52.sta.serdes.ObservedPropertySerDes;
 import org.n52.sta.serdes.SensorSerDes;
 import org.n52.sta.serdes.ThingSerDes;
-import org.n52.svalbard.odata.QueryOptionsFactory;
+import org.n52.svalbard.odata.core.QueryOptionsFactory;
 
 import java.util.regex.Pattern;
 
@@ -583,7 +583,7 @@ public interface STARequestUtils extends StaConstants {
      * This function validates a given URI semantically by checking if all Entities referenced in the navigation
      * exists. As URI is syntactically valid indices can be hard-coded.
      *
-     * @param uriResources URI of the Request split by SLASH
+     * @param uriResources      URI of the Request split by SLASH
      * @param serviceRepository Repository for EntityServices
      * @return STAInvalidUrlException if URI is malformed
      */

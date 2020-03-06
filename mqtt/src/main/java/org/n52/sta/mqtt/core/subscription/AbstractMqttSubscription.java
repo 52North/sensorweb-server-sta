@@ -31,7 +31,7 @@ package org.n52.sta.mqtt.core.subscription;
 
 import org.n52.series.db.beans.HibernateRelations;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
-import org.n52.svalbard.odata.QueryOptionsFactory;
+import org.n52.svalbard.odata.core.QueryOptionsFactory;
 
 import java.util.Map;
 import java.util.Objects;

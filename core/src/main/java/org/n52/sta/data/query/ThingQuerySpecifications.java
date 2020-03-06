@@ -122,10 +122,11 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
         };
     }
 
-    @Override protected Specification<PlatformEntity> handleDirectPropertyFilter(String propertyName,
-                                                                                 Expression<?> propertyValue,
-                                                                                 FilterConstants.ComparisonOperator operator,
-                                                                                 boolean switched) {
+    @Override protected Specification<PlatformEntity> handleDirectPropertyFilter(
+            String propertyName,
+            Expression<?> propertyValue,
+            FilterConstants.ComparisonOperator operator,
+            boolean switched) {
         return (Specification<PlatformEntity>) (root, query, builder) -> {
             try {
                 switch (propertyName) {
