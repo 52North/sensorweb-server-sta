@@ -42,7 +42,7 @@
         <series-hbm.version>2.0.0-alpha.5</series-hbm.version>
         <arctic-sea.version>7.3.0</arctic-sea.version>
         <spring-boot.version>2.2.4.RELEASE</spring-boot.version>
-        <geolatte-geom.version>1.4.0</geolatte-geom.version>
+        <geolatte-geom.version>1.5.0</geolatte-geom.version>
         <hibernate.version>5.4.2.Final</hibernate.version>
         <jackson.version>2.10.3</jackson.version>
         <hamcrest.version>2.2</hamcrest.version>
