@@ -18,6 +18,7 @@ buildNumber.properties
 .classpath
 .project
 .settings/*
+*/.settings/*
 *.factorypath
 
 sensor-things-api-app/.settings/
