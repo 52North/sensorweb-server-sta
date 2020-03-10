@@ -114,6 +114,7 @@ public interface EntityGraphRepository<T, I> extends JpaSpecificationExecutor<T>
         FETCHGRAPH_OBSERVABLE_PROP("observableProperty"),
         FETCHGRAPH_OM_OBS_TYPE("omObservationType"),
         FETCHGRAPH_DATASETS("datasets"),
+        FETCHGRAPH_FEATURE("feature"),
         FETCHGRAPH_DATASET("dataset");
 
         private String val;

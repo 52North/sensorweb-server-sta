@@ -405,7 +405,8 @@ public class ObservationService extends
                                                         .and(dQS.matchOfferings(offering.getIdentifier())));
         Optional<DatasetEntity> queried =
                 datasetRepository.findOne(query,
-                                          EntityGraphRepository.FetchGraph.FETCHGRAPH_OM_OBS_TYPE);
+                                          EntityGraphRepository.FetchGraph.FETCHGRAPH_OM_OBS_TYPE,
+                                          EntityGraphRepository.FetchGraph.FETCHGRAPH_FEATURE);
         if (queried.isPresent()) {
             return queried.get();
         } else {
