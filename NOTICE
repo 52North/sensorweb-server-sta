@@ -4,7 +4,6 @@ Licensed under GNU General Public License, Version 2.0
 
 This project includes: 
 
-  "Java Concurrency in Practice" book annotations under Creative Commons Attribution License, http://creativecommons.org/licenses/by/2.5
   52°North Faroe Annotations under The Apache Software License, Version 2.0
   52°North Faroe Utilities under The Apache Software License, Version 2.0
   52°North Jan Mayen under The Apache Software License, Version 2.0
@@ -12,10 +11,7 @@ This project includes:
   52°North Shetland under The Apache Software License, Version 2.0
   52°North Svalbard Core under The Apache Software License, Version 2.0
   52°North Svalbard OData under The Apache Software License, Version 2.0
-  abego TreeLayout Core under BSD 3-Clause "New" or "Revised" License (BSD-3-Clause)
-  ANTLR 3 Runtime under BSD licence
   ANTLR 4 Runtime under The BSD License
-  ANTLR 4 Tool under The BSD License
   AntLR Parser Generator under BSD License
   Apache Commons Codec under Apache License, Version 2.0
   Apache HttpClient under Apache License, Version 2.0
@@ -24,7 +20,6 @@ This project includes:
   Apache Log4j to SLF4J Adapter under Apache License, Version 2.0
   AspectJ runtime under Eclipse Public License - v 1.0
   AspectJ weaver under Eclipse Public License - v 1.0
-  Bean Validation API under Apache License 2.0
   Byte Buddy (without dependencies) under Apache License, Version 2.0
   Checker Qual under The MIT License
   ClassMate under Apache License, Version 2.0
@@ -44,7 +39,6 @@ This project includes:
   Hibernate ORM - hibernate-spatial under GNU Library General Public License v2.1 or later
   Hibernate Validator Engine under Apache License 2.0
   HikariCP under The Apache Software License, Version 2.0
-  ICU4J under Unicode/ICU License
   io.moquette:moquette-broker under The Apache Software License, Version 2.0
   istack common utility code runtime under Eclipse Distribution License - v 1.0
   J2ObjC Annotations under The Apache Software License, Version 2.0
@@ -55,7 +49,9 @@ This project includes:
   Jackson-core under The Apache Software License, Version 2.0
   jackson-databind under The Apache Software License, Version 2.0
   Jackson-module-parameter-names under The Apache Software License, Version 2.0
+  Jakarta Activation API jar under EDL 1.0
   Jakarta Annotations API under EPL 2.0 or GPL2 w/ CPE
+  Jakarta Bean Validation API under Apache License 2.0
   Jakarta Persistence API under Eclipse Public License v. 2.0 or Eclipse Distribution License v. 1.0
   jakarta.xml.bind-api under Eclipse Distribution License - v 1.0
   Java Annotation Indexer under Apache License, Version 2.0
@@ -72,7 +68,6 @@ This project includes:
   JCL 1.2 implemented over SLF4J under Apache License, Version 2.0
   Joda-Time under Apache License, Version 2.0
   JSON.simple under The Apache Software License, Version 2.0
-  JSR 353 (JSON Processing) Default Provider under Dual license consisting of the CDDL v1.1 and GPL v2
   JUL to SLF4J bridge under MIT License
   JUnit under Eclipse Public License 1.0
   JVM Integration for Metrics under Apache License 2.0
@@ -135,7 +130,6 @@ This project includes:
   sta-http under The Apache Software License, Version 2.0
   sta-mqtt under The Apache Software License, Version 2.0
   sta-webapp under The Apache Software License, Version 2.0
-  StringTemplate 4 under BSD License
   tomcat-embed-core under Apache License, Version 2.0
   tomcat-embed-el under Apache License, Version 2.0
   tomcat-embed-websocket under Apache License, Version 2.0
