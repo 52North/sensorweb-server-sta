@@ -43,6 +43,7 @@ import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.shetland.ogc.sta.model.SensorEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONSensor;
+import org.n52.sta.serdes.json.JSONSensorVariableEncoding;
 import org.n52.sta.serdes.util.ElementWithQueryOptions.SensorWithQueryOptions;
 import org.n52.sta.serdes.util.EntityPatch;
 import org.slf4j.Logger;
@@ -177,14 +178,20 @@ public class SensorSerDes {
     public static class SensorDeserializer extends StdDeserializer<SensorEntity> {
 
         private static final long serialVersionUID = -6513819346703020350L;
+        private final boolean variableEncodingType;
 
-        public SensorDeserializer() {
+        public SensorDeserializer(boolean variableEncodingType) {
             super(SensorEntity.class);
+            this.variableEncodingType = variableEncodingType;
         }
 
         @Override
         public SensorEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return p.readValueAs(JSONSensor.class).toEntity(JSONBase.EntityType.FULL);
+            if (variableEncodingType) {
+                return p.readValueAs(JSONSensorVariableEncoding.class).toEntity(JSONBase.EntityType.FULL);
+            } else {
+                return p.readValueAs(JSONSensor.class).toEntity(JSONBase.EntityType.FULL);
+            }
         }
     }
 

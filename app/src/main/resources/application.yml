@@ -20,6 +20,11 @@ server:
     ## Default (defined by standard): "Observations" only
     mqttPublishTopics: Things, Observations
 
+    ## Toggle strict checking of encodingType for Sensor Entity
+    ## When true Sensor->encodingType is not validated against allowed encodingTypes defined in the Standard
+    ## (currently PDF and SensorML2)
+    variableEncodingType: true
+
 
 # Database Configuration
 database:

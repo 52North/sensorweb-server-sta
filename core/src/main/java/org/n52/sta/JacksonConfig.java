@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta;
 
 import com.fasterxml.jackson.databind.Module;
@@ -63,11 +64,12 @@ import java.util.ArrayList;
 public class JacksonConfig {
 
     @Bean
-    public ObjectMapper customMapper(@Value("${server.rootUrl}") String rootUrl) {
+    public ObjectMapper customMapper(@Value("${server.rootUrl}") String rootUrl,
+                                     @Value("${server.feature.variableEncodingType:false}")
+                                             boolean variableSensorEncodingType) {
         ArrayList<Module> modules = new ArrayList<>();
 
         SimpleModule module = new SimpleModule();
-
 
         // Register Serializers/Deserializers for all custom types
         SimpleSerializers serializers = new SimpleSerializers();
@@ -83,46 +85,50 @@ public class JacksonConfig {
 
         SimpleDeserializers deserializers = new SimpleDeserializers();
         deserializers.addDeserializer(PlatformEntity.class,
-                new ThingSerDes.ThingDeserializer());
+                                      new ThingSerDes.ThingDeserializer());
         deserializers.addDeserializer(LocationEntity.class,
-                new LocationSerDes.LocationDeserializer());
-        deserializers.addDeserializer(SensorEntity.class,
-                new SensorSerDes.SensorDeserializer());
+                                      new LocationSerDes.LocationDeserializer());
+        if (variableSensorEncodingType) {
+            deserializers.addDeserializer(SensorEntity.class,
+                                          new SensorSerDes.SensorDeserializer(true));
+        } else {
+            deserializers.addDeserializer(SensorEntity.class,
+                                          new SensorSerDes.SensorDeserializer(false));
+        }
         deserializers.addDeserializer(DataEntity.class,
-                new ObservationSerDes.ObservationDeserializer());
+                                      new ObservationSerDes.ObservationDeserializer());
         deserializers.addDeserializer(PhenomenonEntity.class,
-                new ObservedPropertySerDes.ObservedPropertyDeserializer());
+                                      new ObservedPropertySerDes.ObservedPropertyDeserializer());
         deserializers.addDeserializer(AbstractFeatureEntity.class,
-                new FeatureOfInterestSerDes.FeatureOfInterestDeserializer());
+                                      new FeatureOfInterestSerDes.FeatureOfInterestDeserializer());
         deserializers.addDeserializer(HistoricalLocationEntity.class,
-                new HistoricalLocationSerDes.HistoricalLocationDeserializer());
+                                      new HistoricalLocationSerDes.HistoricalLocationDeserializer());
         deserializers.addDeserializer(DatastreamEntity.class,
-                new DatastreamSerDes.DatastreamDeserializer());
+                                      new DatastreamSerDes.DatastreamDeserializer());
 
         deserializers.addDeserializer(ThingSerDes.PlatformEntityPatch.class,
-                new ThingSerDes.ThingPatchDeserializer());
+                                      new ThingSerDes.ThingPatchDeserializer());
         deserializers.addDeserializer(LocationSerDes.LocationEntityPatch.class,
-                new LocationSerDes.LocationPatchDeserializer());
+                                      new LocationSerDes.LocationPatchDeserializer());
         deserializers.addDeserializer(SensorSerDes.SensorEntityPatch.class,
-                new SensorSerDes.SensorPatchDeserializer());
+                                      new SensorSerDes.SensorPatchDeserializer());
         deserializers.addDeserializer(ObservationSerDes.StaDataEntityPatch.class,
-                new ObservationSerDes.ObservationPatchDeserializer());
+                                      new ObservationSerDes.ObservationPatchDeserializer());
         deserializers.addDeserializer(ObservedPropertySerDes.PhenomenonEntityPatch.class,
-                new ObservedPropertySerDes.ObservedPropertyPatchDeserializer());
+                                      new ObservedPropertySerDes.ObservedPropertyPatchDeserializer());
         deserializers.addDeserializer(FeatureOfInterestSerDes.AbstractFeatureEntityPatch.class,
-                new FeatureOfInterestSerDes.FeatureOfInterestPatchDeserializer());
+                                      new FeatureOfInterestSerDes.FeatureOfInterestPatchDeserializer());
         deserializers.addDeserializer(HistoricalLocationSerDes.HistoricalLocationEntityPatch.class,
-                new HistoricalLocationSerDes.HistoricalLocationPatchDeserializer());
+                                      new HistoricalLocationSerDes.HistoricalLocationPatchDeserializer());
         deserializers.addDeserializer(DatastreamSerDes.DatastreamEntityPatch.class,
-                new DatastreamSerDes.DatastreamPatchDeserializer());
-
+                                      new DatastreamSerDes.DatastreamPatchDeserializer());
 
         module.setSerializers(serializers);
         module.setDeserializers(deserializers);
         modules.add(module);
         modules.add(new AfterburnerModule());
         return Jackson2ObjectMapperBuilder.json()
-                .modules(modules)
-                .build();
+                                          .modules(modules)
+                                          .build();
     }
 }

@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.serdes.json;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -45,10 +46,10 @@ import java.util.stream.Collectors;
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
 public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorEntity> implements AbstractJSONEntity {
 
-    private static final String INALID_ENCODING_TYPE = "Invalid encodingType supplied. Only SensorML or PDF allowed.";
-    private static final String STA_SENSORML_2 = "http://www.opengis.net/doc/IS/SensorML/2.0";
-    private static final String SENSORML_2 = "http://www.opengis.net/sensorml/2.0";
-    private static final String PDF = "application/pdf";
+    protected static final String INALID_ENCODING_TYPE = "Invalid encodingType supplied. Only SensorML or PDF allowed.";
+    protected static final String STA_SENSORML_2 = "http://www.opengis.net/doc/IS/SensorML/2.0";
+    protected static final String SENSORML_2 = "http://www.opengis.net/sensorml/2.0";
+    protected static final String PDF = "application/pdf";
 
     // JSON Properties. Matched by Annotation or variable name
     public String properties;
@@ -58,7 +59,6 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorEntity>
     @JsonManagedReference
     public JSONDatastream[] Datastreams;
 
-
     public JSONSensor() {
         self = new SensorEntity();
     }
@@ -66,94 +66,81 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorEntity>
     @Override
     public SensorEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
-            case FULL:
-                Assert.notNull(name, INVALID_INLINE_ENTITY + "name");
-                Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
-                Assert.notNull(encodingType, INVALID_INLINE_ENTITY + "encodingType");
-                Assert.notNull(metadata, INVALID_INLINE_ENTITY + "metadata");
-                self.setIdentifier(identifier);
-                self.setName(name);
-                self.setDescription(description);
+        case FULL:
+            Assert.notNull(name, INVALID_INLINE_ENTITY + "name");
+            Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
+            Assert.notNull(encodingType, INVALID_INLINE_ENTITY + "encodingType");
+            Assert.notNull(metadata, INVALID_INLINE_ENTITY + "metadata");
+            self.setIdentifier(identifier);
+            self.setName(name);
+            self.setDescription(description);
 
-                if  (encodingType != null) {
-                    if (encodingType.equalsIgnoreCase(STA_SENSORML_2)) {
-                        self.setFormat(new FormatEntity().setFormat(SENSORML_2));
-                        ProcedureHistoryEntity procedureHistoryEntity = new ProcedureHistoryEntity();
-                        procedureHistoryEntity.setProcedure(self);
-                        procedureHistoryEntity.setFormat(self.getFormat());
-                        procedureHistoryEntity.setStartTime(DateTime.now().toDate());
-                        procedureHistoryEntity.setXml(metadata);
-                        Set<ProcedureHistoryEntity> set = new LinkedHashSet<>();
-                        set.add(procedureHistoryEntity);
-                        self.setProcedureHistory(set);
-                    } else if (encodingType.equalsIgnoreCase(PDF)) {
-                        self.setFormat(new FormatEntity().setFormat(PDF));
-                        self.setDescriptionFile(metadata);
-                    } else {
-                        Assert.notNull(null, INALID_ENCODING_TYPE);
-                    }
-                } else {
-                    // Used when PATCHing new metadata
-                    self.setDescriptionFile(metadata);
-                }
+            if (encodingType != null) {
+                handleEncodingType();
+            }
 
-                if (Datastreams != null) {
-                    self.setDatastreams(Arrays.stream(Datastreams)
-                            .map(ds -> ds.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE))
-                            .collect(Collectors.toSet()));
-                }
+            if (Datastreams != null) {
+                self.setDatastreams(Arrays.stream(Datastreams)
+                                          .map(ds -> ds.toEntity(JSONBase.EntityType.FULL,
+                                                                 JSONBase.EntityType.REFERENCE))
+                                          .collect(Collectors.toSet()));
+            }
 
-                // Deal with back reference during deep insert
-                if (backReference != null) {
-                    self.addDatastream(((JSONDatastream) backReference).getEntity());
-                }
+            // Deal with back reference during deep insert
+            if (backReference != null) {
+                self.addDatastream(((JSONDatastream) backReference).getEntity());
+            }
 
-                return self;
-            case PATCH:
-                self.setIdentifier(identifier);
-                self.setName(name);
-                self.setDescription(description);
+            return self;
+        case PATCH:
+            self.setIdentifier(identifier);
+            self.setName(name);
+            self.setDescription(description);
 
-                if  (encodingType != null) {
-                    if (encodingType.equalsIgnoreCase(STA_SENSORML_2)) {
-                        self.setFormat(new FormatEntity().setFormat(SENSORML_2));
-                        ProcedureHistoryEntity procedureHistoryEntity = new ProcedureHistoryEntity();
-                        procedureHistoryEntity.setProcedure(self);
-                        procedureHistoryEntity.setFormat(self.getFormat());
-                        procedureHistoryEntity.setStartTime(DateTime.now().toDate());
-                        procedureHistoryEntity.setXml(metadata);
-                        Set<ProcedureHistoryEntity> set = new LinkedHashSet<>();
-                        set.add(procedureHistoryEntity);
-                        self.setProcedureHistory(set);
-                    } else if (encodingType.equalsIgnoreCase(PDF)) {
-                        self.setFormat(new FormatEntity().setFormat(PDF));
-                        self.setDescriptionFile(metadata);
-                    } else {
-                        Assert.notNull(null, INALID_ENCODING_TYPE);
-                    }
-                } else {
-                    // Used when PATCHing new metadata
-                    self.setDescriptionFile(metadata);
-                }
+            if (encodingType != null) {
+                handleEncodingType();
+            } else {
+                // Used when PATCHing new metadata
+                self.setDescriptionFile(metadata);
+            }
 
-                if (Datastreams != null) {
-                    self.setDatastreams(Arrays.stream(Datastreams)
-                            .map(ds -> ds.toEntity(JSONBase.EntityType.REFERENCE))
-                            .collect(Collectors.toSet()));
-                }
-                return self;
-            case REFERENCE:
-                Assert.isNull(name, INVALID_REFERENCED_ENTITY);
-                Assert.isNull(description, INVALID_REFERENCED_ENTITY);
-                Assert.isNull(encodingType, INVALID_REFERENCED_ENTITY);
-                Assert.isNull(metadata, INVALID_REFERENCED_ENTITY);
+            if (Datastreams != null) {
+                self.setDatastreams(Arrays.stream(Datastreams)
+                                          .map(ds -> ds.toEntity(JSONBase.EntityType.REFERENCE))
+                                          .collect(Collectors.toSet()));
+            }
+            return self;
+        case REFERENCE:
+            Assert.isNull(name, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(description, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(encodingType, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(metadata, INVALID_REFERENCED_ENTITY);
 
-                Assert.isNull(Datastreams, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(Datastreams, INVALID_REFERENCED_ENTITY);
 
-                self.setIdentifier(identifier);
-                return self;
-            default:
-                return null;
+            self.setIdentifier(identifier);
+            return self;
+        default:
+            return null;
+        }
+    }
+
+    protected void handleEncodingType() {
+        if (encodingType.equalsIgnoreCase(STA_SENSORML_2)) {
+            self.setFormat(new FormatEntity().setFormat(SENSORML_2));
+            ProcedureHistoryEntity procedureHistoryEntity = new ProcedureHistoryEntity();
+            procedureHistoryEntity.setProcedure(self);
+            procedureHistoryEntity.setFormat(self.getFormat());
+            procedureHistoryEntity.setStartTime(DateTime.now().toDate());
+            procedureHistoryEntity.setXml(metadata);
+            Set<ProcedureHistoryEntity> set = new LinkedHashSet<>();
+            set.add(procedureHistoryEntity);
+            self.setProcedureHistory(set);
+        } else if (encodingType.equalsIgnoreCase(PDF)) {
+            self.setFormat(new FormatEntity().setFormat(PDF));
+            self.setDescriptionFile(metadata);
+        } else {
+            Assert.notNull(null, INALID_ENCODING_TYPE);
         }
     }
 }
