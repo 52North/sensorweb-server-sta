@@ -31,6 +31,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 package org.n52.sta.mqtt.core.subscription;
 
 import org.n52.series.db.beans.HibernateRelations;
@@ -61,6 +62,7 @@ public class MqttEntitySubscription extends AbstractMqttSubscription {
         if (mt.group(STARequestUtils.GROUPNAME_WANTED_IDENTIFIER) == null) {
             sourceEntityType = mt.group(STARequestUtils.GROUPNAME_SOURCE_NAME);
             sourceId = mt.group(STARequestUtils.GROUPNAME_SOURCE_IDENTIFIER);
+            sourceId = sourceId.substring(1, sourceId.length() - 1);
             wantedEntityType = mt.group(STARequestUtils.GROUPNAME_WANTED_NAME);
             Assert.notNull(sourceId, "Unable to parse topic. Could not extract sourceId");
             Assert.notNull(sourceEntityType, "Unable to parse topic. Could not extract sourceEntityType");
@@ -98,7 +100,6 @@ public class MqttEntitySubscription extends AbstractMqttSubscription {
         } else {
             // Referenced Entity
             // Check if Entity belongs to collection of this Subscription
-            //TODO(specki): check if this acutally works as names have changed
             if (collections != null) {
                 for (Map.Entry<String, Set<String>> collection : collections.entrySet()) {
                     if (collection.getKey().equals(sourceEntityType)) {

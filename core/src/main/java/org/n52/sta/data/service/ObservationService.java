@@ -649,14 +649,14 @@ public class ObservationService extends
         DataEntity<?> entity = (DataEntity<?>) rawObject;
 
         if (entity.getDataset() != null && entity.getDataset().getFeature() != null) {
-            collections.put(STAEntityDefinition.FEATURE_OF_INTEREST,
+            collections.put(STAEntityDefinition.FEATURES_OF_INTEREST,
                             Collections.singleton(entity.getDataset().getFeature().getIdentifier()));
         }
 
         Optional<DatastreamEntity> datastreamEntity =
                 datastreamRepository.findOne(dsQS.withObservationIdentifier(entity.getIdentifier()));
         if (datastreamEntity.isPresent()) {
-            collections.put(STAEntityDefinition.DATASTREAM,
+            collections.put(STAEntityDefinition.DATASTREAMS,
                             Collections.singleton(datastreamEntity.get().getIdentifier()));
         } else {
             logger.debug("No Datastream associated with this Entity {}", entity.getIdentifier());

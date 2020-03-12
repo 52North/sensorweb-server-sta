@@ -64,6 +64,7 @@ public class MqttEntityCollectionSubscription extends AbstractMqttSubscription {
             // E.g. /Things(52)/Datastreams
             sourceEntityType = mt.group(STARequestUtils.GROUPNAME_SOURCE_NAME);
             sourceId = mt.group(STARequestUtils.GROUPNAME_SOURCE_IDENTIFIER);
+            sourceId = sourceId.substring(1, sourceId.length()-1);
             wantedEntityType = mt.group(STARequestUtils.GROUPNAME_WANTED_NAME);
             Assert.notNull(sourceEntityType, "Unable to parse topic. Could not extract sourceEntityType");
             Assert.notNull(sourceId, "Unable to parse topic. Could not extract sourceId");
@@ -90,7 +91,6 @@ public class MqttEntityCollectionSubscription extends AbstractMqttSubscription {
         }
 
         // Check if Entity belongs to collection of this Subscription
-        //TODO(specki): check if this acutally works as names have changed
         if (collections != null) {
             for (Entry<String, Set<String>> collection : collections.entrySet()) {
                 if (collection.getKey().equals(sourceEntityType)) {

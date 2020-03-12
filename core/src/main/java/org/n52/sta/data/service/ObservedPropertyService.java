@@ -323,7 +323,7 @@ public class ObservedPropertyService
         List<DatastreamEntity> observations = datastreamRepository
                 .findAll(dQS.withObservedPropertyIdentifier(entity.getStaIdentifier()));
         collections.put(
-                STAEntityDefinition.DATASTREAM,
+                STAEntityDefinition.DATASTREAMS,
                 observations
                         .stream()
                         .map(DatastreamEntity::getIdentifier)

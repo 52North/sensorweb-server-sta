@@ -471,17 +471,17 @@ public class DatastreamService
         DatastreamEntity entity = (DatastreamEntity) rawObject;
 
         if (entity.hasThing()) {
-            collections.put(STAEntityDefinition.THING,
+            collections.put(STAEntityDefinition.THINGS,
                             Collections.singleton(entity.getThing().getIdentifier()));
         }
 
         if (entity.hasProcedure()) {
-            collections.put(STAEntityDefinition.SENSOR,
+            collections.put(STAEntityDefinition.SENSORS,
                             Collections.singleton(entity.getProcedure().getIdentifier()));
         }
 
         if (entity.hasObservableProperty()) {
-            collections.put(STAEntityDefinition.OBSERVED_PROPERTY,
+            collections.put(STAEntityDefinition.OBSERVED_PROPERTIES,
                             Collections.singleton(entity.getObservableProperty().getIdentifier()));
         }
 

@@ -178,7 +178,7 @@ public class SensorService
         SensorEntity entity = (SensorEntity) rawObject;
 
         if (entity.hasDatastreams()) {
-            collections.put(STAEntityDefinition.DATASTREAM,
+            collections.put(STAEntityDefinition.DATASTREAMS,
                             entity.getDatastreams()
                                   .stream()
                                   .map(DatastreamEntity::getIdentifier)

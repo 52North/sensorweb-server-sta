@@ -336,7 +336,7 @@ public class LocationService
         LocationEntity entity = (LocationEntity) rawObject;
 
         if (entity.hasHistoricalLocations()) {
-            collections.put(STAEntityDefinition.HISTORICAL_LOCATION,
+            collections.put(STAEntityDefinition.HISTORICAL_LOCATIONS,
                             entity.getHistoricalLocations()
                                   .stream()
                                   .map(HistoricalLocationEntity::getIdentifier)
@@ -344,7 +344,7 @@ public class LocationService
         }
 
         if (entity.hasThings()) {
-            collections.put(STAEntityDefinition.THING,
+            collections.put(STAEntityDefinition.THINGS,
                             entity.getThings()
                                   .stream()
                                   .map(PlatformEntity::getIdentifier)

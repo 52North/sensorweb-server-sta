@@ -280,12 +280,12 @@ public class HistoricalLocationService
         HistoricalLocationEntity entity = (HistoricalLocationEntity) rawObject;
 
         if (entity.hasThing()) {
-            collections.put(STAEntityDefinition.THING,
+            collections.put(STAEntityDefinition.THINGS,
                             Collections.singleton(entity.getThing().getIdentifier()));
         }
 
         if (entity.hasLocationEntities()) {
-            collections.put(STAEntityDefinition.LOCATION,
+            collections.put(STAEntityDefinition.LOCATIONS,
                             entity.getLocations()
                                   .stream()
                                   .map(LocationEntity::getIdentifier)

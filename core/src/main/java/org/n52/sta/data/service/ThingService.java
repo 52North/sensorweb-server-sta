@@ -351,7 +351,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
 
         if (entity.hasLocationEntities()) {
             collections.put(
-                    STAEntityDefinition.LOCATION,
+                    STAEntityDefinition.LOCATIONS,
                     entity.getLocations()
                           .stream()
                           .map(LocationEntity::getIdentifier)
@@ -360,7 +360,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
 
         if (entity.hasHistoricalLocations()) {
             collections.put(
-                    STAEntityDefinition.HISTORICAL_LOCATION,
+                    STAEntityDefinition.HISTORICAL_LOCATIONS,
                     entity.getHistoricalLocations()
                           .stream()
                           .map(HistoricalLocationEntity::getIdentifier)
@@ -368,7 +368,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
         }
 
         if (entity.hasDatastreams()) {
-            collections.put(STAEntityDefinition.DATASTREAM,
+            collections.put(STAEntityDefinition.DATASTREAMS,
                             entity.getDatastreams()
                                   .stream()
                                   .map(DatastreamEntity::getIdentifier)
