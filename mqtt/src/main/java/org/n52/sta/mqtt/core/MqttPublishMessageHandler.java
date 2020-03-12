@@ -99,7 +99,7 @@ public class MqttPublishMessageHandler implements STARequestUtils {
             String topic = (msg.getTopicName().startsWith("/")) ? msg.getTopicName().substring(1) : msg.getTopicName();
 
             // Check topic for syntax+semantics
-            validateResource(new StringBuffer(topic), serviceRepository, 0);
+            validateResource(new StringBuffer(topic), serviceRepository);
 
             // Check if topic references valid Collection
             boolean valid = false;

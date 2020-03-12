@@ -35,7 +35,6 @@ import org.n52.shetland.ogc.filter.FilterClause;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
 import org.n52.sta.utils.STARequestUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -57,11 +56,8 @@ import java.util.HashSet;
 public class STAEntityRequestHandler implements STARequestUtils {
 
     private final EntityServiceRepository serviceRepository;
-    private final int rootUrlLength;
 
-    public STAEntityRequestHandler(@Value("${server.rootUrl}") String rootUrl,
-                                   EntityServiceRepository serviceRepository) {
-        rootUrlLength = rootUrl.length();
+    public STAEntityRequestHandler(EntityServiceRepository serviceRepository) {
         this.serviceRepository = serviceRepository;
     }
 
@@ -80,7 +76,7 @@ public class STAEntityRequestHandler implements STARequestUtils {
     public ElementWithQueryOptions<?> readEntityDirect(@PathVariable String entity,
                                                        @PathVariable String id,
                                                        HttpServletRequest request) throws Exception {
-        validateResource(request.getRequestURL(), serviceRepository, rootUrlLength);
+        validateResource(request.getRequestURI().substring(request.getContextPath().length()), serviceRepository);
 
         String entityId = id.substring(1, id.length() - 1);
         String queryString = request.getQueryString();
@@ -109,8 +105,9 @@ public class STAEntityRequestHandler implements STARequestUtils {
     public ElementWithQueryOptions<?> readEntityRefDirect(@PathVariable String entity,
                                                           @PathVariable String id,
                                                           HttpServletRequest request) throws Exception {
-        String requestUrl = request.getRequestURL().toString();
-        validateResource(requestUrl.substring(0, requestUrl.length() - 5), serviceRepository, rootUrlLength);
+        String requestURI = request.getRequestURI();
+        validateResource(requestURI.substring(request.getContextPath().length(),
+                                              requestURI.length() - 5), serviceRepository);
 
         String entityId = id.substring(1, id.length() - 1);
         HashSet<FilterClause> filters = new HashSet<>();
@@ -141,7 +138,7 @@ public class STAEntityRequestHandler implements STARequestUtils {
                                                         HttpServletRequest request)
             throws Exception {
 
-        validateResource(request.getRequestURL(), serviceRepository, rootUrlLength);
+        validateResource(request.getRequestURI().substring(request.getContextPath().length()), serviceRepository);
 
         String sourceType = entity.substring(0, entity.indexOf("("));
         String sourceId = entity.substring(sourceType.length() + 1, entity.length() - 1);
@@ -181,8 +178,9 @@ public class STAEntityRequestHandler implements STARequestUtils {
                                                            @PathVariable String target,
                                                            HttpServletRequest request)
             throws Exception {
-        String requestUrl = request.getRequestURL().toString();
-        validateResource(requestUrl.substring(0, requestUrl.length() - 5), serviceRepository, rootUrlLength);
+        String requestURI = request.getRequestURI();
+        validateResource(requestURI.substring(request.getContextPath().length(), requestURI.length() - 5),
+                         serviceRepository);
 
         String sourceType = entity.substring(0, entity.indexOf("("));
         String sourceId = entity.substring(sourceType.length() + 1, entity.length() - 1);

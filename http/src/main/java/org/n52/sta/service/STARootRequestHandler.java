@@ -33,12 +33,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
- *
  * Handles all requests to the root
  * e.g. /
  *
@@ -47,15 +47,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class STARootRequestHandler {
 
-    private final String rootUrl;
     private final ObjectMapper mapper;
-    private final String rootResponse;
 
-    public STARootRequestHandler(@Value("${server.rootUrl}") String rootUrl,
-                                 ObjectMapper mapper) {
-        this.rootUrl = rootUrl;
+    public STARootRequestHandler(ObjectMapper mapper) {
         this.mapper = mapper;
-        this.rootResponse = createRootResponse();
     }
 
     /**
@@ -66,16 +61,16 @@ public class STARootRequestHandler {
             value = "/",
             produces = "application/json"
     )
-    public String returnRootResponse() {
-        return rootResponse;
+    public String returnRootResponse(HttpServletRequest request) {
+        return createRootResponse(request.getRequestURL().toString());
     }
 
-    private String createRootResponse() {
+    private String createRootResponse(String uri) {
         ArrayNode arrayNode = mapper.createArrayNode();
         for (String collection : STAEntityDefinition.ALLCOLLECTIONS) {
             ObjectNode node = mapper.createObjectNode();
             node.put("name", collection);
-            node.put("url", rootUrl + collection);
+            node.put("url", uri + collection);
             arrayNode.add(node);
         }
 

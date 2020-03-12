@@ -187,7 +187,7 @@ public class MqttSubscriptionEventHandler implements STARequestUtils, STAEventHa
             Matcher mt;
 
             // Check topic for syntax+semantics
-            validateResource(new StringBuffer(topic), serviceRepository, 0);
+            validateResource(new StringBuffer(topic), serviceRepository);
 
             for (Pattern collectionPattern : NAMED_COLL_PATTERNS) {
                 mt = collectionPattern.matcher(topic);

@@ -53,7 +53,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 /**
- *
  * Handles all CUD requests (POST, PUT, DELETE)
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -80,7 +79,7 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
             produces = "application/json")
     @SuppressWarnings("unchecked")
     public ElementWithQueryOptions<?> handlePost(@PathVariable String collectionName,
-                                              @RequestBody String body)
+                                                 @RequestBody String body)
             throws IOException, STACRUDException {
 
         Class<T> clazz = collectionNameToClass(collectionName);
@@ -102,11 +101,12 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
     )
     @SuppressWarnings("unchecked")
     public ElementWithQueryOptions<?> handleDirectPatch(@PathVariable String collectionName,
-                                                     @PathVariable String id,
-                                                     @RequestBody String body,
-                                                     HttpServletRequest request)
+                                                        @PathVariable String id,
+                                                        @RequestBody String body,
+                                                        HttpServletRequest request)
             throws Exception {
-        validateResource(request.getRequestURL(), serviceRepository, rootUrlLength);
+        String url = request.getRequestURI().substring(request.getContextPath().length());
+        validateResource(url, serviceRepository);
         Class<EntityPatch> clazz = collectionNameToPatchClass(collectionName);
         ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
         String strippedId = id.substring(1, id.length() - 1);
@@ -136,11 +136,12 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
     )
     @SuppressWarnings("unchecked")
     public ElementWithQueryOptions<?> handleRelatedPatch(@PathVariable String entity,
-                                                      @PathVariable String target,
-                                                      @RequestBody String body,
-                                                      HttpServletRequest request)
+                                                         @PathVariable String target,
+                                                         @RequestBody String body,
+                                                         HttpServletRequest request)
             throws Exception {
-        validateResource(request.getRequestURL(), serviceRepository, rootUrlLength);
+        String url = request.getRequestURI().substring(request.getContextPath().length());
+        validateResource(url, serviceRepository);
 
         String sourceType = entity.substring(0, entity.indexOf("("));
         String sourceId = entity.substring(sourceType.length() + 1, entity.length() - 1);
@@ -180,7 +181,8 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
                                @PathVariable String id,
                                HttpServletRequest request)
             throws Exception {
-        validateResource(request.getRequestURL(), serviceRepository, rootUrlLength);
+        String url = request.getRequestURI().substring(request.getContextPath().length());
+        validateResource(url, serviceRepository);
         serviceRepository.getEntityService(collectionName).delete(id.substring(1, id.length() - 1));
         return null;
     }
@@ -207,7 +209,9 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
                                       @RequestBody String body,
                                       HttpServletRequest request)
             throws Exception {
-        validateResource(request.getRequestURL(), serviceRepository, rootUrlLength);
+
+        String url = request.getRequestURI().substring(request.getContextPath().length());
+        validateResource(url, serviceRepository);
 
         String sourceType = entity.substring(0, entity.indexOf("("));
         String sourceId = entity.substring(sourceType.length() + 1, entity.length() - 1);

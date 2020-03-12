@@ -480,31 +480,32 @@ public interface STARequestUtils extends StaConstants {
     /**
      * Validates a given Resource Path. Checks Syntax + Semantics
      *
-     * @param requestURL        URL to the Resource.
+     * @param requestURI        URL to the Resource.
      * @param serviceRepository Backend Repository Factory
-     * @param rootUrlLength     Length of the Root url prepended before the STA Resource Path
      * @throws Exception if URL is not valid
      */
-    default void validateResource(StringBuffer requestURL,
-                                  EntityServiceRepository serviceRepository,
-                                  int rootUrlLength)
+    default void validateResource(StringBuffer requestURI,
+                                  EntityServiceRepository serviceRepository)
             throws Exception {
-        validateResource(requestURL.toString(), serviceRepository, rootUrlLength);
+        validateResource(requestURI.toString(), serviceRepository);
     }
 
     /**
      * Validates a given Resource Path. Checks Syntax + Semantics
      *
-     * @param requestURL        URL to the Resource.
+     * @param requestURI        URL to the Resource.
      * @param serviceRepository Backend Repository Factory
-     * @param rootUrlLength     Length of the Root url prepended before the STA Resource Path
      * @throws Exception if URL is not valid
      */
-    default void validateResource(String requestURL,
-                                  EntityServiceRepository serviceRepository,
-                                  int rootUrlLength)
+    default void validateResource(String requestURI,
+                                  EntityServiceRepository serviceRepository)
             throws Exception {
-        String[] uriResources = requestURL.substring(rootUrlLength).split(SLASH);
+        String[] uriResources;
+        if (requestURI.startsWith("/")) {
+            uriResources = requestURI.substring(1).split(SLASH);
+        } else {
+            uriResources = requestURI.split(SLASH);
+        }
 
         Exception ex;
         ex = validateURISyntax(uriResources);

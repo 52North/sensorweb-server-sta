@@ -35,7 +35,6 @@ import org.n52.shetland.ogc.filter.FilterClause;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
 import org.n52.sta.utils.STARequestUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -56,12 +55,9 @@ import java.util.HashSet;
 public class STAPropertyRequestHandler implements STARequestUtils {
 
     private final EntityServiceRepository serviceRepository;
-    private final int rootUrlLength;
     private final ObjectMapper mapper;
 
-    public STAPropertyRequestHandler(@Value("${server.rootUrl}") String rootUrl,
-                                     EntityServiceRepository serviceRepository, ObjectMapper mapper) {
-        rootUrlLength = rootUrl.length();
+    public STAPropertyRequestHandler(EntityServiceRepository serviceRepository, ObjectMapper mapper) {
         this.serviceRepository = serviceRepository;
         this.mapper = mapper;
     }
@@ -83,7 +79,9 @@ public class STAPropertyRequestHandler implements STARequestUtils {
                                                                @PathVariable String id,
                                                                @PathVariable String property,
                                                                HttpServletRequest request) throws Exception {
-        return readEntityPropertyDirect(entity, id, property, request.getRequestURL().toString());
+
+        String url = request.getRequestURI().substring(request.getContextPath().length());
+        return readEntityPropertyDirect(entity, id, property, url);
     }
 
     private ElementWithQueryOptions<?> readEntityPropertyDirect(String entity,
@@ -91,8 +89,7 @@ public class STAPropertyRequestHandler implements STARequestUtils {
                                                                 String property,
                                                                 String url) throws Exception {
         validateResource(url.substring(0, url.length() - property.length() - 1),
-                         serviceRepository,
-                         rootUrlLength);
+                         serviceRepository);
         validateProperty(entity, property);
 
         String entityId = id.substring(1, id.length() - 1);
@@ -127,7 +124,8 @@ public class STAPropertyRequestHandler implements STARequestUtils {
                                                                 @PathVariable String property,
                                                                 HttpServletRequest request)
             throws Exception {
-        return readRelatedEntityProperty(entity, target, property, request.getRequestURL().toString());
+        String url = request.getRequestURI().substring(request.getContextPath().length());
+        return readRelatedEntityProperty(entity, target, property, url);
     }
 
     private ElementWithQueryOptions readRelatedEntityProperty(String entity,
@@ -135,8 +133,7 @@ public class STAPropertyRequestHandler implements STARequestUtils {
                                                               String property,
                                                               String url) throws Exception {
         validateResource(url.substring(0, url.length() - property.length() - 1),
-                         serviceRepository,
-                         rootUrlLength);
+                         serviceRepository);
         String sourceType = entity.substring(0, entity.indexOf("("));
         String sourceId = entity.substring(sourceType.length() + 1, entity.length() - 1);
 
@@ -170,7 +167,7 @@ public class STAPropertyRequestHandler implements STARequestUtils {
                                                 @PathVariable String id,
                                                 @PathVariable String property,
                                                 HttpServletRequest request) throws Exception {
-        String url = request.getRequestURL().toString();
+        String url = request.getRequestURI().substring(request.getContextPath().length());
         ElementWithQueryOptions<?> elementWithQueryOptions =
                 this.readEntityPropertyDirect(entity, id, property, url.substring(0, url.length() - 7));
         return mapper.valueToTree(elementWithQueryOptions).fields().next().getValue().toString();
@@ -198,7 +195,7 @@ public class STAPropertyRequestHandler implements STARequestUtils {
                                                  @PathVariable String target,
                                                  @PathVariable String property,
                                                  HttpServletRequest request) throws Exception {
-        String url = request.getRequestURL().toString();
+        String url = request.getRequestURI().substring(request.getContextPath().length());
         ElementWithQueryOptions<?> elementWithQueryOptions =
                 this.readRelatedEntityProperty(entity, target, property, url.substring(0, url.length() - 7));
         return mapper.valueToTree(elementWithQueryOptions).fields().next().getValue().toString();
