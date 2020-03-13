@@ -29,13 +29,17 @@
 
 package org.n52.sta.mqtt.core.subscription;
 
+import org.n52.shetland.filter.SelectFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.filter.FilterClause;
 import org.n52.sta.utils.STARequestUtils;
+import org.n52.svalbard.odata.core.QueryOptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
-import java.net.URLDecoder;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.regex.Matcher;
 
 /**
@@ -55,10 +59,12 @@ public class MqttSelectSubscription extends MqttEntityCollectionSubscription {
         selectOption = mt.group(STARequestUtils.GROUPNAME_SELECT);
         Assert.notNull(selectOption, "Unable to parse topic. Could not extract selectOption");
 
-        //TODO: check if this is stable
-        queryOptions = queryOptionsFactory.createQueryOptions(
-                URLDecoder.decode(getTopic().split("\\?")[0]));
-        LOGGER.debug(this.toString());
+        QueryOptionsFactory qof = new QueryOptionsFactory();
+        HashSet<FilterClause> filters = new HashSet<>();
+        HashSet<String> filterItems = new HashSet<>();
+        Collections.addAll(filterItems, mt.group(STARequestUtils.GROUPNAME_SELECT).split(","));
+        filters.add(new SelectFilter(filterItems));
+        queryOptions = qof.createQueryOptions(filters);
     }
 
     public QueryOptions getQueryOptions() {

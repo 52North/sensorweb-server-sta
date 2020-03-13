@@ -46,8 +46,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 
 /**
- * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
+ * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 public class MqttEntityCollectionSubscription extends AbstractMqttSubscription {
 
@@ -58,7 +58,7 @@ public class MqttEntityCollectionSubscription extends AbstractMqttSubscription {
 
         // Root collection
         // E.g. /Things
-        if (mt.groupCount() == 1) {
+        if (!mt.pattern().pattern().contains(STARequestUtils.GROUPNAME_SOURCE_IDENTIFIER)) {
             wantedEntityType = mt.group(1);
         } else {
             // Related collection
