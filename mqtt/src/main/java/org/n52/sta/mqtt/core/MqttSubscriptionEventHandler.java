@@ -187,8 +187,8 @@ public class MqttSubscriptionEventHandler implements STARequestUtils, STAEventHa
             Matcher mt;
 
             // Check topic for syntax+semantics
-            if(topic.contains("?")) {
-                validateResource((topic.substring(0, topic.indexOf("?"))), serviceRepository);
+            if (topic.contains("?")) {
+                validateResource(topic.substring(0, topic.indexOf("?")), serviceRepository);
             } else {
                 validateResource(topic, serviceRepository);
             }
