@@ -31,6 +31,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 package org.n52.sta.mqtt.core.subscription;
 
 import org.n52.series.db.beans.HibernateRelations;
@@ -64,7 +65,7 @@ public class MqttEntityCollectionSubscription extends AbstractMqttSubscription {
             // E.g. /Things(52)/Datastreams
             sourceEntityType = mt.group(STARequestUtils.GROUPNAME_SOURCE_NAME);
             sourceId = mt.group(STARequestUtils.GROUPNAME_SOURCE_IDENTIFIER);
-            sourceId = sourceId.substring(1, sourceId.length()-1);
+            sourceId = sourceId.substring(1, sourceId.length() - 1);
             wantedEntityType = mt.group(STARequestUtils.GROUPNAME_WANTED_NAME);
             Assert.notNull(sourceEntityType, "Unable to parse topic. Could not extract sourceEntityType");
             Assert.notNull(sourceId, "Unable to parse topic. Could not extract sourceId");
