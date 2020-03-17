@@ -87,6 +87,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -104,6 +105,7 @@ public class ObservationService extends
     private static final DatasetQuerySpecifications dQS = new DatasetQuerySpecifications();
     private static final DatastreamQuerySpecifications dsQS = new DatastreamQuerySpecifications();
 
+    private Pattern isMobilePattern = Pattern.compile("(?:.*isMobile\":\")(true)(?:\".*)");
     private static final String STA = "STA";
 
     private final CategoryRepository categoryRepository;
@@ -389,7 +391,9 @@ public class ObservationService extends
                                        AbstractFeatureEntity<?> feature,
                                        CategoryEntity category,
                                        OfferingEntity offering) {
-        DatasetEntity dataset = getDatasetEntity(datastream.getObservationType().getFormat());
+        DatasetEntity dataset = getDatasetEntity(datastream.getObservationType().getFormat(),
+                                                 isMobilePattern.matcher(datastream.getThing().getProperties())
+                                                                .matches());
         dataset.setProcedure(datastream.getProcedure());
         dataset.setPhenomenon(datastream.getObservableProperty());
         dataset.setCategory(category);
@@ -541,9 +545,13 @@ public class ObservationService extends
         }
     }
 
-    private DatasetEntity getDatasetEntity(String observationType) {
-        DatasetEntity dataset = new DatasetEntity().setObservationType(ObservationType.simple)
-                                                   .setDatasetType(DatasetType.timeseries);
+    private DatasetEntity getDatasetEntity(String observationType, boolean isMobile) {
+        DatasetEntity dataset = new DatasetEntity().setObservationType(ObservationType.simple);
+        if (isMobile) {
+            dataset = dataset.setDatasetType(DatasetType.trajectory);
+        } else {
+            dataset = dataset.setDatasetType(DatasetType.timeseries);
+        }
         switch (observationType) {
         case OmConstants.OBS_TYPE_MEASUREMENT:
             return dataset.setValueType(ValueType.quantity);
