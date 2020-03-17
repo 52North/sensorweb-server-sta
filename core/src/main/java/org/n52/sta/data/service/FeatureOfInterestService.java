@@ -31,6 +31,7 @@ package org.n52.sta.data.service;
 
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
@@ -87,7 +88,7 @@ public class FeatureOfInterestService
         extends AbstractSensorThingsEntityService<FeatureOfInterestRepository, AbstractFeatureEntity<?>,
         StaFeatureEntity<?>> {
 
-    private static final Logger logger = LoggerFactory.getLogger(FeatureOfInterestService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FeatureOfInterestService.class);
 
     private static final ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
     private static final FeatureOfInterestQuerySpecifications foiQS = new FeatureOfInterestQuerySpecifications();
@@ -363,8 +364,11 @@ public class FeatureOfInterestService
                     Geometry convert = featureOfInterest.getGeometry();
                     if (convert instanceof Point) {
                         coords.add(convert.getCoordinate());
-                    } else if (convert instanceof LineString) {
+                    } else if (convert instanceof LineString || convert instanceof GeometryCollection) {
                         coords.addAll(Arrays.asList(convert.getCoordinates()));
+                    } else {
+                        LOGGER.error("Could not update FOI geometry. Unknown GeometryType." +
+                                             convert.getClass().getSimpleName());
                     }
                     if (!coords.isEmpty()) {
                         coords.add(geom.getCoordinate());
