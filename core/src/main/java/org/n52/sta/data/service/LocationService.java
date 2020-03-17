@@ -77,7 +77,7 @@ import java.util.stream.Collectors;
 public class LocationService
         extends AbstractSensorThingsEntityService<LocationRepository, LocationEntity, LocationEntity> {
 
-    private static final Logger logger = LoggerFactory.getLogger(LocationService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LocationService.class);
     private static final LocationQuerySpecifications lQS = new LocationQuerySpecifications();
     private static final String UNABLE_TO_UPDATE_ENTITY_NOT_FOUND = "Unable to update. Entity not found";
 
@@ -309,9 +309,12 @@ public class LocationService
                     // via simple regex
                     Matcher matcher = updateFOIPattern.matcher(updated.getProperties());
                     if (matcher.matches()) {
+                        LOGGER.debug("Updating FOI with id: " + matcher.group(1));
                         FeatureOfInterestService foiService = (FeatureOfInterestService) getFeatureOfInterestService();
                         foiService.updateFeatureOfInterestGeometry(matcher.group(1), location.getGeometry());
                     } else {
+                        LOGGER.error("Updating FOI failed as ID could not be extracted from properties:" +
+                                             updated.getProperties());
                         throw new STACRUDException("Could not extract FeatureOfInterest ID from Thing->properties!");
                     }
                 }
