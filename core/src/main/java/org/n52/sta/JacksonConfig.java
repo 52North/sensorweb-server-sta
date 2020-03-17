@@ -106,7 +106,7 @@ public class JacksonConfig {
         deserializers.addDeserializer(LocationSerDes.LocationEntityPatch.class,
                                       new LocationSerDes.LocationPatchDeserializer());
         deserializers.addDeserializer(SensorSerDes.SensorEntityPatch.class,
-                                      new SensorSerDes.SensorPatchDeserializer());
+                                      new SensorSerDes.SensorPatchDeserializer(variableSensorEncodingTypeEnabled));
         deserializers.addDeserializer(ObservationSerDes.StaDataEntityPatch.class,
                                       new ObservationSerDes.ObservationPatchDeserializer());
         deserializers.addDeserializer(ObservedPropertySerDes.PhenomenonEntityPatch.class,

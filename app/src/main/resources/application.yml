@@ -23,6 +23,7 @@ server:
     ## Toggle strict checking of encodingType for Sensor Entity
     ## When true Sensor->encodingType is not validated against allowed encodingTypes defined in the Standard
     ## (currently PDF and SensorML2)
+    ## Note: This only influences encodingType when SensorEntity is posted/patched directly, not when it is inserted via nested insertion inside a Datastream
     variableEncodingType: true
 
 
@@ -75,7 +76,7 @@ mqtt:
       enabled: true
       port: 1883
     websocket:
-      enabled: false
+      enabled: true
       port: 8883
     persistence:
       enabled: false

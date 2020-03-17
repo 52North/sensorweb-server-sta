@@ -213,6 +213,7 @@ public class DatastreamSerDes {
         }
     }
 
+
     public static class DatastreamDeserializer extends StdDeserializer<DatastreamEntity> {
 
         private static final long serialVersionUID = 7491123624385588769L;

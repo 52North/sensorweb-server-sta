@@ -199,14 +199,21 @@ public class SensorSerDes {
     public static class SensorPatchDeserializer extends StdDeserializer<SensorEntityPatch> {
 
         private static final long serialVersionUID = -6636765136530111251L;
+        private final boolean variableEncodingType;
 
-        public SensorPatchDeserializer() {
+        public SensorPatchDeserializer(boolean variableEncodingType) {
             super(SensorEntityPatch.class);
+            this.variableEncodingType = variableEncodingType;
         }
 
         @Override
         public SensorEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return new SensorEntityPatch(p.readValueAs(JSONSensor.class).toEntity(JSONBase.EntityType.PATCH));
+            if (variableEncodingType) {
+                return new SensorEntityPatch(p.readValueAs(JSONSensorVariableEncoding.class)
+                                              .toEntity(JSONBase.EntityType.FULL));
+            } else {
+                return new SensorEntityPatch(p.readValueAs(JSONSensor.class).toEntity(JSONBase.EntityType.FULL));
+            }
         }
     }
 }
