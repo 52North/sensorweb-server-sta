@@ -559,6 +559,7 @@ public class ObservationService extends
         if (isMobile) {
             LOGGER.debug("Setting DatasetType to 'trajectory'");
             dataset = dataset.setDatasetType(DatasetType.trajectory);
+            dataset.setMobile(true);
         } else {
             dataset = dataset.setDatasetType(DatasetType.timeseries);
         }
