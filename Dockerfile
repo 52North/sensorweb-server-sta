@@ -3,10 +3,6 @@
 FROM alpine/git as gitstage
 WORKDIR /app
 
-RUN git clone https://github.com/52North/sensorweb-server-db-model \
-    && cd sensorweb-server-db-model \
-    && git checkout develop
-
 RUN git clone https://github.com/speckij/arctic-sea \
     && cd arctic-sea \
     && git checkout feature/svalbard-odata-queryparsing
@@ -16,16 +12,13 @@ WORKDIR /app
 COPY --from=gitstage /app /app
 COPY . /app/sensorweb-server-sta/
 
-RUN cd sensorweb-server-db-model \
-    && mvn install
-
 RUN cd arctic-sea \
     && mvn install
 
 RUN cd sensorweb-server-sta \
     && mvn package
 
-FROM openjdk:8-jre-alpine as runstage
+FROM adoptopenjdk/openjdk8:alpine-slim as runstage
 
 ARG DEPENDENCY=/app/sensorweb-server-sta/app/target/unpacked
 COPY --from=buildstage ${DEPENDENCY}/BOOT-INF/lib /app/lib
