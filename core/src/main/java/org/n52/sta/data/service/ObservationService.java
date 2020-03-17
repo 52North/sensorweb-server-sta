@@ -114,7 +114,7 @@ public class ObservationService extends
     private final DatastreamRepository datastreamRepository;
     private final DatasetRepository datasetRepository;
     private final ParameterRepository parameterRepository;
-    private final Pattern isMobilePattern = Pattern.compile("(?:.*isMobile\":\")(true)(?:\".*)");
+    private final Pattern isMobilePattern = Pattern.compile(".*\"isMobile\":true.*");
 
     @Autowired
     public ObservationService(DataRepository<DataEntity<?>> repository,
