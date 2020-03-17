@@ -373,9 +373,15 @@ public class FeatureOfInterestService
                                 "Could not update FeatureOfInterest. Unknown GeometryType:" +
                                         convert.getClass().getSimpleName());
                     }
-                    coords.add(geom.getCoordinate());
-                    Geometry newGeometry =
-                            new GeometryFactory().createLineString(coords.toArray(new Coordinate[coords.size()]));
+                    Geometry newGeometry;
+                    if (!coords.isEmpty()) {
+                        coords.add(geom.getCoordinate());
+                        newGeometry =
+                                new GeometryFactory().createLineString(coords.toArray(new Coordinate[coords.size()]));
+                    } else {
+                        newGeometry =
+                                new GeometryFactory().createPoint(geom.getCoordinate());
+                    }
                     newGeometry.setSRID(featureOfInterest.getGeometry().getSRID());
                     featureOfInterest.setGeometry(newGeometry);
                 }
