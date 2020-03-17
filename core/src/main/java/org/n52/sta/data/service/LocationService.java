@@ -86,7 +86,7 @@ public class LocationService
     private final boolean updateFOIFeatureEnabled;
     private Pattern updateFOIPattern = Pattern.compile("(?:.*updateFOI\":\")([0-9A-z'+%-]+)(?:\".*)");
 
-    public LocationService(@Value("${server.feature.updateFOI}") boolean updateFOI,
+    public LocationService(@Value("${server.feature.updateFOI:false}") boolean updateFOI,
                            LocationRepository repository,
                            LocationEncodingRepository locationEncodingRepository) {
         super(repository, LocationEntity.class);

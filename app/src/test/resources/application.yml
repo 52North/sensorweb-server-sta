@@ -21,6 +21,16 @@ server:
     ## Fallback to default it invalid Topics are given (aka non-root collections)
     mqttPublishTopics: Locations, Observations
 
+    ## Toggle strict checking of encodingType for Sensor Entity
+    ## When true Sensor->encodingType is not validated against allowed encodingTypes defined in the Standard
+    ## (currently PDF and SensorML2)
+    ## Note: This only influences encodingType when SensorEntity is posted/patched directly, not when it is inserted via nested insertion inside a Datastream
+    variableEncodingType: false
+
+    ## Toggle support for isMobile Feature
+    ## When true DatasetType is set to trajectory if Thing->property contains KVP '"isMobile": "true"'
+    isMobile: false
+
 
 # Database Configuration
 database:

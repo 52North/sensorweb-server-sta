@@ -123,7 +123,7 @@ public class ObservationService extends
                               DatastreamRepository datastreamRepository,
                               DatasetRepository datasetRepository,
                               ParameterRepository parameterRepository,
-                               @Value("${server.feature.isMobile}") boolean isMobileFeatureEnabled) {
+                               @Value("${server.feature.isMobile:false}") boolean isMobileFeatureEnabled) {
         super(repository,
               DataEntity.class,
               EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
