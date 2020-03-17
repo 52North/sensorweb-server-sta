@@ -100,7 +100,7 @@ import java.util.stream.Collectors;
 public class ObservationService extends
         AbstractSensorThingsEntityService<DataRepository<DataEntity<?>>, DataEntity<?>, StaDataEntity<?>> {
 
-    private static final Logger logger = LoggerFactory.getLogger(ObservationService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ObservationService.class);
 
     private static final ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
     private static final DatasetQuerySpecifications dQS = new DatasetQuerySpecifications();
@@ -419,8 +419,10 @@ public class ObservationService extends
                                           EntityGraphRepository.FetchGraph.FETCHGRAPH_OM_OBS_TYPE,
                                           EntityGraphRepository.FetchGraph.FETCHGRAPH_FEATURE);
         if (queried.isPresent()) {
+            LOGGER.debug("Checking Dataset: Found existing dataset");
             return queried.get();
         } else {
+            LOGGER.debug("Checking Dataset: Creating new dataset");
             return datasetRepository.save(dataset);
         }
     }
@@ -555,6 +557,7 @@ public class ObservationService extends
     private DatasetEntity getDatasetEntity(String observationType, boolean isMobile) {
         DatasetEntity dataset = new DatasetEntity().setObservationType(ObservationType.simple);
         if (isMobile) {
+            LOGGER.debug("Setting DatasetType to 'trajectory'");
             dataset = dataset.setDatasetType(DatasetType.trajectory);
         } else {
             dataset = dataset.setDatasetType(DatasetType.timeseries);
@@ -674,7 +677,7 @@ public class ObservationService extends
             collections.put(STAEntityDefinition.DATASTREAMS,
                             Collections.singleton(datastreamEntity.get().getIdentifier()));
         } else {
-            logger.debug("No Datastream associated with this Entity {}", entity.getIdentifier());
+            LOGGER.debug("No Datastream associated with this Entity {}", entity.getIdentifier());
         }
         return collections;
     }
