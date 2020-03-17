@@ -369,14 +369,15 @@ public class FeatureOfInterestService
                     } else {
                         LOGGER.error("Could not update FOI geometry. Unknown GeometryType." +
                                              convert.getClass().getSimpleName());
+                        throw new STACRUDException(
+                                "Could not update FeatureOfInterest. Unknown GeometryType:" +
+                                        convert.getClass().getSimpleName());
                     }
-                    if (!coords.isEmpty()) {
-                        coords.add(geom.getCoordinate());
-                        Geometry newGeometry =
-                                new GeometryFactory().createLineString(coords.toArray(new Coordinate[coords.size()]));
-                        newGeometry.setSRID(featureOfInterest.getGeometry().getSRID());
-                        featureOfInterest.setGeometry(newGeometry);
-                    }
+                    coords.add(geom.getCoordinate());
+                    Geometry newGeometry =
+                            new GeometryFactory().createLineString(coords.toArray(new Coordinate[coords.size()]));
+                    newGeometry.setSRID(featureOfInterest.getGeometry().getSRID());
+                    featureOfInterest.setGeometry(newGeometry);
                 }
             } else {
                 featureOfInterest.setGeometry(geom);
