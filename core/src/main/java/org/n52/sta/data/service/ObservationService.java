@@ -71,6 +71,7 @@ import org.n52.sta.serdes.util.ElementWithQueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
@@ -105,14 +106,15 @@ public class ObservationService extends
     private static final DatasetQuerySpecifications dQS = new DatasetQuerySpecifications();
     private static final DatastreamQuerySpecifications dsQS = new DatastreamQuerySpecifications();
 
-    private Pattern isMobilePattern = Pattern.compile("(?:.*isMobile\":\")(true)(?:\".*)");
     private static final String STA = "STA";
 
+    private final boolean isMobileFeatureEnabled;
     private final CategoryRepository categoryRepository;
     private final OfferingRepository offeringRepository;
     private final DatastreamRepository datastreamRepository;
     private final DatasetRepository datasetRepository;
     private final ParameterRepository parameterRepository;
+    private final Pattern isMobilePattern = Pattern.compile("(?:.*isMobile\":\")(true)(?:\".*)");
 
     @Autowired
     public ObservationService(DataRepository<DataEntity<?>> repository,
@@ -120,7 +122,8 @@ public class ObservationService extends
                               OfferingRepository offeringRepository,
                               DatastreamRepository datastreamRepository,
                               DatasetRepository datasetRepository,
-                              ParameterRepository parameterRepository) {
+                              ParameterRepository parameterRepository,
+                               @Value("${server.feature.isMobile}") boolean isMobileFeatureEnabled) {
         super(repository,
               DataEntity.class,
               EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
@@ -129,6 +132,7 @@ public class ObservationService extends
         this.datastreamRepository = datastreamRepository;
         this.datasetRepository = datasetRepository;
         this.parameterRepository = parameterRepository;
+        this.isMobileFeatureEnabled = isMobileFeatureEnabled;
     }
 
     @Override
@@ -547,7 +551,7 @@ public class ObservationService extends
 
     private DatasetEntity getDatasetEntity(String observationType, boolean isMobile) {
         DatasetEntity dataset = new DatasetEntity().setObservationType(ObservationType.simple);
-        if (isMobile) {
+        if (isMobileFeatureEnabled && isMobile) {
             dataset = dataset.setDatasetType(DatasetType.trajectory);
         } else {
             dataset = dataset.setDatasetType(DatasetType.timeseries);

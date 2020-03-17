@@ -26,6 +26,10 @@ server:
     ## Note: This only influences encodingType when SensorEntity is posted/patched directly, not when it is inserted via nested insertion inside a Datastream
     variableEncodingType: true
 
+    ## Toggle support for isMobile Feature
+    ## When true DatasetType is set to trajectory if Thing->property contains KVP '"isMobile": "true"'
+    isMobile: true
+
 
 # Database Configuration
 database:
