@@ -210,9 +210,9 @@ public class SensorSerDes {
         public SensorEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             if (variableEncodingType) {
                 return new SensorEntityPatch(p.readValueAs(JSONSensorVariableEncoding.class)
-                                              .toEntity(JSONBase.EntityType.FULL));
+                                              .toEntity(JSONBase.EntityType.PATCH));
             } else {
-                return new SensorEntityPatch(p.readValueAs(JSONSensor.class).toEntity(JSONBase.EntityType.FULL));
+                return new SensorEntityPatch(p.readValueAs(JSONSensor.class).toEntity(JSONBase.EntityType.PATCH));
             }
         }
     }
