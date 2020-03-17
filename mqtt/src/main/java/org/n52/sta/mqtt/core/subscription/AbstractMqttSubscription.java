@@ -31,7 +31,6 @@ package org.n52.sta.mqtt.core.subscription;
 
 import org.n52.series.db.beans.HibernateRelations;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
-import org.n52.svalbard.odata.core.QueryOptionsFactory;
 
 import java.util.Map;
 import java.util.Objects;
@@ -41,8 +40,6 @@ import java.util.Set;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 public abstract class AbstractMqttSubscription {
-
-    protected QueryOptionsFactory queryOptionsFactory = new QueryOptionsFactory();
 
     protected String sourceEntityType;
 

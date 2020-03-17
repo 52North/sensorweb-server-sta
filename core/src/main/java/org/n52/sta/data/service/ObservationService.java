@@ -123,7 +123,7 @@ public class ObservationService extends
                               DatastreamRepository datastreamRepository,
                               DatasetRepository datasetRepository,
                               ParameterRepository parameterRepository,
-                               @Value("${server.feature.isMobile:false}") boolean isMobileFeatureEnabled) {
+                              @Value("${server.feature.isMobile:false}") boolean isMobileFeatureEnabled) {
         super(repository,
               DataEntity.class,
               EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
@@ -396,8 +396,11 @@ public class ObservationService extends
                                        CategoryEntity category,
                                        OfferingEntity offering) {
         DatasetEntity dataset = getDatasetEntity(datastream.getObservationType().getFormat(),
-                                                 isMobilePattern.matcher(datastream.getThing().getProperties())
-                                                                .matches());
+                                                 (isMobileFeatureEnabled
+                                                         && datastream.getThing().hasProperties())
+                                                         && isMobilePattern.matcher(datastream.getThing()
+                                                                                              .getProperties())
+                                                                           .matches());
         dataset.setProcedure(datastream.getProcedure());
         dataset.setPhenomenon(datastream.getObservableProperty());
         dataset.setCategory(category);
@@ -551,7 +554,7 @@ public class ObservationService extends
 
     private DatasetEntity getDatasetEntity(String observationType, boolean isMobile) {
         DatasetEntity dataset = new DatasetEntity().setObservationType(ObservationType.simple);
-        if (isMobileFeatureEnabled && isMobile) {
+        if (isMobile) {
             dataset = dataset.setDatasetType(DatasetType.trajectory);
         } else {
             dataset = dataset.setDatasetType(DatasetType.timeseries);
