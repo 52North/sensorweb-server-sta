@@ -90,7 +90,8 @@ public class SensorService
                          DatastreamRepository datastreamRepository) {
         super(repository,
               ProcedureEntity.class,
-              EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT);
+              EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT,
+              EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDUREHISTORY);
         this.formatRepository = formatRepository;
         this.procedureHistoryRepository = procedureHistoryRepository;
         this.datastreamRepository = datastreamRepository;
