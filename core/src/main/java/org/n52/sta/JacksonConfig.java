@@ -66,7 +66,7 @@ public class JacksonConfig {
     @Bean
     public ObjectMapper customMapper(@Value("${server.rootUrl}") String rootUrl,
                                      @Value("${server.feature.variableEncodingType:false}")
-                                             boolean variableSensorEncodingType) {
+                                             boolean variableSensorEncodingTypeEnabled) {
         ArrayList<Module> modules = new ArrayList<>();
 
         SimpleModule module = new SimpleModule();
@@ -88,13 +88,8 @@ public class JacksonConfig {
                                       new ThingSerDes.ThingDeserializer());
         deserializers.addDeserializer(LocationEntity.class,
                                       new LocationSerDes.LocationDeserializer());
-        if (variableSensorEncodingType) {
-            deserializers.addDeserializer(SensorEntity.class,
-                                          new SensorSerDes.SensorDeserializer(true));
-        } else {
-            deserializers.addDeserializer(SensorEntity.class,
-                                          new SensorSerDes.SensorDeserializer(false));
-        }
+        deserializers.addDeserializer(SensorEntity.class,
+                                      new SensorSerDes.SensorDeserializer(variableSensorEncodingTypeEnabled));
         deserializers.addDeserializer(DataEntity.class,
                                       new ObservationSerDes.ObservationDeserializer());
         deserializers.addDeserializer(PhenomenonEntity.class,
