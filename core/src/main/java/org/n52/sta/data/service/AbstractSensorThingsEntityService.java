@@ -124,7 +124,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
     /**
      * Gets the Entity with given id
      *
-     * @param id the id of the Entity
+     * @param id           the id of the Entity
      * @param queryOptions query Options
      * @return ElementWithQueryOptions wrapping requested Entity
      * @throws STACRUDException if an error occurred
@@ -405,14 +405,16 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
             for (OrderProperty sortProperty :
                     queryOptions.getOrderByOption().getSortProperties()) {
                 if (first) {
-                    sort = Sort.by(sortProperty.getSortOrder().equals(FilterConstants.SortOrder.DESC) ?
+                    sort = Sort.by(sortProperty.isSetSortOrder() &&
+                                           sortProperty.getSortOrder().equals(FilterConstants.SortOrder.DESC) ?
                                            Sort.Direction.DESC : Sort.Direction.ASC,
-                                   sortProperty.getValueReference());
+                                   checkPropertyName(sortProperty.getValueReference()));
                     first = false;
                 } else {
-                    sort = sort.and(Sort.by(sortProperty.getSortOrder().equals(FilterConstants.SortOrder.DESC) ?
+                    sort = sort.and(Sort.by(sortProperty.isSetSortOrder() &&
+                                                    sortProperty.getSortOrder().equals(FilterConstants.SortOrder.DESC) ?
                                                     Sort.Direction.DESC : Sort.Direction.ASC,
-                                            sortProperty.getValueReference()));
+                                            checkPropertyName(sortProperty.getValueReference())));
                 }
             }
         }
