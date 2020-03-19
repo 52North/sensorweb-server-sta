@@ -51,10 +51,10 @@ public class MqttPropertySubscription extends MqttEntitySubscription {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttPropertySubscription.class);
 
-    private String watchedProperty = "<not yet set>";
+    private String watchedProperty;
 
     public MqttPropertySubscription(String topic, Matcher mt) {
-        super(topic, mt);
+        super(topic, mt, true);
         watchedProperty = mt.group(STARequestUtils.GROUPNAME_PROPERTY);
         Assert.notNull(watchedProperty, "Unable to parse topic. Could not extract watchedProperty");
         LOGGER.debug(this.toString());

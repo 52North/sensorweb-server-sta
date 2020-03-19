@@ -182,45 +182,51 @@ public class MqttSubscriptionEventHandler implements STARequestUtils, STAEventHa
         removeSubscription(createMqttSubscription(msg.getTopicFilter()), msg.getClientID());
     }
 
-    private AbstractMqttSubscription createMqttSubscription(String topic) throws MqttHandlerException {
+    private AbstractMqttSubscription createMqttSubscription(String rawTopic) throws MqttHandlerException {
         try {
             Matcher mt;
+            // Delete possible leading slash
+            String topic = (rawTopic.startsWith("/")) ? rawTopic.substring(1) : rawTopic;
 
             // Check topic for syntax+semantics
             if (topic.contains("?")) {
+                // only check path part of the topic (excluding the select parameter)
                 validateResource(topic.substring(0, topic.indexOf("?")), serviceRepository);
+                for (Pattern namedSelectPattern : NAMED_SELECT_PATTERNS) {
+                    mt = namedSelectPattern.matcher(topic);
+                    if (mt.matches()) {
+                        // OGC-15-078r6 14.2.4
+                        return new MqttSelectSubscription(topic, mt);
+                    }
+                }
             } else {
+                for (Pattern namedPropertyPattern : NAMED_PROP_PATTERNS) {
+                    mt = namedPropertyPattern.matcher(topic);
+                    if (mt.matches()) {
+                        // OGC-15-078r6 14.2.3
+                        // Only check path part of the topic (excluding the property)
+                        String path = topic.substring(0, topic.lastIndexOf("/"));
+                        validateResource(path, serviceRepository);
+                        return new MqttPropertySubscription(topic, mt);
+                    }
+                }
+                // check full topic
                 validateResource(topic, serviceRepository);
-            }
-            for (Pattern collectionPattern : NAMED_COLL_PATTERNS) {
-                mt = collectionPattern.matcher(topic);
-                if (mt.matches()) {
-                    // OGC-15-078r6 14.2.1
-                    return new MqttEntityCollectionSubscription(topic, mt);
-                }
-            }
 
-            for (Pattern namedEntityPattern : NAMED_ENTITY_PATTERNS) {
-                mt = namedEntityPattern.matcher(topic);
-                if (mt.matches()) {
-                    // OGC-15-078r6 14.2.2
-                    return new MqttEntitySubscription(topic, mt);
+                for (Pattern collectionPattern : NAMED_COLL_PATTERNS) {
+                    mt = collectionPattern.matcher(topic);
+                    if (mt.matches()) {
+                        // OGC-15-078r6 14.2.1
+                        return new MqttEntityCollectionSubscription(topic, mt);
+                    }
                 }
-            }
 
-            for (Pattern namedSelectPattern : NAMED_SELECT_PATTERNS) {
-                mt = namedSelectPattern.matcher(topic);
-                if (mt.matches()) {
-                    // OGC-15-078r6 14.2.4
-                    return new MqttSelectSubscription(topic, mt);
-                }
-            }
-
-            for (Pattern namedPropertyPattern : NAMED_PROP_PATTERNS) {
-                mt = namedPropertyPattern.matcher(topic);
-                if (mt.matches()) {
-                    // OGC-15-078r6 14.2.3
-                    return new MqttPropertySubscription(topic, mt);
+                for (Pattern namedEntityPattern : NAMED_ENTITY_PATTERNS) {
+                    mt = namedEntityPattern.matcher(topic);
+                    if (mt.matches()) {
+                        // OGC-15-078r6 14.2.2
+                        return new MqttEntitySubscription(topic, mt);
+                    }
                 }
             }
 

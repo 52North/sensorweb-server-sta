@@ -54,7 +54,7 @@ public class MqttSelectSubscription extends MqttEntityCollectionSubscription {
     private QueryOptions queryOptions;
 
     public MqttSelectSubscription(String topic, Matcher mt) {
-        super(topic, mt);
+        super(topic, mt, true);
 
         selectOption = mt.group(STARequestUtils.GROUPNAME_SELECT);
         Assert.notNull(selectOption, "Unable to parse topic. Could not extract selectOption");
@@ -65,6 +65,7 @@ public class MqttSelectSubscription extends MqttEntityCollectionSubscription {
         Collections.addAll(filterItems, mt.group(STARequestUtils.GROUPNAME_SELECT).split(","));
         filters.add(new SelectFilter(filterItems));
         queryOptions = qof.createQueryOptions(filters);
+        LOGGER.debug(this.toString());
     }
 
     public QueryOptions getQueryOptions() {

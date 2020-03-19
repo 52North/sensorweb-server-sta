@@ -55,7 +55,16 @@ public class MqttEntityCollectionSubscription extends AbstractMqttSubscription {
 
     public MqttEntityCollectionSubscription(String topic, Matcher mt) {
         super(topic);
+        init(mt);
+        LOGGER.debug(this.toString());
+    }
 
+    public MqttEntityCollectionSubscription(String topic, Matcher mt, boolean calledFromSubclass) {
+        super(topic);
+        init(mt);
+    }
+
+    private void init(Matcher mt) {
         // Root collection
         // E.g. /Things
         if (!mt.pattern().pattern().contains(STARequestUtils.GROUPNAME_SOURCE_IDENTIFIER)) {
@@ -70,9 +79,7 @@ public class MqttEntityCollectionSubscription extends AbstractMqttSubscription {
             Assert.notNull(sourceEntityType, "Unable to parse topic. Could not extract sourceEntityType");
             Assert.notNull(sourceId, "Unable to parse topic. Could not extract sourceId");
         }
-
         Assert.notNull(wantedEntityType, "Unable to parse topic. Could not extract wantedEntityType");
-        // LOGGER.debug(this.toString());
     }
 
     @Override
