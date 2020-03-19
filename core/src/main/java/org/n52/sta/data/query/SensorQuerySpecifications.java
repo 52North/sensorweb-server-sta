@@ -31,7 +31,6 @@ package org.n52.sta.data.query;
 
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.FormatEntity;
-import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
@@ -40,7 +39,6 @@ import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
@@ -71,7 +69,7 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications<Procedu
                   .where(((Specification<DatastreamEntity>) propertyValue).toPredicate(datastream,
                                                                                        query,
                                                                                        builder));
-                return builder.in(root).value(sq);
+                return builder.in(join.get(DescribableEntity.PROPERTY_ID)).value(sq);
             } else {
                 throw new RuntimeException("Could not find related property: " + propertyName);
             }

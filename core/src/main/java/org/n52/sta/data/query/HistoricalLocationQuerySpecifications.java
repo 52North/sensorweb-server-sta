@@ -68,11 +68,12 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
             String propertyName,
             Specification<?> propertyValue) {
         return (root, query, builder) -> {
+            Root<HistoricalLocationEntity> historicalLocationEntityRoot = query.from(HistoricalLocationEntity.class);
             if (THING.equals(propertyName)) {
                 Subquery<HistoricalLocationEntity> sq = query.subquery(HistoricalLocationEntity.class);
                 Root<PlatformEntity> thing = sq.from(PlatformEntity.class);
                 final Join<PlatformEntity, HistoricalLocationEntity> join =
-                        root.join(HistoricalLocationEntity.PROPERTY_THING, JoinType.INNER);
+                        historicalLocationEntityRoot.join(HistoricalLocationEntity.PROPERTY_THING, JoinType.INNER);
                 sq.select(join)
                   .where(((Specification<PlatformEntity>) propertyValue).toPredicate(thing,
                                                                                      query,
@@ -82,7 +83,7 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
                 Subquery<HistoricalLocationEntity> sq = query.subquery(HistoricalLocationEntity.class);
                 Root<LocationEntity> thing = sq.from(LocationEntity.class);
                 final Join<LocationEntity, HistoricalLocationEntity> join =
-                        root.join(HistoricalLocationEntity.PROPERTY_LOCATIONS, JoinType.INNER);
+                        historicalLocationEntityRoot.join(HistoricalLocationEntity.PROPERTY_LOCATIONS, JoinType.INNER);
                 sq.select(join)
                   .where(((Specification<LocationEntity>) propertyValue).toPredicate(thing,
                                                                                      query,

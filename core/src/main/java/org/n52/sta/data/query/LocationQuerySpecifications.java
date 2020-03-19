@@ -115,8 +115,8 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
             if (THINGS.equals(propertyName)) {
                 Subquery<LocationEntity> sq = query.subquery(LocationEntity.class);
                 Root<PlatformEntity> thing = sq.from(PlatformEntity.class);
-                Join<PlatformEntity, LocationEntity> joinFeature = thing.join(PlatformEntity.PROPERTY_LOCATIONS);
-                sq.select(joinFeature)
+                Join<PlatformEntity, LocationEntity> join = thing.join(PlatformEntity.PROPERTY_LOCATIONS);
+                sq.select(join)
                   .where(((Specification<PlatformEntity>) propertyValue).toPredicate(thing,
                                                                                      query,
                                                                                      builder));
