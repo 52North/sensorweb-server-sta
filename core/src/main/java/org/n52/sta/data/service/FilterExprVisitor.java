@@ -393,7 +393,7 @@ final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, STAInvali
      * @throws STAInvalidQueryException if the visit fails
      */
     @Override public Expression<String> visitString(StringValueExpr expr) throws STAInvalidQueryException {
-        return builder.literal(expr.getValue());
+        return builder.literal(expr.getValue().replace("\'", ""));
     }
 
     /**

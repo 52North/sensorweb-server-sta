@@ -113,14 +113,22 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
             String propertyName,
             Specification<?> propertyValue) {
         return (root, query, builder) -> {
-            Subquery<Long> sqFeature = query.subquery(Long.class);
-            Root<DatasetEntity> dataset = sqFeature.from(DatasetEntity.class);
-            Subquery<DatasetEntity> sqDataset = query.subquery(DatasetEntity.class);
-            Root<DataEntity> data = sqDataset.from(DataEntity.class);
-            sqDataset.select(data.get(DataEntity.PROPERTY_DATASET))
-                     .where(builder.equal(data.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue));
-            sqFeature.select(dataset.get(DatasetEntity.PROPERTY_FEATURE)).where(builder.in(dataset).value(sqDataset));
-            return builder.in(root.get(AbstractFeatureEntity.PROPERTY_IDENTIFIER)).value(sqFeature);
+            if (OBSERVATIONS.equals(propertyName)) {
+                Subquery<Long> sqFeature = query.subquery(Long.class);
+                Root<DatasetEntity> dataset = sqFeature.from(DatasetEntity.class);
+                Subquery<DatasetEntity> sqDataset = query.subquery(DatasetEntity.class);
+                Root<DataEntity> data = sqDataset.from(DataEntity.class);
+                sqDataset.select(dataset)
+                         .where(((Specification<DataEntity>) propertyValue).toPredicate(data,
+                                                                                        query,
+                                                                                        builder));
+
+                sqFeature.select(dataset.get(DatasetEntity.PROPERTY_FEATURE))
+                         .where(builder.in(dataset).value(sqDataset));
+                return builder.in(root.get(AbstractFeatureEntity.PROPERTY_ID)).value(sqFeature);
+            } else {
+                throw new RuntimeException("Could not find related property: " + propertyName);
+            }
         };
     }
 }

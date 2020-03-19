@@ -39,6 +39,8 @@ import org.springframework.data.jpa.domain.Specification;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -56,9 +58,19 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
     @Override protected Specification<PhenomenonEntity> handleRelatedPropertyFilter(String propertyName,
                                                                                     Specification<?> propertyValue) {
         return (root, query, builder) -> {
-            final Join<PhenomenonEntity, DatastreamEntity> join =
-                    root.join(DatastreamEntity.PROPERTY_OBSERVABLE_PROPERTY, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue);
+            if (DATASTREAMS.equals(propertyName)) {
+                Subquery<PhenomenonEntity> sq = query.subquery(PhenomenonEntity.class);
+                Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
+                final Join<DatastreamEntity, PhenomenonEntity> join =
+                        datastream.join(DatastreamEntity.PROPERTY_OBSERVABLE_PROPERTY, JoinType.INNER);
+                sq.select(join)
+                  .where(((Specification<DatastreamEntity>) propertyValue).toPredicate(datastream,
+                                                                                       query,
+                                                                                       builder));
+                return builder.in(root).value(sq);
+            } else {
+                throw new RuntimeException("Could not find related property: " + propertyName);
+            }
         };
     }
 

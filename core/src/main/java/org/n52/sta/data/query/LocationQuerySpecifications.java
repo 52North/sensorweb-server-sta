@@ -112,21 +112,27 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
     @Override protected Specification<LocationEntity> handleRelatedPropertyFilter(String propertyName,
                                                                                   Specification<?> propertyValue) {
         return (root, query, builder) -> {
-            if (propertyName.equals(THINGS)) {
+            if (THINGS.equals(propertyName)) {
                 Subquery<LocationEntity> sq = query.subquery(LocationEntity.class);
-                Root<PlatformEntity> dataset = sq.from(PlatformEntity.class);
-                Join<PlatformEntity, LocationEntity> joinFeature = dataset.join(PlatformEntity.PROPERTY_LOCATIONS);
+                Root<PlatformEntity> thing = sq.from(PlatformEntity.class);
+                Join<PlatformEntity, LocationEntity> joinFeature = thing.join(PlatformEntity.PROPERTY_LOCATIONS);
                 sq.select(joinFeature)
-                  .where(builder.equal(dataset.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue));
+                  .where(((Specification<PlatformEntity>) propertyValue).toPredicate(thing,
+                                                                                     query,
+                                                                                     builder));
+                return builder.in(root).value(sq);
+            } else if (HISTORICAL_LOCATIONS.equals(propertyName)) {
+                Subquery<LocationEntity> sq = query.subquery(LocationEntity.class);
+                Root<HistoricalLocationEntity> historicalLocation = sq.from(HistoricalLocationEntity.class);
+                Join<HistoricalLocationEntity, LocationEntity> joinFeature =
+                        historicalLocation.join(HistoricalLocationEntity.PROPERTY_LOCATIONS);
+                sq.select(joinFeature)
+                  .where(((Specification<HistoricalLocationEntity>) propertyValue).toPredicate(historicalLocation,
+                                                                                               query,
+                                                                                               builder));
                 return builder.in(root).value(sq);
             } else {
-                Subquery<LocationEntity> sq = query.subquery(LocationEntity.class);
-                Root<HistoricalLocationEntity> dataset = sq.from(HistoricalLocationEntity.class);
-                Join<HistoricalLocationEntity, LocationEntity> joinFeature =
-                        dataset.join(HistoricalLocationEntity.PROPERTY_LOCATIONS);
-                sq.select(joinFeature)
-                  .where(builder.equal(dataset.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue));
-                return builder.in(root).value(sq);
+                throw new RuntimeException("Could not find related property: " + propertyName);
             }
         };
     }

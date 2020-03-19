@@ -186,31 +186,50 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
             try {
                 switch (propertyName) {
                 case SENSOR: {
-                    final Join<DatastreamEntity, ProcedureEntity> join =
+                    Subquery<DatastreamEntity> sq = query.subquery(DatastreamEntity.class);
+                    Root<ProcedureEntity> sensor = sq.from(ProcedureEntity.class);
+                    final Join<ProcedureEntity, DatastreamEntity> join =
                             root.join(DatastreamEntity.PROPERTY_SENSOR, JoinType.INNER);
-                    return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue);
+                    sq.select(join)
+                      .where(((Specification<ProcedureEntity>) propertyValue).toPredicate(sensor,
+                                                                                          query,
+                                                                                          builder));
+                    return builder.in(root).value(sq);
                 }
                 case OBSERVED_PROPERTY: {
-                    final Join<DatastreamEntity, PhenomenonEntity> join =
+                    Subquery<DatastreamEntity> sq = query.subquery(DatastreamEntity.class);
+                    Root<PhenomenonEntity> observedProperty = sq.from(PhenomenonEntity.class);
+                    final Join<PhenomenonEntity, DatastreamEntity> join =
                             root.join(DatastreamEntity.PROPERTY_OBSERVABLE_PROPERTY, JoinType.INNER);
-                    return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue);
+                    sq.select(join)
+                      .where(((Specification<PhenomenonEntity>) propertyValue).toPredicate(observedProperty,
+                                                                                           query,
+                                                                                           builder));
+                    return builder.in(root).value(sq);
                 }
                 case THING: {
-                    final Join<DatastreamEntity, PlatformEntity> join =
+                    Subquery<DatastreamEntity> sq = query.subquery(DatastreamEntity.class);
+                    Root<PlatformEntity> thing = sq.from(PlatformEntity.class);
+                    final Join<PlatformEntity, DatastreamEntity> join =
                             root.join(DatastreamEntity.PROPERTY_THING, JoinType.INNER);
-                    return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue);
+                    sq.select(join)
+                      .where(((Specification<PlatformEntity>) propertyValue).toPredicate(thing,
+                                                                                         query,
+                                                                                         builder));
+                    return builder.in(root).value(sq);
                 }
                 case OBSERVATIONS: {
                     Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
+                    Join<DatastreamEntity, DatasetEntity> join = root.join(DatastreamEntity.PROPERTY_DATASETS);
                     Root<DataEntity> data = sq.from(DataEntity.class);
                     sq.select(data.get(DataEntity.PROPERTY_DATASET))
-                      .where(builder.equal(data.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue));
-                    Join<DatastreamEntity, DatasetEntity> join = root.join(DatastreamEntity.PROPERTY_DATASETS);
-                    return builder.in(join.get(DatasetEntity.PROPERTY_IDENTIFIER)).value(sq);
+                      .where(((Specification<DataEntity>) propertyValue).toPredicate(data,
+                                                                                     query,
+                                                                                     builder));
+                    return builder.in(join.get(DatasetEntity.PROPERTY_ID)).value(sq);
                 }
                 default:
-                    throw new STAInvalidFilterExpressionException(
-                            "Error getting filter for Property \"" + propertyName + "\". No such related Entity.");
+                    throw new STAInvalidFilterExpressionException("Could not find related property: " + propertyName);
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);

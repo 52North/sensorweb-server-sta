@@ -40,6 +40,8 @@ import org.springframework.data.jpa.domain.Specification;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -66,14 +68,28 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
             String propertyName,
             Specification<?> propertyValue) {
         return (root, query, builder) -> {
-            if (propertyName.equals(THING)) {
-                final Join<HistoricalLocationEntity, PlatformEntity> join =
+            if (THING.equals(propertyName)) {
+                Subquery<HistoricalLocationEntity> sq = query.subquery(HistoricalLocationEntity.class);
+                Root<PlatformEntity> thing = sq.from(PlatformEntity.class);
+                final Join<PlatformEntity, HistoricalLocationEntity> join =
                         root.join(HistoricalLocationEntity.PROPERTY_THING, JoinType.INNER);
-                return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue);
-            } else {
-                final Join<HistoricalLocationEntity, LocationEntity> join =
+                sq.select(join)
+                  .where(((Specification<PlatformEntity>) propertyValue).toPredicate(thing,
+                                                                                     query,
+                                                                                     builder));
+                return builder.in(root).value(sq);
+            } else if (LOCATIONS.equals(propertyName)) {
+                Subquery<HistoricalLocationEntity> sq = query.subquery(HistoricalLocationEntity.class);
+                Root<LocationEntity> thing = sq.from(LocationEntity.class);
+                final Join<LocationEntity, HistoricalLocationEntity> join =
                         root.join(HistoricalLocationEntity.PROPERTY_LOCATIONS, JoinType.INNER);
-                return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue);
+                sq.select(join)
+                  .where(((Specification<LocationEntity>) propertyValue).toPredicate(thing,
+                                                                                     query,
+                                                                                     builder));
+                return builder.in(root).value(sq);
+            } else {
+                throw new RuntimeException("Could not find related property: " + propertyName);
             }
         };
     }

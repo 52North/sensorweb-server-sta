@@ -87,25 +87,30 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
                                                                                  Specification<?> propertyValue) {
         return (root, query, builder) -> {
             try {
-                if (propertyName.equals(DATASTREAM)) {
+                if (DATASTREAM.equals(propertyName)) {
                     Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
                     Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
                     Join<DatastreamEntity, DatasetEntity> join = datastream.join(DatastreamEntity.PROPERTY_DATASETS);
-                    sq.select(join.get(DatasetEntity.PROPERTY_IDENTIFIER))
-                      .where(builder.equal(datastream.get(DatastreamEntity.PROPERTY_IDENTIFIER), propertyValue));
+                    sq.select(join)
+                      .where(((Specification<DatastreamEntity>) propertyValue).toPredicate(datastream,
+                                                                                           query,
+                                                                                           builder));
                     return builder.in(root.get(DataEntity.PROPERTY_DATASET)).value(sq);
-                    // return qobservation.dataset.id.in(JPAExpressions
-                    // .selectFrom(qdatastream)
-                    // .where(qdatastream.id.eq(propertyValue))
-                    // .select(qdatastream.datasets.any().id));
+
+                } else if (FEATUREOFINTEREST.equals(propertyName)) {
+                    Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
+                    Root<DatasetEntity> dataset = sq.from(DatasetEntity.class);
+                    Subquery<FeatureEntity> subquery = query.subquery(FeatureEntity.class);
+                    Root<FeatureEntity> feature = subquery.from(FeatureEntity.class);
+                    subquery.select(feature)
+                            .where(((Specification<FeatureEntity>) propertyValue).toPredicate(feature,
+                                                                                              query,
+                                                                                              builder));
+                    sq.select(dataset.get(DatasetEntity.PROPERTY_ID))
+                      .where(builder.equal(dataset.get(DatasetEntity.PROPERTY_FEATURE), subquery));
+                    return builder.in(root.get(DataEntity.PROPERTY_DATASET)).value(sq);
                 } else {
-                    final Join<DataEntity, DatasetEntity> join =
-                            root.join(DataEntity.PROPERTY_DATASET, JoinType.INNER);
-                    return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), propertyValue);
-                    // return qobservation.dataset.id.in(JPAExpressions
-                    // .selectFrom(qdataset)
-                    // .where(qdataset.feature.id.eq(propertyValue))
-                    // .select(qdataset.id));
+                    throw new STAInvalidFilterExpressionException("Could not find related property: " + propertyName);
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);

@@ -113,8 +113,7 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
                             root.join(PlatformEntity.PROPERTY_HISTORICAL_LOCATIONS, JoinType.INNER);
                     return builder.in(join.get(DescribableEntity.PROPERTY_ID)).value(subquery);
                 default:
-                    throw new STAInvalidFilterExpressionException(
-                            "Filtering by Related Properties with cardinality >1 is currently not supported!");
+                    throw new STAInvalidFilterExpressionException("Could not find related property: " + propertyName);
                 }
             } catch (STAInvalidFilterExpressionException e) {
                 throw new RuntimeException(e);
