@@ -82,13 +82,13 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
                 case DATASTREAMS: {
                     Subquery<DatastreamEntity> subquery = query.subquery(DatastreamEntity.class);
                     Root<DatastreamEntity> datastream = subquery.from(DatastreamEntity.class);
-                    subquery.select(datastream.get(DatastreamEntity.PROPERTY_ID))
+                    final Join<PlatformEntity, DatastreamEntity> join =
+                            platformEntityRoot.join(PlatformEntity.PROPERTY_DATASTREAMS, JoinType.INNER);
+                    subquery.select(join)
                             .where(((Specification<DatastreamEntity>) propertyValue).toPredicate(datastream,
                                                                                                  query,
                                                                                                  builder));
-                    final Join<PlatformEntity, DatastreamEntity> join =
-                            platformEntityRoot.join(PlatformEntity.PROPERTY_DATASTREAMS, JoinType.INNER);
-                    return builder.in(join.get(DescribableEntity.PROPERTY_ID)).value(subquery);
+                    return builder.in(join).value(subquery);
                 }
                 case LOCATIONS: {
                     Subquery<LocationEntity> subquery = query.subquery(LocationEntity.class);

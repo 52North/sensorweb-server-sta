@@ -202,12 +202,12 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
                     Root<PhenomenonEntity> observedProperty = sq.from(PhenomenonEntity.class);
 
                     final Join<PhenomenonEntity, DatastreamEntity> join =
-                            datastreamEntityRoot.join(DatastreamEntity.PROPERTY_OBSERVABLE_PROPERTY, JoinType.INNER);
+                            root.join(DatastreamEntity.PROPERTY_OBSERVABLE_PROPERTY, JoinType.INNER);
                     sq.select(observedProperty.get(DescribableEntity.PROPERTY_ID))
                       .where(((Specification<PhenomenonEntity>) propertyValue).toPredicate(observedProperty,
                                                                                            query,
                                                                                            builder));
-                    return builder.in(join.get(DescribableEntity.PROPERTY_ID)).value(sq);
+                    return builder.in(root.get(DescribableEntity.PROPERTY_ID)).value(sq);
                 }
                 case THING: {
                     Subquery<DatastreamEntity> sq = query.subquery(DatastreamEntity.class);

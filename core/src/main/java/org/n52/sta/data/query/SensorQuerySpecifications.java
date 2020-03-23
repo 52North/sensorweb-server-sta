@@ -65,11 +65,11 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications<Procedu
                 Subquery<ProcedureEntity> sq = query.subquery(ProcedureEntity.class);
                 Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
                 Join<DatastreamEntity, ProcedureEntity> join = datastream.join(DatastreamEntity.PROPERTY_SENSOR);
-                sq.select(join)
+                sq.select(datastream.get(DatastreamEntity.PROPERTY_ID))
                   .where(((Specification<DatastreamEntity>) propertyValue).toPredicate(datastream,
                                                                                        query,
                                                                                        builder));
-                return builder.in(join.get(DescribableEntity.PROPERTY_ID)).value(sq);
+                return builder.in(root.get(DescribableEntity.PROPERTY_ID)).value(sq);
             } else {
                 throw new RuntimeException("Could not find related property: " + propertyName);
             }
