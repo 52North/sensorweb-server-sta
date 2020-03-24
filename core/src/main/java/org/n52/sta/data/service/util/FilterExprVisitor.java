@@ -27,7 +27,7 @@
  * Public License for more details.
  */
 
-package org.n52.sta.data.service;
+package org.n52.sta.data.service.util;
 
 import org.n52.shetland.oasis.odata.ODataConstants;
 import org.n52.shetland.ogc.filter.FilterConstants;
@@ -36,6 +36,7 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.data.query.EntityQuerySpecifications;
 import org.n52.sta.data.query.QuerySpecificationRepository;
+import org.n52.sta.data.query.SpatialQuerySpecifications;
 import org.n52.svalbard.odata.core.expr.Expr;
 import org.n52.svalbard.odata.core.expr.ExprVisitor;
 import org.n52.svalbard.odata.core.expr.GeoValueExpr;
@@ -50,11 +51,11 @@ import org.n52.svalbard.odata.core.expr.binary.ComparisonExpr;
 import org.n52.svalbard.odata.core.expr.temporal.TimeValueExpr;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.time.Instant;
 import java.util.Date;
 
 /**
@@ -63,19 +64,19 @@ import java.util.Date;
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, STAInvalidQueryException> {
+public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, STAInvalidQueryException> {
 
     private static final String ERROR_NOT_IMPLEMENTED = "not implemented yet!";
     private static final String ERROR_NOT_EVALUABLE = "Could not evaluate Methodcall to :";
 
     private static final String SLASH = "/";
 
-    private CriteriaBuilder builder;
+    private HibernateSpatialCriteriaBuilderImpl builder;
     private EntityQuerySpecifications<T> rootQS;
     private Root root;
     private CriteriaQuery query;
 
-    FilterExprVisitor(Root root, CriteriaQuery query, CriteriaBuilder builder)
+    public FilterExprVisitor(Root root, CriteriaQuery query, HibernateSpatialCriteriaBuilderImpl builder)
             throws STAInvalidFilterExpressionException {
         this.builder = builder;
         this.query = query;
@@ -112,7 +113,7 @@ final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, STAInvali
     @SuppressWarnings("unchecked")
     @Override public Predicate visitBooleanUnary(BooleanUnaryExpr expr) throws STAInvalidQueryException {
         // Only 'not' exists as unary boolean expression
-        return builder.not((Expression<Boolean>) expr.accept(this));
+        return builder.not((Expression<Boolean>) expr.getOperand().accept(this));
     }
 
     /**
@@ -214,7 +215,44 @@ final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, STAInvali
 
         Specification<?> filter =
                 stepQS.getFilterForProperty(resources[resources.length - 1], value, operator, false);
+        return resolveForeignExpression(resources, filter);
+    }
 
+    /**
+     * Resolves a filter on a spatial property of an related entity. Needs special handling as relation link is
+     * nested inside the spatial function call.
+     *
+     * @param path         Path to the property of a related entity
+     * @param functionName name of the function to be used
+     * @param value        arguments of the function
+     * @return Expression specifying the entity
+     * @throws STAInvalidFilterExpressionException if the filter is invalid
+     */
+    private Predicate convertToForeignSpatialExpression(String path,
+                                                        String functionName,
+                                                        String... value)
+            throws STAInvalidFilterExpressionException {
+        String[] resources = path.split(SLASH);
+        String lastResource = resources[resources.length - 2];
+
+        // Get filter on Entity
+        EntityQuerySpecifications<?> stepQS = QuerySpecificationRepository.getSpecification(lastResource);
+        Specification<?> filter;
+        if (stepQS instanceof SpatialQuerySpecifications) {
+            filter = ((SpatialQuerySpecifications) stepQS).handleGeoSpatialPropertyFilter(
+                    resources[resources.length - 1],
+                    functionName,
+                    value);
+            return resolveForeignExpression(resources, filter);
+        } else {
+            throw new STAInvalidFilterExpressionException(
+                    "Entity does not have spatial property:" + resources[resources.length - 1]);
+        }
+    }
+
+    private Predicate resolveForeignExpression(String[] resources, Specification<?> filter)
+            throws STAInvalidFilterExpressionException {
+        EntityQuerySpecifications<?> stepQS;
         for (int i = resources.length - 3; i >= 0; i--) {
             // Get QuerySpecifications for subQuery
             stepQS = QuerySpecificationRepository.getSpecification(resources[i]);
@@ -254,11 +292,11 @@ final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, STAInvali
     private Expression<?> visitMethodCallNullary(MethodCallExpr expr) throws STAInvalidQueryException {
         switch (expr.getName()) {
         case ODataConstants.DateAndTimeFunctions.NOW:
-            // fallthru
+            return builder.currentTimestamp();
         case ODataConstants.DateAndTimeFunctions.MINDATETIME:
-            // fallthru
+            return builder.literal(Date.from(Instant.MIN));
         case ODataConstants.DateAndTimeFunctions.MAXDATETIME:
-            throw new STAInvalidQueryException(ERROR_NOT_IMPLEMENTED);
+            return builder.literal(Date.from(Instant.MAX));
         default:
             throw new STAInvalidQueryException(ERROR_NOT_EVALUABLE + expr.getName());
         }
@@ -279,19 +317,22 @@ final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, STAInvali
             return builder.trim((Expression<String>) param);
         // DateTime Functions
         case ODataConstants.DateAndTimeFunctions.YEAR:
-            // fallthru
+            return builder.function("YEAR", Integer.class, (Expression<Date>) expr);
         case ODataConstants.DateAndTimeFunctions.MONTH:
-            // fallthru
+            return builder.function("MONTH", Integer.class, (Expression<Date>) expr);
         case ODataConstants.DateAndTimeFunctions.DAY:
-            // fallthru
+            return builder.function("DAY", Integer.class, (Expression<Date>) expr);
         case ODataConstants.DateAndTimeFunctions.HOUR:
-            // fallthru
+            return builder.function("HOUR", Integer.class, (Expression<Date>) expr);
         case ODataConstants.DateAndTimeFunctions.MINUTE:
-            // fallthru
+            return builder.function("MINUTE", Integer.class, (Expression<Date>) expr);
         case ODataConstants.DateAndTimeFunctions.SECOND:
-            // fallthru
+            return builder.function("SECOND", Integer.class, (Expression<Date>) expr);
         case ODataConstants.DateAndTimeFunctions.FRACTIONALSECONDS:
-            // fallthru
+            return builder.function("DATEPART",
+                                    Integer.class,
+                                    builder.literal("millisecond"),
+                                    (Expression<Date>) expr);
         case ODataConstants.DateAndTimeFunctions.DATE:
             // fallthru
         case ODataConstants.DateAndTimeFunctions.TIME:
@@ -359,7 +400,11 @@ final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, STAInvali
         case ODataConstants.SpatialFunctions.ST_INTERSECTS:
             // fallthru
         case ODataConstants.SpatialFunctions.ST_CONTAINS:
-            throw new STAInvalidQueryException(ERROR_NOT_IMPLEMENTED);
+            return convertToForeignSpatialExpression(
+                    expr.getParameters().get(0).asGeometry().get().getGeometry(),
+                    expr.getName(),
+                    expr.getParameters().get(1).asGeometry().get().getGeometry()
+            );
         default:
             throw new STAInvalidQueryException(ERROR_NOT_EVALUABLE + expr.getName());
         }
@@ -368,7 +413,10 @@ final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, STAInvali
     private Expression<?> visitMethodCallTernary(MethodCallExpr expr) throws STAInvalidQueryException {
         switch (expr.getName()) {
         case ODataConstants.SpatialFunctions.ST_RELATE:
-            throw new STAInvalidQueryException(ERROR_NOT_IMPLEMENTED);
+            return convertToForeignSpatialExpression(
+                    expr.getParameters().get(0).asGeometry().get().getGeometry(),
+                    expr.getName(),
+                    ((StringValueExpr) expr.getParameters().get(2).asTextValue().get()).getValue());
         default:
             throw new STAInvalidQueryException(ERROR_NOT_EVALUABLE + expr.getName());
         }
@@ -449,7 +497,7 @@ final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, STAInvali
      * @return the result of the visit
      * @throws STAInvalidQueryException if the visit fails
      */
-    @Override public Expression<?> visitGeometry(GeoValueExpr expr) throws STAInvalidQueryException {
+    @Override public Expression<String> visitGeometry(GeoValueExpr expr) throws STAInvalidQueryException {
         return null;
     }
 

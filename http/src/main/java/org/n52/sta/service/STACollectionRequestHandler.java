@@ -33,7 +33,7 @@ import org.n52.shetland.filter.SelectFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.filter.FilterClause;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
-import org.n52.sta.data.service.CollectionWrapper;
+import org.n52.sta.data.service.util.CollectionWrapper;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.utils.STARequestUtils;
 import org.springframework.beans.factory.annotation.Value;

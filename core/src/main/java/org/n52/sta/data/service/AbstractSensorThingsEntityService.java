@@ -29,6 +29,7 @@
 
 package org.n52.sta.data.service;
 
+import org.hibernate.query.criteria.internal.CriteriaBuilderImpl;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DescribableEntity;
@@ -57,6 +58,9 @@ import org.n52.sta.data.OffsetLimitBasedPageRequest;
 import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.IdentifierRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
+import org.n52.sta.data.service.util.CollectionWrapper;
+import org.n52.sta.data.service.util.FilterExprVisitor;
+import org.n52.sta.data.service.util.HibernateSpatialCriteriaBuilderImpl;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
 import org.n52.svalbard.odata.core.expr.Expr;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -442,7 +446,8 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
                 FilterFilter filterOption = (FilterFilter) queryOptions.getFilterOption();
                 Expr filter = (Expr) filterOption.getFilter();
                 try {
-                    return (Predicate) filter.accept(new FilterExprVisitor<S>(root, query, builder));
+                    HibernateSpatialCriteriaBuilderImpl staBuilder = new HibernateSpatialCriteriaBuilderImpl((CriteriaBuilderImpl) builder);
+                    return (Predicate) filter.accept(new FilterExprVisitor<S>(root, query, staBuilder));
                 } catch (STAInvalidQueryException e) {
                     throw new RuntimeException(e);
                 }

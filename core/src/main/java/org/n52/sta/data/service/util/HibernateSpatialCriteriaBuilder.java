@@ -27,51 +27,37 @@
  * Public License for more details.
  */
 
-package org.n52.sta.data.service;
+package org.n52.sta.data.service.util;
 
-import org.n52.sta.serdes.util.ElementWithQueryOptions;
+import org.hibernate.query.criteria.HibernateCriteriaBuilder;
+import org.locationtech.jts.geom.Geometry;
 
-import java.util.List;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Predicate;
+import java.io.Serializable;
 
 /**
+ * Implements Spatial operations as defined in SensorThingsAPI 15-078r6 Section 9.3.3.5.2
+ *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public class CollectionWrapper {
+public interface HibernateSpatialCriteriaBuilder extends HibernateCriteriaBuilder, Serializable {
 
-    private final long totalEntityCount;
+    Predicate st_equals(Expression<Geometry> x, String wktWithType);
 
-    private final List<ElementWithQueryOptions> entities;
+    Predicate st_disjoint(Expression<Geometry> x, String wktWithType);
 
-    private final boolean hasNextPage;
+    Predicate st_touches(Expression<Geometry> x, String wktWithType);
 
-    private String requestURL;
+    Predicate st_within(Expression<Geometry> x, String wktWithType);
 
-    public CollectionWrapper(long entityCount,
-                             List<ElementWithQueryOptions> entity,
-                             boolean hasNextPage) {
-        this.totalEntityCount = entityCount;
-        this.entities = entity;
-        this.hasNextPage = hasNextPage;
-    }
+    Predicate st_overlaps(Expression<Geometry> x, String wktWithType);
 
-    public long getTotalEntityCount() {
-        return totalEntityCount;
-    }
+    Predicate st_crosses(Expression<Geometry> x, String wktWithType);
 
-    public List<ElementWithQueryOptions> getEntities() {
-        return entities;
-    }
+    Predicate st_contains(Expression<Geometry> x, String wktWithType);
 
-    public boolean hasNextPage() {
-        return hasNextPage;
-    }
+    Predicate st_intersects(Expression<String> x, String wktWithType);
 
-    public String getRequestURL() {
-        return requestURL;
-    }
-
-    public CollectionWrapper setRequestURL(String requestURL) {
-        this.requestURL = requestURL;
-        return this;
-    }
+    Predicate st_relate(Expression<Geometry> x, String wktWithType, String mask);
 }

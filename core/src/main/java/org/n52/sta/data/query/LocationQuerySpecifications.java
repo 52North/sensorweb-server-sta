@@ -34,8 +34,10 @@ import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.shetland.oasis.odata.ODataConstants;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
+import org.n52.sta.data.service.util.HibernateSpatialCriteriaBuilder;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.Expression;
@@ -46,7 +48,10 @@ import javax.persistence.criteria.Subquery;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public class LocationQuerySpecifications extends EntityQuerySpecifications<LocationEntity> {
+public class LocationQuerySpecifications extends EntityQuerySpecifications<LocationEntity> implements
+        SpatialQuerySpecifications {
+
+    private static final String GEOMETRYENTITY = "geometryEntity";
 
     public Specification<LocationEntity> withRelatedHistoricalLocationIdentifier(String historicalLocationIdentifier) {
         return (root, query, builder) -> {
@@ -99,12 +104,72 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
                     return handleDirectStringPropertyFilter(
                             join.get(FormatEntity.FORMAT),
                             propertyValue, operator, builder, switched);
+                case "location":
+
                 default:
                     throw new RuntimeException("Error getting filter for Property: \"" + propertyName
                                                        + "\". No such property in Entity.");
                 }
             } catch (STAInvalidFilterExpressionException e) {
                 throw new RuntimeException(e);
+            }
+        };
+    }
+
+    /**
+     * Copies the arguments provided in arguments to the database function call. If too many arguments are provided
+     * they are discarded silently.
+     *
+     * @param spatialFunctionName name of the function to be called
+     * @param arguments           arguments of the function
+     * @return Specification of LocationEntity matching
+     */
+    @Override public Specification<LocationEntity> handleGeoSpatialPropertyFilter(
+            String propertyName,
+            String spatialFunctionName,
+            String... arguments) {
+        return (Specification<LocationEntity>) (root, query, builder) -> {
+            if (!"location".equals(propertyName)) {
+                throw new RuntimeException("Could not find property: " + propertyName);
+            }
+            if (builder instanceof HibernateSpatialCriteriaBuilder) {
+                switch (spatialFunctionName) {
+                case ODataConstants.SpatialFunctions.ST_EQUALS:
+                    return ((HibernateSpatialCriteriaBuilder) builder).st_equals(
+                            root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY),
+                            arguments[0]);
+                case ODataConstants.SpatialFunctions.ST_DISJOINT:
+                    return ((HibernateSpatialCriteriaBuilder) builder).st_disjoint(
+                            root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY),
+                            arguments[0]);
+                case ODataConstants.SpatialFunctions.ST_TOUCHES:
+                    return ((HibernateSpatialCriteriaBuilder) builder).st_touches(
+                            root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY),
+                            arguments[0]);
+                case ODataConstants.SpatialFunctions.ST_WITHIN:
+                    return ((HibernateSpatialCriteriaBuilder) builder).st_within(
+                            root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY),
+                            arguments[0]);
+                case ODataConstants.SpatialFunctions.ST_OVERLAPS:
+                    return ((HibernateSpatialCriteriaBuilder) builder).st_overlaps(
+                            root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY),
+                            arguments[0]);
+                case ODataConstants.SpatialFunctions.ST_CROSSES:
+                    return ((HibernateSpatialCriteriaBuilder) builder).st_crosses(
+                            root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY),
+                            arguments[0]);
+                case ODataConstants.SpatialFunctions.ST_INTERSECTS:
+                    return ((HibernateSpatialCriteriaBuilder) builder).st_intersects(
+                            root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY),
+                            arguments[0]);
+                case ODataConstants.SpatialFunctions.ST_CONTAINS:
+                    return ((HibernateSpatialCriteriaBuilder) builder).st_contains(
+                            root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY),
+                            arguments[0]);
+                }
+                throw new RuntimeException("Could not find function: " + spatialFunctionName);
+            } else {
+                throw new RuntimeException("Invalid QuerySpecificationBuilder supplied! Spatial support not present!");
             }
         };
     }
