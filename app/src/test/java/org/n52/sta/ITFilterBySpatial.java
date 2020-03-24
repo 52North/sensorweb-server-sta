@@ -59,18 +59,27 @@ public class ITFilterBySpatial extends ConformanceTests implements TestUtil {
                 + "  \"encodingType\": \"application/vnd.geo+json\",\n"
                 + "  \"location\": { \"type\": \"Point\", \"coordinates\": [52, 52] }\n"
                 + "}");
-    }
 
-    @Test
-    public void testFilterSTequalsDoesNotThrowError() throws IOException {
-        getCollection(EntityType.OBSERVATION,
-                      URLEncoder.encode("$filter=st_equals(location, geography'POINT (30 10)')"));
+        postEntity(EntityType.FEATURE_OF_INTEREST, "{\n" +
+                "    \"name\": \"MSGuenter-Trip-01\",\n" +
+                "    \"description\": \"This is the first Forschungstrip of MS Guenther\",\n" +
+                "    \"encodingType\": \"application/vnd.geo+json\",\n" +
+                "    \"feature\": {\n" +
+                "      \"geometry\": {\n" +
+                "        \"type\": \"LineString\",\n" +
+                "        \"coordinates\": [\n" +
+                "          [0, 0], [52, 52]\n" +
+                "        ]\n" +
+                "      }\n" +
+                "    }\n" +
+                "}");
     }
 
     @Test
     public void testFilterSTequals() throws IOException {
-        JsonNode response = getCollection(EntityType.LOCATION,
-                                          URLEncoder.encode("$filter=st_equals(location, geography'POINT (30 10)')"));
+        JsonNode response =
+                getCollection(EntityType.LOCATION,
+                              URLEncoder.encode("$filter=st_equals(location, geography'POINT (30 10)')"));
         assertEmptyResponse(response);
 
         response = getCollection(EntityType.LOCATION,
@@ -105,6 +114,165 @@ public class ITFilterBySpatial extends ConformanceTests implements TestUtil {
                                  URLEncoder.encode("$filter=not st_disjoint(location, geography'POINT (52 52)')"));
         assertEmptyResponse(response);
 
+    }
+
+    @Test
+    public void testFilterSTtouches() throws IOException {
+        JsonNode response = getCollection(
+                EntityType.LOCATION,
+                URLEncoder.encode("$filter=st_touches(location, geography'LINESTRING(0 0, 52 52, 0 2)')"));
+        assertEmptyResponse(response);
+
+        response = getCollection(
+                EntityType.LOCATION,
+                URLEncoder.encode("$filter=not st_touches(location, geography'LINESTRING(0 0, 52 52, 0 2)')"));
+        assertSingleResponse(response);
+
+        response = getCollection(
+                EntityType.LOCATION,
+                URLEncoder.encode("$filter=st_touches(location, geography'LINESTRING(0 0, 40 40, 52 52)')"));
+        assertSingleResponse(response);
+
+        response = getCollection(
+                EntityType.LOCATION,
+                URLEncoder.encode("$filter=not st_touches(location, geography'LINESTRING(0 0, 40 40, 52 52)')"));
+        assertEmptyResponse(response);
+    }
+
+    @Test
+    public void testFilterSTwithin() throws IOException {
+        JsonNode response = getCollection(
+                EntityType.LOCATION,
+                URLEncoder.encode(
+                        "$filter=st_within(location, geography'POLYGON (0 0, 0 40, 40 40, 40 0, 0 0)')"));
+        assertEmptyResponse(response);
+
+        response = getCollection(
+                EntityType.LOCATION,
+                URLEncoder.encode(
+                        "$filter=not st_within(location, geography'POLYGON (0 0, 0 40, 40 40, 40 0, 0 0)')"));
+        assertSingleResponse(response);
+
+        response = getCollection(
+                EntityType.LOCATION,
+                URLEncoder.encode(
+                        "$filter=st_within(location, geography'POLYGON (0 0, 0 60, 60 60, 60 0, 0 0)')"));
+        assertSingleResponse(response);
+
+        response = getCollection(
+                EntityType.LOCATION,
+                URLEncoder.encode(
+                        "$filter=not st_within(location, geography'POLYGON (0 0, 0 60, 60 60, 60 0, 0 0)')"));
+        assertEmptyResponse(response);
+
+    }
+
+    @Test
+    public void testFilterSToverlaps() throws IOException {
+        JsonNode response = getCollection(
+                EntityType.LOCATION,
+                URLEncoder.encode(
+                        "$filter=st_overlaps(location, geography'POLYGON (0 0, 0 40, 40 40, 40 0, 0 0)')"));
+        assertEmptyResponse(response);
+
+        response = getCollection(
+                EntityType.LOCATION,
+                URLEncoder.encode(
+                        "$filter=not st_overlaps(location, geography'POLYGON (0 0, 0 40, 40 40, 40 0, 0 0)')"));
+        assertSingleResponse(response);
+
+        response = getCollection(
+                EntityType.LOCATION,
+                URLEncoder.encode(
+                        "$filter=st_overlaps(location, geography'POLYGON (0 0, 0 60, 60 60, 60 0, 0 0)')"));
+        assertSingleResponse(response);
+
+        response = getCollection(
+                EntityType.LOCATION,
+                URLEncoder.encode(
+                        "$filter=not st_overlaps(location, geography'POLYGON (0 0, 0 60, 60 60, 60 0, 0 0)')"));
+        assertEmptyResponse(response);
+    }
+
+    @Test
+    public void testFilterSTcrosses() throws IOException {
+        JsonNode response = getCollection(
+                EntityType.FEATURE_OF_INTEREST,
+                URLEncoder.encode("$filter=st_crosses(feature, geography'LINESTRING (10 10, 11 11)')"));
+        assertEmptyResponse(response);
+
+        response = getCollection(
+                EntityType.FEATURE_OF_INTEREST,
+                URLEncoder.encode("$filter=not st_crosses(feature, geography'LINESTRING (10 10, 11 11)')"));
+        assertSingleResponse(response);
+
+        response = getCollection(
+                EntityType.FEATURE_OF_INTEREST,
+                URLEncoder.encode("$filter=st_crosses(feature, geography'LINESTRING (0 52, 52 0)')"));
+        assertSingleResponse(response);
+
+        response = getCollection(
+                EntityType.FEATURE_OF_INTEREST,
+                URLEncoder.encode("$filter=st_crosses(feature, geography'LINESTRING (0 52, 52 0)')"));
+        assertEmptyResponse(response);
+    }
+
+    @Test
+    public void testFilterSTintersects() throws IOException {
+        JsonNode response = getCollection(
+                EntityType.LOCATION,
+                URLEncoder.encode("$filter=st_intersects(feature, geography'LINESTRING (10 10, 11 11)')"));
+        assertEmptyResponse(response);
+
+        response = getCollection(
+                EntityType.LOCATION,
+                URLEncoder.encode("$filter=not st_intersects(feature, geography'LINESTRING (10 10, 11 11)')"));
+        assertSingleResponse(response);
+
+        response = getCollection(
+                EntityType.LOCATION,
+                URLEncoder.encode("$filter=st_intersects(feature, geography'LINESTRING (0 52, 52 52, 1 1)')"));
+        assertSingleResponse(response);
+
+        response = getCollection(
+                EntityType.LOCATION,
+                URLEncoder.encode("$filter=st_intersects(feature, geography'LINESTRING (0 52, 52 52, 1 1)')"));
+        assertEmptyResponse(response);
+    }
+
+    @Test
+    public void testFilterSTcontains() throws IOException {
+        JsonNode response = getCollection(
+                EntityType.LOCATION,
+                URLEncoder.encode(
+                        "$filter=st_contains(location, geography'POLYGON (0 0, 0 40, 40 40, 40 0, 0 0)')"));
+        assertEmptyResponse(response);
+
+        response = getCollection(
+                EntityType.LOCATION,
+                URLEncoder.encode(
+                        "$filter=not st_contains(location, geography'POLYGON (0 0, 0 40, 40 40, 40 0, 0 0)')"));
+        assertSingleResponse(response);
+
+        response = getCollection(
+                EntityType.LOCATION,
+                URLEncoder.encode(
+                        "$filter=st_contains(location, geography'POLYGON (0 0, 0 60, 60 60, 60 0, 0 0)')"));
+        assertSingleResponse(response);
+
+        response = getCollection(
+                EntityType.LOCATION,
+                URLEncoder.encode(
+                        "$filter=not st_contains(location, geography'POLYGON (0 0, 0 60, 60 60, 60 0, 0 0)')"));
+        assertEmptyResponse(response);
+
+    }
+
+    @Test
+    public void testFilterSTrelate() throws IOException {
+
+        //TODO: implement
+        Assertions.fail();
     }
 
     private void assertEmptyResponse(JsonNode response) {

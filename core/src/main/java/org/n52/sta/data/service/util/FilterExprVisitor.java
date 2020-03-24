@@ -221,6 +221,7 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
     /**
      * Resolves a filter on a spatial property of an related entity. Needs special handling as relation link is
      * nested inside the spatial function call.
+     * e.g. /Things?$filter=st_equals(Locations/location, geography'POINT(52 52)')
      *
      * @param path         Path to the property of a related entity
      * @param functionName name of the function to be used
@@ -233,10 +234,17 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
                                                         String... value)
             throws STAInvalidFilterExpressionException {
         String[] resources = path.split(SLASH);
-        String lastResource = resources[resources.length - 2];
-
+        EntityQuerySpecifications<?> stepQS;
         // Get filter on Entity
-        EntityQuerySpecifications<?> stepQS = QuerySpecificationRepository.getSpecification(lastResource);
+        if (resources.length >= 2) {
+            String lastResource = resources[resources.length - 2];
+            stepQS = QuerySpecificationRepository.getSpecification(lastResource);
+        } else {
+            //TODO: implement
+            stepQS = rootQS;
+            throw new STAInvalidFilterExpressionException("Not implemented yet!");
+        }
+
         Specification<?> filter;
         if (stepQS instanceof SpatialQuerySpecifications) {
             filter = ((SpatialQuerySpecifications) stepQS).handleGeoSpatialPropertyFilter(

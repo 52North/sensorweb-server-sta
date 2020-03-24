@@ -51,8 +51,6 @@ import javax.persistence.criteria.Subquery;
 public class LocationQuerySpecifications extends EntityQuerySpecifications<LocationEntity> implements
         SpatialQuerySpecifications {
 
-    private static final String GEOMETRYENTITY = "geometryEntity";
-
     public Specification<LocationEntity> withRelatedHistoricalLocationIdentifier(String historicalLocationIdentifier) {
         return (root, query, builder) -> {
             Subquery<LocationEntity> sq = query.subquery(LocationEntity.class);
@@ -96,16 +94,20 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
                                                             propertyValue, operator, builder, switched);
                 case "description":
                     return handleDirectStringPropertyFilter(
-                            root.get(DescribableEntity.PROPERTY_DESCRIPTION), propertyValue,
-                            operator, builder, switched);
+                            root.get(DescribableEntity.PROPERTY_DESCRIPTION),
+                            propertyValue,
+                            operator,
+                            builder,
+                            switched);
                 case "encodingType":
                     Join<LocationEntity, FormatEntity> join =
                             root.join(LocationEntity.PROPERTY_LOCATION_ENCODINT);
                     return handleDirectStringPropertyFilter(
                             join.get(FormatEntity.FORMAT),
-                            propertyValue, operator, builder, switched);
-                case "location":
-
+                            propertyValue,
+                            operator,
+                            builder,
+                            switched);
                 default:
                     throw new RuntimeException("Error getting filter for Property: \"" + propertyName
                                                        + "\". No such property in Entity.");
@@ -166,8 +168,14 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
                     return ((HibernateSpatialCriteriaBuilder) builder).st_contains(
                             root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY),
                             arguments[0]);
+                case ODataConstants.SpatialFunctions.ST_RELATE:
+                    return ((HibernateSpatialCriteriaBuilder) builder).st_relate(
+                            root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY),
+                            arguments[0],
+                            arguments[1]);
+                default:
+                    throw new RuntimeException("Could not find function: " + spatialFunctionName);
                 }
-                throw new RuntimeException("Could not find function: " + spatialFunctionName);
             } else {
                 throw new RuntimeException("Invalid QuerySpecificationBuilder supplied! Spatial support not present!");
             }
