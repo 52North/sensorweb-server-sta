@@ -200,34 +200,38 @@ public class MqttSubscriptionEventHandler implements STARequestUtils, STAEventHa
                     }
                 }
             } else {
-                for (Pattern namedPropertyPattern : NAMED_PROP_PATTERNS) {
-                    mt = namedPropertyPattern.matcher(topic);
-                    if (mt.matches()) {
-                        // OGC-15-078r6 14.2.3
-                        // Only check path part of the topic (excluding the property)
-                        String path = topic.substring(0, topic.lastIndexOf("/"));
-                        validateResource(path, serviceRepository);
-                        return new MqttPropertySubscription(topic, mt);
-                    }
-                }
                 // check full topic
-                validateResource(topic, serviceRepository);
+                // This will fail if we have a PropertySubscription
+                try {
+                    validateResource(topic, serviceRepository);
+                    for (Pattern collectionPattern : NAMED_COLL_PATTERNS) {
+                        mt = collectionPattern.matcher(topic);
+                        if (mt.matches()) {
+                            // OGC-15-078r6 14.2.1
+                            return new MqttEntityCollectionSubscription(topic, mt);
+                        }
+                    }
 
-                for (Pattern collectionPattern : NAMED_COLL_PATTERNS) {
-                    mt = collectionPattern.matcher(topic);
-                    if (mt.matches()) {
-                        // OGC-15-078r6 14.2.1
-                        return new MqttEntityCollectionSubscription(topic, mt);
+                    for (Pattern namedEntityPattern : NAMED_ENTITY_PATTERNS) {
+                        mt = namedEntityPattern.matcher(topic);
+                        if (mt.matches()) {
+                            // OGC-15-078r6 14.2.2
+                            return new MqttEntitySubscription(topic, mt);
+                        }
+                    }
+                } catch (Exception ex) {
+                    for (Pattern namedPropertyPattern : NAMED_PROP_PATTERNS) {
+                        mt = namedPropertyPattern.matcher(topic);
+                        if (mt.matches()) {
+                            // OGC-15-078r6 14.2.3
+                            // Only check path part of the topic (excluding the property)
+                            String path = topic.substring(0, topic.lastIndexOf("/"));
+                            validateResource(path, serviceRepository);
+                            return new MqttPropertySubscription(topic, mt);
+                        }
                     }
                 }
 
-                for (Pattern namedEntityPattern : NAMED_ENTITY_PATTERNS) {
-                    mt = namedEntityPattern.matcher(topic);
-                    if (mt.matches()) {
-                        // OGC-15-078r6 14.2.2
-                        return new MqttEntitySubscription(topic, mt);
-                    }
-                }
             }
 
             throw new MqttHandlerException("Error while parsing MQTT topic. Could not identify subscription type!");

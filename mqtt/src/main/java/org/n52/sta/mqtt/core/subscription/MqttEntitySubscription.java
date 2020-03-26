@@ -80,6 +80,7 @@ public class MqttEntitySubscription extends AbstractMqttSubscription {
             // E.g. /Things(52)
             wantedEntityType = mt.group(STARequestUtils.GROUPNAME_WANTED_NAME);
             wantedIdentifier = mt.group(STARequestUtils.GROUPNAME_WANTED_IDENTIFIER);
+            wantedIdentifier = wantedIdentifier.substring(1, wantedIdentifier.length() - 1);
             Assert.notNull(wantedIdentifier, "Unable to parse topic. Could not extract wantedIdentifier");
         }
 
