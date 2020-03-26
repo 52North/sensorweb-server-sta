@@ -446,7 +446,8 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
                 FilterFilter filterOption = (FilterFilter) queryOptions.getFilterOption();
                 Expr filter = (Expr) filterOption.getFilter();
                 try {
-                    HibernateSpatialCriteriaBuilderImpl staBuilder = new HibernateSpatialCriteriaBuilderImpl((CriteriaBuilderImpl) builder);
+                    HibernateSpatialCriteriaBuilderImpl staBuilder =
+                            new HibernateSpatialCriteriaBuilderImpl((CriteriaBuilderImpl) builder);
                     return (Predicate) filter.accept(new FilterExprVisitor<S>(root, query, staBuilder));
                 } catch (STAInvalidQueryException e) {
                     throw new RuntimeException(e);

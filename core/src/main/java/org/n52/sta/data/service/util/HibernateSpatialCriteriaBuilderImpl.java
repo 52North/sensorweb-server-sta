@@ -43,6 +43,8 @@ import javax.persistence.criteria.Predicate;
 public class HibernateSpatialCriteriaBuilderImpl extends CriteriaBuilderImpl
         implements HibernateSpatialCriteriaBuilder {
 
+    private static final String GEOMETRY = "geometry";
+
     public HibernateSpatialCriteriaBuilderImpl(CriteriaBuilderImpl hibernateCriteriaBuilder) {
         super(hibernateCriteriaBuilder.getEntityManagerFactory());
     }
@@ -92,7 +94,7 @@ public class HibernateSpatialCriteriaBuilderImpl extends CriteriaBuilderImpl
                 this.function(
                         "ST_RELATE",
                         Boolean.class,
-                        this.function("geometry", Geometry.class, x),
+                        this.function(GEOMETRY, Geometry.class, x),
                         geometryfromWKT(extractWKT(wktWithType)),
                         this.literal(mask)
                 )
@@ -104,7 +106,7 @@ public class HibernateSpatialCriteriaBuilderImpl extends CriteriaBuilderImpl
                 this.function(
                         methodName,
                         Boolean.class,
-                        this.function("geometry", Geometry.class, x),
+                        this.function(GEOMETRY, Geometry.class, x),
                         geometryfromWKT(extractWKT(wktWithType))
                 )
         );

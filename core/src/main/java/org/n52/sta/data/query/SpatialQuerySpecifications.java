@@ -29,7 +29,6 @@
 
 package org.n52.sta.data.query;
 
-import org.n52.shetland.oasis.odata.ODataConstants;
 import org.springframework.data.jpa.domain.Specification;
 
 /**

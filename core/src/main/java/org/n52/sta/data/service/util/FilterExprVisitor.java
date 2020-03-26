@@ -249,6 +249,7 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
         if (stepQS instanceof SpatialQuerySpecifications) {
             filter = ((SpatialQuerySpecifications) stepQS).handleGeoSpatialPropertyFilter(
                     resources[resources.length - 1],
+
                     functionName,
                     value);
             return resolveForeignExpression(resources, filter);
@@ -258,9 +259,10 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
         }
     }
 
-    private Predicate resolveForeignExpression(String[] resources, Specification<?> filter)
+    private Predicate resolveForeignExpression(String[] resources, Specification<?> rawFilter)
             throws STAInvalidFilterExpressionException {
         EntityQuerySpecifications<?> stepQS;
+        Specification<?> filter = rawFilter;
         for (int i = resources.length - 3; i >= 0; i--) {
             // Get QuerySpecifications for subQuery
             stepQS = QuerySpecificationRepository.getSpecification(resources[i]);
