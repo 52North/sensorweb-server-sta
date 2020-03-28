@@ -236,20 +236,13 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
         String[] resources = path.split(SLASH);
         EntityQuerySpecifications<?> stepQS;
         // Get filter on Entity
-        if (resources.length >= 2) {
-            String lastResource = resources[resources.length - 2];
-            stepQS = QuerySpecificationRepository.getSpecification(lastResource);
-        } else {
-            //TODO: implement
-            stepQS = rootQS;
-            throw new STAInvalidFilterExpressionException("Not implemented yet!");
-        }
+        String lastResource = resources[resources.length - 2];
+        stepQS = QuerySpecificationRepository.getSpecification(lastResource);
 
         Specification<?> filter;
         if (stepQS instanceof SpatialQuerySpecifications) {
             filter = ((SpatialQuerySpecifications) stepQS).handleGeoSpatialPropertyFilter(
                     resources[resources.length - 1],
-
                     functionName,
                     value);
             return resolveForeignExpression(resources, filter);
@@ -354,6 +347,17 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
             return builder.function("FLOOR", Integer.class, param);
         case ODataConstants.ArithmeticFunctions.CEILING:
             return builder.function("CEIL", Integer.class, param);
+        case ODataConstants.GeoFunctions.GEO_LENGTH:
+            if (rootQS instanceof SpatialQuerySpecifications) {
+                return ((SpatialQuerySpecifications) rootQS).handleGeospatial(
+                        expr.getParameters().get(0).asGeometry().get(),
+                        expr.getName(),
+                        null,
+                        builder,
+                        root);
+            } else {
+                throw new STAInvalidQueryException("Entity does not have spatial property!");
+            }
         default:
             throw new STAInvalidQueryException(ERROR_NOT_EVALUABLE + expr.getName());
         }
@@ -390,9 +394,16 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
 
         // Geospatial Functions + Spatial Relationship Functions
         case ODataConstants.GeoFunctions.GEO_DISTANCE:
-            // fallthru
-        case ODataConstants.GeoFunctions.GEO_LENGTH:
-            // fallthru
+            if (rootQS instanceof SpatialQuerySpecifications) {
+                return ((SpatialQuerySpecifications) rootQS).handleGeospatial(
+                        expr.getParameters().get(0).asGeometry().get(),
+                        expr.getName(),
+                        expr.getParameters().get(1).asGeometry().get().getGeometry(),
+                        builder,
+                        root);
+            } else {
+                throw new STAInvalidQueryException("Entity does not have spatial property!");
+            }
         case ODataConstants.GeoFunctions.GEO_INTERSECTS:
             // fallthru
         case ODataConstants.SpatialFunctions.ST_EQUALS:
@@ -410,11 +421,22 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
         case ODataConstants.SpatialFunctions.ST_INTERSECTS:
             // fallthru
         case ODataConstants.SpatialFunctions.ST_CONTAINS:
-            return convertToForeignSpatialExpression(
-                    expr.getParameters().get(0).asGeometry().get().getGeometry(),
-                    expr.getName(),
-                    expr.getParameters().get(1).asGeometry().get().getGeometry()
-            );
+            if (expr.getParameters().get(0).asGeometry().get().getGeometry().contains(SLASH)) {
+                return convertToForeignSpatialExpression(
+                        expr.getParameters().get(0).asGeometry().get().getGeometry(),
+                        expr.getName(),
+                        expr.getParameters().get(1).asGeometry().get().getGeometry());
+            } else {
+                if (rootQS instanceof SpatialQuerySpecifications) {
+                    return ((SpatialQuerySpecifications) rootQS).handleGeoSpatialPropertyFilter(
+                            expr.getParameters().get(0).asGeometry().get().getGeometry(),
+                            expr.getName(),
+                            expr.getParameters().get(1).asGeometry().get().getGeometry())
+                                                                .toPredicate(root, query, builder);
+                } else {
+                    throw new STAInvalidQueryException("Entity does not have spatial property!");
+                }
+            }
         default:
             throw new STAInvalidQueryException(ERROR_NOT_EVALUABLE + expr.getName());
         }
@@ -423,10 +445,24 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
     private Expression<?> visitMethodCallTernary(MethodCallExpr expr) throws STAInvalidQueryException {
         switch (expr.getName()) {
         case ODataConstants.SpatialFunctions.ST_RELATE:
-            return convertToForeignSpatialExpression(
-                    expr.getParameters().get(0).asGeometry().get().getGeometry(),
-                    expr.getName(),
-                    ((StringValueExpr) expr.getParameters().get(2).asTextValue().get()).getValue());
+            if (expr.getParameters().get(0).asGeometry().get().getGeometry().contains(SLASH)) {
+                return convertToForeignSpatialExpression(
+                        expr.getParameters().get(0).asGeometry().get().getGeometry(),
+                        expr.getName(),
+                        expr.getParameters().get(1).asGeometry().get().getGeometry(),
+                        expr.getParameters().get(2).asGeometry().get().getGeometry());
+            } else {
+                if (rootQS instanceof SpatialQuerySpecifications) {
+                    return ((SpatialQuerySpecifications) rootQS).handleGeoSpatialPropertyFilter(
+                            expr.getParameters().get(0).asGeometry().get().getGeometry(),
+                            expr.getName(),
+                            expr.getParameters().get(1).asGeometry().get().getGeometry(),
+                            expr.getParameters().get(2).asGeometry().get().getGeometry())
+                                                                .toPredicate(root, query, builder);
+                } else {
+                    throw new STAInvalidQueryException("Entity does not have spatial property!");
+                }
+            }
         default:
             throw new STAInvalidQueryException(ERROR_NOT_EVALUABLE + expr.getName());
         }

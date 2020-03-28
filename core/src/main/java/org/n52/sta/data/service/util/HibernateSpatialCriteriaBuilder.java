@@ -60,4 +60,12 @@ public interface HibernateSpatialCriteriaBuilder extends HibernateCriteriaBuilde
     Predicate st_intersects(Expression<String> x, String wktWithType);
 
     Predicate st_relate(Expression<Geometry> x, String wktWithType, String mask);
+
+    Expression<Float> st_length(Expression<Geometry> x);
+
+    Expression<Float> st_length(String wkt);
+
+    Expression<Float> st_distance(Expression<Geometry> x, String wktWithType);
+
+    Expression<Float> st_distance(String x, String wktWithType);
 }

@@ -17,8 +17,8 @@ A [Postman](https://www.getpostman.com/) Collection with a multitude of demo req
 
 | Conformance Class                     | Reference | Implemented |Test Status |
 |:--------------------------------------|:---------:|:-----------:|-----------:|
-| Sensing Core                          | A.1       | Partial     |   4 / 6    |
-| Filtering Extension                   | A.2       | Partial     |   0 / 8    |
+| Sensing Core                          | A.1       | Yes         |   5 / 6    |
+| Filtering Extension                   | A.2       | Yes         |   0 / 8    |
 | Create-Update-Delete                  | A.3       | Yes         |   8 / 8    |
 | Batch Requests                        | A.4       | No          |   0 / ?    |
 | MultiDatastream Extension             | A.5       | No          |   0 / ?    |

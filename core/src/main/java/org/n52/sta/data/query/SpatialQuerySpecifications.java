@@ -29,7 +29,12 @@
 
 package org.n52.sta.data.query;
 
+import org.n52.sta.data.service.util.HibernateSpatialCriteriaBuilder;
+import org.n52.svalbard.odata.core.expr.GeoValueExpr;
 import org.springframework.data.jpa.domain.Specification;
+
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Root;
 
 /**
  * Interface providing functions for handling spatial
@@ -43,4 +48,9 @@ public interface SpatialQuerySpecifications<T> {
             String spatialFunctionName,
             String... arguments);
 
+    Expression<Float> handleGeospatial(GeoValueExpr expr,
+                                       String spatialFunctionName,
+                                       String argument,
+                                       HibernateSpatialCriteriaBuilder builder,
+                                       Root root);
 }

@@ -78,6 +78,40 @@ public class HibernateSpatialCriteriaBuilderImpl extends CriteriaBuilderImpl
         return defaultSTMethodCallGeometry("ST_CONTAINS", x, wktWithType);
     }
 
+    @Override public Expression<Float> st_length(String wkt) {
+        return this.function(
+                "ST_LENGTH",
+                Float.class,
+                geographyfromWKT(extractWKT(wkt))
+        );
+    }
+
+    @Override public Expression<Float> st_length(Expression<Geometry> x) {
+        return this.function(
+                "ST_LENGTH",
+                Float.class,
+                this.function("geography", Geometry.class, x)
+        );
+    }
+
+    @Override public Expression<Float> st_distance(Expression<Geometry> x, String wkt) {
+        return this.function(
+                "ST_Distance",
+                Float.class,
+                this.function("geography", Geometry.class, x),
+                geographyfromWKT(extractWKT(wkt))
+        );
+    }
+
+    @Override public Expression<Float> st_distance(String x, String wkt) {
+        return this.function(
+                "ST_Distance",
+                Float.class,
+                geographyfromWKT(extractWKT(x)),
+                geographyfromWKT(extractWKT(wkt))
+        );
+    }
+
     @Override public Predicate st_intersects(Expression<String> x, String wktWithType) {
         return this.isTrue(
                 this.function(
