@@ -19,7 +19,7 @@ server:
     ## Defines all Collections that accept POSTing via MQTT.
     ## Default (defined by standard): "Observations" only
     ## Fallback to default it invalid Topics are given (aka non-root collections)
-    mqttPublishTopics: Locations, Observations
+    mqttPublishTopics: Observations
 
     ## Toggle strict checking of encodingType for Sensor Entity
     ## When true Sensor->encodingType is not validated against allowed encodingTypes defined in the Standard
@@ -80,7 +80,7 @@ http:
 mqtt:
   broker:
     plaintcp:
-      enabled: false
+      enabled: true
       port: 1883
     websocket:
       enabled: false
@@ -102,4 +102,6 @@ logging:
     #     org.hibernate: DEBUG
     #     io.moquette: OFF
     org.n52: TRACE
+    org.hibernate.type: TRACE
+    org.hibernate.SQL: DEBUG
 #     org.springframework.transaction: TRACE

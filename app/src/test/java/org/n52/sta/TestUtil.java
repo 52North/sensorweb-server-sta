@@ -63,6 +63,8 @@ public interface TestUtil {
 
     String jsonMimeType = "application/json";
     String idKey = "@iot.id";
+    String countKey = "@iot.count";
+    String value = "value";
 
     GeometryFactory factory =
             new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
