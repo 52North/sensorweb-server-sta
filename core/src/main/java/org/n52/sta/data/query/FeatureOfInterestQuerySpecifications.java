@@ -219,7 +219,7 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
             case ODataConstants.GeoFunctions.GEO_LENGTH:
                 return builder.st_length(root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY));
             default:
-                throw new RuntimeException("Could not find spatial function: " + spatialFunctionName);
+                break;
             }
         } else {
             switch (spatialFunctionName) {
@@ -230,8 +230,9 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
             case ODataConstants.GeoFunctions.GEO_LENGTH:
                 return builder.st_length(expr.getGeometry());
             default:
-                throw new RuntimeException("Could not find spatial function: " + spatialFunctionName);
+                break;
             }
         }
+        throw new RuntimeException("Could not find spatial function: " + spatialFunctionName);
     }
 }

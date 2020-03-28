@@ -68,6 +68,7 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
 
     private static final String ERROR_NOT_IMPLEMENTED = "not implemented yet!";
     private static final String ERROR_NOT_EVALUABLE = "Could not evaluate Methodcall to :";
+    private static final String ERROR_NOT_SPATIAL = "Entity does not have spatial property!";
 
     private static final String SLASH = "/";
 
@@ -248,7 +249,7 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
             return resolveForeignExpression(resources, filter);
         } else {
             throw new STAInvalidFilterExpressionException(
-                    "Entity does not have spatial property:" + resources[resources.length - 1]);
+                    ERROR_NOT_SPATIAL + resources[resources.length - 1]);
         }
     }
 
@@ -356,7 +357,7 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
                         builder,
                         root);
             } else {
-                throw new STAInvalidQueryException("Entity does not have spatial property!");
+                throw new STAInvalidQueryException(ERROR_NOT_SPATIAL);
             }
         default:
             throw new STAInvalidQueryException(ERROR_NOT_EVALUABLE + expr.getName());
@@ -402,7 +403,7 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
                         builder,
                         root);
             } else {
-                throw new STAInvalidQueryException("Entity does not have spatial property!");
+                throw new STAInvalidQueryException(ERROR_NOT_SPATIAL);
             }
         case ODataConstants.GeoFunctions.GEO_INTERSECTS:
             // fallthru
@@ -434,7 +435,7 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
                             expr.getParameters().get(1).asGeometry().get().getGeometry())
                                                                 .toPredicate(root, query, builder);
                 } else {
-                    throw new STAInvalidQueryException("Entity does not have spatial property!");
+                    throw new STAInvalidQueryException(ERROR_NOT_SPATIAL);
                 }
             }
         default:
@@ -460,7 +461,7 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
                             expr.getParameters().get(2).asGeometry().get().getGeometry())
                                                                 .toPredicate(root, query, builder);
                 } else {
-                    throw new STAInvalidQueryException("Entity does not have spatial property!");
+                    throw new STAInvalidQueryException(ERROR_NOT_SPATIAL);
                 }
             }
         default:

@@ -201,7 +201,7 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
             case ODataConstants.GeoFunctions.GEO_LENGTH:
                 return builder.st_length(root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY));
             default:
-                throw new RuntimeException("Could not find spatial function: " + spatialFunctionName);
+                break;
             }
         } else {
             switch (spatialFunctionName) {
@@ -212,9 +212,10 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
             case ODataConstants.GeoFunctions.GEO_LENGTH:
                 return builder.st_length(expr.getGeometry());
             default:
-                throw new RuntimeException("Could not find spatial function: " + spatialFunctionName);
+                break;
             }
         }
+        throw new RuntimeException("Could not find spatial function: " + spatialFunctionName);
     }
 
     @Override protected Specification<LocationEntity> handleRelatedPropertyFilter(String propertyName,
@@ -235,9 +236,10 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
                 Join<HistoricalLocationEntity, LocationEntity> joinFeature =
                         historicalLocation.join(HistoricalLocationEntity.PROPERTY_LOCATIONS);
                 sq.select(joinFeature)
-                  .where(((Specification<HistoricalLocationEntity>) propertyValue).toPredicate(historicalLocation,
-                                                                                               query,
-                                                                                               builder));
+                  .where(((Specification<HistoricalLocationEntity>) propertyValue).toPredicate(
+                          historicalLocation,
+                          query,
+                          builder));
                 return builder.in(root).value(sq);
             } else {
                 throw new RuntimeException("Could not find related property: " + propertyName);

@@ -44,6 +44,10 @@ public class HibernateSpatialCriteriaBuilderImpl extends CriteriaBuilderImpl
         implements HibernateSpatialCriteriaBuilder {
 
     private static final String GEOMETRY = "geometry";
+    private static final String GEOGRAPHY = "geography";
+    private static final String ST_LENGTH = "ST_LENGTH";
+    private static final String ST_DISTANCE = "ST_DISTANCE";
+
 
     public HibernateSpatialCriteriaBuilderImpl(CriteriaBuilderImpl hibernateCriteriaBuilder) {
         super(hibernateCriteriaBuilder.getEntityManagerFactory());
@@ -80,7 +84,7 @@ public class HibernateSpatialCriteriaBuilderImpl extends CriteriaBuilderImpl
 
     @Override public Expression<Float> st_length(String wkt) {
         return this.function(
-                "ST_LENGTH",
+                ST_LENGTH,
                 Float.class,
                 geographyfromWKT(extractWKT(wkt))
         );
@@ -88,24 +92,24 @@ public class HibernateSpatialCriteriaBuilderImpl extends CriteriaBuilderImpl
 
     @Override public Expression<Float> st_length(Expression<Geometry> x) {
         return this.function(
-                "ST_LENGTH",
+                ST_LENGTH,
                 Float.class,
-                this.function("geography", Geometry.class, x)
+                this.function(GEOGRAPHY, Geometry.class, x)
         );
     }
 
     @Override public Expression<Float> st_distance(Expression<Geometry> x, String wkt) {
         return this.function(
-                "ST_Distance",
+                ST_DISTANCE,
                 Float.class,
-                this.function("geography", Geometry.class, x),
+                this.function(GEOGRAPHY, Geometry.class, x),
                 geographyfromWKT(extractWKT(wkt))
         );
     }
 
     @Override public Expression<Float> st_distance(String x, String wkt) {
         return this.function(
-                "ST_Distance",
+                ST_DISTANCE,
                 Float.class,
                 geographyfromWKT(extractWKT(x)),
                 geographyfromWKT(extractWKT(wkt))
@@ -117,7 +121,7 @@ public class HibernateSpatialCriteriaBuilderImpl extends CriteriaBuilderImpl
                 this.function(
                         "ST_Intersects",
                         Boolean.class,
-                        this.function("geography", Geometry.class, x),
+                        this.function(GEOGRAPHY, Geometry.class, x),
                         geographyfromWKT(extractWKT(wktWithType))
                 )
         );
