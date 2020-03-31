@@ -177,14 +177,24 @@ public class SensorService
     @Override
     public Map<String, Set<String>> getRelatedCollections(Object rawObject) {
         Map<String, Set<String>> collections = new HashMap<>();
-        SensorEntity entity = (SensorEntity) rawObject;
 
-        if (entity.hasDatastreams()) {
-            collections.put(STAEntityDefinition.DATASTREAMS,
-                            entity.getDatastreams()
-                                  .stream()
-                                  .map(DatastreamEntity::getIdentifier)
-                                  .collect(Collectors.toSet()));
+        if (rawObject instanceof SensorEntity) {
+            SensorEntity entity = (SensorEntity) rawObject;
+            if (entity.hasDatastreams()) {
+                collections.put(STAEntityDefinition.DATASTREAMS,
+                                entity.getDatastreams()
+                                      .stream()
+                                      .map(DatastreamEntity::getIdentifier)
+                                      .collect(Collectors.toSet()));
+            }
+        } else {
+            collections.put(STAEntityDefinition.DATASTREAM,
+                            datastreamRepository
+                                    .findAll(dQS.withSensorIdentifier(((ProcedureEntity) rawObject).getIdentifier()))
+                                    .stream()
+                                    .map(DatastreamEntity::getIdentifier)
+                                    .collect(Collectors.toSet())
+            );
         }
         return collections;
     }
@@ -215,6 +225,17 @@ public class SensorService
         }
         checkFormat(sensor);
         ProcedureEntity procedure = getAsProcedureEntity(sensor);
+        // Intermediate save to allow DatastreamService->createOrUpdate to use this entity. Does not trigger
+        // intercept handling (e.g. mqtt). Needed as Datastream<->Procedure connection is not yet set but required by
+        // interceptors
+        getRepository().intermediateSave(procedure);
+        if (sensor instanceof SensorEntity && ((SensorEntity) sensor).hasDatastreams()) {
+            AbstractSensorThingsEntityService<?, DatastreamEntity, DatastreamEntity> dsService = getDatastreamService();
+            for (DatastreamEntity datastreamEntity : ((SensorEntity) sensor).getDatastreams()) {
+                dsService.createOrUpdate(datastreamEntity);
+            }
+        }
+        // Save with Interception as procedure is now linked to Datastream
         checkProcedureHistory(getRepository().save(procedure));
         return procedure;
     }
@@ -228,8 +249,13 @@ public class SensorService
             if (existing.isPresent()) {
                 ProcedureEntity merged = merge(existing.get(), entity);
                 if (entity instanceof SensorEntity) {
-                    // TODO insert datastream
-                    logger.trace("TODO: insert datastream.");
+                    if (((SensorEntity) entity).hasDatastreams()) {
+                        AbstractSensorThingsEntityService<?, DatastreamEntity, DatastreamEntity> dsService =
+                                getDatastreamService();
+                        for (DatastreamEntity datastreamEntity : ((SensorEntity) entity).getDatastreams()) {
+                            dsService.createOrUpdate(datastreamEntity);
+                        }
+                    }
                 }
                 getRepository().save(getAsProcedureEntity(merged));
                 return merged;

@@ -26,8 +26,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data.repositories;
 
+package org.n52.sta.data.repositories;
 
 import org.n52.series.db.beans.ProcedureEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,4 +35,5 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public interface ProcedureRepository extends IdentifierNameRepository<ProcedureEntity> {
 
+    <S extends ProcedureEntity> S intermediateSave(S entity);
 }
