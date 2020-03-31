@@ -245,7 +245,9 @@ public class SensorService
         checkUpdate(entity);
         if (HttpMethod.PATCH.equals(method)) {
             Optional<ProcedureEntity> existing =
-                    getRepository().findByIdentifier(id, EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT);
+                    getRepository().findByIdentifier(id,
+                                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT,
+                                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDUREHISTORY);
             if (existing.isPresent()) {
                 ProcedureEntity merged = merge(existing.get(), entity);
                 if (entity instanceof SensorEntity) {
@@ -257,6 +259,8 @@ public class SensorService
                         }
                     }
                 }
+                checkFormat(merged);
+                checkProcedureHistory(merged);
                 getRepository().save(getAsProcedureEntity(merged));
                 return merged;
             }
@@ -348,6 +352,10 @@ public class SensorService
         if (toMerge.isSetDescriptionFile()) {
             existing.setDescriptionFile(toMerge.getDescriptionFile());
         }
+        if (toMerge.isSetFormat()) {
+            existing.setFormat(toMerge.getFormat());
+        }
+
         return existing;
     }
 }

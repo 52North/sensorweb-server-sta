@@ -56,6 +56,8 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
     public JSONObservation[] Observations;
 
     private final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
+    private final String INVALID_ENCODINGTYPE =
+            "Invalid encodingType supplied. Only GeoJSON (application/vnd.geo+json) is supported!";
 
     private final GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
 
@@ -81,8 +83,6 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
             Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
             Assert.notNull(feature, INVALID_INLINE_ENTITY + "feature");
             Assert.notNull(feature.get(TYPE), INVALID_INLINE_ENTITY + FEATURE_TYPE);
-            final String INVALID_ENCODINGTYPE =
-                    "Invalid encodingType supplied. Only GeoJSON (application/vnd.geo+json) is supported!";
             Assert.notNull(encodingType, INVALID_ENCODINGTYPE);
             Assert.state(encodingType.equals(ENCODINGTYPE_GEOJSON), INVALID_ENCODINGTYPE);
 
@@ -121,6 +121,10 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
             self.setIdentifier(identifier);
             self.setName(name);
             self.setDescription(description);
+
+            if (encodingType != null) {
+                Assert.state(encodingType.equals(ENCODINGTYPE_GEOJSON), INVALID_ENCODINGTYPE);
+            }
 
             if (feature != null) {
                 //TODO: check what is actually allowed here

@@ -697,6 +697,11 @@ public class ObservationService extends
             existing.setValidTimeEnd(toMerge.getValidTimeEnd());
         }
         // parameter
+        if (toMerge.getParameters() != null) {
+            parameterRepository.saveAll(toMerge.getParameters());
+            existing.getParameters().forEach(parameterRepository::delete);
+            existing.setParameters(toMerge.getParameters());
+        }
         // value
         if (toMerge.getValue() != null) {
             checkValue(existing, toMerge);

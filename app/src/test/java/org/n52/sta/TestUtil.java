@@ -158,8 +158,16 @@ public interface TestUtil {
         GeoJsonReader reader = new GeoJsonReader(factory);
         try {
             Geometry referenceGeo, actualGeo;
-            referenceGeo = reader.read(referenceValue.toString());
-            actualGeo = reader.read(actualValue.toString());
+            if (referenceValue.get("type").asText().equals("Feature")) {
+                referenceGeo = reader.read(referenceValue.get("geometry").toString());
+            } else {
+                referenceGeo = reader.read(referenceValue.toString());
+            }
+            if (actualValue.get("type").asText().equals("Feature")) {
+                actualGeo = reader.read(actualValue.get("geometry").toString());
+            } else {
+                actualGeo = reader.read(actualValue.toString());
+            }
             Assertions.assertTrue(
                     referenceGeo.equals(actualGeo),
                     "ERROR: Deep inserted " + fieldname + " is not created correctly."

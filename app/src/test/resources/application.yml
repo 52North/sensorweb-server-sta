@@ -102,6 +102,6 @@ logging:
     #     org.hibernate: DEBUG
     #     io.moquette: OFF
     org.n52: TRACE
-    org.hibernate.type: TRACE
-    org.hibernate.SQL: DEBUG
+    #org.hibernate.type: TRACE
+    #org.hibernate.SQL: DEBUG
 #     org.springframework.transaction: TRACE

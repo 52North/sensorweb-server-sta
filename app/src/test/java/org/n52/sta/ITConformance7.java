@@ -74,7 +74,10 @@ public class ITConformance7 extends ConformanceTests implements TestUtil {
     }
 
     @AfterAll static void disconnectClient() throws MqttException {
-        mqttClient.disconnect();
+        if (mqttClient.isConnected()) {
+            mqttClient.disconnect();
+            mqttClient.close();
+        }
     }
 
     void init() throws IOException, MqttException {
@@ -168,7 +171,7 @@ public class ITConformance7 extends ConformanceTests implements TestUtil {
                 "    \"description\": \"ITConformance7 FOI\",\n" +
                 "    \"encodingType\": \"application/vnd.geo+json\",\n" +
                 "    \"feature\": {\n" +
-                "      \"type\": \"Feature\"" +
+                "      \"type\": \"Feature\"," +
                 "      \"geometry\": {\n" +
                 "        \"type\": \"LineString\",\n" +
                 "        \"coordinates\": [\n" +

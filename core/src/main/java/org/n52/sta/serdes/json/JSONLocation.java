@@ -59,6 +59,8 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
     public JSONHistoricalLocation[] HistoricalLocations;
 
     private final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
+    private final String INVALID_ENCODINGTYPE =
+            "Invalid encodingType supplied. Only GeoJSON (application/vnd.geo+json) is supported!";
 
     private final GeometryFactory factory =
             new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
@@ -82,8 +84,6 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
             Assert.notNull(name, INVALID_INLINE_ENTITY + "name");
             Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
             Assert.notNull(encodingType, INVALID_INLINE_ENTITY + "encodingType");
-            final String INVALID_ENCODINGTYPE =
-                    "Invalid encodingType supplied. Only GeoJSON (application/vnd.geo+json) is supported!";
             Assert.notNull(encodingType, INVALID_ENCODINGTYPE);
             Assert.state(encodingType.equals(ENCODINGTYPE_GEOJSON), INVALID_ENCODINGTYPE);
 
@@ -143,6 +143,10 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
             self.setName(name);
             self.setDescription(description);
             self.setLocationEncoding(new FormatEntity().setFormat(encodingType));
+
+            if (encodingType != null) {
+                Assert.state(encodingType.equals(ENCODINGTYPE_GEOJSON), INVALID_ENCODINGTYPE);
+            }
 
             if (location != null) {
                 reader = new GeoJsonReader(factory);

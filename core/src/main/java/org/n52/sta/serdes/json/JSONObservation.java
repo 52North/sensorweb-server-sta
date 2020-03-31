@@ -96,8 +96,10 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> impl
     }
 
     private StaDataEntity createPatchEntity() {
-
         self.setIdentifier(identifier);
+
+        // parameters
+        handleParameters(parameters);
 
         // phenomenonTime
         if (phenomenonTime != null) {
@@ -183,31 +185,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> impl
         }
 
         // parameters
-        if (parameters != null) {
-            final String NAME = "name";
-            final String VALUE = "value";
-            HashSet<ParameterEntity<?>> parameterJsonEntities = new HashSet<>();
-            for (JsonNode param : parameters) {
-                if (param.get(NAME).asText().equals(Sos2Constants.HREF_PARAMETER_SPATIAL_FILTERING_PROFILE)) {
-                    // Add as samplingGeometry to enable interoperability with SOS
-                    GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
-                    JsonNode jsonNode = param.get(VALUE);
-                    GeoJsonReader reader = new GeoJsonReader(factory);
-                    try {
-                        GeometryEntity geometryEntity = new GeometryEntity();
-                        geometryEntity.setGeometry(reader.read(jsonNode.toString()));
-                        self.setGeometryEntity(geometryEntity);
-                    } catch (ParseException e) {
-                        Assert.notNull(null, "Could not parse" + e.getMessage());
-                    }
-                }
-                ParameterJsonEntity parameterEntity = new ParameterJsonEntity();
-                parameterEntity.setName(param.get(NAME).asText());
-                parameterEntity.setValue(param.get(VALUE).toString());
-                parameterJsonEntities.add(parameterEntity);
-            }
-            self.setParameters(parameterJsonEntities);
-        }
+        handleParameters(parameters);
 
         // result
         self.setValue(result);
@@ -231,5 +209,41 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> impl
         }
 
         return self;
+    }
+
+    private void handleParameters(ArrayNode parameters) {
+        // parameters
+        if (parameters != null) {
+            final String NAME = "name";
+            final String VALUE = "value";
+            HashSet<ParameterEntity<?>> parameterJsonEntities = new HashSet<>();
+            for (JsonNode param : parameters) {
+
+                // Check that structure is correct
+                Assert.isTrue(param.has(NAME));
+                Assert.isTrue(param.has(VALUE));
+                Assert.isTrue(!param.has(2));
+
+                if (param.get(NAME).asText().equals(Sos2Constants.HREF_PARAMETER_SPATIAL_FILTERING_PROFILE)) {
+                    // Add as samplingGeometry to enable interoperability with SOS
+                    GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
+                    JsonNode jsonNode = param.get(VALUE);
+                    GeoJsonReader reader = new GeoJsonReader(factory);
+                    try {
+                        GeometryEntity geometryEntity = new GeometryEntity();
+                        geometryEntity.setGeometry(reader.read(jsonNode.toString()));
+                        self.setGeometryEntity(geometryEntity);
+                    } catch (ParseException e) {
+                        Assert.notNull(null, "Could not parse" + e.getMessage());
+                    }
+
+                }
+                ParameterJsonEntity parameterEntity = new ParameterJsonEntity();
+                parameterEntity.setName(param.get(NAME).asText());
+                parameterEntity.setValue(param.get(VALUE).asText());
+                parameterJsonEntities.add(parameterEntity);
+            }
+            self.setParameters(parameterJsonEntities);
+        }
     }
 }

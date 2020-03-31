@@ -38,6 +38,12 @@ public interface RepositoryConstants {
     String ENCODINGTYPE = "encodingType";
     String LOCATION = "location";
     String PHENOMENONTIME = "phenomenonTime";
+    String SAMPLINGTIMESTART = "samplingTimeStart";
+    String SAMPLINGTIMEEND = "samplingTimeEnd";
+    String RESULTTIMESTART = "resultTimeStart";
+    String RESULTTIMEEND = "resultTimeEnd";
+    String VALIDTIMESTART = "validTimeStart";
+    String VALIDTIMEEND = "validTimeEnd";
     String RESULTTIME = "resultTime";
     String VALIDTIME = "validTime";
     String METADATA = "metadata";
@@ -48,6 +54,8 @@ public interface RepositoryConstants {
     String TIME = "time";
     String FEATURE = "feature";
     String DEFINITION = "definition";
+    String PARAMETERS = "parameters";
+    String RESULT = "result";
 
     String ENTITYNAME_OBSERVATION = "DataEntity";
     String ENTITYNAME_DATASTREAM = "DatastreamEntity";
