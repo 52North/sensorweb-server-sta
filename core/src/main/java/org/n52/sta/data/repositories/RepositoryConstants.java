@@ -51,6 +51,7 @@ public interface RepositoryConstants {
 
     String ENTITYNAME_OBSERVATION = "DataEntity";
     String ENTITYNAME_DATASTREAM = "DatastreamEntity";
+    String ENTITYNAME_AFEATURE_OF_INTEREST = "AbstractFeatureEntity";
     String ENTITYNAME_FEATURE_OF_INTEREST = "FeatureEntity";
     String ENTITYNAME_HIST_LOCATION = "HistoricalLocationEntity";
     String ENTITYNAME_LOCATION = "LocationEntity";

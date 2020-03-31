@@ -118,6 +118,7 @@ public class MessageBusRepository<T, I extends Serializable>
         map.put(ENTITYNAME_OBSERVATION, StaConstants.OBSERVATIONS);
         map.put(ENTITYNAME_DATASTREAM, StaConstants.DATASTREAMS);
         map.put(ENTITYNAME_FEATURE_OF_INTEREST, StaConstants.FEATURES_OF_INTEREST);
+        map.put(ENTITYNAME_AFEATURE_OF_INTEREST, StaConstants.FEATURES_OF_INTEREST);
         map.put(ENTITYNAME_HIST_LOCATION, StaConstants.HISTORICAL_LOCATIONS);
         map.put(ENTITYNAME_LOCATION, StaConstants.LOCATIONS);
         map.put(ENTITYNAME_OBSERVED_PROPERTY, StaConstants.OBSERVED_PROPERTIES);
