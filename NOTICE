@@ -4,13 +4,14 @@ Licensed under GNU General Public License, Version 2.0
 
 This project includes: 
 
-  "Java Concurrency in Practice" book annotations under Creative Commons Attribution License, http://creativecommons.org/licenses/by/2.5
-  'Bugsnag' under MIT
   52°North Faroe Annotations under The Apache Software License, Version 2.0
+  52°North Faroe Utilities under The Apache Software License, Version 2.0
   52°North Jan Mayen under The Apache Software License, Version 2.0
   52°North Sensor Things API under The Apache Software License, Version 2.0
   52°North Shetland under The Apache Software License, Version 2.0
-  Animal Sniffer Annotations under MIT license
+  52°North Svalbard Core under The Apache Software License, Version 2.0
+  52°North Svalbard OData under The Apache Software License, Version 2.0
+  ANTLR 4 Runtime under The BSD License
   AntLR Parser Generator under BSD License
   Apache Commons Codec under Apache License, Version 2.0
   Apache HttpClient under Apache License, Version 2.0
@@ -19,7 +20,6 @@ This project includes:
   Apache Log4j to SLF4J Adapter under Apache License, Version 2.0
   AspectJ runtime under Eclipse Public License - v 1.0
   AspectJ weaver under Eclipse Public License - v 1.0
-  Bean Validation API under Apache License 2.0
   Byte Buddy (without dependencies) under Apache License, Version 2.0
   Checker Qual under The MIT License
   ClassMate under Apache License, Version 2.0
@@ -44,11 +44,14 @@ This project includes:
   J2ObjC Annotations under The Apache Software License, Version 2.0
   Jackson datatype: jdk8 under The Apache Software License, Version 2.0
   Jackson datatype: JSR310 under The Apache Software License, Version 2.0
+  Jackson module: Afterburner under The Apache Software License, Version 2.0
   Jackson-annotations under The Apache Software License, Version 2.0
   Jackson-core under The Apache Software License, Version 2.0
   jackson-databind under The Apache Software License, Version 2.0
   Jackson-module-parameter-names under The Apache Software License, Version 2.0
+  Jakarta Activation API jar under EDL 1.0
   Jakarta Annotations API under EPL 2.0 or GPL2 w/ CPE
+  Jakarta Bean Validation API under Apache License 2.0
   Jakarta Persistence API under Eclipse Public License v. 2.0 or Eclipse Distribution License v. 1.0
   jakarta.xml.bind-api under Eclipse Distribution License - v 1.0
   Java Annotation Indexer under Apache License, Version 2.0
@@ -64,7 +67,9 @@ This project includes:
   JBoss Logging 3 under Apache License, version 2.0
   JCL 1.2 implemented over SLF4J under Apache License, Version 2.0
   Joda-Time under Apache License, Version 2.0
+  JSON.simple under The Apache Software License, Version 2.0
   JUL to SLF4J bridge under MIT License
+  JUnit under Eclipse Public License 1.0
   JVM Integration for Metrics under Apache License 2.0
   Librato Metrics API Java Library under Apache License 2.0
   Logback Classic Module under Eclipse Public License - v 1.0 or GNU Lesser General Public License
@@ -86,16 +91,12 @@ This project includes:
   odata-commons-core under The Apache Software License, Version 2.0
   odata-server-api under The Apache Software License, Version 2.0
   odata-server-core under The Apache Software License, Version 2.0
+  org.locationtech.jts.io:jts-io-common under Eclipse Publish License, Version 1.0 or Eclipse Distribution License - v 1.0
   org.locationtech.jts:jts-core under Eclipse Publish License, Version 1.0 or Eclipse Distribution License - v 1.0
   PostgreSQL JDBC Driver - JDBC 4.2 under BSD-2-Clause
-  sensor-things-api-app under The Apache Software License, Version 2.0
-  sensor-things-api-core under The Apache Software License, Version 2.0
-  sensor-things-api-http under The Apache Software License, Version 2.0
-  sensor-things-api-mqtt under The Apache Software License, Version 2.0
-  sensor-things-api-webapp under The Apache Software License, Version 2.0
-  Series Database Model - Entities under The Apache Software License, Version 2.0
-  Series Database Model - Hibernate Types under The Apache Software License, Version 2.0
-  Series Database Model - Mappings under The Apache Software License, Version 2.0
+  Sensor Web Server Database Model - Entities under The Apache Software License, Version 2.0
+  Sensor Web Server Database Model - Hibernate Types under The Apache Software License, Version 2.0
+  Sensor Web Server Database Model - Mappings under The Apache Software License, Version 2.0
   SLF4J API Module under MIT License
   SnakeYAML under Apache License, Version 2.0
   SpotBugs Annotations under GNU LESSER GENERAL PUBLIC LICENSE, Version 2.1
@@ -124,8 +125,14 @@ This project includes:
   Spring Transaction under Apache License, Version 2.0
   Spring Web under Apache License, Version 2.0
   Spring Web MVC under Apache License, Version 2.0
+  sta-app under The Apache Software License, Version 2.0
+  sta-core under The Apache Software License, Version 2.0
+  sta-http under The Apache Software License, Version 2.0
+  sta-mqtt under The Apache Software License, Version 2.0
+  sta-webapp under The Apache Software License, Version 2.0
   tomcat-embed-core under Apache License, Version 2.0
   tomcat-embed-el under Apache License, Version 2.0
   tomcat-embed-websocket under Apache License, Version 2.0
   TXW2 Runtime under Eclipse Distribution License - v 1.0
+  XmlBeans under The Apache Software License, Version 2.0
 

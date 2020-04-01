@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.n52</groupId>
         <artifactId>parent</artifactId>
-        <version>16</version>
+        <version>18</version>
     </parent>
 
-    <groupId>org.n52.sta</groupId>
-    <artifactId>sensor-things-api</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <groupId>org.n52.sensorweb-server.sta</groupId>
+    <artifactId>sta-parent</artifactId>
+    <version>2.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>52°North Sensor Things API</name>
@@ -25,11 +26,11 @@
     </scm>
 
     <modules>
-        <module>sensor-things-api-core</module>
-        <module>sensor-things-api-app</module>
-        <module>sensor-things-api-http</module>
-        <module>sensor-things-api-mqtt</module>
-        <module>sensor-things-api-webapp</module>
+        <module>core</module>
+        <module>app</module>
+        <module>http</module>
+        <module>mqtt</module>
+        <module>webapp</module>
     </modules>
 
     <properties>
@@ -38,13 +39,12 @@
         <java.version>1.8</java.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <odata.version>4.6.0-STA-SNAPSHOT</odata.version>
-        <series-hbm.version>2.0.0-alpha.5</series-hbm.version>
-        <arctic-sea.version>7.2.0</arctic-sea.version>
-        <spring-boot.version>2.2.4.RELEASE</spring-boot.version>
+        <db-model.version>1.2.0</db-model.version>
+        <arctic-sea.version>7.4.0</arctic-sea.version>
+        <spring-boot.version>2.2.5.RELEASE</spring-boot.version>
         <geolatte-geom.version>1.4.0</geolatte-geom.version>
-        <hibernate.version>5.4.2.Final</hibernate.version>
-        <jackson.version>2.10.2</jackson.version>
+        <hibernate.version>5.4.12.Final</hibernate.version>
+        <jackson.version>2.10.3</jackson.version>
         <hamcrest.version>2.2</hamcrest.version>
         <locationtech-jts.version>1.16.1</locationtech-jts.version>
         <h2database.version>1.4.200</h2database.version>
@@ -54,27 +54,27 @@
         <dependencies>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>sensor-things-api-core</artifactId>
+                <artifactId>sta-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>sensor-things-api-http</artifactId>
+                <artifactId>sta-http</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>sensor-things-api-mqtt</artifactId>
+                <artifactId>sta-mqtt</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>sensor-things-api-app</artifactId>
+                <artifactId>sta-app</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>sensor-things-api-webapp</artifactId>
+                <artifactId>sta-webapp</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -86,16 +86,6 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>org.apache.olingo</groupId>
-                <artifactId>odata-server-api</artifactId>
-                <version>4.6.0-STA</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.olingo</groupId>
-                <artifactId>odata-server-core</artifactId>
-                <version>4.6.0-STA</version>
-            </dependency>
-            <dependency>
                 <groupId>javax</groupId>
                 <artifactId>javaee-api</artifactId>
                 <version>8.0.1</version>
@@ -103,19 +93,19 @@
             </dependency>
 
             <dependency>
-                <groupId>org.n52.series.db</groupId>
-                <artifactId>entities</artifactId>
-                <version>${series-hbm.version}</version>
+                <groupId>org.n52.sensorweb-server.db-model</groupId>
+                <artifactId>db-model-entities</artifactId>
+                <version>${db-model.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.n52.series.db</groupId>
-                <artifactId>mappings</artifactId>
-                <version>${series-hbm.version}</version>
+                <groupId>org.n52.sensorweb-server.db-model</groupId>
+                <artifactId>db-model-mappings</artifactId>
+                <version>${db-model.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.n52.series.db</groupId>
-                <artifactId>types</artifactId>
-                <version>${series-hbm.version}</version>
+                <groupId>org.n52.sensorweb-server.db-model</groupId>
+                <artifactId>db-model-types</artifactId>
+                <version>${db-model.version}</version>
             </dependency>
 
             <dependency>
@@ -127,6 +117,11 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.module</groupId>
+                <artifactId>jackson-module-afterburner</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
 
@@ -146,6 +141,17 @@
                 <artifactId>jts-core</artifactId>
                 <version>${locationtech-jts.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.locationtech.jts.io</groupId>
+                <artifactId>jts-io-common</artifactId>
+                <version>${locationtech-jts.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-runtime</artifactId>
+                <version>4.8-1</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.hibernate</groupId>
@@ -156,18 +162,6 @@
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-spatial</artifactId>
                 <version>${hibernate.version}</version>
-            </dependency>
-
-            <!-- Olingo -->
-            <dependency>
-                <groupId>org.apache.olingo</groupId>
-                <artifactId>odata-commons-api</artifactId>
-                <version>4.6.0-STA</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.olingo</groupId>
-                <artifactId>odata-commons-core</artifactId>
-                <version>4.6.0-STA</version>
             </dependency>
 
             <dependency>
@@ -204,6 +198,11 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+            <dependency>
+                <groupId>org.n52.arctic-sea</groupId>
+                <artifactId>svalbard-odata</artifactId>
+                <version>${arctic-sea.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -231,14 +230,6 @@
                         </ignoredDependencies>
                     </configuration>
                 </plugin>
-                <!-- FIXME remove this once all problems are resolved -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <configuration>
-                        <testFailureIgnore>true</testFailureIgnore>
-                    </configuration>
-                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
@@ -246,7 +237,7 @@
                         <rules>
                             <requireNoRepositories>
                                 <banRepositories>false</banRepositories>
-                                <allowSnapshotRepositories>true</allowSnapshotRepositories>
+                                <allowSnapshotRepositories>false</allowSnapshotRepositories>
                                 <allowedRepositories>
                                     <id>
                                         sonatype-nexus-snapshots,edu-repo,n52-releases,n52-snapshots,refractions,hibernate-spatial,unidata-releases,
@@ -263,7 +254,7 @@
                     <configuration>
                         <noticeTemplate>etc/NOTICE.template</noticeTemplate>
                         <licenseMapping>
-                            <param>http://52north.github.io/cdn/licenses/license-mappings.xml</param>
+                            <param>https://52north.github.io/cdn/licenses/license-mappings.xml</param>
                             <param>etc/license-mappings.xml</param>
                         </licenseMapping>
                     </configuration>
@@ -335,7 +326,7 @@
                 <configuration>
                     <aggregate>true</aggregate>
                     <header>etc/52N_GPLv2_License.xt</header>
-                    
+
                     <includes>
                         <include>**/src/**/*.java</include>
                     </includes>
@@ -346,7 +337,7 @@
                     </excludes>
                     <strictCheck>true</strictCheck>
                     <properties>
-                      <year>${project.inceptionYear}-${currentYearDynamic}</year>
+                        <year>${project.inceptionYear}-2020</year>
                     </properties>
                     <mapping>
                         <java>SLASHSTAR_STYLE</java>

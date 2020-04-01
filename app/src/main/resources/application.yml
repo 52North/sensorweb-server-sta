@@ -1,0 +1,102 @@
+# Log Bean initiation process
+debug: false
+trace: false
+
+# General Server Configuration
+server:
+  port: 8081
+  ## Used for response serialization + url parsing. Must be set correctly!
+  rootUrl: "http://localhost:8081/v2/"
+  servlet:
+    context-path: "/v2"
+
+  ## Used for enabling/disabling custom 52N-STA Features
+  feature:
+    ## Automatically updates a FeatureOfInterest linked in Thing->properties under
+    ## key "updateFOI" with new Locations of the Thing
+    updateFOI: true
+
+    ## Defines all Collections that accept POSTing via MQTT.
+    ## Default (defined by standard): "Observations" only
+    mqttPublishTopics: Things, Observations
+
+    ## Toggle strict checking of encodingType for Sensor Entity
+    ## When true Sensor->encodingType is not validated against allowed encodingTypes defined in the Standard
+    ## (currently PDF and SensorML2)
+    ## Note: This only influences encodingType when SensorEntity is posted/patched directly, not when it is inserted via nested insertion inside a Datastream
+    variableEncodingType: true
+
+    ## Toggle support for isMobile Feature
+    ## When true DatasetType is set to trajectory if Thing->property contains KVP '"isMobile": "true"'
+    isMobile: true
+
+
+# Database Configuration
+database:
+  jpa:
+    persistence-location: classpath:META-INF/sensorthings-persistence.xml
+spring:
+  datasource:
+    platform: postgres
+    username: postgres
+    password: postgres
+    url: jdbc:postgresql://localhost:5000/sta
+    initialization-mode: always
+  jpa:
+    openInView: false
+    properties:
+      hibernate: 
+        hbm2ddl:
+          # hbm2ddl values: validate | update | create | create-drop | none
+          auto: update
+        jdbc:
+          time_zone: UTC
+          # https://hibernate.atlassian.net/browse/HHH-12368
+          lob.non_contextual_creation: true
+        default_schema: public
+        dialect: org.hibernate.spatial.dialect.postgis.PostgisPG95Dialect
+        # disable driver's feature detection
+        # see https://stackoverflow.com/questions/46493500/hibernate-with-c3p0-createclob-is-not-yet-implemented
+        temp.use_jdbc_metadata_defaults: false
+
+        show_sql: false
+        format_sql: false
+        use_sql_comments: false
+  jmx:
+    enabled: false
+
+# HTTP Configuration
+http:
+  cors:
+    allowOrigin: "*"
+    allowMethods: "POST, PUT, GET, OPTIONS, DELETE, PATCH"
+    allowHeaders: "Access-Control-Allow-Headers, Content-Type, Authorization, X-Requested-With"
+    maxAge: 3600
+
+# MQTT Configuration
+mqtt:
+  broker:
+    plaintcp:
+      enabled: true
+      port: 1883
+    websocket:
+      enabled: true
+      port: 8883
+    persistence:
+      enabled: false
+      path: "" # Empty for default path (java "user.dir")
+      filename: "52N-STA-MQTTBroker.h2"
+      autosave_interval: "30"
+    
+# Logging
+logging:
+  level:
+     root: INFO
+#    org.opengis.cite: TRACE
+#    org.apache.coyote.http11.Http11InputBuffer: TRACE
+#    org.hibernate: INFO
+#    org.hibernate.type: INFO
+#    org.hibernate: TRACE
+#    io.moquette: TRACE
+     org.n52: TRACE
+#    org.springframework.orm.jpa: TRACE
