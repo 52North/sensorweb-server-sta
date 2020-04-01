@@ -223,8 +223,9 @@ public class SensorService
         } else if (getRepository().existsByIdentifier(sensor.getIdentifier())) {
             throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
         }
-        checkFormat(sensor);
         ProcedureEntity procedure = getAsProcedureEntity(sensor);
+        checkFormat(procedure);
+        checkProcedureHistory(procedure);
         // Intermediate save to allow DatastreamService->createOrUpdate to use this entity. Does not trigger
         // intercept handling (e.g. mqtt). Needed as Datastream<->Procedure connection is not yet set but required by
         // interceptors
@@ -240,7 +241,7 @@ public class SensorService
             }
         }
         // Save with Interception as procedure is now linked to Datastream
-        checkProcedureHistory(getRepository().save(procedure));
+        getRepository().save(procedure);
         return procedure;
     }
 
@@ -342,10 +343,6 @@ public class SensorService
             if (procedureHistoryRepository != null) {
                 for (ProcedureHistoryEntity procedureHistory : sensor.getProcedureHistory()) {
                     procedureHistory.setProcedure(sensor);
-                    if (procedureHistory.getFormat() == null) {
-                        LOGGER.error("Trying to post procedureHistory without format! Automatically correcting.");
-                        procedureHistory.setFormat(sensor.getFormat());
-                    }
                     sensor.getProcedureHistory().add(procedureHistoryRepository.save(procedureHistory));
                 }
             } else {
