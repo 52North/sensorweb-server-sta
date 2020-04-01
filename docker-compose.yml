@@ -1,20 +1,29 @@
 version: '3'
 services:
   sta:
-    image: 52n/sensorthingsapi
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ${REGISTRY}sensor-web/sensorweb-server-sta:latest
+    build: https://github.com/52North/sensorweb-server-sta.git#develop
     ports:
       - 8081:8081
       - 1883:1883
       - 8883:8883
     environment:
-      - "SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/sta"
-      - "MQTT_BROKER_PLAINTCP_ENABLED=true"
-      - "MQTT_BROKER_WEBSOCKET_ENABLED=true"
-      - "MQTT_BROKER_PERSISTENCE_ENABLED=true"
-      - "LOGGING_LEVEL_ROOT=INFO"
+      LOGGING_LEVEL_ROOT: INFO
+      LOGGING_LEVEL_ORG_N52: TRACE
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/sta
+      SPING_JPA_PROPERTIES_HIBERNATE_HBM2DDL: update
+      MQTT_BROKER_PLAINTCP_ENABLED: "false"
+      MQTT_BROKER_WEBSOCKET_ENABLED: "false"
+      MQTT_BROKER_PERSISTENCE_ENABLED: "false"
+      SERVER_ROOTURL: http://localhost:8081/sta/
+      SERVER_SERVLET_CONTEXT_PATH: /sta
+      SERVER_FEATURE_UPDATEFOI: "false"
+      SERVER_FEATURE_MQTTPUBLISHTOPICS: Observations
+      SERVER_FEATURE_VARIABLEENCODINGTYPE: false
+      SERVER_FEATURE_ISMOBILE: false
+    restart: on-failure:10
+    depends_on:
+    - database
 
   database:
     image: mdillon/postgis
@@ -27,5 +36,5 @@ services:
       - POSTGRES_MULTIPLE_EXTENSIONS=postgis
 
     # For debug/show purposes!
-    ports:
-      - 5000:5432
+    #ports:
+    #  - 5000:5432
