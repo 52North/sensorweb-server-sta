@@ -3,9 +3,7 @@
 FROM alpine/git as gitstage
 WORKDIR /app
 
-RUN git clone https://github.com/speckij/arctic-sea \
-    && cd arctic-sea \
-    && git checkout feature/svalbard-odata-queryparsing
+RUN git clone https://github.com/52North/arctic-sea
 
 FROM maven:3.6.1-jdk-8-slim as buildstage
 WORKDIR /app
