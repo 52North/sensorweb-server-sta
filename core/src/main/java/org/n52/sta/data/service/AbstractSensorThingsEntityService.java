@@ -340,6 +340,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
         return this.createWrapper(createEntity(entity), null);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     protected abstract S createEntity(S entity) throws STACRUDException;
 
     @Transactional(rollbackFor = Exception.class)
@@ -350,6 +351,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
     @Transactional(rollbackFor = Exception.class)
     protected abstract S updateEntity(String id, S entity, HttpMethod method) throws STACRUDException;
 
+    @Transactional(rollbackFor = Exception.class)
     protected abstract S updateEntity(S entity) throws STACRUDException;
 
     @Transactional(rollbackFor = Exception.class)

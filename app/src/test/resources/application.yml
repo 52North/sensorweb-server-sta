@@ -94,7 +94,7 @@ mqtt:
 # Logging
 logging:
   level:
-    root: WARN
+    root: ERROR
     #    org.opengis.cite: TRACE
     #    org.apache.coyote.http11.Http11InputBuffer: TRACE
     #    org.hibernate: INFO

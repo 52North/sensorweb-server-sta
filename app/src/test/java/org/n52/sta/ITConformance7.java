@@ -208,15 +208,15 @@ public class ITConformance7 extends ConformanceTests implements TestUtil {
                 "        \"@iot.id\": \"ITConformance7FOI\"\n" +
                 "    }\n" +
                 "}";
-
         mqttClient.publish("Observations", observation.getBytes(), 1, false);
 
         JsonNode response = getCollection(EntityType.OBSERVATION);
         Assertions.assertTrue(response.has(value));
         Assertions.assertTrue(response.has(countKey));
 
-        Assertions.assertTrue(
-                1 == response.get(countKey).asDouble(),
+        Assertions.assertEquals(
+                3,
+                response.get(countKey).asDouble(),
                 "Entity count is not one although it should be"
         );
         Assertions.assertFalse(

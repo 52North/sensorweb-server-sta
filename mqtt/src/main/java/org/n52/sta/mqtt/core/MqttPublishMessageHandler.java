@@ -43,6 +43,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -116,9 +117,9 @@ public class MqttPublishMessageHandler implements STARequestUtils {
             } else {
                 throw new STAInvalidUrlException("Topic does not reference a Collection allowed for POSTing via mqtt");
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LOGGER.error("Creation of Entity {} on topic {} failed with Exception {}!",
-                         msg.getPayload().toString(),
+                         msg.getPayload().toString(StandardCharsets.UTF_8),
                          msg.getTopicName(),
                          e.getMessage());
         }

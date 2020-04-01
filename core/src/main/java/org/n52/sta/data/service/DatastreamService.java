@@ -254,7 +254,8 @@ public class DatastreamService
         }
         return getRepository().findByIdentifier(entity.getIdentifier(),
                                                 EntityGraphRepository.FetchGraph.FETCHGRAPH_UOM,
-                                                EntityGraphRepository.FetchGraph.FETCHGRAPH_OBS_TYPE).get();
+                                                EntityGraphRepository.FetchGraph.FETCHGRAPH_OBS_TYPE)
+                              .orElseThrow(() -> new STACRUDException("Datastream requested but still processing!"));
     }
 
     private Specification<DatastreamEntity> createQuery(DatastreamEntity datastream) {

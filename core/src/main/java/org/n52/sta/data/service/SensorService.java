@@ -232,7 +232,11 @@ public class SensorService
         if (sensor instanceof SensorEntity && ((SensorEntity) sensor).hasDatastreams()) {
             AbstractSensorThingsEntityService<?, DatastreamEntity, DatastreamEntity> dsService = getDatastreamService();
             for (DatastreamEntity datastreamEntity : ((SensorEntity) sensor).getDatastreams()) {
-                dsService.createOrUpdate(datastreamEntity);
+                try {
+                    dsService.createOrUpdate(datastreamEntity);
+                } catch (STACRUDException e) {
+                    // Datastream might be currently processing.
+                }
             }
         }
         // Save with Interception as procedure is now linked to Datastream

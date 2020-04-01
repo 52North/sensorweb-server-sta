@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.serdes.json;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -45,6 +46,7 @@ import org.springframework.util.Assert;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("VisibilityModifier")
@@ -97,8 +99,9 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
             Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
             Assert.notNull(observationType, INVALID_INLINE_ENTITY + obsType);
             Assert.state(observationType.equals(OM_Measurement) || observationType.equals(OM_CountObservation)
-                    || observationType.equals(OM_CategoryObservation) || observationType.equals(OM_Observation)
-                    || observationType.equals(OM_TruthObservation), INVALID_INLINE_ENTITY + obsType);
+                                 || observationType.equals(OM_CategoryObservation) ||
+                                 observationType.equals(OM_Observation)
+                                 || observationType.equals(OM_TruthObservation), INVALID_INLINE_ENTITY + obsType);
             Assert.notNull(unitOfMeasurement, INVALID_INLINE_ENTITY + "unitOfMeasurement");
             Assert.notNull(unitOfMeasurement.name, INVALID_INLINE_ENTITY + "unitOfMeasurement->name");
             Assert.notNull(unitOfMeasurement.symbol, INVALID_INLINE_ENTITY + "unitOfMeasurement->symbol");
@@ -185,7 +188,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
 
         if (Observations != null) {
             self.setObservations(Arrays.stream(Observations).map(obs -> obs.toEntity(JSONBase.EntityType.REFERENCE))
-                    .collect(Collectors.toSet()));
+                                       .collect(Collectors.toSet()));
         }
 
         return self;
@@ -250,8 +253,13 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
 
         if (Observations != null) {
             self.setObservations(Arrays.stream(Observations)
-                    .map(entity -> entity.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE))
-                    .collect(Collectors.toSet()));
+                                       .map(entity -> entity.toEntity(JSONBase.EntityType.FULL,
+                                                                      JSONBase.EntityType.REFERENCE))
+                                       .map(entity -> {
+                                           entity.setId(new Random().nextLong());
+                                           return entity;
+                                       })
+                                       .collect(Collectors.toSet()));
         } else if (backReference instanceof JSONObservation) {
             self.setObservations(Collections.singleton(((JSONObservation) backReference).self));
         }
