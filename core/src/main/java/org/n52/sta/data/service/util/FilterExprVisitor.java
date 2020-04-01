@@ -321,22 +321,22 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
             return builder.trim((Expression<String>) param);
         // DateTime Functions
         case ODataConstants.DateAndTimeFunctions.YEAR:
-            return builder.function("YEAR", Integer.class, (Expression<Date>) expr);
+            return builder.function("YEAR", Integer.class, param);
         case ODataConstants.DateAndTimeFunctions.MONTH:
-            return builder.function("MONTH", Integer.class, (Expression<Date>) expr);
+            return builder.function("MONTH", Integer.class, param);
         case ODataConstants.DateAndTimeFunctions.DAY:
-            return builder.function("DAY", Integer.class, (Expression<Date>) expr);
+            return builder.function("DAY", Integer.class, param);
         case ODataConstants.DateAndTimeFunctions.HOUR:
-            return builder.function("HOUR", Integer.class, (Expression<Date>) expr);
+            return builder.function("HOUR", Integer.class, param);
         case ODataConstants.DateAndTimeFunctions.MINUTE:
-            return builder.function("MINUTE", Integer.class, (Expression<Date>) expr);
+            return builder.function("MINUTE", Integer.class, param);
         case ODataConstants.DateAndTimeFunctions.SECOND:
-            return builder.function("SECOND", Integer.class, (Expression<Date>) expr);
+            return builder.function("SECOND", Integer.class, param);
         case ODataConstants.DateAndTimeFunctions.FRACTIONALSECONDS:
             return builder.function("DATEPART",
                                     Integer.class,
                                     builder.literal("millisecond"),
-                                    (Expression<Date>) expr);
+                                    param);
         case ODataConstants.DateAndTimeFunctions.DATE:
             // fallthru
         case ODataConstants.DateAndTimeFunctions.TIME:

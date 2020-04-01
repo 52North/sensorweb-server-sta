@@ -211,16 +211,16 @@ public class MessageBusRepository<T, I extends Serializable>
 
     private Set<String> computeDifference(Map<String, Object> oldProperties, Map<String, Object> newProperties) {
         HashSet<String> result = new HashSet<>();
-        for (String key : oldProperties.keySet()) {
-            if (!Objects.equals(oldProperties.get(key), newProperties.get(key))) {
-                if (SAMPLINGTIMEEND.equals(key) || SAMPLINGTIMESTART.equals(key)) {
+        for (Map.Entry<String, Object> entry : oldProperties.entrySet()) {
+            if (!Objects.equals(entry.getValue(), newProperties.get(entry.getKey()))) {
+                if (SAMPLINGTIMEEND.equals(entry.getKey()) || SAMPLINGTIMESTART.equals(entry.getKey())) {
                     result.add(PHENOMENONTIME);
-                } else if (RESULTTIMESTART.equals(key) || RESULTTIMEEND.equals(key)) {
+                } else if (RESULTTIMESTART.equals(entry.getKey()) || RESULTTIMEEND.equals(entry.getKey())) {
                     result.add(RESULTTIME);
-                } else if (VALIDTIMESTART.equals(key) || VALIDTIMEEND.equals(key)) {
+                } else if (VALIDTIMESTART.equals(entry.getKey()) || VALIDTIMEEND.equals(entry.getKey())) {
                     result.add(VALIDTIME);
                 } else {
-                    result.add(key);
+                    result.add(entry.getKey());
                 }
             }
         }
