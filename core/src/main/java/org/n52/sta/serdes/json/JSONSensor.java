@@ -75,9 +75,7 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorEntity>
             self.setName(name);
             self.setDescription(description);
 
-            if (encodingType != null) {
-                handleEncodingType();
-            }
+            handleEncodingType();
 
             if (Datastreams != null) {
                 self.setDatastreams(Arrays.stream(Datastreams)

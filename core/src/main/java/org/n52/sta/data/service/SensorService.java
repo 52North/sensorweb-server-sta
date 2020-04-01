@@ -75,7 +75,7 @@ import java.util.stream.Collectors;
 public class SensorService
         extends AbstractSensorThingsEntityService<ProcedureRepository, ProcedureEntity, SensorEntity> {
 
-    private static final Logger logger = LoggerFactory.getLogger(SensorService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SensorService.class);
 
     private static final SensorQuerySpecifications sQS = new SensorQuerySpecifications();
     private static final DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
@@ -342,6 +342,10 @@ public class SensorService
             if (procedureHistoryRepository != null) {
                 for (ProcedureHistoryEntity procedureHistory : sensor.getProcedureHistory()) {
                     procedureHistory.setProcedure(sensor);
+                    if (procedureHistory.getFormat() == null) {
+                        LOGGER.error("Trying to post procedureHistory without format! Automatically correcting.");
+                        procedureHistory.setFormat(sensor.getFormat());
+                    }
                     sensor.getProcedureHistory().add(procedureHistoryRepository.save(procedureHistory));
                 }
             } else {
