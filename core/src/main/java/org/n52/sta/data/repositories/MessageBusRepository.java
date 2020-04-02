@@ -98,7 +98,7 @@ public class MessageBusRepository<T, I extends Serializable>
     private final CriteriaBuilder criteriaBuilder;
 
     // Is set in Repositories that need it to get related Collections for mqtt handling
-    private DatastreamRepository datastreamRepository = null;
+    private DatastreamRepository datastreamRepository;
     private DatastreamQuerySpecifications dQs = new DatastreamQuerySpecifications();
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
@@ -345,7 +345,6 @@ public class MessageBusRepository<T, I extends Serializable>
         } else if (rawObject instanceof PhenomenonEntity) {
             PhenomenonEntity entity = (PhenomenonEntity) rawObject;
 
-            DatastreamQuerySpecifications dQs = new DatastreamQuerySpecifications();
             List<DatastreamEntity> observations = datastreamRepository
                     .findAll(dQs.withObservedPropertyIdentifier(entity.getStaIdentifier()));
             collections.put(

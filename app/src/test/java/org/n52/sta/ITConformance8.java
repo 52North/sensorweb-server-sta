@@ -426,6 +426,13 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
         mqttClient.setCallback(listener);
         mqttClient.subscribe(endpoints.get(type));
 
+        // Wait for subscription to register properly
+        try {
+            Thread.sleep(5000L);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         JsonNode entity = postEntity(type, source);
         MqttMessage message = listener.next();
         Assertions.assertNotNull(message);
@@ -451,6 +458,13 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
         JsonNode entity = postEntity(type, source);
         mqttClient.setCallback(listener);
         mqttClient.subscribe(endpoints.get(type));
+
+        // Wait for subscription to register properly
+        try {
+            Thread.sleep(5000L);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         for (String key : patchMap.keySet()) {
             JsonNode updatedEntity = patchEntity(type, patchMap.get(key), entity.get(idKey).asText());
@@ -486,8 +500,9 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
             String topic = endpoints.get(type) + "(" + entityKey + ")/" + key;
             mqttClient.subscribe(topic);
 
+            // Wait for subscription to register properly
             try {
-                Thread.sleep(10L);
+                Thread.sleep(5000L);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -520,6 +535,12 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
         for (String key : patchMap.keySet()) {
             String topic = endpoints.get(type) + "?$select=" + key;
             mqttClient.subscribe(topic);
+        }
+        // Wait for subscription to register properly
+        try {
+            Thread.sleep(5000L);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
         JsonNode entity = postEntity(type, source);
 
@@ -558,6 +579,12 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
         for (String key : patchMap.keySet()) {
             String topic = endpoints.get(type) + "?$select=" + key;
             mqttClient.subscribe(topic);
+        }
+        // Wait for subscription to register properly
+        try {
+            Thread.sleep(5000L);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
         Set<String> alreadyPatched = new HashSet<>();

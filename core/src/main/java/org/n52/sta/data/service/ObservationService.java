@@ -79,14 +79,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -139,7 +135,6 @@ public class ObservationService extends
     public EntityTypes[] getTypes() {
         return new EntityTypes[] {EntityTypes.Observation, EntityTypes.Observations};
     }
-
 
     @Override
     protected StaDataEntity<?> fetchExpandEntities(DataEntity<?> entity,
