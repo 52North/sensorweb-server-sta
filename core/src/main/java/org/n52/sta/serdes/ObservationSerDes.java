@@ -154,16 +154,16 @@ public class ObservationSerDes {
             }
 
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_PARAMETERS)) {
+                gen.writeArrayFieldStart(STAEntityDefinition.PROP_PARAMETERS);
                 if (observation.hasParameters()) {
-                    gen.writeArrayFieldStart(STAEntityDefinition.PROP_PARAMETERS);
                     for (ParameterEntity<?> parameter : observation.getParameters()) {
                         gen.writeStartObject();
                         gen.writeStringField("name", parameter.getName());
                         gen.writeStringField("value", parameter.getValueAsString());
                         gen.writeEndObject();
                     }
-                    gen.writeEndArray();
                 }
+                gen.writeEndArray();
             }
 
             // navigation properties
