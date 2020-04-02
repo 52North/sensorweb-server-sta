@@ -227,6 +227,10 @@ public class ObservedPropertyService
                                                    "' found");
             }
         }
+        // Check for duplicate definition
+        if (getRepository().existsByIdentifier(observableProperty.getIdentifier())) {
+            throw new STACRUDException("Entity with given Definition already exists!", HTTPStatus.CONFLICT);
+        }
         if (observableProperty.getStaIdentifier() == null) {
             if (getRepository().existsByName(observableProperty.getName())) {
                 Optional<PhenomenonEntity> optional
@@ -238,8 +242,6 @@ public class ObservedPropertyService
             }
         } else if (getRepository().existsByStaIdentifier(observableProperty.getStaIdentifier())) {
             throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
-        } else if (getRepository().existsByIdentifier(observableProperty.getIdentifier())) {
-            throw new STACRUDException("Entity with given Definition already exists!", HTTPStatus.CONFLICT);
         }
         return getRepository().save(getAsPhenomenonEntity(observableProperty));
     }
