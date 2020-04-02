@@ -55,10 +55,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -350,38 +348,5 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
             }
             thing.setHistoricalLocations(historicalLocations);
         }
-    }
-
-    @Override
-    public Map<String, Set<String>> getRelatedCollections(Object rawObject) {
-        Map<String, Set<String>> collections = new HashMap<>();
-        PlatformEntity entity = (PlatformEntity) rawObject;
-
-        if (entity.hasLocationEntities()) {
-            collections.put(
-                    STAEntityDefinition.LOCATIONS,
-                    entity.getLocations()
-                          .stream()
-                          .map(LocationEntity::getIdentifier)
-                          .collect(Collectors.toSet()));
-        }
-
-        if (entity.hasHistoricalLocations()) {
-            collections.put(
-                    STAEntityDefinition.HISTORICAL_LOCATIONS,
-                    entity.getHistoricalLocations()
-                          .stream()
-                          .map(HistoricalLocationEntity::getIdentifier)
-                          .collect(Collectors.toSet()));
-        }
-
-        if (entity.hasDatastreams()) {
-            collections.put(STAEntityDefinition.DATASTREAMS,
-                            entity.getDatastreams()
-                                  .stream()
-                                  .map(DatastreamEntity::getIdentifier)
-                                  .collect(Collectors.toSet()));
-        }
-        return collections;
     }
 }

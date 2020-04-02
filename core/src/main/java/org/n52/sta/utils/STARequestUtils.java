@@ -58,6 +58,8 @@ public interface STARequestUtils extends StaConstants {
 
     QueryOptionsFactory QUERY_OPTIONS_FACTORY = new QueryOptionsFactory();
 
+    String INTERNAL_CLIENT_ID = "POC";
+
     // Used for identifying/referencing source Entity Type
     // e.g. "Datastreams" in /Datastreams(52)/Thing
     String GROUPNAME_SOURCE_NAME = "sourceName";

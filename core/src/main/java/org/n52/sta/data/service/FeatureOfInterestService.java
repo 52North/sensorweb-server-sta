@@ -71,11 +71,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -334,24 +331,6 @@ public class FeatureOfInterestService
 
     private void generateIdentifier(AbstractFeatureEntity<?> feature) {
         feature.setIdentifier(IdGenerator.generate(feature.getIdentifier()));
-    }
-
-    /* (non-Javadoc)
-     * @see org.n52.sta.mapping.AbstractMapper#getRelatedCollections(java.lang.Object)
-     */
-    @Override
-    public Map<String, Set<String>> getRelatedCollections(Object rawObject) {
-        Map<String, Set<String>> collections = new HashMap<>();
-
-        //AbstractFeatureEntity<?> entity = (AbstractFeatureEntity<?>) rawObject;
-        //Iterable<DataEntity<?>> observations = dataRepository.findAll(d.withId(entity.getId()));
-        //Set<Long> observationIds = new HashSet<>();
-        //observations.forEach((o) -> {
-        //    observationIds.add(o.getId());
-        //});
-        //collections.put(ET_FEATURE_OF_INTEREST_NAME, observationIds);
-
-        return collections;
     }
 
     /**

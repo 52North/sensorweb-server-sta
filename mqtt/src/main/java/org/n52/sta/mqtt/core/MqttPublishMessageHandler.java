@@ -29,99 +29,13 @@
 
 package org.n52.sta.mqtt.core;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.moquette.interception.messages.InterceptPublishMessage;
 import org.n52.series.db.beans.IdEntity;
-import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
-import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.data.service.AbstractSensorThingsEntityService;
-import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.utils.STARequestUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
- * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
+ * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@Component
-public class MqttPublishMessageHandler implements STARequestUtils {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(MqttPublishMessageHandler.class);
-
-    private final EntityServiceRepository serviceRepository;
-    private final ObjectMapper mapper;
-    private final Set<String> publishTopics;
-
-    public MqttPublishMessageHandler(
-            @Value("${server.feature.mqttPublishTopics:Observations}") List<String> publishTopics,
-            EntityServiceRepository serviceRepository,
-            ObjectMapper mapper) {
-        this.serviceRepository = serviceRepository;
-        this.mapper = mapper;
-        Set topics = new HashSet<>(publishTopics);
-
-        // Fallback to default if parameter was invalid
-        if (!validateTopics(topics)) {
-            this.publishTopics = Collections.singleton(STAEntityDefinition.OBSERVATIONS);
-            LOGGER.error("Invalid mqttPublishTopics given. Using only default Topic!");
-        } else {
-            this.publishTopics = topics;
-        }
-        LOGGER.info("Initialized mqttPublishTopics: " + String.join(",", topics));
-    }
-
-    /**
-     * Validates that topics only include STA collections
-     *
-     * @param topics list of wanted topics
-     */
-    private boolean validateTopics(Set<String> topics) {
-        boolean valid = true;
-        for (String topic : topics) {
-            valid = Arrays.asList(STAEntityDefinition.ALLCOLLECTIONS).contains(topic);
-        }
-        return valid;
-    }
-
-    public <T extends IdEntity> void processPublishMessage(InterceptPublishMessage msg) {
-        try {
-            // This may only be a reference to Observation collection
-            // Remove leading slash if present
-            String topic = (msg.getTopicName().startsWith("/")) ? msg.getTopicName().substring(1) : msg.getTopicName();
-
-            // Check topic for syntax+semantics
-            validateResource(new StringBuffer(topic), serviceRepository);
-
-            // Check if topic references valid Collection
-            boolean valid = false;
-            for (String publishTopic : publishTopics) {
-                if (topic.endsWith(publishTopic)) {
-                    valid = true;
-                    break;
-                }
-            }
-            if (valid) {
-                Class<T> clazz = collectionNameToClass(topic);
-                ((AbstractSensorThingsEntityService<?, T, ? extends T>) serviceRepository.getEntityService(topic))
-                        .create(mapper.readValue(msg.getPayload().toString(Charset.defaultCharset()), clazz));
-            } else {
-                throw new STAInvalidUrlException("Topic does not reference a Collection allowed for POSTing via mqtt");
-            }
-        } catch (Throwable e) {
-            LOGGER.error("Creation of Entity {} on topic {} failed with Exception {}!",
-                         msg.getPayload().toString(StandardCharsets.UTF_8),
-                         msg.getTopicName(),
-                         e.getMessage());
-        }
-    }
+public interface MqttPublishMessageHandler extends STARequestUtils {
+    <T extends IdEntity> void processPublishMessage(InterceptPublishMessage msg);
 }

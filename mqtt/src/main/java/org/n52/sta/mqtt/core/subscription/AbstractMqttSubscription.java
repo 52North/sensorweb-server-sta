@@ -116,7 +116,6 @@ public abstract class AbstractMqttSubscription {
     @Override
     public String toString() {
         return new StringBuilder()
-                .append("New ")
                 .append(this.getClass().getSimpleName())
                 .append("[")
                 .append("topic=")

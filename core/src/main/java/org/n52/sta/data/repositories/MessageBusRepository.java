@@ -42,9 +42,12 @@ import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.SpringApplicationContext;
 import org.n52.sta.data.STAEventHandler;
+import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -69,6 +72,7 @@ import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -76,6 +80,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class MessageBusRepository<T, I extends Serializable>
         extends SimpleJpaRepository<T, I> implements RepositoryConstants {
@@ -92,6 +97,10 @@ public class MessageBusRepository<T, I extends Serializable>
     private final Class<T> entityClass;
     private final CriteriaBuilder criteriaBuilder;
 
+    // Is set in Repositories that need it to get related Collections for mqtt handling
+    private DatastreamRepository datastreamRepository = null;
+    private DatastreamQuerySpecifications dQs = new DatastreamQuerySpecifications();
+
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     MessageBusRepository(JpaEntityInformation<T, Long> entityInformation,
                          EntityManager entityManager) {
@@ -104,6 +113,12 @@ public class MessageBusRepository<T, I extends Serializable>
 
         this.mqttHandler = (STAEventHandler) SpringApplicationContext.getBean(STAEventHandler.class);
         Assert.notNull(this.mqttHandler, "Could not autowire Mqtt handler!");
+
+        if (!this.entityClass.equals(DatastreamEntity.class)) {
+            this.datastreamRepository =
+                    (DatastreamRepository) SpringApplicationContext.getBean(DatastreamRepository.class);
+            Assert.notNull(this.datastreamRepository, "Could not autowire DatastreamRepository!");
+        }
     }
 
     private TypedQuery<T> createIdentifierQuery(String identifier) {
@@ -187,7 +202,7 @@ public class MessageBusRepository<T, I extends Serializable>
             em.persist(newEntity);
             em.flush();
             if (intercept) {
-                this.mqttHandler.handleEvent(newEntity, entityType, null);
+                this.mqttHandler.handleEvent(newEntity, entityType, null, getRelatedCollections(newEntity));
             }
         } else {
             if (intercept) {
@@ -195,8 +210,10 @@ public class MessageBusRepository<T, I extends Serializable>
                 Map<String, Object> oldProperties = getPropertyMap(oldEntity);
                 S entity = em.merge(newEntity);
                 em.flush();
-                this.mqttHandler.handleEvent(entity, entityType, computeDifference(oldProperties,
-                                                                                   getPropertyMap(newEntity)));
+                this.mqttHandler.handleEvent(newEntity,
+                                             entityType,
+                                             computeDifference(oldProperties, getPropertyMap(newEntity)),
+                                             getRelatedCollections(entity));
                 // Entity was saved multiple times without changes. As reference is the same
                 if (oldEntity == entity) {
                     return entity;
@@ -207,6 +224,140 @@ public class MessageBusRepository<T, I extends Serializable>
         }
 
         return newEntity;
+    }
+
+    private <S extends T> Map<String, Set<String>> getRelatedCollections(S rawObject) {
+        Map<String, Set<String>> collections = new HashMap<>();
+        if (rawObject instanceof ProcedureEntity) {
+            if (rawObject instanceof SensorEntity) {
+                SensorEntity entity = (SensorEntity) rawObject;
+                if (entity.hasDatastreams()) {
+                    collections.put(STAEntityDefinition.DATASTREAMS,
+                                    entity.getDatastreams()
+                                          .stream()
+                                          .map(DatastreamEntity::getIdentifier)
+                                          .collect(Collectors.toSet()));
+                }
+            } else {
+                ProcedureEntity entity = (ProcedureEntity) rawObject;
+                collections.put(STAEntityDefinition.DATASTREAM,
+                                datastreamRepository
+                                        .findAll(dQs.withSensorIdentifier(entity.getIdentifier()))
+                                        .stream()
+                                        .map(DatastreamEntity::getIdentifier)
+                                        .collect(Collectors.toSet())
+                );
+            }
+        } else if (rawObject instanceof LocationEntity) {
+            LocationEntity entity = (LocationEntity) rawObject;
+            if (entity.hasHistoricalLocations()) {
+                collections.put(STAEntityDefinition.HISTORICAL_LOCATIONS,
+                                entity.getHistoricalLocations()
+                                      .stream()
+                                      .map(HistoricalLocationEntity::getIdentifier)
+                                      .collect(Collectors.toSet()));
+            }
+
+            if (entity.hasThings()) {
+                collections.put(STAEntityDefinition.THINGS,
+                                entity.getThings()
+                                      .stream()
+                                      .map(PlatformEntity::getIdentifier)
+                                      .collect(Collectors.toSet()));
+            }
+        } else if (rawObject instanceof PlatformEntity) {
+            PlatformEntity entity = (PlatformEntity) rawObject;
+            if (entity.hasLocationEntities()) {
+                collections.put(
+                        STAEntityDefinition.LOCATIONS,
+                        entity.getLocations()
+                              .stream()
+                              .map(LocationEntity::getIdentifier)
+                              .collect(Collectors.toSet()));
+            }
+
+            if (entity.hasHistoricalLocations()) {
+                collections.put(
+                        STAEntityDefinition.HISTORICAL_LOCATIONS,
+                        entity.getHistoricalLocations()
+                              .stream()
+                              .map(HistoricalLocationEntity::getIdentifier)
+                              .collect(Collectors.toSet()));
+            }
+
+            if (entity.hasDatastreams()) {
+                collections.put(STAEntityDefinition.DATASTREAMS,
+                                entity.getDatastreams()
+                                      .stream()
+                                      .map(DatastreamEntity::getIdentifier)
+                                      .collect(Collectors.toSet()));
+            }
+        } else if (rawObject instanceof DatastreamEntity) {
+            DatastreamEntity entity = (DatastreamEntity) rawObject;
+
+            if (entity.hasThing()) {
+                collections.put(STAEntityDefinition.THINGS,
+                                Collections.singleton(entity.getThing().getIdentifier()));
+            }
+
+            if (entity.hasProcedure()) {
+                collections.put(STAEntityDefinition.SENSORS,
+                                Collections.singleton(entity.getProcedure().getIdentifier()));
+            }
+
+            if (entity.hasObservableProperty()) {
+                collections.put(STAEntityDefinition.OBSERVED_PROPERTIES,
+                                Collections.singleton(entity.getObservableProperty().getIdentifier()));
+            }
+        } else if (rawObject instanceof HistoricalLocationEntity) {
+            HistoricalLocationEntity entity = (HistoricalLocationEntity) rawObject;
+
+            if (entity.hasThing()) {
+                collections.put(STAEntityDefinition.THINGS,
+                                Collections.singleton(entity.getThing().getIdentifier()));
+            }
+
+            if (entity.hasLocationEntities()) {
+                collections.put(STAEntityDefinition.LOCATIONS,
+                                entity.getLocations()
+                                      .stream()
+                                      .map(LocationEntity::getIdentifier)
+                                      .collect(Collectors.toSet()));
+            }
+        } else if (rawObject instanceof DataEntity<?>) {
+            DataEntity<?> entity = (DataEntity<?>) rawObject;
+
+            if (entity.getDataset() != null && entity.getDataset().getFeature() != null) {
+                collections.put(STAEntityDefinition.FEATURES_OF_INTEREST,
+                                Collections.singleton(entity.getDataset().getFeature().getIdentifier()));
+            }
+
+            Optional<DatastreamEntity> datastreamEntity =
+                    datastreamRepository.findOne(dQs.withObservationIdentifier(entity.getIdentifier()));
+            if (datastreamEntity.isPresent()) {
+                collections.put(STAEntityDefinition.DATASTREAMS,
+                                Collections.singleton(datastreamEntity.get().getIdentifier()));
+            } else {
+                LOGGER.debug("No Datastream associated with this Entity {}", entity.getIdentifier());
+            }
+        } else if (rawObject instanceof AbstractFeatureEntity) {
+            return collections;
+        } else if (rawObject instanceof PhenomenonEntity) {
+            PhenomenonEntity entity = (PhenomenonEntity) rawObject;
+
+            DatastreamQuerySpecifications dQs = new DatastreamQuerySpecifications();
+            List<DatastreamEntity> observations = datastreamRepository
+                    .findAll(dQs.withObservedPropertyIdentifier(entity.getStaIdentifier()));
+            collections.put(
+                    STAEntityDefinition.DATASTREAMS,
+                    observations
+                            .stream()
+                            .map(DatastreamEntity::getIdentifier)
+                            .collect(Collectors.toSet()));
+        } else {
+            LOGGER.error("Error while computing related Collections: Could not identify Entity Type");
+        }
+        return collections;
     }
 
     private Set<String> computeDifference(Map<String, Object> oldProperties, Map<String, Object> newProperties) {

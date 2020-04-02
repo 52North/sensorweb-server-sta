@@ -27,26 +27,43 @@
  * Public License for more details.
  */
 
-package org.n52.sta;
+package org.n52.sta.data;
 
-import org.n52.sta.data.repositories.MessageBusRepository;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.util.ConcurrentReferenceHashMap;
 
-@SpringBootApplication
-@EnableJpaRepositories(repositoryBaseClass = MessageBusRepository.class,
-                       basePackages = {"org.n52.sta.data.repositories"})
-@EnableConfigurationProperties
-@EnableTransactionManagement
-@EnableAsync
-@SuppressWarnings("uncommentedmain")
-public class Application {
+/**
+ * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
+ */
+@Component
+public class MutexFactory {
 
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MutexFactory.class);
+
+    // MutexMap used for locking during thread-bound in-memory computations on database entities
+    private ConcurrentReferenceHashMap<String, Object> lock;
+
+    public MutexFactory() {
+        this.lock = new ConcurrentReferenceHashMap<>();
     }
+
+    /**
+     * Gets a lock with given name from global lockMap. Name is unique per EntityType.
+     * Uses weak references so Map is automatically cleared by GC.
+     *
+     * @param key name of the lock
+     * @return Object used for holding the lock
+     */
+    public Object getLock(String key) throws STACRUDException {
+        if (key != null) {
+            LOGGER.debug("Locking:" + key);
+            return this.lock.compute(key, (k, v) -> v == null ? new Object() : v);
+        } else {
+            throw new STACRUDException("Unable to obtain Lock. No name specified!");
+        }
+    }
+
 }

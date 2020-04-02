@@ -54,6 +54,7 @@ import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
+import org.n52.sta.data.MutexFactory;
 import org.n52.sta.data.OffsetLimitBasedPageRequest;
 import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.IdentifierRepository;
@@ -73,13 +74,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpMethod;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ConcurrentReferenceHashMap;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.criteria.Predicate;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * Interface for requesting Sensor Things entities
@@ -97,11 +95,11 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSensorThingsEntityService.class);
 
-    // MutexMap used for locking during thread-bound in-memory computations on database entities
-    protected ConcurrentReferenceHashMap<String, Object> lock;
-
     @Autowired
     private EntityServiceRepository serviceRepository;
+
+    @Autowired
+    private MutexFactory lock;
 
     private final Class<S> entityClass;
     private final EntityGraphRepository.FetchGraph[] defaultFetchGraphs;
@@ -114,7 +112,6 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
         this.entityClass = entityClass;
         this.repository = repository;
         this.defaultFetchGraphs = defaultFetchGraphs;
-        this.lock = new ConcurrentReferenceHashMap<>();
     }
 
     @PostConstruct
@@ -130,12 +127,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
      * @return Object used for holding the lock
      */
     protected Object getLock(String key) throws STACRUDException {
-        if (key != null) {
-            LOGGER.debug("Locking:" + key + entityClass.getSimpleName());
-            return this.lock.compute(key + entityClass.getSimpleName(), (k, v) -> v == null ? new Object() : v);
-        } else {
-            throw new STACRUDException("Unable to obtain Lock. No name specified!");
-        }
+        return lock.getLock(key + entityClass.getSimpleName());
     }
 
     public abstract EntityTypes[] getTypes();
@@ -327,18 +319,6 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
     protected abstract Specification<S> byRelatedEntityFilter(String relatedId,
                                                               String relatedType,
                                                               String ownId);
-
-    /**
-     * Gets a Map that holds definitions for all related Entities of the
-     * requested Entity. In this Map K represents the EntityType and V the Set
-     * of IDs for those Entities that has a Collection the requested Entity is
-     * part of. Returns null if this Entity is not part of any collection.
-     *
-     * @param rawObject Raw Database Entity of type T
-     * @return Map with definitions for all Entities the requested Entity is
-     * related to
-     */
-    public abstract Map<String, Set<String>> getRelatedCollections(Object rawObject);
 
     /**
      * Get the {@link JpaRepository} for this

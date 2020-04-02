@@ -55,10 +55,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -278,29 +275,6 @@ public class HistoricalLocationService
 
     private void updateThing(HistoricalLocationEntity historicalLocation) throws STACRUDException {
         getThingService().updateEntity(historicalLocation.getThing().setHistoricalLocations(null));
-    }
-
-    /* (non-Javadoc)
-     * @see org.n52.sta.mapping.AbstractMapper#getRelatedCollections(java.lang.Object)
-     */
-    @Override
-    public Map<String, Set<String>> getRelatedCollections(Object rawObject) {
-        Map<String, Set<String>> collections = new HashMap<>();
-        HistoricalLocationEntity entity = (HistoricalLocationEntity) rawObject;
-
-        if (entity.hasThing()) {
-            collections.put(STAEntityDefinition.THINGS,
-                            Collections.singleton(entity.getThing().getIdentifier()));
-        }
-
-        if (entity.hasLocationEntities()) {
-            collections.put(STAEntityDefinition.LOCATIONS,
-                            entity.getLocations()
-                                  .stream()
-                                  .map(LocationEntity::getIdentifier)
-                                  .collect(Collectors.toSet()));
-        }
-        return collections;
     }
 
     @Override

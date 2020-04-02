@@ -58,10 +58,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -204,10 +202,16 @@ public class LocationService
     public LocationEntity updateEntity(String id, LocationEntity entity, HttpMethod method) throws STACRUDException {
         if (HttpMethod.PATCH.equals(method)) {
             synchronized (getLock(id)) {
-                Optional<LocationEntity> existing = getRepository().findByIdentifier(id);
+                Optional<LocationEntity> existing = getRepository()
+                        .findByIdentifier(id,
+                                          EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATION,
+                                          EntityGraphRepository.FetchGraph.FETCHGRAPH_THINGS);
                 if (existing.isPresent()) {
+                    System.out.println("mergin in thread:" + Thread.currentThread().getName());
                     LocationEntity merged = merge(existing.get(), entity);
-                    return getRepository().save(merged);
+                    LocationEntity result = getRepository().save(merged);
+                    System.out.println("has saved in thread:" + Thread.currentThread().getName());
+                    return result;
                 }
                 throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }
@@ -336,32 +340,6 @@ public class LocationService
         referenced.setIdentifier(location.getIdentifier());
         referenced.setId(location.getId());
         return referenced;
-    }
-
-    /* (non-Javadoc)
-     * @see org.n52.sta.mapping.AbstractMapper#getRelatedCollections(java.lang.Object)
-     */
-    @Override
-    public Map<String, Set<String>> getRelatedCollections(Object rawObject) {
-        Map<String, Set<String>> collections = new HashMap<>();
-        LocationEntity entity = (LocationEntity) rawObject;
-
-        if (entity.hasHistoricalLocations()) {
-            collections.put(STAEntityDefinition.HISTORICAL_LOCATIONS,
-                            entity.getHistoricalLocations()
-                                  .stream()
-                                  .map(HistoricalLocationEntity::getIdentifier)
-                                  .collect(Collectors.toSet()));
-        }
-
-        if (entity.hasThings()) {
-            collections.put(STAEntityDefinition.THINGS,
-                            entity.getThings()
-                                  .stream()
-                                  .map(PlatformEntity::getIdentifier)
-                                  .collect(Collectors.toSet()));
-        }
-        return collections;
     }
 
     @Override

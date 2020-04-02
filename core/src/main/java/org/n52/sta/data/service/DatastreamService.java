@@ -63,11 +63,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -466,39 +463,6 @@ public class DatastreamService
             datastream.setDatasets(datasets);
         }
         return datastream;
-    }
-
-    @Override
-    /* (non-Javadoc)
-     * @see org.n52.sta.mapping.AbstractMapper#getRelatedCollections(java.lang.Object)
-     */
-    public Map<String, Set<String>> getRelatedCollections(Object rawObject) {
-        Map<String, Set<String>> collections = new HashMap<>();
-        DatastreamEntity entity = (DatastreamEntity) rawObject;
-
-        if (entity.hasThing()) {
-            collections.put(STAEntityDefinition.THINGS,
-                            Collections.singleton(entity.getThing().getIdentifier()));
-        }
-
-        if (entity.hasProcedure()) {
-            collections.put(STAEntityDefinition.SENSORS,
-                            Collections.singleton(entity.getProcedure().getIdentifier()));
-        }
-
-        if (entity.hasObservableProperty()) {
-            collections.put(STAEntityDefinition.OBSERVED_PROPERTIES,
-                            Collections.singleton(entity.getObservableProperty().getIdentifier()));
-        }
-
-        //Iterable<DataEntity<?>> observations = dataRepository.findAll(dQS.withId(entity.getId()));
-        //Set<Long> observationIds = new HashSet<>();
-        //observations.forEach((o) -> {
-        //    observationIds.add(o.getId());
-        //});
-        //collections.put(ET_OBSERVATION_NAME, observationIds);
-
-        return collections;
     }
 
     @Override

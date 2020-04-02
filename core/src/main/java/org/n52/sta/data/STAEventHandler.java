@@ -26,8 +26,12 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data;
 
+import org.springframework.scheduling.annotation.Async;
+
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -44,10 +48,15 @@ public interface STAEventHandler {
      * @param entityType    java class name of entity
      * @param differenceMap names of properties that changed. null if all properties changed (e.g. new entity)
      */
-    void handleEvent(Object entity, String entityType, Set<String> differenceMap);
+    @Async
+    void handleEvent(Object entity,
+                     String entityType,
+                     Set<String> differenceMap,
+                     Map<String, Set<String>> relatedCollections);
 
     /**
      * Lists all Entity types that are monitored by this Handler. Directly matched with getJavaType().getName().
+     *
      * @return Set of all watched Entity Types. Empty if Handler is inactive.
      */
     Set<String> getWatchedEntityTypes();

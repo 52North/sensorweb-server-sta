@@ -62,11 +62,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -323,25 +319,6 @@ public class ObservedPropertyService
         return observableProperty instanceof ObservablePropertyEntity
                 ? ((ObservablePropertyEntity) observableProperty).asPhenomenonEntity()
                 : observableProperty;
-    }
-
-    /* (non-Javadoc)
-     * @see org.n52.sta.mapping.AbstractMapper#getRelatedCollections(java.lang.Object)
-     */
-    @Override
-    public Map<String, Set<String>> getRelatedCollections(Object rawObject) {
-        Map<String, Set<String>> collections = new HashMap<>();
-        PhenomenonEntity entity = (PhenomenonEntity) rawObject;
-
-        List<DatastreamEntity> observations = datastreamRepository
-                .findAll(dQS.withObservedPropertyIdentifier(entity.getStaIdentifier()));
-        collections.put(
-                STAEntityDefinition.DATASTREAMS,
-                observations
-                        .stream()
-                        .map(DatastreamEntity::getIdentifier)
-                        .collect(Collectors.toSet()));
-        return collections;
     }
 
     @Override

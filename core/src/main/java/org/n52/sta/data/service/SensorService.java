@@ -59,10 +59,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -169,34 +166,6 @@ public class SensorService
         return sensor instanceof SensorEntity
                 ? ((SensorEntity) sensor).asProcedureEntity()
                 : sensor;
-    }
-
-    /* (non-Javadoc)
-     * @see org.n52.sta.mapping.AbstractMapper#getRelatedCollections(java.lang.Object)
-     */
-    @Override
-    public Map<String, Set<String>> getRelatedCollections(Object rawObject) {
-        Map<String, Set<String>> collections = new HashMap<>();
-
-        if (rawObject instanceof SensorEntity) {
-            SensorEntity entity = (SensorEntity) rawObject;
-            if (entity.hasDatastreams()) {
-                collections.put(STAEntityDefinition.DATASTREAMS,
-                                entity.getDatastreams()
-                                      .stream()
-                                      .map(DatastreamEntity::getIdentifier)
-                                      .collect(Collectors.toSet()));
-            }
-        } else {
-            collections.put(STAEntityDefinition.DATASTREAM,
-                            datastreamRepository
-                                    .findAll(dQS.withSensorIdentifier(((ProcedureEntity) rawObject).getIdentifier()))
-                                    .stream()
-                                    .map(DatastreamEntity::getIdentifier)
-                                    .collect(Collectors.toSet())
-            );
-        }
-        return collections;
     }
 
     @Override

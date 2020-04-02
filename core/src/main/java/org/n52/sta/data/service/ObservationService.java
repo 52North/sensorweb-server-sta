@@ -671,32 +671,6 @@ public class ObservationService extends
         return data;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.n52.sta.mapping.AbstractMapper#getRelatedCollections(java.lang.Object)
-     */
-    @Override
-    public Map<String, Set<String>> getRelatedCollections(Object rawObject) {
-        Map<String, Set<String>> collections = new HashMap<>();
-        DataEntity<?> entity = (DataEntity<?>) rawObject;
-
-        if (entity.getDataset() != null && entity.getDataset().getFeature() != null) {
-            collections.put(STAEntityDefinition.FEATURES_OF_INTEREST,
-                            Collections.singleton(entity.getDataset().getFeature().getIdentifier()));
-        }
-
-        Optional<DatastreamEntity> datastreamEntity =
-                datastreamRepository.findOne(dsQS.withObservationIdentifier(entity.getIdentifier()));
-        if (datastreamEntity.isPresent()) {
-            collections.put(STAEntityDefinition.DATASTREAMS,
-                            Collections.singleton(datastreamEntity.get().getIdentifier()));
-        } else {
-            LOGGER.debug("No Datastream associated with this Entity {}", entity.getIdentifier());
-        }
-        return collections;
-    }
-
     @Override
     public DataEntity<?> merge(DataEntity<?> existing, DataEntity<?> toMerge) throws STACRUDException {
         // phenomenonTime

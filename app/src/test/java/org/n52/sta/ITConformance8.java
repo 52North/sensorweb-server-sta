@@ -143,8 +143,10 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
         patchMap.put("description", "{\"description\":\"This is a PATCHED Description\"}");
         patchMap.put("location", "{\"location\":{ \"type\": \"Point\", \"coordinates\": [-114.05, 50] }}}");
 
+        /*
         testCollectionSubscriptionOnNewEntityCreation(type, source);
         deleteCollection(type);
+         */
         testCollectionSubscriptionOnExistingEntityPatch(patchMap, type, source);
         deleteCollection(type);
         testPropertySubscriptionOnEntityPatch(patchMap, type, source);
@@ -484,7 +486,14 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
             String topic = endpoints.get(type) + "(" + entityKey + ")/" + key;
             mqttClient.subscribe(topic);
 
+            try {
+                Thread.sleep(10L);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
             JsonNode updatedEntity = patchEntity(type, patchMap.get(key), entityKey);
+            LOGGER.debug("PATCH returned:" + updatedEntity.toPrettyString());
             MqttMessage message = listener.next();
             Assertions.assertNotNull(message);
             Assertions.assertEquals(updatedEntity.get(key), mapper.readTree(message.toString()).get(key));
@@ -605,7 +614,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
             synchronized (messages) {
                 if (messages.size() == 0) {
                     try {
-                        messages.wait(10000);
+                        messages.wait(3000);
                     } catch (InterruptedException ignored) {
                     }
                 }
