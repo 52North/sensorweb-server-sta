@@ -240,7 +240,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> impl
                 }
                 ParameterJsonEntity parameterEntity = new ParameterJsonEntity();
                 parameterEntity.setName(param.get(NAME).asText());
-                parameterEntity.setValue(param.get(VALUE).asText());
+                parameterEntity.setValue(param.get(VALUE).toString());
                 parameterJsonEntities.add(parameterEntity);
             }
             self.setParameters(parameterJsonEntities);
