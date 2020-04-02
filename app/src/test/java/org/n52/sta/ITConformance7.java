@@ -106,7 +106,7 @@ public class ITConformance7 extends ConformanceTests implements TestUtil {
                 "    ],\n" +
                 "    \"Datastreams\": [\n" +
                 "        {\n" +
-                "        \t\"@iot.id\": \"ITConformance7Datastream\",\n" +
+                "            \"@iot.id\": \"ITConformance7Datastream\",\n" +
                 "            \"unitOfMeasurement\": {\n" +
                 "                \"name\": \"Lumen\",\n" +
                 "                \"symbol\": \"lm\",\n" +
@@ -138,29 +138,6 @@ public class ITConformance7 extends ConformanceTests implements TestUtil {
                 "                    \"result\": 4\n" +
                 "                }\n" +
                 "            ]\n" +
-                "        },\n" +
-                "        {\n" +
-                "            \"unitOfMeasurement\": {\n" +
-                "                \"name\": \"Centigrade\",\n" +
-                "                \"symbol\": \"C\",\n" +
-                "                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\"\n" +
-                "            },\n" +
-                "            \"description\": \"datastream 2\",\n" +
-                "            \"name\": \"datastream name 2\",\n" +
-                "            \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2" +
-                ".0/OM_Measurement\",\n" +
-                "            \"ObservedProperty\": {\n" +
-                "                \"name\": \"Tempretaure\",\n" +
-                "                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances" +
-                ".html/Tempreture\",\n" +
-                "                \"description\": \"observedProperty 2\"\n" +
-                "            },\n" +
-                "            \"Sensor\": {\n" +
-                "                \"description\": \"sensor 2\",\n" +
-                "                \"name\": \"sensor name 2\",\n" +
-                "                \"encodingType\": \"application/pdf\",\n" +
-                "                \"metadata\": \"Tempreture sensor\"\n" +
-                "            }\n" +
                 "        }\n" +
                 "    ]\n" +
                 "}");
