@@ -387,8 +387,8 @@ public class FeatureOfInterestService
                         Geometry newGeometry;
                         if (!coords.isEmpty()) {
                             coords.add(geom.getCoordinate());
-                            newGeometry =
-                                    new GeometryFactory().createLineString(coords.toArray(new Coordinate[coords.size()]));
+                            newGeometry = new GeometryFactory()
+                                    .createLineString(coords.toArray(new Coordinate[coords.size()]));
                         } else {
                             newGeometry =
                                     new GeometryFactory().createPoint(geom.getCoordinate());

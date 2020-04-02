@@ -223,11 +223,11 @@ public class HistoricalLocationService
     public void delete(String id) throws STACRUDException {
         synchronized (getLock(id)) {
             if (getRepository().existsByIdentifier(id)) {
-                HistoricalLocationEntity historicalLocation =
-                        getRepository().findByIdentifier(id,
-                                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_LOCATIONHISTLOCATION,
-                                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_THING)
-                                       .get();
+                HistoricalLocationEntity historicalLocation = getRepository()
+                        .findByIdentifier(id,
+                                          EntityGraphRepository.FetchGraph.FETCHGRAPH_LOCATIONHISTLOCATION,
+                                          EntityGraphRepository.FetchGraph.FETCHGRAPH_THING)
+                        .get();
                 updateLocations(historicalLocation);
                 updateThing(historicalLocation);
                 getRepository().deleteByIdentifier(id);

@@ -91,13 +91,13 @@ import java.util.Set;
 public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepository<S, Long>, S extends IdEntity,
         E extends S> {
 
+    protected static final String IDENTIFIER = "identifier";
+    protected static final String STAIDENTIFIER = "staIdentifier";
+    protected static final String ENCODINGTYPE = "encodingType";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSensorThingsEntityService.class);
 
-    static final String IDENTIFIER = "identifier";
-    static final String STAIDENTIFIER = "staIdentifier";
-    static final String ENCODINGTYPE = "encodingType";
-
-    // MutexMAp used for locking during thread-bound in-memory computations on database entities
+    // MutexMap used for locking during thread-bound in-memory computations on database entities
     protected ConcurrentReferenceHashMap<String, Object> lock;
 
     @Autowired

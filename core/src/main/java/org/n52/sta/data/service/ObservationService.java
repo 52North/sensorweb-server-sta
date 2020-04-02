@@ -364,7 +364,8 @@ public class ObservationService extends
             List<DatastreamEntity> datastreamEntity =
                     datastreamRepository.findAll(dsQS.withObservationIdentifier(entity.getIdentifier()),
                                                  EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS);
-            // Important! Delete first and then update else we find ourselves again in search for new latest/earliest obs.
+            // Important! Delete first and then update else we find
+            // ourselves again in search for new latest/earliest obs.
             getRepository().deleteByIdentifier(entity.getIdentifier());
             if (!datastreamEntity.isEmpty()) {
                 updateDatastreamPhenomenonTimeOnObservationUpdate(datastreamEntity, entity);
