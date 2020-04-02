@@ -225,11 +225,11 @@ public class SensorService
         }
         ProcedureEntity procedure = getAsProcedureEntity(sensor);
         checkFormat(procedure);
-        checkProcedureHistory(procedure);
         // Intermediate save to allow DatastreamService->createOrUpdate to use this entity. Does not trigger
         // intercept handling (e.g. mqtt). Needed as Datastream<->Procedure connection is not yet set but required by
         // interceptors
         getRepository().intermediateSave(procedure);
+        checkProcedureHistory(procedure);
         if (sensor instanceof SensorEntity && ((SensorEntity) sensor).hasDatastreams()) {
             AbstractSensorThingsEntityService<?, DatastreamEntity, DatastreamEntity> dsService = getDatastreamService();
             for (DatastreamEntity datastreamEntity : ((SensorEntity) sensor).getDatastreams()) {
