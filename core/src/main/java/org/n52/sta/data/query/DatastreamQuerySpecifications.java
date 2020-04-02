@@ -184,44 +184,38 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
                                                                                     Specification<?> propertyValue) {
         return (root, query, builder) -> {
             try {
-                Root<DatastreamEntity> datastreamEntityRoot = query.from(DatastreamEntity.class);
                 switch (propertyName) {
                 case SENSOR: {
                     Subquery<DatastreamEntity> sq = query.subquery(DatastreamEntity.class);
                     Root<ProcedureEntity> sensor = sq.from(ProcedureEntity.class);
-                    final Join<ProcedureEntity, DatastreamEntity> join =
-                            datastreamEntityRoot.join(DatastreamEntity.PROPERTY_SENSOR, JoinType.INNER);
-                    sq.select(join)
+                    sq.select(sensor.get(DescribableEntity.PROPERTY_ID))
                       .where(((Specification<ProcedureEntity>) propertyValue).toPredicate(sensor,
                                                                                           query,
                                                                                           builder));
-                    return builder.in(root).value(sq);
+                    return builder.in(root.get(DatastreamEntity.PROPERTY_SENSOR)).value(sq);
                 }
                 case OBSERVED_PROPERTY: {
                     Subquery<DatastreamEntity> sq = query.subquery(DatastreamEntity.class);
                     Root<PhenomenonEntity> observedProperty = sq.from(PhenomenonEntity.class);
 
-                    final Join<PhenomenonEntity, DatastreamEntity> join =
-                            root.join(DatastreamEntity.PROPERTY_OBSERVABLE_PROPERTY, JoinType.INNER);
                     sq.select(observedProperty.get(DescribableEntity.PROPERTY_ID))
                       .where(((Specification<PhenomenonEntity>) propertyValue).toPredicate(observedProperty,
                                                                                            query,
                                                                                            builder));
-                    return builder.in(root.get(DescribableEntity.PROPERTY_ID)).value(sq);
+                    return builder.in(root.get(DatastreamEntity.PROPERTY_OBSERVABLE_PROPERTY)).value(sq);
                 }
                 case THING: {
                     Subquery<DatastreamEntity> sq = query.subquery(DatastreamEntity.class);
                     Root<PlatformEntity> thing = sq.from(PlatformEntity.class);
-                    final Join<PlatformEntity, DatastreamEntity> join =
-                            datastreamEntityRoot.join(DatastreamEntity.PROPERTY_THING, JoinType.INNER);
-                    sq.select(join)
+                    sq.select(thing.get(DescribableEntity.PROPERTY_ID))
                       .where(((Specification<PlatformEntity>) propertyValue).toPredicate(thing,
                                                                                          query,
                                                                                          builder));
-                    return builder.in(root).value(sq);
+                    return builder.in(root.get(DatastreamEntity.PROPERTY_THING)).value(sq);
                 }
                 case OBSERVATIONS: {
                     Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
+                    Root<DatastreamEntity> datastreamEntityRoot = query.from(DatastreamEntity.class);
                     Join<DatastreamEntity, DatasetEntity> join =
                             datastreamEntityRoot.join(DatastreamEntity.PROPERTY_DATASETS);
                     Root<DataEntity> data = sq.from(DataEntity.class);
