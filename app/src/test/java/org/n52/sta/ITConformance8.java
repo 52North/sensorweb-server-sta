@@ -37,10 +37,12 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.joda.time.DateTime;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,7 +54,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Implements Conformance Tests according to Section A.7 in OGC SensorThings API Part 1: Sensing (15-078r6)
@@ -95,301 +100,156 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
     }
 
     /**
-     * Subscribe to an entity set with MQTT Subscribe.
-     * Then create a new entity of the subscribed entity set.
-     * Check if a complete JSON representation of the newly created entity through MQTT is received.
-     * Subscribe to an entity set with MQTT Subscribe.
-     * Then update an existing entity of the subscribed entity set.
-     * Check if a complete JSON representation of the updated entity through MQTT is received.
+     * Checks all Mqtt Subscriptions dealing with Things
      *
      * @throws MqttException when an error occurred
      * @throws IOException   when an error occurred
      */
     @Test
-    public void checkThingsRootSubscription() throws MqttException, IOException {
+    public void checkThings() throws MqttException, IOException {
         init();
         /* Thing */
         EntityType type = EntityType.THING;
-        String thing = demoThing;
-
-        MessageListener listener = new MessageListener();
-        mqttClient.setCallback(listener);
-        mqttClient.subscribe(endpoints.get(type));
-
-        JsonNode entity = postEntity(type, thing);
-        MqttMessage message = listener.next();
-        Assertions.assertNotNull(message);
-        compareJsonNodes(entity, mapper.readTree(message.toString()));
-
-        /* Thing Patch */
-        String patch = "{\"description\":\"This is a PATCHED Test Thing\"}";
-        Map<String, String> diffs = new HashMap<>();
-        diffs.put("description", "This is a PATCHED Test Thing");
-        JsonNode updatedEntity = patchEntity(type, patch, entity.get(idKey).asText());
-
-        message = listener.next();
-        Assertions.assertNotNull(message);
-        compareJsonNodes(updatedEntity, mapper.readTree(message.toString()));
-    }
-
-    /**
-     * Subscribe to an entity’s property with MQTT Subscribe.
-     * Then update the property with PATCH.
-     * Check if the JSON object of the updated property is received.
-     */
-    @Test
-    public void checkThingsPropertySubscription() throws MqttException, IOException {
-        init();
-        /* Thing */
-        EntityType type = EntityType.THING;
+        String source = demoThing;
         Map<String, String> patchMap = new HashMap<>();
-        String thing = demoThing;
         patchMap.put("description", "{\"description\":\"This is a PATCHED Description\"}");
         patchMap.put("name", "{\"name\":\"This is a PATCHED Name\"}");
-        JsonNode entity = postEntity(type, thing);
-        testPatch(patchMap, type, entity.get(idKey).asText());
+
+        testCollectionSubscriptionOnNewEntityCreation(type, source);
+        deleteCollection(type);
+        testCollectionSubscriptionOnExistingEntityPatch(patchMap, type, source);
+        deleteCollection(type);
+        testPropertySubscriptionOnEntityPatch(patchMap, type, source);
+        deleteCollection(type);
+        testSelectSubscriptionOnNewEntityCreation(patchMap, type, source);
+        deleteCollection(type);
+        testSelectSubscriptionOnEntityPatch(patchMap, type, source);
     }
 
     /**
-     * Subscribe to an entity set with MQTT Subscribe.
-     * Then create a new entity of the subscribed entity set.
-     * Check if a complete JSON representation of the newly created entity through MQTT is received.
-     * Subscribe to an entity set with MQTT Subscribe.
-     * Then update an existing entity of the subscribed entity set.
-     * Check if a complete JSON representation of the updated entity through MQTT is received.
+     * Checks all Mqtt Subscriptions dealing with Locations
      *
      * @throws MqttException when an error occurred
      * @throws IOException   when an error occurred
      */
     @Test
-    public void checkLocationsRootSubscription() throws MqttException, IOException {
+    public void checkLocations() throws MqttException, IOException {
         init();
         /* Location */
         EntityType type = EntityType.LOCATION;
-        String location = demoLocation;
-
-        MessageListener listener = new MessageListener();
-        mqttClient.setCallback(listener);
-        mqttClient.subscribe(endpoints.get(type));
-
-        JsonNode entity = postEntity(type, location);
-        MqttMessage message = listener.next();
-        Assertions.assertNotNull(message);
-        compareJsonNodes(entity, mapper.readTree(message.toString()));
-
-        /* Location Patch */
-        String patch = "{\"location\": { \"type\": \"Point\", \"coordinates\": [114.05, -50] }}";
-        Map<String, String> diffs = new HashMap<>();
-        diffs.put("location", "{ \"type\": \"Point\", \"coordinates\": [114.05, -50] }}");
-        JsonNode updatedEntity = patchEntity(type, patch, entity.get(idKey).asText());
-
-        message = listener.next();
-        Assertions.assertNotNull(message);
-        compareJsonNodes(updatedEntity, mapper.readTree(message.toString()));
-    }
-
-    /**
-     * Subscribe to an entity’s property with MQTT Subscribe.
-     * Then update the property with PATCH.
-     * Check if the JSON object of the updated property is received.
-     */
-    @Test
-    public void checkLocationsPropertySubscription() throws MqttException, IOException {
-        init();
+        String source = demoLocation;
         Map<String, String> patchMap = new HashMap<>();
-        EntityType type = EntityType.LOCATION;
-        String location = demoLocation;
         patchMap.put("name", "{\"name\":\"This is a PATCHED Name\"}");
         patchMap.put("description", "{\"description\":\"This is a PATCHED Description\"}");
         patchMap.put("location", "{\"location\":{ \"type\": \"Point\", \"coordinates\": [-114.05, 50] }}}");
-        JsonNode entity = postEntity(type, location);
-        testPatch(patchMap, type, entity.get(idKey).asText());
+
+        testCollectionSubscriptionOnNewEntityCreation(type, source);
+        deleteCollection(type);
+        testCollectionSubscriptionOnExistingEntityPatch(patchMap, type, source);
+        deleteCollection(type);
+        testPropertySubscriptionOnEntityPatch(patchMap, type, source);
+        deleteCollection(type);
+        testSelectSubscriptionOnNewEntityCreation(patchMap, type, source);
+        deleteCollection(type);
+        testSelectSubscriptionOnEntityPatch(patchMap, type, source);
     }
 
     /**
-     * Subscribe to an entity set with MQTT Subscribe.
-     * Then create a new entity of the subscribed entity set.
-     * Check if a complete JSON representation of the newly created entity through MQTT is received.
-     * Subscribe to an entity set with MQTT Subscribe.
-     * Then update an existing entity of the subscribed entity set.
-     * Check if a complete JSON representation of the updated entity through MQTT is received.
+     * Checks all Mqtt Subscriptions dealing with Sensors
      *
      * @throws MqttException when an error occurred
      * @throws IOException   when an error occurred
      */
     @Test
-    public void checkSensorRootSubscription() throws MqttException, IOException {
+    public void checkSensors() throws MqttException, IOException {
         init();
         /* Sensor */
-        EntityType type = EntityType.SENSOR;
-        String sensor = demoSensor;
-
-        MessageListener listener = new MessageListener();
-        mqttClient.setCallback(listener);
-        mqttClient.subscribe(endpoints.get(type));
-
-        JsonNode entity = postEntity(type, sensor);
-        MqttMessage message = listener.next();
-        Assertions.assertNotNull(message);
-        compareJsonNodes(entity, mapper.readTree(message.toString()));
-
-        /* Sensor Patch */
-        String patch = "{\"metadata\": \"PATCHED\"}";
-        Map<String, String> diffs = new HashMap<>();
-        diffs.put("metadata", "PATCHED");
-        JsonNode updatedEntity = patchEntity(type, patch, entity.get(idKey).asText());
-
-        message = listener.next();
-        Assertions.assertNotNull(message);
-        compareJsonNodes(updatedEntity, mapper.readTree(message.toString()));
-    }
-
-    /**
-     * Subscribe to an entity’s property with MQTT Subscribe.
-     * Then update the property with PATCH.
-     * Check if the JSON object of the updated property is received.
-     */
-    @Test
-    public void checkSensorPropertySubscription() throws MqttException, IOException {
-        init();
         Map<String, String> patchMap = new HashMap<>();
         EntityType type = EntityType.SENSOR;
-        String sensor = demoSensor;
+        String source = demoSensor;
         patchMap.put("name", "{\"name\":\"This is a PATCHED Name\"}");
         patchMap.put("description", "{\"description\":\"This is a PATCHED Description\"}");
         patchMap.put("encodingType", "{\"encodingType\":\"http://www.opengis.net/doc/IS/SensorML/2.0\"}");
         patchMap.put("metadata", "{\"metadata\":\"This is a PATCHED metadata\"}");
-        JsonNode entity = postEntity(type, sensor);
-        testPatch(patchMap, type, entity.get(idKey).asText());
+
+        testCollectionSubscriptionOnNewEntityCreation(type, source);
+        deleteCollection(type);
+        testCollectionSubscriptionOnExistingEntityPatch(patchMap, type, source);
+        deleteCollection(type);
+        testPropertySubscriptionOnEntityPatch(patchMap, type, source);
+        deleteCollection(type);
+        testSelectSubscriptionOnNewEntityCreation(patchMap, type, source);
+        deleteCollection(type);
+        testSelectSubscriptionOnEntityPatch(patchMap, type, source);
     }
 
+
     /**
-     * Subscribe to an entity set with MQTT Subscribe.
-     * Then create a new entity of the subscribed entity set.
-     * Check if a complete JSON representation of the newly created entity through MQTT is received.
-     * Subscribe to an entity set with MQTT Subscribe.
-     * Then update an existing entity of the subscribed entity set.
-     * Check if a complete JSON representation of the updated entity through MQTT is received.
+     * Checks all Mqtt Subscriptions dealing with Sensors
      *
      * @throws MqttException when an error occurred
      * @throws IOException   when an error occurred
      */
     @Test
-    public void checkObservedPropertyRootSubscription() throws MqttException, IOException {
+    public void checkObservedProperties() throws MqttException, IOException {
         init();
         /* ObservedProperty */
-        EntityType type = EntityType.OBSERVED_PROPERTY;
-        String obsProp = demoObsProp;
-
-        MessageListener listener = new MessageListener();
-        mqttClient.setCallback(listener);
-        mqttClient.subscribe(endpoints.get(type));
-
-        JsonNode entity = postEntity(type, obsProp);
-        MqttMessage message = listener.next();
-        Assertions.assertNotNull(message);
-        compareJsonNodes(entity, mapper.readTree(message.toString()));
-
-        /* ObservedProperty Patch */
-        String patch = "{\"description\":\"PATCHED\"}";
-        Map<String, String> diffs = new HashMap<>();
-        diffs.put("description", "PATCHED");
-        JsonNode updatedEntity = patchEntity(type, patch, entity.get(idKey).asText());
-
-        message = listener.next();
-        Assertions.assertNotNull(message);
-        compareJsonNodes(updatedEntity, mapper.readTree(message.toString()));
-    }
-
-    /**
-     * Subscribe to an entity’s property with MQTT Subscribe.
-     * Then update the property with PATCH.
-     * Check if the JSON object of the updated property is received.
-     */
-    @Test
-    public void checkObservedPropertyPropertySubscription() throws MqttException, IOException {
-        init();
         Map<String, String> patchMap = new HashMap<>();
         EntityType type = EntityType.OBSERVED_PROPERTY;
-        String obsProp = demoObsProp;
+        String source = demoObsProp;
         patchMap.put("name", "{\"name\":\"This is a PATCHED Name\"}");
         patchMap.put("description", "{\"description\":\"This is a PATCHED description\"}");
         patchMap.put("definition", "{\"definition\":\"This is a PATCHED definition\"}");
-        JsonNode entity = postEntity(type, obsProp);
-        testPatch(patchMap, type, entity.get(idKey).asText());
+
+        testCollectionSubscriptionOnNewEntityCreation(type, source);
+        deleteCollection(type);
+        testCollectionSubscriptionOnExistingEntityPatch(patchMap, type, source);
+        deleteCollection(type);
+        testPropertySubscriptionOnEntityPatch(patchMap, type, source);
+        deleteCollection(type);
+        testSelectSubscriptionOnNewEntityCreation(patchMap, type, source);
+        deleteCollection(type);
+        testSelectSubscriptionOnEntityPatch(patchMap, type, source);
     }
 
     /**
-     * Subscribe to an entity set with MQTT Subscribe.
-     * Then create a new entity of the subscribed entity set.
-     * Check if a complete JSON representation of the newly created entity through MQTT is received.
-     * Subscribe to an entity set with MQTT Subscribe.
-     * Then update an existing entity of the subscribed entity set.
-     * Check if a complete JSON representation of the updated entity through MQTT is received.
+     * Checks all Mqtt Subscriptions dealing with FeaturesOfInterest
      *
      * @throws MqttException when an error occurred
      * @throws IOException   when an error occurred
      */
     @Test
-    public void checkFOIRootSubscription() throws MqttException, IOException {
+    public void checkFOI() throws MqttException, IOException {
         init();
         /* FeatureOfInterest */
-        EntityType type = EntityType.FEATURE_OF_INTEREST;
-        String foi = demoFOI;
-
-        MessageListener listener = new MessageListener();
-        mqttClient.setCallback(listener);
-        mqttClient.subscribe(endpoints.get(type));
-
-        JsonNode entity = postEntity(type, foi);
-        MqttMessage message = listener.next();
-        Assertions.assertNotNull(message);
-        compareJsonNodes(entity, mapper.readTree(message.toString()));
-
-        /* ObservedProperty Patch */
-        String patch = "{\"feature\":{ \"type\": \"Point\", \"coordinates\": [114.05, -51.05] }}";
-        Map<String, String> diffs = new HashMap<>();
-        diffs.put("feature", "{ \"type\": \"Point\", \"coordinates\": [114.05, -51.05] }");
-        JsonNode updatedEntity = patchEntity(type, patch, entity.get(idKey).asText());
-
-        message = listener.next();
-        Assertions.assertNotNull(message);
-        compareJsonNodes(updatedEntity, mapper.readTree(message.toString()));
-    }
-
-    /**
-     * Subscribe to an entity’s property with MQTT Subscribe.
-     * Then update the property with PATCH.
-     * Check if the JSON object of the updated property is received.
-     */
-    @Test
-    public void checkFOIPropertySubscription() throws MqttException, IOException {
-        init();
         Map<String, String> patchMap = new HashMap<>();
         EntityType type = EntityType.FEATURE_OF_INTEREST;
-        String foi = demoFOI;
+        String source = demoFOI;
         patchMap.put("name", "{\"name\":\"This is a PATCHED Name\"}");
         patchMap.put("description", "{\"description\":\"This is a PATCHED description\"}");
         // There is currently only a single encodingType specified
         //patchMap.put("encodingType", "{\"encodingType\":\"This is a PATCHED encodingType\"}");
         patchMap.put("feature", "{\"feature\":{ \"type\": \"Point\", \"coordinates\": [-114.05, 51.05] }}");
-        JsonNode entity = postEntity(type, foi);
-        testPatch(patchMap, type, entity.get(idKey).asText());
+
+        testCollectionSubscriptionOnNewEntityCreation(type, source);
+        deleteCollection(type);
+        testCollectionSubscriptionOnExistingEntityPatch(patchMap, type, source);
+        deleteCollection(type);
+        testPropertySubscriptionOnEntityPatch(patchMap, type, source);
+        deleteCollection(type);
+        testSelectSubscriptionOnNewEntityCreation(patchMap, type, source);
+        deleteCollection(type);
+        testSelectSubscriptionOnEntityPatch(patchMap, type, source);
     }
 
     /**
-     * Subscribe to an entity set with MQTT Subscribe.
-     * Then create a new entity of the subscribed entity set.
-     * Check if a complete JSON representation of the newly created entity through MQTT is received.
-     * Subscribe to an entity set with MQTT Subscribe.
-     * Then update an existing entity of the subscribed entity set.
-     * Check if a complete JSON representation of the updated entity through MQTT is received.
+     * Checks all Mqtt Subscriptions dealing with Datastreams
      *
      * @throws MqttException when an error occurred
      * @throws IOException   when an error occurred
      */
     @Test
-    public void checkDatastreamRootSubscription() throws MqttException, IOException {
+    public void checkDatastreams() throws MqttException, IOException {
         init();
         /* Thing */
         JsonNode entity = postEntity(EntityType.THING, demoThing);
@@ -405,7 +265,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
 
         /* Datastream */
         EntityType type = EntityType.DATASTREAM;
-        String datastream = "{\n"
+        String source = "{\n"
                 + "  \"unitOfMeasurement\": {\n"
                 + "    \"name\": \"Celsius\",\n"
                 + "    \"symbol\": \"degC\",\n"
@@ -419,82 +279,29 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
                 + "  \"Sensor\": { \"@iot.id\": " + escape(sensorId) + " }\n"
                 + "}";
 
-        MessageListener listener = new MessageListener();
-        mqttClient.setCallback(listener);
-        mqttClient.subscribe(endpoints.get(type));
-
-        entity = postEntity(type, datastream);
-        MqttMessage message = listener.next();
-        Assertions.assertNotNull(message);
-        compareJsonNodes(entity, mapper.readTree(message.toString()));
-
-        /* Datastream Patch */
-        String patch = "{\"description\": \"Patched Description\"}";
-        Map<String, String> diffs = new HashMap<>();
-        diffs.put("description", "Patched Description");
-        JsonNode updatedEntity = patchEntity(type, patch, entity.get(idKey).asText());
-
-        message = listener.next();
-        Assertions.assertNotNull(message);
-        compareJsonNodes(updatedEntity, mapper.readTree(message.toString()));
-    }
-
-    /**
-     * Subscribe to an entity’s property with MQTT Subscribe.
-     * Then update the property with PATCH.
-     * Check if the JSON object of the updated property is received.
-     */
-    @Test
-    public void checkDatastreamPropertySubscription() throws MqttException, IOException {
-        init();
         Map<String, String> patchMap = new HashMap<>();
-
-        /* Thing */
-        JsonNode entity = postEntity(EntityType.THING, demoThing);
-        String thingId = entity.get(idKey).asText();
-
-        /* ObservedProperty */
-        entity = postEntity(EntityType.OBSERVED_PROPERTY, demoObsProp);
-        String obsPropId = entity.get(idKey).asText();
-
-        /* Sensor */
-        entity = postEntity(EntityType.SENSOR, demoSensor);
-        String sensorId = entity.get(idKey).asText();
-
-        EntityType type = EntityType.DATASTREAM;
-        String datastream = "{\n"
-                + "  \"unitOfMeasurement\": {\n"
-                + "    \"name\": \"Celsius\",\n"
-                + "    \"symbol\": \"degC\",\n"
-                + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
-                + "  },\n"
-                + "  \"name\": \"test datastream.\",\n"
-                + "  \"description\": \"test datastream.\",\n"
-                + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                + "  \"Thing\": { \"@iot.id\": " + escape(thingId) + " },\n"
-                + "  \"ObservedProperty\":{ \"@iot.id\":" + escape(obsPropId) + "},\n"
-                + "  \"Sensor\": { \"@iot.id\": " + escape(sensorId) + " }\n"
-                + "}";
         patchMap.put("name", "{\"name\":\"This is a PATCHED Name\"}");
         patchMap.put("description", "{\"description\":\"This is a PATCHED description\"}");
-        // patchMap.put("observationType", "{\"observationType\":\"This is a PATCHED observationType\"}");
-        entity = postEntity(type, datastream);
-        testPatch(patchMap, type, entity.get(idKey).asText());
+
+        testCollectionSubscriptionOnNewEntityCreation(type, source);
+        deleteCollection(type);
+        testCollectionSubscriptionOnExistingEntityPatch(patchMap, type, source);
+        deleteCollection(type);
+        testPropertySubscriptionOnEntityPatch(patchMap, type, source);
+        deleteCollection(type);
+        testSelectSubscriptionOnNewEntityCreation(patchMap, type, source);
+        deleteCollection(type);
+        testSelectSubscriptionOnEntityPatch(patchMap, type, source);
     }
 
     /**
-     * Subscribe to an entity set with MQTT Subscribe.
-     * Then create a new entity of the subscribed entity set.
-     * Check if a complete JSON representation of the newly created entity through MQTT is received.
-     * Subscribe to an entity set with MQTT Subscribe.
-     * Then update an existing entity of the subscribed entity set.
-     * Check if a complete JSON representation of the updated entity through MQTT is received.
+     * Checks all Mqtt Subscriptions dealing with Observations
      *
      * @throws MqttException when an error occurred
      * @throws IOException   when an error occurred
      */
     @Test
-    public void checkObservationRootSubscription() throws MqttException, IOException {
+    public void checkObservations() throws MqttException, IOException {
         init();
         /* Thing */
         JsonNode entity = postEntity(EntityType.THING, demoThing);
@@ -531,91 +338,36 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
 
         /* Observation */
         EntityType type = EntityType.OBSERVATION;
-        String observation = "{\n"
+        String source = "{\n"
                 + "  \"phenomenonTime\": \"2015-03-01T00:40:00.000Z\",\n"
+                + "  \"validTime\": \"2015-03-01T00:40:00.000Z\",\n"
                 + "  \"result\": 8,\n"
                 + "  \"Datastream\":{\"@iot.id\": " + escape(datastreamId) + "},\n"
                 + "  \"FeatureOfInterest\": {\"@iot.id\": " + escape(foiId) + "}  \n"
                 + "}";
-
-        MessageListener listener = new MessageListener();
-        mqttClient.setCallback(listener);
-        mqttClient.subscribe(endpoints.get(type));
-
-        entity = postEntity(type, observation);
-        MqttMessage message = listener.next();
-        Assertions.assertNotNull(message);
-        compareJsonNodes(entity, mapper.readTree(message.toString()));
-
-        /* Observation Patch */
-        String patch = "{\"phenomenonTime\": \"2015-07-01T00:40:00.000Z\"}";
-        Map<String, String> diffs = new HashMap<>();
-        diffs.put("phenomenonTime", "2015-07-01T00:40:00.000Z");
-        JsonNode updatedEntity = patchEntity(type, patch, entity.get(idKey).asText());
-
-        message = listener.next();
-        Assertions.assertNotNull(message);
-        compareJsonNodes(updatedEntity, mapper.readTree(message.toString()));
-    }
-
-    /**
-     * Subscribe to an entity’s property with MQTT Subscribe.
-     * Then update the property with PATCH.
-     * Check if the JSON object of the updated property is received.
-     */
-    @Test
-    public void checkObservationPropertySubscription() throws MqttException, IOException {
-        init();
-
-        /* Thing */
-        JsonNode entity = postEntity(EntityType.THING, demoThing);
-        String thingId = entity.get(idKey).asText();
-
-        /* ObservedProperty */
-        entity = postEntity(EntityType.OBSERVED_PROPERTY, demoObsProp);
-        String obsPropId = entity.get(idKey).asText();
-
-        /* Sensor */
-        entity = postEntity(EntityType.SENSOR, demoSensor);
-        String sensorId = entity.get(idKey).asText();
-
-        /* FeatureOfInterest */
-        entity = postEntity(EntityType.FEATURE_OF_INTEREST, demoFOI);
-        String foiId = entity.get(idKey).asText();
-
-        String datastream = "{\n"
-                + "  \"unitOfMeasurement\": {\n"
-                + "    \"name\": \"Celsius\",\n"
-                + "    \"symbol\": \"degC\",\n"
-                + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
-                + "  },\n"
-                + "  \"name\": \"test datastream.\",\n"
-                + "  \"description\": \"test datastream.\",\n"
-                + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                + "  \"Thing\": { \"@iot.id\": " + escape(thingId) + " },\n"
-                + "  \"ObservedProperty\":{ \"@iot.id\":" + escape(obsPropId) + "},\n"
-                + "  \"Sensor\": { \"@iot.id\": " + escape(sensorId) + " }\n"
-                + "}";
-        entity = postEntity(EntityType.DATASTREAM, datastream);
-        String datastreamId = entity.get(idKey).asText();
-
-        /* Observation */
-        EntityType type = EntityType.OBSERVATION;
-        String observation = "{\n"
-                + "  \"phenomenonTime\": \"2015-03-01T00:40:00.000Z\",\n"
-                + "  \"result\": 8,\n"
-                + "  \"Datastream\":{\"@iot.id\": " + escape(datastreamId) + "},\n"
-                + "  \"FeatureOfInterest\": {\"@iot.id\": " + escape(foiId) + "}  \n"
-                + "}";
-        entity = postEntity(type, observation);
 
         Map<String, String> patchMap = new HashMap<>();
-//        patchMap.put("result", "{\"result\":\"52\"}");
-//        patchMap.put("phenomenonTime", "{\"phenomenonTime\":\"2052-07-01T00:40:00.000Z\"}");
-//        patchMap.put("resultTime", "{\"resultTime\":\"2052-07-01T00:40:00.000Z\"}");
-//        patchMap.put("validTime", "{\"validTime\":\"2052-07-01T00:40:00.000Z\"}");
+        patchMap.put("result", "{\"result\":\"52.0\"}");
+        patchMap.put("phenomenonTime", "{\"phenomenonTime\":\"2052-07-01T00:40:00.000Z\"}");
+        patchMap.put("resultTime", "{\"resultTime\":\"2053-07-01T00:40:00.000Z\"}");
+        patchMap.put("validTime", "{\"validTime\":\"2053-07-01T00:40:00.000Z\"}");
         patchMap.put("parameters", "{\"parameters\":[{\"name\":\"PATCHED Parameters\", \"value\":\"test\"}]}}");
-        testPatch(patchMap, type, entity.get(idKey).asText());
+
+        testCollectionSubscriptionOnNewEntityCreation(type, source);
+        deleteCollection(type);
+        testCollectionSubscriptionOnExistingEntityPatch(patchMap, type, source);
+        deleteCollection(type);
+        testPropertySubscriptionOnEntityPatch(patchMap, type, source);
+        deleteCollection(type);
+        testSelectSubscriptionOnNewEntityCreation(patchMap, type, source);
+        deleteCollection(type);
+        testSelectSubscriptionOnEntityPatch(patchMap, type, source);
+    }
+
+    private void deleteCollection(EntityType type) throws IOException {
+        for (JsonNode elem : getCollection(type).get("value")) {
+            deleteEntity(type, elem.get(idKey).asText(), false);
+        }
     }
 
     private String demoThing = "{"
@@ -639,7 +391,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
 
     private String demoObsProp = "{\n"
             + "  \"name\": \"DewPoint Temperature\",\n"
-            + "  \"definition\": \"http://dbpedia.org/page/Dew_point\",\n"
+            + "  \"definition\": \"http://dbpedia.org/page/Dew_point" + System.currentTimeMillis() +"\",\n"
             + "  \"description\": \"The dewpoint temperature \"\n"
             + "}";
 
@@ -656,26 +408,187 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
             + "  }\n"
             + "}";
 
-    private void testPatch(Map<String, String> patchMap, EntityType type, String entityKey)
+    /**
+     * Subscribe to an entity set with MQTT Subscribe.
+     * Then create a new entity of the subscribed entity set.
+     * Check if a complete JSON representation of the newly created entity through MQTT is received.
+     *
+     * @param type   Type of the Entity
+     * @param source Entity to be created
+     * @throws MqttException if an error occurred
+     * @throws IOException   if an error occurred
+     */
+    private void testCollectionSubscriptionOnNewEntityCreation(EntityType type, String source)
             throws MqttException, IOException {
         MessageListener listener = new MessageListener();
         mqttClient.setCallback(listener);
+        mqttClient.subscribe(endpoints.get(type));
+
+        JsonNode entity = postEntity(type, source);
+        MqttMessage message = listener.next();
+        Assertions.assertNotNull(message);
+        compareJsonNodes(entity, mapper.readTree(message.toString()));
+        mqttClient.unsubscribe(endpoints.get(type));
+    }
+
+    /**
+     * Subscribe to an entity set with MQTT Subscribe.
+     * Then update an existing entity of the subscribed entity set.
+     * Check if a complete JSON representation of the updated entity through MQTT is received.
+     *
+     * @param patchMap Map of Patches to be applied
+     * @param type     Type of the Entity
+     * @param source   Entity to be created
+     * @throws MqttException if an error occurred
+     * @throws IOException   if an error occurred
+     */
+    private void testCollectionSubscriptionOnExistingEntityPatch(Map<String, String> patchMap,
+                                                                 EntityType type,
+                                                                 String source) throws MqttException, IOException {
+        MessageListener listener = new MessageListener();
+        JsonNode entity = postEntity(type, source);
+        mqttClient.setCallback(listener);
+        mqttClient.subscribe(endpoints.get(type));
 
         for (String key : patchMap.keySet()) {
-            mqttClient.subscribe(endpoints.get(type) + "(" + entityKey + ")/" + key);
+            JsonNode updatedEntity = patchEntity(type, patchMap.get(key), entity.get(idKey).asText());
+
+            MqttMessage message = listener.next();
+            Assertions.assertNotNull(message);
+            compareJsonNodes(updatedEntity, mapper.readTree(message.toString()));
+        }
+        mqttClient.unsubscribe(endpoints.get(type));
+    }
+
+    /**
+     * Subscribe to an entity’s property with MQTT Subscribe.
+     * Then update the property with PATCH.
+     * Check if the JSON object of the updated property is received.
+     *
+     * @param patchMap Map of Patches to be applied
+     * @param type     Type of the Entity
+     * @param source   Entity to be created
+     * @throws MqttException if an error occurred
+     * @throws IOException   if an error occurred
+     */
+    private void testPropertySubscriptionOnEntityPatch(Map<String, String> patchMap,
+                                                       EntityType type,
+                                                       String source)
+            throws MqttException, IOException {
+        MessageListener listener = new MessageListener();
+        JsonNode entity = postEntity(type, source);
+        mqttClient.setCallback(listener);
+        String entityKey = entity.get(idKey).asText();
+
+        for (String key : patchMap.keySet()) {
+            String topic = endpoints.get(type) + "(" + entityKey + ")/" + key;
+            mqttClient.subscribe(topic);
 
             JsonNode updatedEntity = patchEntity(type, patchMap.get(key), entityKey);
             MqttMessage message = listener.next();
             Assertions.assertNotNull(message);
             Assertions.assertEquals(updatedEntity.get(key), mapper.readTree(message.toString()).get(key));
+            mqttClient.unsubscribe(topic);
         }
     }
 
-    class MessageListener implements MqttCallback {
+    /**
+     * Subscribe to multiple properties of an entity set with MQTT Subscribe.
+     * Then create a new entity of the entity set.
+     * Check if a JSON object of the subscribed properties is received.
+     *
+     * @param patchMap Map of Patches to be applied
+     * @param type     Type of the Entity
+     * @param source   Entity to be created
+     * @throws MqttException if an error occurred
+     * @throws IOException   if an error occurred
+     */
+    private void testSelectSubscriptionOnNewEntityCreation(Map<String, String> patchMap, EntityType type, String source)
+            throws IOException, MqttException {
+        MessageListener listener = new MessageListener();
+        mqttClient.setCallback(listener);
+
+        for (String key : patchMap.keySet()) {
+            String topic = endpoints.get(type) + "?$select=" + key;
+            mqttClient.subscribe(topic);
+        }
+        JsonNode entity = postEntity(type, source);
+
+        for (String ignored : patchMap.keySet()) {
+            JsonNode mqtt = mapper.readTree(listener.next().toString());
+            Iterator<String> fieldNameIt = mqtt.fieldNames();
+            Assertions.assertTrue(fieldNameIt.hasNext());
+            String name = fieldNameIt.next();
+            Assertions.assertFalse(fieldNameIt.hasNext());
+            Assertions.assertEquals(entity.get(name).asText(), mqtt.get(name).asText());
+        }
+
+        for (String key : patchMap.keySet()) {
+            String topic = endpoints.get(type) + "?$select=" + key;
+            mqttClient.unsubscribe(topic);
+        }
+    }
+
+    /**
+     * Subscribe to multiple properties of an entity set with MQTT Subscribe.
+     * Then update an existing entity of the entity set with PATCH.
+     * Check if a JSON object of the subscribed properties is received.
+     *
+     * @param patchMap Map of Patches to be applied
+     * @param type     Type of the Entity
+     * @param source   Entity to be created
+     * @throws MqttException if an error occurred
+     * @throws IOException   if an error occurred
+     */
+    private void testSelectSubscriptionOnEntityPatch(Map<String, String> patchMap, EntityType type, String source)
+            throws MqttException, IOException {
+        MessageListener listener = new MessageListener();
+        mqttClient.setCallback(listener);
+        JsonNode entity = postEntity(type, source);
+
+        for (String key : patchMap.keySet()) {
+            String topic = endpoints.get(type) + "?$select=" + key;
+            mqttClient.subscribe(topic);
+        }
+
+        Set<String> alreadyPatched = new HashSet<>();
+        for (String patchKey : patchMap.keySet()) {
+            patchEntity(type, patchMap.get(patchKey), entity.get(idKey).asText());
+            alreadyPatched.add(patchKey);
+            for (int i = 0; i < patchMap.keySet().size(); i++) {
+                JsonNode mqtt = mapper.readTree(listener.next().toString());
+                Iterator<String> fieldNameIt = mqtt.fieldNames();
+                Assertions.assertTrue(fieldNameIt.hasNext());
+                String name = fieldNameIt.next();
+                Assertions.assertFalse(fieldNameIt.hasNext());
+                if (alreadyPatched.contains(name)) {
+                    if (name.equals("result")) {
+                        Assertions.assertEquals(Double.valueOf(mapper.readTree(patchMap.get(name)).get(name).asText()),
+                                                Double.valueOf(mqtt.get(name).asText()));
+                    } else if (name.contains("Time")) {
+                        Assertions.assertEquals(new TimeInstant(DateTime.parse(mapper.readTree(patchMap.get(name)).get(name).asText())),
+                                                new TimeInstant(DateTime.parse(mqtt.get(name).asText())));
+                    } else {
+                        Assertions.assertEquals(mapper.readTree(patchMap.get(name)).get(name).asText(),
+                                                mqtt.get(name).asText());
+                    }
+                } else {
+                    Assertions.assertEquals(entity.get(name).asText(), mqtt.get(name).asText());
+                }
+            }
+        }
+
+        for (String key : patchMap.keySet()) {
+            String topic = endpoints.get(type) + "?$select=" + key;
+            mqttClient.unsubscribe(topic);
+        }
+    }
+
+    static class MessageListener implements MqttCallback {
 
         final ArrayList<MqttMessage> messages;
 
-        public MessageListener() {
+        MessageListener() {
             messages = new ArrayList<>();
         }
 
@@ -688,17 +601,17 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
             }
         }
 
-        public MqttMessage next() {
+        MqttMessage next() {
             synchronized (messages) {
                 if (messages.size() == 0) {
                     try {
                         messages.wait(10000);
-                    } catch (InterruptedException e) {
+                    } catch (InterruptedException ignored) {
                     }
                 }
 
                 if (messages.size() == 0) {
-                    return null;
+                    throw new IllegalStateException("No Mqtt Message received!");
                 }
                 return messages.remove(0);
             }
