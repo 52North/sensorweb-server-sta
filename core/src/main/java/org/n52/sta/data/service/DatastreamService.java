@@ -226,31 +226,25 @@ public class DatastreamService
                 }
             }
             check(datastream);
-            //Specification<DatastreamEntity> predicate = createQuery(datastream);
-            //if (getRepository().count() > 0) {
-            //    DatastreamEntity optional = getRepository().findOne(predicate).get();
-            //    return processObservation((DatastreamEntity) optional.setProcesssed(true),
-            //    datastream.getObservations());
-            //}
-            datastream.setProcesssed(true);
-            checkObservationType(datastream);
-            checkUnit(datastream);
-            datastream.setObservableProperty(getObservedPropertyService()
-                                                     .createEntity(datastream.getObservableProperty()));
-            datastream.setProcedure(getSensorService().createEntity(datastream.getProcedure()));
-            datastream.setThing(getThingService().createEntity(datastream.getThing()));
-            if (datastream.getIdentifier() != null) {
-                if (getRepository().existsByIdentifier(datastream.getIdentifier())) {
-                    throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
-                } else {
-                    datastream.setIdentifier(datastream.getIdentifier());
-                }
-            } else {
+            if (datastream.getIdentifier() == null) {
                 datastream.setIdentifier(UUID.randomUUID().toString());
             }
-            entity = getRepository().intermediateSave(datastream);
-            processObservation(entity, entity.getObservations());
-            entity = getRepository().save(entity);
+            synchronized (getLock(datastream.getIdentifier())) {
+                if (getRepository().existsByIdentifier(datastream.getIdentifier())) {
+                    throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
+                }
+                datastream.setProcesssed(true);
+                checkObservationType(datastream);
+                checkUnit(datastream);
+                datastream.setObservableProperty(getObservedPropertyService()
+                                                         .createEntity(datastream.getObservableProperty()));
+                datastream.setProcedure(getSensorService().createEntity(datastream.getProcedure()));
+                datastream.setThing(getThingService().createEntity(datastream.getThing()));
+
+                entity = getRepository().intermediateSave(datastream);
+                processObservation(entity, entity.getObservations());
+                entity = getRepository().save(entity);
+            }
         }
         return getRepository().findByIdentifier(entity.getIdentifier(),
                                                 EntityGraphRepository.FetchGraph.FETCHGRAPH_UOM,
@@ -297,24 +291,26 @@ public class DatastreamService
             throws STACRUDException {
         checkUpdate(entity);
         if (HttpMethod.PATCH.equals(method)) {
-            Optional<DatastreamEntity> existing =
-                    getRepository().findOne(dQS.withIdentifier(id),
-                                            EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS,
-                                            EntityGraphRepository.FetchGraph.FETCHGRAPH_UOM,
-                                            EntityGraphRepository.FetchGraph.FETCHGRAPH_OBS_TYPE);
-            if (existing.isPresent()) {
-                DatastreamEntity merged = merge(existing.get(), entity);
-                checkUnit(merged, entity);
-                if (merged.getDatasets() != null) {
-                    merged.getDatasets().forEach(d -> {
-                        d.setUnit(merged.getUnit());
-                        datasetRepository.saveAndFlush(d);
-                    });
+            synchronized (getLock(id)) {
+                Optional<DatastreamEntity> existing =
+                        getRepository().findOne(dQS.withIdentifier(id),
+                                                EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS,
+                                                EntityGraphRepository.FetchGraph.FETCHGRAPH_UOM,
+                                                EntityGraphRepository.FetchGraph.FETCHGRAPH_OBS_TYPE);
+                if (existing.isPresent()) {
+                    DatastreamEntity merged = merge(existing.get(), entity);
+                    checkUnit(merged, entity);
+                    if (merged.getDatasets() != null) {
+                        merged.getDatasets().forEach(d -> {
+                            d.setUnit(merged.getUnit());
+                            datasetRepository.saveAndFlush(d);
+                        });
+                    }
+                    getRepository().save(merged);
+                    return merged;
                 }
-                getRepository().save(merged);
-                return merged;
+                throw new STACRUDException("Unable to update. Entity not found.", HTTPStatus.NOT_FOUND);
             }
-            throw new STACRUDException("Unable to update. Entity not found.", HTTPStatus.NOT_FOUND);
         } else if (HttpMethod.PUT.equals(method)) {
             throw new STACRUDException("Http PUT is not yet supported!", HTTPStatus.NOT_IMPLEMENTED);
         }
@@ -346,16 +342,18 @@ public class DatastreamService
 
     @Override
     public void delete(String id) throws STACRUDException {
-        if (getRepository().existsByIdentifier(id)) {
-            Optional<DatastreamEntity> datastream =
-                    getRepository().findByIdentifier(id,
-                                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS);
-            // check datasets
-            deleteRelatedDatasetsAndObservations(datastream.get());
-            // check observations
-            getRepository().deleteByIdentifier(id);
-        } else {
-            throw new STACRUDException("Unable to delete. Entity not found.", HTTPStatus.NOT_FOUND);
+        synchronized (getLock(id)) {
+            if (getRepository().existsByIdentifier(id)) {
+                Optional<DatastreamEntity> datastream =
+                        getRepository().findByIdentifier(id,
+                                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS);
+                // check datasets
+                deleteRelatedDatasetsAndObservations(datastream.get());
+                // check observations
+                getRepository().deleteByIdentifier(id);
+            } else {
+                throw new STACRUDException("Unable to delete. Entity not found.", HTTPStatus.NOT_FOUND);
+            }
         }
     }
 
@@ -372,45 +370,49 @@ public class DatastreamService
         return createEntity(entity);
     }
 
-    private void deleteRelatedDatasetsAndObservations(DatastreamEntity datastream) {
-        // update datasets
-        datastream.getDatasets().forEach(d -> {
-            d.setFirstObservation(null);
-            d.setFirstQuantityValue(null);
-            d.setFirstValueAt(null);
-            d.setLastObservation(null);
-            d.setLastQuantityValue(null);
-            d.setLastValueAt(null);
-            datasetRepository.saveAndFlush(d);
-        });
-        // delete observations
-        dataRepository.deleteAll(dataRepository.findAll(oQS.withDatastreamIdentifier(datastream.getIdentifier())));
-        getRepository().flush();
-        // delete datasets
-        Set<DatasetEntity> datasets = new HashSet<>(datastream.getDatasets());
-        datastream.setDatasets(null);
-        getRepository().saveAndFlush(datastream);
-        datasets.forEach(d -> {
-            d.setFirstObservation(null);
-            d.setFirstQuantityValue(null);
-            d.setFirstValueAt(null);
-            d.setLastObservation(null);
-            d.setLastQuantityValue(null);
-            d.setLastValueAt(null);
-            datasetRepository.delete(d);
-        });
-        getRepository().flush();
+    private void deleteRelatedDatasetsAndObservations(DatastreamEntity datastream) throws STACRUDException {
+        synchronized (getLock(datastream.getIdentifier())) {
+            // update datasets
+            datastream.getDatasets().forEach(d -> {
+                d.setFirstObservation(null);
+                d.setFirstQuantityValue(null);
+                d.setFirstValueAt(null);
+                d.setLastObservation(null);
+                d.setLastQuantityValue(null);
+                d.setLastValueAt(null);
+                datasetRepository.saveAndFlush(d);
+            });
+            // delete observations
+            dataRepository.deleteAll(dataRepository.findAll(oQS.withDatastreamIdentifier(datastream.getIdentifier())));
+            getRepository().flush();
+            // delete datasets
+            Set<DatasetEntity> datasets = new HashSet<>(datastream.getDatasets());
+            datastream.setDatasets(null);
+            getRepository().saveAndFlush(datastream);
+            datasets.forEach(d -> {
+                d.setFirstObservation(null);
+                d.setFirstQuantityValue(null);
+                d.setFirstValueAt(null);
+                d.setLastObservation(null);
+                d.setLastQuantityValue(null);
+                d.setLastValueAt(null);
+                datasetRepository.delete(d);
+            });
+            getRepository().flush();
+        }
     }
 
     private void checkUnit(DatastreamEntity datastream) {
         UnitEntity unit;
         if (datastream.isSetUnit()) {
-            if (!unitRepository.existsBySymbol(datastream.getUnit().getSymbol())) {
-                unit = unitRepository.save(datastream.getUnit());
-            } else {
-                unit = unitRepository.findBySymbol(datastream.getUnit().getSymbol());
+            synchronized (datastream.getUnit().getSymbol() + "unit") {
+                if (!unitRepository.existsBySymbol(datastream.getUnit().getSymbol())) {
+                    unit = unitRepository.save(datastream.getUnit());
+                } else {
+                    unit = unitRepository.findBySymbol(datastream.getUnit().getSymbol());
+                }
+                datastream.setUnit(unit);
             }
-            datastream.setUnit(unit);
         }
     }
 
@@ -421,12 +423,14 @@ public class DatastreamService
         }
     }
 
-    private void checkObservationType(DatastreamEntity datastream) {
+    private void checkObservationType(DatastreamEntity datastream) throws STACRUDException {
         FormatEntity format;
-        if (!formatRepository.existsByFormat(datastream.getObservationType().getFormat())) {
-            format = formatRepository.save(datastream.getObservationType());
-        } else {
-            format = formatRepository.findByFormat(datastream.getObservationType().getFormat());
+        synchronized (getLock(datastream.getObservationType().getFormat() + "format")) {
+            if (!formatRepository.existsByFormat(datastream.getObservationType().getFormat())) {
+                format = formatRepository.save(datastream.getObservationType());
+            } else {
+                format = formatRepository.findByFormat(datastream.getObservationType().getFormat());
+            }
         }
         datastream.setObservationType(format);
     }

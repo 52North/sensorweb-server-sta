@@ -227,10 +227,7 @@ public class ObservedPropertyService
                                                    "' found");
             }
         }
-        // Check for duplicate definition
-        if (getRepository().existsByIdentifier(observableProperty.getIdentifier())) {
-            throw new STACRUDException("Entity with given Definition already exists!", HTTPStatus.CONFLICT);
-        }
+
         if (observableProperty.getStaIdentifier() == null) {
             if (getRepository().existsByName(observableProperty.getName())) {
                 Optional<PhenomenonEntity> optional
@@ -240,10 +237,17 @@ public class ObservedPropertyService
                 // Autogenerate Identifier
                 observableProperty.setStaIdentifier(UUID.randomUUID().toString());
             }
-        } else if (getRepository().existsByStaIdentifier(observableProperty.getStaIdentifier())) {
-            throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
         }
-        return getRepository().save(getAsPhenomenonEntity(observableProperty));
+        synchronized (getLock(observableProperty.getStaIdentifier())) {
+            // Check for duplicate definition
+            if (getRepository().existsByIdentifier(observableProperty.getIdentifier())) {
+                throw new STACRUDException("Entity with given Definition already exists!", HTTPStatus.CONFLICT);
+            }
+            if (getRepository().existsByStaIdentifier(observableProperty.getStaIdentifier())) {
+                throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
+            }
+            return getRepository().save(getAsPhenomenonEntity(observableProperty));
+        }
     }
 
     @Override
@@ -251,12 +255,14 @@ public class ObservedPropertyService
             throws STACRUDException {
         checkUpdate(entity);
         if (HttpMethod.PATCH.equals(method)) {
-            Optional<PhenomenonEntity> existing = getRepository().findByStaIdentifier(id);
-            if (existing.isPresent()) {
-                PhenomenonEntity merged = merge(existing.get(), entity);
-                return getRepository().save(getAsPhenomenonEntity(merged));
+            synchronized (getLock(id)) {
+                Optional<PhenomenonEntity> existing = getRepository().findByStaIdentifier(id);
+                if (existing.isPresent()) {
+                    PhenomenonEntity merged = merge(existing.get(), entity);
+                    return getRepository().save(getAsPhenomenonEntity(merged));
+                }
+                throw new STACRUDException("Unable to update. Entity not found.", HTTPStatus.NOT_FOUND);
             }
-            throw new STACRUDException("Unable to update. Entity not found.", HTTPStatus.NOT_FOUND);
         } else if (HttpMethod.PUT.equals(method)) {
             throw new STACRUDException("Http PUT is not yet supported!", HTTPStatus.NOT_IMPLEMENTED);
         }
@@ -281,20 +287,22 @@ public class ObservedPropertyService
 
     @Override
     public void delete(String id) throws STACRUDException {
-        if (getRepository().existsByStaIdentifier(id)) {
-            // delete datastreams
-            datastreamRepository.findAll(dQS.withObservedPropertyIdentifier(id)).forEach(d -> {
-                try {
-                    getDatastreamService().delete(d.getIdentifier());
-                } catch (STACRUDException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            });
-            getRepository().deleteByStaIdentifier(id);
-        } else {
-            throw new STACRUDException(
-                    "Unable to delete. Entity not found.", HTTPStatus.NOT_FOUND);
+        synchronized (getLock(id)) {
+            if (getRepository().existsByStaIdentifier(id)) {
+                // delete datastreams
+                datastreamRepository.findAll(dQS.withObservedPropertyIdentifier(id)).forEach(d -> {
+                    try {
+                        getDatastreamService().delete(d.getIdentifier());
+                    } catch (STACRUDException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                });
+                getRepository().deleteByStaIdentifier(id);
+            } else {
+                throw new STACRUDException(
+                        "Unable to delete. Entity not found.", HTTPStatus.NOT_FOUND);
+            }
         }
     }
 

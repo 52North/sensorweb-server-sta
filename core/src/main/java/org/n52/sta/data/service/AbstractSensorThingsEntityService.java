@@ -63,6 +63,8 @@ import org.n52.sta.data.service.util.FilterExprVisitor;
 import org.n52.sta.data.service.util.HibernateSpatialCriteriaBuilderImpl;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
 import org.n52.svalbard.odata.core.expr.Expr;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -71,6 +73,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpMethod;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ConcurrentReferenceHashMap;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.criteria.Predicate;
@@ -88,9 +91,14 @@ import java.util.Set;
 public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepository<S, Long>, S extends IdEntity,
         E extends S> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSensorThingsEntityService.class);
+
     static final String IDENTIFIER = "identifier";
     static final String STAIDENTIFIER = "staIdentifier";
     static final String ENCODINGTYPE = "encodingType";
+
+    // MutexMAp used for locking during thread-bound in-memory computations on database entities
+    protected ConcurrentReferenceHashMap<String, Object> lock;
 
     @Autowired
     private EntityServiceRepository serviceRepository;
@@ -106,11 +114,28 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
         this.entityClass = entityClass;
         this.repository = repository;
         this.defaultFetchGraphs = defaultFetchGraphs;
+        this.lock = new ConcurrentReferenceHashMap<>();
     }
 
     @PostConstruct
     public void init() {
         serviceRepository.addEntityService(this);
+    }
+
+    /**
+     * Gets a lock with given name from global lockMap. Name is unique per EntityType.
+     * Uses weak references so Map is automatically cleared by GC.
+     *
+     * @param key name of the lock
+     * @return Object used for holding the lock
+     */
+    protected Object getLock(String key) throws STACRUDException {
+        if (key != null) {
+            LOGGER.debug("Locking:" + key + entityClass.getSimpleName());
+            return this.lock.compute(key + entityClass.getSimpleName(), (k, v) -> v == null ? new Object() : v);
+        } else {
+            throw new STACRUDException("Unable to obtain Lock. No name specified!");
+        }
     }
 
     public abstract EntityTypes[] getTypes();
@@ -414,6 +439,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
                     sort = Sort.by(sortProperty.isSetSortOrder() &&
                                            sortProperty.getSortOrder().equals(FilterConstants.SortOrder.DESC) ?
                                            Sort.Direction.DESC : Sort.Direction.ASC,
+
                                    checkPropertyName(sortProperty.getValueReference()));
                     first = false;
                 } else {

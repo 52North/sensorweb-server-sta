@@ -140,6 +140,7 @@ public class ObservationService extends
         return new EntityTypes[] {EntityTypes.Observation, EntityTypes.Observations};
     }
 
+
     @Override
     protected StaDataEntity<?> fetchExpandEntities(DataEntity<?> entity,
                                                    ExpandFilter expandOption)
@@ -215,44 +216,46 @@ public class ObservationService extends
 
     @Override
     public DataEntity<?> createEntity(DataEntity<?> entity) throws STACRUDException {
-        if (entity instanceof StaDataEntity) {
-            StaDataEntity observation = (StaDataEntity) entity;
-            if (!observation.isProcessed()) {
-                observation.setProcessed(true);
-                check(observation);
+        synchronized (getLock(entity.getIdentifier())) {
+            if (entity instanceof StaDataEntity) {
+                StaDataEntity observation = (StaDataEntity) entity;
+                if (!observation.isProcessed()) {
+                    observation.setProcessed(true);
+                    check(observation);
 
-                DatastreamEntity datastream = getDatastreamService().createEntity(observation.getDatastream());
-                observation.setDatastream(datastream);
+                    DatastreamEntity datastream = getDatastreamService().createEntity(observation.getDatastream());
+                    observation.setDatastream(datastream);
 
-                // Fetch with all needed associations
-                datastream = datastreamRepository
-                        .findByIdentifier(datastream.getIdentifier(),
-                                          EntityGraphRepository.FetchGraph.FETCHGRAPH_THINGLOCATION,
-                                          EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDURE,
-                                          EntityGraphRepository.FetchGraph.FETCHGRAPH_UOM,
-                                          EntityGraphRepository.FetchGraph.FETCHGRAPH_OBS_TYPE,
-                                          EntityGraphRepository.FetchGraph.FETCHGRAPH_OBSERVABLE_PROP,
-                                          EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS
-                        ).get();
+                    // Fetch with all needed associations
+                    datastream = datastreamRepository
+                            .findByIdentifier(datastream.getIdentifier(),
+                                              EntityGraphRepository.FetchGraph.FETCHGRAPH_THINGLOCATION,
+                                              EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDURE,
+                                              EntityGraphRepository.FetchGraph.FETCHGRAPH_UOM,
+                                              EntityGraphRepository.FetchGraph.FETCHGRAPH_OBS_TYPE,
+                                              EntityGraphRepository.FetchGraph.FETCHGRAPH_OBSERVABLE_PROP,
+                                              EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS
+                            ).orElseThrow(() -> new STACRUDException("Unable to find Datastream!"));
 
-                AbstractFeatureEntity<?> feature = checkFeature(observation, datastream);
-                // category (obdProp)
-                CategoryEntity category = checkCategory(datastream);
-                // offering (sensor)
-                OfferingEntity offering = checkOffering(datastream);
-                // dataset
-                DatasetEntity dataset = checkDataset(datastream, feature, category, offering);
-                // observation
-                DataEntity<?> data = checkData(observation, dataset);
-                if (data != null) {
-                    updateDataset(dataset, data);
-                    updateDatastream(datastream, dataset, data);
+                    AbstractFeatureEntity<?> feature = checkFeature(observation, datastream);
+                    // category (obdProp)
+                    CategoryEntity category = checkCategory();
+                    // offering (sensor)
+                    OfferingEntity offering = checkOffering(datastream);
+                    // dataset
+                    DatasetEntity dataset = checkDataset(datastream, feature, category, offering);
+                    // observation
+                    DataEntity<?> data = checkData(observation, dataset);
+                    if (data != null) {
+                        updateDataset(dataset, data);
+                        updateDatastream(datastream, dataset, data);
+                    }
+                    return data;
                 }
-                return data;
+                return observation;
             }
-            return observation;
+            return entity;
         }
-        return entity;
     }
 
     private void check(StaDataEntity observation) throws STACRUDException {
@@ -310,22 +313,24 @@ public class ObservationService extends
     @Override
     public DataEntity<?> updateEntity(String id, DataEntity<?> entity, HttpMethod method) throws STACRUDException {
         if (HttpMethod.PATCH.equals(method)) {
-            Optional<DataEntity<?>> existing =
-                    getRepository().findByIdentifier(id,
-                                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
-            if (existing.isPresent()) {
-                DataEntity<?> merged = merge(existing.get(), entity);
-                DataEntity<?> saved = getRepository().save(merged);
+            synchronized (getLock(id)) {
+                Optional<DataEntity<?>> existing =
+                        getRepository().findByIdentifier(id,
+                                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
+                if (existing.isPresent()) {
+                    DataEntity<?> merged = merge(existing.get(), entity);
+                    DataEntity<?> saved = getRepository().save(merged);
 
-                List<DatastreamEntity> datastreamEntity =
-                        datastreamRepository.findAll(dsQS.withObservationIdentifier(saved.getIdentifier()),
-                                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS);
-                if (!datastreamEntity.isEmpty()) {
-                    updateDatastreamPhenomenonTimeOnObservationUpdate(datastreamEntity, saved);
+                    List<DatastreamEntity> datastreamEntity =
+                            datastreamRepository.findAll(dsQS.withObservationIdentifier(saved.getIdentifier()),
+                                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS);
+                    if (!datastreamEntity.isEmpty()) {
+                        updateDatastreamPhenomenonTimeOnObservationUpdate(datastreamEntity, saved);
+                    }
+                    return saved;
                 }
-                return saved;
+                throw new STACRUDException("Unable to update. Entity not found.", HTTPStatus.NOT_FOUND);
             }
-            throw new STACRUDException("Unable to update. Entity not found.", HTTPStatus.NOT_FOUND);
         } else if (HttpMethod.PUT.equals(method)) {
             throw new STACRUDException("Http PUT is not yet supported!", HTTPStatus.NOT_IMPLEMENTED);
         }
@@ -333,42 +338,48 @@ public class ObservationService extends
     }
 
     @Override
-    public DataEntity<?> updateEntity(DataEntity<?> entity) {
+    protected DataEntity<?> updateEntity(DataEntity<?> entity) {
         return getRepository().save(entity);
     }
 
     @Override
     public void delete(String identifier) throws STACRUDException {
-        if (getRepository().existsByIdentifier(identifier)) {
-            DataEntity<?> observation =
-                    getRepository().findByIdentifier(identifier,
-                                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASET)
-                                   .get();
-            checkDataset(observation);
-            delete(observation);
-        } else {
-            throw new STACRUDException("Unable to delete. Entity not found.", HTTPStatus.NOT_FOUND);
+        synchronized (getLock(identifier)) {
+            if (getRepository().existsByIdentifier(identifier)) {
+                DataEntity<?> observation =
+                        getRepository().findByIdentifier(identifier,
+                                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASET)
+                                       .get();
+                checkDataset(observation);
+                delete(observation);
+            } else {
+                throw new STACRUDException("Unable to delete. Entity not found.", HTTPStatus.NOT_FOUND);
+            }
         }
     }
 
     @Override
-    public void delete(DataEntity<?> entity) {
-        List<DatastreamEntity> datastreamEntity =
-                datastreamRepository.findAll(dsQS.withObservationIdentifier(entity.getIdentifier()),
-                                             EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS);
-        // Important! Delete first and then update else we find ourselves again in search for new latest/earliest obs.
-        getRepository().deleteByIdentifier(entity.getIdentifier());
-        if (!datastreamEntity.isEmpty()) {
-            updateDatastreamPhenomenonTimeOnObservationUpdate(datastreamEntity, entity);
+    public void delete(DataEntity<?> entity) throws STACRUDException {
+        synchronized (getLock(entity.getIdentifier())) {
+            List<DatastreamEntity> datastreamEntity =
+                    datastreamRepository.findAll(dsQS.withObservationIdentifier(entity.getIdentifier()),
+                                                 EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS);
+            // Important! Delete first and then update else we find ourselves again in search for new latest/earliest obs.
+            getRepository().deleteByIdentifier(entity.getIdentifier());
+            if (!datastreamEntity.isEmpty()) {
+                updateDatastreamPhenomenonTimeOnObservationUpdate(datastreamEntity, entity);
+            }
         }
     }
 
     @Override
     protected DataEntity<?> createOrUpdate(DataEntity<?> entity) throws STACRUDException {
-        if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
-            return updateEntity(entity.getIdentifier(), entity, HttpMethod.PATCH);
+        synchronized (getLock(entity.getIdentifier())) {
+            if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
+                return updateEntity(entity.getIdentifier(), entity, HttpMethod.PATCH);
+            }
+            return createEntity(entity);
         }
-        return createEntity(entity);
     }
 
     private void checkDataset(DataEntity<?> observation) {
@@ -394,7 +405,7 @@ public class ObservationService extends
     private DatasetEntity checkDataset(DatastreamEntity datastream,
                                        AbstractFeatureEntity<?> feature,
                                        CategoryEntity category,
-                                       OfferingEntity offering) {
+                                       OfferingEntity offering) throws STACRUDException {
         DatasetEntity dataset = getDatasetEntity(datastream.getObservationType().getFormat(),
                                                  (isMobileFeatureEnabled
                                                          && datastream.getThing().hasProperties())
@@ -414,16 +425,18 @@ public class ObservationService extends
                                                                                   .getIdentifier())
                                                         .and(dQS.matchFeatures(feature.getIdentifier()))
                                                         .and(dQS.matchOfferings(offering.getIdentifier())));
-        Optional<DatasetEntity> queried =
-                datasetRepository.findOne(query,
-                                          EntityGraphRepository.FetchGraph.FETCHGRAPH_OM_OBS_TYPE,
-                                          EntityGraphRepository.FetchGraph.FETCHGRAPH_FEATURE);
-        if (queried.isPresent()) {
-            LOGGER.debug("Checking Dataset: Found existing dataset");
-            return queried.get();
-        } else {
-            LOGGER.debug("Checking Dataset: Creating new dataset");
-            return datasetRepository.save(dataset);
+        synchronized (getLock(datastream.getIdentifier())) {
+            Optional<DatasetEntity> queried =
+                    datasetRepository.findOne(query,
+                                              EntityGraphRepository.FetchGraph.FETCHGRAPH_OM_OBS_TYPE,
+                                              EntityGraphRepository.FetchGraph.FETCHGRAPH_FEATURE);
+            if (queried.isPresent()) {
+                LOGGER.debug("Checking Dataset: Found existing dataset");
+                return queried.get();
+            } else {
+                LOGGER.debug("Checking Dataset: Creating new dataset");
+                return datasetRepository.save(dataset);
+            }
         }
     }
 
@@ -438,7 +451,6 @@ public class ObservationService extends
         if (!observation.hasFeatureOfInterest()) {
             AbstractFeatureEntity<?> feature = null;
             for (LocationEntity location : datastream.getThing().getLocations()) {
-                //TODO: check why this looks weird.
                 if (feature == null) {
                     feature = ServiceUtils.createFeatureOfInterest(location);
                 }
@@ -492,16 +504,17 @@ public class ObservationService extends
         }
     }
 
-    private CategoryEntity checkCategory(DatastreamEntity datastream) {
+    private CategoryEntity checkCategory() throws STACRUDException {
         CategoryEntity category = new CategoryEntity();
-        // PhenomenonEntity obsProp = datastream.getObservableProperty();
         category.setIdentifier(STA);
         category.setName(STA);
         category.setDescription("Default SOS category");
-        if (!categoryRepository.existsByIdentifier(category.getIdentifier())) {
-            return categoryRepository.save(category);
-        } else {
-            return categoryRepository.findByIdentifier(category.getIdentifier()).get();
+        synchronized (getLock(category.getIdentifier())) {
+            if (!categoryRepository.existsByIdentifier(category.getIdentifier())) {
+                return categoryRepository.save(category);
+            } else {
+                return categoryRepository.findByIdentifier(category.getIdentifier()).get();
+            }
         }
     }
 
@@ -698,9 +711,11 @@ public class ObservationService extends
         }
         // parameter
         if (toMerge.getParameters() != null) {
-            parameterRepository.saveAll(toMerge.getParameters());
-            existing.getParameters().forEach(parameterRepository::delete);
-            existing.setParameters(toMerge.getParameters());
+            synchronized (getLock(String.valueOf(existing.getParameters().hashCode()))) {
+                parameterRepository.saveAll(toMerge.getParameters());
+                existing.getParameters().forEach(parameterRepository::delete);
+                existing.setParameters(toMerge.getParameters());
+            }
         }
         // value
         if (toMerge.getValue() != null) {

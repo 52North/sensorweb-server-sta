@@ -184,18 +184,21 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
                     // Autogenerate Identifier
                     thing.setIdentifier(UUID.randomUUID().toString());
                 }
-            } else if (getRepository().existsByIdentifier(thing.getIdentifier())) {
-                throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
             }
-            thing.setProcesssed(true);
-            processLocations(thing, thing.getLocations());
-            thing = getRepository().intermediateSave(thing);
-            processHistoricalLocations(thing);
-            processDatastreams(thing);
-            thing = getRepository().save(thing);
+            synchronized (getLock(thing.getIdentifier())) {
+                if (getRepository().existsByIdentifier(thing.getIdentifier())) {
+                    throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
+                } else {
+                    thing.setProcesssed(true);
+                    processLocations(thing, thing.getLocations());
+                    thing = getRepository().intermediateSave(thing);
+                    processHistoricalLocations(thing);
+                    processDatastreams(thing);
+                    thing = getRepository().save(thing);
+                }
+            }
         }
         return thing;
-
     }
 
     @Override
@@ -203,20 +206,22 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
     public PlatformEntity updateEntity(String id, PlatformEntity entity, HttpMethod method) throws STACRUDException {
         checkUpdate(entity);
         if (HttpMethod.PATCH.equals(method)) {
-            Optional<PlatformEntity> existing =
-                    getRepository().findByIdentifier(id,
-                                                     IdentifierRepository.FetchGraph.FETCHGRAPH_LOCATION,
-                                                     IdentifierRepository.FetchGraph.FETCHGRAPH_HIST_LOCATION);
-            if (existing.isPresent()) {
-                PlatformEntity merged = merge(existing.get(), entity);
-                if (entity.hasLocationEntities()) {
-                    processLocations(merged, entity.getLocations());
-                    merged = getRepository().save(merged);
-                    processHistoricalLocations(merged);
+            synchronized (getLock(id)) {
+                Optional<PlatformEntity> existing =
+                        getRepository().findByIdentifier(id,
+                                                         IdentifierRepository.FetchGraph.FETCHGRAPH_LOCATION,
+                                                         IdentifierRepository.FetchGraph.FETCHGRAPH_HIST_LOCATION);
+                if (existing.isPresent()) {
+                    PlatformEntity merged = merge(existing.get(), entity);
+                    if (entity.hasLocationEntities()) {
+                        processLocations(merged, entity.getLocations());
+                        merged = getRepository().save(merged);
+                        processHistoricalLocations(merged);
+                    }
+                    return getRepository().save(merged);
+                } else {
+                    throw new STACRUDException("Unable to update. Entity not found.", HTTPStatus.NOT_FOUND);
                 }
-                return getRepository().save(merged);
-            } else {
-                throw new STACRUDException("Unable to update. Entity not found.", HTTPStatus.NOT_FOUND);
             }
         } else if (HttpMethod.PUT.equals(method)) {
             throw new STACRUDException("Http PUT is not yet supported!", HTTPStatus.NOT_IMPLEMENTED);
@@ -254,33 +259,35 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
 
     @Override
     public void delete(String identifier) throws STACRUDException {
-        if (getRepository().existsByIdentifier(identifier)) {
-            PlatformEntity thing =
-                    getRepository().findByIdentifier(identifier,
-                                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASTREAMS,
-                                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATION)
-                                   .get();
-            // delete datastreams
-            thing.getDatastreams().forEach(d -> {
-                try {
-                    getDatastreamService().delete(d.getIdentifier());
-                } catch (STACRUDException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            });
-            // delete historicalLocation
-            thing.getHistoricalLocations().forEach(hl -> {
-                try {
-                    getHistoricalLocationService().delete(hl);
-                } catch (STACRUDException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            });
-            getRepository().deleteByIdentifier(identifier);
-        } else {
-            throw new STACRUDException("Unable to delete. Entity not found.", HTTPStatus.NOT_FOUND);
+        synchronized (getLock(identifier)) {
+            if (getRepository().existsByIdentifier(identifier)) {
+                PlatformEntity thing =
+                        getRepository().findByIdentifier(identifier,
+                                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASTREAMS,
+                                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATION)
+                                       .get();
+                // delete datastreams
+                thing.getDatastreams().forEach(d -> {
+                    try {
+                        getDatastreamService().delete(d.getIdentifier());
+                    } catch (STACRUDException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                });
+                // delete historicalLocation
+                thing.getHistoricalLocations().forEach(hl -> {
+                    try {
+                        getHistoricalLocationService().delete(hl);
+                    } catch (STACRUDException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                });
+                getRepository().deleteByIdentifier(identifier);
+            } else {
+                throw new STACRUDException("Unable to delete. Entity not found.", HTTPStatus.NOT_FOUND);
+            }
         }
     }
 

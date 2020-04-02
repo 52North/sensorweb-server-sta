@@ -157,18 +157,20 @@ public class HistoricalLocationService
     @Override
     public HistoricalLocationEntity createEntity(HistoricalLocationEntity historicalLocation)
             throws STACRUDException {
-        if (!historicalLocation.isProcesssed()) {
-            check(historicalLocation);
-            HistoricalLocationEntity created = processThing(historicalLocation);
-            processLocations(created);
-            return created;
+        synchronized (getLock(historicalLocation.getIdentifier())) {
+            if (!historicalLocation.isProcesssed()) {
+                check(historicalLocation);
+                HistoricalLocationEntity created = processThing(historicalLocation);
+                processLocations(created);
+                return created;
+            }
+            return getRepository().save(historicalLocation);
         }
-        return getRepository().save(historicalLocation);
     }
 
     private void check(HistoricalLocationEntity historicalLocation) throws STACRUDException {
         if (historicalLocation.getThing() == null && historicalLocation.getLocations() != null) {
-            throw new STACRUDException("The datastream to create is invalid", HTTPStatus.BAD_REQUEST);
+            throw new STACRUDException("The HistoricalLocation to create is invalid", HTTPStatus.BAD_REQUEST);
         }
     }
 
@@ -198,12 +200,14 @@ public class HistoricalLocationService
     public HistoricalLocationEntity updateEntity(String id, HistoricalLocationEntity entity, HttpMethod method)
             throws STACRUDException {
         if (HttpMethod.PATCH.equals(method)) {
-            Optional<HistoricalLocationEntity> existing = getRepository().findByIdentifier(id);
-            if (existing.isPresent()) {
-                HistoricalLocationEntity merged = merge(existing.get(), entity);
-                return getRepository().save(merged);
+            synchronized (getLock(id)) {
+                Optional<HistoricalLocationEntity> existing = getRepository().findByIdentifier(id);
+                if (existing.isPresent()) {
+                    HistoricalLocationEntity merged = merge(existing.get(), entity);
+                    return getRepository().save(merged);
+                }
+                throw new STACRUDException("Unable to update. Entity not found.", HTTPStatus.NOT_FOUND);
             }
-            throw new STACRUDException("Unable to update. Entity not found.", HTTPStatus.NOT_FOUND);
         } else if (HttpMethod.PUT.equals(method)) {
             throw new STACRUDException("Http PUT is not yet supported!", HTTPStatus.NOT_IMPLEMENTED);
         }
@@ -217,38 +221,42 @@ public class HistoricalLocationService
 
     @Override
     public void delete(String id) throws STACRUDException {
-        if (getRepository().existsByIdentifier(id)) {
-            HistoricalLocationEntity historicalLocation =
-                    getRepository().findByIdentifier(id,
-                                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_LOCATIONHISTLOCATION,
-                                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_THING)
-                                   .get();
-            updateLocations(historicalLocation);
-            updateThing(historicalLocation);
-            getRepository().deleteByIdentifier(id);
-        } else {
-            throw new STACRUDException("Unable to delete. Entity not found.", HTTPStatus.NOT_FOUND);
+        synchronized (getLock(id)) {
+            if (getRepository().existsByIdentifier(id)) {
+                HistoricalLocationEntity historicalLocation =
+                        getRepository().findByIdentifier(id,
+                                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_LOCATIONHISTLOCATION,
+                                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_THING)
+                                       .get();
+                updateLocations(historicalLocation);
+                updateThing(historicalLocation);
+                getRepository().deleteByIdentifier(id);
+            } else {
+                throw new STACRUDException("Unable to delete. Entity not found.", HTTPStatus.NOT_FOUND);
+            }
         }
     }
 
     @Override
-    public void delete(HistoricalLocationEntity entity) {
-        // delete historicalLocation
-        Optional<HistoricalLocationEntity> fetched =
-                getRepository().findByIdentifier(entity.getIdentifier(),
-                                                 EntityGraphRepository.FetchGraph.FETCHGRAPH_LOCATIONHISTLOCATION);
-        if (fetched.isPresent()) {
-            fetched.get().getLocations().forEach(l -> {
-                try {
-                    l.getHistoricalLocations().remove(fetched.get());
-                    getLocationService().updateEntity(l);
-                } catch (STACRUDException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            });
-            getRepository().saveAndFlush(fetched.get());
-            getRepository().deleteByIdentifier(fetched.get().getIdentifier());
+    public void delete(HistoricalLocationEntity entity) throws STACRUDException {
+        synchronized (getLock(entity.getIdentifier())) {
+            // delete historicalLocation
+            Optional<HistoricalLocationEntity> fetched =
+                    getRepository().findByIdentifier(entity.getIdentifier(),
+                                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_LOCATIONHISTLOCATION);
+            if (fetched.isPresent()) {
+                fetched.get().getLocations().forEach(l -> {
+                    try {
+                        l.getHistoricalLocations().remove(fetched.get());
+                        getLocationService().updateEntity(l);
+                    } catch (STACRUDException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                });
+                getRepository().saveAndFlush(fetched.get());
+                getRepository().deleteByIdentifier(fetched.get().getIdentifier());
+            }
         }
     }
 

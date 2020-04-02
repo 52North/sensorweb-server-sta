@@ -220,54 +220,62 @@ public class SensorService
                 // Autogenerate Identifier
                 sensor.setIdentifier(UUID.randomUUID().toString());
             }
-        } else if (getRepository().existsByIdentifier(sensor.getIdentifier())) {
-            throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
         }
-        ProcedureEntity procedure = getAsProcedureEntity(sensor);
-        checkFormat(procedure);
-        // Intermediate save to allow DatastreamService->createOrUpdate to use this entity. Does not trigger
-        // intercept handling (e.g. mqtt). Needed as Datastream<->Procedure connection is not yet set but required by
-        // interceptors
-        getRepository().intermediateSave(procedure);
-        checkProcedureHistory(procedure);
-        if (sensor instanceof SensorEntity && ((SensorEntity) sensor).hasDatastreams()) {
-            AbstractSensorThingsEntityService<?, DatastreamEntity, DatastreamEntity> dsService = getDatastreamService();
-            for (DatastreamEntity datastreamEntity : ((SensorEntity) sensor).getDatastreams()) {
-                try {
-                    dsService.createOrUpdate(datastreamEntity);
-                } catch (STACRUDException e) {
-                    // Datastream might be currently processing.
+
+        synchronized (getLock(sensor.getIdentifier())) {
+            if (getRepository().existsByIdentifier(sensor.getIdentifier())) {
+                throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
+            }
+            ProcedureEntity procedure = getAsProcedureEntity(sensor);
+            checkFormat(procedure);
+            // Intermediate save to allow DatastreamService->createOrUpdate to use this entity. Does not trigger
+            // intercept handling (e.g. mqtt). Needed as Datastream<->Procedure connection is not yet set but
+            // required by interceptors
+            getRepository().intermediateSave(procedure);
+            checkProcedureHistory(procedure);
+            if (sensor instanceof SensorEntity && ((SensorEntity) sensor).hasDatastreams()) {
+                AbstractSensorThingsEntityService<?, DatastreamEntity, DatastreamEntity> dsService =
+                        getDatastreamService();
+                for (DatastreamEntity datastreamEntity : ((SensorEntity) sensor).getDatastreams()) {
+                    try {
+                        dsService.createOrUpdate(datastreamEntity);
+                    } catch (STACRUDException e) {
+                        // Datastream might be currently processing.
+                    }
                 }
             }
+            // Save with Interception as procedure is now linked to Datastream
+            getRepository().save(procedure);
+            return procedure;
         }
-        // Save with Interception as procedure is now linked to Datastream
-        getRepository().save(procedure);
-        return procedure;
     }
 
     @Override
-    public ProcedureEntity updateEntity(String id, ProcedureEntity entity, HttpMethod method) throws STACRUDException {
+    public ProcedureEntity updateEntity(String id, ProcedureEntity entity, HttpMethod method) throws
+            STACRUDException {
         checkUpdate(entity);
         if (HttpMethod.PATCH.equals(method)) {
-            Optional<ProcedureEntity> existing =
-                    getRepository().findByIdentifier(id,
-                                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT,
-                                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDUREHISTORY);
-            if (existing.isPresent()) {
-                ProcedureEntity merged = merge(existing.get(), entity);
-                if (entity instanceof SensorEntity) {
-                    if (((SensorEntity) entity).hasDatastreams()) {
-                        AbstractSensorThingsEntityService<?, DatastreamEntity, DatastreamEntity> dsService =
-                                getDatastreamService();
-                        for (DatastreamEntity datastreamEntity : ((SensorEntity) entity).getDatastreams()) {
-                            dsService.createOrUpdate(datastreamEntity);
+            synchronized (getLock(id)) {
+                Optional<ProcedureEntity> existing =
+                        getRepository().findByIdentifier(id,
+                                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT,
+                                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDUREHISTORY);
+                if (existing.isPresent()) {
+                    ProcedureEntity merged = merge(existing.get(), entity);
+                    if (entity instanceof SensorEntity) {
+                        if (((SensorEntity) entity).hasDatastreams()) {
+                            AbstractSensorThingsEntityService<?, DatastreamEntity, DatastreamEntity> dsService =
+                                    getDatastreamService();
+                            for (DatastreamEntity datastreamEntity : ((SensorEntity) entity).getDatastreams()) {
+                                dsService.createOrUpdate(datastreamEntity);
+                            }
                         }
                     }
+                    checkFormat(merged);
+                    checkProcedureHistory(merged);
+                    getRepository().save(getAsProcedureEntity(merged));
+                    return merged;
                 }
-                checkFormat(merged);
-                checkProcedureHistory(merged);
-                getRepository().save(getAsProcedureEntity(merged));
-                return merged;
             }
             throw new STACRUDException("Unable to update. Entity not found.", HTTPStatus.NOT_FOUND);
         } else if (HttpMethod.PUT.equals(method)) {
@@ -294,27 +302,28 @@ public class SensorService
 
     @Override
     public void delete(String identifier) throws STACRUDException {
-        if (getRepository().existsByIdentifier(identifier)) {
-            // delete datastreams
-            datastreamRepository.findAll(dQS.withSensorIdentifier(identifier)).forEach(d -> {
-                try {
-                    // TODO delete observation and datasets ...
-                    getDatastreamService().delete(d.getIdentifier());
-                } catch (STACRUDException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            });
-            getRepository().deleteByIdentifier(identifier);
-        } else {
-            throw new STACRUDException("Unable to delete. Entity not found.", HTTPStatus.NOT_FOUND);
+        synchronized (getLock(identifier)) {
+            if (getRepository().existsByIdentifier(identifier)) {
+                // delete datastreams
+                datastreamRepository.findAll(dQS.withSensorIdentifier(identifier)).forEach(d -> {
+                    try {
+                        // TODO delete observation and datasets ...
+                        getDatastreamService().delete(d.getIdentifier());
+                    } catch (STACRUDException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                });
+                getRepository().deleteByIdentifier(identifier);
+            } else {
+                throw new STACRUDException("Unable to delete. Entity not found.", HTTPStatus.NOT_FOUND);
+            }
         }
     }
 
     @Override
     protected void delete(ProcedureEntity entity) {
         getRepository().deleteByIdentifier(entity.getIdentifier());
-
     }
 
     @Override
@@ -325,12 +334,14 @@ public class SensorService
         return createEntity(entity);
     }
 
-    private void checkFormat(ProcedureEntity sensor) {
+    private void checkFormat(ProcedureEntity sensor) throws STACRUDException {
         FormatEntity format;
-        if (!formatRepository.existsByFormat(sensor.getFormat().getFormat())) {
-            format = formatRepository.save(sensor.getFormat());
-        } else {
-            format = formatRepository.findByFormat(sensor.getFormat().getFormat());
+        synchronized (getLock(sensor.getFormat().getFormat())) {
+            if (!formatRepository.existsByFormat(sensor.getFormat().getFormat())) {
+                format = formatRepository.save(sensor.getFormat());
+            } else {
+                format = formatRepository.findByFormat(sensor.getFormat().getFormat());
+            }
         }
         sensor.setFormat(format);
         if (sensor.hasProcedureHistory()) {

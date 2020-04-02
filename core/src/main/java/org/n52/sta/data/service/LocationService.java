@@ -186,13 +186,16 @@ public class LocationService
                     // Autogenerate Identifier
                     location.setIdentifier(UUID.randomUUID().toString());
                 }
-            } else if (getRepository().existsByIdentifier(location.getIdentifier())) {
-                throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
             }
-            location.setProcesssed(true);
-            checkLocationEncoding(location);
-            location = getRepository().save(location);
-            processThings(location);
+            synchronized (getLock(location.getIdentifier())) {
+                if (getRepository().existsByIdentifier(location.getIdentifier())) {
+                    throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
+                }
+                location.setProcesssed(true);
+                checkLocationEncoding(location);
+                location = getRepository().save(location);
+                processThings(location);
+            }
         }
         return location;
     }
@@ -200,12 +203,14 @@ public class LocationService
     @Override
     public LocationEntity updateEntity(String id, LocationEntity entity, HttpMethod method) throws STACRUDException {
         if (HttpMethod.PATCH.equals(method)) {
-            Optional<LocationEntity> existing = getRepository().findByIdentifier(id);
-            if (existing.isPresent()) {
-                LocationEntity merged = merge(existing.get(), entity);
-                return getRepository().save(merged);
+            synchronized (getLock(id)) {
+                Optional<LocationEntity> existing = getRepository().findByIdentifier(id);
+                if (existing.isPresent()) {
+                    LocationEntity merged = merge(existing.get(), entity);
+                    return getRepository().save(merged);
+                }
+                throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }
-            throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
         } else if (HttpMethod.PUT.equals(method)) {
             throw new STACRUDException("Http PUT is not yet supported!", HTTPStatus.NOT_IMPLEMENTED);
         }
@@ -219,26 +224,28 @@ public class LocationService
 
     @Override
     public void delete(String id) throws STACRUDException {
-        if (getRepository().existsByIdentifier(id)) {
-            LocationEntity location =
-                    getRepository().findByIdentifier(id,
-                                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATION,
-                                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_THINGSHISTLOCATION)
-                                   .get();
-            for (PlatformEntity thing : location.getThings()) {
-                thing.setLocations(null);
-                if (location.getHistoricalLocations() != null) {
-                    thing.getHistoricalLocations().removeAll(location.getHistoricalLocations());
+        synchronized (getLock(id)) {
+            if (getRepository().existsByIdentifier(id)) {
+                LocationEntity location =
+                        getRepository().findByIdentifier(id,
+                                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATION,
+                                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_THINGSHISTLOCATION)
+                                       .get();
+                for (PlatformEntity thing : location.getThings()) {
+                    thing.setLocations(null);
+                    if (location.getHistoricalLocations() != null) {
+                        thing.getHistoricalLocations().removeAll(location.getHistoricalLocations());
+                    }
+                    getThingService().updateEntity(thing);
                 }
-                getThingService().updateEntity(thing);
+                // delete all historical locations
+                for (HistoricalLocationEntity historicalLocation : location.getHistoricalLocations()) {
+                    getHistoricalLocationService().delete(historicalLocation);
+                }
+                getRepository().deleteByIdentifier(id);
+            } else {
+                throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }
-            // delete all historical locations
-            for (HistoricalLocationEntity historicalLocation : location.getHistoricalLocations()) {
-                getHistoricalLocationService().delete(historicalLocation);
-            }
-            getRepository().deleteByIdentifier(id);
-        } else {
-            throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
         }
     }
 
@@ -299,7 +306,7 @@ public class LocationService
                 HashSet<LocationEntity> set = new HashSet<>();
                 set.add(createReferencedLocation(location));
                 newThing.setLocations(set);
-                PlatformEntity updated = (PlatformEntity) getThingService().createOrUpdate(newThing);
+                PlatformEntity updated = getThingService().createOrUpdate(newThing);
                 things.add(updated);
 
                 // non-standard feature 'updateFOI'
