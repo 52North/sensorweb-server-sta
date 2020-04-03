@@ -108,7 +108,6 @@ public class MqttSubscriptionEventHandlerImpl implements MqttSubscriptionEventHa
                             String entityType,
                             Set<String> differenceMap,
                             Map<String, Set<String>> collections) {
-        System.out.println("handleEvent in thread:" + Thread.currentThread().getName());
         try {
             // Invariant: As watchedEntityTypes contains rawObject->class
             // there is at least one subscription that matches.
@@ -122,7 +121,6 @@ public class MqttSubscriptionEventHandlerImpl implements MqttSubscriptionEventHa
 
                 String topic = subscrip.checkSubscription(rawObject, entityType, collections, differenceMap);
 
-                System.out.println(topic);
                 if (topic != null) {
                     // Use cache if applicable
                     ByteBuf out;
@@ -140,7 +138,7 @@ public class MqttSubscriptionEventHandlerImpl implements MqttSubscriptionEventHa
                     mqttBroker.internalPublish(msg, INTERNAL_CLIENT_ID);
                     LOGGER.debug("Posted Message to Topic: {}", topic);
                 } else {
-                    LOGGER.debug("subscription does not match!");
+                    LOGGER.debug("Subscription does not match!");
                 }
             }
         } catch (JsonProcessingException ex) {

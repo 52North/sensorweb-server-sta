@@ -207,10 +207,8 @@ public class LocationService
                                           EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATION,
                                           EntityGraphRepository.FetchGraph.FETCHGRAPH_THINGS);
                 if (existing.isPresent()) {
-                    System.out.println("mergin in thread:" + Thread.currentThread().getName());
                     LocationEntity merged = merge(existing.get(), entity);
                     LocationEntity result = getRepository().save(merged);
-                    System.out.println("has saved in thread:" + Thread.currentThread().getName());
                     return result;
                 }
                 throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
