@@ -30,11 +30,13 @@
 package org.n52.sta.data.repositories;
 
 import org.n52.series.db.beans.DataEntity;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Transactional
+@DependsOn("DatastreamRepository")
 public interface DataRepository<T extends DataEntity<?>>
         extends IdentifierRepository<T, Long> {
 

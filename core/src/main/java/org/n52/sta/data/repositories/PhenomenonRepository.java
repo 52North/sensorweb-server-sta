@@ -30,11 +30,13 @@
 package org.n52.sta.data.repositories;
 
 import org.n52.series.db.beans.PhenomenonEntity;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @Transactional
+@DependsOn("DatastreamRepository")
 public interface PhenomenonRepository extends IdentifierNameRepository<PhenomenonEntity> {
 
     Optional<PhenomenonEntity> findByStaIdentifier(String identifier);
@@ -43,3 +45,4 @@ public interface PhenomenonRepository extends IdentifierNameRepository<Phenomeno
 
     boolean existsByStaIdentifier(String id);
 }
+

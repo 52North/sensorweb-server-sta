@@ -30,9 +30,11 @@
 package org.n52.sta.data.repositories;
 
 import org.n52.series.db.beans.ProcedureEntity;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
+@DependsOn("DatastreamRepository")
 public interface ProcedureRepository extends IdentifierNameRepository<ProcedureEntity> {
 
     <S extends ProcedureEntity> S intermediateSave(S entity);

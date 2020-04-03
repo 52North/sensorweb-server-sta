@@ -114,7 +114,9 @@ public class MessageBusRepository<T, I extends Serializable>
         this.mqttHandler = (STAEventHandler) SpringApplicationContext.getBean(STAEventHandler.class);
         Assert.notNull(this.mqttHandler, "Could not autowire Mqtt handler!");
 
-        if (!this.entityClass.equals(DatastreamEntity.class)) {
+        if (this.entityClass.equals(DataEntity.class)
+                || this.entityClass.equals(ProcedureEntity.class)
+                || this.entityClass.equals(PhenomenonEntity.class)) {
             this.datastreamRepository =
                     (DatastreamRepository) SpringApplicationContext.getBean(DatastreamRepository.class);
             Assert.notNull(this.datastreamRepository, "Could not autowire DatastreamRepository!");
