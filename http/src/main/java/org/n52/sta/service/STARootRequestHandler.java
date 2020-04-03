@@ -63,8 +63,8 @@ public class STARootRequestHandler {
             value = "/",
             produces = "application/json"
     )
-    public String returnRootResponse(String rootUrl) {
-        return createRootResponse(rootUrl);
+    public String returnRootResponse() {
+        return createRootResponse(this.rootUrl);
     }
 
     private String createRootResponse(String uri) {

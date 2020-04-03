@@ -33,8 +33,8 @@ import org.n52.shetland.filter.SelectFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.filter.FilterClause;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
-import org.n52.sta.data.service.util.CollectionWrapper;
 import org.n52.sta.data.service.EntityServiceRepository;
+import org.n52.sta.data.service.util.CollectionWrapper;
 import org.n52.sta.utils.STARequestUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -91,7 +91,7 @@ public class STACollectionRequestHandler implements STARequestUtils {
         return serviceRepository
                 .getEntityService(collectionName)
                 .getEntityCollection(options)
-                .setRequestURL(rootUrl);
+                .setRequestURL(rootUrl + collectionName);
     }
 
     /**
@@ -124,7 +124,7 @@ public class STACollectionRequestHandler implements STARequestUtils {
         return serviceRepository
                 .getEntityService(collectionName)
                 .getEntityCollection(QUERY_OPTIONS_FACTORY.createQueryOptions(filters))
-                .setRequestURL(rootUrl);
+                .setRequestURL(rootUrl + collectionName);
     }
 
     /**
@@ -169,7 +169,7 @@ public class STACollectionRequestHandler implements STARequestUtils {
                                 .getEntityCollectionByRelatedEntity(sourceId,
                                                                     sourceType,
                                                                     options)
-                                .setRequestURL(rootUrl);
+                                .setRequestURL(rootUrl + target);
     }
 
     /**
@@ -222,6 +222,6 @@ public class STACollectionRequestHandler implements STARequestUtils {
                                 .getEntityCollectionByRelatedEntity(sourceId,
                                                                     sourceType,
                                                                     QUERY_OPTIONS_FACTORY.createQueryOptions(filters))
-                                .setRequestURL(rootUrl);
+                                .setRequestURL(rootUrl + target);
     }
 }
