@@ -33,10 +33,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * Handles all requests to the root
@@ -47,9 +46,12 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 public class STARootRequestHandler {
 
+    private final String rootUrl;
     private final ObjectMapper mapper;
 
-    public STARootRequestHandler(ObjectMapper mapper) {
+    public STARootRequestHandler(@Value("${server.rootUrl}") String rootUrl,
+                                 ObjectMapper mapper) {
+        this.rootUrl = rootUrl;
         this.mapper = mapper;
     }
 
@@ -61,8 +63,8 @@ public class STARootRequestHandler {
             value = "/",
             produces = "application/json"
     )
-    public String returnRootResponse(HttpServletRequest request) {
-        return createRootResponse(request.getRequestURL().toString());
+    public String returnRootResponse(String rootUrl) {
+        return createRootResponse(rootUrl);
     }
 
     private String createRootResponse(String uri) {

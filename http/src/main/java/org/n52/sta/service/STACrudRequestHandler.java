@@ -39,7 +39,6 @@ import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
 import org.n52.sta.serdes.util.EntityPatch;
 import org.n52.sta.utils.STARequestUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -61,14 +60,11 @@ import java.io.IOException;
 public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtils {
 
     private static final String COULD_NOT_FIND_RELATED_ENTITY = "Could not find related Entity!";
-    private final int rootUrlLength;
     private final EntityServiceRepository serviceRepository;
     private final ObjectMapper mapper;
 
-    public STACrudRequestHandler(@Value("${server.rootUrl}") String rootUrl,
-                                 EntityServiceRepository serviceRepository,
+    public STACrudRequestHandler(EntityServiceRepository serviceRepository,
                                  ObjectMapper mapper) {
-        this.rootUrlLength = rootUrl.length();
         this.serviceRepository = serviceRepository;
         this.mapper = mapper;
     }

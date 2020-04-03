@@ -58,11 +58,11 @@ import java.util.HashSet;
 public class STACollectionRequestHandler implements STARequestUtils {
 
     private final EntityServiceRepository serviceRepository;
-    private final int rootUrlLength;
+    private final String rootUrl;
 
     public STACollectionRequestHandler(@Value("${server.rootUrl}") String rootUrl,
                                        EntityServiceRepository serviceRepository) {
-        rootUrlLength = rootUrl.length();
+        this.rootUrl = rootUrl;
         this.serviceRepository = serviceRepository;
     }
 
@@ -91,7 +91,7 @@ public class STACollectionRequestHandler implements STARequestUtils {
         return serviceRepository
                 .getEntityService(collectionName)
                 .getEntityCollection(options)
-                .setRequestURL(request.getRequestURL().toString());
+                .setRequestURL(rootUrl);
     }
 
     /**
@@ -124,7 +124,7 @@ public class STACollectionRequestHandler implements STARequestUtils {
         return serviceRepository
                 .getEntityService(collectionName)
                 .getEntityCollection(QUERY_OPTIONS_FACTORY.createQueryOptions(filters))
-                .setRequestURL(request.getRequestURL().toString());
+                .setRequestURL(rootUrl);
     }
 
     /**
@@ -169,7 +169,7 @@ public class STACollectionRequestHandler implements STARequestUtils {
                                 .getEntityCollectionByRelatedEntity(sourceId,
                                                                     sourceType,
                                                                     options)
-                                .setRequestURL(request.getRequestURL().toString());
+                                .setRequestURL(rootUrl);
     }
 
     /**
@@ -222,6 +222,6 @@ public class STACollectionRequestHandler implements STARequestUtils {
                                 .getEntityCollectionByRelatedEntity(sourceId,
                                                                     sourceType,
                                                                     QUERY_OPTIONS_FACTORY.createQueryOptions(filters))
-                                .setRequestURL(request.getRequestURL().toString());
+                                .setRequestURL(rootUrl);
     }
 }
