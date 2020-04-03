@@ -319,14 +319,16 @@ public class FeatureOfInterestService
         }
     }
 
-    private void checkFeatureType(AbstractFeatureEntity<?> feature) {
+    private void checkFeatureType(AbstractFeatureEntity<?> feature) throws STACRUDException {
         FormatEntity format;
-        if (!formatRepository.existsByFormat(feature.getFeatureType().getFormat())) {
-            format = formatRepository.save(feature.getFeatureType());
-        } else {
-            format = formatRepository.findByFormat(feature.getFeatureType().getFormat());
+        synchronized (getLock(feature.getFeatureType().getFormat())) {
+            if (!formatRepository.existsByFormat(feature.getFeatureType().getFormat())) {
+                format = formatRepository.save(feature.getFeatureType());
+            } else {
+                format = formatRepository.findByFormat(feature.getFeatureType().getFormat());
+            }
+            feature.setFeatureType(format);
         }
-        feature.setFeatureType(format);
     }
 
     private void generateIdentifier(AbstractFeatureEntity<?> feature) {
