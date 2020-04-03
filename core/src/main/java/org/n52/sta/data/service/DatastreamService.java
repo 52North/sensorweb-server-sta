@@ -399,10 +399,10 @@ public class DatastreamService
         }
     }
 
-    private void checkUnit(DatastreamEntity datastream) {
+    private void checkUnit(DatastreamEntity datastream) throws STACRUDException {
         UnitEntity unit;
         if (datastream.isSetUnit()) {
-            synchronized (datastream.getUnit().getSymbol() + "unit") {
+            synchronized (getLock(datastream.getUnit().getSymbol() + "unit")) {
                 if (!unitRepository.existsBySymbol(datastream.getUnit().getSymbol())) {
                     unit = unitRepository.save(datastream.getUnit());
                 } else {
@@ -413,7 +413,7 @@ public class DatastreamService
         }
     }
 
-    private void checkUnit(DatastreamEntity merged, DatastreamEntity toMerge) {
+    private void checkUnit(DatastreamEntity merged, DatastreamEntity toMerge) throws STACRUDException {
         if (toMerge.isSetUnit()) {
             checkUnit(toMerge);
             merged.setUnit(toMerge.getUnit());
