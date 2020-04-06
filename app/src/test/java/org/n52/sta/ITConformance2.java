@@ -31,6 +31,9 @@ package org.n52.sta;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * Implements Conformance Tests according to Section A.2 in OGC SensorThings API Part 1: Sensing (15-078r6)
@@ -39,9 +42,12 @@ import org.springframework.beans.factory.annotation.Value;
  * @see <a href="http://docs.opengeospatial.org/is/15-078r6/15-078r6.html#54">
  * OGC SensorThings API Part 1: Sensing (15-078r6)</a>
  */
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@Testcontainers
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class ITConformance2 extends ConformanceTests implements TestUtil {
 
-    ITConformance2(@Value("${server.rootUrl}") String rootUrl) {
+    public ITConformance2(@Value("${server.rootUrl}") String rootUrl) {
         super(rootUrl);
     }
 
@@ -62,7 +68,7 @@ public class ITConformance2 extends ConformanceTests implements TestUtil {
 
     }
 
-    
+
 
 
 }
