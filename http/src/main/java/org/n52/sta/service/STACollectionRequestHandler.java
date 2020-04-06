@@ -169,7 +169,7 @@ public class STACollectionRequestHandler implements STARequestUtils {
                                 .getEntityCollectionByRelatedEntity(sourceId,
                                                                     sourceType,
                                                                     options)
-                                .setRequestURL(rootUrl + target);
+                                .setRequestURL(rootUrl + entity + "/" + target);
     }
 
     /**
@@ -222,6 +222,6 @@ public class STACollectionRequestHandler implements STARequestUtils {
                                 .getEntityCollectionByRelatedEntity(sourceId,
                                                                     sourceType,
                                                                     QUERY_OPTIONS_FACTORY.createQueryOptions(filters))
-                                .setRequestURL(rootUrl + target);
+                                .setRequestURL(rootUrl + entity + "/" + target);
     }
 }
