@@ -57,7 +57,12 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * Implements Conformance Tests according to Section A.1 in OGC SensorThings API Part 1: Sensing (15-078r6)
+ * Adapted from the official Test Suite <a href="https://github.com/opengeospatial/ets-sta10/">ets-sta10</a>
+ *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
+ * @see <a href="http://docs.opengeospatial.org/is/15-078r6/15-078r6.html#54">
+ * OGC SensorThings API Part 1: Sensing (15-078r6)</a>
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Testcontainers
