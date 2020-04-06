@@ -51,6 +51,7 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.om.OmConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
@@ -67,12 +68,14 @@ import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.OfferingRepository;
 import org.n52.sta.data.repositories.ParameterRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
+import org.n52.sta.data.service.util.CollectionWrapper;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
@@ -134,6 +137,40 @@ public class ObservationService extends
     @Override
     public EntityTypes[] getTypes() {
         return new EntityTypes[] {EntityTypes.Observation, EntityTypes.Observations};
+    }
+
+    @Override
+    public CollectionWrapper getEntityCollection(QueryOptions queryOptions) throws STACRUDException {
+        try {
+            List<String> identifierList = getRepository()
+                    .identifierList(getFilterPredicate(DataEntity.class, queryOptions),
+                                    createPageableRequest(queryOptions),
+                                    IDENTIFIER);
+            List<DataEntity<?>> pages = getRepository().findAll(oQS.withIdentifier(identifierList),
+                                                                EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
+            return getCollectionWrapper(queryOptions, new PageImpl<>(pages));
+        } catch (RuntimeException e) {
+            throw new STACRUDException(e.getMessage(), e);
+        }
+    }
+
+    @Override public CollectionWrapper getEntityCollectionByRelatedEntity(String relatedId,
+                                                                          String relatedType,
+                                                                          QueryOptions queryOptions)
+            throws STACRUDException {
+
+        try {
+            List<String> identifierList = getRepository()
+                    .identifierList(byRelatedEntityFilter(relatedId, relatedType, null),
+                                    createPageableRequest(queryOptions),
+                                    IDENTIFIER);
+
+            List<DataEntity<?>> pages = getRepository().findAll(oQS.withIdentifier(identifierList),
+                                                                EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
+            return getCollectionWrapper(queryOptions, new PageImpl<>(pages));
+        } catch (RuntimeException e) {
+            throw new STACRUDException(e.getMessage(), e);
+        }
     }
 
     @Override

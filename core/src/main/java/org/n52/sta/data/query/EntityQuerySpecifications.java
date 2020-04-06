@@ -39,6 +39,7 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -104,6 +105,10 @@ public abstract class EntityQuerySpecifications<T> {
         return (root, query, builder) -> {
             return builder.equal(root.get(DescribableEntity.PROPERTY_IDENTIFIER), name);
         };
+    }
+
+    public Specification<T> withIdentifier(final List<String> identifiers) {
+        return (root, query, builder) -> builder.in(root.get(DescribableEntity.PROPERTY_IDENTIFIER)).value(identifiers);
     }
 
     // Wrapper

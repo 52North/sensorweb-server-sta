@@ -29,10 +29,12 @@
 
 package org.n52.sta.data.repositories;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @NoRepositoryBean
@@ -73,4 +75,15 @@ public interface IdentifierRepository<T, I> extends EntityGraphRepository<T, I> 
      * @return Content of the column with columnName if spec matches. Optional.empty() otherwise
      */
     Optional<String> identifier(Specification<T> spec, String columnName);
+
+    /**
+     * Gets content of columnName of entity that is specified by spec. Used for fetching only identifier instead of
+     * whole Entity
+     *
+     * @param spec       Specification of Entity
+     * @param pageable   Pagination Specification
+     * @param columnName Name of Column
+     * @return Content of the column with columnName if spec matches. Optional.empty() otherwise
+     */
+    List<String> identifierList(Specification<T> spec, Pageable pageable, String columnName);
 }

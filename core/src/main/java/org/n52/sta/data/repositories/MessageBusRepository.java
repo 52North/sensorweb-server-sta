@@ -166,6 +166,31 @@ public class MessageBusRepository<T, I extends Serializable>
         }
     }
 
+    @Transactional(readOnly = true)
+    public List<String> identifierList(Specification<T> spec, Pageable pageable, String columnName) {
+        CriteriaQuery<String> query = criteriaBuilder.createQuery(String.class);
+        Root<T> root = query.from(getDomainClass());
+        if (spec != null) {
+            Predicate predicate = spec.toPredicate(root, query, criteriaBuilder);
+            if (predicate != null) {
+                query.where(predicate);
+            }
+        }
+        if (columnName != null) {
+            query.select(root.get(columnName));
+        }
+        TypedQuery<String> typedQuery = em.createQuery(query);
+        List<String> resultList;
+        if (pageable.isUnpaged()) {
+            return new PageImpl<>(typedQuery.getResultList()).get().collect(Collectors.toList());
+        } else {
+            typedQuery.setFirstResult((int) pageable.getOffset());
+            typedQuery.setMaxResults(pageable.getPageSize());
+            resultList = typedQuery.getResultList();
+        }
+        return resultList;
+    }
+
     @Transactional
     public Optional<T> findByIdentifier(String identifier, EntityGraphRepository.FetchGraph... entityGraphs) {
         TypedQuery<T> query = createIdentifierQuery(identifier);

@@ -182,7 +182,7 @@ public abstract class AbstractSensorThingsEntityService<T extends IdentifierRepo
         }
     }
 
-    private CollectionWrapper getCollectionWrapper(QueryOptions queryOptions, Page<S> pages) {
+    protected CollectionWrapper getCollectionWrapper(QueryOptions queryOptions, Page<S> pages) {
         if (queryOptions.hasExpandOption()) {
             Page<E> expanded = pages.map(e -> {
                 try {
