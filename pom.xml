@@ -9,7 +9,7 @@
 
     <groupId>org.n52.sensorweb-server.sta</groupId>
     <artifactId>sta-parent</artifactId>
-    <version>2.0.1-SNAPSHOT</version>
+    <version>2.0.1</version>
     <packaging>pom</packaging>
 
     <name>52°North Sensor Things API</name>
@@ -21,7 +21,7 @@
         <url>https://github.com/52North/sensor-things</url>
         <connection>scm:git:https://github.com/52North/sensor-things.git</connection>
         <developerConnection>scm:git:https://github.com/52North/sensor-things.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>v2.0.1</tag>
     </scm>
 
     <modules>
