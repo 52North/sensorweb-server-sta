@@ -96,13 +96,13 @@ public class ThingSerDes {
             boolean hasSelectOption = false;
             boolean hasExpandOption = false;
             if (options != null) {
-                if (options.hasSelectOption()) {
+                if (options.hasSelectFilter()) {
                     hasSelectOption = true;
-                    fieldsToSerialize = options.getSelectOption().getItems();
+                    fieldsToSerialize = options.getSelectFilter().getItems();
                 }
-                if (options.hasExpandOption()) {
+                if (options.hasExpandFilter()) {
                     hasExpandOption = true;
-                    for (ExpandItem item : options.getExpandOption().getItems()) {
+                    for (ExpandItem item : options.getExpandFilter().getItems()) {
                         fieldsToExpand.put(item.getPath(), item.getQueryOptions());
                     }
                 }

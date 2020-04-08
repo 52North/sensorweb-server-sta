@@ -45,9 +45,9 @@ import org.n52.svalbard.odata.core.expr.MethodCallExpr;
 import org.n52.svalbard.odata.core.expr.StringValueExpr;
 import org.n52.svalbard.odata.core.expr.arithmetic.NumericValueExpr;
 import org.n52.svalbard.odata.core.expr.arithmetic.SimpleArithmeticExpr;
-import org.n52.svalbard.odata.core.expr.binary.BooleanBinaryExpr;
-import org.n52.svalbard.odata.core.expr.binary.BooleanUnaryExpr;
-import org.n52.svalbard.odata.core.expr.binary.ComparisonExpr;
+import org.n52.svalbard.odata.core.expr.bool.BooleanBinaryExpr;
+import org.n52.svalbard.odata.core.expr.bool.BooleanUnaryExpr;
+import org.n52.svalbard.odata.core.expr.bool.ComparisonExpr;
 import org.n52.svalbard.odata.core.expr.temporal.TimeValueExpr;
 import org.springframework.data.jpa.domain.Specification;
 
