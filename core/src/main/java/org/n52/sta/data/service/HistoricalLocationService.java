@@ -78,7 +78,7 @@ public class HistoricalLocationService
     @Autowired
     public HistoricalLocationService(HistoricalLocationRepository repository,
                                      LocationRepository locationRepository) {
-        super(repository, HistoricalLocationEntity.class);
+        super(repository, HistoricalLocationEntity.class, EntityGraphRepository.FetchGraph.FETCHGRAPH_THING);
         this.locationRepository = locationRepository;
     }
 
@@ -102,7 +102,7 @@ public class HistoricalLocationService
                                                                    expandItem.getQueryOptions());
                     entity.setLocations(locations.get().collect(Collectors.toSet()));
                     break;
-                case STAEntityDefinition.THINGS:
+                case STAEntityDefinition.THING:
                     PlatformEntity things = getThingService()
                             .getEntityByRelatedEntityRaw(entity.getIdentifier(),
                                                          STAEntityDefinition.HISTORICAL_LOCATIONS,

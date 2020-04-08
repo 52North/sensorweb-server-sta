@@ -125,8 +125,13 @@ public class ObservedPropertyService
     @Override
     public ElementWithQueryOptions getEntity(String id, QueryOptions queryOptions) throws STACRUDException {
         try {
-            return this.createWrapper(getRepository().findByStaIdentifier(id).get(), queryOptions);
-        } catch (RuntimeException e) {
+            PhenomenonEntity entity = getRepository().findByStaIdentifier(id).get();
+            if (queryOptions.hasExpandFilter()) {
+                return this.createWrapper(fetchExpandEntities(entity, queryOptions.getExpandFilter()), queryOptions);
+            } else {
+                return this.createWrapper(entity, queryOptions);
+            }
+        } catch (RuntimeException | STAInvalidQueryException e) {
             throw new STACRUDException(e.getMessage());
         }
     }
