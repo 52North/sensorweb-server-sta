@@ -45,7 +45,6 @@ import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.LocationEncodingRepository;
 import org.n52.sta.data.repositories.LocationRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
-import org.n52.sta.data.service.util.CollectionWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,6 +52,7 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
@@ -74,7 +74,7 @@ import java.util.stream.Collectors;
 @DependsOn({"springApplicationContext"})
 @Transactional
 public class LocationService
-        extends AbstractSensorThingsEntityService<LocationRepository, LocationEntity, LocationEntity> {
+        extends AbstractSensorThingsEntityServiceImpl<LocationRepository, LocationEntity, LocationEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LocationService.class);
     private static final LocationQuerySpecifications lQS = new LocationQuerySpecifications();
@@ -103,30 +103,20 @@ public class LocationService
         for (ExpandItem expandItem : expandOption.getItems()) {
             String expandProperty = expandItem.getPath();
             if (LocationEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
-                CollectionWrapper expandedEntities;
                 switch (expandProperty) {
                 case STAEntityDefinition.HISTORICAL_LOCATIONS:
-                    expandedEntities =
-                            getHistoricalLocationService()
-                                    .getEntityCollectionByRelatedEntity(entity.getIdentifier(),
-                                                                        LocationEntity.class.getSimpleName(),
-                                                                        expandItem.getQueryOptions());
-                    entity.setHistoricalLocations(
-                            expandedEntities.getEntities()
-                                            .stream()
-                                            .map(s -> (HistoricalLocationEntity) s.getEntity())
-                                            .collect(Collectors.toSet()));
+                    Page<HistoricalLocationEntity> hLocs = getHistoricalLocationService()
+                            .getEntityCollectionByRelatedEntityRaw(entity.getIdentifier(),
+                                                                   STAEntityDefinition.LOCATIONS,
+                                                                   expandItem.getQueryOptions());
+                    entity.setHistoricalLocations(hLocs.get().collect(Collectors.toSet()));
                     break;
                 case STAEntityDefinition.THINGS:
-                    expandedEntities = getThingService()
-                            .getEntityCollectionByRelatedEntity(entity.getIdentifier(),
-                                                                LocationEntity.class.getSimpleName(),
-                                                                expandItem.getQueryOptions());
-                    entity.setThings(
-                            expandedEntities.getEntities()
-                                            .stream()
-                                            .map(s -> (PlatformEntity) s.getEntity())
-                                            .collect(Collectors.toSet()));
+                    Page<PlatformEntity> things = getThingService()
+                            .getEntityCollectionByRelatedEntityRaw(entity.getIdentifier(),
+                                                                   STAEntityDefinition.LOCATIONS,
+                                                                   expandItem.getQueryOptions());
+                    entity.setThings(things.get().collect(Collectors.toSet()));
                     break;
                 default:
                     throw new RuntimeException("This can never happen!");
@@ -154,7 +144,7 @@ public class LocationService
             break;
         }
         default:
-            return null;
+            throw new IllegalStateException("Trying to filter by unrelated type: " + relatedType + "not found!");
         }
 
         if (ownId != null) {

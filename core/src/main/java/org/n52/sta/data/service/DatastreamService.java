@@ -54,10 +54,11 @@ import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.FormatRepository;
 import org.n52.sta.data.repositories.UnitRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
-import org.n52.sta.data.service.util.CollectionWrapper;
-import org.n52.sta.serdes.util.ElementWithQueryOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
@@ -77,9 +78,9 @@ import java.util.stream.Collectors;
 @DependsOn({"springApplicationContext"})
 @Transactional
 public class DatastreamService
-        extends AbstractSensorThingsEntityService<DatastreamRepository, DatastreamEntity, DatastreamEntity> {
+        extends AbstractSensorThingsEntityServiceImpl<DatastreamRepository, DatastreamEntity, DatastreamEntity> {
 
-    //private static final Logger logger = LoggerFactory.getLogger(DatastreamService.class);
+    private static final Logger logger = LoggerFactory.getLogger(DatastreamService.class);
     private static final DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
     private static final ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
     private static final String UNKNOWN = "unknown";
@@ -115,45 +116,40 @@ public class DatastreamService
         for (ExpandItem expandItem : expandOption.getItems()) {
             String expandProperty = expandItem.getPath();
             if (DatastreamEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
-                CollectionWrapper expandedEntities;
-                ElementWithQueryOptions<?> expandedEntity;
                 switch (expandProperty) {
                 case STAEntityDefinition.SENSOR:
-                    expandedEntity = getSensorService()
-                            .getEntityByRelatedEntity(entity.getIdentifier(),
-                                                      DatastreamEntity.class.getSimpleName(),
+                    ProcedureEntity sensor = getSensorService()
+                            .getEntityByRelatedEntityRaw(entity.getIdentifier(),
+                                                      STAEntityDefinition.DATASTREAMS,
                                                       null,
                                                       expandItem.getQueryOptions());
-                    entity.setProcedure((ProcedureEntity) expandedEntity.getEntity());
+                    entity.setProcedure(sensor);
                     break;
                 case STAEntityDefinition.THING:
-                    expandedEntity = getThingService()
-                            .getEntityByRelatedEntity(entity.getIdentifier(),
-                                                      DatastreamEntity.class.getSimpleName(),
-                                                      null,
-                                                      expandItem.getQueryOptions());
-                    entity.setThing((PlatformEntity) expandedEntity.getEntity());
+                    PlatformEntity thing = getThingService()
+                            .getEntityByRelatedEntityRaw(entity.getIdentifier(),
+                                                         STAEntityDefinition.DATASTREAMS,
+                                                         null,
+                                                         expandItem.getQueryOptions());
+                    entity.setThing(thing);
                     break;
                 case STAEntityDefinition.OBSERVED_PROPERTY:
-                    expandedEntity = getObservedPropertyService()
-                            .getEntityByRelatedEntity(entity.getIdentifier(),
-                                                      DatastreamEntity.class.getSimpleName(),
-                                                      null,
-                                                      expandItem.getQueryOptions());
-                    entity.setObservableProperty((PhenomenonEntity) expandedEntity.getEntity());
+                    PhenomenonEntity obsProp = getObservedPropertyService()
+                            .getEntityByRelatedEntityRaw(entity.getIdentifier(),
+                                                         STAEntityDefinition.DATASTREAMS,
+                                                         null,
+                                                         expandItem.getQueryOptions());
+                    entity.setObservableProperty(obsProp);
                     break;
                 case STAEntityDefinition.OBSERVATIONS:
-                    expandedEntities = getObservationService()
-                            .getEntityCollectionByRelatedEntity(entity.getIdentifier(),
-                                                                DatastreamEntity.class.getSimpleName(),
-                                                                expandItem.getQueryOptions());
-                    entity.setObservations(
-                            expandedEntities.getEntities()
-                                            .stream()
-                                            .map(s -> (StaDataEntity<?>) s.getEntity())
-                                            .collect(Collectors.toSet()));
+                    Page<StaDataEntity<?>> observations = getObservationService()
+                            .getEntityCollectionByRelatedEntityRaw(entity.getIdentifier(),
+                                                                   STAEntityDefinition.DATASTREAMS,
+                                                                   expandItem.getQueryOptions());
+                    entity.setObservations(observations.get().collect(Collectors.toSet()));
                     break;
                 default:
+                    logger.error("Trying to expand unrelated Entity!");
                     throw new RuntimeException("This can never happen!");
                 }
             } else {
@@ -187,7 +183,7 @@ public class DatastreamService
             break;
         }
         default:
-            return null;
+            throw new IllegalStateException("Trying to filter by unrelated type: " + relatedType + "not found!");
         }
 
         if (ownId != null) {

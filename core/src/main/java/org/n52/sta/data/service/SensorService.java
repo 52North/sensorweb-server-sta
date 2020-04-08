@@ -49,11 +49,11 @@ import org.n52.sta.data.repositories.FormatRepository;
 import org.n52.sta.data.repositories.ProcedureHistoryRepository;
 import org.n52.sta.data.repositories.ProcedureRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
-import org.n52.sta.data.service.util.CollectionWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
@@ -70,7 +70,7 @@ import java.util.stream.Collectors;
 @DependsOn({"springApplicationContext"})
 @Transactional
 public class SensorService
-        extends AbstractSensorThingsEntityService<ProcedureRepository, ProcedureEntity, SensorEntity> {
+        extends AbstractSensorThingsEntityServiceImpl<ProcedureRepository, ProcedureEntity, SensorEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SensorService.class);
 
@@ -110,17 +110,12 @@ public class SensorService
         for (ExpandItem expandItem : expandOption.getItems()) {
             String expandProperty = expandItem.getPath();
             if (SensorEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
-                CollectionWrapper expandedEntities;
-                expandedEntities = getDatastreamService()
-                        .getEntityCollectionByRelatedEntity(entity.getIdentifier(),
-                                                            ProcedureEntity.class.getSimpleName(),
-                                                            expandItem.getQueryOptions());
+                Page<DatastreamEntity> observedProps = getDatastreamService()
+                        .getEntityCollectionByRelatedEntityRaw(entity.getIdentifier(),
+                                                               STAEntityDefinition.SENSORS,
+                                                               expandItem.getQueryOptions());
                 SensorEntity sensor = new SensorEntity(entity);
-                return sensor.setDatastreams(
-                        expandedEntities.getEntities()
-                                        .stream()
-                                        .map(s -> (DatastreamEntity) s.getEntity())
-                                        .collect(Collectors.toSet()));
+                return sensor.setDatastreams(observedProps.get().collect(Collectors.toSet()));
             } else {
                 throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty +
                                                            " on Entity of type 'Sensor'");
@@ -140,7 +135,7 @@ public class SensorService
             break;
         }
         default:
-            return null;
+            throw new IllegalStateException("Trying to filter by unrelated type: " + relatedType + "not found!");
         }
 
         if (ownId != null) {
@@ -203,7 +198,7 @@ public class SensorService
             getRepository().intermediateSave(procedure);
             checkProcedureHistory(procedure);
             if (sensor instanceof SensorEntity && ((SensorEntity) sensor).hasDatastreams()) {
-                AbstractSensorThingsEntityService<?, DatastreamEntity, DatastreamEntity> dsService =
+                AbstractSensorThingsEntityServiceImpl<?, DatastreamEntity, DatastreamEntity> dsService =
                         getDatastreamService();
                 for (DatastreamEntity datastreamEntity : ((SensorEntity) sensor).getDatastreams()) {
                     try {
@@ -233,7 +228,7 @@ public class SensorService
                     ProcedureEntity merged = merge(existing.get(), entity);
                     if (entity instanceof SensorEntity) {
                         if (((SensorEntity) entity).hasDatastreams()) {
-                            AbstractSensorThingsEntityService<?, DatastreamEntity, DatastreamEntity> dsService =
+                            AbstractSensorThingsEntityServiceImpl<?, DatastreamEntity, DatastreamEntity> dsService =
                                     getDatastreamService();
                             for (DatastreamEntity datastreamEntity : ((SensorEntity) entity).getDatastreams()) {
                                 dsService.createOrUpdate(datastreamEntity);

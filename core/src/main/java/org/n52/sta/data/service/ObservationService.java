@@ -69,7 +69,6 @@ import org.n52.sta.data.repositories.OfferingRepository;
 import org.n52.sta.data.repositories.ParameterRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.data.service.util.CollectionWrapper;
-import org.n52.sta.serdes.util.ElementWithQueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,7 +96,7 @@ import java.util.stream.Collectors;
 @DependsOn({"springApplicationContext"})
 @Transactional
 public class ObservationService extends
-        AbstractSensorThingsEntityService<DataRepository<DataEntity<?>>, DataEntity<?>, StaDataEntity<?>> {
+        AbstractSensorThingsEntityServiceImpl<DataRepository<DataEntity<?>>, DataEntity<?>, StaDataEntity<?>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ObservationService.class);
 
@@ -161,7 +160,8 @@ public class ObservationService extends
 
         try {
             List<String> identifierList = getRepository()
-                    .identifierList(byRelatedEntityFilter(relatedId, relatedType, null),
+                    .identifierList(byRelatedEntityFilter(relatedId, relatedType, null)
+                                            .and(getFilterPredicate(DataEntity.class, queryOptions)),
                                     createPageableRequest(queryOptions),
                                     IDENTIFIER);
 
@@ -181,23 +181,22 @@ public class ObservationService extends
         for (ExpandItem expandItem : expandOption.getItems()) {
             String expandProperty = expandItem.getPath();
             if (ObservationEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
-                ElementWithQueryOptions<?> expandedEntity;
                 switch (expandProperty) {
                 case STAEntityDefinition.DATASTREAM:
-                    expandedEntity = getDatastreamService()
-                            .getEntityByRelatedEntity(entity.getIdentifier(),
-                                                      DataEntity.class.getSimpleName(),
-                                                      null,
-                                                      expandItem.getQueryOptions());
-                    returned.setDatastream((DatastreamEntity) expandedEntity.getEntity());
+                    DatastreamEntity datastream = getDatastreamService()
+                            .getEntityByRelatedEntityRaw(entity.getIdentifier(),
+                                                         STAEntityDefinition.OBSERVATIONS,
+                                                         null,
+                                                         expandItem.getQueryOptions());
+                    returned.setDatastream(datastream);
                     break;
                 case STAEntityDefinition.FEATURE_OF_INTEREST:
-                    expandedEntity = getFeatureOfInterestService()
-                            .getEntityByRelatedEntity(entity.getIdentifier(),
-                                                      DataEntity.class.getSimpleName(),
-                                                      null,
-                                                      expandItem.getQueryOptions());
-                    returned.setFeatureOfInterest((AbstractFeatureEntity<?>) expandedEntity.getEntity());
+                    AbstractFeatureEntity<?> foi = getFeatureOfInterestService()
+                            .getEntityByRelatedEntityRaw(entity.getIdentifier(),
+                                                         STAEntityDefinition.OBSERVATIONS,
+                                                         null,
+                                                         expandItem.getQueryOptions());
+                    returned.setFeatureOfInterest(foi);
                     break;
                 default:
                     throw new RuntimeException("This can never happen!");
@@ -225,7 +224,7 @@ public class ObservationService extends
             break;
         }
         default:
-            return null;
+            throw new IllegalStateException("Trying to filter by unrelated type: " + relatedType + "not found!");
         }
         if (ownId != null) {
             filter = filter.and(oQS.withIdentifier(ownId));
