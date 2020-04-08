@@ -142,14 +142,17 @@ public class ObservationSerDes {
                 String phenomenonTime = DateTimeHelper.format(createPhenomenonTime(observation));
                 gen.writeStringField(STAEntityDefinition.PROP_PHENOMENON_TIME, phenomenonTime);
             }
-            //            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_RESULT_QUALITY)) {
-            //                //TODO: implement
-            //                //throw new NotImplementedException();
-            //            }
+
+            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_RESULT_QUALITY)) {
+                gen.writeNullField(STAEntityDefinition.PROP_RESULT_QUALITY);
+            }
+
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_VALID_TIME)) {
                 if (observation.isSetValidTime()) {
                     gen.writeStringField(STAEntityDefinition.PROP_VALID_TIME,
                                          DateTimeHelper.format(createValidTime(observation)));
+                } else {
+                    gen.writeNullField(STAEntityDefinition.PROP_VALID_TIME);
                 }
             }
 
