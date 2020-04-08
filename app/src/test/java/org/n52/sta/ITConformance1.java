@@ -627,28 +627,4 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
 
     }
 
-    /**
-     * This helper method is checking the mandatory properties of the response
-     * for a specific entity
-     *
-     * @param mandatoryProperties List of mandatory properties
-     * @param response            The response of the GET request to be checked
-     */
-    private void checkEntityProperties(Set<String> mandatoryProperties, JsonNode response) {
-        for (String property : mandatoryProperties) {
-            Assertions.assertTrue(response.has(property),
-                                  "Entity: "
-                                          + response.toPrettyString()
-                                          + "does not have mandatory property:"
-                                          + property);
-            Assertions.assertNotNull(response.get(property),
-                                     "Entity: "
-                                             + response.toPrettyString()
-                                             + "does not have mandatory property:"
-                                             + property);
-
-        }
-
-    }
-
 }

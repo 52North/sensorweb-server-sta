@@ -50,16 +50,29 @@ import java.util.Objects;
 public interface TestUtil {
 
     enum EntityType {
-        THING,
-        LOCATION,
-        HISTORICAL_LOCATION,
-        DATASTREAM,
-        SENSOR,
-        FEATURE_OF_INTEREST,
-        OBSERVATION,
-        OBSERVED_PROPERTY
-    }
+        THING("Things"),
+        LOCATION("Locations"),
+        HISTORICAL_LOCATION("HistoricalLocations"),
+        DATASTREAM("Datastreams"),
+        SENSOR("Sensors"),
+        FEATURE_OF_INTEREST("FeaturesOfInterest"),
+        OBSERVATION("Observations"),
+        OBSERVED_PROPERTY("ObservedProperties");
 
+        String val;
+        EntityType(String value) {
+            val = value;
+        }
+
+        public static EntityType getByVal(String value) {
+            for (EntityType entityType : EntityType.values()) {
+                if (entityType.val.equals(value)) {
+                    return entityType;
+                }
+            }
+            return null;
+        }
+    }
 
     String jsonMimeType = "application/json";
     String idKey = "@iot.id";

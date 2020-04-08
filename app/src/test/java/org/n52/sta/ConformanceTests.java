@@ -48,6 +48,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -348,6 +349,7 @@ abstract class ConformanceTests implements TestUtil {
     }
 
     protected JsonNode getCollection(EntityType type, String filters) throws IOException {
+        logger.debug("GET Collection: " + rootUrl + endpoints.get(type) + "?" + filters);
         HttpGet request = new HttpGet(rootUrl + endpoints.get(type) + "?" + filters);
         HttpResponse response = HttpClientBuilder.create().build().execute(request);
 
@@ -364,6 +366,45 @@ abstract class ConformanceTests implements TestUtil {
 
     protected JsonNode getCollection(EntityType type) throws IOException {
         return getCollection(type, "");
+    }
+
+    /**
+     * This helper method is checking the mandatory properties of the response
+     * for a specific entity
+     *
+     * @param mandatoryProperties List of mandatory properties
+     * @param response            The response of the GET request to be checked
+     */
+    protected void checkEntityProperties(Set<String> mandatoryProperties, JsonNode response) {
+        if (response.has(countKey)) {
+            Assertions.assertTrue(response.has(value));
+            response.get(value).forEach(v -> checkObjectProperties(mandatoryProperties, v));
+        } else {
+            checkObjectProperties(mandatoryProperties, response);
+        }
+    }
+
+    private void checkObjectProperties(Set<String> mandatoryProperties, JsonNode response) {
+        for (String property : mandatoryProperties) {
+            if (property.equals("id")) {
+                property = idKey;
+            }
+            Assertions.assertTrue(response.has(property),
+                                  "Entity: "
+                                          + response.toPrettyString()
+                                          + "does not have mandatory property:"
+                                          + property);
+            Assertions.assertNotNull(response.get(property),
+                                     "Entity: "
+                                             + response.toPrettyString()
+                                             + "does not have mandatory property:"
+                                             + property);
+        }
+        response.fieldNames().forEachRemaining(name -> {
+            if (!name.equals(idKey)) {
+                Assertions.assertTrue(mandatoryProperties.contains(name));
+            }
+        });
     }
 
 }
