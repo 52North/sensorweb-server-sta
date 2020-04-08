@@ -195,9 +195,9 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
     private void readPropertyOfEntityWithEntityType(EntityType entityType, STAEntityDefinition definition)
             throws IOException {
         JsonNode collection = getCollection(entityType);
-        Assertions.assertNotNull(collection.get("value"),
+        Assertions.assertNotNull(collection.get(value),
                                  "Could not get collection for EntityType: " + entityType.name());
-        for (JsonNode entity : collection.get("value")) {
+        for (JsonNode entity : collection.get(value)) {
             Assertions.assertNotNull(entity.get("@iot.id"),
                                      "Could not read @iot.id from entity:" + entity.toPrettyString());
             for (String mandatoryProp : this.getEntityPropsMandatory(definition)) {
@@ -216,7 +216,7 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
      * @param property   The property to get requested
      */
     private void checkGetPropertyOfEntity(EntityType entityType, String id, String property) throws IOException {
-        JsonNode entity = getEntity(entityType, id, property);
+        JsonNode entity = getEntityProperty(entityType, id, property);
         Assertions.assertNotNull(entity.get(property),
                                  "Reading property \"" + property + "\"of \"" + entityType + "\" fails.");
         Assertions.assertEquals(1,
@@ -320,7 +320,7 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
         //                    !entityTypes.get(entityTypes.size() - 1).endsWith("s")) {
         //                return;
         //            }
-        //            Long id = new JSONObject(response.toString()).getJSONArray("value")
+        //            Long id = new JSONObject(response.toString()).getJSONArray(value)
         //                                                         .getJSONObject(0)
         //                                                         .getLong(ControlInformation.ID);
         //
@@ -363,12 +363,12 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
     private void checkAssociationLinks(String response, List<String> entityTypes, List<Long> ids) {
 
         //        try {
-        //            Assert.assertTrue(response.indexOf("value") != -1,
+        //            Assert.assertTrue(response.indexOf(value) != -1,
         //                              "The GET entities Association Link response does not match SensorThings API :
         //                              missing " +
         //                                      "\"value\" in response.: " +
         //                                      entityTypes.toString() + ids.toString());
-        //            JSONArray value = new JSONObject(response.toString()).getJSONArray("value");
+        //            JSONArray value = new JSONObject(response.toString()).getJSONArray(value);
         //            int count = 0;
         //            for (int i = 0; i < value.length() && count < 2; i++) {
         //                count++;
@@ -401,9 +401,9 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
     private Set<JsonNode> readEntityWithEntityType(EntityType entityType) throws IOException {
         HashSet<JsonNode> responses = new HashSet<>();
         JsonNode collection = getCollection(entityType);
-        Assertions.assertNotNull(collection.get("value"),
+        Assertions.assertNotNull(collection.get(value),
                                  "Could not get collection for EntityType: " + entityType.name());
-        for (JsonNode entity : collection.get("value")) {
+        for (JsonNode entity : collection.get(value)) {
             Assertions.assertNotNull(entity.get("@iot.id"),
                                      "Could not read @iot.id from entity:" + entity.toPrettyString());
             responses.add(getEntity(entityType, entity.get("@iot.id").asText()));
@@ -417,7 +417,7 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
     @Test()
     public void checkServiceRootUri() throws IOException {
         JsonNode response = getRootResponse();
-        ArrayNode entities = (ArrayNode) response.get("value");
+        ArrayNode entities = (ArrayNode) response.get(value);
 
         Map<String, Boolean> addedLinks = new HashMap<>();
         addedLinks.put("Things", false);
@@ -587,7 +587,7 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
      * @param response The response of the GET request to be checked
      */
     private void checkEntitiesControlInformation(JsonNode response) {
-        JsonNode entities = response.get("value");
+        JsonNode entities = response.get(value);
         for (int i = 0; i < entities.size(); i++) {
             JsonNode entity = entities.get(i);
             checkEntityControlInformation(entity);
@@ -619,7 +619,7 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
      * @param response            The response of the GET request to be checked
      */
     private void checkEntitiesProperties(Set<String> mandatoryProperties, JsonNode response) {
-        JsonNode entities = response.get("value");
+        JsonNode entities = response.get(value);
         for (int i = 0; i < entities.size(); i++) {
             JsonNode entity = entities.get(i);
             checkEntityProperties(mandatoryProperties, entity);

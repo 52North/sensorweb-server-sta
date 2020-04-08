@@ -275,7 +275,11 @@ abstract class ConformanceTests implements TestUtil {
         }
     }
 
-    protected JsonNode getEntity(EntityType type, String id, String property) throws IOException {
+    protected JsonNode getEntity(EntityType type, String id, String queryOption) throws IOException {
+        return getEntity(endpoints.get(type) + "(" + id + ")" + "?" + queryOption);
+    }
+
+    protected JsonNode getEntityProperty(EntityType type, String id, String property) throws IOException {
         return getEntity(endpoints.get(type) + "(" + id + ")" + "/" + property);
     }
 
@@ -400,11 +404,6 @@ abstract class ConformanceTests implements TestUtil {
                                              + "does not have mandatory property:"
                                              + property);
         }
-        response.fieldNames().forEachRemaining(name -> {
-            if (!name.equals(idKey)) {
-                Assertions.assertTrue(mandatoryProperties.contains(name));
-            }
-        });
     }
 
 }

@@ -77,7 +77,25 @@ public interface TestUtil {
     String jsonMimeType = "application/json";
     String idKey = "@iot.id";
     String countKey = "@iot.count";
+    String selfLinkKey = "@iot.selfLink";
     String value = "value";
+
+    String DATASTREAMS = "Datastreams";
+    String DATASTREAM = "Datastream";
+    String THING = "Thing";
+    String THINGS = "Things";
+    String LOCATIONS = "Locations";
+    String LOCATION = "Location";
+    String SENSORS = "Sensors";
+    String SENSOR = "Sensor";
+    String HISTORICALLOCATIONS = "HistoricalLocations";
+    String HISTORICALLOCATION = "HistoricalLocation";
+    String OBSERVATIONS = "Observations";
+    String OBSERVATION = "Observation";
+    String FEATUREOFINTEREST = "FeatureOfInterest";
+    String FEATURESOFINTEREST = "FeaturesOfInterest";
+    String OBSERVEDPROPERTY = "ObservedProperty";
+    String OBSERVEDPROPERTIES = "ObservedProperties";
 
     GeometryFactory factory =
             new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
