@@ -65,7 +65,7 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications<Procedu
                 Subquery<ProcedureEntity> sq = query.subquery(ProcedureEntity.class);
                 Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
                 Join<DatastreamEntity, ProcedureEntity> join = datastream.join(DatastreamEntity.PROPERTY_SENSOR);
-                sq.select(datastream.get(DatastreamEntity.PROPERTY_ID))
+                sq.select(datastream.get(DatastreamEntity.PROPERTY_SENSOR))
                   .where(((Specification<DatastreamEntity>) propertyValue).toPredicate(datastream,
                                                                                        query,
                                                                                        builder));

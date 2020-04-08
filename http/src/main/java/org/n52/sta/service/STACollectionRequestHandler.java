@@ -117,7 +117,7 @@ public class STACollectionRequestHandler implements STARequestUtils {
             filters.add(options.getSkipOption());
             filters.add(options.getTopOption());
             filters.add(options.getCountOption());
-            filters.add(options.getFilterOption());
+            filters.add(options.getFilterFilter());
         }
         // Overwrite select filter with filter only returning id
         filters.add(new SelectFilter(ID));
@@ -214,7 +214,7 @@ public class STACollectionRequestHandler implements STARequestUtils {
             filters.add(options.getSkipOption());
             filters.add(options.getTopOption());
             filters.add(options.getCountOption());
-            filters.add(options.getFilterOption());
+            filters.add(options.getFilterFilter());
         }
         // Overwrite select filter with filter only returning id
         filters.add(new SelectFilter(ID));
