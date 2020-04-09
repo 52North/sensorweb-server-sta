@@ -42,6 +42,7 @@ import org.springframework.util.Assert;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("VisibilityModifier")
@@ -85,7 +86,7 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
             Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
             Assert.notNull(encodingType, INVALID_INLINE_ENTITY + "encodingType");
             Assert.notNull(encodingType, INVALID_ENCODINGTYPE);
-            Assert.state(encodingType.equals(ENCODINGTYPE_GEOJSON), INVALID_ENCODINGTYPE);
+            Assert.isTrue(Objects.equals(encodingType, ENCODINGTYPE_GEOJSON), INVALID_ENCODINGTYPE);
 
             Assert.notNull(location, INVALID_INLINE_ENTITY + "location");
             //TODO: check what is actually allowed here.

@@ -114,9 +114,9 @@ public class STACollectionRequestHandler implements STARequestUtils {
         if (queryString != null) {
             // Parse QueryString normally and extract relevant Filters
             QueryOptions options = QUERY_OPTIONS_FACTORY.createQueryOptions(URLDecoder.decode(queryString));
-            filters.add(options.getSkipOption());
-            filters.add(options.getTopOption());
-            filters.add(options.getCountOption());
+            filters.add(options.getSkipFilter());
+            filters.add(options.getTopFilter());
+            filters.add(options.getCountFilter());
             filters.add(options.getFilterFilter());
         }
         // Overwrite select filter with filter only returning id
@@ -211,9 +211,9 @@ public class STACollectionRequestHandler implements STARequestUtils {
         if (queryString != null) {
             // Parse QueryString normally and extract relevant Filters
             QueryOptions options = QUERY_OPTIONS_FACTORY.createQueryOptions(URLDecoder.decode(queryString));
-            filters.add(options.getSkipOption());
-            filters.add(options.getTopOption());
-            filters.add(options.getCountOption());
+            filters.add(options.getSkipFilter());
+            filters.add(options.getTopFilter());
+            filters.add(options.getCountFilter());
             filters.add(options.getFilterFilter());
         }
         // Overwrite select filter with filter only returning id

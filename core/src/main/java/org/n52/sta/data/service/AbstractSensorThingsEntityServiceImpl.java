@@ -383,7 +383,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends Identifier
      */
     OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions,
                                                       String defaultSortingProperty) {
-        long offset = queryOptions.hasSkipOption() ? queryOptions.getSkipOption().getValue() : 0;
+        long offset = queryOptions.hasSkipFilter() ? queryOptions.getSkipFilter().getValue() : 0;
         Sort sort = Sort.by(Sort.Direction.ASC, defaultSortingProperty);
         if (queryOptions.hasOrderByFilter()) {
             boolean first = true;
@@ -405,7 +405,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends Identifier
             }
         }
         return new OffsetLimitBasedPageRequest((int) offset,
-                                               queryOptions.getTopOption().getValue().intValue(),
+                                               queryOptions.getTopFilter().getValue().intValue(),
                                                sort);
     }
 
