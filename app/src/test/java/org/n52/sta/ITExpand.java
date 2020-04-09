@@ -39,6 +39,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.Arrays;
 
 /**
  * Test expanding nested Entities.
@@ -231,43 +232,43 @@ public class ITExpand extends ConformanceTests implements TestUtil {
 
     @Test
     public void testMultipleExpandOnEntity() throws IOException {
-        checkMultipleExpandOnCollection(EntityType.THING, DATASTREAMS, LOCATIONS);
-        checkMultipleExpandOnCollection(EntityType.THING, DATASTREAMS, HISTORICALLOCATIONS);
-        checkMultipleExpandOnCollection(EntityType.THING, LOCATIONS, HISTORICALLOCATIONS);
-        checkMultipleExpandOnCollection(EntityType.THING, DATASTREAMS, LOCATIONS, HISTORICALLOCATIONS);
+        checkMultipleExpandOnEntity(EntityType.THING, DATASTREAMS, LOCATIONS);
+        checkMultipleExpandOnEntity(EntityType.THING, DATASTREAMS, HISTORICALLOCATIONS);
+        checkMultipleExpandOnEntity(EntityType.THING, LOCATIONS, HISTORICALLOCATIONS);
+        checkMultipleExpandOnEntity(EntityType.THING, DATASTREAMS, LOCATIONS, HISTORICALLOCATIONS);
 
-        checkMultipleExpandOnCollection(EntityType.LOCATION, HISTORICALLOCATIONS, THINGS);
+        checkMultipleExpandOnEntity(EntityType.LOCATION, HISTORICALLOCATIONS, THINGS);
 
-        checkMultipleExpandOnCollection(EntityType.HISTORICAL_LOCATION, THING, LOCATIONS);
+        checkMultipleExpandOnEntity(EntityType.HISTORICAL_LOCATION, THING, LOCATIONS);
 
-        checkMultipleExpandOnCollection(EntityType.DATASTREAM, OBSERVATIONS, OBSERVEDPROPERTY, THING, SENSOR);
+        checkMultipleExpandOnEntity(EntityType.DATASTREAM, OBSERVATIONS, OBSERVEDPROPERTY, THING, SENSOR);
 
-        checkMultipleExpandOnCollection(EntityType.DATASTREAM, OBSERVATIONS, OBSERVEDPROPERTY, THING);
-        checkMultipleExpandOnCollection(EntityType.DATASTREAM, OBSERVATIONS, OBSERVEDPROPERTY, THING);
-        checkMultipleExpandOnCollection(EntityType.DATASTREAM, OBSERVATIONS, OBSERVEDPROPERTY, THING);
-        checkMultipleExpandOnCollection(EntityType.DATASTREAM, OBSERVATIONS, OBSERVEDPROPERTY, SENSOR);
-        checkMultipleExpandOnCollection(EntityType.DATASTREAM, OBSERVATIONS, OBSERVEDPROPERTY, SENSOR);
-        checkMultipleExpandOnCollection(EntityType.DATASTREAM, OBSERVATIONS, OBSERVEDPROPERTY, SENSOR);
-        checkMultipleExpandOnCollection(EntityType.DATASTREAM, OBSERVATIONS, THING, SENSOR);
-        checkMultipleExpandOnCollection(EntityType.DATASTREAM, OBSERVATIONS, THING, SENSOR);
-        checkMultipleExpandOnCollection(EntityType.DATASTREAM, OBSERVATIONS, THING, SENSOR);
-        checkMultipleExpandOnCollection(EntityType.DATASTREAM, OBSERVEDPROPERTY, THING, SENSOR);
-        checkMultipleExpandOnCollection(EntityType.DATASTREAM, OBSERVEDPROPERTY, THING, SENSOR);
-        checkMultipleExpandOnCollection(EntityType.DATASTREAM, OBSERVEDPROPERTY, THING, SENSOR);
-        checkMultipleExpandOnCollection(EntityType.DATASTREAM, OBSERVATIONS, SENSOR);
-        checkMultipleExpandOnCollection(EntityType.DATASTREAM, OBSERVATIONS, OBSERVEDPROPERTY);
-        checkMultipleExpandOnCollection(EntityType.DATASTREAM, OBSERVATIONS, THING);
-        checkMultipleExpandOnCollection(EntityType.DATASTREAM, OBSERVEDPROPERTY, SENSOR);
-        checkMultipleExpandOnCollection(EntityType.DATASTREAM, OBSERVEDPROPERTY, THING);
-        checkMultipleExpandOnCollection(EntityType.DATASTREAM, OBSERVEDPROPERTY, OBSERVATIONS);
-        checkMultipleExpandOnCollection(EntityType.DATASTREAM, THING, SENSOR);
-        checkMultipleExpandOnCollection(EntityType.DATASTREAM, THING, OBSERVATIONS);
-        checkMultipleExpandOnCollection(EntityType.DATASTREAM, THING, OBSERVEDPROPERTY);
-        checkMultipleExpandOnCollection(EntityType.DATASTREAM, SENSOR, OBSERVATIONS);
-        checkMultipleExpandOnCollection(EntityType.DATASTREAM, SENSOR, THING);
-        checkMultipleExpandOnCollection(EntityType.DATASTREAM, SENSOR, OBSERVEDPROPERTY);
+        checkMultipleExpandOnEntity(EntityType.DATASTREAM, OBSERVATIONS, OBSERVEDPROPERTY, THING);
+        checkMultipleExpandOnEntity(EntityType.DATASTREAM, OBSERVATIONS, OBSERVEDPROPERTY, THING);
+        checkMultipleExpandOnEntity(EntityType.DATASTREAM, OBSERVATIONS, OBSERVEDPROPERTY, THING);
+        checkMultipleExpandOnEntity(EntityType.DATASTREAM, OBSERVATIONS, OBSERVEDPROPERTY, SENSOR);
+        checkMultipleExpandOnEntity(EntityType.DATASTREAM, OBSERVATIONS, OBSERVEDPROPERTY, SENSOR);
+        checkMultipleExpandOnEntity(EntityType.DATASTREAM, OBSERVATIONS, OBSERVEDPROPERTY, SENSOR);
+        checkMultipleExpandOnEntity(EntityType.DATASTREAM, OBSERVATIONS, THING, SENSOR);
+        checkMultipleExpandOnEntity(EntityType.DATASTREAM, OBSERVATIONS, THING, SENSOR);
+        checkMultipleExpandOnEntity(EntityType.DATASTREAM, OBSERVATIONS, THING, SENSOR);
+        checkMultipleExpandOnEntity(EntityType.DATASTREAM, OBSERVEDPROPERTY, THING, SENSOR);
+        checkMultipleExpandOnEntity(EntityType.DATASTREAM, OBSERVEDPROPERTY, THING, SENSOR);
+        checkMultipleExpandOnEntity(EntityType.DATASTREAM, OBSERVEDPROPERTY, THING, SENSOR);
+        checkMultipleExpandOnEntity(EntityType.DATASTREAM, OBSERVATIONS, SENSOR);
+        checkMultipleExpandOnEntity(EntityType.DATASTREAM, OBSERVATIONS, OBSERVEDPROPERTY);
+        checkMultipleExpandOnEntity(EntityType.DATASTREAM, OBSERVATIONS, THING);
+        checkMultipleExpandOnEntity(EntityType.DATASTREAM, OBSERVEDPROPERTY, SENSOR);
+        checkMultipleExpandOnEntity(EntityType.DATASTREAM, OBSERVEDPROPERTY, THING);
+        checkMultipleExpandOnEntity(EntityType.DATASTREAM, OBSERVEDPROPERTY, OBSERVATIONS);
+        checkMultipleExpandOnEntity(EntityType.DATASTREAM, THING, SENSOR);
+        checkMultipleExpandOnEntity(EntityType.DATASTREAM, THING, OBSERVATIONS);
+        checkMultipleExpandOnEntity(EntityType.DATASTREAM, THING, OBSERVEDPROPERTY);
+        checkMultipleExpandOnEntity(EntityType.DATASTREAM, SENSOR, OBSERVATIONS);
+        checkMultipleExpandOnEntity(EntityType.DATASTREAM, SENSOR, THING);
+        checkMultipleExpandOnEntity(EntityType.DATASTREAM, SENSOR, OBSERVEDPROPERTY);
 
-        checkMultipleExpandOnCollection(EntityType.OBSERVATION, DATASTREAM, FEATUREOFINTEREST);
+        checkMultipleExpandOnEntity(EntityType.OBSERVATION, DATASTREAM, FEATUREOFINTEREST);
     }
 
     private void checkMultipleExpandOnEntity(EntityType type, String... expanded) throws IOException {
@@ -279,7 +280,7 @@ public class ITExpand extends ConformanceTests implements TestUtil {
                 expand.append(expanded[i]);
             }
             String id = getCollection(type).get(value).get(0).get(idKey).asText();
-            JsonNode response = getEntity(type, id, URLEncoder.encode("$expand=" + expanded));
+            JsonNode response = getEntity(type, id, URLEncoder.encode("$expand=" + expand.toString()));
             for (int i = 0; i < length; i++) {
                 if (response.get(expanded[i]).isArray()) {
                     for (JsonNode jsonNode : response.get(expanded[i])) {
@@ -289,6 +290,190 @@ public class ITExpand extends ConformanceTests implements TestUtil {
                     Assertions.assertTrue(response.get(expanded[i]).has(idKey));
                 }
             }
+        }
+    }
+
+    @Test
+    public void testNestedExpandOnCollection() throws IOException {
+        checkNestedExpandOnCollection(EntityType.THING, DATASTREAMS, OBSERVATIONS);
+        checkNestedExpandOnCollection(EntityType.THING, DATASTREAMS, OBSERVEDPROPERTY);
+        checkNestedExpandOnCollection(EntityType.THING, DATASTREAMS, THING);
+        checkNestedExpandOnCollection(EntityType.THING, DATASTREAMS, SENSOR);
+        checkNestedExpandOnCollection(EntityType.THING, LOCATIONS, THINGS);
+        checkNestedExpandOnCollection(EntityType.THING, LOCATIONS, HISTORICALLOCATIONS);
+        checkNestedExpandOnCollection(EntityType.THING, HISTORICALLOCATIONS, THING);
+        checkNestedExpandOnCollection(EntityType.THING, HISTORICALLOCATIONS, LOCATIONS);
+
+        checkNestedExpandOnCollection(EntityType.LOCATION, THINGS, DATASTREAMS);
+        checkNestedExpandOnCollection(EntityType.LOCATION, THINGS, LOCATIONS);
+        checkNestedExpandOnCollection(EntityType.LOCATION, HISTORICALLOCATIONS, THING);
+        checkNestedExpandOnCollection(EntityType.LOCATION, HISTORICALLOCATIONS, LOCATIONS);
+
+        checkNestedExpandOnCollection(EntityType.HISTORICAL_LOCATION, THING, DATASTREAMS);
+        checkNestedExpandOnCollection(EntityType.HISTORICAL_LOCATION, THING, LOCATIONS);
+        checkNestedExpandOnCollection(EntityType.HISTORICAL_LOCATION, THING, HISTORICALLOCATIONS);
+
+        checkNestedExpandOnCollection(EntityType.HISTORICAL_LOCATION, THINGS);
+        checkNestedExpandOnCollection(EntityType.HISTORICAL_LOCATION, HISTORICALLOCATIONS);
+
+        checkNestedExpandOnCollection(EntityType.DATASTREAM, OBSERVATIONS, DATASTREAM);
+        checkNestedExpandOnCollection(EntityType.DATASTREAM, OBSERVATIONS, FEATUREOFINTEREST);
+        checkNestedExpandOnCollection(EntityType.DATASTREAM, OBSERVEDPROPERTY, DATASTREAMS);
+        checkNestedExpandOnCollection(EntityType.DATASTREAM, THING, DATASTREAMS);
+        checkNestedExpandOnCollection(EntityType.DATASTREAM, THING, LOCATIONS);
+        checkNestedExpandOnCollection(EntityType.DATASTREAM, THING, HISTORICALLOCATIONS);
+        checkNestedExpandOnCollection(EntityType.DATASTREAM, SENSOR, DATASTREAMS);
+
+        checkNestedExpandOnCollection(EntityType.SENSOR, DATASTREAMS, SENSOR);
+        checkNestedExpandOnCollection(EntityType.SENSOR, DATASTREAMS, THING);
+        checkNestedExpandOnCollection(EntityType.SENSOR, DATASTREAMS, OBSERVEDPROPERTY);
+        checkNestedExpandOnCollection(EntityType.SENSOR, DATASTREAMS, OBSERVATIONS);
+
+        checkNestedExpandOnCollection(EntityType.OBSERVATION, DATASTREAM, SENSOR);
+        checkNestedExpandOnCollection(EntityType.OBSERVATION, DATASTREAM, THING);
+        checkNestedExpandOnCollection(EntityType.OBSERVATION, DATASTREAM, OBSERVEDPROPERTY);
+        checkNestedExpandOnCollection(EntityType.OBSERVATION, DATASTREAM, OBSERVATIONS);
+        checkNestedExpandOnCollection(EntityType.OBSERVATION, FEATUREOFINTEREST, OBSERVATIONS);
+
+        checkNestedExpandOnCollection(EntityType.OBSERVED_PROPERTY, DATASTREAMS, SENSOR);
+        checkNestedExpandOnCollection(EntityType.OBSERVED_PROPERTY, DATASTREAMS, THING);
+        checkNestedExpandOnCollection(EntityType.OBSERVED_PROPERTY, DATASTREAMS, OBSERVEDPROPERTY);
+        checkNestedExpandOnCollection(EntityType.OBSERVED_PROPERTY, DATASTREAMS, OBSERVATIONS);
+
+        checkNestedExpandOnCollection(EntityType.FEATURE_OF_INTEREST, OBSERVATIONS, DATASTREAM);
+        checkNestedExpandOnCollection(EntityType.FEATURE_OF_INTEREST, OBSERVATIONS, FEATUREOFINTEREST);
+    }
+
+    private void checkNestedExpandOnCollection(EntityType type, String... expanded) throws IOException {
+        checkNestedExpandOnCollectionNestedExpand(type, expanded);
+        checkNestedExpandOnCollectionWithSlash(type, expanded);
+    }
+
+    private void checkNestedExpandOnCollectionNestedExpand(EntityType type, String... expanded) throws IOException {
+        for (int length = expanded.length; length > 1; length--) {
+            StringBuilder expand = new StringBuilder();
+            expand.append(expanded[0]);
+            for (int i = 1; i < length; i++) {
+                expand.append("($expand=");
+                expand.append(expanded[i]);
+                expand.append(")");
+            }
+            String id = getCollection(type).get(value).get(0).get(idKey).asText();
+            JsonNode response = getEntity(type, id, URLEncoder.encode("$expand=" + expand.toString()));
+            checkNested(response, expanded);
+        }
+    }
+
+    private void checkNestedExpandOnCollectionWithSlash(EntityType type, String... expanded) throws IOException {
+        for (int length = expanded.length; length > 1; length--) {
+            StringBuilder expand = new StringBuilder();
+            expand.append(expanded[0]);
+            for (int i = 1; i < length; i++) {
+                expand.append("/");
+                expand.append(expanded[i]);
+            }
+            String id = getCollection(type).get(value).get(0).get(idKey).asText();
+            JsonNode response = getEntity(type, id, URLEncoder.encode("$expand=" + expand.toString()));
+            checkNested(response, expanded);
+        }
+    }
+
+    private void checkNested(JsonNode obj, String... expand) {
+        if (expand.length > 0) {
+            if (obj.get(expand[0]).isArray()) {
+                for (JsonNode jsonNode : obj.get(expand[0])) {
+                    Assertions.assertTrue(jsonNode.has(idKey));
+                    checkNested(jsonNode, Arrays.copyOfRange(expand, 1, expand.length));
+                }
+            } else {
+                Assertions.assertTrue(obj.get(expand[0]).has(idKey));
+                checkNested(obj.get(expand[0]), Arrays.copyOfRange(expand, 1, expand.length));
+            }
+        }
+    }
+
+    @Test
+    public void testNestedExpandOnEntity() throws IOException {
+        checkNestedExpandOnEntity(EntityType.THING, DATASTREAMS, OBSERVATIONS);
+        checkNestedExpandOnEntity(EntityType.THING, DATASTREAMS, OBSERVEDPROPERTY);
+        checkNestedExpandOnEntity(EntityType.THING, DATASTREAMS, THING);
+        checkNestedExpandOnEntity(EntityType.THING, DATASTREAMS, SENSOR);
+        checkNestedExpandOnEntity(EntityType.THING, LOCATIONS, THINGS);
+        checkNestedExpandOnEntity(EntityType.THING, LOCATIONS, HISTORICALLOCATIONS);
+        checkNestedExpandOnEntity(EntityType.THING, HISTORICALLOCATIONS, THING);
+        checkNestedExpandOnEntity(EntityType.THING, HISTORICALLOCATIONS, LOCATIONS);
+
+        checkNestedExpandOnEntity(EntityType.LOCATION, THINGS, DATASTREAMS);
+        checkNestedExpandOnEntity(EntityType.LOCATION, THINGS, LOCATIONS);
+        checkNestedExpandOnEntity(EntityType.LOCATION, HISTORICALLOCATIONS, THING);
+        checkNestedExpandOnEntity(EntityType.LOCATION, HISTORICALLOCATIONS, LOCATIONS);
+
+        checkNestedExpandOnEntity(EntityType.HISTORICAL_LOCATION, THING, DATASTREAMS);
+        checkNestedExpandOnEntity(EntityType.HISTORICAL_LOCATION, THING, LOCATIONS);
+        checkNestedExpandOnEntity(EntityType.HISTORICAL_LOCATION, THING, HISTORICALLOCATIONS);
+
+        checkNestedExpandOnEntity(EntityType.HISTORICAL_LOCATION, THINGS);
+        checkNestedExpandOnEntity(EntityType.HISTORICAL_LOCATION, HISTORICALLOCATIONS);
+
+        checkNestedExpandOnEntity(EntityType.DATASTREAM, OBSERVATIONS, DATASTREAM);
+        checkNestedExpandOnEntity(EntityType.DATASTREAM, OBSERVATIONS, FEATUREOFINTEREST);
+        checkNestedExpandOnEntity(EntityType.DATASTREAM, OBSERVEDPROPERTY, DATASTREAMS);
+        checkNestedExpandOnEntity(EntityType.DATASTREAM, THING, DATASTREAMS);
+        checkNestedExpandOnEntity(EntityType.DATASTREAM, THING, LOCATIONS);
+        checkNestedExpandOnEntity(EntityType.DATASTREAM, THING, HISTORICALLOCATIONS);
+        checkNestedExpandOnEntity(EntityType.DATASTREAM, SENSOR, DATASTREAMS);
+
+        checkNestedExpandOnEntity(EntityType.SENSOR, DATASTREAMS, SENSOR);
+        checkNestedExpandOnEntity(EntityType.SENSOR, DATASTREAMS, THING);
+        checkNestedExpandOnEntity(EntityType.SENSOR, DATASTREAMS, OBSERVEDPROPERTY);
+        checkNestedExpandOnEntity(EntityType.SENSOR, DATASTREAMS, OBSERVATIONS);
+
+        checkNestedExpandOnEntity(EntityType.OBSERVATION, DATASTREAM, SENSOR);
+        checkNestedExpandOnEntity(EntityType.OBSERVATION, DATASTREAM, THING);
+        checkNestedExpandOnEntity(EntityType.OBSERVATION, DATASTREAM, OBSERVEDPROPERTY);
+        checkNestedExpandOnEntity(EntityType.OBSERVATION, DATASTREAM, OBSERVATIONS);
+        checkNestedExpandOnEntity(EntityType.OBSERVATION, FEATUREOFINTEREST, OBSERVATIONS);
+
+        checkNestedExpandOnEntity(EntityType.OBSERVED_PROPERTY, DATASTREAMS, SENSOR);
+        checkNestedExpandOnEntity(EntityType.OBSERVED_PROPERTY, DATASTREAMS, THING);
+        checkNestedExpandOnEntity(EntityType.OBSERVED_PROPERTY, DATASTREAMS, OBSERVEDPROPERTY);
+        checkNestedExpandOnEntity(EntityType.OBSERVED_PROPERTY, DATASTREAMS, OBSERVATIONS);
+
+        checkNestedExpandOnEntity(EntityType.FEATURE_OF_INTEREST, OBSERVATIONS, DATASTREAM);
+        checkNestedExpandOnEntity(EntityType.FEATURE_OF_INTEREST, OBSERVATIONS, FEATUREOFINTEREST);
+    }
+
+    private void checkNestedExpandOnEntity(EntityType type, String... expanded) throws IOException {
+        checkNestedExpandOnEntityNestedExpand(type, expanded);
+        checkNestedExpandOnEntityWithSlash(type, expanded);
+    }
+
+    private void checkNestedExpandOnEntityNestedExpand(EntityType type, String[] expanded) throws IOException {
+        for (int length = expanded.length; length > 1; length--) {
+            StringBuilder expand = new StringBuilder();
+            expand.append(expanded[0]);
+            for (int i = 1; i < length; i++) {
+                expand.append("($expand=");
+                expand.append(expanded[i]);
+                expand.append(")");
+            }
+            String id = getCollection(type).get(value).get(0).get(idKey).asText();
+            JsonNode response = getEntity(type, id, URLEncoder.encode("$expand=" + expand.toString()));
+            checkNested(response, expanded);
+        }
+    }
+
+    private void checkNestedExpandOnEntityWithSlash(EntityType type, String... expanded) throws IOException {
+        for (int length = expanded.length; length > 1; length--) {
+            StringBuilder expand = new StringBuilder();
+            expand.append(expanded[0]);
+            for (int i = 1; i < length; i++) {
+                expand.append("/");
+                expand.append(expanded[i]);
+            }
+            String id = getCollection(type).get(value).get(0).get(idKey).asText();
+            JsonNode response = getEntity(type, id, URLEncoder.encode("$expand=" + expand.toString()));
+            checkNested(response, expanded);
         }
     }
 
