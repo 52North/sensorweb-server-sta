@@ -59,11 +59,11 @@ import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.FeatureOfInterestRepository;
 import org.n52.sta.data.repositories.FormatRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
-import org.n52.sta.data.service.util.CollectionWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
@@ -74,7 +74,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -83,7 +82,7 @@ import java.util.stream.Collectors;
 @DependsOn({"springApplicationContext"})
 @Transactional
 public class FeatureOfInterestService
-        extends AbstractSensorThingsEntityService<FeatureOfInterestRepository, AbstractFeatureEntity<?>,
+        extends AbstractSensorThingsEntityServiceImpl<FeatureOfInterestRepository, AbstractFeatureEntity<?>,
         StaFeatureEntity<?>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FeatureOfInterestService.class);
@@ -125,16 +124,11 @@ public class FeatureOfInterestService
         for (ExpandItem expandItem : expandOption.getItems()) {
             String expandProperty = expandItem.getPath();
             if (FeatureOfInterestEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
-                CollectionWrapper expandedEntities;
-                expandedEntities = getObservationService()
-                        .getEntityCollectionByRelatedEntity(entity.getIdentifier(),
-                                                            AbstractFeatureEntity.class.getSimpleName(),
-                                                            expandItem.getQueryOptions());
-                return foi.setObservations(
-                        expandedEntities.getEntities()
-                                        .stream()
-                                        .map(s -> (StaDataEntity<?>) s.getEntity())
-                                        .collect(Collectors.toSet()));
+                Page<StaDataEntity<?>> observation = getObservationService()
+                        .getEntityCollectionByRelatedEntityRaw(entity.getIdentifier(),
+                                                               STAEntityDefinition.FEATURES_OF_INTEREST,
+                                                               expandItem.getQueryOptions());
+                return foi.setObservations(observation.toSet());
             } else {
                 throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty +
                                                            " on Entity of type 'FeatureOfInterest'");
@@ -154,7 +148,7 @@ public class FeatureOfInterestService
             break;
         }
         default:
-            return null;
+            throw new IllegalStateException("Trying to filter by unrelated type: " + relatedType + "not found!");
         }
 
         if (ownId != null) {

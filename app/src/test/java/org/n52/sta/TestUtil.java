@@ -50,21 +50,52 @@ import java.util.Objects;
 public interface TestUtil {
 
     enum EntityType {
-        THING,
-        LOCATION,
-        HISTORICAL_LOCATION,
-        DATASTREAM,
-        SENSOR,
-        FEATURE_OF_INTEREST,
-        OBSERVATION,
-        OBSERVED_PROPERTY
-    }
+        THING("Things"),
+        LOCATION("Locations"),
+        HISTORICAL_LOCATION("HistoricalLocations"),
+        DATASTREAM("Datastreams"),
+        SENSOR("Sensors"),
+        FEATURE_OF_INTEREST("FeaturesOfInterest"),
+        OBSERVATION("Observations"),
+        OBSERVED_PROPERTY("ObservedProperties");
 
+        String val;
+        EntityType(String value) {
+            val = value;
+        }
+
+        public static EntityType getByVal(String value) {
+            for (EntityType entityType : EntityType.values()) {
+                if (entityType.val.equals(value)) {
+                    return entityType;
+                }
+            }
+            return null;
+        }
+    }
 
     String jsonMimeType = "application/json";
     String idKey = "@iot.id";
     String countKey = "@iot.count";
+    String selfLinkKey = "@iot.selfLink";
     String value = "value";
+
+    String DATASTREAMS = "Datastreams";
+    String DATASTREAM = "Datastream";
+    String THING = "Thing";
+    String THINGS = "Things";
+    String LOCATIONS = "Locations";
+    String LOCATION = "Location";
+    String SENSORS = "Sensors";
+    String SENSOR = "Sensor";
+    String HISTORICALLOCATIONS = "HistoricalLocations";
+    String HISTORICALLOCATION = "HistoricalLocation";
+    String OBSERVATIONS = "Observations";
+    String OBSERVATION = "Observation";
+    String FEATUREOFINTEREST = "FeatureOfInterest";
+    String FEATURESOFINTEREST = "FeaturesOfInterest";
+    String OBSERVEDPROPERTY = "ObservedProperty";
+    String OBSERVEDPROPERTIES = "ObservedProperties";
 
     GeometryFactory factory =
             new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);

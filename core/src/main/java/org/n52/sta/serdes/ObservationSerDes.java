@@ -104,13 +104,13 @@ public class ObservationSerDes {
             boolean hasSelectOption = false;
             boolean hasExpandOption = false;
             if (options != null) {
-                if (options.hasSelectOption()) {
+                if (options.hasSelectFilter()) {
                     hasSelectOption = true;
-                    fieldsToSerialize = options.getSelectOption().getItems();
+                    fieldsToSerialize = options.getSelectFilter().getItems();
                 }
-                if (options.hasExpandOption()) {
+                if (options.hasExpandFilter()) {
                     hasExpandOption = true;
-                    for (ExpandItem item : options.getExpandOption().getItems()) {
+                    for (ExpandItem item : options.getExpandFilter().getItems()) {
                         fieldsToExpand.put(item.getPath(), item.getQueryOptions());
                     }
                 }
@@ -142,14 +142,17 @@ public class ObservationSerDes {
                 String phenomenonTime = DateTimeHelper.format(createPhenomenonTime(observation));
                 gen.writeStringField(STAEntityDefinition.PROP_PHENOMENON_TIME, phenomenonTime);
             }
-            //            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_RESULT_QUALITY)) {
-            //                //TODO: implement
-            //                //throw new NotImplementedException();
-            //            }
+
+            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_RESULT_QUALITY)) {
+                gen.writeNullField(STAEntityDefinition.PROP_RESULT_QUALITY);
+            }
+
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_VALID_TIME)) {
                 if (observation.isSetValidTime()) {
                     gen.writeStringField(STAEntityDefinition.PROP_VALID_TIME,
                                          DateTimeHelper.format(createValidTime(observation)));
+                } else {
+                    gen.writeNullField(STAEntityDefinition.PROP_VALID_TIME);
                 }
             }
 

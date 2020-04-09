@@ -56,8 +56,8 @@ public class CollectionSer extends StdSerializer<CollectionWrapper> {
         // We have multiple pages
         if (value.hasNextPage()) {
             QueryOptions queryOptions = value.getEntities().get(0).getQueryOptions();
-            Long oldTop = queryOptions.getTopOption().getValue();
-            Long oldSkip = queryOptions.hasSkipOption() ? queryOptions.getSkipOption().getValue() : 0;
+            long oldTop = queryOptions.getTopFilter().getValue();
+            long oldSkip = queryOptions.hasSkipFilter() ? queryOptions.getSkipFilter().getValue() : 0L;
             gen.writeStringField("@iot.nextLink",
                                  value.getRequestURL()
                                          + "?$top="

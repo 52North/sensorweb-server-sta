@@ -47,7 +47,7 @@ public class EntityServiceRepository {
 
     }
 
-    public void addEntityService(AbstractSensorThingsEntityService<?, ?, ?> entityService) {
+    public void addEntityService(AbstractSensorThingsEntityServiceImpl<?, ?, ?> entityService) {
         for (EntityTypes entityType : entityService.getTypes()) {
             entityServices.put(entityType, entityService);
         }

@@ -61,7 +61,6 @@ public class DatastreamSerDes {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatastreamSerDes.class);
 
-
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     public static class DatastreamEntityPatch extends DatastreamEntity implements EntityPatch<DatastreamEntity> {
 
@@ -105,13 +104,13 @@ public class DatastreamSerDes {
             boolean hasSelectOption = false;
             boolean hasExpandOption = false;
             if (options != null) {
-                if (options.hasSelectOption()) {
+                if (options.hasSelectFilter()) {
                     hasSelectOption = true;
-                    fieldsToSerialize = options.getSelectOption().getItems();
+                    fieldsToSerialize = options.getSelectFilter().getItems();
                 }
-                if (options.hasExpandOption()) {
+                if (options.hasExpandFilter()) {
                     hasExpandOption = true;
-                    for (ExpandItem item : options.getExpandOption().getItems()) {
+                    for (ExpandItem item : options.getExpandFilter().getItems()) {
                         fieldsToExpand.put(item.getPath(), item.getQueryOptions());
                     }
                 }
@@ -160,6 +159,8 @@ public class DatastreamSerDes {
                                                     TimeUtil.createDateTime(datastream.getResultTimeEnd()));
                     gen.writeStringField(STAEntityDefinition.PROP_RESULT_TIME,
                                          DateTimeHelper.format(time));
+                } else {
+                    gen.writeNullField(STAEntityDefinition.PROP_RESULT_TIME);
                 }
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_PHENOMENON_TIME)) {
@@ -168,6 +169,8 @@ public class DatastreamSerDes {
                                                     TimeUtil.createDateTime(datastream.getSamplingTimeEnd()));
                     gen.writeStringField(STAEntityDefinition.PROP_PHENOMENON_TIME,
                                          DateTimeHelper.format(time));
+                } else {
+                    gen.writeNullField(STAEntityDefinition.PROP_PHENOMENON_TIME);
                 }
             }
 

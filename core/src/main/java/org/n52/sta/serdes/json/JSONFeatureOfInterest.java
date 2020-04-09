@@ -40,6 +40,8 @@ import org.n52.series.db.beans.FeatureEntity;
 import org.n52.sta.data.service.ServiceUtils;
 import org.springframework.util.Assert;
 
+import java.util.Objects;
+
 @SuppressWarnings("VisibilityModifier")
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
 public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<FeatureEntity>
@@ -84,7 +86,7 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
             Assert.notNull(feature, INVALID_INLINE_ENTITY + "feature");
             Assert.notNull(feature.get(TYPE), INVALID_INLINE_ENTITY + FEATURE_TYPE);
             Assert.notNull(encodingType, INVALID_ENCODINGTYPE);
-            Assert.state(encodingType.equals(ENCODINGTYPE_GEOJSON), INVALID_ENCODINGTYPE);
+            Assert.isTrue(Objects.equals(encodingType, ENCODINGTYPE_GEOJSON), INVALID_ENCODINGTYPE);
 
             self.setIdentifier(identifier);
             self.setName(name);

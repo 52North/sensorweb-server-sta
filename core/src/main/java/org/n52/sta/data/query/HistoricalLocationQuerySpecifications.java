@@ -68,27 +68,24 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
             String propertyName,
             Specification<?> propertyValue) {
         return (root, query, builder) -> {
-            Root<HistoricalLocationEntity> historicalLocationEntityRoot = query.from(HistoricalLocationEntity.class);
             if (THING.equals(propertyName)) {
                 Subquery<HistoricalLocationEntity> sq = query.subquery(HistoricalLocationEntity.class);
                 Root<PlatformEntity> thing = sq.from(PlatformEntity.class);
-                final Join<PlatformEntity, HistoricalLocationEntity> join =
-                        historicalLocationEntityRoot.join(HistoricalLocationEntity.PROPERTY_THING, JoinType.INNER);
-                sq.select(join)
+                sq.select(thing.get(DescribableEntity.PROPERTY_ID))
                   .where(((Specification<PlatformEntity>) propertyValue).toPredicate(thing,
                                                                                      query,
                                                                                      builder));
-                return builder.in(root).value(sq);
+                return builder.in(root.get(HistoricalLocationEntity.PROPERTY_THING)).value(sq);
             } else if (LOCATIONS.equals(propertyName)) {
                 Subquery<HistoricalLocationEntity> sq = query.subquery(HistoricalLocationEntity.class);
-                Root<LocationEntity> thing = sq.from(LocationEntity.class);
-                final Join<LocationEntity, HistoricalLocationEntity> join =
-                        historicalLocationEntityRoot.join(HistoricalLocationEntity.PROPERTY_LOCATIONS, JoinType.INNER);
-                sq.select(join)
-                  .where(((Specification<LocationEntity>) propertyValue).toPredicate(thing,
+                Root<LocationEntity> location = sq.from(LocationEntity.class);
+                Join<Object, Object> join = root.join(HistoricalLocationEntity.PROPERTY_LOCATIONS, JoinType.INNER);
+
+                sq.select(location.get(DescribableEntity.PROPERTY_ID))
+                  .where(((Specification<LocationEntity>) propertyValue).toPredicate(location,
                                                                                      query,
                                                                                      builder));
-                return builder.in(root).value(sq);
+                return join.in(sq);
             } else {
                 throw new RuntimeException("Could not find related property: " + propertyName);
             }

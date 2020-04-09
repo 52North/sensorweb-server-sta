@@ -46,10 +46,10 @@ import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.IdentifierRepository;
 import org.n52.sta.data.repositories.ThingRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
-import org.n52.sta.data.service.util.CollectionWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
@@ -68,7 +68,8 @@ import java.util.stream.Collectors;
 @Component
 @DependsOn({"springApplicationContext"})
 @Transactional
-public class ThingService extends AbstractSensorThingsEntityService<ThingRepository, PlatformEntity, PlatformEntity> {
+public class ThingService
+        extends AbstractSensorThingsEntityServiceImpl<ThingRepository, PlatformEntity, PlatformEntity> {
 
     private static final Logger logger = LoggerFactory.getLogger(ThingService.class);
     private static final ThingQuerySpecifications tQS = new ThingQuerySpecifications();
@@ -87,41 +88,27 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
         for (ExpandItem expandItem : expandOption.getItems()) {
             String expandProperty = expandItem.getPath();
             if (ThingEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
-                CollectionWrapper expandedEntities;
                 switch (expandProperty) {
                 case STAEntityDefinition.HISTORICAL_LOCATIONS:
-                    expandedEntities =
-                            getHistoricalLocationService()
-                                    .getEntityCollectionByRelatedEntity(entity.getIdentifier(),
-                                                                        PlatformEntity.class.getSimpleName(),
-                                                                        expandItem.getQueryOptions());
-                    entity.setHistoricalLocations(
-                            expandedEntities.getEntities()
-                                            .stream()
-                                            .map(s -> (HistoricalLocationEntity) s.getEntity())
-                                            .collect(Collectors.toSet()));
+                    Page<HistoricalLocationEntity> hLocs = getHistoricalLocationService()
+                            .getEntityCollectionByRelatedEntityRaw(entity.getIdentifier(),
+                                                                   STAEntityDefinition.THINGS,
+                                                                   expandItem.getQueryOptions());
+                    entity.setHistoricalLocations(hLocs.get().collect(Collectors.toSet()));
                     break;
                 case STAEntityDefinition.DATASTREAMS:
-                    expandedEntities = getDatastreamService()
-                            .getEntityCollectionByRelatedEntity(entity.getIdentifier(),
-                                                                PlatformEntity.class.getSimpleName(),
-                                                                expandItem.getQueryOptions());
-                    entity.setDatastreams(
-                            expandedEntities.getEntities()
-                                            .stream()
-                                            .map(s -> (DatastreamEntity) s.getEntity())
-                                            .collect(Collectors.toSet()));
+                    Page<DatastreamEntity> datastreams = getDatastreamService()
+                            .getEntityCollectionByRelatedEntityRaw(entity.getIdentifier(),
+                                                                   STAEntityDefinition.THINGS,
+                                                                   expandItem.getQueryOptions());
+                    entity.setDatastreams(datastreams.get().collect(Collectors.toSet()));
                     break;
                 case STAEntityDefinition.LOCATIONS:
-                    expandedEntities = getLocationService()
-                            .getEntityCollectionByRelatedEntity(entity.getIdentifier(),
-                                                                PlatformEntity.class.getSimpleName(),
-                                                                expandItem.getQueryOptions());
-                    entity.setLocations(
-                            expandedEntities.getEntities()
-                                            .stream()
-                                            .map(s -> (LocationEntity) s.getEntity())
-                                            .collect(Collectors.toSet()));
+                    Page<LocationEntity> locations = getLocationService()
+                            .getEntityCollectionByRelatedEntityRaw(entity.getIdentifier(),
+                                                                   STAEntityDefinition.THINGS,
+                                                                   expandItem.getQueryOptions());
+                    entity.setLocations(locations.get().collect(Collectors.toSet()));
                     break;
                 default:
                     throw new RuntimeException("This can never happen!");
@@ -153,7 +140,7 @@ public class ThingService extends AbstractSensorThingsEntityService<ThingReposit
             break;
         }
         default:
-            return null;
+            throw new IllegalStateException("Trying to filter by unrelated type: " + relatedType + "not found!");
         }
 
         if (ownId != null) {

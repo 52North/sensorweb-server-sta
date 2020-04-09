@@ -48,12 +48,12 @@ import org.n52.sta.data.query.ObservedPropertyQuerySpecifications;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.PhenomenonRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
-import org.n52.sta.data.service.util.CollectionWrapper;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
@@ -73,7 +73,9 @@ import java.util.stream.Collectors;
 @DependsOn({"springApplicationContext"})
 @Transactional
 public class ObservedPropertyService
-        extends AbstractSensorThingsEntityService<PhenomenonRepository, PhenomenonEntity, ObservablePropertyEntity> {
+        extends AbstractSensorThingsEntityServiceImpl<PhenomenonRepository,
+        PhenomenonEntity,
+        ObservablePropertyEntity> {
 
     private static final Logger logger = LoggerFactory.getLogger(ObservedPropertyService.class);
 
@@ -123,8 +125,13 @@ public class ObservedPropertyService
     @Override
     public ElementWithQueryOptions getEntity(String id, QueryOptions queryOptions) throws STACRUDException {
         try {
-            return this.createWrapper(getRepository().findByStaIdentifier(id).get(), queryOptions);
-        } catch (RuntimeException e) {
+            PhenomenonEntity entity = getRepository().findByStaIdentifier(id).get();
+            if (queryOptions.hasExpandFilter()) {
+                return this.createWrapper(fetchExpandEntities(entity, queryOptions.getExpandFilter()), queryOptions);
+            } else {
+                return this.createWrapper(entity, queryOptions);
+            }
+        } catch (RuntimeException | STAInvalidQueryException e) {
             throw new STACRUDException(e.getMessage());
         }
     }
@@ -134,17 +141,12 @@ public class ObservedPropertyService
         for (ExpandItem expandItem : expandOption.getItems()) {
             String expandProperty = expandItem.getPath();
             if (ObservedPropertyEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
-                CollectionWrapper expandedEntities;
-                expandedEntities = getDatastreamService()
-                        .getEntityCollectionByRelatedEntity(entity.getIdentifier(),
-                                                            PhenomenonEntity.class.getSimpleName(),
-                                                            expandItem.getQueryOptions());
+                Page<DatastreamEntity> obsP = getDatastreamService()
+                        .getEntityCollectionByRelatedEntityRaw(entity.getIdentifier(),
+                                                               STAEntityDefinition.OBSERVED_PROPERTIES,
+                                                               expandItem.getQueryOptions());
                 ObservablePropertyEntity obsProp = new ObservablePropertyEntity(entity);
-                return obsProp.setDatastreams(
-                        expandedEntities.getEntities()
-                                        .stream()
-                                        .map(s -> (DatastreamEntity) s.getEntity())
-                                        .collect(Collectors.toSet()));
+                return obsProp.setDatastreams(obsP.get().collect(Collectors.toSet()));
             } else {
                 throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty +
                                                            " on Entity of type 'ObservableProperty'");
@@ -195,7 +197,7 @@ public class ObservedPropertyService
             };
         }
         default:
-            return null;
+            throw new IllegalStateException("Trying to filter by unrelated type: " + relatedType + "not found!");
         }
     }
 
