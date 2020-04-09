@@ -128,13 +128,11 @@ public class FeatureOfInterestService
         for (ExpandItem expandItem : expandOption.getItems()) {
             String expandProperty = expandItem.getPath();
             if (FeatureOfInterestEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
-                Page<DataEntity<?>> observation = getObservationService()
+                Page<StaDataEntity<?>> observation = getObservationService()
                         .getEntityCollectionByRelatedEntityRaw(entity.getIdentifier(),
                                                                STAEntityDefinition.FEATURES_OF_INTEREST,
                                                                expandItem.getQueryOptions());
-                Stream<StaDataEntity<?>> dataEntityStream = observation.get().map(o -> new StaDataEntity(o));
-                Set<StaDataEntity<?>> collect = dataEntityStream.collect(Collectors.toSet());
-                return foi.setObservations(collect);
+                return foi.setObservations(observation.toSet());
             } else {
                 throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty +
                                                            " on Entity of type 'FeatureOfInterest'");
