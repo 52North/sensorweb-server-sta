@@ -54,7 +54,7 @@ import java.util.Set;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Testcontainers
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ITConformance2 extends ConformanceTests implements TestUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(ITConformance2.class);

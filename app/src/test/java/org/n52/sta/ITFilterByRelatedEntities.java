@@ -45,7 +45,7 @@ import java.net.URLEncoder;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Testcontainers
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ITFilterByRelatedEntities extends ConformanceTests implements TestUtil {
 
     ITFilterByRelatedEntities(@Value("${server.rootUrl}") String rootUrl) throws IOException {

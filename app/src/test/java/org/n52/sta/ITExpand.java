@@ -48,7 +48,7 @@ import java.util.Arrays;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Testcontainers
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ITExpand extends ConformanceTests implements TestUtil {
 
     ITExpand(@Value("${server.rootUrl}") String rootUrl) throws IOException {
