@@ -84,7 +84,8 @@ public class STACollectionRequestHandler implements STARequestUtils {
         String queryString = request.getQueryString();
         QueryOptions options;
         if (queryString != null) {
-            options = QUERY_OPTIONS_FACTORY.createQueryOptions(URLDecoder.decode(queryString));
+            options = QUERY_OPTIONS_FACTORY.createQueryOptions(
+                    URLDecoder.decode(queryString.replaceAll("\\+", "%2b")));
         } else {
             options = QUERY_OPTIONS_FACTORY.createDummy();
         }
@@ -113,7 +114,8 @@ public class STACollectionRequestHandler implements STARequestUtils {
         String queryString = request.getQueryString();
         if (queryString != null) {
             // Parse QueryString normally and extract relevant Filters
-            QueryOptions options = QUERY_OPTIONS_FACTORY.createQueryOptions(URLDecoder.decode(queryString));
+            QueryOptions options = QUERY_OPTIONS_FACTORY.createQueryOptions(
+                    URLDecoder.decode(queryString.replaceAll("\\+", "%2b")));
             filters.add(options.getSkipFilter());
             filters.add(options.getTopFilter());
             filters.add(options.getCountFilter());
@@ -161,7 +163,8 @@ public class STACollectionRequestHandler implements STARequestUtils {
         String queryString = request.getQueryString();
         QueryOptions options;
         if (queryString != null) {
-            options = QUERY_OPTIONS_FACTORY.createQueryOptions(URLDecoder.decode(request.getQueryString()));
+            options = QUERY_OPTIONS_FACTORY.createQueryOptions(URLDecoder.decode(request.getQueryString()
+                                                                                        .replaceAll("\\+", "%2b")));
         } else {
             options = QUERY_OPTIONS_FACTORY.createDummy();
         }
@@ -210,7 +213,8 @@ public class STACollectionRequestHandler implements STARequestUtils {
         String queryString = request.getQueryString();
         if (queryString != null) {
             // Parse QueryString normally and extract relevant Filters
-            QueryOptions options = QUERY_OPTIONS_FACTORY.createQueryOptions(URLDecoder.decode(queryString));
+            QueryOptions options = QUERY_OPTIONS_FACTORY.createQueryOptions(
+                    URLDecoder.decode(queryString.replaceAll("\\+", "%2b")));
             filters.add(options.getSkipFilter());
             filters.add(options.getTopFilter());
             filters.add(options.getCountFilter());

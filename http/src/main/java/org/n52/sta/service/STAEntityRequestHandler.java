@@ -82,7 +82,8 @@ public class STAEntityRequestHandler implements STARequestUtils {
         String queryString = request.getQueryString();
         QueryOptions options;
         if (queryString != null) {
-            options = QUERY_OPTIONS_FACTORY.createQueryOptions(URLDecoder.decode(request.getQueryString()));
+            options = QUERY_OPTIONS_FACTORY.createQueryOptions(
+                    URLDecoder.decode(request.getQueryString().replaceAll("\\+", "%2b")));
         } else {
             options = QUERY_OPTIONS_FACTORY.createDummy();
         }
@@ -146,7 +147,8 @@ public class STAEntityRequestHandler implements STARequestUtils {
         String queryString = request.getQueryString();
         QueryOptions options;
         if (queryString != null) {
-            options = QUERY_OPTIONS_FACTORY.createQueryOptions(URLDecoder.decode(request.getQueryString()));
+            options = QUERY_OPTIONS_FACTORY.createQueryOptions(
+                    URLDecoder.decode(request.getQueryString().replaceAll("\\+", "%2b")));
         } else {
             options = QUERY_OPTIONS_FACTORY.createDummy();
         }
