@@ -42,11 +42,15 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.util.UriUtils;
 import org.testcontainers.junit.jupiter.Container;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -238,7 +242,7 @@ abstract class ConformanceTests implements TestUtil {
         );
     }
 
-    protected void deleteEverythings() throws IOException {
+    protected void deleteEverythings() throws IOException, URISyntaxException {
         for (EntityType type : EntityType.values()) {
             for (JsonNode elem : getCollection(type).get("value")) {
                 deleteEntity(type, elem.get(idKey).asText(), false);
@@ -276,7 +280,8 @@ abstract class ConformanceTests implements TestUtil {
     }
 
     protected JsonNode getEntity(EntityType type, String id, String queryOption) throws IOException {
-        return getEntity(endpoints.get(type) + "(" + id + ")" + "?" + queryOption);
+        String query = UriUtils.encode(queryOption, Charset.defaultCharset());
+        return getEntity(endpoints.get(type) + "(" + id + ")" + "?" + query);
     }
 
     protected JsonNode getEntityProperty(EntityType type, String id, String property) throws IOException {
@@ -335,9 +340,7 @@ abstract class ConformanceTests implements TestUtil {
     }
 
     protected void getNonExistentEntity(EntityType type) throws IOException {
-        HttpGet request = new HttpGet(rootUrl
-                                              + endpoints.get(type)
-                                              + "(aaaaaa)");
+        HttpGet request = new HttpGet(rootUrl + endpoints.get(type) + "(aaaaaa)");
         HttpResponse response = HttpClientBuilder.create().build().execute(request);
 
         // Check Response MIME Type
@@ -353,8 +356,9 @@ abstract class ConformanceTests implements TestUtil {
     }
 
     protected JsonNode getCollection(EntityType type, String filters) throws IOException {
-        logger.debug("GET Collection: " + rootUrl + endpoints.get(type) + "?" + filters);
-        HttpGet request = new HttpGet(rootUrl + endpoints.get(type) + "?" + filters);
+        String query = UriUtils.encode(filters, Charset.defaultCharset());
+        logger.debug("GET Collection: " + rootUrl + endpoints.get(type) + "?" + query);
+        HttpGet request = new HttpGet(rootUrl + endpoints.get(type) + "?" + query);
         HttpResponse response = HttpClientBuilder.create().build().execute(request);
 
         // Check Response MIME Type
@@ -368,7 +372,7 @@ abstract class ConformanceTests implements TestUtil {
         return mapper.readTree(response.getEntity().getContent());
     }
 
-    protected JsonNode getCollection(EntityType type) throws IOException {
+    protected JsonNode getCollection(EntityType type) throws IOException, URISyntaxException {
         return getCollection(type, "");
     }
 

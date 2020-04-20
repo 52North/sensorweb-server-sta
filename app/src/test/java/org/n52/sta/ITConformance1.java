@@ -48,7 +48,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -75,7 +74,7 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
      */
     private final int resourcePathLevel = 4;
 
-    public ITConformance1(@Value("${server.rootUrl}") String rootUrl) throws IOException {
+    public ITConformance1(@Value("${server.rootUrl}") String rootUrl) throws Exception {
         super(rootUrl);
 
         // Create required test harness
@@ -109,7 +108,7 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
      * properties, and mandatory related entities.
      */
     @Test
-    public void testReadEntitiesAndCheckResponse() throws IOException {
+    public void testReadEntitiesAndCheckResponse() throws Exception {
         JsonNode collection;
         collection = getCollection(EntityType.THING);
         checkEntitiesAllAspectsForResponse(new ThingEntityDefinition(), collection);
@@ -134,7 +133,7 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
      * response should be 404.
      */
     @Test
-    public void readNonexistentEntity() throws IOException {
+    public void readNonexistentEntity() throws Exception {
         getNonExistentEntity(EntityType.THING);
         getNonExistentEntity(EntityType.LOCATION);
         getNonExistentEntity(EntityType.HISTORICAL_LOCATION);
@@ -151,7 +150,7 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
      * entities for the response entity.
      */
     @Test
-    public void readEntityAndCheckResponse() throws IOException {
+    public void readEntityAndCheckResponse() throws Exception {
         Set<JsonNode> response;
         response = readEntityWithEntityType(EntityType.THING);
         checkEntityAllAspectsForResponse(new ThingEntityDefinition(), response);
@@ -175,7 +174,7 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
      * This method is testing GET for a property of an entity.
      */
     @Test
-    public void readPropertyOfEntityAndCheckResponse() throws IOException {
+    public void readPropertyOfEntityAndCheckResponse() throws Exception {
         readPropertyOfEntityWithEntityType(EntityType.THING, new ThingEntityDefinition());
         readPropertyOfEntityWithEntityType(EntityType.LOCATION, new LocationEntityDefinition());
         readPropertyOfEntityWithEntityType(EntityType.HISTORICAL_LOCATION, new HistoricalLocationEntityDefinition());
@@ -193,7 +192,7 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
      * @param entityType Entity type from EntityType enum list
      */
     private void readPropertyOfEntityWithEntityType(EntityType entityType, STAEntityDefinition definition)
-            throws IOException {
+            throws Exception {
         JsonNode collection = getCollection(entityType);
         Assertions.assertNotNull(collection.get(value),
                                  "Could not get collection for EntityType: " + entityType.name());
@@ -215,7 +214,7 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
      * @param id         The id of the entity
      * @param property   The property to get requested
      */
-    private void checkGetPropertyOfEntity(EntityType entityType, String id, String property) throws IOException {
+    private void checkGetPropertyOfEntity(EntityType entityType, String id, String property) throws Exception {
         JsonNode entity = getEntityProperty(entityType, id, property);
         Assertions.assertNotNull(entity.get(property),
                                  "Reading property \"" + property + "\"of \"" + entityType + "\" fails.");
@@ -233,7 +232,7 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
      * @param id         The id of the entity
      * @param property   The property to get requested
      */
-    private void checkGetPropertyValueOfEntity(EntityType entityType, String id, String property) throws IOException {
+    private void checkGetPropertyValueOfEntity(EntityType entityType, String id, String property) throws Exception {
         String response = getEntityValue(entityType, id, property);
         Assertions.assertNotNull(response,
                                  "Reading property \"" + property + "\"of \"" + entityType + "\" fails.");
@@ -398,7 +397,7 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
      * @param entityType Entity type from EntityType enum list
      * @return The entity response as a string
      */
-    private Set<JsonNode> readEntityWithEntityType(EntityType entityType) throws IOException {
+    private Set<JsonNode> readEntityWithEntityType(EntityType entityType) throws Exception {
         HashSet<JsonNode> responses = new HashSet<>();
         JsonNode collection = getCollection(entityType);
         Assertions.assertNotNull(collection.get(value),
@@ -415,7 +414,7 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
      * This method is testing the root URL of the service under test.
      */
     @Test()
-    public void checkServiceRootUri() throws IOException {
+    public void checkServiceRootUri() throws Exception {
         JsonNode response = getRootResponse();
         ArrayNode entities = (ArrayNode) response.get(value);
 

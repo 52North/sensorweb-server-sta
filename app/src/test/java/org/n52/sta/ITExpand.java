@@ -37,8 +37,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.io.IOException;
-import java.net.URLEncoder;
 import java.util.Arrays;
 
 /**
@@ -51,7 +49,7 @@ import java.util.Arrays;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ITExpand extends ConformanceTests implements TestUtil {
 
-    ITExpand(@Value("${server.rootUrl}") String rootUrl) throws IOException {
+    ITExpand(@Value("${server.rootUrl}") String rootUrl) throws Exception {
         super(rootUrl);
 
         // Create required test harness
@@ -80,7 +78,7 @@ public class ITExpand extends ConformanceTests implements TestUtil {
     }
 
     @Test
-    public void testSingleExpandonCollection() throws IOException {
+    public void testSingleExpandonCollection() throws Exception {
         checkSingleExpandOnCollection(EntityType.THING, DATASTREAMS);
         checkSingleExpandOnCollection(EntityType.THING, LOCATIONS);
         checkSingleExpandOnCollection(EntityType.THING, HISTORICALLOCATIONS);
@@ -106,8 +104,8 @@ public class ITExpand extends ConformanceTests implements TestUtil {
         checkSingleExpandOnCollection(EntityType.FEATURE_OF_INTEREST, OBSERVATIONS);
     }
 
-    private void checkSingleExpandOnCollection(EntityType type, String expanded) throws IOException {
-        JsonNode response = getCollection(type, URLEncoder.encode("$expand=" + expanded));
+    private void checkSingleExpandOnCollection(EntityType type, String expanded) throws Exception {
+        JsonNode response = getCollection(type, "$expand=" + expanded);
         Assertions.assertTrue(response.has(countKey));
         Assertions.assertTrue(response.has(value));
         for (JsonNode item : response.get(value)) {
@@ -122,7 +120,7 @@ public class ITExpand extends ConformanceTests implements TestUtil {
     }
 
     @Test
-    public void testMultipleExpandOnCollection() throws IOException {
+    public void testMultipleExpandOnCollection() throws Exception {
         checkMultipleExpandOnCollection(EntityType.THING, DATASTREAMS, LOCATIONS);
         checkMultipleExpandOnCollection(EntityType.THING, DATASTREAMS, HISTORICALLOCATIONS);
         checkMultipleExpandOnCollection(EntityType.THING, LOCATIONS, HISTORICALLOCATIONS);
@@ -162,7 +160,7 @@ public class ITExpand extends ConformanceTests implements TestUtil {
         checkMultipleExpandOnCollection(EntityType.OBSERVATION, DATASTREAM, FEATUREOFINTEREST);
     }
 
-    private void checkMultipleExpandOnCollection(EntityType type, String... expanded) throws IOException {
+    private void checkMultipleExpandOnCollection(EntityType type, String... expanded) throws Exception {
         for (int length = expanded.length; length > 1; length--) {
             StringBuilder expand = new StringBuilder();
             expand.append(expanded[0]);
@@ -170,7 +168,7 @@ public class ITExpand extends ConformanceTests implements TestUtil {
                 expand.append(",");
                 expand.append(expanded[i]);
             }
-            JsonNode response = getCollection(type, URLEncoder.encode("$expand=" + expand.toString()));
+            JsonNode response = getCollection(type, "$expand=" + expand.toString());
             Assertions.assertTrue(response.has(countKey));
             Assertions.assertTrue(response.has(value));
             for (JsonNode item : response.get(value)) {
@@ -188,7 +186,7 @@ public class ITExpand extends ConformanceTests implements TestUtil {
     }
 
     @Test
-    public void testSingleExpandOnEntity() throws IOException {
+    public void testSingleExpandOnEntity() throws Exception {
         checkSingleExpandOnEntity(EntityType.THING, DATASTREAMS);
         checkSingleExpandOnEntity(EntityType.THING, LOCATIONS);
         checkSingleExpandOnEntity(EntityType.THING, HISTORICALLOCATIONS);
@@ -214,9 +212,9 @@ public class ITExpand extends ConformanceTests implements TestUtil {
         checkSingleExpandOnEntity(EntityType.FEATURE_OF_INTEREST, OBSERVATIONS);
     }
 
-    private void checkSingleExpandOnEntity(EntityType type, String expanded) throws IOException {
+    private void checkSingleExpandOnEntity(EntityType type, String expanded) throws Exception {
         String id = getCollection(type).get(value).get(0).get(idKey).asText();
-        JsonNode response = getEntity(type, id, URLEncoder.encode("$expand=" + expanded));
+        JsonNode response = getEntity(type, id, "$expand=" + expanded);
         Assertions.assertTrue(response.has(idKey));
         Assertions.assertTrue(response.has(expanded));
         System.out.println(expanded);
@@ -231,7 +229,7 @@ public class ITExpand extends ConformanceTests implements TestUtil {
     }
 
     @Test
-    public void testMultipleExpandOnEntity() throws IOException {
+    public void testMultipleExpandOnEntity() throws Exception {
         checkMultipleExpandOnEntity(EntityType.THING, DATASTREAMS, LOCATIONS);
         checkMultipleExpandOnEntity(EntityType.THING, DATASTREAMS, HISTORICALLOCATIONS);
         checkMultipleExpandOnEntity(EntityType.THING, LOCATIONS, HISTORICALLOCATIONS);
@@ -271,7 +269,7 @@ public class ITExpand extends ConformanceTests implements TestUtil {
         checkMultipleExpandOnEntity(EntityType.OBSERVATION, DATASTREAM, FEATUREOFINTEREST);
     }
 
-    private void checkMultipleExpandOnEntity(EntityType type, String... expanded) throws IOException {
+    private void checkMultipleExpandOnEntity(EntityType type, String... expanded) throws Exception {
         for (int length = expanded.length; length > 1; length--) {
             StringBuilder expand = new StringBuilder();
             expand.append(expanded[0]);
@@ -280,7 +278,7 @@ public class ITExpand extends ConformanceTests implements TestUtil {
                 expand.append(expanded[i]);
             }
             String id = getCollection(type).get(value).get(0).get(idKey).asText();
-            JsonNode response = getEntity(type, id, URLEncoder.encode("$expand=" + expand.toString()));
+            JsonNode response = getEntity(type, id, "$expand=" + expand.toString());
             for (int i = 0; i < length; i++) {
                 if (response.get(expanded[i]).isArray()) {
                     for (JsonNode jsonNode : response.get(expanded[i])) {
@@ -294,7 +292,7 @@ public class ITExpand extends ConformanceTests implements TestUtil {
     }
 
     @Test
-    public void testNestedExpandOnCollection() throws IOException {
+    public void testNestedExpandOnCollection() throws Exception {
         checkNestedExpandOnCollection(EntityType.THING, DATASTREAMS, OBSERVATIONS);
         checkNestedExpandOnCollection(EntityType.THING, DATASTREAMS, OBSERVEDPROPERTY);
         checkNestedExpandOnCollection(EntityType.THING, DATASTREAMS, THING);
@@ -344,12 +342,12 @@ public class ITExpand extends ConformanceTests implements TestUtil {
         checkNestedExpandOnCollection(EntityType.FEATURE_OF_INTEREST, OBSERVATIONS, FEATUREOFINTEREST);
     }
 
-    private void checkNestedExpandOnCollection(EntityType type, String... expanded) throws IOException {
+    private void checkNestedExpandOnCollection(EntityType type, String... expanded) throws Exception {
         checkNestedExpandOnCollectionNestedExpand(type, expanded);
         checkNestedExpandOnCollectionWithSlash(type, expanded);
     }
 
-    private void checkNestedExpandOnCollectionNestedExpand(EntityType type, String... expanded) throws IOException {
+    private void checkNestedExpandOnCollectionNestedExpand(EntityType type, String... expanded) throws Exception {
         for (int length = expanded.length; length > 1; length--) {
             StringBuilder expand = new StringBuilder();
             expand.append(expanded[0]);
@@ -359,12 +357,12 @@ public class ITExpand extends ConformanceTests implements TestUtil {
                 expand.append(")");
             }
             String id = getCollection(type).get(value).get(0).get(idKey).asText();
-            JsonNode response = getEntity(type, id, URLEncoder.encode("$expand=" + expand.toString()));
+            JsonNode response = getEntity(type, id, "$expand=" + expand.toString());
             checkNested(response, expanded);
         }
     }
 
-    private void checkNestedExpandOnCollectionWithSlash(EntityType type, String... expanded) throws IOException {
+    private void checkNestedExpandOnCollectionWithSlash(EntityType type, String... expanded) throws Exception {
         for (int length = expanded.length; length > 1; length--) {
             StringBuilder expand = new StringBuilder();
             expand.append(expanded[0]);
@@ -373,7 +371,7 @@ public class ITExpand extends ConformanceTests implements TestUtil {
                 expand.append(expanded[i]);
             }
             String id = getCollection(type).get(value).get(0).get(idKey).asText();
-            JsonNode response = getEntity(type, id, URLEncoder.encode("$expand=" + expand.toString()));
+            JsonNode response = getEntity(type, id, "$expand=" + expand.toString());
             checkNested(response, expanded);
         }
     }
@@ -393,7 +391,7 @@ public class ITExpand extends ConformanceTests implements TestUtil {
     }
 
     @Test
-    public void testNestedExpandOnEntity() throws IOException {
+    public void testNestedExpandOnEntity() throws Exception {
         checkNestedExpandOnEntity(EntityType.THING, DATASTREAMS, OBSERVATIONS);
         checkNestedExpandOnEntity(EntityType.THING, DATASTREAMS, OBSERVEDPROPERTY);
         checkNestedExpandOnEntity(EntityType.THING, DATASTREAMS, THING);
@@ -443,12 +441,12 @@ public class ITExpand extends ConformanceTests implements TestUtil {
         checkNestedExpandOnEntity(EntityType.FEATURE_OF_INTEREST, OBSERVATIONS, FEATUREOFINTEREST);
     }
 
-    private void checkNestedExpandOnEntity(EntityType type, String... expanded) throws IOException {
+    private void checkNestedExpandOnEntity(EntityType type, String... expanded) throws Exception {
         checkNestedExpandOnEntityNestedExpand(type, expanded);
         checkNestedExpandOnEntityWithSlash(type, expanded);
     }
 
-    private void checkNestedExpandOnEntityNestedExpand(EntityType type, String[] expanded) throws IOException {
+    private void checkNestedExpandOnEntityNestedExpand(EntityType type, String[] expanded) throws Exception {
         for (int length = expanded.length; length > 1; length--) {
             StringBuilder expand = new StringBuilder();
             expand.append(expanded[0]);
@@ -458,12 +456,12 @@ public class ITExpand extends ConformanceTests implements TestUtil {
                 expand.append(")");
             }
             String id = getCollection(type).get(value).get(0).get(idKey).asText();
-            JsonNode response = getEntity(type, id, URLEncoder.encode("$expand=" + expand.toString()));
+            JsonNode response = getEntity(type, id, "$expand=" + expand.toString());
             checkNested(response, expanded);
         }
     }
 
-    private void checkNestedExpandOnEntityWithSlash(EntityType type, String... expanded) throws IOException {
+    private void checkNestedExpandOnEntityWithSlash(EntityType type, String... expanded) throws Exception {
         for (int length = expanded.length; length > 1; length--) {
             StringBuilder expand = new StringBuilder();
             expand.append(expanded[0]);
@@ -472,7 +470,7 @@ public class ITExpand extends ConformanceTests implements TestUtil {
                 expand.append(expanded[i]);
             }
             String id = getCollection(type).get(value).get(0).get(idKey).asText();
-            JsonNode response = getEntity(type, id, URLEncoder.encode("$expand=" + expand.toString()));
+            JsonNode response = getEntity(type, id, "$expand=" + expand.toString());
             checkNested(response, expanded);
         }
     }

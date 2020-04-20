@@ -42,7 +42,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import java.net.URLDecoder;
 import java.util.HashSet;
 
 /**
@@ -81,14 +80,7 @@ public class STACollectionRequestHandler implements STARequestUtils {
     public CollectionWrapper readCollectionDirect(@PathVariable String collectionName,
                                                   HttpServletRequest request)
             throws STACRUDException {
-        String queryString = request.getQueryString();
-        QueryOptions options;
-        if (queryString != null) {
-            options = QUERY_OPTIONS_FACTORY.createQueryOptions(
-                    URLDecoder.decode(queryString.replaceAll("\\+", "%2b")));
-        } else {
-            options = QUERY_OPTIONS_FACTORY.createDummy();
-        }
+        QueryOptions options = decodeQueryString(request);
         return serviceRepository
                 .getEntityService(collectionName)
                 .getEntityCollection(options)
@@ -114,8 +106,7 @@ public class STACollectionRequestHandler implements STARequestUtils {
         String queryString = request.getQueryString();
         if (queryString != null) {
             // Parse QueryString normally and extract relevant Filters
-            QueryOptions options = QUERY_OPTIONS_FACTORY.createQueryOptions(
-                    URLDecoder.decode(queryString.replaceAll("\\+", "%2b")));
+            QueryOptions options = decodeQueryString(request);
             filters.add(options.getSkipFilter());
             filters.add(options.getTopFilter());
             filters.add(options.getCountFilter());
@@ -160,14 +151,7 @@ public class STACollectionRequestHandler implements STARequestUtils {
         String sourceType = split[0];
         String sourceId = split[1].replace(")", "");
 
-        String queryString = request.getQueryString();
-        QueryOptions options;
-        if (queryString != null) {
-            options = QUERY_OPTIONS_FACTORY.createQueryOptions(URLDecoder.decode(request.getQueryString()
-                                                                                        .replaceAll("\\+", "%2b")));
-        } else {
-            options = QUERY_OPTIONS_FACTORY.createDummy();
-        }
+        QueryOptions options = decodeQueryString(request);
         return serviceRepository.getEntityService(target)
                                 .getEntityCollectionByRelatedEntity(sourceId,
                                                                     sourceType,
@@ -213,8 +197,7 @@ public class STACollectionRequestHandler implements STARequestUtils {
         String queryString = request.getQueryString();
         if (queryString != null) {
             // Parse QueryString normally and extract relevant Filters
-            QueryOptions options = QUERY_OPTIONS_FACTORY.createQueryOptions(
-                    URLDecoder.decode(queryString.replaceAll("\\+", "%2b")));
+            QueryOptions options = decodeQueryString(request);
             filters.add(options.getSkipFilter());
             filters.add(options.getTopFilter());
             filters.add(options.getCountFilter());

@@ -37,6 +37,7 @@ import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.shetland.ogc.sta.exception.STANotFoundException;
@@ -51,7 +52,10 @@ import org.n52.sta.serdes.ObservedPropertySerDes;
 import org.n52.sta.serdes.SensorSerDes;
 import org.n52.sta.serdes.ThingSerDes;
 import org.n52.svalbard.odata.core.QueryOptionsFactory;
+import org.springframework.web.util.UriUtils;
 
+import javax.servlet.http.HttpServletRequest;
+import java.nio.charset.Charset;
 import java.util.regex.Pattern;
 
 public interface STARequestUtils extends StaConstants {
@@ -424,6 +428,15 @@ public interface STARequestUtils extends StaConstants {
     Pattern BY_SENSOR_PATTERN = Pattern.compile(IDENTIFIED_BY_SENSOR_REGEX);
     Pattern BY_OBSER_PROP_PATTERN = Pattern.compile(IDENTIFIED_BY_OBSERVED_PROPERTY_REGEX);
     Pattern BY_FOI_PATTERN = Pattern.compile(IDENTIFIED_BY_FEATURE_OF_INTEREST_REGEX);
+
+    default QueryOptions decodeQueryString(HttpServletRequest request) {
+        if (request.getQueryString() != null) {
+            String decoded = UriUtils.decode(request.getQueryString(), Charset.defaultCharset());
+            return QUERY_OPTIONS_FACTORY.createQueryOptions(decoded);
+        } else {
+            return QUERY_OPTIONS_FACTORY.createDummy();
+        }
+    }
 
     default Class collectionNameToClass(String collectionName) {
         switch (collectionName) {

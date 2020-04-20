@@ -35,9 +35,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.io.IOException;
-import java.net.URLEncoder;
-
 /**
  * Test filtering by related Entities. For now only checks that no error is returned.
  *
@@ -48,7 +45,7 @@ import java.net.URLEncoder;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ITFilterByRelatedEntities extends ConformanceTests implements TestUtil {
 
-    ITFilterByRelatedEntities(@Value("${server.rootUrl}") String rootUrl) throws IOException {
+    ITFilterByRelatedEntities(@Value("${server.rootUrl}") String rootUrl) throws Exception {
         super(rootUrl);
 
         // Create required test harness
@@ -77,77 +74,77 @@ public class ITFilterByRelatedEntities extends ConformanceTests implements TestU
     }
 
     @Test
-    public void testFilterOnSingleNavigationDoesNotThrowError() throws IOException {
-        getCollection(EntityType.THING, URLEncoder.encode("$filter=Datastreams/id eq '52N'"));
-        getCollection(EntityType.THING, URLEncoder.encode("$filter=Locations/id eq '52N'"));
-        getCollection(EntityType.THING, URLEncoder.encode("$filter=HistoricalLocations/id eq '52N'"));
-        getCollection(EntityType.LOCATION, URLEncoder.encode("$filter=Things/id eq '52N'"));
-        getCollection(EntityType.LOCATION, URLEncoder.encode("$filter=HistoricalLocations/id eq '52N'"));
-        getCollection(EntityType.HISTORICAL_LOCATION, URLEncoder.encode("$filter=Thing/id eq '52N'"));
-        getCollection(EntityType.HISTORICAL_LOCATION, URLEncoder.encode("$filter=Locations/id eq '52N'"));
-        getCollection(EntityType.DATASTREAM, URLEncoder.encode("$filter=Observations/id eq '52N'"));
-        getCollection(EntityType.DATASTREAM, URLEncoder.encode("$filter=ObservedProperty/id eq '52N'"));
-        getCollection(EntityType.DATASTREAM, URLEncoder.encode("$filter=Thing/id eq '52N'"));
-        getCollection(EntityType.DATASTREAM, URLEncoder.encode("$filter=Sensor/id eq '52N'"));
-        getCollection(EntityType.SENSOR, URLEncoder.encode("$filter=Datastreams/id eq '52N'"));
-        getCollection(EntityType.OBSERVATION, URLEncoder.encode("$filter=Datastream/id eq '52N'"));
-        getCollection(EntityType.OBSERVATION, URLEncoder.encode("$filter=FeatureOfInterest/id eq '52N'"));
-        getCollection(EntityType.OBSERVED_PROPERTY, URLEncoder.encode("$filter=Datastreams/id eq '52N'"));
-        getCollection(EntityType.FEATURE_OF_INTEREST, URLEncoder.encode("$filter=Observations/id eq '52N'"));
+    public void testFilterOnSingleNavigationDoesNotThrowError() throws Exception {
+        getCollection(EntityType.THING, "$filter=Datastreams/id eq '52N'");
+        getCollection(EntityType.THING, "$filter=Locations/id eq '52N'");
+        getCollection(EntityType.THING, "$filter=HistoricalLocations/id eq '52N'");
+        getCollection(EntityType.LOCATION, "$filter=Things/id eq '52N'");
+        getCollection(EntityType.LOCATION, "$filter=HistoricalLocations/id eq '52N'");
+        getCollection(EntityType.HISTORICAL_LOCATION, "$filter=Thing/id eq '52N'");
+        getCollection(EntityType.HISTORICAL_LOCATION, "$filter=Locations/id eq '52N'");
+        getCollection(EntityType.DATASTREAM, "$filter=Observations/id eq '52N'");
+        getCollection(EntityType.DATASTREAM, "$filter=ObservedProperty/id eq '52N'");
+        getCollection(EntityType.DATASTREAM, "$filter=Thing/id eq '52N'");
+        getCollection(EntityType.DATASTREAM, "$filter=Sensor/id eq '52N'");
+        getCollection(EntityType.SENSOR, "$filter=Datastreams/id eq '52N'");
+        getCollection(EntityType.OBSERVATION, "$filter=Datastream/id eq '52N'");
+        getCollection(EntityType.OBSERVATION, "$filter=FeatureOfInterest/id eq '52N'");
+        getCollection(EntityType.OBSERVED_PROPERTY, "$filter=Datastreams/id eq '52N'");
+        getCollection(EntityType.FEATURE_OF_INTEREST, "$filter=Observations/id eq '52N'");
     }
 
     @Test
-    public void testFilterOnDoubleNavigationDoesNotThrowError() throws IOException {
+    public void testFilterOnDoubleNavigationDoesNotThrowError() throws Exception {
 
-        getCollection(EntityType.THING, URLEncoder.encode("$filter=Datastreams/Observations/id eq '52N'"));
-        getCollection(EntityType.THING, URLEncoder.encode("$filter=Datastreams/ObservedProperty/id eq '52N'"));
-        getCollection(EntityType.THING, URLEncoder.encode("$filter=Datastreams/Thing/id eq '52N'"));
-        getCollection(EntityType.THING, URLEncoder.encode("$filter=Datastreams/Sensor/id eq '52N'"));
-        getCollection(EntityType.THING, URLEncoder.encode("$filter=Locations/Things/id eq '52N'"));
-        getCollection(EntityType.THING, URLEncoder.encode("$filter=Locations/HistoricalLocations/id eq '52N'"));
-        getCollection(EntityType.THING, URLEncoder.encode("$filter=HistoricalLocations/Thing/id eq '52N'"));
-        getCollection(EntityType.THING, URLEncoder.encode("$filter=HistoricalLocations/Locations/id eq '52N'"));
+        getCollection(EntityType.THING, "$filter=Datastreams/Observations/id eq '52N'");
+        getCollection(EntityType.THING, "$filter=Datastreams/ObservedProperty/id eq '52N'");
+        getCollection(EntityType.THING, "$filter=Datastreams/Thing/id eq '52N'");
+        getCollection(EntityType.THING, "$filter=Datastreams/Sensor/id eq '52N'");
+        getCollection(EntityType.THING, "$filter=Locations/Things/id eq '52N'");
+        getCollection(EntityType.THING, "$filter=Locations/HistoricalLocations/id eq '52N'");
+        getCollection(EntityType.THING, "$filter=HistoricalLocations/Thing/id eq '52N'");
+        getCollection(EntityType.THING, "$filter=HistoricalLocations/Locations/id eq '52N'");
 
-        getCollection(EntityType.LOCATION, URLEncoder.encode("$filter=Things/Datastreams/id eq '52N'"));
-        getCollection(EntityType.LOCATION, URLEncoder.encode("$filter=Things/Locations/id eq '52N'"));
-        getCollection(EntityType.LOCATION, URLEncoder.encode("$filter=HistoricalLocations/Thing/id eq '52N'"));
-        getCollection(EntityType.LOCATION, URLEncoder.encode("$filter=HistoricalLocations/Locations/id eq '52N'"));
+        getCollection(EntityType.LOCATION, "$filter=Things/Datastreams/id eq '52N'");
+        getCollection(EntityType.LOCATION, "$filter=Things/Locations/id eq '52N'");
+        getCollection(EntityType.LOCATION, "$filter=HistoricalLocations/Thing/id eq '52N'");
+        getCollection(EntityType.LOCATION, "$filter=HistoricalLocations/Locations/id eq '52N'");
 
-        getCollection(EntityType.HISTORICAL_LOCATION, URLEncoder.encode("$filter=Thing/Datastreams/id eq '52N'"));
-        getCollection(EntityType.HISTORICAL_LOCATION, URLEncoder.encode("$filter=Thing/Locations/id eq '52N'"));
-        getCollection(EntityType.HISTORICAL_LOCATION, URLEncoder.encode("$filter=Thing/HistoricalLocations/id eq " +
-                                                                                "'52N'"));
-        getCollection(EntityType.HISTORICAL_LOCATION, URLEncoder.encode("$filter=Locations/Things/id eq '52N'"));
+        getCollection(EntityType.HISTORICAL_LOCATION, "$filter=Thing/Datastreams/id eq '52N'");
+        getCollection(EntityType.HISTORICAL_LOCATION, "$filter=Thing/Locations/id eq '52N'");
+        getCollection(EntityType.HISTORICAL_LOCATION, "$filter=Thing/HistoricalLocations/id eq " +
+                "'52N'");
+        getCollection(EntityType.HISTORICAL_LOCATION, "$filter=Locations/Things/id eq '52N'");
         getCollection(EntityType.HISTORICAL_LOCATION,
-                      URLEncoder.encode("$filter=Locations/HistoricalLocations/id eq '52N'"));
+                      "$filter=Locations/HistoricalLocations/id eq '52N'");
 
-        getCollection(EntityType.DATASTREAM, URLEncoder.encode("$filter=Observations/Datastream/id eq '52N'"));
-        getCollection(EntityType.DATASTREAM, URLEncoder.encode("$filter=Observations/FeatureOfInterest/id eq '52N'"));
-        getCollection(EntityType.DATASTREAM, URLEncoder.encode("$filter=ObservedProperty/Datastreams/id eq '52N'"));
-        getCollection(EntityType.DATASTREAM, URLEncoder.encode("$filter=Thing/Datastreams/id eq '52N'"));
-        getCollection(EntityType.DATASTREAM, URLEncoder.encode("$filter=Thing/Locations/id eq '52N'"));
-        getCollection(EntityType.DATASTREAM, URLEncoder.encode("$filter=Thing/HistoricalLocations/id eq '52N'"));
-        getCollection(EntityType.DATASTREAM, URLEncoder.encode("$filter=Sensor/Datastreams/id eq '52N'"));
+        getCollection(EntityType.DATASTREAM, "$filter=Observations/Datastream/id eq '52N'");
+        getCollection(EntityType.DATASTREAM, "$filter=Observations/FeatureOfInterest/id eq '52N'");
+        getCollection(EntityType.DATASTREAM, "$filter=ObservedProperty/Datastreams/id eq '52N'");
+        getCollection(EntityType.DATASTREAM, "$filter=Thing/Datastreams/id eq '52N'");
+        getCollection(EntityType.DATASTREAM, "$filter=Thing/Locations/id eq '52N'");
+        getCollection(EntityType.DATASTREAM, "$filter=Thing/HistoricalLocations/id eq '52N'");
+        getCollection(EntityType.DATASTREAM, "$filter=Sensor/Datastreams/id eq '52N'");
 
-        getCollection(EntityType.SENSOR, URLEncoder.encode("$filter=Datastreams/Sensor/id eq '52N'"));
-        getCollection(EntityType.SENSOR, URLEncoder.encode("$filter=Datastreams/Thing/id eq '52N'"));
-        getCollection(EntityType.SENSOR, URLEncoder.encode("$filter=Datastreams/ObservedProperty/id eq '52N'"));
-        getCollection(EntityType.SENSOR, URLEncoder.encode("$filter=Datastreams/Observations/id eq '52N'"));
+        getCollection(EntityType.SENSOR, "$filter=Datastreams/Sensor/id eq '52N'");
+        getCollection(EntityType.SENSOR, "$filter=Datastreams/Thing/id eq '52N'");
+        getCollection(EntityType.SENSOR, "$filter=Datastreams/ObservedProperty/id eq '52N'");
+        getCollection(EntityType.SENSOR, "$filter=Datastreams/Observations/id eq '52N'");
 
-        getCollection(EntityType.OBSERVATION, URLEncoder.encode("$filter=Datastream/Sensor/id eq '52N'"));
-        getCollection(EntityType.OBSERVATION, URLEncoder.encode("$filter=Datastream/Thing/id eq '52N'"));
-        getCollection(EntityType.OBSERVATION, URLEncoder.encode("$filter=Datastream/ObservedProperty/id eq '52N'"));
-        getCollection(EntityType.OBSERVATION, URLEncoder.encode("$filter=Datastream/Observations/id eq '52N'"));
-        getCollection(EntityType.OBSERVATION, URLEncoder.encode("$filter=FeatureOfInterest/Observations/id eq '52N'"));
+        getCollection(EntityType.OBSERVATION, "$filter=Datastream/Sensor/id eq '52N'");
+        getCollection(EntityType.OBSERVATION, "$filter=Datastream/Thing/id eq '52N'");
+        getCollection(EntityType.OBSERVATION, "$filter=Datastream/ObservedProperty/id eq '52N'");
+        getCollection(EntityType.OBSERVATION, "$filter=Datastream/Observations/id eq '52N'");
+        getCollection(EntityType.OBSERVATION, "$filter=FeatureOfInterest/Observations/id eq '52N'");
 
-        getCollection(EntityType.OBSERVED_PROPERTY, URLEncoder.encode("$filter=Datastreams/Sensor/id eq '52N'"));
-        getCollection(EntityType.OBSERVED_PROPERTY, URLEncoder.encode("$filter=Datastreams/Thing/id eq '52N'"));
+        getCollection(EntityType.OBSERVED_PROPERTY, "$filter=Datastreams/Sensor/id eq '52N'");
+        getCollection(EntityType.OBSERVED_PROPERTY, "$filter=Datastreams/Thing/id eq '52N'");
         getCollection(EntityType.OBSERVED_PROPERTY,
-                      URLEncoder.encode("$filter=Datastreams/ObservedProperty/id eq '52N'"));
-        getCollection(EntityType.OBSERVED_PROPERTY, URLEncoder.encode("$filter=Datastreams/Observations/id eq '52N'"));
+                      "$filter=Datastreams/ObservedProperty/id eq '52N'");
+        getCollection(EntityType.OBSERVED_PROPERTY, "$filter=Datastreams/Observations/id eq '52N'");
 
-        getCollection(EntityType.FEATURE_OF_INTEREST, URLEncoder.encode("$filter=Observations/Datastream/id eq '52N'"));
+        getCollection(EntityType.FEATURE_OF_INTEREST, "$filter=Observations/Datastream/id eq '52N'");
         getCollection(EntityType.FEATURE_OF_INTEREST,
-                      URLEncoder.encode("$filter=Observations/FeatureOfInterest/id eq '52N'"));
+                      "$filter=Observations/FeatureOfInterest/id eq '52N'");
     }
 }

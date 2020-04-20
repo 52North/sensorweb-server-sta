@@ -40,7 +40,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import java.net.URLDecoder;
 import java.util.HashSet;
 
 /**
@@ -79,14 +78,7 @@ public class STAEntityRequestHandler implements STARequestUtils {
         validateResource(request.getRequestURI().substring(request.getContextPath().length()), serviceRepository);
 
         String entityId = id.substring(1, id.length() - 1);
-        String queryString = request.getQueryString();
-        QueryOptions options;
-        if (queryString != null) {
-            options = QUERY_OPTIONS_FACTORY.createQueryOptions(
-                    URLDecoder.decode(request.getQueryString().replaceAll("\\+", "%2b")));
-        } else {
-            options = QUERY_OPTIONS_FACTORY.createDummy();
-        }
+        QueryOptions options = decodeQueryString(request);
         return serviceRepository.getEntityService(entity)
                                 .getEntity(entityId, options);
     }
@@ -144,14 +136,7 @@ public class STAEntityRequestHandler implements STARequestUtils {
         String sourceType = entity.substring(0, entity.indexOf("("));
         String sourceId = entity.substring(sourceType.length() + 1, entity.length() - 1);
 
-        String queryString = request.getQueryString();
-        QueryOptions options;
-        if (queryString != null) {
-            options = QUERY_OPTIONS_FACTORY.createQueryOptions(
-                    URLDecoder.decode(request.getQueryString().replaceAll("\\+", "%2b")));
-        } else {
-            options = QUERY_OPTIONS_FACTORY.createDummy();
-        }
+        QueryOptions options = decodeQueryString(request);
         return serviceRepository.getEntityService(target)
                                 .getEntityByRelatedEntity(sourceId,
                                                           sourceType,

@@ -51,7 +51,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -103,10 +102,10 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
      * Checks all Mqtt Subscriptions dealing with Things
      *
      * @throws MqttException when an error occurred
-     * @throws IOException   when an error occurred
+     * @throws Exception     when an error occurred
      */
     @Test
-    public void checkThings() throws MqttException, IOException {
+    public void checkThings() throws MqttException, Exception {
         init();
         /* Thing */
         EntityType type = EntityType.THING;
@@ -130,10 +129,10 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
      * Checks all Mqtt Subscriptions dealing with Locations
      *
      * @throws MqttException when an error occurred
-     * @throws IOException   when an error occurred
+     * @throws Exception     when an error occurred
      */
     @Test
-    public void checkLocations() throws MqttException, IOException {
+    public void checkLocations() throws MqttException, Exception {
         init();
         /* Location */
         EntityType type = EntityType.LOCATION;
@@ -160,10 +159,10 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
      * Checks all Mqtt Subscriptions dealing with Sensors
      *
      * @throws MqttException when an error occurred
-     * @throws IOException   when an error occurred
+     * @throws Exception     when an error occurred
      */
     @Test
-    public void checkSensors() throws MqttException, IOException {
+    public void checkSensors() throws MqttException, Exception {
         init();
         /* Sensor */
         Map<String, String> patchMap = new HashMap<>();
@@ -185,15 +184,14 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
         testSelectSubscriptionOnEntityPatch(patchMap, type, source);
     }
 
-
     /**
      * Checks all Mqtt Subscriptions dealing with Sensors
      *
      * @throws MqttException when an error occurred
-     * @throws IOException   when an error occurred
+     * @throws Exception     when an error occurred
      */
     @Test
-    public void checkObservedProperties() throws MqttException, IOException {
+    public void checkObservedProperties() throws MqttException, Exception {
         init();
         /* ObservedProperty */
         Map<String, String> patchMap = new HashMap<>();
@@ -218,10 +216,10 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
      * Checks all Mqtt Subscriptions dealing with FeaturesOfInterest
      *
      * @throws MqttException when an error occurred
-     * @throws IOException   when an error occurred
+     * @throws Exception     when an error occurred
      */
     @Test
-    public void checkFOI() throws MqttException, IOException {
+    public void checkFOI() throws MqttException, Exception {
         init();
         /* FeatureOfInterest */
         Map<String, String> patchMap = new HashMap<>();
@@ -248,10 +246,10 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
      * Checks all Mqtt Subscriptions dealing with Datastreams
      *
      * @throws MqttException when an error occurred
-     * @throws IOException   when an error occurred
+     * @throws Exception     when an error occurred
      */
     @Test
-    public void checkDatastreams() throws MqttException, IOException {
+    public void checkDatastreams() throws MqttException, Exception {
         init();
         /* Thing */
         JsonNode entity = postEntity(EntityType.THING, demoThing);
@@ -300,10 +298,10 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
      * Checks all Mqtt Subscriptions dealing with Observations
      *
      * @throws MqttException when an error occurred
-     * @throws IOException   when an error occurred
+     * @throws Exception     when an error occurred
      */
     @Test
-    public void checkObservations() throws MqttException, IOException {
+    public void checkObservations() throws MqttException, Exception {
         init();
         /* Thing */
         JsonNode entity = postEntity(EntityType.THING, demoThing);
@@ -366,7 +364,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
         testSelectSubscriptionOnEntityPatch(patchMap, type, source);
     }
 
-    private void deleteCollection(EntityType type) throws IOException {
+    private void deleteCollection(EntityType type) throws Exception {
         for (JsonNode elem : getCollection(type).get("value")) {
             deleteEntity(type, elem.get(idKey).asText(), false);
         }
@@ -393,7 +391,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
 
     private String demoObsProp = "{\n"
             + "  \"name\": \"DewPoint Temperature\",\n"
-            + "  \"definition\": \"http://dbpedia.org/page/Dew_point" + System.currentTimeMillis() +"\",\n"
+            + "  \"definition\": \"http://dbpedia.org/page/Dew_point" + System.currentTimeMillis() + "\",\n"
             + "  \"description\": \"The dewpoint temperature \"\n"
             + "}";
 
@@ -418,10 +416,10 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
      * @param type   Type of the Entity
      * @param source Entity to be created
      * @throws MqttException if an error occurred
-     * @throws IOException   if an error occurred
+     * @throws Exception     if an error occurred
      */
     private void testCollectionSubscriptionOnNewEntityCreation(EntityType type, String source)
-            throws MqttException, IOException {
+            throws MqttException, Exception {
         MessageListener listener = new MessageListener();
         mqttClient.setCallback(listener);
         mqttClient.subscribe(endpoints.get(type));
@@ -449,11 +447,11 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
      * @param type     Type of the Entity
      * @param source   Entity to be created
      * @throws MqttException if an error occurred
-     * @throws IOException   if an error occurred
+     * @throws Exception     if an error occurred
      */
     private void testCollectionSubscriptionOnExistingEntityPatch(Map<String, String> patchMap,
                                                                  EntityType type,
-                                                                 String source) throws MqttException, IOException {
+                                                                 String source) throws MqttException, Exception {
         MessageListener listener = new MessageListener();
         JsonNode entity = postEntity(type, source);
         mqttClient.setCallback(listener);
@@ -485,12 +483,12 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
      * @param type     Type of the Entity
      * @param source   Entity to be created
      * @throws MqttException if an error occurred
-     * @throws IOException   if an error occurred
+     * @throws Exception     if an error occurred
      */
     private void testPropertySubscriptionOnEntityPatch(Map<String, String> patchMap,
                                                        EntityType type,
                                                        String source)
-            throws MqttException, IOException {
+            throws MqttException, Exception {
         MessageListener listener = new MessageListener();
         JsonNode entity = postEntity(type, source);
         mqttClient.setCallback(listener);
@@ -525,10 +523,10 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
      * @param type     Type of the Entity
      * @param source   Entity to be created
      * @throws MqttException if an error occurred
-     * @throws IOException   if an error occurred
+     * @throws Exception     if an error occurred
      */
     private void testSelectSubscriptionOnNewEntityCreation(Map<String, String> patchMap, EntityType type, String source)
-            throws IOException, MqttException {
+            throws Exception, MqttException {
         MessageListener listener = new MessageListener();
         mqttClient.setCallback(listener);
 
@@ -568,10 +566,10 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
      * @param type     Type of the Entity
      * @param source   Entity to be created
      * @throws MqttException if an error occurred
-     * @throws IOException   if an error occurred
+     * @throws Exception     if an error occurred
      */
     private void testSelectSubscriptionOnEntityPatch(Map<String, String> patchMap, EntityType type, String source)
-            throws MqttException, IOException {
+            throws MqttException, Exception {
         MessageListener listener = new MessageListener();
         mqttClient.setCallback(listener);
         JsonNode entity = postEntity(type, source);
@@ -602,7 +600,9 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
                         Assertions.assertEquals(Double.valueOf(mapper.readTree(patchMap.get(name)).get(name).asText()),
                                                 Double.valueOf(mqtt.get(name).asText()));
                     } else if (name.contains("Time")) {
-                        Assertions.assertEquals(new TimeInstant(DateTime.parse(mapper.readTree(patchMap.get(name)).get(name).asText())),
+                        Assertions.assertEquals(new TimeInstant(DateTime.parse(mapper.readTree(patchMap.get(name))
+                                                                                     .get(name)
+                                                                                     .asText())),
                                                 new TimeInstant(DateTime.parse(mqtt.get(name).asText())));
                     } else {
                         Assertions.assertEquals(mapper.readTree(patchMap.get(name)).get(name).asText(),

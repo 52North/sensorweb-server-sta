@@ -44,8 +44,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.io.IOException;
-
 /**
  * Implements Conformance Tests according to Section A.7 in OGC SensorThings API Part 1: Sensing (15-078r6)
  *
@@ -65,6 +63,13 @@ public class ITConformance7 extends ConformanceTests implements TestUtil {
         super(rootUrl);
     }
 
+    @AfterAll static void disconnectClient() throws MqttException {
+        if (mqttClient.isConnected()) {
+            mqttClient.disconnect();
+            mqttClient.close();
+        }
+    }
+
     private void connectClient() throws MqttException {
         MqttClient client = new MqttClient("tcp://localhost:1883", "ITConformance7");
         MqttConnectOptions options = new MqttConnectOptions();
@@ -73,14 +78,7 @@ public class ITConformance7 extends ConformanceTests implements TestUtil {
         mqttClient = client;
     }
 
-    @AfterAll static void disconnectClient() throws MqttException {
-        if (mqttClient.isConnected()) {
-            mqttClient.disconnect();
-            mqttClient.close();
-        }
-    }
-
-    void init() throws IOException, MqttException {
+    void init() throws Exception {
         connectClient();
         // Create required test harness
         // Requires POST with deep insert to work.
@@ -160,7 +158,7 @@ public class ITConformance7 extends ConformanceTests implements TestUtil {
     }
 
     @Test
-    public void postObservation() throws MqttException, IOException {
+    public void postObservation() throws Exception {
         init();
         String observation = "{\n" +
                 "    \"result\": 0.29,\n" +

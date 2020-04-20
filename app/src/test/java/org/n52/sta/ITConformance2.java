@@ -104,7 +104,7 @@ public class ITConformance2 extends ConformanceTests implements TestUtil {
     }
 
     @Test
-    public void testSelect() throws IOException {
+    public void testSelect() throws Exception {
         for (String collectionName : STAEntityDefinition.ALLCOLLECTIONS) {
             STAEntityDefinition definition = STAEntityDefinition.definitions.get(collectionName);
             String prefix = "$select=";

@@ -41,7 +41,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -67,7 +66,7 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
     }
 
     @Test
-    public void createEntities() throws IOException {
+    public void createEntities() throws Exception {
         /* Thing */
         String urlParameters = "{"
                 + "\"name\":\"Test Thing\","
@@ -287,7 +286,7 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
      * service.
      */
     @Test
-    public void createEntitiesWithDeepInsert() throws IOException {
+    public void createEntitiesWithDeepInsert() throws Exception {
         /* Thing */
         String urlParameters = "{\n"
                 + "  \"name\": \"Office Building\",\n"
@@ -478,7 +477,7 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
     }
 
     @Test
-    public void createInvalidEntitiesWithDeepInsert() throws IOException {
+    public void createInvalidEntitiesWithDeepInsert() throws Exception {
         String urlParameters = "{\n"
                 + "  \"name\": \"Office Building\",\n"
                 + "  \"description\": \"Office Building\",\n"
@@ -684,7 +683,7 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
     }
 
     @Test()
-    public void createInvalidEntities() throws IOException {
+    public void createInvalidEntities() throws Exception {
         // Create necessary structures
         /* Thing */
         String urlParameters = "{"
@@ -824,7 +823,7 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
      * rest must be unchanged.
      */
     @Test()
-    public void patchEntities() throws IOException {
+    public void patchEntities() throws Exception {
         // Create Entities
 
         /* Thing */
@@ -998,7 +997,7 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
      * 404.
      */
     @Test()
-    public void deleteEntities() throws IOException {
+    public void deleteEntities() throws Exception {
         Map<EntityType, String[]> entitiesForDelete = createEntitiesForDelete();
         deleteEntity(EntityType.THING, entitiesForDelete.get(EntityType.THING)[0], false);
         List<EntityType> entityTypes = new ArrayList<>();
@@ -1132,7 +1131,7 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
      * is invalid if the body contains related entities as inline content.
      */
     @Test
-    public void invalidPatchEntities() throws IOException {
+    public void invalidPatchEntities() throws Exception {
         /**
          * Thing *
          */
@@ -1281,7 +1280,7 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
      * response should be 404.
      **/
     @Test
-    public void deleteNonexistentEntities() throws IOException {
+    public void deleteNonexistentEntities() throws Exception {
         deleteNonexistentEntity(EntityType.THING);
         deleteNonexistentEntity(EntityType.LOCATION);
         deleteNonexistentEntity(EntityType.HISTORICAL_LOCATION);
@@ -1295,7 +1294,7 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
     /**
      * Create entities as a pre-process for testing DELETE.
      */
-    private Map<EntityType, String[]> createEntitiesForDelete() throws IOException {
+    private Map<EntityType, String[]> createEntitiesForDelete() throws Exception {
         deleteEverythings();
 
         //First Thing
@@ -1375,7 +1374,7 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
      * @return The id of FOI
      */
     private String checkAutomaticInsertionOfFOI(String obsId, JsonNode locationObj, String expectedFOIId)
-            throws IOException {
+            throws Exception {
         String urlString = "Observations(" + obsId + ")/FeatureOfInterest";
         JsonNode result = getEntity(urlString);
         String id = result.get(idKey).asText();
@@ -1410,7 +1409,7 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
     private String checkRelatedEntity(EntityType sourceType,
                                       String sourceId,
                                       EntityType targetType,
-                                      JsonNode reference) throws IOException {
+                                      JsonNode reference) throws Exception {
 
         String url = String.format(getRelatedEntityEndpoint(sourceType, targetType), sourceId);
         JsonNode result = getEntity(url);
@@ -1482,7 +1481,7 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
      *
      * @param entityTypes List of entity types
      */
-    private void checkNotExisting(List<EntityType> entityTypes) throws IOException {
+    private void checkNotExisting(List<EntityType> entityTypes) throws Exception {
         for (EntityType entityType : entityTypes) {
             JsonNode response = getEntity(endpoints.get(entityType));
             Assertions.assertTrue(
@@ -1492,7 +1491,7 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
         }
     }
 
-    private void checkExisting(List<EntityType> entityTypes) throws IOException {
+    private void checkExisting(List<EntityType> entityTypes) throws Exception {
         for (EntityType entityType : entityTypes) {
             JsonNode response = getEntity(endpoints.get(entityType));
             Assertions.assertTrue(
