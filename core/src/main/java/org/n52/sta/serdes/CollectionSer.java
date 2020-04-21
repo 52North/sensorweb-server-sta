@@ -54,7 +54,7 @@ public class CollectionSer extends StdSerializer<CollectionWrapper> {
         gen.writeNumberField("@iot.count", value.getTotalEntityCount());
 
         // We have multiple pages
-        if (value.hasNextPage()) {
+        if (value.hasNextPage() && !value.getEntities().isEmpty()) {
             QueryOptions queryOptions = value.getEntities().get(0).getQueryOptions();
             long oldTop = queryOptions.getTopFilter().getValue();
             long oldSkip = queryOptions.hasSkipFilter() ? queryOptions.getSkipFilter().getValue() : 0L;

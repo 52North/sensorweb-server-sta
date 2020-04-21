@@ -158,9 +158,13 @@ public class ObservationService extends
             CollectionWrapper wrapper = getCollectionWrapper(queryOptions, pages);
             // Create Page manually as we used Database Pagination and are not sure how many Entities there are in
             // the Database
-            long count = getRepository().count();
-            return new CollectionWrapper(count, wrapper.getEntities(),
-                                         identifierList.size() + pageableRequest.getOffset() < count);
+            if (pages.isEmpty()) {
+                return wrapper;
+            } else {
+                long count = getRepository().count();
+                return new CollectionWrapper(count, wrapper.getEntities(),
+                                             identifierList.size() + pageableRequest.getOffset() < count);
+            }
         } catch (RuntimeException e) {
             throw new STACRUDException(e.getMessage(), e);
         }
