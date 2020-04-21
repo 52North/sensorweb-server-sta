@@ -79,8 +79,7 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
             } else if (LOCATIONS.equals(propertyName)) {
                 Subquery<HistoricalLocationEntity> sq = query.subquery(HistoricalLocationEntity.class);
                 Root<LocationEntity> location = sq.from(LocationEntity.class);
-                Join<Object, Object> join = root.join(HistoricalLocationEntity.PROPERTY_LOCATIONS, JoinType.INNER);
-
+                Join<Object, Object> join = root.join(HistoricalLocationEntity.PROPERTY_LOCATIONS);
                 sq.select(location.get(DescribableEntity.PROPERTY_ID))
                   .where(((Specification<LocationEntity>) propertyValue).toPredicate(location,
                                                                                      query,

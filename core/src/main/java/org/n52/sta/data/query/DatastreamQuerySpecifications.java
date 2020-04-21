@@ -215,9 +215,8 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
                 }
                 case OBSERVATIONS: {
                     Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
-                    Root<DatastreamEntity> datastreamEntityRoot = query.from(DatastreamEntity.class);
                     Join<DatastreamEntity, DatasetEntity> join =
-                            datastreamEntityRoot.join(DatastreamEntity.PROPERTY_DATASETS);
+                            root.join(DatastreamEntity.PROPERTY_DATASETS);
                     Root<DataEntity> data = sq.from(DataEntity.class);
                     sq.select(data.get(DataEntity.PROPERTY_DATASET))
                       .where(((Specification<DataEntity>) propertyValue).toPredicate(data,

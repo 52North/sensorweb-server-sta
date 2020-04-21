@@ -29,6 +29,7 @@
 
 package org.n52.sta.data.query;
 
+import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
@@ -77,18 +78,15 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
                                                                                   Specification<?> propertyValue) {
         return (root, query, builder) -> {
             try {
-                Root<PlatformEntity> platformEntityRoot = query.from(PlatformEntity.class);
                 switch (propertyName) {
                 case DATASTREAMS: {
                     Subquery<DatastreamEntity> subquery = query.subquery(DatastreamEntity.class);
                     Root<DatastreamEntity> datastream = subquery.from(DatastreamEntity.class);
-                    final Join<PlatformEntity, DatastreamEntity> join =
-                            platformEntityRoot.join(PlatformEntity.PROPERTY_DATASTREAMS, JoinType.INNER);
-                    subquery.select(join)
+                    subquery.select(datastream.get(DatastreamEntity.PROPERTY_THING))
                             .where(((Specification<DatastreamEntity>) propertyValue).toPredicate(datastream,
                                                                                                  query,
                                                                                                  builder));
-                    return builder.in(join).value(subquery);
+                    return builder.in(root.get(PlatformEntity.PROPERTY_ID)).value(subquery);
                 }
                 case LOCATIONS: {
                     Subquery<LocationEntity> subquery = query.subquery(LocationEntity.class);
@@ -98,7 +96,7 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
                                                                                                query,
                                                                                                builder));
                     final Join<PlatformEntity, LocationEntity> join =
-                            platformEntityRoot.join(PlatformEntity.PROPERTY_LOCATIONS, JoinType.INNER);
+                            root.join(PlatformEntity.PROPERTY_LOCATIONS, JoinType.INNER);
                     return builder.in(join.get(DescribableEntity.PROPERTY_ID)).value(subquery);
                 }
                 case HISTORICAL_LOCATIONS:
@@ -111,7 +109,7 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
                                     query,
                                     builder));
                     final Join<PlatformEntity, HistoricalLocationEntity> join =
-                            platformEntityRoot.join(PlatformEntity.PROPERTY_HISTORICAL_LOCATIONS, JoinType.INNER);
+                            root.join(PlatformEntity.PROPERTY_HISTORICAL_LOCATIONS);
                     return builder.in(join.get(DescribableEntity.PROPERTY_ID)).value(subquery);
                 default:
                     throw new STAInvalidFilterExpressionException("Could not find related property: " + propertyName);

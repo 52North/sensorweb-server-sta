@@ -29,6 +29,8 @@
 
 package org.n52.sta;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -75,76 +77,237 @@ public class ITFilterByRelatedEntities extends ConformanceTests implements TestU
 
     @Test
     public void testFilterOnSingleNavigationDoesNotThrowError() throws Exception {
-        getCollection(EntityType.THING, "$filter=Datastreams/id eq '52N'");
-        getCollection(EntityType.THING, "$filter=Locations/id eq '52N'");
-        getCollection(EntityType.THING, "$filter=HistoricalLocations/id eq '52N'");
-        getCollection(EntityType.LOCATION, "$filter=Things/id eq '52N'");
-        getCollection(EntityType.LOCATION, "$filter=HistoricalLocations/id eq '52N'");
-        getCollection(EntityType.HISTORICAL_LOCATION, "$filter=Thing/id eq '52N'");
-        getCollection(EntityType.HISTORICAL_LOCATION, "$filter=Locations/id eq '52N'");
-        getCollection(EntityType.DATASTREAM, "$filter=Observations/id eq '52N'");
-        getCollection(EntityType.DATASTREAM, "$filter=ObservedProperty/id eq '52N'");
-        getCollection(EntityType.DATASTREAM, "$filter=Thing/id eq '52N'");
-        getCollection(EntityType.DATASTREAM, "$filter=Sensor/id eq '52N'");
-        getCollection(EntityType.SENSOR, "$filter=Datastreams/id eq '52N'");
-        getCollection(EntityType.OBSERVATION, "$filter=Datastream/id eq '52N'");
-        getCollection(EntityType.OBSERVATION, "$filter=FeatureOfInterest/id eq '52N'");
-        getCollection(EntityType.OBSERVED_PROPERTY, "$filter=Datastreams/id eq '52N'");
-        getCollection(EntityType.FEATURE_OF_INTEREST, "$filter=Observations/id eq '52N'");
+        int thingCount = getCollection(EntityType.THING).get(value).size();
+        int locationCount = getCollection(EntityType.LOCATION).get(value).size();
+        int historicallocationCount = getCollection(EntityType.HISTORICAL_LOCATION).get(value).size();
+        int datastreamCount = getCollection(EntityType.DATASTREAM).get(value).size();
+        int sensorCount = getCollection(EntityType.SENSOR).get(value).size();
+        int observationCount = getCollection(EntityType.OBSERVATION).get(value).size();
+        int obspropCount = getCollection(EntityType.OBSERVED_PROPERTY).get(value).size();
+        int foiCount = getCollection(EntityType.FEATURE_OF_INTEREST).get(value).size();
+        assertEmptyResponse(getCollection(EntityType.THING, "$filter=Datastreams/id eq '52N'"));
+        assertEmptyResponse(getCollection(EntityType.THING, "$filter=Locations/id eq '52N'"));
+        assertEmptyResponse(getCollection(EntityType.THING, "$filter=HistoricalLocations/id eq '52N'"));
+        assertEmptyResponse(getCollection(EntityType.LOCATION, "$filter=Things/id eq '52N'"));
+        assertEmptyResponse(getCollection(EntityType.LOCATION, "$filter=HistoricalLocations/id eq '52N'"));
+        assertEmptyResponse(getCollection(EntityType.HISTORICAL_LOCATION, "$filter=Thing/id eq '52N'"));
+        assertEmptyResponse(getCollection(EntityType.HISTORICAL_LOCATION, "$filter=Locations/id eq '52N'"));
+        assertEmptyResponse(getCollection(EntityType.DATASTREAM, "$filter=Observations/id eq '52N'"));
+        assertEmptyResponse(getCollection(EntityType.DATASTREAM, "$filter=ObservedProperty/id eq '52N'"));
+        assertEmptyResponse(getCollection(EntityType.DATASTREAM, "$filter=Thing/id eq '52N'"));
+        assertEmptyResponse(getCollection(EntityType.DATASTREAM, "$filter=Sensor/id eq '52N'"));
+        assertEmptyResponse(getCollection(EntityType.SENSOR, "$filter=Datastreams/id eq '52N'"));
+        assertEmptyResponse(getCollection(EntityType.OBSERVATION, "$filter=Datastream/id eq '52N'"));
+        assertEmptyResponse(getCollection(EntityType.OBSERVATION, "$filter=FeatureOfInterest/id eq '52N'"));
+        assertEmptyResponse(getCollection(EntityType.OBSERVED_PROPERTY, "$filter=Datastreams/id eq '52N'"));
+        assertEmptyResponse(getCollection(EntityType.FEATURE_OF_INTEREST, "$filter=Observations/id eq '52N'"));
+
+        assertResponseCount(getCollection(EntityType.THING, "$filter=Datastreams/id eq '52N'"),
+                            thingCount);
+        assertResponseCount(getCollection(EntityType.THING, "$filter=Locations/id eq '52N'"),
+                            thingCount);
+        assertResponseCount(getCollection(EntityType.THING, "$filter=HistoricalLocations/id eq '52N'"),
+                            thingCount);
+        assertResponseCount(getCollection(EntityType.LOCATION, "$filter=Things/id eq '52N'"),
+                            locationCount);
+        assertResponseCount(getCollection(EntityType.LOCATION, "$filter=HistoricalLocations/id eq '52N'"),
+                            locationCount);
+        assertResponseCount(getCollection(EntityType.HISTORICAL_LOCATION, "$filter=Thing/id eq '52N'"),
+                            historicallocationCount);
+        assertResponseCount(getCollection(EntityType.HISTORICAL_LOCATION, "$filter=Locations/id eq '52N'"),
+                            historicallocationCount);
+        assertResponseCount(getCollection(EntityType.DATASTREAM, "$filter=Observations/id eq '52N'"),
+                            datastreamCount);
+        assertResponseCount(getCollection(EntityType.DATASTREAM, "$filter=ObservedProperty/id eq '52N'"),
+                            datastreamCount);
+        assertResponseCount(getCollection(EntityType.DATASTREAM, "$filter=Thing/id eq '52N'"),
+                            datastreamCount);
+        assertResponseCount(getCollection(EntityType.DATASTREAM, "$filter=Sensor/id eq '52N'"),
+                            datastreamCount);
+        assertResponseCount(getCollection(EntityType.SENSOR, "$filter=Datastreams/id eq '52N'"),
+                            sensorCount);
+        assertResponseCount(getCollection(EntityType.OBSERVATION, "$filter=Datastream/id eq '52N'"),
+                            observationCount);
+        assertResponseCount(getCollection(EntityType.OBSERVATION, "$filter=FeatureOfInterest/id eq '52N'"),
+                            observationCount);
+        assertResponseCount(getCollection(EntityType.OBSERVED_PROPERTY, "$filter=Datastreams/id eq '52N'"),
+                            obspropCount);
+        assertResponseCount(getCollection(EntityType.FEATURE_OF_INTEREST, "$filter=Observations/id eq '52N'"),
+                            foiCount);
     }
 
     @Test
-    public void testFilterOnDoubleNavigationDoesNotThrowError() throws Exception {
+    public void testFilterOnDoubleNavigationHasCorrectCount() throws Exception {
+        int thingCount = getCollection(EntityType.THING).get(value).size();
+        int locationCount = getCollection(EntityType.LOCATION).get(value).size();
+        int historicallocationCount = getCollection(EntityType.HISTORICAL_LOCATION).get(value).size();
+        int datastreamCount = getCollection(EntityType.DATASTREAM).get(value).size();
+        int sensorCount = getCollection(EntityType.SENSOR).get(value).size();
+        int observationCount = getCollection(EntityType.OBSERVATION).get(value).size();
+        int obspropCount = getCollection(EntityType.OBSERVED_PROPERTY).get(value).size();
+        int foiCount = getCollection(EntityType.FEATURE_OF_INTEREST).get(value).size();
 
-        getCollection(EntityType.THING, "$filter=Datastreams/Observations/id eq '52N'");
-        getCollection(EntityType.THING, "$filter=Datastreams/ObservedProperty/id eq '52N'");
-        getCollection(EntityType.THING, "$filter=Datastreams/Thing/id eq '52N'");
-        getCollection(EntityType.THING, "$filter=Datastreams/Sensor/id eq '52N'");
-        getCollection(EntityType.THING, "$filter=Locations/Things/id eq '52N'");
-        getCollection(EntityType.THING, "$filter=Locations/HistoricalLocations/id eq '52N'");
-        getCollection(EntityType.THING, "$filter=HistoricalLocations/Thing/id eq '52N'");
-        getCollection(EntityType.THING, "$filter=HistoricalLocations/Locations/id eq '52N'");
+        assertEmptyResponse(getCollection(EntityType.THING, "$filter=Datastreams/Observations/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.THING, "$filter=Datastreams/Observations/id ne '52N'"),
+                            thingCount);
+        assertEmptyResponse(getCollection(EntityType.THING, "$filter=Datastreams/ObservedProperty/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.THING, "$filter=Datastreams/ObservedProperty/id ne '52N'"),
+                            thingCount);
+        assertEmptyResponse(getCollection(EntityType.THING, "$filter=Datastreams/Thing/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.THING, "$filter=Datastreams/Thing/id ne '52N'"),
+                            thingCount);
+        assertEmptyResponse(getCollection(EntityType.THING, "$filter=Datastreams/Sensor/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.THING, "$filter=Datastreams/Sensor/id ne '52N'"),
+                            thingCount);
+        assertEmptyResponse(getCollection(EntityType.THING, "$filter=Locations/Things/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.THING, "$filter=Locations/Things/id ne '52N'"),
+                            thingCount);
+        assertEmptyResponse(getCollection(EntityType.THING, "$filter=Locations/HistoricalLocations/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.THING, "$filter=Locations/HistoricalLocations/id ne '52N'"),
+                            thingCount);
+        assertEmptyResponse(getCollection(EntityType.THING, "$filter=HistoricalLocations/Thing/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.THING, "$filter=HistoricalLocations/Thing/id ne '52N'"),
+                            thingCount);
+        assertEmptyResponse(getCollection(EntityType.THING, "$filter=HistoricalLocations/Locations/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.THING, "$filter=HistoricalLocations/Locations/id ne '52N'"),
+                            thingCount);
 
-        getCollection(EntityType.LOCATION, "$filter=Things/Datastreams/id eq '52N'");
-        getCollection(EntityType.LOCATION, "$filter=Things/Locations/id eq '52N'");
-        getCollection(EntityType.LOCATION, "$filter=HistoricalLocations/Thing/id eq '52N'");
-        getCollection(EntityType.LOCATION, "$filter=HistoricalLocations/Locations/id eq '52N'");
+        assertEmptyResponse(getCollection(EntityType.LOCATION, "$filter=Things/Datastreams/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.LOCATION, "$filter=Things/Datastreams/id ne '52N'"),
+                            locationCount);
+        assertEmptyResponse(getCollection(EntityType.LOCATION, "$filter=Things/Locations/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.LOCATION, "$filter=Things/Locations/id ne '52N'"),
+                            locationCount);
+        assertEmptyResponse(getCollection(EntityType.LOCATION, "$filter=HistoricalLocations/Thing/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.LOCATION, "$filter=HistoricalLocations/Thing/id ne '52N'"),
+                            locationCount);
+        assertEmptyResponse(getCollection(EntityType.LOCATION, "$filter=HistoricalLocations/Locations/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.LOCATION, "$filter=HistoricalLocations/Locations/id ne '52N'"),
+                            locationCount);
 
-        getCollection(EntityType.HISTORICAL_LOCATION, "$filter=Thing/Datastreams/id eq '52N'");
-        getCollection(EntityType.HISTORICAL_LOCATION, "$filter=Thing/Locations/id eq '52N'");
-        getCollection(EntityType.HISTORICAL_LOCATION, "$filter=Thing/HistoricalLocations/id eq " +
-                "'52N'");
-        getCollection(EntityType.HISTORICAL_LOCATION, "$filter=Locations/Things/id eq '52N'");
-        getCollection(EntityType.HISTORICAL_LOCATION,
-                      "$filter=Locations/HistoricalLocations/id eq '52N'");
+        assertEmptyResponse(getCollection(EntityType.HISTORICAL_LOCATION, "$filter=Thing/Datastreams/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.HISTORICAL_LOCATION, "$filter=Thing/Datastreams/id ne '52N'"),
+                            historicallocationCount);
+        assertEmptyResponse(getCollection(EntityType.HISTORICAL_LOCATION, "$filter=Thing/Locations/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.HISTORICAL_LOCATION, "$filter=Thing/Locations/id ne '52N'"),
+                            historicallocationCount);
+        assertEmptyResponse(getCollection(EntityType.HISTORICAL_LOCATION,
+                                          "$filter=Thing/HistoricalLocations/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.HISTORICAL_LOCATION,
+                                          "$filter=Thing/HistoricalLocations/id ne '52N'"),
+                            historicallocationCount);
+        assertEmptyResponse(getCollection(EntityType.HISTORICAL_LOCATION, "$filter=Locations/Things/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.HISTORICAL_LOCATION, "$filter=Locations/Things/id ne '52N'"),
+                            historicallocationCount);
+        assertEmptyResponse(getCollection(EntityType.HISTORICAL_LOCATION,
+                                          "$filter=Locations/HistoricalLocations/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.HISTORICAL_LOCATION,
+                                          "$filter=Locations/HistoricalLocations/id ne '52N'"),
+                            historicallocationCount);
 
-        getCollection(EntityType.DATASTREAM, "$filter=Observations/Datastream/id eq '52N'");
-        getCollection(EntityType.DATASTREAM, "$filter=Observations/FeatureOfInterest/id eq '52N'");
-        getCollection(EntityType.DATASTREAM, "$filter=ObservedProperty/Datastreams/id eq '52N'");
-        getCollection(EntityType.DATASTREAM, "$filter=Thing/Datastreams/id eq '52N'");
-        getCollection(EntityType.DATASTREAM, "$filter=Thing/Locations/id eq '52N'");
-        getCollection(EntityType.DATASTREAM, "$filter=Thing/HistoricalLocations/id eq '52N'");
-        getCollection(EntityType.DATASTREAM, "$filter=Sensor/Datastreams/id eq '52N'");
+        assertEmptyResponse(getCollection(EntityType.DATASTREAM, "$filter=Observations/Datastream/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.DATASTREAM, "$filter=Observations/Datastream/id ne '52N'"),
+                            datastreamCount);
+        assertEmptyResponse(getCollection(EntityType.DATASTREAM, "$filter=Observations/FeatureOfInterest/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.DATASTREAM, "$filter=Observations/FeatureOfInterest/id ne '52N'"),
+                            datastreamCount);
+        assertEmptyResponse(getCollection(EntityType.DATASTREAM, "$filter=ObservedProperty/Datastreams/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.DATASTREAM, "$filter=ObservedProperty/Datastreams/id ne '52N'"),
+                            datastreamCount);
+        assertEmptyResponse(getCollection(EntityType.DATASTREAM, "$filter=Thing/Datastreams/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.DATASTREAM, "$filter=Thing/Datastreams/id ne '52N'"),
+                            datastreamCount);
+        assertEmptyResponse(getCollection(EntityType.DATASTREAM, "$filter=Thing/Locations/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.DATASTREAM, "$filter=Thing/Locations/id ne '52N'"),
+                            datastreamCount);
+        assertEmptyResponse(getCollection(EntityType.DATASTREAM, "$filter=Thing/HistoricalLocations/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.DATASTREAM, "$filter=Thing/HistoricalLocations/id ne '52N'"),
+                            datastreamCount);
+        assertEmptyResponse(getCollection(EntityType.DATASTREAM, "$filter=Sensor/Datastreams/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.DATASTREAM, "$filter=Sensor/Datastreams/id ne '52N'"),
+                            datastreamCount);
 
-        getCollection(EntityType.SENSOR, "$filter=Datastreams/Sensor/id eq '52N'");
-        getCollection(EntityType.SENSOR, "$filter=Datastreams/Thing/id eq '52N'");
-        getCollection(EntityType.SENSOR, "$filter=Datastreams/ObservedProperty/id eq '52N'");
-        getCollection(EntityType.SENSOR, "$filter=Datastreams/Observations/id eq '52N'");
+        assertEmptyResponse(getCollection(EntityType.SENSOR, "$filter=Datastreams/Sensor/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.SENSOR, "$filter=Datastreams/Sensor/id ne '52N'"),
+                            sensorCount);
+        assertEmptyResponse(getCollection(EntityType.SENSOR, "$filter=Datastreams/Thing/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.SENSOR, "$filter=Datastreams/Thing/id ne '52N'"),
+                            sensorCount);
+        assertEmptyResponse(getCollection(EntityType.SENSOR, "$filter=Datastreams/ObservedProperty/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.SENSOR, "$filter=Datastreams/ObservedProperty/id ne '52N'"),
+                            sensorCount);
+        assertEmptyResponse(getCollection(EntityType.SENSOR, "$filter=Datastreams/Observations/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.SENSOR, "$filter=Datastreams/Observations/id ne '52N'"),
+                            sensorCount);
 
-        getCollection(EntityType.OBSERVATION, "$filter=Datastream/Sensor/id eq '52N'");
-        getCollection(EntityType.OBSERVATION, "$filter=Datastream/Thing/id eq '52N'");
-        getCollection(EntityType.OBSERVATION, "$filter=Datastream/ObservedProperty/id eq '52N'");
-        getCollection(EntityType.OBSERVATION, "$filter=Datastream/Observations/id eq '52N'");
-        getCollection(EntityType.OBSERVATION, "$filter=FeatureOfInterest/Observations/id eq '52N'");
+        assertEmptyResponse(getCollection(EntityType.OBSERVATION, "$filter=Datastream/Sensor/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.OBSERVATION, "$filter=Datastream/Sensor/id ne '52N'"),
+                            observationCount);
+        assertEmptyResponse(getCollection(EntityType.OBSERVATION, "$filter=Datastream/Thing/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.OBSERVATION, "$filter=Datastream/Thing/id ne '52N'"),
+                            observationCount);
+        assertEmptyResponse(getCollection(EntityType.OBSERVATION, "$filter=Datastream/ObservedProperty/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.OBSERVATION, "$filter=Datastream/ObservedProperty/id ne '52N'"),
+                            observationCount);
+        assertEmptyResponse(getCollection(EntityType.OBSERVATION, "$filter=Datastream/Observations/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.OBSERVATION, "$filter=Datastream/Observations/id ne '52N'"),
+                            observationCount);
+        assertEmptyResponse(getCollection(EntityType.OBSERVATION,
+                                          "$filter=FeatureOfInterest/Observations/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.OBSERVATION, "$filter=FeatureOfInterest/Observations/id ne '52N'"),
+                            observationCount);
 
-        getCollection(EntityType.OBSERVED_PROPERTY, "$filter=Datastreams/Sensor/id eq '52N'");
-        getCollection(EntityType.OBSERVED_PROPERTY, "$filter=Datastreams/Thing/id eq '52N'");
-        getCollection(EntityType.OBSERVED_PROPERTY,
-                      "$filter=Datastreams/ObservedProperty/id eq '52N'");
-        getCollection(EntityType.OBSERVED_PROPERTY, "$filter=Datastreams/Observations/id eq '52N'");
+        assertEmptyResponse(getCollection(EntityType.OBSERVED_PROPERTY, "$filter=Datastreams/Sensor/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.OBSERVED_PROPERTY, "$filter=Datastreams/Sensor/id ne '52N'"),
+                            obspropCount);
+        assertEmptyResponse(getCollection(EntityType.OBSERVED_PROPERTY, "$filter=Datastreams/Thing/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.OBSERVED_PROPERTY, "$filter=Datastreams/Thing/id ne '52N'"),
+                            obspropCount);
+        assertEmptyResponse(getCollection(EntityType.OBSERVED_PROPERTY,
+                                          "$filter=Datastreams/ObservedProperty/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.OBSERVED_PROPERTY,
+                                          "$filter=Datastreams/ObservedProperty/id ne '52N'"),
+                            obspropCount);
+        assertEmptyResponse(getCollection(EntityType.OBSERVED_PROPERTY,
+                                          "$filter=Datastreams/Observations/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.OBSERVED_PROPERTY, "$filter=Datastreams/Observations/id ne '52N'"),
+                            obspropCount);
 
-        getCollection(EntityType.FEATURE_OF_INTEREST, "$filter=Observations/Datastream/id eq '52N'");
-        getCollection(EntityType.FEATURE_OF_INTEREST,
-                      "$filter=Observations/FeatureOfInterest/id eq '52N'");
+
+        assertEmptyResponse(getCollection(EntityType.FEATURE_OF_INTEREST,
+                                          "$filter=Observations/Datastream/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.FEATURE_OF_INTEREST,
+                                          "$filter=Observations/Datastream/id ne '52N'"),
+                            foiCount);
+        assertEmptyResponse(getCollection(EntityType.FEATURE_OF_INTEREST,
+                                          "$filter=Observations/FeatureOfInterest/id eq '52N'"));
+        assertResponseCount(getCollection(EntityType.FEATURE_OF_INTEREST,
+                                          "$filter=Observations/FeatureOfInterest/id ne '52N'"),
+                            foiCount);
+    }
+
+    private void assertEmptyResponse(JsonNode response) {
+        Assertions.assertTrue(
+                0 == response.get("@iot.count").asDouble(),
+                "Entity count is not zero although it should be"
+        );
+        Assertions.assertTrue(
+                response.get("value").isEmpty(),
+                "Entity is returned although it shouldn't"
+        );
+    }
+
+    private void assertResponseCount(JsonNode response, int count) {
+        if (count == 0) {
+            Assertions.fail("trying to test empty response with exact matcher");
+        }
+        Assertions.assertTrue(
+                count == response.get("@iot.count").asDouble(),
+                "Entity count is not zero although it should be"
+        );
+        Assertions.assertFalse(
+                response.get("value").isEmpty(),
+                "Entity is not returned although it should"
+        );
     }
 }
