@@ -393,7 +393,6 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends Identifier
                     sort = Sort.by(sortProperty.isSetSortOrder() &&
                                            sortProperty.getSortOrder().equals(FilterConstants.SortOrder.DESC) ?
                                            Sort.Direction.DESC : Sort.Direction.ASC,
-
                                    checkPropertyName(sortProperty.getValueReference()));
                     first = false;
                 } else {

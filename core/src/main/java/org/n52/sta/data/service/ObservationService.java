@@ -57,6 +57,7 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.ObservationEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.sta.data.OffsetLimitBasedPageRequest;
 import org.n52.sta.data.query.DatasetQuerySpecifications;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
@@ -74,6 +75,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
@@ -142,13 +144,23 @@ public class ObservationService extends
     @Override
     public CollectionWrapper getEntityCollection(QueryOptions queryOptions) throws STACRUDException {
         try {
+            OffsetLimitBasedPageRequest pageableRequest = createPageableRequest(queryOptions);
             List<String> identifierList = getRepository()
                     .identifierList(getFilterPredicate(DataEntity.class, queryOptions),
-                                    createPageableRequest(queryOptions),
+                                    pageableRequest,
                                     IDENTIFIER);
-            List<DataEntity<?>> pages = getRepository().findAll(oQS.withIdentifier(identifierList),
-                                                                EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
-            return getCollectionWrapper(queryOptions, new PageImpl<>(pages));
+            Page<DataEntity<?>> pages = getRepository().findAll(
+                    oQS.withIdentifier(identifierList),
+                    new OffsetLimitBasedPageRequest(0,
+                                                    pageableRequest.getPageSize(),
+                                                    pageableRequest.getSort()),
+                    EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
+            CollectionWrapper wrapper = getCollectionWrapper(queryOptions, pages);
+            // Create Page manually as we used Database Pagination and are not sure how many Entities there are in
+            // the Database
+            long count = getRepository().count();
+            return new CollectionWrapper(count, wrapper.getEntities(),
+                                         identifierList.size() + pageableRequest.getOffset() < count);
         } catch (RuntimeException e) {
             throw new STACRUDException(e.getMessage(), e);
         }
