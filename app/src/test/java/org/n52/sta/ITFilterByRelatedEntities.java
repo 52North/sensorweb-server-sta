@@ -102,37 +102,37 @@ public class ITFilterByRelatedEntities extends ConformanceTests implements TestU
         assertEmptyResponse(getCollection(EntityType.OBSERVED_PROPERTY, "$filter=Datastreams/id eq '52N'"));
         assertEmptyResponse(getCollection(EntityType.FEATURE_OF_INTEREST, "$filter=Observations/id eq '52N'"));
 
-        assertResponseCount(getCollection(EntityType.THING, "$filter=Datastreams/id eq '52N'"),
+        assertResponseCount(getCollection(EntityType.THING, "$filter=Datastreams/id ne '52N'"),
                             thingCount);
-        assertResponseCount(getCollection(EntityType.THING, "$filter=Locations/id eq '52N'"),
+        assertResponseCount(getCollection(EntityType.THING, "$filter=Locations/id ne '52N'"),
                             thingCount);
-        assertResponseCount(getCollection(EntityType.THING, "$filter=HistoricalLocations/id eq '52N'"),
+        assertResponseCount(getCollection(EntityType.THING, "$filter=HistoricalLocations/id ne '52N'"),
                             thingCount);
-        assertResponseCount(getCollection(EntityType.LOCATION, "$filter=Things/id eq '52N'"),
+        assertResponseCount(getCollection(EntityType.LOCATION, "$filter=Things/id ne '52N'"),
                             locationCount);
-        assertResponseCount(getCollection(EntityType.LOCATION, "$filter=HistoricalLocations/id eq '52N'"),
+        assertResponseCount(getCollection(EntityType.LOCATION, "$filter=HistoricalLocations/id ne '52N'"),
                             locationCount);
-        assertResponseCount(getCollection(EntityType.HISTORICAL_LOCATION, "$filter=Thing/id eq '52N'"),
+        assertResponseCount(getCollection(EntityType.HISTORICAL_LOCATION, "$filter=Thing/id ne '52N'"),
                             historicallocationCount);
-        assertResponseCount(getCollection(EntityType.HISTORICAL_LOCATION, "$filter=Locations/id eq '52N'"),
+        assertResponseCount(getCollection(EntityType.HISTORICAL_LOCATION, "$filter=Locations/id ne '52N'"),
                             historicallocationCount);
-        assertResponseCount(getCollection(EntityType.DATASTREAM, "$filter=Observations/id eq '52N'"),
+        assertResponseCount(getCollection(EntityType.DATASTREAM, "$filter=Observations/id ne '52N'"),
                             datastreamCount);
-        assertResponseCount(getCollection(EntityType.DATASTREAM, "$filter=ObservedProperty/id eq '52N'"),
+        assertResponseCount(getCollection(EntityType.DATASTREAM, "$filter=ObservedProperty/id ne '52N'"),
                             datastreamCount);
-        assertResponseCount(getCollection(EntityType.DATASTREAM, "$filter=Thing/id eq '52N'"),
+        assertResponseCount(getCollection(EntityType.DATASTREAM, "$filter=Thing/id ne '52N'"),
                             datastreamCount);
-        assertResponseCount(getCollection(EntityType.DATASTREAM, "$filter=Sensor/id eq '52N'"),
+        assertResponseCount(getCollection(EntityType.DATASTREAM, "$filter=Sensor/id ne '52N'"),
                             datastreamCount);
-        assertResponseCount(getCollection(EntityType.SENSOR, "$filter=Datastreams/id eq '52N'"),
+        assertResponseCount(getCollection(EntityType.SENSOR, "$filter=Datastreams/id ne '52N'"),
                             sensorCount);
-        assertResponseCount(getCollection(EntityType.OBSERVATION, "$filter=Datastream/id eq '52N'"),
+        assertResponseCount(getCollection(EntityType.OBSERVATION, "$filter=Datastream/id ne '52N'"),
                             observationCount);
-        assertResponseCount(getCollection(EntityType.OBSERVATION, "$filter=FeatureOfInterest/id eq '52N'"),
+        assertResponseCount(getCollection(EntityType.OBSERVATION, "$filter=FeatureOfInterest/id ne '52N'"),
                             observationCount);
-        assertResponseCount(getCollection(EntityType.OBSERVED_PROPERTY, "$filter=Datastreams/id eq '52N'"),
+        assertResponseCount(getCollection(EntityType.OBSERVED_PROPERTY, "$filter=Datastreams/id ne '52N'"),
                             obspropCount);
-        assertResponseCount(getCollection(EntityType.FEATURE_OF_INTEREST, "$filter=Observations/id eq '52N'"),
+        assertResponseCount(getCollection(EntityType.FEATURE_OF_INTEREST, "$filter=Observations/id ne '52N'"),
                             foiCount);
     }
 

@@ -29,7 +29,6 @@
 
 package org.n52.sta.data.query;
 
-import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
