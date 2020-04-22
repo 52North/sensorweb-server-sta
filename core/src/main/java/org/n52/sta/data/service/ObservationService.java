@@ -76,7 +76,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
@@ -174,8 +173,8 @@ public class ObservationService extends
     }
 
     private CollectionWrapper getEntityCollectionWrapperByIdentifierList(List<String> identifierList,
-                                                                        OffsetLimitBasedPageRequest pageableRequest,
-                                                                        QueryOptions queryOptions) {
+                                                                         OffsetLimitBasedPageRequest pageableRequest,
+                                                                         QueryOptions queryOptions) {
         Page<DataEntity<?>> pages = getRepository().findAll(oQS.withIdentifier(identifierList),
                                                             new OffsetLimitBasedPageRequest(0,
                                                                                             pageableRequest.getPageSize(),
