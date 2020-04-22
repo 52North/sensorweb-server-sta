@@ -180,15 +180,13 @@ public class MessageBusRepository<T, I extends Serializable>
             query.select(root.get(columnName));
         }
         TypedQuery<String> typedQuery = em.createQuery(query);
-        List<String> resultList;
         if (pageable.isUnpaged()) {
             return new PageImpl<>(typedQuery.getResultList()).get().collect(Collectors.toList());
         } else {
             typedQuery.setFirstResult((int) pageable.getOffset());
             typedQuery.setMaxResults(pageable.getPageSize());
-            resultList = typedQuery.getResultList();
+            return typedQuery.getResultList();
         }
-        return resultList;
     }
 
     @Transactional

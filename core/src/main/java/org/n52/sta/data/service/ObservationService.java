@@ -144,11 +144,12 @@ public class ObservationService extends
     public CollectionWrapper getEntityCollection(QueryOptions queryOptions) throws STACRUDException {
         try {
             OffsetLimitBasedPageRequest pageableRequest = createPageableRequest(queryOptions);
+            Specification<DataEntity<?>> spec = getFilterPredicate(DataEntity.class, queryOptions);
             List<String> identifierList = getRepository()
-                    .identifierList(getFilterPredicate(DataEntity.class, queryOptions),
+                    .identifierList(spec,
                                     pageableRequest,
                                     IDENTIFIER);
-            return getEntityCollectionWrapperByIdentifierList(identifierList, pageableRequest, queryOptions);
+            return getEntityCollectionWrapperByIdentifierList(identifierList, pageableRequest, queryOptions, spec);
         } catch (RuntimeException e) {
             throw new STACRUDException(e.getMessage(), e);
         }
@@ -161,12 +162,14 @@ public class ObservationService extends
 
         try {
             OffsetLimitBasedPageRequest pageableRequest = createPageableRequest(queryOptions);
-            List<String> identifierList = getRepository()
-                    .identifierList(byRelatedEntityFilter(relatedId, relatedType, null)
-                                            .and(getFilterPredicate(DataEntity.class, queryOptions)),
-                                    createPageableRequest(queryOptions),
-                                    IDENTIFIER);
-            return getEntityCollectionWrapperByIdentifierList(identifierList, pageableRequest, queryOptions);
+            Specification<DataEntity<?>> spec =
+                    byRelatedEntityFilter(relatedId, relatedType, null)
+                            .and(getFilterPredicate(DataEntity.class, queryOptions));
+
+            List<String> identifierList = getRepository().identifierList(spec,
+                                                                         createPageableRequest(queryOptions),
+                                                                         IDENTIFIER);
+            return getEntityCollectionWrapperByIdentifierList(identifierList, pageableRequest, queryOptions, spec);
         } catch (RuntimeException e) {
             throw new STACRUDException(e.getMessage(), e);
         }
@@ -174,12 +177,14 @@ public class ObservationService extends
 
     private CollectionWrapper getEntityCollectionWrapperByIdentifierList(List<String> identifierList,
                                                                          OffsetLimitBasedPageRequest pageableRequest,
-                                                                         QueryOptions queryOptions) {
-        Page<DataEntity<?>> pages = getRepository().findAll(oQS.withIdentifier(identifierList),
-                                                            new OffsetLimitBasedPageRequest(0,
-                                                                                            pageableRequest.getPageSize(),
-                                                                                            pageableRequest.getSort()),
-                                                            EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
+                                                                         QueryOptions queryOptions,
+                                                                         Specification<DataEntity<?>> spec) {
+        Page<DataEntity<?>> pages = getRepository().findAll(
+                oQS.withIdentifier(identifierList),
+                new OffsetLimitBasedPageRequest(0,
+                                                pageableRequest.getPageSize(),
+                                                pageableRequest.getSort()),
+                EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
 
         CollectionWrapper wrapper = getCollectionWrapper(queryOptions, pages);
         // Create Page manually as we used Database Pagination and are not sure how many Entities there are in
@@ -187,7 +192,7 @@ public class ObservationService extends
         if (pages.isEmpty()) {
             return wrapper;
         } else {
-            long count = getRepository().count(oQS.withIdentifier(identifierList));
+            long count = getRepository().count(spec);
             return new CollectionWrapper(count, wrapper.getEntities(),
                                          identifierList.size() + pageableRequest.getOffset() < count);
         }
