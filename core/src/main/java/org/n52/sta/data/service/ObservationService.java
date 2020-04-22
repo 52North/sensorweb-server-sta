@@ -149,22 +149,7 @@ public class ObservationService extends
                     .identifierList(getFilterPredicate(DataEntity.class, queryOptions),
                                     pageableRequest,
                                     IDENTIFIER);
-            Page<DataEntity<?>> pages = getRepository().findAll(
-                    oQS.withIdentifier(identifierList),
-                    new OffsetLimitBasedPageRequest(0,
-                                                    pageableRequest.getPageSize(),
-                                                    pageableRequest.getSort()),
-                    EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
-            CollectionWrapper wrapper = getCollectionWrapper(queryOptions, pages);
-            // Create Page manually as we used Database Pagination and are not sure how many Entities there are in
-            // the Database
-            if (pages.isEmpty()) {
-                return wrapper;
-            } else {
-                long count = getRepository().count();
-                return new CollectionWrapper(count, wrapper.getEntities(),
-                                             identifierList.size() + pageableRequest.getOffset() < count);
-            }
+            return getEntityCollectionWrapperByIdentifierList(identifierList, pageableRequest, queryOptions);
         } catch (RuntimeException e) {
             throw new STACRUDException(e.getMessage(), e);
         }
@@ -176,17 +161,36 @@ public class ObservationService extends
             throws STACRUDException {
 
         try {
+            OffsetLimitBasedPageRequest pageableRequest = createPageableRequest(queryOptions);
             List<String> identifierList = getRepository()
                     .identifierList(byRelatedEntityFilter(relatedId, relatedType, null)
                                             .and(getFilterPredicate(DataEntity.class, queryOptions)),
                                     createPageableRequest(queryOptions),
                                     IDENTIFIER);
-
-            List<DataEntity<?>> pages = getRepository().findAll(oQS.withIdentifier(identifierList),
-                                                                EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
-            return getCollectionWrapper(queryOptions, new PageImpl<>(pages));
+            return getEntityCollectionWrapperByIdentifierList(identifierList, pageableRequest, queryOptions);
         } catch (RuntimeException e) {
             throw new STACRUDException(e.getMessage(), e);
+        }
+    }
+
+    private CollectionWrapper getEntityCollectionWrapperByIdentifierList(List<String> identifierList,
+                                                                        OffsetLimitBasedPageRequest pageableRequest,
+                                                                        QueryOptions queryOptions) {
+        Page<DataEntity<?>> pages = getRepository().findAll(oQS.withIdentifier(identifierList),
+                                                            new OffsetLimitBasedPageRequest(0,
+                                                                                            pageableRequest.getPageSize(),
+                                                                                            pageableRequest.getSort()),
+                                                            EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
+
+        CollectionWrapper wrapper = getCollectionWrapper(queryOptions, pages);
+        // Create Page manually as we used Database Pagination and are not sure how many Entities there are in
+        // the Database
+        if (pages.isEmpty()) {
+            return wrapper;
+        } else {
+            long count = getRepository().count(oQS.withIdentifier(identifierList));
+            return new CollectionWrapper(count, wrapper.getEntities(),
+                                         identifierList.size() + pageableRequest.getOffset() < count);
         }
     }
 
