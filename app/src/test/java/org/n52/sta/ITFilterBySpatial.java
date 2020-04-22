@@ -85,11 +85,11 @@ public class ITFilterBySpatial extends ConformanceTests implements TestUtil {
 
         response = getCollection(EntityType.LOCATION,
                                  "$filter=not st_equals(location, geography'POINT (30 10)')");
-        assertSingleResponse(response);
+        assertResponseCount(response,1);
 
         response = getCollection(EntityType.LOCATION,
                                  "$filter=st_equals(location, geography'POINT (52 52)')");
-        assertSingleResponse(response);
+        assertResponseCount(response,1);
 
         response = getCollection(EntityType.LOCATION,
                                  "$filter=not st_equals(location, geography'POINT (52 52)')");
@@ -101,7 +101,7 @@ public class ITFilterBySpatial extends ConformanceTests implements TestUtil {
         init();
         JsonNode response = getCollection(EntityType.LOCATION,
                                           "$filter=st_disjoint(location, geography'POINT (30 10)')");
-        assertSingleResponse(response);
+        assertResponseCount(response,1);
 
         response = getCollection(EntityType.LOCATION,
                                  "$filter=not st_disjoint(location, geography'POINT (30 10)')");
@@ -113,7 +113,7 @@ public class ITFilterBySpatial extends ConformanceTests implements TestUtil {
 
         response = getCollection(EntityType.LOCATION,
                                  "$filter=not st_disjoint(location, geography'POINT (52 52)')");
-        assertSingleResponse(response);
+        assertResponseCount(response,1);
     }
 
     @Test
@@ -127,12 +127,12 @@ public class ITFilterBySpatial extends ConformanceTests implements TestUtil {
         response = getCollection(
                 EntityType.LOCATION,
                 "$filter=not st_touches(location, geography'LINESTRING(0 0, 52 52, 0 2)')");
-        assertSingleResponse(response);
+        assertResponseCount(response,1);
 
         response = getCollection(
                 EntityType.LOCATION,
                 "$filter=st_touches(location, geography'LINESTRING(0 0, 40 40, 52 52)')");
-        assertSingleResponse(response);
+        assertResponseCount(response,1);
 
         response = getCollection(
                 EntityType.LOCATION,
@@ -151,12 +151,12 @@ public class ITFilterBySpatial extends ConformanceTests implements TestUtil {
         response = getCollection(
                 EntityType.LOCATION,
                 "$filter=not st_within(location, geography'POLYGON((0 0, 0 40, 40 40, 40 0, 0 0))')");
-        assertSingleResponse(response);
+        assertResponseCount(response,1);
 
         response = getCollection(
                 EntityType.LOCATION,
                 "$filter=st_within(location, geography'POLYGON((0 0, 0 60, 60 60, 60 0, 0 0))')");
-        assertSingleResponse(response);
+        assertResponseCount(response,1);
 
         response = getCollection(
                 EntityType.LOCATION,
@@ -176,7 +176,7 @@ public class ITFilterBySpatial extends ConformanceTests implements TestUtil {
         response = getCollection(
                 EntityType.FEATURE_OF_INTEREST,
                 "$filter=not st_overlaps(feature, geography'POLYGON((0 0, 0 40, 40 40, 40 0, 0 0))')");
-        assertSingleResponse(response);
+        assertResponseCount(response,1);
 
         response = getCollection(
                 EntityType.FEATURE_OF_INTEREST,
@@ -186,7 +186,7 @@ public class ITFilterBySpatial extends ConformanceTests implements TestUtil {
         response = getCollection(
                 EntityType.FEATURE_OF_INTEREST,
                 "$filter=not st_overlaps(feature, geography'POLYGON((1 1, 1 60, 60 60, 60 1, 1 1))')");
-        assertSingleResponse(response);
+        assertResponseCount(response,1);
     }
 
     @Test
@@ -200,12 +200,12 @@ public class ITFilterBySpatial extends ConformanceTests implements TestUtil {
         response = getCollection(
                 EntityType.FEATURE_OF_INTEREST,
                 "$filter=not st_crosses(feature, geography'LINESTRING (10 10, 11 11)')");
-        assertSingleResponse(response);
+        assertResponseCount(response,1);
 
         response = getCollection(
                 EntityType.FEATURE_OF_INTEREST,
                 "$filter=st_crosses(feature, geography'LINESTRING (0 52, 52 0)')");
-        assertSingleResponse(response);
+        assertResponseCount(response,1);
 
         response = getCollection(
                 EntityType.FEATURE_OF_INTEREST,
@@ -224,12 +224,12 @@ public class ITFilterBySpatial extends ConformanceTests implements TestUtil {
         response = getCollection(
                 EntityType.FEATURE_OF_INTEREST,
                 "$filter=not st_intersects(feature, geography'LINESTRING (10 10, 11 11)')");
-        assertSingleResponse(response);
+        assertResponseCount(response,1);
 
         response = getCollection(
                 EntityType.FEATURE_OF_INTEREST,
                 "$filter=st_intersects(feature, geography'LINESTRING (0 52, 52 52, 1 1)')");
-        assertSingleResponse(response);
+        assertResponseCount(response,1);
 
         response = getCollection(
                 EntityType.FEATURE_OF_INTEREST,
@@ -248,7 +248,7 @@ public class ITFilterBySpatial extends ConformanceTests implements TestUtil {
         response = getCollection(
                 EntityType.LOCATION,
                 "$filter=not st_contains(location, geography'POLYGON((0 0, 0 40, 40 40, 40 0, 0 0))')");
-        assertSingleResponse(response);
+        assertResponseCount(response,1);
 
         response = getCollection(
                 EntityType.LOCATION,
@@ -258,7 +258,7 @@ public class ITFilterBySpatial extends ConformanceTests implements TestUtil {
         response = getCollection(
                 EntityType.LOCATION,
                 "$filter=not st_contains(location, geography'POLYGON((0 0, 0 60, 60 60, 60 0, 0 0))')");
-        assertSingleResponse(response);
+        assertResponseCount(response,1);
     }
 
     @Test
@@ -281,7 +281,7 @@ public class ITFilterBySpatial extends ConformanceTests implements TestUtil {
         response = getCollection(
                 EntityType.FEATURE_OF_INTEREST,
                 "$filter=geo.length(feature) gt 5");
-        assertSingleResponse(response);
+        assertResponseCount(response,1);
 
         response = getCollection(
                 EntityType.FEATURE_OF_INTEREST,
@@ -291,13 +291,13 @@ public class ITFilterBySpatial extends ConformanceTests implements TestUtil {
         response = getCollection(
                 EntityType.FEATURE_OF_INTEREST,
                 "$filter=geo.length(geography'LINESTRING (0 0, 0 10)') gt 5");
-        assertSingleResponse(response);
+        assertResponseCount(response,1);
 
         /*
         response = getCollection(
                 EntityType.FEATURE_OF_INTEREST,
                 "$filter=geo.length(geography'LINESTRING (0 0, 0 10)') eq 1105854.83323437"));
-        assertSingleResponse(response);
+        assertResponseCount(response,1);
         */
     }
 
@@ -308,18 +308,18 @@ public class ITFilterBySpatial extends ConformanceTests implements TestUtil {
         response = getCollection(
                 EntityType.FEATURE_OF_INTEREST,
                 "$filter=geo.distance(feature, geography'POINT(0 0)') eq 0");
-        assertSingleResponse(response);
+        assertResponseCount(response,1);
 
         response = getCollection(
                 EntityType.FEATURE_OF_INTEREST,
                 "$filter=geo.distance(feature, geography'POINT(0 0)') ne -99995");
-        assertSingleResponse(response);
+        assertResponseCount(response,1);
 
         response = getCollection(
                 EntityType.FEATURE_OF_INTEREST,
                 "$filter=geo.distance(geography'LINESTRING (0 0, 0 10)'," +
                         " geography'POINT(0 0)') eq 0");
-        assertSingleResponse(response);
+        assertResponseCount(response,1);
 
         response = getCollection(
                 EntityType.FEATURE_OF_INTEREST,
@@ -345,40 +345,17 @@ public class ITFilterBySpatial extends ConformanceTests implements TestUtil {
         response = getCollection(
                 EntityType.FEATURE_OF_INTEREST,
                 "$filter=not geo.intersects(feature, geography'LINESTRING (10 10, 11 11)')");
-        assertSingleResponse(response);
+        assertResponseCount(response,1);
 
         response = getCollection(
                 EntityType.FEATURE_OF_INTEREST,
                 "$filter=geo.intersects(feature, geography'LINESTRING (0 52, 52 52, 1 1)')");
-        assertSingleResponse(response);
+        assertResponseCount(response,1);
 
         response = getCollection(
                 EntityType.FEATURE_OF_INTEREST,
                 "$filter=not geo.intersects(feature, geography'LINESTRING (0 52, 52 52, 1 1)')");
         assertEmptyResponse(response);
-    }
-
-    private void assertEmptyResponse(JsonNode response) {
-        Assertions.assertTrue(
-                0 == response.get("@iot.count").asDouble(),
-                "Entity count is not zero although it should be"
-        );
-        Assertions.assertTrue(
-                response.get("value").isEmpty(),
-                "Entity is returned although it shouldn't"
-        );
-    }
-
-    private void assertSingleResponse(JsonNode response) {
-        Assertions.assertTrue(
-                1 == response.get("@iot.count").asDouble(),
-                "Entity count is not one although it should be"
-        );
-        Assertions.assertFalse(
-                response.get("value").isEmpty(),
-                "Entity is not returned although it should be"
-        );
-
     }
 
 }

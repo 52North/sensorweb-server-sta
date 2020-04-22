@@ -60,6 +60,7 @@ public interface TestUtil {
         OBSERVED_PROPERTY("ObservedProperties");
 
         String val;
+
         EntityType(String value) {
             val = value;
         }
@@ -73,6 +74,7 @@ public interface TestUtil {
             return null;
         }
     }
+
 
     String jsonMimeType = "application/json";
     String idKey = "@iot.id";
@@ -290,6 +292,40 @@ public interface TestUtil {
 
     default String escape(String val) {
         return "\"" + val + "\"";
+    }
+
+    default void assertEmptyResponse(JsonNode response) {
+        Assertions.assertTrue(
+                0 == response.get("@iot.count").asDouble(),
+                "Entity count is not zero although it should be"
+        );
+        Assertions.assertTrue(
+                response.get("value").isEmpty(),
+                "Entity is returned although it shouldn't"
+        );
+    }
+
+    default void assertResponseCount(JsonNode response, int iotCount, int valueCount) {
+        if (iotCount == 0 || valueCount == 0) {
+            Assertions.fail("trying to test empty response with exact matcher");
+        }
+        Assertions.assertEquals(iotCount,
+                                response.get("@iot.count").asDouble(),
+                                "@iot.id count is not" + iotCount + " although it should be");
+        Assertions.assertFalse(
+                response.get("value").isEmpty(),
+                "Entity is not returned although it should"
+        );
+        Assertions.assertEquals(response.get("value").size(),
+                                valueCount,
+                                "value has invalid number of elements! Expected: "
+                                        + valueCount
+                                        + ", Actual: "
+                                        + response.get("value").size());
+    }
+
+    default void assertResponseCount(JsonNode response, int count) {
+        assertResponseCount(response, count, count);
     }
 
 }

@@ -285,29 +285,4 @@ public class ITFilterByRelatedEntities extends ConformanceTests implements TestU
                                           "$filter=Observations/FeatureOfInterest/id ne '52N'"),
                             foiCount);
     }
-
-    private void assertEmptyResponse(JsonNode response) {
-        Assertions.assertTrue(
-                0 == response.get("@iot.count").asDouble(),
-                "Entity count is not zero although it should be"
-        );
-        Assertions.assertTrue(
-                response.get("value").isEmpty(),
-                "Entity is returned although it shouldn't"
-        );
-    }
-
-    private void assertResponseCount(JsonNode response, int count) {
-        if (count == 0) {
-            Assertions.fail("trying to test empty response with exact matcher");
-        }
-        Assertions.assertTrue(
-                count == response.get("@iot.count").asDouble(),
-                "Entity count is not zero although it should be"
-        );
-        Assertions.assertFalse(
-                response.get("value").isEmpty(),
-                "Entity is not returned although it should"
-        );
-    }
 }

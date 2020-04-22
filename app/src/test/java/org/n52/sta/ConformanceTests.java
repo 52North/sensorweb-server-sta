@@ -356,9 +356,13 @@ abstract class ConformanceTests implements TestUtil {
     }
 
     protected JsonNode getCollection(EntityType type, String filters) throws IOException {
+        return getCollection(rootUrl + endpoints.get(type), filters);
+    }
+
+    protected JsonNode getCollection(String url, String filters) throws IOException {
         String query = UriUtils.encode(filters, Charset.defaultCharset());
-        logger.debug("GET Collection: " + rootUrl + endpoints.get(type) + "?" + query);
-        HttpGet request = new HttpGet(rootUrl + endpoints.get(type) + "?" + query);
+        logger.debug("GET Collection: " + url + "?" + query);
+        HttpGet request = new HttpGet(url + "?" + query);
         HttpResponse response = HttpClientBuilder.create().build().execute(request);
 
         // Check Response MIME Type
@@ -367,12 +371,12 @@ abstract class ConformanceTests implements TestUtil {
 
         Assertions.assertEquals(200,
                                 response.getStatusLine().getStatusCode(),
-                                "ERROR: Did not receive 200 OK for path: " + rootUrl + endpoints.get(type)
+                                "ERROR: Did not receive 200 OK for path: " + url
                                         + " Instead received Status Code: " + response.getStatusLine().getStatusCode());
         return mapper.readTree(response.getEntity().getContent());
     }
 
-    protected JsonNode getCollection(EntityType type) throws IOException, URISyntaxException {
+    protected JsonNode getCollection(EntityType type) throws IOException {
         return getCollection(type, "");
     }
 
