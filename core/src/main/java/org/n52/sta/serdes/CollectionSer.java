@@ -32,11 +32,15 @@ package org.n52.sta.serdes;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import org.n52.shetland.filter.SkipTopFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.filter.FilterClause;
+import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.sta.data.service.util.CollectionWrapper;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
 
 import java.io.IOException;
+import java.util.Set;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -58,12 +62,14 @@ public class CollectionSer extends StdSerializer<CollectionWrapper> {
             QueryOptions queryOptions = value.getEntities().get(0).getQueryOptions();
             long oldTop = queryOptions.getTopFilter().getValue();
             long oldSkip = queryOptions.hasSkipFilter() ? queryOptions.getSkipFilter().getValue() : 0L;
+            // Replace old skip Filter with new one
+            Set<FilterClause> allFilters = queryOptions.getAllFilters();
+            allFilters.remove(queryOptions.getSkipFilter());
+            allFilters.add(new SkipTopFilter(FilterConstants.SkipTopOperator.Skip, oldSkip + oldTop));
             gen.writeStringField("@iot.nextLink",
                                  value.getRequestURL()
-                                         + "?$top="
-                                         + oldTop
-                                         + "&$skip="
-                                         + (oldTop + oldSkip)
+                                         + "?"
+                                         + new QueryOptions("", allFilters).toString()
             );
         }
 
