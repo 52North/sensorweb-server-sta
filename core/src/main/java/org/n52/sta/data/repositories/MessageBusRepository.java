@@ -179,9 +179,13 @@ public class MessageBusRepository<T, I extends Serializable>
         if (columnName != null) {
             query.select(root.get(columnName));
         }
+        if (pageable.getSort().isSorted()) {
+            query.orderBy(QueryUtils.toOrders(pageable.getSort(), root, criteriaBuilder));
+        }
+
         TypedQuery<String> typedQuery = em.createQuery(query);
         if (pageable.isUnpaged()) {
-            return new PageImpl<>(typedQuery.getResultList()).get().collect(Collectors.toList());
+            return typedQuery.getResultList();
         } else {
             typedQuery.setFirstResult((int) pageable.getOffset());
             typedQuery.setMaxResults(pageable.getPageSize());
