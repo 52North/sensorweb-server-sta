@@ -295,7 +295,7 @@ public class FeatureOfInterestService
                 getRepository().flush();
                 datastreamRepository.findAll(dsQS.withDatasetId(d.getId()),
                                              EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS).forEach(ds -> {
-                    ds.getDatasets().remove(d);
+                    ds.getDatasets().removeIf(e -> e.getId().equals(d.getId()));
                     datastreamRepository.saveAndFlush(ds);
                 });
             });
