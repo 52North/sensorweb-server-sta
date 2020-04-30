@@ -106,14 +106,14 @@ public class LocationService
                 switch (expandProperty) {
                 case STAEntityDefinition.HISTORICAL_LOCATIONS:
                     Page<HistoricalLocationEntity> hLocs = getHistoricalLocationService()
-                            .getEntityCollectionByRelatedEntityRaw(entity.getIdentifier(),
+                            .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
                                                                    STAEntityDefinition.LOCATIONS,
                                                                    expandItem.getQueryOptions());
                     entity.setHistoricalLocations(hLocs.get().collect(Collectors.toSet()));
                     break;
                 case STAEntityDefinition.THINGS:
                     Page<PlatformEntity> things = getThingService()
-                            .getEntityCollectionByRelatedEntityRaw(entity.getIdentifier(),
+                            .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
                                                                    STAEntityDefinition.LOCATIONS,
                                                                    expandItem.getQueryOptions());
                     entity.setThings(things.get().collect(Collectors.toSet()));
@@ -136,11 +136,11 @@ public class LocationService
         Specification<LocationEntity> filter;
         switch (relatedType) {
         case STAEntityDefinition.HISTORICAL_LOCATIONS: {
-            filter = lQS.withRelatedHistoricalLocationIdentifier(relatedId);
+            filter = lQS.withHistoricalLocationStaIdentifier(relatedId);
             break;
         }
         case STAEntityDefinition.THINGS: {
-            filter = lQS.withRelatedThingIdentifier(relatedId);
+            filter = lQS.withThingStaIdentifier(relatedId);
             break;
         }
         default:
@@ -148,7 +148,7 @@ public class LocationService
         }
 
         if (ownId != null) {
-            filter = filter.and(lQS.withIdentifier(ownId));
+            filter = filter.and(lQS.withStaIdentifier(ownId));
         }
         return filter;
     }
@@ -157,26 +157,28 @@ public class LocationService
     public LocationEntity createEntity(LocationEntity newLocation) throws STACRUDException {
         LocationEntity location = newLocation;
         if (!location.isProcesssed()) {
-            if (location.getIdentifier() != null && !location.isSetName()) {
+            if (location.getStaIdentifier() != null && !location.isSetName()) {
                 Optional<LocationEntity> optionalEntity =
-                        getRepository().findByIdentifier(location.getIdentifier());
+                        getRepository().findByStaIdentifier(location.getStaIdentifier());
                 if (optionalEntity.isPresent()) {
                     return optionalEntity.get();
                 } else {
-                    throw new STACRUDException("No Location with id '" + location.getIdentifier() + "' found");
+                    throw new STACRUDException("No Location with id '" + location.getStaIdentifier() + "' found");
                 }
             }
-            if (location.getIdentifier() == null) {
+            if (location.getStaIdentifier() == null) {
                 if (getRepository().existsByName(location.getName())) {
                     Optional<LocationEntity> optional = getRepository().findByName(location.getName());
                     return optional.orElse(null);
                 } else {
                     // Autogenerate Identifier
-                    location.setIdentifier(UUID.randomUUID().toString());
+                    String uuid = UUID.randomUUID().toString();
+                    location.setIdentifier(uuid);
+                    location.setIdentifier(uuid);
                 }
             }
-            synchronized (getLock(location.getIdentifier())) {
-                if (getRepository().existsByIdentifier(location.getIdentifier())) {
+            synchronized (getLock(location.getStaIdentifier())) {
+                if (getRepository().existsByStaIdentifier(location.getStaIdentifier())) {
                     throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
                 }
                 location.setProcesssed(true);
@@ -193,9 +195,9 @@ public class LocationService
         if (HttpMethod.PATCH.equals(method)) {
             synchronized (getLock(id)) {
                 Optional<LocationEntity> existing = getRepository()
-                        .findByIdentifier(id,
-                                          EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATION,
-                                          EntityGraphRepository.FetchGraph.FETCHGRAPH_THINGS);
+                        .findByStaIdentifier(id,
+                                             EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATION,
+                                             EntityGraphRepository.FetchGraph.FETCHGRAPH_THINGS);
                 if (existing.isPresent()) {
                     LocationEntity merged = merge(existing.get(), entity);
                     LocationEntity result = getRepository().save(merged);
@@ -217,11 +219,11 @@ public class LocationService
     @Override
     public void delete(String id) throws STACRUDException {
         synchronized (getLock(id)) {
-            if (getRepository().existsByIdentifier(id)) {
+            if (getRepository().existsByStaIdentifier(id)) {
                 LocationEntity location =
-                        getRepository().findByIdentifier(id,
-                                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATION,
-                                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_THINGSHISTLOCATION)
+                        getRepository().findByStaIdentifier(id,
+                                                            EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATION,
+                                                            EntityGraphRepository.FetchGraph.FETCHGRAPH_THINGSHISTLOCATION)
                                        .get();
                 for (PlatformEntity thing : location.getThings()) {
                     thing.setLocations(null);
@@ -234,7 +236,7 @@ public class LocationService
                 for (HistoricalLocationEntity historicalLocation : location.getHistoricalLocations()) {
                     getHistoricalLocationService().delete(historicalLocation);
                 }
-                getRepository().deleteByIdentifier(id);
+                getRepository().deleteByStaIdentifier(id);
             } else {
                 throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }
@@ -242,14 +244,14 @@ public class LocationService
     }
 
     @Override
-    public void delete(LocationEntity entity) {
-        getRepository().deleteByIdentifier(entity.getIdentifier());
+    public void delete(LocationEntity entity) throws STACRUDException {
+        delete(entity.getStaIdentifier());
     }
 
     @Override
     protected LocationEntity createOrUpdate(LocationEntity entity) throws STACRUDException {
-        if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
-            return updateEntity(entity.getIdentifier(), entity, HttpMethod.PATCH);
+        if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
+            return updateEntity(entity.getStaIdentifier(), entity, HttpMethod.PATCH);
         }
         return createEntity(entity);
     }
@@ -325,7 +327,7 @@ public class LocationService
 
     private LocationEntity createReferencedLocation(LocationEntity location) {
         LocationEntity referenced = new LocationEntity();
-        referenced.setIdentifier(location.getIdentifier());
+        referenced.setStaIdentifier(location.getStaIdentifier());
         referenced.setId(location.getId());
         return referenced;
     }

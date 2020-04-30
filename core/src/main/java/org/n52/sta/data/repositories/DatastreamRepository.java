@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.repositories;
 
 import org.n52.series.db.beans.sta.DatastreamEntity;
@@ -35,7 +36,8 @@ import org.springframework.transaction.annotation.Transactional;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Transactional
-public interface DatastreamRepository extends NameRepository<DatastreamEntity> {
+public interface DatastreamRepository
+        extends NameRepository<DatastreamEntity>, StaIdentifierRepository<DatastreamEntity> {
 
     <S extends DatastreamEntity> S intermediateSave(S entity);
 }

@@ -33,6 +33,7 @@ import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
-public interface FeatureOfInterestRepository extends IdentifierNameRepository<AbstractFeatureEntity<?>> {
+public interface FeatureOfInterestRepository extends IdentifierNameRepository<AbstractFeatureEntity<?>>,
+        StaIdentifierRepository<AbstractFeatureEntity<?>> {
 
 }

@@ -98,6 +98,7 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
                 Assert.notNull(location.get(COORDINATES), INVALID_INLINE_ENTITY + LOCATION_GEOM);
             }
             self.setIdentifier(identifier);
+            self.setStaIdentifier(identifier);
             self.setName(name);
             self.setDescription(description);
             self.setLocationEncoding(new FormatEntity().setFormat(encodingType));
@@ -141,6 +142,7 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
 
         case PATCH:
             self.setIdentifier(identifier);
+            self.setStaIdentifier(identifier);
             self.setName(name);
             self.setDescription(description);
             self.setLocationEncoding(new FormatEntity().setFormat(encodingType));
@@ -182,6 +184,7 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
             Assert.isNull(Things, INVALID_REFERENCED_ENTITY);
 
             self.setIdentifier(identifier);
+            self.setStaIdentifier(identifier);
             return self;
         default:
             return null;

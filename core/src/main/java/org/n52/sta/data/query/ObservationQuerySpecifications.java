@@ -50,27 +50,27 @@ import javax.persistence.criteria.Subquery;
  */
 public class ObservationQuerySpecifications extends EntityQuerySpecifications<DataEntity<?>> {
 
-    public Specification<DataEntity<?>> withFeatureOfInterestIdentifier(final String featureIdentifier) {
+    public Specification<DataEntity<?>> withFeatureOfInterestStaIdentifier(final String featureIdentifier) {
         return (root, query, builder) -> {
             Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
             Root<DatasetEntity> dataset = sq.from(DatasetEntity.class);
             Subquery<FeatureEntity> subquery = query.subquery(FeatureEntity.class);
             Root<FeatureEntity> feature = subquery.from(FeatureEntity.class);
             subquery.select(feature.get(FeatureEntity.PROPERTY_ID))
-                    .where(builder.equal(feature.get(FeatureEntity.IDENTIFIER), featureIdentifier));
+                    .where(builder.equal(feature.get(FeatureEntity.PROPERTY_STA_IDENTIFIER), featureIdentifier));
             sq.select(dataset.get(DatasetEntity.PROPERTY_ID))
               .where(builder.equal(dataset.get(DatasetEntity.PROPERTY_FEATURE), subquery));
             return builder.in(root.get(DataEntity.PROPERTY_DATASET)).value(sq);
         };
     }
 
-    public Specification<DataEntity<?>> withDatastreamIdentifier(final String datastreamIdentifier) {
+    public Specification<DataEntity<?>> withDatastreamStaIdentifier(final String datastreamIdentifier) {
         return (root, query, builder) -> {
             Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
             Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
             Join<DatastreamEntity, DatasetEntity> join = datastream.join(DatastreamEntity.PROPERTY_DATASETS);
             sq.select(join.get(DatasetEntity.PROPERTY_ID))
-              .where(builder.equal(datastream.get(DatastreamEntity.PROPERTY_IDENTIFIER), datastreamIdentifier));
+              .where(builder.equal(datastream.get(DatastreamEntity.PROPERTY_STA_IDENTIFIER), datastreamIdentifier));
             return builder.in(root.get(DataEntity.PROPERTY_DATASET)).value(sq);
         };
     }
@@ -128,7 +128,7 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
             try {
                 switch (propertyName) {
                 case "id":
-                    return handleDirectStringPropertyFilter(root.get(DataEntity.PROPERTY_IDENTIFIER),
+                    return handleDirectStringPropertyFilter(root.get(DataEntity.PROPERTY_STA_IDENTIFIER),
                                                             propertyValue,
                                                             operator,
                                                             builder,

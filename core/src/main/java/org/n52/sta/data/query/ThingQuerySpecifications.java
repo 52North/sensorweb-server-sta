@@ -49,27 +49,27 @@ import javax.persistence.criteria.Subquery;
  */
 public class ThingQuerySpecifications extends EntityQuerySpecifications<PlatformEntity> {
 
-    public Specification<PlatformEntity> withRelatedLocationIdentifier(final String locationIdentifier) {
+    public Specification<PlatformEntity> withLocationStaIdentifier(final String locationIdentifier) {
         return (root, query, builder) -> {
             final Join<PlatformEntity, LocationEntity> join =
                     root.join(PlatformEntity.PROPERTY_LOCATIONS, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), locationIdentifier);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), locationIdentifier);
         };
     }
 
-    public Specification<PlatformEntity> withRelatedHistoricalLocationIdentifier(final String historicalIdentifier) {
+    public Specification<PlatformEntity> withHistoricalLocationStaIdentifier(final String historicalIdentifier) {
         return (root, query, builder) -> {
             final Join<PlatformEntity, HistoricalLocationEntity> join =
                     root.join(PlatformEntity.PROPERTY_HISTORICAL_LOCATIONS, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), historicalIdentifier);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), historicalIdentifier);
         };
     }
 
-    public Specification<PlatformEntity> withRelatedDatastreamIdentifier(final String datastreamIdentifier) {
+    public Specification<PlatformEntity> withDatastreamStaIdentifier(final String datastreamIdentifier) {
         return (root, query, builder) -> {
             final Join<PlatformEntity, DatastreamEntity> join =
                     root.join(PlatformEntity.PROPERTY_DATASTREAMS, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), datastreamIdentifier);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), datastreamIdentifier);
         };
     }
 
@@ -128,7 +128,7 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
             try {
                 switch (propertyName) {
                 case "id":
-                    return handleDirectStringPropertyFilter(root.get(PlatformEntity.PROPERTY_IDENTIFIER),
+                    return handleDirectStringPropertyFilter(root.get(PlatformEntity.PROPERTY_STA_IDENTIFIER),
                                                             propertyValue, operator, builder, false);
                 case "name":
                     return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),

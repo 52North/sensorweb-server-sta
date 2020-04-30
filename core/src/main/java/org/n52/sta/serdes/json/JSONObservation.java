@@ -89,6 +89,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> impl
             Assert.isNull(parameters, INVALID_REFERENCED_ENTITY);
 
             self.setIdentifier(identifier);
+            self.setStaIdentifier(identifier);
             return self;
         default:
             return null;
@@ -97,6 +98,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> impl
 
     private StaDataEntity createPatchEntity() {
         self.setIdentifier(identifier);
+        self.setStaIdentifier(identifier);
 
         // parameters
         handleParameters(parameters);
@@ -148,6 +150,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> impl
 
     private StaDataEntity createPostEntity() {
         self.setIdentifier(identifier);
+        self.setStaIdentifier(identifier);
 
         // phenomenonTime
         if (phenomenonTime != null) {

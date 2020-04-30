@@ -39,7 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 @NoRepositoryBean
 @Transactional
 public interface AbstractStaRepository<T extends AbstractStaEntity>
-        extends IdentifierRepository<T, Long> {
+        extends IdentifierRepository<T, Long>, StaIdentifierRepository<T> {
 
 }
 

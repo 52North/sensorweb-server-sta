@@ -78,7 +78,7 @@ public class MqttPropertySubscription extends MqttEntitySubscription {
     }
 
     @Override
-    public boolean matches(HibernateRelations.HasIdentifier entity,
+    public boolean matches(HibernateRelations.HasStaIdentifier entity,
                            String realEntityType,
                            Map<String, Set<String>> collections,
                            Set<String> differenceMap) {

@@ -47,11 +47,11 @@ import javax.persistence.criteria.Subquery;
  */
 public class ObservedPropertyQuerySpecifications extends EntityQuerySpecifications<PhenomenonEntity> {
 
-    public Specification<PhenomenonEntity> withDatastreamIdentifier(final String datastreamIdentifier) {
+    public Specification<PhenomenonEntity> withDatastreamStaIdentifier(final String datastreamIdentifier) {
         return (root, query, builder) -> {
             final Join<PhenomenonEntity, DatastreamEntity> join =
                     root.join(DatastreamEntity.PROPERTY_OBSERVABLE_PROPERTY, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), datastreamIdentifier);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), datastreamIdentifier);
         };
     }
 
@@ -83,7 +83,7 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
             try {
                 switch (propertyName) {
                 case "id":
-                    return handleDirectStringPropertyFilter(root.get("staIdentifier"),
+                    return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_STA_IDENTIFIER),
                                                             propertyValue,
                                                             operator,
                                                             builder,

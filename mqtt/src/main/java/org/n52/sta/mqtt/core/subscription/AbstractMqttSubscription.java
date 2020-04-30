@@ -105,10 +105,10 @@ public abstract class AbstractMqttSubscription {
                            String realEntityType,
                            Map<String, Set<String>> collections,
                            Set<String> differenceMap) {
-        return matches((HibernateRelations.HasIdentifier) entity, realEntityType, collections, differenceMap);
+        return matches((HibernateRelations.HasStaIdentifier) entity, realEntityType, collections, differenceMap);
     }
 
-    protected abstract boolean matches(HibernateRelations.HasIdentifier entity,
+    protected abstract boolean matches(HibernateRelations.HasStaIdentifier entity,
                                        String realEntityType,
                                        Map<String, Set<String>> collections,
                                        Set<String> differenceMap);

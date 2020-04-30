@@ -54,26 +54,26 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
 
     private static final String LOCATION = "location";
 
-    public Specification<LocationEntity> withRelatedHistoricalLocationIdentifier(String historicalLocationIdentifier) {
+    public Specification<LocationEntity> withHistoricalLocationStaIdentifier(String historicalLocationIdentifier) {
         return (root, query, builder) -> {
             Subquery<LocationEntity> sq = query.subquery(LocationEntity.class);
             Root<HistoricalLocationEntity> historicalLoc = sq.from(HistoricalLocationEntity.class);
             Join<HistoricalLocationEntity, LocationEntity> joinFeature =
                     historicalLoc.join(HistoricalLocationEntity.PROPERTY_LOCATIONS);
             sq.select(joinFeature)
-              .where(builder.equal(historicalLoc.get(DescribableEntity.PROPERTY_IDENTIFIER),
+              .where(builder.equal(historicalLoc.get(DescribableEntity.PROPERTY_STA_IDENTIFIER),
                                    historicalLocationIdentifier));
             return builder.in(root).value(sq);
         };
     }
 
-    public Specification<LocationEntity> withRelatedThingIdentifier(final String thingIdentifier) {
+    public Specification<LocationEntity> withThingStaIdentifier(final String thingIdentifier) {
         return (root, query, builder) -> {
             Subquery<LocationEntity> sq = query.subquery(LocationEntity.class);
             Root<PlatformEntity> platform = sq.from(PlatformEntity.class);
             Join<PlatformEntity, LocationEntity> joinFeature = platform.join(PlatformEntity.PROPERTY_LOCATIONS);
             sq.select(joinFeature)
-              .where(builder.equal(platform.get(DescribableEntity.PROPERTY_IDENTIFIER), thingIdentifier));
+              .where(builder.equal(platform.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), thingIdentifier));
             return builder.in(root).value(sq);
         };
     }
@@ -87,7 +87,7 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
             try {
                 switch (propertyName) {
                 case "id":
-                    return handleDirectStringPropertyFilter(root.get(LocationEntity.PROPERTY_IDENTIFIER),
+                    return handleDirectStringPropertyFilter(root.get(LocationEntity.PROPERTY_STA_IDENTIFIER),
                                                             propertyValue,
                                                             operator,
                                                             builder,

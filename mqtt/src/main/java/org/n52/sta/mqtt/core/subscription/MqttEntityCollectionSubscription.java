@@ -83,7 +83,7 @@ public class MqttEntityCollectionSubscription extends AbstractMqttSubscription {
     }
 
     @Override
-    public boolean matches(HibernateRelations.HasIdentifier entity,
+    public boolean matches(HibernateRelations.HasStaIdentifier entity,
                            String realEntityType,
                            Map<String, Set<String>> collections,
                            Set<String> differenceMap) {

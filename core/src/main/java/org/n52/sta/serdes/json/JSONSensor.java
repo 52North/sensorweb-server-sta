@@ -72,6 +72,7 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorEntity>
             Assert.notNull(encodingType, INVALID_INLINE_ENTITY + "encodingType");
             Assert.notNull(metadata, INVALID_INLINE_ENTITY + "metadata");
             self.setIdentifier(identifier);
+            self.setStaIdentifier(identifier);
             self.setName(name);
             self.setDescription(description);
 
@@ -92,6 +93,7 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorEntity>
             return self;
         case PATCH:
             self.setIdentifier(identifier);
+            self.setStaIdentifier(identifier);
             self.setName(name);
             self.setDescription(description);
 
@@ -117,6 +119,7 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorEntity>
             Assert.isNull(Datastreams, INVALID_REFERENCED_ENTITY);
 
             self.setIdentifier(identifier);
+            self.setStaIdentifier(identifier);
             return self;
         default:
             return null;

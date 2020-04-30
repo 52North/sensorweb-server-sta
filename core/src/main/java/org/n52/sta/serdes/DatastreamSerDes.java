@@ -118,10 +118,10 @@ public class DatastreamSerDes {
 
             // olingo @iot links
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
-                writeId(gen, datastream.getIdentifier());
+                writeId(gen, datastream.getStaIdentifier());
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_SELF_LINK)) {
-                writeSelfLink(gen, datastream.getIdentifier());
+                writeSelfLink(gen, datastream.getStaIdentifier());
             }
 
             // actual properties
@@ -178,7 +178,7 @@ public class DatastreamSerDes {
             for (String navigationProperty : DatastreamEntityDefinition.NAVIGATION_PROPERTIES) {
                 if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
                     if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
-                        writeNavigationProp(gen, navigationProperty, datastream.getIdentifier());
+                        writeNavigationProp(gen, navigationProperty, datastream.getStaIdentifier());
                     } else {
                         gen.writeFieldName(navigationProperty);
                         switch (navigationProperty) {

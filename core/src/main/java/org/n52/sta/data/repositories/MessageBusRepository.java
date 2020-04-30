@@ -90,6 +90,7 @@ public class MessageBusRepository<T, I extends Serializable>
     private final Map<String, String> entityTypeToStaType;
     private final String FETCHGRAPH_HINT = "javax.persistence.fetchgraph";
     private final String IDENTIFIER = "identifier";
+    private final String STAIDENTIFIER = "staIdentifier";
 
     private final JpaEntityInformation entityInformation;
     private final STAEventHandler mqttHandler;
@@ -123,12 +124,12 @@ public class MessageBusRepository<T, I extends Serializable>
         }
     }
 
-    private TypedQuery<T> createIdentifierQuery(String identifier) {
+    private TypedQuery<T> createIdentifierQuery(String identifier, String column) {
         CriteriaQuery<T> criteriaQuery = criteriaBuilder.createQuery(entityClass);
         Root<T> root = criteriaQuery.from(entityClass);
 
         ParameterExpression<String> params = criteriaBuilder.parameter(String.class);
-        criteriaQuery.where(criteriaBuilder.equal(root.get(IDENTIFIER), params));
+        criteriaQuery.where(criteriaBuilder.equal(root.get(column), params));
         return em.createQuery(criteriaQuery).setParameter(params, identifier);
     }
 
@@ -195,7 +196,15 @@ public class MessageBusRepository<T, I extends Serializable>
 
     @Transactional
     public Optional<T> findByIdentifier(String identifier, EntityGraphRepository.FetchGraph... entityGraphs) {
-        TypedQuery<T> query = createIdentifierQuery(identifier);
+        return findByQuery(createIdentifierQuery(identifier, IDENTIFIER), entityGraphs);
+    }
+
+    @Transactional
+    public Optional<T> findByStaIdentifier(String identifier, EntityGraphRepository.FetchGraph... entityGraphs) {
+        return findByQuery(createIdentifierQuery(identifier, STAIDENTIFIER), entityGraphs);
+    }
+
+    private Optional<T> findByQuery(TypedQuery<T> query, EntityGraphRepository.FetchGraph... entityGraphs) {
         EntityGraph<T> fetchGraph = createEntityGraph(entityGraphs);
         if (fetchGraph != null) {
             query.setHint(FETCHGRAPH_HINT, fetchGraph);
@@ -208,13 +217,13 @@ public class MessageBusRepository<T, I extends Serializable>
     }
 
     @Transactional
-    public boolean existsByIdentifier(String identifier) {
+    public boolean existsByStaIdentifier(String identifier) {
         CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
         Root<T> root = criteriaQuery.from(entityClass);
 
         criteriaQuery.select(criteriaBuilder.count(root));
         ParameterExpression<String> params = criteriaBuilder.parameter(String.class);
-        criteriaQuery.where(criteriaBuilder.equal(root.get(IDENTIFIER), params));
+        criteriaQuery.where(criteriaBuilder.equal(root.get(STAIDENTIFIER), params));
         TypedQuery<Long> query = em.createQuery(criteriaQuery).setParameter(params, identifier);
 
         return query.getSingleResult() > 0;
@@ -264,16 +273,16 @@ public class MessageBusRepository<T, I extends Serializable>
                     collections.put(STAEntityDefinition.DATASTREAMS,
                                     entity.getDatastreams()
                                           .stream()
-                                          .map(DatastreamEntity::getIdentifier)
+                                          .map(DatastreamEntity::getStaIdentifier)
                                           .collect(Collectors.toSet()));
                 }
             } else {
                 ProcedureEntity entity = (ProcedureEntity) rawObject;
                 collections.put(STAEntityDefinition.DATASTREAM,
                                 datastreamRepository
-                                        .findAll(dQs.withSensorIdentifier(entity.getIdentifier()))
+                                        .findAll(dQs.withSensorStaIdentifier(entity.getStaIdentifier()))
                                         .stream()
-                                        .map(DatastreamEntity::getIdentifier)
+                                        .map(DatastreamEntity::getStaIdentifier)
                                         .collect(Collectors.toSet())
                 );
             }
@@ -283,7 +292,7 @@ public class MessageBusRepository<T, I extends Serializable>
                 collections.put(STAEntityDefinition.HISTORICAL_LOCATIONS,
                                 entity.getHistoricalLocations()
                                       .stream()
-                                      .map(HistoricalLocationEntity::getIdentifier)
+                                      .map(HistoricalLocationEntity::getStaIdentifier)
                                       .collect(Collectors.toSet()));
             }
 
@@ -291,7 +300,7 @@ public class MessageBusRepository<T, I extends Serializable>
                 collections.put(STAEntityDefinition.THINGS,
                                 entity.getThings()
                                       .stream()
-                                      .map(PlatformEntity::getIdentifier)
+                                      .map(PlatformEntity::getStaIdentifier)
                                       .collect(Collectors.toSet()));
             }
         } else if (rawObject instanceof PlatformEntity) {
@@ -301,7 +310,7 @@ public class MessageBusRepository<T, I extends Serializable>
                         STAEntityDefinition.LOCATIONS,
                         entity.getLocations()
                               .stream()
-                              .map(LocationEntity::getIdentifier)
+                              .map(LocationEntity::getStaIdentifier)
                               .collect(Collectors.toSet()));
             }
 
@@ -310,7 +319,7 @@ public class MessageBusRepository<T, I extends Serializable>
                         STAEntityDefinition.HISTORICAL_LOCATIONS,
                         entity.getHistoricalLocations()
                               .stream()
-                              .map(HistoricalLocationEntity::getIdentifier)
+                              .map(HistoricalLocationEntity::getStaIdentifier)
                               .collect(Collectors.toSet()));
             }
 
@@ -318,7 +327,7 @@ public class MessageBusRepository<T, I extends Serializable>
                 collections.put(STAEntityDefinition.DATASTREAMS,
                                 entity.getDatastreams()
                                       .stream()
-                                      .map(DatastreamEntity::getIdentifier)
+                                      .map(DatastreamEntity::getStaIdentifier)
                                       .collect(Collectors.toSet()));
             }
         } else if (rawObject instanceof DatastreamEntity) {
@@ -326,31 +335,31 @@ public class MessageBusRepository<T, I extends Serializable>
 
             if (entity.hasThing()) {
                 collections.put(STAEntityDefinition.THINGS,
-                                Collections.singleton(entity.getThing().getIdentifier()));
+                                Collections.singleton(entity.getThing().getStaIdentifier()));
             }
 
             if (entity.hasProcedure()) {
                 collections.put(STAEntityDefinition.SENSORS,
-                                Collections.singleton(entity.getProcedure().getIdentifier()));
+                                Collections.singleton(entity.getProcedure().getStaIdentifier()));
             }
 
             if (entity.hasObservableProperty()) {
                 collections.put(STAEntityDefinition.OBSERVED_PROPERTIES,
-                                Collections.singleton(entity.getObservableProperty().getIdentifier()));
+                                Collections.singleton(entity.getObservableProperty().getStaIdentifier()));
             }
         } else if (rawObject instanceof HistoricalLocationEntity) {
             HistoricalLocationEntity entity = (HistoricalLocationEntity) rawObject;
 
             if (entity.hasThing()) {
                 collections.put(STAEntityDefinition.THINGS,
-                                Collections.singleton(entity.getThing().getIdentifier()));
+                                Collections.singleton(entity.getThing().getStaIdentifier()));
             }
 
             if (entity.hasLocationEntities()) {
                 collections.put(STAEntityDefinition.LOCATIONS,
                                 entity.getLocations()
                                       .stream()
-                                      .map(LocationEntity::getIdentifier)
+                                      .map(LocationEntity::getStaIdentifier)
                                       .collect(Collectors.toSet()));
             }
         } else if (rawObject instanceof DataEntity<?>) {
@@ -358,16 +367,16 @@ public class MessageBusRepository<T, I extends Serializable>
 
             if (entity.getDataset() != null && entity.getDataset().getFeature() != null) {
                 collections.put(STAEntityDefinition.FEATURES_OF_INTEREST,
-                                Collections.singleton(entity.getDataset().getFeature().getIdentifier()));
+                                Collections.singleton(entity.getDataset().getFeature().getStaIdentifier()));
             }
 
             Optional<DatastreamEntity> datastreamEntity =
-                    datastreamRepository.findOne(dQs.withObservationIdentifier(entity.getIdentifier()));
+                    datastreamRepository.findOne(dQs.withObservationStaIdentifier(entity.getStaIdentifier()));
             if (datastreamEntity.isPresent()) {
                 collections.put(STAEntityDefinition.DATASTREAMS,
-                                Collections.singleton(datastreamEntity.get().getIdentifier()));
+                                Collections.singleton(datastreamEntity.get().getStaIdentifier()));
             } else {
-                LOGGER.debug("No Datastream associated with this Entity {}", entity.getIdentifier());
+                LOGGER.debug("No Datastream associated with this Entity {}", entity.getStaIdentifier());
             }
         } else if (rawObject instanceof AbstractFeatureEntity) {
             return collections;
@@ -375,12 +384,12 @@ public class MessageBusRepository<T, I extends Serializable>
             PhenomenonEntity entity = (PhenomenonEntity) rawObject;
 
             List<DatastreamEntity> observations = datastreamRepository
-                    .findAll(dQs.withObservedPropertyIdentifier(entity.getStaIdentifier()));
+                    .findAll(dQs.withObservedPropertyStaIdentifier(entity.getStaIdentifier()));
             collections.put(
                     STAEntityDefinition.DATASTREAMS,
                     observations
                             .stream()
-                            .map(DatastreamEntity::getIdentifier)
+                            .map(DatastreamEntity::getStaIdentifier)
                             .collect(Collectors.toSet()));
         } else {
             LOGGER.error("Error while computing related Collections: Could not identify Entity Type");

@@ -59,10 +59,10 @@ public class JSONObservedProperty extends JSONBase.JSONwithIdNameDescription<Obs
                 Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
                 Assert.notNull(definition, INVALID_INLINE_ENTITY + "definition");
 
+                self.setIdentifier(definition);
                 self.setStaIdentifier(identifier);
                 self.setName(name);
                 self.setDescription(description);
-                self.setIdentifier(definition);
 
                 if (Datastreams != null) {
                     self.setDatastreams(Arrays.stream(Datastreams)
@@ -76,10 +76,10 @@ public class JSONObservedProperty extends JSONBase.JSONwithIdNameDescription<Obs
 
                 return self;
             case PATCH:
+                self.setIdentifier(definition);
                 self.setStaIdentifier(identifier);
                 self.setName(name);
                 self.setDescription(description);
-                self.setIdentifier(definition);
 
                 if (Datastreams != null) {
                     self.setDatastreams(Arrays.stream(Datastreams)
@@ -94,6 +94,7 @@ public class JSONObservedProperty extends JSONBase.JSONwithIdNameDescription<Obs
                 Assert.isNull(definition, INVALID_REFERENCED_ENTITY);
                 Assert.isNull(Datastreams, INVALID_REFERENCED_ENTITY);
 
+                self.setIdentifier(definition);
                 self.setStaIdentifier(identifier);
                 return self;
             default:

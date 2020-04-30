@@ -92,7 +92,7 @@ public interface STARequestUtils extends StaConstants {
     String ID = "id";
 
     // Note: This is duplicated in LocationService to allow for non-standard 'updateFOI'-feature.
-    //TODO: Check if this coveras all identifiers
+    //TODO: Check if this covers all identifiers
     String IDENTIFIER_REGEX = "(?:\\()[^(]+(?:\\))";
 
     String URL_INVALID = "Url is invalid. ";

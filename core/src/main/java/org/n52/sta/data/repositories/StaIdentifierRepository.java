@@ -29,18 +29,41 @@
 
 package org.n52.sta.data.repositories;
 
-import org.n52.series.db.beans.DataEntity;
-import org.springframework.context.annotation.DependsOn;
+import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.Optional;
 
+/**
+ * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
+ */
+@NoRepositoryBean
 @Transactional
-@DependsOn("DatastreamRepository")
-public interface DataRepository<T extends DataEntity<?>>
-        extends IdentifierRepository<T, Long>, StaIdentifierRepository<T> {
+public interface StaIdentifierRepository<T> extends IdentifierRepository<T, Long> {
 
-    DataEntity<?> findFirstByDataset_idInOrderBySamplingTimeStartAsc(List<Long> datasetIdentifiers);
+    /**
+     * Checks whether Entity with given id exists.
+     *
+     * @param identifier Identifier of the Entity
+     * @return true if Entity exists. false otherwise
+     */
+    boolean existsByStaIdentifier(String identifier);
 
-    DataEntity<?> findFirstByDataset_idInOrderBySamplingTimeEndDesc(List<Long> datasetIdentifiers);
+    /**
+     * Finds Entity by identifier. Fetches Entity and all related Entities given by EntityGraphs
+     *
+     * @param identifier      Identifier of the wanted Entity
+     * @param relatedEntities EntityGraphs describing related Entities to be fetched. All graphs are merged into one
+     *                        graph internally. may be null.
+     * @return Entity found in Database. Optional.empty() otherwise
+     */
+    Optional<T> findByStaIdentifier(String identifier, EntityGraphRepository.FetchGraph... relatedEntities);
+
+    /**
+     * Deletes Entity with given Identifier
+     *
+     * @param identifier Identifier of the Entity
+     */
+    void deleteByStaIdentifier(String identifier);
+
 }

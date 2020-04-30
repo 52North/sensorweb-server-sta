@@ -91,21 +91,21 @@ public class ThingService
                 switch (expandProperty) {
                 case STAEntityDefinition.HISTORICAL_LOCATIONS:
                     Page<HistoricalLocationEntity> hLocs = getHistoricalLocationService()
-                            .getEntityCollectionByRelatedEntityRaw(entity.getIdentifier(),
+                            .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
                                                                    STAEntityDefinition.THINGS,
                                                                    expandItem.getQueryOptions());
                     entity.setHistoricalLocations(hLocs.get().collect(Collectors.toSet()));
                     break;
                 case STAEntityDefinition.DATASTREAMS:
                     Page<DatastreamEntity> datastreams = getDatastreamService()
-                            .getEntityCollectionByRelatedEntityRaw(entity.getIdentifier(),
+                            .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
                                                                    STAEntityDefinition.THINGS,
                                                                    expandItem.getQueryOptions());
                     entity.setDatastreams(datastreams.get().collect(Collectors.toSet()));
                     break;
                 case STAEntityDefinition.LOCATIONS:
                     Page<LocationEntity> locations = getLocationService()
-                            .getEntityCollectionByRelatedEntityRaw(entity.getIdentifier(),
+                            .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
                                                                    STAEntityDefinition.THINGS,
                                                                    expandItem.getQueryOptions());
                     entity.setLocations(locations.get().collect(Collectors.toSet()));
@@ -128,15 +128,15 @@ public class ThingService
         Specification<PlatformEntity> filter;
         switch (relatedType) {
         case STAEntityDefinition.HISTORICAL_LOCATIONS: {
-            filter = tQS.withRelatedHistoricalLocationIdentifier(relatedId);
+            filter = tQS.withHistoricalLocationStaIdentifier(relatedId);
             break;
         }
         case STAEntityDefinition.DATASTREAMS: {
-            filter = tQS.withRelatedDatastreamIdentifier(relatedId);
+            filter = tQS.withDatastreamStaIdentifier(relatedId);
             break;
         }
         case STAEntityDefinition.LOCATIONS: {
-            filter = tQS.withRelatedLocationIdentifier(relatedId);
+            filter = tQS.withLocationStaIdentifier(relatedId);
             break;
         }
         default:
@@ -144,7 +144,7 @@ public class ThingService
         }
 
         if (ownId != null) {
-            filter = filter.and(tQS.withIdentifier(ownId));
+            filter = filter.and(tQS.withStaIdentifier(ownId));
         }
         return filter;
     }
@@ -153,25 +153,27 @@ public class ThingService
     public PlatformEntity createEntity(PlatformEntity newThing) throws STACRUDException {
         PlatformEntity thing = newThing;
         if (!thing.isProcesssed()) {
-            if (thing.getIdentifier() != null && !thing.isSetName()) {
+            if (thing.getStaIdentifier() != null && !thing.isSetName()) {
                 Optional<PlatformEntity> optionalEntity =
-                        getRepository().findByIdentifier(thing.getIdentifier());
+                        getRepository().findByStaIdentifier(thing.getStaIdentifier());
                 if (optionalEntity.isPresent()) {
                     return optionalEntity.get();
                 } else {
-                    throw new STACRUDException("No Thing with id '" + thing.getIdentifier() + "' found");
+                    throw new STACRUDException("No Thing with id '" + thing.getStaIdentifier() + "' found");
                 }
             }
-            if (thing.getIdentifier() == null) {
+            if (thing.getStaIdentifier() == null) {
                 if (getRepository().existsByName(thing.getName())) {
                     return getRepository().findByName(thing.getName()).orElse(null);
                 } else {
                     // Autogenerate Identifier
-                    thing.setIdentifier(UUID.randomUUID().toString());
+                    String uuid = UUID.randomUUID().toString();
+                    thing.setIdentifier(uuid);
+                    thing.setStaIdentifier(uuid);
                 }
             }
-            synchronized (getLock(thing.getIdentifier())) {
-                if (getRepository().existsByIdentifier(thing.getIdentifier())) {
+            synchronized (getLock(thing.getStaIdentifier())) {
+                if (getRepository().existsByStaIdentifier(thing.getStaIdentifier())) {
                     throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
                 } else {
                     thing.setProcesssed(true);
@@ -193,7 +195,7 @@ public class ThingService
         if (HttpMethod.PATCH.equals(method)) {
             synchronized (getLock(id)) {
                 Optional<PlatformEntity> existing =
-                        getRepository().findByIdentifier(id,
+                        getRepository().findByStaIdentifier(id,
                                                          IdentifierRepository.FetchGraph.FETCHGRAPH_LOCATION,
                                                          IdentifierRepository.FetchGraph.FETCHGRAPH_HIST_LOCATION);
                 if (existing.isPresent()) {
@@ -245,16 +247,16 @@ public class ThingService
     @Override
     public void delete(String identifier) throws STACRUDException {
         synchronized (getLock(identifier)) {
-            if (getRepository().existsByIdentifier(identifier)) {
+            if (getRepository().existsByStaIdentifier(identifier)) {
                 PlatformEntity thing =
-                        getRepository().findByIdentifier(identifier,
+                        getRepository().findByStaIdentifier(identifier,
                                                          EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASTREAMS,
                                                          EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATION)
                                        .get();
                 // delete datastreams
                 thing.getDatastreams().forEach(d -> {
                     try {
-                        getDatastreamService().delete(d.getIdentifier());
+                        getDatastreamService().delete(d);
                     } catch (STACRUDException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
@@ -269,7 +271,7 @@ public class ThingService
                         e.printStackTrace();
                     }
                 });
-                getRepository().deleteByIdentifier(identifier);
+                getRepository().deleteByStaIdentifier(identifier);
             } else {
                 throw new STACRUDException("Unable to delete. Entity not found.", HTTPStatus.NOT_FOUND);
             }
@@ -277,14 +279,14 @@ public class ThingService
     }
 
     @Override
-    public void delete(PlatformEntity entity) {
-        getRepository().deleteByIdentifier(entity.getIdentifier());
+    public void delete(PlatformEntity entity) throws STACRUDException {
+        delete(entity.getStaIdentifier());
     }
 
     @Override
     protected PlatformEntity createOrUpdate(PlatformEntity entity) throws STACRUDException {
-        if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
-            return updateEntity(entity.getIdentifier(), entity, HttpMethod.PATCH);
+        if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
+            return updateEntity(entity.getStaIdentifier(), entity, HttpMethod.PATCH);
         }
         return createEntity(entity);
     }

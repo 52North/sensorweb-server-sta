@@ -109,10 +109,10 @@ public class ThingSerDes {
             }
             // olingo @iot links
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
-                writeId(gen, thing.getIdentifier());
+                writeId(gen, thing.getStaIdentifier());
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_SELF_LINK)) {
-                writeSelfLink(gen, thing.getIdentifier());
+                writeSelfLink(gen, thing.getStaIdentifier());
             }
 
             // actual properties
@@ -130,7 +130,7 @@ public class ThingSerDes {
             for (String navigationProperty : ThingEntityDefinition.NAVIGATION_PROPERTIES) {
                 if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
                     if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
-                        writeNavigationProp(gen, navigationProperty, thing.getIdentifier());
+                        writeNavigationProp(gen, navigationProperty, thing.getStaIdentifier());
                     } else {
                         gen.writeFieldName(navigationProperty);
                         switch (navigationProperty) {

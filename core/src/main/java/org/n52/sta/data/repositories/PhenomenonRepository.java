@@ -33,16 +33,10 @@ import org.n52.series.db.beans.PhenomenonEntity;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 @Transactional
 @DependsOn("DatastreamRepository")
-public interface PhenomenonRepository extends IdentifierNameRepository<PhenomenonEntity> {
+public interface PhenomenonRepository
+        extends IdentifierNameRepository<PhenomenonEntity>, StaIdentifierRepository<PhenomenonEntity> {
 
-    Optional<PhenomenonEntity> findByStaIdentifier(String identifier);
-
-    void deleteByStaIdentifier(String identifier);
-
-    boolean existsByStaIdentifier(String id);
 }
 

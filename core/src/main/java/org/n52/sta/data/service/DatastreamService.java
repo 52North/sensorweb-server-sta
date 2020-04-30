@@ -119,15 +119,15 @@ public class DatastreamService
                 switch (expandProperty) {
                 case STAEntityDefinition.SENSOR:
                     ProcedureEntity sensor = getSensorService()
-                            .getEntityByRelatedEntityRaw(entity.getIdentifier(),
-                                                      STAEntityDefinition.DATASTREAMS,
-                                                      null,
-                                                      expandItem.getQueryOptions());
+                            .getEntityByRelatedEntityRaw(entity.getStaIdentifier(),
+                                                         STAEntityDefinition.DATASTREAMS,
+                                                         null,
+                                                         expandItem.getQueryOptions());
                     entity.setProcedure(sensor);
                     break;
                 case STAEntityDefinition.THING:
                     PlatformEntity thing = getThingService()
-                            .getEntityByRelatedEntityRaw(entity.getIdentifier(),
+                            .getEntityByRelatedEntityRaw(entity.getStaIdentifier(),
                                                          STAEntityDefinition.DATASTREAMS,
                                                          null,
                                                          expandItem.getQueryOptions());
@@ -135,7 +135,7 @@ public class DatastreamService
                     break;
                 case STAEntityDefinition.OBSERVED_PROPERTY:
                     PhenomenonEntity obsProp = getObservedPropertyService()
-                            .getEntityByRelatedEntityRaw(entity.getIdentifier(),
+                            .getEntityByRelatedEntityRaw(entity.getStaIdentifier(),
                                                          STAEntityDefinition.DATASTREAMS,
                                                          null,
                                                          expandItem.getQueryOptions());
@@ -143,7 +143,7 @@ public class DatastreamService
                     break;
                 case STAEntityDefinition.OBSERVATIONS:
                     Page<StaDataEntity<?>> observations = getObservationService()
-                            .getEntityCollectionByRelatedEntityRaw(entity.getIdentifier(),
+                            .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
                                                                    STAEntityDefinition.DATASTREAMS,
                                                                    expandItem.getQueryOptions());
                     entity.setObservations(observations.get().collect(Collectors.toSet()));
@@ -167,19 +167,19 @@ public class DatastreamService
         Specification<DatastreamEntity> filter;
         switch (relatedType) {
         case STAEntityDefinition.THINGS: {
-            filter = dQS.withThingIdentifier(relatedId);
+            filter = dQS.withThingStaIdentifier(relatedId);
             break;
         }
         case STAEntityDefinition.SENSORS: {
-            filter = dQS.withSensorIdentifier(relatedId);
+            filter = dQS.withSensorStaIdentifier(relatedId);
             break;
         }
         case STAEntityDefinition.OBSERVED_PROPERTIES: {
-            filter = dQS.withObservedPropertyIdentifier(relatedId);
+            filter = dQS.withObservedPropertyStaIdentifier(relatedId);
             break;
         }
         case STAEntityDefinition.OBSERVATIONS: {
-            filter = dQS.withObservationIdentifier(relatedId);
+            filter = dQS.withObservationStaIdentifier(relatedId);
             break;
         }
         default:
@@ -187,7 +187,7 @@ public class DatastreamService
         }
 
         if (ownId != null) {
-            filter = filter.and(dQS.withIdentifier(ownId));
+            filter = filter.and(dQS.withStaIdentifier(ownId));
         }
         return filter;
     }
@@ -209,21 +209,23 @@ public class DatastreamService
         DatastreamEntity entity = datastream;
         if (!datastream.isProcesssed()) {
             // Getting by reference
-            if (datastream.getIdentifier() != null && !datastream.isSetName()) {
+            if (datastream.getStaIdentifier() != null && !datastream.isSetName()) {
                 Optional<DatastreamEntity> optionalEntity =
-                        getRepository().findOne(dQS.withIdentifier(datastream.getIdentifier()));
+                        getRepository().findOne(dQS.withStaIdentifier(datastream.getStaIdentifier()));
                 if (optionalEntity.isPresent()) {
                     return optionalEntity.get();
                 } else {
-                    throw new STACRUDException("No Datastream with id '" + datastream.getIdentifier() + "' found");
+                    throw new STACRUDException("No Datastream with id '" + datastream.getStaIdentifier() + "' found");
                 }
             }
             check(datastream);
-            if (datastream.getIdentifier() == null) {
-                datastream.setIdentifier(UUID.randomUUID().toString());
+            if (datastream.getStaIdentifier() == null) {
+                String uuid = UUID.randomUUID().toString();
+                datastream.setIdentifier(uuid);
+                datastream.setStaIdentifier(uuid);
             }
-            synchronized (getLock(datastream.getIdentifier())) {
-                if (getRepository().existsByIdentifier(datastream.getIdentifier())) {
+            synchronized (getLock(datastream.getStaIdentifier())) {
+                if (getRepository().existsByStaIdentifier(datastream.getStaIdentifier())) {
                     throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
                 }
                 datastream.setProcesssed(true);
@@ -239,28 +241,28 @@ public class DatastreamService
                 entity = getRepository().save(entity);
             }
         }
-        return getRepository().findByIdentifier(entity.getIdentifier(),
-                                                EntityGraphRepository.FetchGraph.FETCHGRAPH_UOM,
-                                                EntityGraphRepository.FetchGraph.FETCHGRAPH_OBS_TYPE)
+        return getRepository().findByStaIdentifier(entity.getStaIdentifier(),
+                                                   EntityGraphRepository.FetchGraph.FETCHGRAPH_UOM,
+                                                   EntityGraphRepository.FetchGraph.FETCHGRAPH_OBS_TYPE)
                               .orElseThrow(() -> new STACRUDException("Datastream requested but still processing!"));
     }
 
     private Specification<DatastreamEntity> createQuery(DatastreamEntity datastream) {
         Specification<DatastreamEntity> expression;
-        if (datastream.getThing().getIdentifier() != null && !datastream.getThing().isSetName()) {
-            expression = dQS.withThingIdentifier(datastream.getThing().getIdentifier());
+        if (datastream.getThing().getStaIdentifier() != null && !datastream.getThing().isSetName()) {
+            expression = dQS.withThingStaIdentifier(datastream.getThing().getStaIdentifier());
         } else {
             expression = dQS.withThingName(datastream.getThing().getName());
         }
-        if (datastream.getProcedure().getIdentifier() != null && !datastream.getProcedure().isSetName()) {
-            expression = expression.and(dQS.withSensorIdentifier(datastream.getProcedure().getIdentifier()));
+        if (datastream.getProcedure().getStaIdentifier() != null && !datastream.getProcedure().isSetName()) {
+            expression = expression.and(dQS.withSensorStaIdentifier(datastream.getProcedure().getStaIdentifier()));
         } else {
             expression = expression.and(dQS.withSensorName(datastream.getProcedure().getName()));
         }
-        if (datastream.getObservableProperty().getIdentifier() != null && !datastream.getObservableProperty()
-                                                                                     .isSetName()) {
-            expression = expression.and(dQS.withObservedPropertyIdentifier(datastream.getObservableProperty()
-                                                                                     .getIdentifier()));
+        if (datastream.getObservableProperty().getStaIdentifier() != null && !datastream.getObservableProperty()
+                                                                                        .isSetName()) {
+            expression = expression.and(dQS.withObservedPropertyStaIdentifier(datastream.getObservableProperty()
+                                                                                        .getStaIdentifier()));
         } else {
             expression = expression.and(dQS.withObservedPropertyName(datastream.getObservableProperty().getName()));
         }
@@ -286,7 +288,7 @@ public class DatastreamService
         if (HttpMethod.PATCH.equals(method)) {
             synchronized (getLock(id)) {
                 Optional<DatastreamEntity> existing =
-                        getRepository().findOne(dQS.withIdentifier(id),
+                        getRepository().findOne(dQS.withStaIdentifier(id),
                                                 EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS,
                                                 EntityGraphRepository.FetchGraph.FETCHGRAPH_UOM,
                                                 EntityGraphRepository.FetchGraph.FETCHGRAPH_OBS_TYPE);
@@ -318,13 +320,13 @@ public class DatastreamService
         }
 
         if (entity.getProcedure() != null
-                && (entity.getProcedure().getIdentifier() == null
+                && (entity.getProcedure().getStaIdentifier() == null
                 || entity.getProcedure().isSetName()
                 || entity.getProcedure().isSetDescription())) {
             throw new STACRUDException(ERROR_MSG, HTTPStatus.BAD_REQUEST);
         }
 
-        if (entity.getThing() != null && (entity.getThing().getIdentifier() == null || entity.getThing().isSetName()
+        if (entity.getThing() != null && (entity.getThing().getStaIdentifier() == null || entity.getThing().isSetName()
                 || entity.getThing().isSetDescription())) {
             throw new STACRUDException(ERROR_MSG, HTTPStatus.BAD_REQUEST);
         }
@@ -336,14 +338,14 @@ public class DatastreamService
     @Override
     public void delete(String id) throws STACRUDException {
         synchronized (getLock(id)) {
-            if (getRepository().existsByIdentifier(id)) {
+            if (getRepository().existsByStaIdentifier(id)) {
                 Optional<DatastreamEntity> datastream =
-                        getRepository().findByIdentifier(id,
+                        getRepository().findByStaIdentifier(id,
                                                          EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS);
                 // check datasets
                 deleteRelatedDatasetsAndObservations(datastream.get());
                 // check observations
-                getRepository().deleteByIdentifier(id);
+                getRepository().deleteByStaIdentifier(id);
             } else {
                 throw new STACRUDException("Unable to delete. Entity not found.", HTTPStatus.NOT_FOUND);
             }
@@ -351,20 +353,20 @@ public class DatastreamService
     }
 
     @Override
-    protected void delete(DatastreamEntity entity) {
-        getRepository().deleteByIdentifier(entity.getIdentifier());
+    protected void delete(DatastreamEntity entity) throws STACRUDException {
+        delete(entity.getStaIdentifier());
     }
 
     @Override
     protected DatastreamEntity createOrUpdate(DatastreamEntity entity) throws STACRUDException {
-        if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
-            return updateEntity(entity.getIdentifier(), entity, HttpMethod.PATCH);
+        if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
+            return updateEntity(entity.getStaIdentifier(), entity, HttpMethod.PATCH);
         }
         return createEntity(entity);
     }
 
     private void deleteRelatedDatasetsAndObservations(DatastreamEntity datastream) throws STACRUDException {
-        synchronized (getLock(datastream.getIdentifier())) {
+        synchronized (getLock(datastream.getStaIdentifier())) {
             // update datasets
             datastream.getDatasets().forEach(d -> {
                 d.setFirstObservation(null);
@@ -376,7 +378,8 @@ public class DatastreamService
                 datasetRepository.saveAndFlush(d);
             });
             // delete observations
-            dataRepository.deleteAll(dataRepository.findAll(oQS.withDatastreamIdentifier(datastream.getIdentifier())));
+            dataRepository.deleteAll(dataRepository.findAll(
+                    oQS.withDatastreamStaIdentifier(datastream.getStaIdentifier())));
             getRepository().flush();
             // delete datasets
             Set<DatasetEntity> datasets = new HashSet<>(datastream.getDatasets());

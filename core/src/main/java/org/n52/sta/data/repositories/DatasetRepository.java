@@ -29,10 +29,11 @@
 package org.n52.sta.data.repositories;
 
 import org.n52.series.db.beans.DatasetEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
-public interface DatasetRepository extends IdentifierNameRepository<DatasetEntity> {
+public interface DatasetRepository extends EntityGraphRepository<DatasetEntity, Long> {
 
 //    /**
 //     * Qualifies a 'not_initialized' dataset with the given value type. Once set, no update is possible

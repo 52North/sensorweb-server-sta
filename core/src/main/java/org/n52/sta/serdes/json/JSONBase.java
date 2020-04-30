@@ -41,7 +41,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.UUID;
 
 @SuppressWarnings("VisibilityModifier")
@@ -52,7 +51,6 @@ public class JSONBase {
         PATCH,
         REFERENCE
     }
-
 
     abstract static class JSONwithId<T> {
 
@@ -72,7 +70,9 @@ public class JSONBase {
 
         public void setIdentifier(String rawIdentifier) throws UnsupportedEncodingException {
             generatedId = false;
-            identifier = URLEncoder.encode(rawIdentifier.replace("\'", ""), "utf-8");
+            Assert.doesNotContain(rawIdentifier, "/", "Identifier may not contain slashes due to incompatibility " +
+                    "with @iot.selfLink!");
+            identifier = rawIdentifier;
         }
 
         /**

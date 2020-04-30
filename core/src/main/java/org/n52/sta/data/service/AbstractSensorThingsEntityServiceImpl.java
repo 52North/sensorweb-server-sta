@@ -58,6 +58,7 @@ import org.n52.sta.data.MutexFactory;
 import org.n52.sta.data.OffsetLimitBasedPageRequest;
 import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.IdentifierRepository;
+import org.n52.sta.data.repositories.StaIdentifierRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.data.service.util.CollectionWrapper;
 import org.n52.sta.data.service.util.FilterExprVisitor;
@@ -85,10 +86,10 @@ import java.util.Optional;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Transactional
-public abstract class AbstractSensorThingsEntityServiceImpl<T extends IdentifierRepository<S, Long>, S extends IdEntity,
+public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentifierRepository<S>, S extends IdEntity,
         E extends S> implements AbstractSensorThingsEntityService<T, S, E> {
 
-    protected static final String IDENTIFIER = "identifier";
+    // protected static final String IDENTIFIER = "identifier";
     protected static final String STAIDENTIFIER = "staIdentifier";
     protected static final String ENCODINGTYPE = "encodingType";
 
@@ -122,6 +123,8 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends Identifier
      * Gets a lock with given name from global lockMap. Name is unique per EntityType.
      * Uses weak references so Map is automatically cleared by GC.
      *
+     * Used to lock Entities to avoid race conditions
+     *
      * @param key name of the lock
      * @return Object used for holding the lock
      */
@@ -132,12 +135,12 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends Identifier
     public abstract EntityTypes[] getTypes();
 
     @Override public boolean existsEntity(String id) {
-        return getRepository().existsByIdentifier(id);
+        return getRepository().existsByStaIdentifier(id);
     }
 
     @Override public ElementWithQueryOptions getEntity(String id, QueryOptions queryOptions) throws STACRUDException {
         try {
-            S entity = getRepository().findByIdentifier(id, defaultFetchGraphs).get();
+            S entity = getRepository().findByStaIdentifier(id, defaultFetchGraphs).get();
             if (queryOptions.hasExpandFilter()) {
                 return this.createWrapper(fetchExpandEntities(entity, queryOptions.getExpandFilter()), queryOptions);
             } else {
@@ -263,7 +266,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends Identifier
     @Override public String getEntityIdByRelatedEntity(String relatedId, String relatedType) {
         Optional<String> entity = getRepository().identifier(
                 this.byRelatedEntityFilter(relatedId, relatedType, null),
-                IDENTIFIER);
+                STAIDENTIFIER);
         return entity.orElse(null);
     }
 
@@ -349,14 +352,14 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends Identifier
 
     protected abstract S createOrUpdate(S entity) throws STACRUDException;
     //protected S createOrUpdate(S entity) throws STACRUDException {
-    //    if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
+    //    if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
     //        return update(entity, HttpMethod.PATCH);
     //    }
     //    return create(entity);
     //}
 
     protected void checkInlineDatastream(DatastreamEntity datastream) throws STACRUDException {
-        if (datastream.getIdentifier() == null
+        if (datastream.getStaIdentifier() == null
                 || datastream.isSetName()
                 || datastream.isSetDescription()
                 || datastream.isSetUnit()) {
@@ -365,7 +368,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends Identifier
     }
 
     protected void checkInlineLocation(LocationEntity location) throws STACRUDException {
-        if (location.getIdentifier() == null || location.isSetName() || location.isSetDescription()) {
+        if (location.getStaIdentifier() == null || location.isSetName() || location.isSetDescription()) {
             throw new STACRUDException("Inlined location entities are not allowed for updates!");
         }
     }
@@ -409,7 +412,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends Identifier
     }
 
     protected OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions) {
-        return this.createPageableRequest(queryOptions, IDENTIFIER);
+        return this.createPageableRequest(queryOptions, STAIDENTIFIER);
     }
 
     /**
@@ -424,7 +427,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends Identifier
             if (!queryOptions.hasFilterFilter()) {
                 return null;
             } else {
-                FilterFilter filterOption = (FilterFilter) queryOptions.getFilterFilter();
+                FilterFilter filterOption = queryOptions.getFilterFilter();
                 Expr filter = (Expr) filterOption.getFilter();
                 try {
                     HibernateSpatialCriteriaBuilderImpl staBuilder =
@@ -452,6 +455,9 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends Identifier
     protected void mergeIdentifierNameDescription(DescribableEntity existing, DescribableEntity toMerge) {
         if (toMerge.isSetIdentifier()) {
             existing.setIdentifier(toMerge.getIdentifier());
+        }
+        if (toMerge.isSetStaIdentifier()) {
+            existing.setStaIdentifier(toMerge.getStaIdentifier());
         }
         mergeNameDescription(existing, toMerge);
     }

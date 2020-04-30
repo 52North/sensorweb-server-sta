@@ -53,22 +53,17 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
 
     private static final String FEATURE = "feature";
 
-    public Specification<AbstractFeatureEntity<?>> withObservationIdentifier(final String observationIdentifier) {
+    public Specification<AbstractFeatureEntity<?>> withObservationStaIdentifier(final String observationIdentifier) {
         return (root, query, builder) -> {
             Subquery<Long> sqFeature = query.subquery(Long.class);
             Root<DatasetEntity> dataset = sqFeature.from(DatasetEntity.class);
             Subquery<DatasetEntity> sqDataset = query.subquery(DatasetEntity.class);
             Root<DataEntity> data = sqDataset.from(DataEntity.class);
             sqDataset.select(data.get(DataEntity.PROPERTY_DATASET))
-                     .where(builder.equal(data.get(DescribableEntity.PROPERTY_IDENTIFIER), observationIdentifier));
+                     .where(builder.equal(data.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), observationIdentifier));
             sqFeature.select(dataset.get(DatasetEntity.PROPERTY_FEATURE)).where(builder.in(dataset).value(sqDataset));
             return builder.in(root.get(AbstractFeatureEntity.PROPERTY_ID)).value(sqFeature);
         };
-    }
-
-    @Override
-    public Specification<AbstractFeatureEntity<?>> withIdentifier(final String identifier) {
-        return (root, query, builder) -> builder.equal(root.get(DescribableEntity.PROPERTY_IDENTIFIER), identifier);
     }
 
     @Override protected Specification<AbstractFeatureEntity<?>> handleDirectPropertyFilter(
@@ -80,7 +75,7 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
             try {
                 switch (propertyName) {
                 case "id":
-                    return handleDirectStringPropertyFilter(root.get(AbstractFeatureEntity.PROPERTY_IDENTIFIER),
+                    return handleDirectStringPropertyFilter(root.get(AbstractFeatureEntity.PROPERTY_STA_IDENTIFIER),
                                                             propertyValue,
                                                             operator,
                                                             builder,

@@ -88,7 +88,7 @@ public class MqttEntitySubscription extends AbstractMqttSubscription {
     }
 
     @Override
-    public boolean matches(HibernateRelations.HasIdentifier entity,
+    public boolean matches(HibernateRelations.HasStaIdentifier entity,
                            String realEntityType,
                            Map<String, Set<String>> collections,
                            Set<String> differenceMap) {
@@ -100,12 +100,7 @@ public class MqttEntitySubscription extends AbstractMqttSubscription {
 
         // Direct Entity
         if (wantedIdentifier != null) {
-            // Use special case for PhenomenonEntity as staIdentifier is used for addressing
-            if (entity instanceof PhenomenonEntity) {
-                return wantedIdentifier.equals(((PhenomenonEntity) entity).getStaIdentifier());
-            } else {
-                return wantedIdentifier.equals(entity.getIdentifier());
-            }
+            return wantedIdentifier.equals(entity.getStaIdentifier());
         } else {
             // Referenced Entity
             // Check if Entity belongs to collection of this Subscription

@@ -101,13 +101,13 @@ public abstract class EntityQuerySpecifications<T> {
         };
     }
 
-    public Specification<T> withIdentifier(final String name) {
+    public Specification<T> withStaIdentifier(final String name) {
         return (root, query, builder) -> {
-            return builder.equal(root.get(DescribableEntity.PROPERTY_IDENTIFIER), name);
+            return builder.equal(root.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), name);
         };
     }
 
-    public Specification<T> withIdentifier(final List<String> identifiers) {
+    public Specification<T> withStaIdentifier(final List<String> identifiers) {
         return (root, query, builder) -> builder.in(root.get(DescribableEntity.PROPERTY_IDENTIFIER)).value(identifiers);
     }
 

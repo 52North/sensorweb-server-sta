@@ -131,7 +131,7 @@ public class ObservedPropertySerDes {
             for (String navigationProperty : ObservedPropertyEntityDefinition.NAVIGATION_PROPERTIES) {
                 if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
                     if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
-                        writeNavigationProp(gen, navigationProperty, obsProp.getIdentifier());
+                        writeNavigationProp(gen, navigationProperty, obsProp.getStaIdentifier());
                     } else {
                         gen.writeFieldName(navigationProperty);
                         switch (navigationProperty) {

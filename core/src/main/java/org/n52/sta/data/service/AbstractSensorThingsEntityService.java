@@ -133,16 +133,11 @@ public interface AbstractSensorThingsEntityService<T extends IdentifierRepositor
     T getRepository();
 
     @Transactional(rollbackFor = Exception.class)
-    ElementWithQueryOptions create(S entity)
-            throws STACRUDException;
+    ElementWithQueryOptions create(S entity) throws STACRUDException;
 
     @Transactional(rollbackFor = Exception.class)
-    ElementWithQueryOptions update(String id,
-                                   S entity,
-                                   HttpMethod method)
-            throws STACRUDException;
+    ElementWithQueryOptions update(String id, S entity, HttpMethod method) throws STACRUDException;
 
     @Transactional(rollbackFor = Exception.class)
-    void delete(String id)
-            throws STACRUDException;
+    void delete(String id) throws STACRUDException;
 }

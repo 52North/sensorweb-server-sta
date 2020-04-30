@@ -107,21 +107,6 @@ public class ObservedPropertyService
         return getRepository().existsByStaIdentifier(id);
     }
 
-    /**
-     * Overrides the default method as different field is used to store identifier
-     *
-     * @param relatedId   ID of the related Entity
-     * @param relatedType EntityType of the related Entity
-     * @return identifier of the entity. can be null if entity is nout found
-     */
-    @Override
-    public String getEntityIdByRelatedEntity(String relatedId, String relatedType) {
-        Optional<String> entity = getRepository().identifier(
-                this.byRelatedEntityFilter(relatedId, relatedType, null),
-                STAIDENTIFIER);
-        return entity.isPresent() ? entity.get() : null;
-    }
-
     @Override
     public ElementWithQueryOptions getEntity(String id, QueryOptions queryOptions) throws STACRUDException {
         try {
@@ -142,7 +127,7 @@ public class ObservedPropertyService
             String expandProperty = expandItem.getPath();
             if (ObservedPropertyEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
                 Page<DatastreamEntity> obsP = getDatastreamService()
-                        .getEntityCollectionByRelatedEntityRaw(entity.getIdentifier(),
+                        .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
                                                                STAEntityDefinition.OBSERVED_PROPERTIES,
                                                                expandItem.getQueryOptions());
                 ObservablePropertyEntity obsProp = new ObservablePropertyEntity(entity);
@@ -153,17 +138,6 @@ public class ObservedPropertyService
             }
         }
         return new ObservablePropertyEntity(entity);
-    }
-
-    /**
-     * Overrides the default method as different field is used to store identifier
-     *
-     * @param queryOptions QueryOptions to be used
-     * @return OffsetLimitBasedPageRequest
-     */
-    @Override
-    protected OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions) {
-        return this.createPageableRequest(queryOptions, STAIDENTIFIER);
     }
 
     @Override
@@ -288,9 +262,9 @@ public class ObservedPropertyService
         synchronized (getLock(id)) {
             if (getRepository().existsByStaIdentifier(id)) {
                 // delete datastreams
-                datastreamRepository.findAll(dQS.withObservedPropertyIdentifier(id)).forEach(d -> {
+                datastreamRepository.findAll(dQS.withObservedPropertyStaIdentifier(id)).forEach(d -> {
                     try {
-                        getDatastreamService().delete(d.getIdentifier());
+                        getDatastreamService().delete(d);
                     } catch (STACRUDException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
@@ -305,8 +279,8 @@ public class ObservedPropertyService
     }
 
     @Override
-    protected void delete(PhenomenonEntity entity) {
-        getRepository().deleteByStaIdentifier(entity.getStaIdentifier());
+    protected void delete(PhenomenonEntity entity) throws STACRUDException {
+        delete(entity.getStaIdentifier());
     }
 
     @Override

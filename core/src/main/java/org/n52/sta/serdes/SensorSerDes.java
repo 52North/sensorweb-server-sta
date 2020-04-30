@@ -115,10 +115,10 @@ public class SensorSerDes {
 
             // olingo @iot links
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
-                writeId(gen, sensor.getIdentifier());
+                writeId(gen, sensor.getStaIdentifier());
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_SELF_LINK)) {
-                writeSelfLink(gen, sensor.getIdentifier());
+                writeSelfLink(gen, sensor.getStaIdentifier());
             }
 
             // actual properties
@@ -154,7 +154,7 @@ public class SensorSerDes {
             for (String navigationProperty : SensorEntityDefinition.NAVIGATION_PROPERTIES) {
                 if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
                     if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
-                        writeNavigationProp(gen, navigationProperty, sensor.getIdentifier());
+                        writeNavigationProp(gen, navigationProperty, sensor.getStaIdentifier());
                     } else {
                         gen.writeFieldName(navigationProperty);
                         switch (navigationProperty) {

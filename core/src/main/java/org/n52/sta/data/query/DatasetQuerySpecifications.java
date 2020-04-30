@@ -49,7 +49,7 @@ public class DatasetQuerySpecifications {
      * @param id the id to match
      * @return a specification
      */
-    public Specification<DatasetEntity> matchOfferings(final String id) {
+    public Specification<DatasetEntity> matchOfferingsIdentifier(final String id) {
         return (root, query, builder) -> {
             final Join<DatasetEntity, OfferingEntity> join =
                     root.join(DatasetEntity.PROPERTY_OFFERING, JoinType.INNER);
@@ -63,11 +63,19 @@ public class DatasetQuerySpecifications {
      * @param id the id to match
      * @return a specification
      */
-    public Specification<DatasetEntity> matchFeatures(final String id) {
+    public Specification<DatasetEntity> matchFeatureIdentifier(final String id) {
         return (root, query, builder) -> {
             final Join<DatasetEntity, FeatureEntity> join =
                     root.join(DatasetEntity.PROPERTY_FEATURE, JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), id);
+        };
+    }
+
+    public Specification<DatasetEntity> matchFeatureStaIdentifier(final String staIdentifier) {
+        return (root, query, builder) -> {
+            final Join<DatasetEntity, FeatureEntity> join =
+                    root.join(DatasetEntity.PROPERTY_FEATURE, JoinType.INNER);
+            return builder.equal(join.get(FeatureEntity.PROPERTY_STA_IDENTIFIER), staIdentifier);
         };
     }
 
@@ -77,7 +85,7 @@ public class DatasetQuerySpecifications {
      * @param id the id to match
      * @return a specification
      */
-    public Specification<DatasetEntity> matchProcedures(final String id) {
+    public Specification<DatasetEntity> matchProcedureIdentifier(final String id) {
         return (root, query, builder) -> {
             final Join<DatasetEntity, ProcedureEntity> join =
                     root.join(DatasetEntity.PROPERTY_PROCEDURE, JoinType.INNER);
@@ -91,7 +99,7 @@ public class DatasetQuerySpecifications {
      * @param id the id to match
      * @return a specification
      */
-    public Specification<DatasetEntity> matchPhenomena(final String id) {
+    public Specification<DatasetEntity> matchPhenomenaIdentifier(final String id) {
         return (root, query, builder) -> {
             final Join<DatasetEntity, PhenomenonEntity> join =
                     root.join(DatasetEntity.PROPERTY_PHENOMENON, JoinType.INNER);

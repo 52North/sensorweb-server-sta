@@ -118,10 +118,10 @@ public class ObservationSerDes {
 
             // olingo @iot links
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
-                writeId(gen, observation.getIdentifier());
+                writeId(gen, observation.getStaIdentifier());
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_SELF_LINK)) {
-                writeSelfLink(gen, observation.getIdentifier());
+                writeSelfLink(gen, observation.getStaIdentifier());
             }
 
             // actual properties
@@ -173,7 +173,7 @@ public class ObservationSerDes {
             for (String navigationProperty : ObservationEntityDefinition.NAVIGATION_PROPERTIES) {
                 if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
                     if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
-                        writeNavigationProp(gen, navigationProperty, observation.getIdentifier());
+                        writeNavigationProp(gen, navigationProperty, observation.getStaIdentifier());
                     } else {
                         gen.writeFieldName(navigationProperty);
                         switch (navigationProperty) {

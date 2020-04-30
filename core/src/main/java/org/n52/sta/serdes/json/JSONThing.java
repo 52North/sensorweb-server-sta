@@ -62,6 +62,7 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
             Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
 
             self.setIdentifier(identifier);
+            self.setStaIdentifier(identifier);
             self.setName(name);
             self.setDescription(description);
 
@@ -102,6 +103,7 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
             return self;
         case PATCH:
             self.setIdentifier(identifier);
+            self.setStaIdentifier(identifier);
             self.setName(name);
             self.setDescription(description);
 
@@ -132,6 +134,7 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
             Assert.isNull(Datastreams, INVALID_REFERENCED_ENTITY);
 
             self.setIdentifier(identifier);
+            self.setStaIdentifier(identifier);
             return self;
         default:
             return null;

@@ -111,7 +111,7 @@ public class SensorService
             String expandProperty = expandItem.getPath();
             if (SensorEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
                 Page<DatastreamEntity> observedProps = getDatastreamService()
-                        .getEntityCollectionByRelatedEntityRaw(entity.getIdentifier(),
+                        .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
                                                                STAEntityDefinition.SENSORS,
                                                                expandItem.getQueryOptions());
                 SensorEntity sensor = new SensorEntity(entity);
@@ -131,7 +131,7 @@ public class SensorService
         Specification<ProcedureEntity> filter;
         switch (relatedType) {
         case STAEntityDefinition.DATASTREAMS: {
-            filter = sQS.withDatastreamIdentifier(relatedId);
+            filter = sQS.withDatastreamStaIdentifier(relatedId);
             break;
         }
         default:
@@ -139,7 +139,7 @@ public class SensorService
         }
 
         if (ownId != null) {
-            filter = filter.and(sQS.withIdentifier(ownId));
+            filter = filter.and(sQS.withStaIdentifier(ownId));
         }
         return filter;
     }
@@ -165,29 +165,31 @@ public class SensorService
 
     @Override
     public ProcedureEntity createEntity(ProcedureEntity sensor) throws STACRUDException {
-        if (sensor.getIdentifier() != null && !sensor.isSetName()) {
+        if (sensor.getStaIdentifier() != null && !sensor.isSetName()) {
             Optional<ProcedureEntity> optionalEntity =
-                    getRepository().findByIdentifier(sensor.getIdentifier(),
+                    getRepository().findByStaIdentifier(sensor.getStaIdentifier(),
                                                      EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT);
             if (optionalEntity.isPresent()) {
                 return optionalEntity.get();
             } else {
-                throw new STACRUDException("No Sensor with id '" + sensor.getIdentifier() + "' found");
+                throw new STACRUDException("No Sensor with id '" + sensor.getStaIdentifier() + "' found");
             }
         }
-        if (sensor.getIdentifier() == null) {
+        if (sensor.getStaIdentifier() == null) {
             if (getRepository().existsByName(sensor.getName())) {
                 Optional<ProcedureEntity> optional = getRepository()
-                        .findOne(sQS.withIdentifier(sensor.getIdentifier()).or(sQS.withName(sensor.getName())));
+                        .findOne(sQS.withStaIdentifier(sensor.getStaIdentifier()).or(sQS.withName(sensor.getName())));
                 return optional.isPresent() ? optional.get() : null;
             } else {
                 // Autogenerate Identifier
-                sensor.setIdentifier(UUID.randomUUID().toString());
+                String uuid = UUID.randomUUID().toString();
+                sensor.setIdentifier(uuid);
+                sensor.setStaIdentifier(uuid);
             }
         }
 
-        synchronized (getLock(sensor.getIdentifier())) {
-            if (getRepository().existsByIdentifier(sensor.getIdentifier())) {
+        synchronized (getLock(sensor.getStaIdentifier())) {
+            if (getRepository().existsByStaIdentifier(sensor.getStaIdentifier())) {
                 throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
             }
             ProcedureEntity procedure = getAsProcedureEntity(sensor);
@@ -221,7 +223,7 @@ public class SensorService
         if (HttpMethod.PATCH.equals(method)) {
             synchronized (getLock(id)) {
                 Optional<ProcedureEntity> existing =
-                        getRepository().findByIdentifier(id,
+                        getRepository().findByStaIdentifier(id,
                                                          EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT,
                                                          EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDUREHISTORY);
                 if (existing.isPresent()) {
@@ -267,18 +269,18 @@ public class SensorService
     @Override
     public void delete(String identifier) throws STACRUDException {
         synchronized (getLock(identifier)) {
-            if (getRepository().existsByIdentifier(identifier)) {
+            if (getRepository().existsByStaIdentifier(identifier)) {
                 // delete datastreams
-                datastreamRepository.findAll(dQS.withSensorIdentifier(identifier)).forEach(d -> {
+                datastreamRepository.findAll(dQS.withSensorStaIdentifier(identifier)).forEach(d -> {
                     try {
                         // TODO delete observation and datasets ...
-                        getDatastreamService().delete(d.getIdentifier());
+                        getDatastreamService().delete(d);
                     } catch (STACRUDException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
                 });
-                getRepository().deleteByIdentifier(identifier);
+                getRepository().deleteByStaIdentifier(identifier);
             } else {
                 throw new STACRUDException("Unable to delete. Entity not found.", HTTPStatus.NOT_FOUND);
             }
@@ -286,14 +288,14 @@ public class SensorService
     }
 
     @Override
-    protected void delete(ProcedureEntity entity) {
-        getRepository().deleteByIdentifier(entity.getIdentifier());
+    protected void delete(ProcedureEntity entity) throws STACRUDException {
+        delete(entity.getStaIdentifier());
     }
 
     @Override
     protected ProcedureEntity createOrUpdate(ProcedureEntity entity) throws STACRUDException {
-        if (entity.getIdentifier() != null && getRepository().existsByIdentifier(entity.getIdentifier())) {
-            return updateEntity(entity.getIdentifier(), entity, HttpMethod.PATCH);
+        if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
+            return updateEntity(entity.getStaIdentifier(), entity, HttpMethod.PATCH);
         }
         return createEntity(entity);
     }

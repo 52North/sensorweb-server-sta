@@ -119,10 +119,10 @@ public class FeatureOfInterestSerDes {
 
             // olingo @iot links
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
-                writeId(gen, feature.getIdentifier());
+                writeId(gen, feature.getStaIdentifier());
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_SELF_LINK)) {
-                writeSelfLink(gen, feature.getIdentifier());
+                writeSelfLink(gen, feature.getStaIdentifier());
             }
 
             // actual properties
@@ -147,7 +147,7 @@ public class FeatureOfInterestSerDes {
             for (String navigationProperty : FeatureOfInterestEntityDefinition.NAVIGATION_PROPERTIES) {
                 if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
                     if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
-                        writeNavigationProp(gen, navigationProperty, feature.getIdentifier());
+                        writeNavigationProp(gen, navigationProperty, feature.getStaIdentifier());
                     } else {
                         gen.writeFieldName(navigationProperty);
                         switch (navigationProperty) {

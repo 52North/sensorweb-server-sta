@@ -126,6 +126,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
             Assert.isNull(Observations, INVALID_REFERENCED_ENTITY);
 
             self.setIdentifier(identifier);
+            self.setStaIdentifier(identifier);
             return self;
         default:
             return null;
@@ -134,6 +135,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
 
     private DatastreamEntity createPatchEntity() {
         self.setIdentifier(identifier);
+        self.setStaIdentifier(identifier);
         self.setName(name);
         self.setDescription(description);
 
@@ -196,6 +198,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
 
     private DatastreamEntity createPostEntity() {
         self.setIdentifier(identifier);
+        self.setStaIdentifier(identifier);
         self.setName(name);
         self.setDescription(description);
         self.setObservationType(new FormatEntity().setFormat(observationType));

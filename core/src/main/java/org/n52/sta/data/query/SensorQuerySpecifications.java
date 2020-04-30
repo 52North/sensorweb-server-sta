@@ -47,13 +47,13 @@ import javax.persistence.criteria.Subquery;
  */
 public class SensorQuerySpecifications extends EntityQuerySpecifications<ProcedureEntity> {
 
-    public Specification<ProcedureEntity> withDatastreamIdentifier(final String datastreamIdentifier) {
+    public Specification<ProcedureEntity> withDatastreamStaIdentifier(final String datastreamIdentifier) {
         return (root, query, builder) -> {
             Subquery<ProcedureEntity> sq = query.subquery(ProcedureEntity.class);
             Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
             Join<DatastreamEntity, ProcedureEntity> join = datastream.join(DatastreamEntity.PROPERTY_SENSOR);
             sq.select(join)
-              .where(builder.equal(datastream.get(DescribableEntity.PROPERTY_IDENTIFIER), datastreamIdentifier));
+              .where(builder.equal(datastream.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), datastreamIdentifier));
             return builder.in(root).value(sq);
         };
     }
@@ -84,7 +84,7 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications<Procedu
             try {
                 switch (propertyName) {
                 case "id":
-                    return handleDirectStringPropertyFilter(root.get(ProcedureEntity.PROPERTY_IDENTIFIER),
+                    return handleDirectStringPropertyFilter(root.get(ProcedureEntity.PROPERTY_STA_IDENTIFIER),
                                                             propertyValue,
                                                             operator,
                                                             builder,

@@ -114,10 +114,10 @@ public class LocationSerDes {
 
             // olingo @iot links
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
-                writeId(gen, location.getIdentifier());
+                writeId(gen, location.getStaIdentifier());
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_SELF_LINK)) {
-                writeSelfLink(gen, location.getIdentifier());
+                writeSelfLink(gen, location.getStaIdentifier());
             }
 
             // actual properties
@@ -142,7 +142,7 @@ public class LocationSerDes {
             for (String navigationProperty : LocationEntityDefinition.NAVIGATION_PROPERTIES) {
                 if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
                     if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
-                        writeNavigationProp(gen, navigationProperty, location.getIdentifier());
+                        writeNavigationProp(gen, navigationProperty, location.getStaIdentifier());
                     } else {
                         gen.writeFieldName(navigationProperty);
                         switch (navigationProperty) {

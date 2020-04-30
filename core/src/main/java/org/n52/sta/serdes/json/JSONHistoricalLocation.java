@@ -69,6 +69,7 @@ public class JSONHistoricalLocation extends JSONBase.JSONwithIdTime<HistoricalLo
             Assert.notNull(date, INVALID_INLINE_ENTITY + "time");
 
             self.setIdentifier(identifier);
+            self.setStaIdentifier(identifier);
             self.setTime(date);
 
             if (Thing != null) {
@@ -93,6 +94,7 @@ public class JSONHistoricalLocation extends JSONBase.JSONwithIdTime<HistoricalLo
             return self;
         case PATCH:
             self.setIdentifier(identifier);
+            self.setStaIdentifier(identifier);
             self.setTime(date);
 
             if (Thing != null) {
@@ -112,6 +114,7 @@ public class JSONHistoricalLocation extends JSONBase.JSONwithIdTime<HistoricalLo
             Assert.isNull(Locations, INVALID_REFERENCED_ENTITY);
 
             self.setIdentifier(identifier);
+            self.setStaIdentifier(identifier);
             return self;
         default:
             return null;

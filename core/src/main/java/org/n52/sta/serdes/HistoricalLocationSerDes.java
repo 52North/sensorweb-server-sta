@@ -112,10 +112,10 @@ public class HistoricalLocationSerDes {
 
             // olingo @iot links
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
-                writeId(gen, histLoc.getIdentifier());
+                writeId(gen, histLoc.getStaIdentifier());
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_SELF_LINK)) {
-                writeSelfLink(gen, histLoc.getIdentifier());
+                writeSelfLink(gen, histLoc.getStaIdentifier());
             }
 
             // actual properties
@@ -126,7 +126,7 @@ public class HistoricalLocationSerDes {
             // navigation properties
             for (String navigationProperty : HistoricalLocationEntityDefinition.NAVIGATION_PROPERTIES) {
                 if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
-                    writeNavigationProp(gen, navigationProperty, histLoc.getIdentifier());
+                    writeNavigationProp(gen, navigationProperty, histLoc.getStaIdentifier());
                 }
             }
 
@@ -134,7 +134,7 @@ public class HistoricalLocationSerDes {
             for (String navigationProperty : HistoricalLocationEntityDefinition.NAVIGATION_PROPERTIES) {
                 if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
                     if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
-                        writeNavigationProp(gen, navigationProperty, histLoc.getIdentifier());
+                        writeNavigationProp(gen, navigationProperty, histLoc.getStaIdentifier());
                     } else {
                         gen.writeFieldName(navigationProperty);
                         switch (navigationProperty) {

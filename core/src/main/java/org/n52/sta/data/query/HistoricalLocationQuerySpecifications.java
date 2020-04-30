@@ -48,19 +48,19 @@ import javax.persistence.criteria.Subquery;
  */
 public class HistoricalLocationQuerySpecifications extends EntityQuerySpecifications<HistoricalLocationEntity> {
 
-    public Specification<HistoricalLocationEntity> withRelatedLocationIdentifier(final String locationIdentifier) {
+    public Specification<HistoricalLocationEntity> withLocationStaIdentifier(final String locationIdentifier) {
         return (root, query, builder) -> {
             final Join<HistoricalLocationEntity, LocationEntity> join =
                     root.join(HistoricalLocationEntity.PROPERTY_LOCATIONS, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), locationIdentifier);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), locationIdentifier);
         };
     }
 
-    public Specification<HistoricalLocationEntity> withRelatedThingIdentifier(final String thingIdentifier) {
+    public Specification<HistoricalLocationEntity> withThingStaIdentifier(final String thingIdentifier) {
         return (root, query, builder) -> {
             final Join<HistoricalLocationEntity, PlatformEntity> join =
                     root.join(HistoricalLocationEntity.PROPERTY_THING, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_IDENTIFIER), thingIdentifier);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), thingIdentifier);
         };
     }
 
@@ -100,7 +100,7 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
             try {
                 switch (propertyName) {
                 case "id":
-                    return handleDirectStringPropertyFilter(root.get(HistoricalLocationEntity.PROPERTY_IDENTIFIER),
+                    return handleDirectStringPropertyFilter(root.get(HistoricalLocationEntity.PROPERTY_STA_IDENTIFIER),
                                                             propertyValue,
                                                             operator,
                                                             builder,
