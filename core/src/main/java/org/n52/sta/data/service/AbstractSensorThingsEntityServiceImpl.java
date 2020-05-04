@@ -29,6 +29,11 @@
 
 package org.n52.sta.data.service;
 
+import java.util.Optional;
+
+import javax.annotation.PostConstruct;
+import javax.persistence.criteria.Predicate;
+
 import org.hibernate.query.criteria.internal.CriteriaBuilderImpl;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DataEntity;
@@ -57,7 +62,6 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.data.MutexFactory;
 import org.n52.sta.data.OffsetLimitBasedPageRequest;
 import org.n52.sta.data.repositories.EntityGraphRepository;
-import org.n52.sta.data.repositories.IdentifierRepository;
 import org.n52.sta.data.repositories.StaIdentifierRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.data.service.util.CollectionWrapper;
@@ -74,10 +78,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.annotation.PostConstruct;
-import javax.persistence.criteria.Predicate;
-import java.util.Optional;
 
 /**
  * Interface for requesting Sensor Things entities

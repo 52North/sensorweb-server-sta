@@ -28,10 +28,10 @@
  */
 package org.n52.sta.data.service;
 
-import org.springframework.stereotype.Component;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import org.springframework.stereotype.Component;
 
 /**
  * Repository for all Sensor Things entity data services
