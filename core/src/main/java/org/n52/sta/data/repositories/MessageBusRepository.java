@@ -34,10 +34,12 @@ import org.hibernate.graph.EntityGraphs;
 import org.hibernate.graph.GraphParser;
 import org.hibernate.graph.RootGraph;
 import org.n52.series.db.beans.AbstractFeatureEntity;
+import org.n52.series.db.beans.CountDataEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
+import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
@@ -65,6 +67,7 @@ import org.springframework.util.Assert;
 import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -181,7 +184,23 @@ public class MessageBusRepository<T, I extends Serializable>
             query.select(root.get(columnName));
         }
         if (pageable.getSort().isSorted()) {
-            query.orderBy(QueryUtils.toOrders(pageable.getSort(), root, criteriaBuilder));
+//            if (getDomainClass().getName().equals(DataEntity.class.getName())) {
+//                StringBuffer buffer = new StringBuffer("SELECT d.id, ");
+//                String when = " WHEN TYPE(e) = ";
+//                buffer.append(" CASE ");
+//                buffer.append(when).append(QuantityDataEntity.class.getSimpleName())
+//                        .append(" THEN q.value ");
+//                buffer.append(when).append(CountDataEntity.class.getSimpleName())
+//                        .append(" THEN c.value ");
+//                buffer.append(" END as value ");
+//                buffer.append(" FROM DataEntity d, QuantityDataEntity q, CountDataEntity c");
+//                Query createQuery = em.createQuery(buffer.toString());
+//
+//                query.where(criteriaBuilder.and(query.getRestriction(),
+//                        criteriaBuilder.in(root.get(DataEntity.PROPERTY_ID)).value(createQuery)));
+//            } else {
+                query.orderBy(QueryUtils.toOrders(pageable.getSort(), root, criteriaBuilder));
+//            }
         }
 
         TypedQuery<String> typedQuery = em.createQuery(query);
@@ -501,7 +520,7 @@ public class MessageBusRepository<T, I extends Serializable>
 
     public Page<T> findAll(Specification<T> spec, Pageable pageable, EntityGraphRepository.FetchGraph... fetchGraphs) {
         TypedQuery<T> query = getQuery(spec, pageable, createEntityGraph(fetchGraphs));
-        return pageable.isUnpaged() ? new PageImpl<T>(query.getResultList())
+        return pageable.isUnpaged() ? new PageImpl<>(query.getResultList())
                 : readPage(query, getDomainClass(), pageable, spec);
     }
 
