@@ -29,15 +29,23 @@
 
 package org.n52.sta.data.query;
 
+import org.n52.series.db.beans.CategoryDataEntity;
+import org.n52.series.db.beans.CountDataEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.FeatureEntity;
+import org.n52.series.db.beans.QuantityDataEntity;
+import org.n52.series.db.beans.ReferencedDataEntity;
+import org.n52.series.db.beans.TextDataEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
+import org.n52.shetland.ogc.filter.FilterConstants.ComparisonOperator;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.springframework.data.jpa.domain.Specification;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
@@ -118,94 +126,99 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
         };
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Override protected Specification<DataEntity<?>> handleDirectPropertyFilter(
-            String propertyName,
-            Expression<?> propertyValue,
-            FilterConstants.ComparisonOperator operator,
-            boolean switched) {
+    @Override
+    protected Specification<DataEntity<?>> handleDirectPropertyFilter(String propertyName, Expression<?> propertyValue,
+            FilterConstants.ComparisonOperator operator, boolean switched) {
         return (root, query, builder) -> {
             try {
                 switch (propertyName) {
-                case "id":
-                    return handleDirectStringPropertyFilter(root.get(DataEntity.PROPERTY_STA_IDENTIFIER),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            false);
-                case "value":
-                    // TODO: implement
-                    /*
-                    Subquery<QuantityDataEntity> sq = query.subquery(QuantityDataEntity.class);
-                    Root<QuantityDataEntity> dataset = sq.from(QuantityDataEntity.class);
-                    Predicate predicate = handleDirectNumberPropertyFilter(dataset.get(propertyName),
-                                                                           Double.valueOf(propertyValue),
-                                                                           operator,
-                                                                           builder);
-                    sq.select(dataset.get(QuantityDataEntity.PROPERTY_IDENTIFIER)).where(predicate);
-                    return builder.in(root.get(DataEntity.PROPERTY_IDENTIFIER)).value(sq);
-                    */
-                    //return handleDirectNumberPropertyFilter(
-                    //        dataset.<Number> get(propertyName),
-                    //        propertyValue,
-                    //        operator,
-                    //        builder,
-                    //        switched);
-                case "phenomenonTime":
-                    switch (operator) {
-                    case PropertyIsLessThan:
-                    case PropertyIsLessThanOrEqualTo:
-                        return handleDirectDateTimePropertyFilter(
-                                root.get(DataEntity.PROPERTY_SAMPLING_TIME_END),
-                                propertyValue,
-                                operator,
-                                builder);
-                    case PropertyIsGreaterThan:
-                    case PropertyIsGreaterThanOrEqualTo:
-                        return handleDirectDateTimePropertyFilter(
-                                root.get(DataEntity.PROPERTY_SAMPLING_TIME_START),
-                                propertyValue,
-                                operator,
-                                builder);
-                    case PropertyIsEqualTo:
-                        Predicate eqStart = handleDirectDateTimePropertyFilter(
-                                root.get(DataEntity.PROPERTY_SAMPLING_TIME_START),
-                                propertyValue,
-                                operator,
-                                builder);
-                        Predicate eqEnd = handleDirectDateTimePropertyFilter(
-                                root.get(DataEntity.PROPERTY_SAMPLING_TIME_END),
-                                propertyValue,
-                                operator,
-                                builder);
-                        return builder.and(eqStart, eqEnd);
-                    case PropertyIsNotEqualTo:
-                        Predicate neStart = handleDirectDateTimePropertyFilter(
-                                root.get(DataEntity.PROPERTY_SAMPLING_TIME_START),
-                                propertyValue,
-                                operator,
-                                builder);
-                        Predicate neEnd = handleDirectDateTimePropertyFilter(
-                                root.get(DataEntity.PROPERTY_SAMPLING_TIME_END),
-                                propertyValue,
-                                operator,
-                                builder);
-                        return builder.or(neStart, neEnd);
+                    case "id":
+                        return handleDirectStringPropertyFilter(root.get(DataEntity.PROPERTY_STA_IDENTIFIER),
+                                propertyValue, operator, builder, false);
+                    case "value":
+                        if (propertyValue.getJavaType().getName().equals(Double.class.getName())
+                                || propertyValue.getJavaType().getName().equals(Long.class.getName())
+                                || propertyValue.getJavaType().getName().equals(Integer.class.getName())) {
+                            return builder.or(
+                                    createNumericPredicate(root, query, builder, QuantityDataEntity.class,
+                                            propertyName, propertyValue, operator),
+                                    createNumericPredicate(root, query, builder, CountDataEntity.class, propertyName,
+                                            propertyValue, operator));
+
+                        } else if (propertyValue.getJavaType().getName().equals(String.class.getName())) {
+                            return builder.or(
+                                    createStringPredicate(root, query, builder, TextDataEntity.class, propertyName,
+                                            propertyValue, operator),
+                                    createStringPredicate(root, query, builder, CategoryDataEntity.class, propertyName,
+                                            propertyValue, operator),
+                                    createStringPredicate(root, query, builder, ReferencedDataEntity.class,
+                                            propertyName, propertyValue, operator));
+
+                        } else {
+                            throw new STAInvalidFilterExpressionException("Value type not supported!");
+                        }
+                    case "phenomenonTime":
+                        switch (operator) {
+                            case PropertyIsLessThan:
+                            case PropertyIsLessThanOrEqualTo:
+                                return handleDirectDateTimePropertyFilter(
+                                        root.get(DataEntity.PROPERTY_SAMPLING_TIME_END), propertyValue, operator,
+                                        builder);
+                            case PropertyIsGreaterThan:
+                            case PropertyIsGreaterThanOrEqualTo:
+                                return handleDirectDateTimePropertyFilter(
+                                        root.get(DataEntity.PROPERTY_SAMPLING_TIME_START), propertyValue, operator,
+                                        builder);
+                            case PropertyIsEqualTo:
+                                Predicate eqStart = handleDirectDateTimePropertyFilter(
+                                        root.get(DataEntity.PROPERTY_SAMPLING_TIME_START), propertyValue, operator,
+                                        builder);
+                                Predicate eqEnd = handleDirectDateTimePropertyFilter(
+                                        root.get(DataEntity.PROPERTY_SAMPLING_TIME_END), propertyValue, operator,
+                                        builder);
+                                return builder.and(eqStart, eqEnd);
+                            case PropertyIsNotEqualTo:
+                                Predicate neStart = handleDirectDateTimePropertyFilter(
+                                        root.get(DataEntity.PROPERTY_SAMPLING_TIME_START), propertyValue, operator,
+                                        builder);
+                                Predicate neEnd = handleDirectDateTimePropertyFilter(
+                                        root.get(DataEntity.PROPERTY_SAMPLING_TIME_END), propertyValue, operator,
+                                        builder);
+                                return builder.or(neStart, neEnd);
+                            default:
+                                throw new STAInvalidFilterExpressionException("Operator not implemented!");
+                        }
+                    case "resultTime":
+                        return this.handleDirectDateTimePropertyFilter(root.get(DataEntity.PROPERTY_RESULT_TIME),
+                                propertyValue, operator, builder);
                     default:
-                        throw new STAInvalidFilterExpressionException("Operator not implemented!");
-                    }
-                case "resultTime":
-                    return this.handleDirectDateTimePropertyFilter(
-                            root.get(DataEntity.PROPERTY_RESULT_TIME),
-                            propertyValue,
-                            operator,
-                            builder);
-                default:
-                    throw new STAInvalidFilterExpressionException("Currently not implemented!");
+                        throw new STAInvalidFilterExpressionException("Currently not implemented!");
                 }
             } catch (STAInvalidFilterExpressionException e) {
                 throw new RuntimeException(e);
             }
         };
+    }
+
+    private <T extends DataEntity> Predicate createNumericPredicate(Root<DataEntity<?>> root, CriteriaQuery<?> query,
+            CriteriaBuilder builder, Class<T> clazz, String propertyName, Expression<?> propertyValue,
+            ComparisonOperator operator) throws STAInvalidFilterExpressionException {
+        Subquery<T> sq = query.subquery(clazz);
+        Root<T> entity = sq.from(clazz);
+        Predicate predicate =
+                handleDirectNumberPropertyFilter(entity.get(propertyName), propertyValue, operator, builder);
+        sq.select(entity.get(QuantityDataEntity.PROPERTY_ID)).where(predicate);
+        return builder.in(root.get(DataEntity.PROPERTY_ID)).value(sq);
+    }
+
+    private <T extends DataEntity> Predicate createStringPredicate(Root<DataEntity<?>> root, CriteriaQuery<?> query,
+            CriteriaBuilder builder, Class<T> clazz, String propertyName, Expression<?> propertyValue,
+            ComparisonOperator operator) throws STAInvalidFilterExpressionException {
+        Subquery<T> sq = query.subquery(clazz);
+        Root<T> entity = sq.from(clazz);
+        Predicate predicate =
+                handleDirectStringPropertyFilter(entity.get(propertyName), propertyValue, operator, builder, false);
+        sq.select(entity.get(QuantityDataEntity.PROPERTY_ID)).where(predicate);
+        return builder.in(root.get(DataEntity.PROPERTY_ID)).value(sq);
     }
 }
