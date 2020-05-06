@@ -108,7 +108,7 @@ public abstract class EntityQuerySpecifications<T> {
     }
 
     public Specification<T> withStaIdentifier(final List<String> identifiers) {
-        return (root, query, builder) -> builder.in(root.get(DescribableEntity.PROPERTY_IDENTIFIER)).value(identifiers);
+        return (root, query, builder) -> builder.in(root.get(DescribableEntity.PROPERTY_STA_IDENTIFIER)).value(identifiers);
     }
 
     // Wrapper
