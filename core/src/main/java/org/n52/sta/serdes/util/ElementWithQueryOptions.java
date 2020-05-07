@@ -70,8 +70,6 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
                                                         queryOptions);
         case "ObservablePropertyEntity":
             return new ObservedPropertyWithQueryOptions((ObservablePropertyEntity) entity, queryOptions);
-        case "ObservationEntity":
-            return new ObservationWithQueryOptions((ObservationEntity<?>) entity, queryOptions);
         case "LocationEntity":
             return new LocationWithQueryOptions((LocationEntity) entity, queryOptions);
         case "HistoricalLocationEntity":
@@ -84,8 +82,13 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
         case "DatastreamEntity":
             return new DatastreamWithQueryOptions((DatastreamEntity) entity, queryOptions);
         default:
-            throw new RuntimeException("Error wrapping object with queryOptions. Could not find Wrapper for class: " +
-                                               entity.getClass().getSimpleName());
+            if (entity instanceof ObservationEntity) {
+                return new ObservationWithQueryOptions((ObservationEntity<?>) entity, queryOptions);
+            } else {
+                throw new RuntimeException(
+                        "Error wrapping object with queryOptions. Could not find Wrapper for class: " +
+                                entity.getClass().getSimpleName());
+            }
         }
     }
 
@@ -134,7 +137,8 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
     }
 
 
-    public static class HistoricalLocationWithQueryOptions extends ElementWithQueryOptions<HistoricalLocationEntity> {
+    public static class HistoricalLocationWithQueryOptions
+            extends ElementWithQueryOptions<HistoricalLocationEntity> {
 
         HistoricalLocationWithQueryOptions(HistoricalLocationEntity thing, QueryOptions queryOptions) {
             this.entity = thing;
