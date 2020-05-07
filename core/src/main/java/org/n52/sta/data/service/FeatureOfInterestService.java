@@ -29,12 +29,6 @@
 
 package org.n52.sta.data.service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
@@ -45,7 +39,7 @@ import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
-import org.n52.series.db.beans.sta.StaDataEntity;
+import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.series.db.beans.sta.StaFeatureEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
@@ -57,12 +51,12 @@ import org.n52.sta.data.query.DatasetQuerySpecifications;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.FeatureOfInterestQuerySpecifications;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
-import org.n52.sta.data.repositories.DataRepository;
 import org.n52.sta.data.repositories.DatasetRepository;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.FeatureOfInterestRepository;
 import org.n52.sta.data.repositories.FormatRepository;
+import org.n52.sta.data.repositories.ObservationRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,6 +67,12 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -92,21 +92,21 @@ public class FeatureOfInterestService
     private static final DatastreamQuerySpecifications dsQS = new DatastreamQuerySpecifications();
 
     private final FormatRepository formatRepository;
-    private final DataRepository dataRepository;
+    private final ObservationRepository observationRepository;
     private final DatasetRepository datasetRepository;
     private final DatastreamRepository datastreamRepository;
 
     @Autowired
     public FeatureOfInterestService(FeatureOfInterestRepository repository,
                                     FormatRepository formatRepository,
-                                    DataRepository dataRepository,
+                                    ObservationRepository observationRepository,
                                     DatasetRepository datasetRepository,
                                     DatastreamRepository datastreamRepository) {
         super(repository,
               AbstractFeatureEntity.class,
               EntityGraphRepository.FetchGraph.FETCHGRAPH_FEATURETYPE);
         this.formatRepository = formatRepository;
-        this.dataRepository = dataRepository;
+        this.observationRepository = observationRepository;
         this.datasetRepository = datasetRepository;
         this.datastreamRepository = datastreamRepository;
     }
@@ -123,7 +123,7 @@ public class FeatureOfInterestService
         for (ExpandItem expandItem : expandOption.getItems()) {
             String expandProperty = expandItem.getPath();
             if (FeatureOfInterestEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
-                Page<StaDataEntity<?>> observation = getObservationService()
+                Page<ObservationEntity<?>> observation = getObservationService()
                         .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
                                                                STAEntityDefinition.FEATURES_OF_INTEREST,
                                                                expandItem.getQueryOptions());
@@ -294,7 +294,7 @@ public class FeatureOfInterestService
                 d.setLastValueAt(null);
                 datasetRepository.saveAndFlush(d);
                 // delete observations
-                dataRepository.deleteAll(dataRepository.findAll(oQS.withDatasetId(d.getId())));
+                observationRepository.deleteAll(observationRepository.findAll(oQS.withDatasetId(d.getId())));
                 getRepository().flush();
                 datastreamRepository.findAll(dsQS.withDatasetId(d.getId()),
                                              EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS).forEach(ds -> {

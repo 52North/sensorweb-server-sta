@@ -36,12 +36,12 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.module.SimpleSerializers;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import org.n52.series.db.beans.AbstractFeatureEntity;
-import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.sta.data.service.util.CollectionWrapper;
 import org.n52.sta.serdes.CollectionSer;
@@ -90,7 +90,7 @@ public class JacksonConfig {
                                       new LocationSerDes.LocationDeserializer());
         deserializers.addDeserializer(SensorEntity.class,
                                       new SensorSerDes.SensorDeserializer(variableSensorEncodingTypeEnabled));
-        deserializers.addDeserializer(DataEntity.class,
+        deserializers.addDeserializer(ObservationEntity.class,
                                       new ObservationSerDes.ObservationDeserializer());
         deserializers.addDeserializer(PhenomenonEntity.class,
                                       new ObservedPropertySerDes.ObservedPropertyDeserializer());
@@ -107,7 +107,7 @@ public class JacksonConfig {
                                       new LocationSerDes.LocationPatchDeserializer());
         deserializers.addDeserializer(SensorSerDes.SensorEntityPatch.class,
                                       new SensorSerDes.SensorPatchDeserializer(variableSensorEncodingTypeEnabled));
-        deserializers.addDeserializer(ObservationSerDes.StaDataEntityPatch.class,
+        deserializers.addDeserializer(ObservationSerDes.ObservationEntityPatch.class,
                                       new ObservationSerDes.ObservationPatchDeserializer());
         deserializers.addDeserializer(ObservedPropertySerDes.PhenomenonEntityPatch.class,
                                       new ObservedPropertySerDes.ObservedPropertyPatchDeserializer());

@@ -34,19 +34,15 @@ import org.hibernate.graph.EntityGraphs;
 import org.hibernate.graph.GraphParser;
 import org.hibernate.graph.RootGraph;
 import org.n52.series.db.beans.AbstractFeatureEntity;
-import org.n52.series.db.beans.CategoryDataEntity;
-import org.n52.series.db.beans.CountDataEntity;
-import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
-import org.n52.series.db.beans.QuantityDataEntity;
-import org.n52.series.db.beans.ReferencedDataEntity;
-import org.n52.series.db.beans.TextDataEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
@@ -70,7 +66,6 @@ import org.springframework.util.Assert;
 import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -95,8 +90,8 @@ public class MessageBusRepository<T, I extends Serializable>
 
     private final Map<String, String> entityTypeToStaType;
     private final String FETCHGRAPH_HINT = "javax.persistence.fetchgraph";
-    private final String IDENTIFIER = "identifier";
-    private final String STAIDENTIFIER = "staIdentifier";
+    private final String IDENTIFIER = DescribableEntity.PROPERTY_IDENTIFIER;
+    private final String STAIDENTIFIER = DescribableEntity.PROPERTY_STA_IDENTIFIER;
 
     private final JpaEntityInformation entityInformation;
     private final STAEventHandler mqttHandler;
@@ -121,7 +116,7 @@ public class MessageBusRepository<T, I extends Serializable>
         this.mqttHandler = (STAEventHandler) SpringApplicationContext.getBean(STAEventHandler.class);
         Assert.notNull(this.mqttHandler, "Could not autowire Mqtt handler!");
 
-        if (this.entityClass.equals(DataEntity.class)
+        if (this.entityClass.equals(ObservationEntity.class)
                 || this.entityClass.equals(ProcedureEntity.class)
                 || this.entityClass.equals(PhenomenonEntity.class)) {
             this.datastreamRepository =
@@ -187,34 +182,7 @@ public class MessageBusRepository<T, I extends Serializable>
             query.select(root.get(columnName));
         }
         if (pageable.getSort().isSorted()) {
-//            if (getDomainClass().getName().equals(DataEntity.class.getName())) {
-//                StringBuffer buffer = new StringBuffer("SELECT d.id as id, ");
-//                String when = " WHEN TYPE(d) = ";
-//                buffer.append(" CASE ");
-//                buffer.append(when).append(QuantityDataEntity.class.getSimpleName())
-//                        .append(" THEN CAST (q.value as string) ");
-//                buffer.append(when).append(CountDataEntity.class.getSimpleName())
-//                        .append(" THEN CAST (c.value as string)");
-//                buffer.append(when).append(TextDataEntity.class.getSimpleName()).append(" THEN t.value");
-//                buffer.append(when).append(CategoryDataEntity.class.getSimpleName()).append(" THEN cat.value");
-//                buffer.append(when).append(ReferencedDataEntity.class.getSimpleName()).append(" THEN ref.value");
-//                buffer.append(" END as value ");
-//                buffer.append(" FROM DataEntity d ");
-//                buffer.append(" INNER JOIN QuantityDataEntity q ON d.id = q.id ");
-//                buffer.append(" INNER JOIN CountDataEntity c ON d.id = c.id ");
-//                buffer.append(" INNER JOIN TextDataEntity t ON d.id = t.id ");
-//                buffer.append(" INNER JOIN CategoryDataEntity cat ON d.id = cat.id ");
-//                buffer.append(" INNER JOIN ReferencedDataEntity ref ON d.id = ref.id ");
-//                Query sb = em.createQuery("SELECT de.id FROM DataEntity de WHERE EXISTS (" + buffer.toString()
-//                        + " WHERE d.id = de.id)", Long.class);
-//                System.out.println(sb.getResultList());
-//                
-//                query.where(criteriaBuilder.and(query.getRestriction(),
-//                        criteriaBuilder.in(root.get(DataEntity.PROPERTY_ID)).value(sb)));
-//                query.orderBy(QueryUtils.toOrders(pageable.getSort(), root, criteriaBuilder));
-//            } else {
-                query.orderBy(QueryUtils.toOrders(pageable.getSort(), root, criteriaBuilder));
-//            }
+            query.orderBy(QueryUtils.toOrders(pageable.getSort(), root, criteriaBuilder));
         }
 
         TypedQuery<String> typedQuery = em.createQuery(query);
@@ -395,8 +363,8 @@ public class MessageBusRepository<T, I extends Serializable>
                                       .map(LocationEntity::getStaIdentifier)
                                       .collect(Collectors.toSet()));
             }
-        } else if (rawObject instanceof DataEntity<?>) {
-            DataEntity<?> entity = (DataEntity<?>) rawObject;
+        } else if (rawObject instanceof ObservationEntity<?>) {
+            ObservationEntity<?> entity = (ObservationEntity<?>) rawObject;
 
             if (entity.getDataset() != null && entity.getDataset().getFeature() != null) {
                 collections.put(STAEntityDefinition.FEATURES_OF_INTEREST,
@@ -478,16 +446,16 @@ public class MessageBusRepository<T, I extends Serializable>
             result.put(RESULTTIMEEND, ((DatastreamEntity) entity).getResultTimeEnd());
         } else if (entity instanceof HistoricalLocationEntity) {
             result.put(TIME, ((HistoricalLocationEntity) entity).getTime());
-        } else if (entity instanceof DataEntity<?>) {
-            result.put(SAMPLINGTIMESTART, ((DataEntity<?>) entity).getSamplingTimeStart());
-            result.put(SAMPLINGTIMEEND, ((DataEntity<?>) entity).getSamplingTimeEnd());
-            result.put(RESULTTIME, ((DataEntity<?>) entity).getResultTime());
-            result.put(VALIDTIMESTART, ((DataEntity<?>) entity).getValidTimeStart());
-            result.put(VALIDTIMEEND, ((DataEntity<?>) entity).getValidTimeEnd());
-            Set<ParameterEntity<?>> parameters = new HashSet<>();
-            parameters.addAll(((DataEntity<?>) entity).getParameters());
+        } else if (entity instanceof ObservationEntity<?>) {
+            result.put(SAMPLINGTIMESTART, ((ObservationEntity<?>) entity).getSamplingTimeStart());
+            result.put(SAMPLINGTIMEEND, ((ObservationEntity<?>) entity).getSamplingTimeEnd());
+            result.put(RESULTTIME, ((ObservationEntity<?>) entity).getResultTime());
+            result.put(VALIDTIMESTART, ((ObservationEntity<?>) entity).getValidTimeStart());
+            result.put(VALIDTIMEEND, ((ObservationEntity<?>) entity).getValidTimeEnd());
+            Set<ParameterEntity> parameters = new HashSet<>();
+            parameters.addAll(((ObservationEntity<?>) entity).getParameters());
             result.put(PARAMETERS, parameters);
-            result.put(RESULT, ((DataEntity<?>) entity).getValue());
+            result.put(RESULT, ((ObservationEntity<?>) entity).getValue());
             //TODO: implement difference map for "resultQuality"
         } else if (entity instanceof AbstractFeatureEntity) {
             result.put(NAME, ((AbstractFeatureEntity) entity).getName());

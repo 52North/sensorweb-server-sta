@@ -29,7 +29,6 @@
 
 package org.n52.sta.data.query;
 
-import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.FormatEntity;
@@ -37,6 +36,7 @@ import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.springframework.data.jpa.domain.Specification;
@@ -121,9 +121,9 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
     public Specification<DatastreamEntity> withObservationStaIdentifier(String observationIdentifier) {
         return (root, query, builder) -> {
             Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
-            Root<DataEntity> data = sq.from(DataEntity.class);
-            sq.select(data.get(DataEntity.PROPERTY_DATASET))
-              .where(builder.equal(data.get(DataEntity.PROPERTY_STA_IDENTIFIER), observationIdentifier));
+            Root<ObservationEntity> data = sq.from(ObservationEntity.class);
+            sq.select(data.get(ObservationEntity.PROPERTY_DATASET))
+              .where(builder.equal(data.get(ObservationEntity.PROPERTY_STA_IDENTIFIER), observationIdentifier));
             Join<DatastreamEntity, DatasetEntity> join = root.join(DatastreamEntity.PROPERTY_DATASETS);
             return builder.in(join.get(DatasetEntity.PROPERTY_ID)).value(sq);
         };
@@ -218,11 +218,11 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Dat
                     Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
                     Join<DatastreamEntity, DatasetEntity> join =
                             root.join(DatastreamEntity.PROPERTY_DATASETS);
-                    Root<DataEntity> data = sq.from(DataEntity.class);
-                    sq.select(data.get(DataEntity.PROPERTY_DATASET))
-                      .where(((Specification<DataEntity>) propertyValue).toPredicate(data,
-                                                                                     query,
-                                                                                     builder));
+                    Root<ObservationEntity> data = sq.from(ObservationEntity.class);
+                    sq.select(data.get(ObservationEntity.PROPERTY_DATASET))
+                      .where(((Specification<ObservationEntity>) propertyValue).toPredicate(data,
+                                                                                            query,
+                                                                                            builder));
                     return builder.in(join.get(DatasetEntity.PROPERTY_ID)).value(sq);
                 }
                 default:

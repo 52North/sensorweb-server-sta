@@ -1,3 +1,4 @@
+<!--suppress JpaConfigDomFacetInspection -->
 <persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence
@@ -31,6 +32,14 @@
         <mapping-file>/hbm/transactional/core/DatastreamResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/LocationResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/PlatformResource.hbm.xml</mapping-file>
+
+        <!-- Load Classes annoted by @Entity-->
+        <class>org.n52.series.db.beans.sta.QuantityObservationEntity</class>
+        <class>org.n52.series.db.beans.sta.TextObservationEntity</class>
+        <class>org.n52.series.db.beans.sta.CountObservationEntity</class>
+        <class>org.n52.series.db.beans.sta.CategoryObservationEntity</class>
+        <class>org.n52.series.db.beans.sta.BooleanObservationEntity</class>
+
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
           <property name="hibernate.archive.autodetection" value="class"/>

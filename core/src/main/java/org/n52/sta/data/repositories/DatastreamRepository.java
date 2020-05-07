@@ -30,12 +30,14 @@
 package org.n52.sta.data.repositories;
 
 import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Transactional
+@DependsOn("ObservationRepository")
 public interface DatastreamRepository
         extends NameRepository<DatastreamEntity>, StaIdentifierRepository<DatastreamEntity> {
 

@@ -26,11 +26,11 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.serdes.util;
 
-import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.FeatureEntity;
-import org.n52.series.db.beans.IdEntity;
+import org.n52.series.db.beans.HibernateRelations;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
@@ -38,12 +38,12 @@ import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ObservablePropertyEntity;
+import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
-import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.series.db.beans.sta.StaFeatureEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 
-public abstract class ElementWithQueryOptions<P extends IdEntity> {
+public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId> {
 
     protected P entity;
     protected QueryOptions queryOptions;
@@ -70,10 +70,8 @@ public abstract class ElementWithQueryOptions<P extends IdEntity> {
                                                         queryOptions);
         case "ObservablePropertyEntity":
             return new ObservedPropertyWithQueryOptions((ObservablePropertyEntity) entity, queryOptions);
-        case "QuantityDataEntity":
-            return new ObservationWithQueryOptions(new StaDataEntity<>((DataEntity<?>) entity), queryOptions);
-        case "StaDataEntity":
-            return new ObservationWithQueryOptions((StaDataEntity<?>) entity, queryOptions);
+        case "ObservationEntity":
+            return new ObservationWithQueryOptions((ObservationEntity<?>) entity, queryOptions);
         case "LocationEntity":
             return new LocationWithQueryOptions((LocationEntity) entity, queryOptions);
         case "HistoricalLocationEntity":
@@ -118,9 +116,9 @@ public abstract class ElementWithQueryOptions<P extends IdEntity> {
     }
 
 
-    public static class ObservationWithQueryOptions extends ElementWithQueryOptions<StaDataEntity<?>> {
+    public static class ObservationWithQueryOptions extends ElementWithQueryOptions<ObservationEntity<?>> {
 
-        ObservationWithQueryOptions(StaDataEntity<?> thing, QueryOptions queryOptions) {
+        ObservationWithQueryOptions(ObservationEntity<?> thing, QueryOptions queryOptions) {
             this.entity = thing;
             this.queryOptions = queryOptions;
         }

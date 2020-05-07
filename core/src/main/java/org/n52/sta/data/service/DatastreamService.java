@@ -29,15 +29,7 @@
 
 package org.n52.sta.data.service;
 
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 import org.n52.janmayen.http.HTTPStatus;
-import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
@@ -45,7 +37,7 @@ import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.UnitEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
-import org.n52.series.db.beans.sta.StaDataEntity;
+import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
@@ -54,11 +46,11 @@ import org.n52.shetland.ogc.sta.model.DatastreamEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
-import org.n52.sta.data.repositories.DataRepository;
 import org.n52.sta.data.repositories.DatasetRepository;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.FormatRepository;
+import org.n52.sta.data.repositories.ObservationRepository;
 import org.n52.sta.data.repositories.UnitRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.slf4j.Logger;
@@ -71,11 +63,18 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Component
-@DependsOn({"springApplicationContext"})
+@DependsOn({"springApplicationContext", "datastreamRepository"})
 @Transactional
 public class DatastreamService
         extends AbstractSensorThingsEntityServiceImpl<DatastreamRepository, DatastreamEntity, DatastreamEntity> {
@@ -87,14 +86,14 @@ public class DatastreamService
 
     private final UnitRepository unitRepository;
     private final FormatRepository formatRepository;
-    private final DataRepository dataRepository;
+    private final ObservationRepository observationRepository;
     private final DatasetRepository datasetRepository;
 
     @Autowired
     public DatastreamService(DatastreamRepository repository,
                              UnitRepository unitRepository,
                              FormatRepository formatRepository,
-                             DataRepository dataRepository,
+                             ObservationRepository observationRepository,
                              DatasetRepository datasetRepository) {
         super(repository,
               DatastreamEntity.class,
@@ -102,7 +101,7 @@ public class DatastreamService
               EntityGraphRepository.FetchGraph.FETCHGRAPH_UOM);
         this.unitRepository = unitRepository;
         this.formatRepository = formatRepository;
-        this.dataRepository = dataRepository;
+        this.observationRepository = observationRepository;
         this.datasetRepository = datasetRepository;
     }
 
@@ -142,7 +141,7 @@ public class DatastreamService
                     entity.setObservableProperty(obsProp);
                     break;
                 case STAEntityDefinition.OBSERVATIONS:
-                    Page<StaDataEntity<?>> observations = getObservationService()
+                    Page<ObservationEntity<?>> observations = getObservationService()
                             .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
                                                                    STAEntityDefinition.DATASTREAMS,
                                                                    expandItem.getQueryOptions());
@@ -341,7 +340,7 @@ public class DatastreamService
             if (getRepository().existsByStaIdentifier(id)) {
                 Optional<DatastreamEntity> datastream =
                         getRepository().findByStaIdentifier(id,
-                                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS);
+                                                            EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS);
                 // check datasets
                 deleteRelatedDatasetsAndObservations(datastream.get());
                 // check observations
@@ -378,7 +377,7 @@ public class DatastreamService
                 datasetRepository.saveAndFlush(d);
             });
             // delete observations
-            dataRepository.deleteAll(dataRepository.findAll(
+            observationRepository.deleteAll(observationRepository.findAll(
                     oQS.withDatastreamStaIdentifier(datastream.getStaIdentifier())));
             getRepository().flush();
             // delete datasets
@@ -447,14 +446,14 @@ public class DatastreamService
     }
 
     private DatastreamEntity processObservation(DatastreamEntity datastream,
-                                                Set<StaDataEntity> observations) throws STACRUDException {
+                                                Set<ObservationEntity> observations) throws STACRUDException {
         if (observations != null && !observations.isEmpty()) {
             Set<DatasetEntity> datasets = new LinkedHashSet<>();
             if (datastream.getDatasets() != null) {
                 datasets.addAll(datastream.getDatasets());
             }
-            for (StaDataEntity observation : observations) {
-                DataEntity<?> data = getObservationService().createEntity(observation);
+            for (ObservationEntity observation : observations) {
+                ObservationEntity<?> data = getObservationService().createEntity(observation);
                 if (data != null) {
                     datasets.add(data.getDataset());
                 }
