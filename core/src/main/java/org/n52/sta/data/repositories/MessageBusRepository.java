@@ -34,12 +34,15 @@ import org.hibernate.graph.EntityGraphs;
 import org.hibernate.graph.GraphParser;
 import org.hibernate.graph.RootGraph;
 import org.n52.series.db.beans.AbstractFeatureEntity;
+import org.n52.series.db.beans.CategoryDataEntity;
 import org.n52.series.db.beans.CountDataEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.QuantityDataEntity;
+import org.n52.series.db.beans.ReferencedDataEntity;
+import org.n52.series.db.beans.TextDataEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
@@ -185,19 +188,30 @@ public class MessageBusRepository<T, I extends Serializable>
         }
         if (pageable.getSort().isSorted()) {
 //            if (getDomainClass().getName().equals(DataEntity.class.getName())) {
-//                StringBuffer buffer = new StringBuffer("SELECT d.id, ");
-//                String when = " WHEN TYPE(e) = ";
+//                StringBuffer buffer = new StringBuffer("SELECT d.id as id, ");
+//                String when = " WHEN TYPE(d) = ";
 //                buffer.append(" CASE ");
 //                buffer.append(when).append(QuantityDataEntity.class.getSimpleName())
-//                        .append(" THEN q.value ");
+//                        .append(" THEN CAST (q.value as string) ");
 //                buffer.append(when).append(CountDataEntity.class.getSimpleName())
-//                        .append(" THEN c.value ");
+//                        .append(" THEN CAST (c.value as string)");
+//                buffer.append(when).append(TextDataEntity.class.getSimpleName()).append(" THEN t.value");
+//                buffer.append(when).append(CategoryDataEntity.class.getSimpleName()).append(" THEN cat.value");
+//                buffer.append(when).append(ReferencedDataEntity.class.getSimpleName()).append(" THEN ref.value");
 //                buffer.append(" END as value ");
-//                buffer.append(" FROM DataEntity d, QuantityDataEntity q, CountDataEntity c");
-//                Query createQuery = em.createQuery(buffer.toString());
-//
+//                buffer.append(" FROM DataEntity d ");
+//                buffer.append(" INNER JOIN QuantityDataEntity q ON d.id = q.id ");
+//                buffer.append(" INNER JOIN CountDataEntity c ON d.id = c.id ");
+//                buffer.append(" INNER JOIN TextDataEntity t ON d.id = t.id ");
+//                buffer.append(" INNER JOIN CategoryDataEntity cat ON d.id = cat.id ");
+//                buffer.append(" INNER JOIN ReferencedDataEntity ref ON d.id = ref.id ");
+//                Query sb = em.createQuery("SELECT de.id FROM DataEntity de WHERE EXISTS (" + buffer.toString()
+//                        + " WHERE d.id = de.id)", Long.class);
+//                System.out.println(sb.getResultList());
+//                
 //                query.where(criteriaBuilder.and(query.getRestriction(),
-//                        criteriaBuilder.in(root.get(DataEntity.PROPERTY_ID)).value(createQuery)));
+//                        criteriaBuilder.in(root.get(DataEntity.PROPERTY_ID)).value(sb)));
+//                query.orderBy(QueryUtils.toOrders(pageable.getSort(), root, criteriaBuilder));
 //            } else {
                 query.orderBy(QueryUtils.toOrders(pageable.getSort(), root, criteriaBuilder));
 //            }
