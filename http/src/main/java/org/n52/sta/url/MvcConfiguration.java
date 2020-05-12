@@ -27,32 +27,20 @@
  * Public License for more details.
  */
 
-package org.n52.sta;
+package org.n52.sta.url;
 
-import org.n52.sta.data.repositories.MessageBusRepository;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-@SpringBootApplication
-@EnableJpaRepositories(repositoryBaseClass = MessageBusRepository.class,
-                       basePackages = {"org.n52.sta.data.repositories"})
-@EnableConfigurationProperties
-@EnableTransactionManagement
-@EnableAsync
-@SuppressWarnings("uncommentedmain")
-public class Application {
+/**
+ * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
+ */
+@Configuration
+public class MvcConfiguration implements WebMvcConfigurer {
 
-    static {
-        System.setProperty("tomcat.util.http.parser.HttpParser.requestTargetAllow", "%");
-        System.setProperty("org.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH", "true");
-        System.setProperty("org.apache.catalina.connector.CoyoteAdapter.ALLOW_BACKSLASH", "true");
-    }
-
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+    @Override
+    public void configurePathMatch(PathMatchConfigurer configurer) {
+        configurer.setUrlPathHelper(new CustomUrlPathHelper());
     }
 }

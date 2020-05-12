@@ -69,6 +69,11 @@ spring:
         use_sql_comments: false
   jmx:
     enabled: false
+  http:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
 
 # HTTP Configuration
 http:
