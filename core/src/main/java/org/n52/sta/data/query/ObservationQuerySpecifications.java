@@ -86,8 +86,9 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Ob
         };
     }
 
-    @Override protected Specification<ObservationEntity<?>> handleRelatedPropertyFilter(String propertyName,
-                                                                                        Specification<?> propertyValue) {
+    @Override protected Specification<ObservationEntity<?>> handleRelatedPropertyFilter(
+            String propertyName,
+            Specification<?> propertyValue) {
         return (root, query, builder) -> {
             try {
                 if (DATASTREAM.equals(propertyName)) {
@@ -122,10 +123,11 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Ob
     }
 
     @Override
-    protected Specification<ObservationEntity<?>> handleDirectPropertyFilter(String propertyName,
-                                                                             Expression<?> propertyValue,
-                                                                             FilterConstants.ComparisonOperator operator,
-                                                                             boolean switched) {
+    protected Specification<ObservationEntity<?>> handleDirectPropertyFilter(
+            String propertyName,
+            Expression<?> propertyValue,
+            FilterConstants.ComparisonOperator operator,
+            boolean switched) {
         return (root, query, builder) -> {
             try {
                 switch (propertyName) {
@@ -133,28 +135,29 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Ob
                     return handleDirectStringPropertyFilter(root.get(ObservationEntity.PROPERTY_STA_IDENTIFIER),
                                                             propertyValue, operator, builder, false);
                 case "value":
-                        /*
-                        if (propertyValue.getJavaType().getName().equals(Double.class.getName())
-                                || propertyValue.getJavaType().getName().equals(Long.class.getName())
-                                || propertyValue.getJavaType().getName().equals(Integer.class.getName())) {
-                            return builder.or(
-                                    createNumericPredicate(root, query, builder, QuantityDataEntity.class,
-                                            propertyName, propertyValue, operator),
-                                    createNumericPredicate(root, query, builder, CountDataEntity.class, propertyName,
-                                            propertyValue, operator));
-
-                        } else if (propertyValue.getJavaType().getName().equals(String.class.getName())) {
-                            return builder.or(
-                                    createStringPredicate(root, query, builder, TextDataEntity.class, propertyName,
-                                            propertyValue, operator),
-                                    createStringPredicate(root, query, builder, CategoryDataEntity.class, propertyName,
-                                            propertyValue, operator),
-                                    createStringPredicate(root, query, builder, ReferencedDataEntity.class,
-                                            propertyName, propertyValue, operator));
-
-                        } else {*/
-                    throw new STAInvalidFilterExpressionException("Value type not supported!");
-                    //}
+                    if (propertyValue.getJavaType().getName().equals(Double.class.getName())
+                            || propertyValue.getJavaType().getName().equals(Long.class.getName())
+                            || propertyValue.getJavaType().getName().equals(Integer.class.getName())) {
+                        return createNumericPredicate(root,
+                                                      query,
+                                                      builder,
+                                                      ObservationEntity.class,
+                                                      propertyName,
+                                                      propertyValue,
+                                                      operator
+                        );
+                    } else if (propertyValue.getJavaType().getName().equals(String.class.getName())) {
+                        return createStringPredicate(root,
+                                                     query,
+                                                     builder,
+                                                     ObservationEntity.class,
+                                                     propertyName,
+                                                     propertyValue,
+                                                     operator
+                        );
+                    } else {
+                        throw new STAInvalidFilterExpressionException("Value type not supported!");
+                    }
                 case "phenomenonTime":
                     switch (operator) {
                     case PropertyIsLessThan:
@@ -225,7 +228,11 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Ob
         Subquery<T> sq = query.subquery(clazz);
         Root<T> entity = sq.from(clazz);
         Predicate predicate =
-                handleDirectStringPropertyFilter(entity.get(propertyName), propertyValue, operator, builder, false);
+                handleDirectStringPropertyFilter(entity.get(propertyName),
+                                                 propertyValue,
+                                                 operator,
+                                                 builder,
+                                                 false);
         sq.select(entity.get(ObservationEntity.PROPERTY_ID)).where(predicate);
         return builder.in(root.get(ObservationEntity.PROPERTY_ID)).value(sq);
     }
