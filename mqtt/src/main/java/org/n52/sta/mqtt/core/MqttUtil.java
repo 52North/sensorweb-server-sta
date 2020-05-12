@@ -86,43 +86,4 @@ public class MqttUtil {
         TYPEMAP = Collections.unmodifiableMap(map);
     }
 
-    /*
-    @Bean
-    public Parser uriParser(CsdlAbstractEdmProvider provider) {
-        OData odata = OData.newInstance();
-        ServiceMetadata meta = odata.createServiceMetadata(provider, new ArrayList<EdmxReference>());
-        return new Parser(meta.getEdm(), odata);
-    }
-
-    /**
-     * Multiplexes to the different Mappers for transforming Beans into olingo Entities
-     *
-     * @param className Name of the base class
-     * @return Mapper appropiate for this class
-     */
-    /*
-    public AbstractMapper getMapper(String className) {
-        switch (className) {
-            case OBSERVATION_ENTITY:
-                return obsMapper;
-            case DATASTREAM_ENTITY:
-                return dsMapper;
-            case FEATURE_ENTITY:
-                return foiMapper;
-            case HISTORICAL_LOCATION_ENTITY:
-                return hlocMapper;
-            case LOCATION_ENTITY:
-                return locMapper;
-            case OBSERVED_PROPERTY_ENTITY:
-                return obspropMapper;
-            case SENSOR_ENTITY:
-                return sensorMapper;
-            case THING_ENTITY:
-                return thingMapper;
-            default:
-                return null;
-        }
-    }
-    */
-
 }
