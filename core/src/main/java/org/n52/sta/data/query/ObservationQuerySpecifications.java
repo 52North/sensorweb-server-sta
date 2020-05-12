@@ -186,6 +186,8 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Ob
                                 root.get(ObservationEntity.PROPERTY_SAMPLING_TIME_END), propertyValue, operator,
                                 builder);
                         return builder.or(neStart, neEnd);
+                    default:
+                        throw new STAInvalidFilterExpressionException("Unknown operator: " + operator.toString());
                     }
                 default:
                     throw new STAInvalidFilterExpressionException("Currently not implemented!");
