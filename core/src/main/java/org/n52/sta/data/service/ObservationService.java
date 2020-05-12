@@ -33,6 +33,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.CategoryEntity;
+import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.OfferingEntity;
@@ -61,6 +62,7 @@ import org.n52.sta.data.query.DatasetQuerySpecifications;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
 import org.n52.sta.data.repositories.CategoryRepository;
+import org.n52.sta.data.repositories.DataRepository;
 import org.n52.sta.data.repositories.DatasetRepository;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.EntityGraphRepository;
@@ -109,6 +111,7 @@ public class ObservationService extends
     private static final String STA = "STA";
 
     private final boolean isMobileFeatureEnabled;
+    private final DataRepository<DataEntity<?>> dataRepository;
     private final CategoryRepository categoryRepository;
     private final OfferingRepository offeringRepository;
     private final DatastreamRepository datastreamRepository;
@@ -118,6 +121,7 @@ public class ObservationService extends
 
     @Autowired
     public ObservationService(ObservationRepository<ObservationEntity<?>> repository,
+                              DataRepository<DataEntity<?>> dataRepository,
                               CategoryRepository categoryRepository,
                               OfferingRepository offeringRepository,
                               DatastreamRepository datastreamRepository,
@@ -128,6 +132,7 @@ public class ObservationService extends
               ObservationEntity.class,
               EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS,
               EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASET);
+        this.dataRepository = dataRepository;
         this.categoryRepository = categoryRepository;
         this.offeringRepository = offeringRepository;
         this.datastreamRepository = datastreamRepository;
@@ -593,26 +598,30 @@ public class ObservationService extends
         return null;
     }
 
-    private DatasetEntity updateDataset(DatasetEntity dataset, ObservationEntity<?> data) {
-        /*
-        if (!dataset.isSetFirstValueAt()
-                || (dataset.isSetFirstValueAt() && data.getSamplingTimeStart().before(dataset.getFirstValueAt()))) {
-            dataset.setFirstValueAt(data.getSamplingTimeStart());
-            dataset.setFirstObservation(data);
-            if (data instanceof QuantityObservationEntity) {
-                dataset.setFirstQuantityValue(((QuantityObservationEntity) data).getValue());
+    private DatasetEntity updateDataset(DatasetEntity dataset, ObservationEntity<?> data) throws STACRUDException {
+        Optional<DataEntity<?>> rawObservation = dataRepository.findById(data.getId());
+        if (rawObservation.isPresent()) {
+            if (!dataset.isSetFirstValueAt()
+                    || (dataset.isSetFirstValueAt() && data.getSamplingTimeStart().before(dataset.getFirstValueAt()))) {
+                dataset.setFirstValueAt(data.getSamplingTimeStart());
+                dataset.setFirstObservation(rawObservation.get());
+                if (data instanceof QuantityObservationEntity) {
+                    dataset.setFirstQuantityValue(((QuantityObservationEntity) data).getValue());
+                }
             }
-        }
-        if (!dataset.isSetLastValueAt()
-                || (dataset.isSetLastValueAt() && data.getSamplingTimeEnd().after(dataset.getLastValueAt()))) {
-            dataset.setLastValueAt(data.getSamplingTimeEnd());
-            dataset.setLastObservation(data);
-            if (data instanceof QuantityObservationEntity) {
-                dataset.setLastQuantityValue(((QuantityObservationEntity) data).getValue());
+            if (!dataset.isSetLastValueAt()
+                    || (dataset.isSetLastValueAt() && data.getSamplingTimeEnd().after(dataset.getLastValueAt()))) {
+                dataset.setLastValueAt(data.getSamplingTimeEnd());
+                dataset.setLastObservation(rawObservation.get());
+                if (data instanceof QuantityObservationEntity) {
+                    dataset.setLastQuantityValue(((QuantityObservationEntity) data).getValue());
+                }
             }
+            return datasetRepository.save(dataset);
+        } else {
+            throw new STACRUDException("Could not update Dataset->firstObservation or Dataset->firstObservation. " +
+                                               "Unable to find Observation with Id:" + data.getId());
         }
-        */
-        return datasetRepository.save(dataset);
     }
 
     private void updateDatastream(DatastreamEntity datastream, DatasetEntity dataset, ObservationEntity<?> data)
@@ -780,7 +789,6 @@ public class ObservationService extends
     }
 
     private void checkValue(ObservationEntity<?> existing, ObservationEntity<?> toMerge) throws STACRUDException {
-        /*
         if (existing instanceof QuantityObservationEntity) {
             ((QuantityObservationEntity) existing)
                     .setValue(BigDecimal.valueOf(Double.parseDouble(toMerge.getValue().toString())));
@@ -798,7 +806,5 @@ public class ObservationService extends
                                   existing.getStaIdentifier()),
                     HTTPStatus.CONFLICT);
         }
-        */
-        throw new RuntimeException("not implemented yet!");
     }
 }
