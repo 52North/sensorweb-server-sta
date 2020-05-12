@@ -418,8 +418,9 @@ public class ObservationService extends
         synchronized (getLock(identifier)) {
             if (getRepository().existsByStaIdentifier(identifier)) {
                 ObservationEntity<?> observation =
-                        getRepository().findByStaIdentifier(identifier,
-                                                            EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASET)
+                        getRepository().findByStaIdentifier(
+                                identifier,
+                                EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASET_FIRSTLAST_OBSERVATION)
                                        .get();
                 checkDataset(observation);
                 List<DatastreamEntity> datastreamEntity =
