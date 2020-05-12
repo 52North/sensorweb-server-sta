@@ -37,9 +37,8 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
-import org.n52.series.db.beans.sta.StaDataEntity;
+import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.gml.time.Time;
@@ -67,16 +66,16 @@ public class ObservationSerDes {
 
 
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
-    public static class StaDataEntityPatch extends StaDataEntity implements EntityPatch<DataEntity> {
+    public static class ObservationEntityPatch extends ObservationEntity implements EntityPatch<ObservationEntity> {
 
         private static final long serialVersionUID = 7385044376634149048L;
-        private final StaDataEntity entity;
+        private final ObservationEntity entity;
 
-        StaDataEntityPatch(StaDataEntity entity) {
+        ObservationEntityPatch(ObservationEntity entity) {
             this.entity = entity;
         }
 
-        public StaDataEntity getEntity() {
+        public ObservationEntity getEntity() {
             return entity;
         }
     }
@@ -96,7 +95,7 @@ public class ObservationSerDes {
         public void serialize(ObservationWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers)
                 throws IOException {
             gen.writeStartObject();
-            StaDataEntity<?> observation = value.getEntity();
+            ObservationEntity<?> observation = value.getEntity();
             QueryOptions options = value.getQueryOptions();
 
             Set<String> fieldsToSerialize = null;
@@ -198,7 +197,7 @@ public class ObservationSerDes {
             gen.writeEndObject();
         }
 
-        private Time createPhenomenonTime(DataEntity<?> observation) {
+        private Time createPhenomenonTime(ObservationEntity<?> observation) {
             final DateTime start = new DateTime(observation.getSamplingTimeStart(), DateTimeZone.UTC);
             DateTime end;
             if (observation.getSamplingTimeEnd() != null) {
@@ -209,7 +208,7 @@ public class ObservationSerDes {
             return createTime(start, end);
         }
 
-        private Time createValidTime(DataEntity<?> observation) {
+        private Time createValidTime(ObservationEntity<?> observation) {
             final DateTime start = new DateTime(observation.getValidTimeStart(), DateTimeZone.UTC);
             DateTime end;
             if (observation.getValidTimeEnd() != null) {
@@ -230,32 +229,32 @@ public class ObservationSerDes {
     }
 
 
-    public static class ObservationDeserializer extends StdDeserializer<StaDataEntity> {
+    public static class ObservationDeserializer extends StdDeserializer<ObservationEntity> {
 
         private static final long serialVersionUID = 2731654401126762133L;
 
         public ObservationDeserializer() {
-            super(StaDataEntity.class);
+            super(ObservationEntity.class);
         }
 
         @Override
-        public StaDataEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+        public ObservationEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return p.readValueAs(JSONObservation.class).toEntity(JSONBase.EntityType.FULL);
         }
     }
 
 
-    public static class ObservationPatchDeserializer extends StdDeserializer<StaDataEntityPatch> {
+    public static class ObservationPatchDeserializer extends StdDeserializer<ObservationEntityPatch> {
 
         private static final long serialVersionUID = 9042768872493184420L;
 
         public ObservationPatchDeserializer() {
-            super(StaDataEntityPatch.class);
+            super(ObservationEntityPatch.class);
         }
 
         @Override
-        public StaDataEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return new StaDataEntityPatch(p.readValueAs(JSONObservation.class).toEntity(JSONBase.EntityType.PATCH));
+        public ObservationEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+            return new ObservationEntityPatch(p.readValueAs(JSONObservation.class).toEntity(JSONBase.EntityType.PATCH));
         }
     }
 }

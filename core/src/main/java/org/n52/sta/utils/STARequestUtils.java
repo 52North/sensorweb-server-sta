@@ -30,12 +30,12 @@
 package org.n52.sta.utils;
 
 import org.n52.series.db.beans.AbstractFeatureEntity;
-import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
@@ -440,55 +440,55 @@ public interface STARequestUtils extends StaConstants {
 
     default Class collectionNameToClass(String collectionName) {
         switch (collectionName) {
-            case THINGS:
-                return PlatformEntity.class;
-            case LOCATIONS:
-                return LocationEntity.class;
-            case DATASTREAMS:
-                return DatastreamEntity.class;
-            case HISTORICAL_LOCATIONS:
-                return HistoricalLocationEntity.class;
-            case SENSORS:
-                return SensorEntity.class;
-            case OBSERVATIONS:
-                return DataEntity.class;
-            case OBSERVED_PROPERTIES:
-                return PhenomenonEntity.class;
-            case FEATURES_OF_INTEREST:
-                return AbstractFeatureEntity.class;
-            default:
-                return null;
+        case THINGS:
+            return PlatformEntity.class;
+        case LOCATIONS:
+            return LocationEntity.class;
+        case DATASTREAMS:
+            return DatastreamEntity.class;
+        case HISTORICAL_LOCATIONS:
+            return HistoricalLocationEntity.class;
+        case SENSORS:
+            return SensorEntity.class;
+        case OBSERVATIONS:
+            return ObservationEntity.class;
+        case OBSERVED_PROPERTIES:
+            return PhenomenonEntity.class;
+        case FEATURES_OF_INTEREST:
+            return AbstractFeatureEntity.class;
+        default:
+            return null;
         }
     }
 
     default Class collectionNameToPatchClass(String collectionName) {
         switch (collectionName) {
-            case THINGS:
-            case THING:
-                return ThingSerDes.PlatformEntityPatch.class;
-            case LOCATIONS:
-            case LOCATION:
-                return LocationSerDes.LocationEntityPatch.class;
-            case DATASTREAMS:
-            case DATASTREAM:
-                return DatastreamSerDes.DatastreamEntityPatch.class;
-            case HISTORICAL_LOCATIONS:
-            case HISTORICAL_LOCATION:
-                return HistoricalLocationSerDes.HistoricalLocationEntityPatch.class;
-            case SENSORS:
-            case SENSOR:
-                return SensorSerDes.SensorEntityPatch.class;
-            case OBSERVATIONS:
-            case OBSERVATION:
-                return ObservationSerDes.StaDataEntityPatch.class;
-            case OBSERVED_PROPERTIES:
-            case OBSERVED_PROPERTY:
-                return ObservedPropertySerDes.PhenomenonEntityPatch.class;
-            case FEATURES_OF_INTEREST:
-            case FEATURE_OF_INTEREST:
-                return FeatureOfInterestSerDes.AbstractFeatureEntityPatch.class;
-            default:
-                return null;
+        case THINGS:
+        case THING:
+            return ThingSerDes.PlatformEntityPatch.class;
+        case LOCATIONS:
+        case LOCATION:
+            return LocationSerDes.LocationEntityPatch.class;
+        case DATASTREAMS:
+        case DATASTREAM:
+            return DatastreamSerDes.DatastreamEntityPatch.class;
+        case HISTORICAL_LOCATIONS:
+        case HISTORICAL_LOCATION:
+            return HistoricalLocationSerDes.HistoricalLocationEntityPatch.class;
+        case SENSORS:
+        case SENSOR:
+            return SensorSerDes.SensorEntityPatch.class;
+        case OBSERVATIONS:
+        case OBSERVATION:
+            return ObservationSerDes.ObservationEntityPatch.class;
+        case OBSERVED_PROPERTIES:
+        case OBSERVED_PROPERTY:
+            return ObservedPropertySerDes.PhenomenonEntityPatch.class;
+        case FEATURES_OF_INTEREST:
+        case FEATURE_OF_INTEREST:
+            return FeatureOfInterestSerDes.AbstractFeatureEntityPatch.class;
+        default:
+            return null;
         }
     }
 

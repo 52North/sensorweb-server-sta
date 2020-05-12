@@ -29,7 +29,7 @@
 
 package org.n52.sta.data.repositories;
 
-import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.sta.ObservationEntity;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,10 +37,10 @@ import java.util.List;
 
 @Transactional
 @DependsOn("DatastreamRepository")
-public interface DataRepository<T extends DataEntity<?>>
+public interface ObservationRepository<T extends ObservationEntity<?>>
         extends IdentifierRepository<T, Long>, StaIdentifierRepository<T> {
 
-    DataEntity<?> findFirstByDataset_idInOrderBySamplingTimeStartAsc(List<Long> datasetIdentifiers);
+    ObservationEntity<T> findFirstByDataset_idInOrderBySamplingTimeStartAsc(List<Long> datasetIdentifiers);
 
-    DataEntity<?> findFirstByDataset_idInOrderBySamplingTimeEndDesc(List<Long> datasetIdentifiers);
+    ObservationEntity<T> findFirstByDataset_idInOrderBySamplingTimeEndDesc(List<Long> datasetIdentifiers);
 }

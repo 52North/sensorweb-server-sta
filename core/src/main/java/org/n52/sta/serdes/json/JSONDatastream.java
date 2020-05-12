@@ -53,7 +53,6 @@ import java.util.stream.Collectors;
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
 public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<DatastreamEntity>
         implements AbstractJSONEntity {
-
     private static final String COULD_NOT_PARSE_OBS_AREA = "Could not parse observedArea to GeoJSON. Error was: ";
     // JSON Properties. Matched by Annotation or variable name
     public String observationType;
@@ -61,7 +60,6 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
     public JsonNode observedArea;
     public String phenomenonTime;
     public String resultTime;
-
     @JsonManagedReference
     public JSONSensor Sensor;
     @JsonManagedReference
@@ -70,10 +68,8 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
     public JSONObservedProperty ObservedProperty;
     @JsonManagedReference
     public JSONObservation[] Observations;
-
     private final GeometryFactory factory =
             new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
-
     private final String OM_CategoryObservation =
             "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CategoryObservation";
     private final String OM_CountObservation =
@@ -84,7 +80,6 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
             "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation";
     private final String OM_TruthObservation =
             "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_TruthObservation";
-
     private final String obsType = "observationType";
 
     public JSONDatastream() {
@@ -189,7 +184,8 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
         }
 
         if (Observations != null) {
-            self.setObservations(Arrays.stream(Observations).map(obs -> obs.toEntity(JSONBase.EntityType.REFERENCE))
+            self.setObservations(Arrays.stream(Observations)
+                                       .map(obs -> obs.toEntity(JSONBase.EntityType.REFERENCE))
                                        .collect(Collectors.toSet()));
         }
 
@@ -259,10 +255,6 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
             self.setObservations(Arrays.stream(Observations)
                                        .map(entity -> entity.toEntity(JSONBase.EntityType.FULL,
                                                                       JSONBase.EntityType.REFERENCE))
-                                       .map(entity -> {
-                                           entity.setId(random.nextLong());
-                                           return entity;
-                                       })
                                        .collect(Collectors.toSet()));
         } else if (backReference instanceof JSONObservation) {
             self.setObservations(Collections.singleton(((JSONObservation) backReference).self));

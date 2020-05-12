@@ -29,19 +29,12 @@
 
 package org.n52.sta.data.service;
 
-import java.util.Optional;
-
-import javax.annotation.PostConstruct;
-import javax.persistence.criteria.Predicate;
-
 import org.hibernate.query.criteria.internal.CriteriaBuilderImpl;
 import org.n52.series.db.beans.AbstractFeatureEntity;
-import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.HibernateRelations;
 import org.n52.series.db.beans.HibernateRelations.HasDescription;
 import org.n52.series.db.beans.HibernateRelations.HasName;
-import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
@@ -49,8 +42,8 @@ import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ObservablePropertyEntity;
+import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
-import org.n52.series.db.beans.sta.StaDataEntity;
 import org.n52.series.db.beans.sta.StaFeatureEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.FilterFilter;
@@ -79,6 +72,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
+import javax.persistence.criteria.Predicate;
+import java.util.Optional;
+
 /**
  * Interface for requesting Sensor Things entities
  *
@@ -86,7 +83,8 @@ import org.springframework.transaction.annotation.Transactional;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Transactional
-public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentifierRepository<S>, S extends IdEntity,
+public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentifierRepository<S>,
+        S extends HibernateRelations.HasId,
         E extends S> implements AbstractSensorThingsEntityService<T, S, E> {
 
     // protected static final String IDENTIFIER = "identifier";
@@ -122,7 +120,6 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     /**
      * Gets a lock with given name from global lockMap. Name is unique per EntityType.
      * Uses weak references so Map is automatically cleared by GC.
-     *
      * Used to lock Entities to avoid race conditions
      *
      * @param key name of the lock
@@ -535,8 +532,9 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     }
 
     @SuppressWarnings("unchecked")
-    protected AbstractSensorThingsEntityServiceImpl<?, DataEntity<?>, StaDataEntity<?>> getObservationService() {
-        return (AbstractSensorThingsEntityServiceImpl<?, DataEntity<?>, StaDataEntity<?>>)
-                getEntityService(EntityTypes.Observation);
+    protected AbstractSensorThingsEntityServiceImpl<?, ObservationEntity<?>, ObservationEntity<?>>
+               getObservationService() {
+        return (AbstractSensorThingsEntityServiceImpl<?, ObservationEntity<?>, ObservationEntity<?>>) getEntityService(
+                EntityTypes.Observation);
     }
 }

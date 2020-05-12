@@ -29,16 +29,11 @@
 
 package org.n52.sta.data.query;
 
-import org.n52.series.db.beans.CategoryDataEntity;
-import org.n52.series.db.beans.CountDataEntity;
-import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.FeatureEntity;
-import org.n52.series.db.beans.QuantityDataEntity;
-import org.n52.series.db.beans.ReferencedDataEntity;
-import org.n52.series.db.beans.TextDataEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.filter.FilterConstants.ComparisonOperator;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
@@ -56,9 +51,9 @@ import javax.persistence.criteria.Subquery;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public class ObservationQuerySpecifications extends EntityQuerySpecifications<DataEntity<?>> {
+public class ObservationQuerySpecifications extends EntityQuerySpecifications<ObservationEntity<?>> {
 
-    public Specification<DataEntity<?>> withFeatureOfInterestStaIdentifier(final String featureIdentifier) {
+    public Specification<ObservationEntity<?>> withFeatureOfInterestStaIdentifier(final String featureIdentifier) {
         return (root, query, builder) -> {
             Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
             Root<DatasetEntity> dataset = sq.from(DatasetEntity.class);
@@ -67,56 +62,53 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
             subquery.select(feature.get(FeatureEntity.PROPERTY_ID))
                     .where(builder.equal(feature.get(FeatureEntity.PROPERTY_STA_IDENTIFIER), featureIdentifier));
             sq.select(dataset.get(DatasetEntity.PROPERTY_ID))
-              .where(builder.equal(dataset.get(DatasetEntity.PROPERTY_FEATURE), subquery));
-            return builder.in(root.get(DataEntity.PROPERTY_DATASET)).value(sq);
+                    .where(builder.equal(dataset.get(DatasetEntity.PROPERTY_FEATURE), subquery));
+            return builder.in(root.get(ObservationEntity.PROPERTY_DATASET)).value(sq);
         };
     }
 
-    public Specification<DataEntity<?>> withDatastreamStaIdentifier(final String datastreamIdentifier) {
+    public Specification<ObservationEntity<?>> withDatastreamStaIdentifier(final String datastreamIdentifier) {
         return (root, query, builder) -> {
             Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
             Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
             Join<DatastreamEntity, DatasetEntity> join = datastream.join(DatastreamEntity.PROPERTY_DATASETS);
-            sq.select(join.get(DatasetEntity.PROPERTY_ID))
-              .where(builder.equal(datastream.get(DatastreamEntity.PROPERTY_STA_IDENTIFIER), datastreamIdentifier));
-            return builder.in(root.get(DataEntity.PROPERTY_DATASET)).value(sq);
+            sq.select(join.get(DatasetEntity.PROPERTY_ID)).where(
+                    builder.equal(datastream.get(DatastreamEntity.PROPERTY_STA_IDENTIFIER), datastreamIdentifier));
+            return builder.in(root.get(ObservationEntity.PROPERTY_DATASET)).value(sq);
         };
     }
 
-    public Specification<DataEntity<?>> withDatasetId(final long datasetId) {
+    public Specification<ObservationEntity<?>> withDatasetId(final long datasetId) {
         return (root, query, builder) -> {
-            final Join<DataEntity, DatasetEntity> join =
-                    root.join(DataEntity.PROPERTY_DATASET, JoinType.INNER);
+            final Join<ObservationEntity, DatasetEntity> join =
+                    root.join(ObservationEntity.PROPERTY_DATASET, JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_ID), datasetId);
         };
     }
 
-    @Override protected Specification<DataEntity<?>> handleRelatedPropertyFilter(String propertyName,
-                                                                                 Specification<?> propertyValue) {
+    @Override
+    protected Specification<ObservationEntity<?>> handleRelatedPropertyFilter(String propertyName,
+            Specification<?> propertyValue) {
         return (root, query, builder) -> {
             try {
                 if (DATASTREAM.equals(propertyName)) {
                     Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
                     Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
                     Join<DatastreamEntity, DatasetEntity> join = datastream.join(DatastreamEntity.PROPERTY_DATASETS);
-                    sq.select(join)
-                      .where(((Specification<DatastreamEntity>) propertyValue).toPredicate(datastream,
-                                                                                           query,
-                                                                                           builder));
-                    return builder.in(root.get(DataEntity.PROPERTY_DATASET)).value(sq);
+                    sq.select(join).where(
+                            ((Specification<DatastreamEntity>) propertyValue).toPredicate(datastream, query, builder));
+                    return builder.in(root.get(ObservationEntity.PROPERTY_DATASET)).value(sq);
 
                 } else if (FEATUREOFINTEREST.equals(propertyName)) {
                     Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
                     Root<DatasetEntity> dataset = sq.from(DatasetEntity.class);
                     Subquery<FeatureEntity> subquery = query.subquery(FeatureEntity.class);
                     Root<FeatureEntity> feature = subquery.from(FeatureEntity.class);
-                    subquery.select(feature)
-                            .where(((Specification<FeatureEntity>) propertyValue).toPredicate(feature,
-                                                                                              query,
-                                                                                              builder));
+                    subquery.select(feature).where(
+                            ((Specification<FeatureEntity>) propertyValue).toPredicate(feature, query, builder));
                     sq.select(dataset.get(DatasetEntity.PROPERTY_ID))
-                      .where(builder.equal(dataset.get(DatasetEntity.PROPERTY_FEATURE), subquery));
-                    return builder.in(root.get(DataEntity.PROPERTY_DATASET)).value(sq);
+                            .where(builder.equal(dataset.get(DatasetEntity.PROPERTY_FEATURE), subquery));
+                    return builder.in(root.get(ObservationEntity.PROPERTY_DATASET)).value(sq);
                 } else {
                     throw new STAInvalidFilterExpressionException("Could not find related property: " + propertyName);
                 }
@@ -127,70 +119,68 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
     }
 
     @Override
-    protected Specification<DataEntity<?>> handleDirectPropertyFilter(String propertyName, Expression<?> propertyValue,
-            FilterConstants.ComparisonOperator operator, boolean switched) {
+    protected Specification<ObservationEntity<?>> handleDirectPropertyFilter(String propertyName,
+            Expression<?> propertyValue, FilterConstants.ComparisonOperator operator, boolean switched) {
         return (root, query, builder) -> {
             try {
                 switch (propertyName) {
                     case "id":
-                        return handleDirectStringPropertyFilter(root.get(DataEntity.PROPERTY_STA_IDENTIFIER),
+                        return handleDirectStringPropertyFilter(root.get(ObservationEntity.PROPERTY_STA_IDENTIFIER),
                                 propertyValue, operator, builder, false);
                     case "value":
-                        if (propertyValue.getJavaType().getName().equals(Double.class.getName())
-                                || propertyValue.getJavaType().getName().equals(Long.class.getName())
-                                || propertyValue.getJavaType().getName().equals(Integer.class.getName())) {
-                            return builder.or(
-                                    createNumericPredicate(root, query, builder, QuantityDataEntity.class,
-                                            propertyName, propertyValue, operator),
-                                    createNumericPredicate(root, query, builder, CountDataEntity.class, propertyName,
-                                            propertyValue, operator));
-
-                        } else if (propertyValue.getJavaType().getName().equals(String.class.getName())) {
-                            return builder.or(
-                                    createStringPredicate(root, query, builder, TextDataEntity.class, propertyName,
-                                            propertyValue, operator),
-                                    createStringPredicate(root, query, builder, CategoryDataEntity.class, propertyName,
-                                            propertyValue, operator),
-                                    createStringPredicate(root, query, builder, ReferencedDataEntity.class,
-                                            propertyName, propertyValue, operator));
-
-                        } else {
-                            throw new STAInvalidFilterExpressionException("Value type not supported!");
-                        }
+                        /*
+                         * if (propertyValue.getJavaType().getName().equals(Double.class.getName()) ||
+                         * propertyValue.getJavaType().getName().equals(Long.class.getName()) ||
+                         * propertyValue.getJavaType().getName().equals(Integer.class.getName())) { return
+                         * builder.or( createNumericPredicate(root, query, builder, QuantityDataEntity.class,
+                         * propertyName, propertyValue, operator), createNumericPredicate(root, query,
+                         * builder, CountDataEntity.class, propertyName, propertyValue, operator));
+                         *
+                         * } else if (propertyValue.getJavaType().getName().equals(String.class.getName())) {
+                         * return builder.or( createStringPredicate(root, query, builder,
+                         * TextDataEntity.class, propertyName, propertyValue, operator),
+                         * createStringPredicate(root, query, builder, CategoryDataEntity.class, propertyName,
+                         * propertyValue, operator), createStringPredicate(root, query, builder,
+                         * ReferencedDataEntity.class, propertyName, propertyValue, operator));
+                         *
+                         * } else {
+                         */
+                        throw new STAInvalidFilterExpressionException("Value type not supported!");
+                    // }
                     case "phenomenonTime":
                         switch (operator) {
                             case PropertyIsLessThan:
                             case PropertyIsLessThanOrEqualTo:
                                 return handleDirectDateTimePropertyFilter(
-                                        root.get(DataEntity.PROPERTY_SAMPLING_TIME_END), propertyValue, operator,
-                                        builder);
+                                        root.get(ObservationEntity.PROPERTY_SAMPLING_TIME_END), propertyValue,
+                                        operator, builder);
                             case PropertyIsGreaterThan:
                             case PropertyIsGreaterThanOrEqualTo:
                                 return handleDirectDateTimePropertyFilter(
-                                        root.get(DataEntity.PROPERTY_SAMPLING_TIME_START), propertyValue, operator,
-                                        builder);
+                                        root.get(ObservationEntity.PROPERTY_SAMPLING_TIME_START), propertyValue,
+                                        operator, builder);
                             case PropertyIsEqualTo:
                                 Predicate eqStart = handleDirectDateTimePropertyFilter(
-                                        root.get(DataEntity.PROPERTY_SAMPLING_TIME_START), propertyValue, operator,
-                                        builder);
+                                        root.get(ObservationEntity.PROPERTY_SAMPLING_TIME_START), propertyValue,
+                                        operator, builder);
                                 Predicate eqEnd = handleDirectDateTimePropertyFilter(
-                                        root.get(DataEntity.PROPERTY_SAMPLING_TIME_END), propertyValue, operator,
-                                        builder);
+                                        root.get(ObservationEntity.PROPERTY_SAMPLING_TIME_END), propertyValue,
+                                        operator, builder);
                                 return builder.and(eqStart, eqEnd);
                             case PropertyIsNotEqualTo:
                                 Predicate neStart = handleDirectDateTimePropertyFilter(
-                                        root.get(DataEntity.PROPERTY_SAMPLING_TIME_START), propertyValue, operator,
-                                        builder);
+                                        root.get(ObservationEntity.PROPERTY_SAMPLING_TIME_START), propertyValue,
+                                        operator, builder);
                                 Predicate neEnd = handleDirectDateTimePropertyFilter(
-                                        root.get(DataEntity.PROPERTY_SAMPLING_TIME_END), propertyValue, operator,
-                                        builder);
+                                        root.get(ObservationEntity.PROPERTY_SAMPLING_TIME_END), propertyValue,
+                                        operator, builder);
                                 return builder.or(neStart, neEnd);
                             default:
                                 throw new STAInvalidFilterExpressionException("Operator not implemented!");
                         }
                     case "resultTime":
-                        return this.handleDirectDateTimePropertyFilter(root.get(DataEntity.PROPERTY_RESULT_TIME),
-                                propertyValue, operator, builder);
+                        return this.handleDirectDateTimePropertyFilter(
+                                root.get(ObservationEntity.PROPERTY_RESULT_TIME), propertyValue, operator, builder);
                     default:
                         throw new STAInvalidFilterExpressionException("Currently not implemented!");
                 }
@@ -200,25 +190,25 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
         };
     }
 
-    private <T extends DataEntity> Predicate createNumericPredicate(Root<DataEntity<?>> root, CriteriaQuery<?> query,
-            CriteriaBuilder builder, Class<T> clazz, String propertyName, Expression<?> propertyValue,
-            ComparisonOperator operator) throws STAInvalidFilterExpressionException {
+    private <T extends ObservationEntity> Predicate createNumericPredicate(Root<ObservationEntity<?>> root,
+            CriteriaQuery<?> query, CriteriaBuilder builder, Class<T> clazz, String propertyName,
+            Expression<?> propertyValue, ComparisonOperator operator) throws STAInvalidFilterExpressionException {
         Subquery<T> sq = query.subquery(clazz);
         Root<T> entity = sq.from(clazz);
         Predicate predicate =
                 handleDirectNumberPropertyFilter(entity.get(propertyName), propertyValue, operator, builder);
-        sq.select(entity.get(QuantityDataEntity.PROPERTY_ID)).where(predicate);
-        return builder.in(root.get(DataEntity.PROPERTY_ID)).value(sq);
+        sq.select(entity.get(ObservationEntity.PROPERTY_ID)).where(predicate);
+        return builder.in(root.get(ObservationEntity.PROPERTY_ID)).value(sq);
     }
 
-    private <T extends DataEntity> Predicate createStringPredicate(Root<DataEntity<?>> root, CriteriaQuery<?> query,
-            CriteriaBuilder builder, Class<T> clazz, String propertyName, Expression<?> propertyValue,
-            ComparisonOperator operator) throws STAInvalidFilterExpressionException {
+    private <T extends ObservationEntity> Predicate createStringPredicate(Root<ObservationEntity<?>> root,
+            CriteriaQuery<?> query, CriteriaBuilder builder, Class<T> clazz, String propertyName,
+            Expression<?> propertyValue, ComparisonOperator operator) throws STAInvalidFilterExpressionException {
         Subquery<T> sq = query.subquery(clazz);
         Root<T> entity = sq.from(clazz);
         Predicate predicate =
                 handleDirectStringPropertyFilter(entity.get(propertyName), propertyValue, operator, builder, false);
-        sq.select(entity.get(QuantityDataEntity.PROPERTY_ID)).where(predicate);
-        return builder.in(root.get(DataEntity.PROPERTY_ID)).value(sq);
+        sq.select(entity.get(ObservationEntity.PROPERTY_ID)).where(predicate);
+        return builder.in(root.get(ObservationEntity.PROPERTY_ID)).value(sq);
     }
 }

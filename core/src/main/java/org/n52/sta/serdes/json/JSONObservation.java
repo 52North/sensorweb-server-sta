@@ -41,7 +41,7 @@ import org.locationtech.jts.io.geojson.GeoJsonReader;
 import org.n52.series.db.beans.GeometryEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.parameter.ParameterJsonEntity;
-import org.n52.series.db.beans.sta.StaDataEntity;
+import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
@@ -53,7 +53,7 @@ import java.util.HashSet;
 
 @SuppressWarnings("VisibilityModifier")
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
-public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> implements AbstractJSONEntity {
+public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> implements AbstractJSONEntity {
 
     // JSON Properties. Matched by Annotation or variable name
     public String phenomenonTime;
@@ -69,11 +69,11 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> impl
     public JSONDatastream Datastream;
 
     public JSONObservation() {
-        self = new StaDataEntity();
+        self = new ObservationEntity();
     }
 
     @Override
-    public StaDataEntity toEntity(JSONBase.EntityType type) {
+    public ObservationEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
         case FULL:
             Assert.notNull(result, INVALID_INLINE_ENTITY + "result");
@@ -96,7 +96,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> impl
         }
     }
 
-    private StaDataEntity createPatchEntity() {
+    private ObservationEntity createPatchEntity() {
         self.setIdentifier(identifier);
         self.setStaIdentifier(identifier);
 
@@ -148,7 +148,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> impl
         return self;
     }
 
-    private StaDataEntity createPostEntity() {
+    private ObservationEntity createPostEntity() {
         self.setIdentifier(identifier);
         self.setStaIdentifier(identifier);
 
@@ -235,7 +235,10 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<StaDataEntity> impl
                     try {
                         GeometryEntity geometryEntity = new GeometryEntity();
                         geometryEntity.setGeometry(reader.read(jsonNode.toString()));
+                        //TODO: implement geometryEntity on ObservationEntity
+                        /*
                         self.setGeometryEntity(geometryEntity);
+                         */
                     } catch (ParseException e) {
                         Assert.notNull(null, "Could not parse" + e.getMessage());
                     }

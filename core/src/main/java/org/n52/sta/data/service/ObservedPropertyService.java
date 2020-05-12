@@ -29,16 +29,7 @@
 
 package org.n52.sta.data.service;
 
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
-
 import org.n52.janmayen.http.HTTPStatus;
-import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
@@ -65,6 +56,13 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -165,7 +163,9 @@ public class ObservedPropertyService
                 sq.select(join)
                   .where(builder.equal(datastream.get(DescribableEntity.PROPERTY_IDENTIFIER), relatedId));
                 if (ownId != null) {
-                    return builder.and(builder.in(root).value(sq), builder.equal(root.get(STAIDENTIFIER), ownId));
+                    return builder.and(builder.in(root).value(sq),
+                                       builder.equal(root.get(PhenomenonEntity.PROPERTY_STA_IDENTIFIER),
+                                                     ownId));
                 }
                 return builder.in(root).value(sq);
             };
@@ -179,9 +179,9 @@ public class ObservedPropertyService
     public String checkPropertyName(String property) {
         switch (property) {
         case "definition":
-            return DataEntity.PROPERTY_IDENTIFIER;
+            return PhenomenonEntity.PROPERTY_IDENTIFIER;
         case "identifier":
-            return STAIDENTIFIER;
+            return PhenomenonEntity.STA_IDENTIFIER;
         default:
             return super.checkPropertyName(property);
         }

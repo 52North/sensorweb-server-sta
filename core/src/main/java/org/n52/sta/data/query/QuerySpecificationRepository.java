@@ -64,7 +64,7 @@ public class QuerySpecificationRepository {
         case "Sensors": {
             return new SensorQuerySpecifications();
         }
-        case "DataEntity":
+        case "ObservationEntity":
         case "Observation":
         case "Observations": {
             return new ObservationQuerySpecifications();
