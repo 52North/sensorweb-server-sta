@@ -39,6 +39,7 @@ import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
 import org.n52.sta.serdes.util.EntityPatch;
 import org.n52.sta.utils.STARequestUtils;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -57,6 +58,7 @@ import java.io.IOException;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @RestController
+@ConditionalOnProperty(value = "server.feature.readOnly", havingValue = "false", matchIfMissing = true)
 public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtils {
 
     private static final String COULD_NOT_FIND_RELATED_ENTITY = "Could not find related Entity!";

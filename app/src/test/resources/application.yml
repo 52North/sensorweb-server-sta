@@ -31,6 +31,10 @@ server:
     ## When true DatasetType is set to trajectory if Thing->property contains KVP '"isMobile": "true"'
     isMobile: false
 
+    # Toggle whether this Instance should be read-only
+    # All HTTP POST & PUT Requests will be dropped with a HTTP Status 405 NOT Allowed
+    # All Mqtt Publish Messages will be dropped silently
+    readOnly: false
 
 # Database Configuration
 database:

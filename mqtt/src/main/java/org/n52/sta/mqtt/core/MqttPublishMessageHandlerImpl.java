@@ -61,12 +61,16 @@ public class MqttPublishMessageHandlerImpl implements MqttPublishMessageHandler 
     private final ObjectMapper mapper;
     private final Set<String> publishTopics;
 
+    private final boolean readOnly;
+
     public MqttPublishMessageHandlerImpl(
             @Value("${server.feature.mqttPublishTopics:Observations}") List<String> publishTopics,
+            @Value("${server.feature.readOnly}") boolean readOnly,
             EntityServiceRepository serviceRepository,
             ObjectMapper mapper) {
         this.serviceRepository = serviceRepository;
         this.mapper = mapper;
+        this.readOnly = readOnly;
         Set topics = new HashSet<>(publishTopics);
 
         // Fallback to default if parameter was invalid
@@ -94,7 +98,7 @@ public class MqttPublishMessageHandlerImpl implements MqttPublishMessageHandler 
 
     @Override public <T extends IdEntity> void processPublishMessage(InterceptPublishMessage msg) {
         try {
-            if (msg.getClientID().equals(INTERNAL_CLIENT_ID)) {
+            if (msg.getClientID().equals(INTERNAL_CLIENT_ID) || readOnly) {
                 return;
             }
             // This may only be a reference to Observation collection
