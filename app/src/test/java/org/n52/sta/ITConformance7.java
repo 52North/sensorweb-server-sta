@@ -189,14 +189,10 @@ public class ITConformance7 extends ConformanceTests implements TestUtil {
         Assertions.assertTrue(response.has(value));
         Assertions.assertTrue(response.has(countKey));
 
-        Assertions.assertEquals(
+        assertResponseCount(
+                response,
                 3,
-                response.get(countKey).asDouble(),
-                "Entity count is not one although it should be"
-        );
-        Assertions.assertFalse(
-                response.get(value).isEmpty(),
-                "Entity is not returned although it should be"
+                3
         );
     }
 

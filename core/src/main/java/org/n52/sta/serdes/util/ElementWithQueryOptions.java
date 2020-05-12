@@ -56,7 +56,6 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
         return entity;
     }
 
-    //TODO: implement
     public static ElementWithQueryOptions from(Object entity, QueryOptions queryOptions) {
         switch (entity.getClass().getSimpleName()) {
         case "PlatformEntity":

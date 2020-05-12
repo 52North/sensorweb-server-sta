@@ -252,7 +252,6 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
         }
 
         if (Observations != null) {
-            Random random = new Random();
             self.setObservations(Arrays.stream(Observations)
                                        .map(entity -> entity.toEntity(JSONBase.EntityType.FULL,
                                                                       JSONBase.EntityType.REFERENCE))

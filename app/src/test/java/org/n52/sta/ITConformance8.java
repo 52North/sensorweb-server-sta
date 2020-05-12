@@ -536,7 +536,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
         }
         // Wait for subscription to register properly
         try {
-            Thread.sleep(5000L);
+            Thread.sleep(2000L);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
