@@ -52,7 +52,6 @@ import java.util.stream.Collectors;
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
 public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<DatastreamEntity>
         implements AbstractJSONEntity {
-
     private static final String COULD_NOT_PARSE_OBS_AREA = "Could not parse observedArea to GeoJSON. Error was: ";
 
     // JSON Properties. Matched by Annotation or variable name

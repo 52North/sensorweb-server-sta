@@ -536,5 +536,6 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     getObservationService() {
         return (AbstractSensorThingsEntityServiceImpl<?, ObservationEntity<?>, ObservationEntity<?>>)
                 getEntityService(EntityTypes.Observation);
+
     }
 }

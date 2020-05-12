@@ -72,8 +72,8 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Ob
             Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
             Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
             Join<DatastreamEntity, DatasetEntity> join = datastream.join(DatastreamEntity.PROPERTY_DATASETS);
-            sq.select(join.get(DatasetEntity.PROPERTY_ID))
-              .where(builder.equal(datastream.get(DatastreamEntity.PROPERTY_STA_IDENTIFIER), datastreamIdentifier));
+            sq.select(join.get(DatasetEntity.PROPERTY_ID)).where(
+                    builder.equal(datastream.get(DatastreamEntity.PROPERTY_STA_IDENTIFIER), datastreamIdentifier));
             return builder.in(root.get(ObservationEntity.PROPERTY_DATASET)).value(sq);
         };
     }
@@ -95,10 +95,8 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Ob
                     Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
                     Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
                     Join<DatastreamEntity, DatasetEntity> join = datastream.join(DatastreamEntity.PROPERTY_DATASETS);
-                    sq.select(join)
-                      .where(((Specification<DatastreamEntity>) propertyValue).toPredicate(datastream,
-                                                                                           query,
-                                                                                           builder));
+                    sq.select(join).where(
+                            ((Specification<DatastreamEntity>) propertyValue).toPredicate(datastream, query, builder));
                     return builder.in(root.get(ObservationEntity.PROPERTY_DATASET)).value(sq);
 
                 } else if (FEATUREOFINTEREST.equals(propertyName)) {
@@ -106,10 +104,8 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Ob
                     Root<DatasetEntity> dataset = sq.from(DatasetEntity.class);
                     Subquery<FeatureEntity> subquery = query.subquery(FeatureEntity.class);
                     Root<FeatureEntity> feature = subquery.from(FeatureEntity.class);
-                    subquery.select(feature)
-                            .where(((Specification<FeatureEntity>) propertyValue).toPredicate(feature,
-                                                                                              query,
-                                                                                              builder));
+                    subquery.select(feature).where(
+                            ((Specification<FeatureEntity>) propertyValue).toPredicate(feature, query, builder));
                     sq.select(dataset.get(DatasetEntity.PROPERTY_ID))
                       .where(builder.equal(dataset.get(DatasetEntity.PROPERTY_FEATURE), subquery));
                     return builder.in(root.get(ObservationEntity.PROPERTY_DATASET)).value(sq);
@@ -135,9 +131,10 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Ob
                     return handleDirectStringPropertyFilter(root.get(ObservationEntity.PROPERTY_STA_IDENTIFIER),
                                                             propertyValue, operator, builder, false);
                 case "value":
-                    if (propertyValue.getJavaType().getName().equals(Double.class.getName())
-                            || propertyValue.getJavaType().getName().equals(Long.class.getName())
-                            || propertyValue.getJavaType().getName().equals(Integer.class.getName())) {
+                    String type = propertyValue.getJavaType().getName();
+                    if (type.equals(Double.class.getName())
+                            || type.equals(Long.class.getName())
+                            || type.equals(Integer.class.getName())) {
                         return createNumericPredicate(root,
                                                       query,
                                                       builder,
@@ -146,7 +143,7 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Ob
                                                       propertyValue,
                                                       operator
                         );
-                    } else if (propertyValue.getJavaType().getName().equals(String.class.getName())) {
+                    } else if (type.equals(String.class.getName())) {
                         return createStringPredicate(root,
                                                      query,
                                                      builder,
@@ -158,6 +155,9 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Ob
                     } else {
                         throw new STAInvalidFilterExpressionException("Value type not supported!");
                     }
+                case "resultTime":
+                    return this.handleDirectDateTimePropertyFilter(
+                            root.get(ObservationEntity.PROPERTY_RESULT_TIME), propertyValue, operator, builder);
                 case "phenomenonTime":
                     switch (operator) {
                     case PropertyIsLessThan:
@@ -186,12 +186,7 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Ob
                                 root.get(ObservationEntity.PROPERTY_SAMPLING_TIME_END), propertyValue, operator,
                                 builder);
                         return builder.or(neStart, neEnd);
-                    default:
-                        throw new STAInvalidFilterExpressionException("Operator not implemented!");
                     }
-                case "resultTime":
-                    return this.handleDirectDateTimePropertyFilter(root.get(ObservationEntity.PROPERTY_RESULT_TIME),
-                                                                   propertyValue, operator, builder);
                 default:
                     throw new STAInvalidFilterExpressionException("Currently not implemented!");
                 }
