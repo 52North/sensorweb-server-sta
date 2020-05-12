@@ -68,10 +68,8 @@ public class JSONBase {
 
         protected boolean generatedId = true;
 
-        public void setIdentifier(String rawIdentifier) throws UnsupportedEncodingException {
+        public void setIdentifier(String rawIdentifier) {
             generatedId = false;
-            Assert.doesNotContain(rawIdentifier, "/", "Identifier may not contain slashes due to incompatibility " +
-                    "with @iot.selfLink!");
             identifier = rawIdentifier;
         }
 

@@ -35,7 +35,6 @@ server:
     # All Mqtt Publish Messages will be dropped silently
     readOnly: false
 
-
 # Database Configuration
 database:
   jpa:
@@ -74,6 +73,9 @@ spring:
       charset: UTF-8
       enabled: true
       force: true
+  mvc:
+    servlet:
+      path: /
 
 # HTTP Configuration
 http:
@@ -110,3 +112,4 @@ logging:
 #    io.moquette: TRACE
      org.n52: TRACE
 #    org.springframework.orm.jpa: TRACE
+     org.springframework.web: DEBUG
