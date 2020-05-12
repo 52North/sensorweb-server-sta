@@ -47,9 +47,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class Application {
 
     static {
+        String TRUE = "true";
         System.setProperty("tomcat.util.http.parser.HttpParser.requestTargetAllow", "%");
-        System.setProperty("org.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH", "true");
-        System.setProperty("org.apache.catalina.connector.CoyoteAdapter.ALLOW_BACKSLASH", "true");
+        System.setProperty("org.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH", TRUE);
+        System.setProperty("org.apache.catalina.connector.CoyoteAdapter.ALLOW_BACKSLASH", TRUE);
     }
 
     public static void main(String[] args) {

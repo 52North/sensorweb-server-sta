@@ -30,7 +30,6 @@
 package org.n52.sta.data.service;
 
 import org.n52.series.db.beans.HibernateRelations;
-import org.n52.series.db.beans.IdEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.repositories.IdentifierRepository;
@@ -43,7 +42,8 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public interface AbstractSensorThingsEntityService<T extends IdentifierRepository<S, Long>, S extends HibernateRelations.HasId,
+public interface AbstractSensorThingsEntityService<T extends IdentifierRepository<S, Long>,
+        S extends HibernateRelations.HasId,
         E extends S> {
     /**
      * Checks if an Entity with given id exists

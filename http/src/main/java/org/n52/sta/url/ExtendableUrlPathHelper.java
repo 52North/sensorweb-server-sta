@@ -65,7 +65,7 @@ public class ExtendableUrlPathHelper extends UrlPathHelper {
         } else if (requestUri.charAt(index1) == ';') {
             index1 = requestUri.indexOf('/', index1);
         }
-        return (index1 != -1 ? requestUri.substring(index1) : "");
+        return index1 != -1 ? requestUri.substring(index1) : "";
     }
 
     /**

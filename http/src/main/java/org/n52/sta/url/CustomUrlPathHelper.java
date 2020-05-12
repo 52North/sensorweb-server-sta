@@ -46,8 +46,9 @@ public class CustomUrlPathHelper extends ExtendableUrlPathHelper {
     private static final String SLASH = "/";
     private static final String ENCODED_SLASH = UriUtils.encode(SLASH, StandardCharsets.UTF_8);
     private static final String DOUBLE_ENCODED_SLASH = UriUtils.encode(ENCODED_SLASH, StandardCharsets.UTF_8);
-    private static final Pattern ENCODED_SLASH_PATTERN = Pattern.compile(ENCODED_SLASH,
-                                                                         Pattern.CASE_INSENSITIVE | Pattern.LITERAL);
+    private static final Pattern ENCODED_SLASH_PATTERN =
+            Pattern.compile(ENCODED_SLASH,
+                            Pattern.CASE_INSENSITIVE | Pattern.LITERAL);
 
     @Override
     public String decodeRequestString(HttpServletRequest request, String source) {
@@ -60,7 +61,8 @@ public class CustomUrlPathHelper extends ExtendableUrlPathHelper {
     public String getServletPath(HttpServletRequest request) {
         String servletPath = getSanitizedPath(super.getServletPath(request));
         String contextPath = getContextPath(request);
-        String requestUri = getSanitizedPath(super.decodeRequestString(request, removeSemicolonContent(getRequestUri(request))));
+        String requestUri = getSanitizedPath(super.decodeRequestString(request,
+                                                                       removeSemicolonContent(getRequestUri(request))));
         String pathWithinApplication = getRemainingPath(requestUri, contextPath, true);
         if (pathWithinApplication != null) {
             // Normal case: URI contains context path.

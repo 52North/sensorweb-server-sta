@@ -46,7 +46,6 @@ import org.springframework.util.Assert;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("VisibilityModifier")
@@ -55,8 +54,26 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
         implements AbstractJSONEntity {
 
     private static final String COULD_NOT_PARSE_OBS_AREA = "Could not parse observedArea to GeoJSON. Error was: ";
+
+    // JSON Properties. Matched by Annotation or variable name
+    public String observationType;
+    public JSONUnitOfMeasurement unitOfMeasurement;
+    public JsonNode observedArea;
+    public String phenomenonTime;
+    public String resultTime;
+
+    @JsonManagedReference
+    public JSONSensor Sensor;
+    @JsonManagedReference
+    public JSONThing Thing;
+    @JsonManagedReference
+    public JSONObservedProperty ObservedProperty;
+    @JsonManagedReference
+    public JSONObservation[] Observations;
+
     private final GeometryFactory factory =
             new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
+
     private final String OM_CategoryObservation =
             "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CategoryObservation";
     private final String OM_CountObservation =
@@ -68,20 +85,6 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
     private final String OM_TruthObservation =
             "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_TruthObservation";
     private final String obsType = "observationType";
-    // JSON Properties. Matched by Annotation or variable name
-    public String observationType;
-    public JSONUnitOfMeasurement unitOfMeasurement;
-    public JsonNode observedArea;
-    public String phenomenonTime;
-    public String resultTime;
-    @JsonManagedReference
-    public JSONSensor Sensor;
-    @JsonManagedReference
-    public JSONThing Thing;
-    @JsonManagedReference
-    public JSONObservedProperty ObservedProperty;
-    @JsonManagedReference
-    public JSONObservation[] Observations;
 
     public JSONDatastream() {
         self = new DatastreamEntity();

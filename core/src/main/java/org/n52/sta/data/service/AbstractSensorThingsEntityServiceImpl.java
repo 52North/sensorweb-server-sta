@@ -532,7 +532,8 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     }
 
     @SuppressWarnings("unchecked")
-    protected AbstractSensorThingsEntityServiceImpl<?, ObservationEntity<?>, ObservationEntity<?>> getObservationService() {
+    protected AbstractSensorThingsEntityServiceImpl<?, ObservationEntity<?>, ObservationEntity<?>>
+    getObservationService() {
         return (AbstractSensorThingsEntityServiceImpl<?, ObservationEntity<?>, ObservationEntity<?>>)
                 getEntityService(EntityTypes.Observation);
     }
