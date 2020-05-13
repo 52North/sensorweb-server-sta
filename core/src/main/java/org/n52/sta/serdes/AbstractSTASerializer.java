@@ -44,12 +44,15 @@ public abstract class AbstractSTASerializer<T> extends StdSerializer<T> {
     protected String rootUrl;
     protected String entitySetName;
 
+    private final String ENCODEDSLASH = "%2F";
+    private final String SLASH = "/";
+
     protected AbstractSTASerializer(Class<T> t) {
         super(t);
     }
 
     public void writeSelfLink(JsonGenerator gen, String id) throws IOException {
-        String escaped = id.replaceAll("/", "%2F");
+        String escaped = id.replaceAll(SLASH, ENCODEDSLASH);
         gen.writeStringField("@iot.selfLink", rootUrl + entitySetName + "(" + escaped + ")");
     }
 
@@ -58,7 +61,7 @@ public abstract class AbstractSTASerializer<T> extends StdSerializer<T> {
     }
 
     public void writeNavigationProp(JsonGenerator gen, String navigationProperty, String id) throws IOException {
-        String escaped = id.replaceAll("/", "%2F");
+        String escaped = id.replaceAll(SLASH, ENCODEDSLASH);
         gen.writeStringField(navigationProperty + "@iot.navigationLink",
                              rootUrl + entitySetName + "(" + escaped + ")/" + navigationProperty);
     }

@@ -30,7 +30,6 @@
 package org.n52.sta.url;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -38,7 +37,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Configuration
-@DependsOn("customMapper")
 public class MvcConfiguration implements WebMvcConfigurer {
 
     @Override

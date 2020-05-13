@@ -40,7 +40,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
-import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
 @SuppressWarnings("VisibilityModifier")
@@ -51,6 +50,7 @@ public class JSONBase {
         PATCH,
         REFERENCE
     }
+
 
     abstract static class JSONwithId<T> {
 
