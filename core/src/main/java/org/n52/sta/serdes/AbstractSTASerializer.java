@@ -49,7 +49,8 @@ public abstract class AbstractSTASerializer<T> extends StdSerializer<T> {
     }
 
     public void writeSelfLink(JsonGenerator gen, String id) throws IOException {
-        gen.writeStringField("@iot.selfLink", rootUrl + entitySetName + "(" + id + ")");
+        String escaped = id.replaceAll("/", "%2F");
+        gen.writeStringField("@iot.selfLink", rootUrl + entitySetName + "(" + escaped + ")");
     }
 
     public void writeId(JsonGenerator gen, String id) throws IOException {
@@ -57,8 +58,9 @@ public abstract class AbstractSTASerializer<T> extends StdSerializer<T> {
     }
 
     public void writeNavigationProp(JsonGenerator gen, String navigationProperty, String id) throws IOException {
+        String escaped = id.replaceAll("/", "%2F");
         gen.writeStringField(navigationProperty + "@iot.navigationLink",
-                             rootUrl + entitySetName + "(" + id + ")/" + navigationProperty);
+                             rootUrl + entitySetName + "(" + escaped + ")/" + navigationProperty);
     }
 
     protected static void writeNestedEntity(Object expandedElement,

@@ -92,8 +92,7 @@ public interface STARequestUtils extends StaConstants {
     String ID = "id";
 
     // Note: This is duplicated in LocationService to allow for non-standard 'updateFOI'-feature.
-    //TODO: Check if this covers all identifiers
-    String IDENTIFIER_REGEX = "(?:\\()[^(]+(?:\\))";
+    String IDENTIFIER_REGEX = "(?:\\()[^)]+(?:\\))";
 
     String URL_INVALID = "Url is invalid. ";
 
@@ -612,6 +611,7 @@ public interface STARequestUtils extends StaConstants {
         // Parse first navigation Element
         String[] sourceEntity = splitId(uriResources[0]);
         String sourceId = sourceEntity[1].replace(ROUND_BRACKET_CLOSE, "");
+        sourceId = sourceId.replaceAll("%2F", "/");
         String sourceType = sourceEntity[0];
 
         if (!serviceRepository.getEntityService(sourceType).existsEntity(sourceId)) {
