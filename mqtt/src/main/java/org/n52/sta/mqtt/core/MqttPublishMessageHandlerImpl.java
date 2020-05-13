@@ -65,7 +65,7 @@ public class MqttPublishMessageHandlerImpl implements MqttPublishMessageHandler 
 
     public MqttPublishMessageHandlerImpl(
             @Value("${server.feature.mqttPublishTopics:Observations}") List<String> publishTopics,
-            @Value("${server.feature.readOnly}") boolean readOnly,
+            @Value("${server.feature.mqttReadOnly}") boolean readOnly,
             EntityServiceRepository serviceRepository,
             ObjectMapper mapper) {
         this.serviceRepository = serviceRepository;

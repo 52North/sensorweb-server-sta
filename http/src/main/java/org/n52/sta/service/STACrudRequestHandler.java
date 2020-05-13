@@ -58,7 +58,7 @@ import java.io.IOException;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @RestController
-@ConditionalOnProperty(value = "server.feature.readOnly", havingValue = "false", matchIfMissing = true)
+@ConditionalOnProperty(value = "server.feature.httpReadOnly", havingValue = "false", matchIfMissing = true)
 public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtils {
 
     private static final String COULD_NOT_FIND_RELATED_ENTITY = "Could not find related Entity!";
