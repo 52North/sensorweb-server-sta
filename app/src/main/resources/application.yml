@@ -14,21 +14,21 @@ server:
   feature:
     ## Automatically updates a FeatureOfInterest linked in Thing->properties under
     ## key "updateFOI" with new Locations of the Thing
-    updateFOI: true
+    updateFOI: false
 
     ## Defines all Collections that accept POSTing via MQTT.
     ## Default (defined by standard): "Observations" only
-    mqttPublishTopics: Things, Observations
+    mqttPublishTopics: Observations
 
     ## Toggle strict checking of encodingType for Sensor Entity
     ## When true Sensor->encodingType is not validated against allowed encodingTypes defined in the Standard
     ## (currently PDF and SensorML2)
     ## Note: This only influences encodingType when SensorEntity is posted/patched directly, not when it is inserted via nested insertion inside a Datastream
-    variableEncodingType: true
+    variableEncodingType: false
 
     ## Toggle support for isMobile Feature
     ## When true DatasetType is set to trajectory if Thing->property contains KVP '"isMobile": "true"'
-    isMobile: true
+    isMobile: false
 
     # Toggle whether this Instance should be read-only. Can be toggled separately for MQTT and HTTP
     # All MQTT Publish Messages will be dropped silently
