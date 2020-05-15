@@ -100,16 +100,27 @@ public class JSONBase {
          * @return created entity
          */
         public T toEntity(EntityType type1, EntityType type2) {
+            Exception ex = null;
+            Exception secondEx = null;
             try {
                 return toEntity(type1);
-            } catch (IllegalStateException | IllegalArgumentException ex) {
-                try {
-                    return toEntity(type2);
-                } catch (IllegalStateException | IllegalArgumentException secondEx) {
-                    throw new IllegalStateException(
-                            type1.name() + ex.getMessage() + type2.name() + secondEx.getMessage());
-                }
+            } catch (IllegalStateException | IllegalArgumentException e) {
+                // We have errored out on type 1
+                ex = e;
             }
+
+            try {
+                return toEntity(type2);
+            } catch (IllegalStateException | IllegalArgumentException e) {
+                // We have errored out on type 2
+                secondEx = e;
+            }
+            String couldNotParse = "Could not parse as ";
+            String entityError = " Entity. Error: ";
+            // We have errored out on both types so return error message
+            throw new IllegalStateException(
+                    couldNotParse + type1.name() + entityError + ex.getMessage() + "! " +
+                            couldNotParse + type2.name() + entityError + secondEx.getMessage());
         }
     }
 

@@ -85,6 +85,10 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
             "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_TruthObservation";
     private final String obsType = "observationType";
 
+    private final String uomName = "unitOfMeasurement->name";
+    private final String uomSymbol = "unitOfMeasurement->symbol";
+    private final String uomDef = "unitOfMeasurement->definition";
+
     public JSONDatastream() {
         self = new DatastreamEntity();
     }
@@ -101,10 +105,16 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
                                  observationType.equals(OM_Observation)
                                  || observationType.equals(OM_TruthObservation), INVALID_INLINE_ENTITY + obsType);
             Assert.notNull(unitOfMeasurement, INVALID_INLINE_ENTITY + "unitOfMeasurement");
-            Assert.notNull(unitOfMeasurement.name, INVALID_INLINE_ENTITY + "unitOfMeasurement->name");
-            Assert.notNull(unitOfMeasurement.symbol, INVALID_INLINE_ENTITY + "unitOfMeasurement->symbol");
-            Assert.notNull(unitOfMeasurement.definition, INVALID_INLINE_ENTITY + "unitOfMeasurement->definition");
-
+            // Check if we have special null-unit
+            if (unitOfMeasurement.name != null) {
+                Assert.notNull(unitOfMeasurement.name, INVALID_INLINE_ENTITY + uomName);
+                Assert.notNull(unitOfMeasurement.symbol, INVALID_INLINE_ENTITY + uomSymbol);
+                Assert.notNull(unitOfMeasurement.definition, INVALID_INLINE_ENTITY + uomDef);
+            } else {
+                Assert.isNull(unitOfMeasurement.name, INVALID_INLINE_ENTITY + uomName);
+                Assert.isNull(unitOfMeasurement.symbol, INVALID_INLINE_ENTITY + uomSymbol);
+                Assert.isNull(unitOfMeasurement.definition, INVALID_INLINE_ENTITY + uomDef);
+            }
             return createPostEntity();
         case PATCH:
             return createPatchEntity();
@@ -151,11 +161,15 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
         }
 
         if (unitOfMeasurement != null) {
-            UnitEntity unit = new UnitEntity();
-            unit.setLink(unitOfMeasurement.definition);
-            unit.setName(unitOfMeasurement.name);
-            unit.setSymbol(unitOfMeasurement.symbol);
-            self.setUnit(unit);
+            if (unitOfMeasurement.name == null) {
+                self.setUnit(null);
+            } else {
+                UnitEntity unit = new UnitEntity();
+                unit.setLink(unitOfMeasurement.definition);
+                unit.setName(unitOfMeasurement.name);
+                unit.setSymbol(unitOfMeasurement.symbol);
+                self.setUnit(unit);
+            }
         }
 
         if (resultTime != null) {
@@ -170,8 +184,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
         }
 
         // if (phenomenonTime != null) {
-        // phenomenonTime (aka samplingTime) is automatically calculated based
-        // on associated Observations
+        // phenomenonTime (aka samplingTime) is automatically calculated based on associated Observations
         // phenomenonTime parsed from json is therefore ignored.
         // }
         if (Thing != null) {
@@ -211,11 +224,13 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
             }
         }
 
-        UnitEntity unit = new UnitEntity();
-        unit.setLink(unitOfMeasurement.definition);
-        unit.setName(unitOfMeasurement.name);
-        unit.setSymbol(unitOfMeasurement.symbol);
-        self.setUnit(unit);
+        if (unitOfMeasurement.name != null) {
+            UnitEntity unit = new UnitEntity();
+            unit.setLink(unitOfMeasurement.definition);
+            unit.setName(unitOfMeasurement.name);
+            unit.setSymbol(unitOfMeasurement.symbol);
+            self.setUnit(unit);
+        }
 
         if (resultTime != null) {
             Time time = parseTime(resultTime);

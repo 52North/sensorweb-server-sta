@@ -138,9 +138,17 @@ public class DatastreamSerDes {
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_UOM)) {
                 gen.writeObjectFieldStart(STAEntityDefinition.PROP_UOM);
-                gen.writeStringField(STAEntityDefinition.PROP_NAME, datastream.getUnitOfMeasurement().getName());
-                gen.writeStringField(STAEntityDefinition.PROP_SYMBOL, datastream.getUnitOfMeasurement().getSymbol());
-                gen.writeStringField(STAEntityDefinition.PROP_DEFINITION, datastream.getUnitOfMeasurement().getLink());
+                if (datastream.getUnitOfMeasurement() != null) {
+                    gen.writeStringField(STAEntityDefinition.PROP_NAME, datastream.getUnitOfMeasurement().getName());
+                    gen.writeStringField(STAEntityDefinition.PROP_SYMBOL,
+                                         datastream.getUnitOfMeasurement().getSymbol());
+                    gen.writeStringField(STAEntityDefinition.PROP_DEFINITION,
+                                         datastream.getUnitOfMeasurement().getLink());
+                } else {
+                    gen.writeNullField(STAEntityDefinition.PROP_NAME);
+                    gen.writeNullField(STAEntityDefinition.PROP_SYMBOL);
+                    gen.writeNullField(STAEntityDefinition.PROP_DEFINITION);
+                }
                 gen.writeEndObject();
             }
 
