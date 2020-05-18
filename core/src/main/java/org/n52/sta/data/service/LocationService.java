@@ -173,7 +173,7 @@ public class LocationService
                     // Autogenerate Identifier
                     String uuid = UUID.randomUUID().toString();
                     location.setIdentifier(uuid);
-                    location.setIdentifier(uuid);
+                    location.setStaIdentifier(uuid);
                 }
             }
             synchronized (getLock(location.getStaIdentifier())) {
