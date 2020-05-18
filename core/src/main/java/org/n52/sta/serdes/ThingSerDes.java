@@ -32,6 +32,8 @@ package org.n52.sta.serdes;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -57,7 +59,6 @@ public class ThingSerDes {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SensorSerDes.class);
 
-
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     public static class PlatformEntityPatch extends PlatformEntity implements EntityPatch<PlatformEntity> {
 
@@ -72,7 +73,6 @@ public class ThingSerDes {
             return entity;
         }
     }
-
 
     public static class ThingSerializer extends AbstractSTASerializer<ThingWithQueryOptions> {
 
@@ -123,7 +123,12 @@ public class ThingSerDes {
                 gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, thing.getDescription());
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_PROPERTIES)) {
-                gen.writeObjectField(STAEntityDefinition.PROP_PROPERTIES, thing.getProperties());
+                if (thing.hasProperties()) {
+                    ObjectMapper mapper = new ObjectMapper();
+                    gen.writeObjectField(STAEntityDefinition.PROP_PROPERTIES, mapper.readTree(thing.getProperties()));
+                } else {
+                    gen.writeNullField(STAEntityDefinition.PROP_PROPERTIES);
+                }
             }
 
             // navigation properties
