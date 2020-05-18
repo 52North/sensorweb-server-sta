@@ -32,7 +32,6 @@ package org.n52.sta.serdes;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
@@ -59,6 +58,7 @@ public class ThingSerDes {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SensorSerDes.class);
 
+
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     public static class PlatformEntityPatch extends PlatformEntity implements EntityPatch<PlatformEntity> {
 
@@ -73,6 +73,7 @@ public class ThingSerDes {
             return entity;
         }
     }
+
 
     public static class ThingSerializer extends AbstractSTASerializer<ThingWithQueryOptions> {
 
