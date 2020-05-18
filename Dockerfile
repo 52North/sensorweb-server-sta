@@ -1,9 +1,9 @@
 FROM alpine/git as gitstage
 WORKDIR /app
 
-RUN git clone https://github.com/speckij/arctic-sea \
+RUN git clone https://github.com/52north/arctic-sea \
     && cd arctic-sea \
-    && git checkout fix/sta_queryoptions_parsing
+    && git checkout master
 
 RUN git clone https://github.com/52north/sensorweb-server-db-model \
     && cd sensorweb-server-db-model \
