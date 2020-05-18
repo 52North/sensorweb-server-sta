@@ -265,21 +265,23 @@ public class LocationService
         }
     }
 
-    private void checkLocationEncoding(LocationEntity location) {
+    private void checkLocationEncoding(LocationEntity location) throws STACRUDException {
         if (location.getLocationEncoding() != null) {
             FormatEntity optionalLocationEncoding = createLocationEncoding(location.getLocationEncoding());
             location.setLocationEncoding(optionalLocationEncoding);
         }
     }
 
-    private FormatEntity createLocationEncoding(FormatEntity locationEncoding) {
+    private FormatEntity createLocationEncoding(FormatEntity locationEncoding) throws STACRUDException {
         ExampleMatcher createEncodingTypeMatcher = createEncodingTypeMatcher();
-        if (!locationEncodingRepository
-                .exists(createEncodingTypeExample(locationEncoding, createEncodingTypeMatcher))) {
-            return locationEncodingRepository.save(locationEncoding);
+        synchronized (getLock(locationEncoding.getFormat())) {
+            if (!locationEncodingRepository
+                    .exists(createEncodingTypeExample(locationEncoding, createEncodingTypeMatcher))) {
+                return locationEncodingRepository.save(locationEncoding);
+            }
+            return locationEncodingRepository
+                    .findOne(createEncodingTypeExample(locationEncoding, createEncodingTypeMatcher)).get();
         }
-        return locationEncodingRepository
-                .findOne(createEncodingTypeExample(locationEncoding, createEncodingTypeMatcher)).get();
     }
 
     private Example<FormatEntity> createEncodingTypeExample(FormatEntity locationEncoding, ExampleMatcher matcher) {
