@@ -742,9 +742,7 @@ public class ObservationService extends
             }
             data.setValidTimeStart(observation.getValidTimeStart());
             data.setValidTimeEnd(observation.getValidTimeEnd());
-
-            //TODO: Implement GeometryEntity on ObservationEntity
-            //data.setGeometryEntity(observation.getGeometryEntity());
+            data.setSamplingGeometry(observation.getSamplingGeometry());
 
             if (observation.getParameters() != null) {
                 parameterRepository.saveAll(observation.getParameters());
