@@ -97,23 +97,25 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
     public DatastreamEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
         case FULL:
-            Assert.notNull(name, INVALID_INLINE_ENTITY + "name");
-            Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
-            Assert.notNull(observationType, INVALID_INLINE_ENTITY + obsType);
-            Assert.state(observationType.equals(OM_Measurement) || observationType.equals(OM_CountObservation)
-                                 || observationType.equals(OM_CategoryObservation) ||
-                                 observationType.equals(OM_Observation)
-                                 || observationType.equals(OM_TruthObservation), INVALID_INLINE_ENTITY + obsType);
-            Assert.notNull(unitOfMeasurement, INVALID_INLINE_ENTITY + "unitOfMeasurement");
+            Assert.notNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
+            Assert.notNull(description, INVALID_INLINE_ENTITY_MISSING + "description");
+            Assert.notNull(observationType, INVALID_INLINE_ENTITY_MISSING + obsType);
+            Assert.state(observationType.equals(OM_Measurement)
+                                 || observationType.equals(OM_CountObservation)
+                                 || observationType.equals(OM_CategoryObservation)
+                                 || observationType.equals(OM_Observation)
+                                 || observationType.equals(OM_TruthObservation),
+                         INVALID_INLINE_ENTITY_INVALID_VALUE + obsType);
+            Assert.notNull(unitOfMeasurement, INVALID_INLINE_ENTITY_MISSING + "unitOfMeasurement");
             // Check if we have special null-unit
             if (unitOfMeasurement.name != null) {
-                Assert.notNull(unitOfMeasurement.name, INVALID_INLINE_ENTITY + uomName);
-                Assert.notNull(unitOfMeasurement.symbol, INVALID_INLINE_ENTITY + uomSymbol);
-                Assert.notNull(unitOfMeasurement.definition, INVALID_INLINE_ENTITY + uomDef);
+                Assert.notNull(unitOfMeasurement.name, INVALID_INLINE_ENTITY_MISSING + uomName);
+                Assert.notNull(unitOfMeasurement.symbol, INVALID_INLINE_ENTITY_MISSING + uomSymbol);
+                Assert.notNull(unitOfMeasurement.definition, INVALID_INLINE_ENTITY_MISSING + uomDef);
             } else {
-                Assert.isNull(unitOfMeasurement.name, INVALID_INLINE_ENTITY + uomName);
-                Assert.isNull(unitOfMeasurement.symbol, INVALID_INLINE_ENTITY + uomSymbol);
-                Assert.isNull(unitOfMeasurement.definition, INVALID_INLINE_ENTITY + uomDef);
+                Assert.isNull(unitOfMeasurement.name, INVALID_INLINE_ENTITY_MISSING + uomName);
+                Assert.isNull(unitOfMeasurement.symbol, INVALID_INLINE_ENTITY_MISSING + uomSymbol);
+                Assert.isNull(unitOfMeasurement.definition, INVALID_INLINE_ENTITY_MISSING + uomDef);
             }
             return createPostEntity();
         case PATCH:
@@ -248,7 +250,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
         } else if (backReference instanceof JSONThing) {
             self.setThing(((JSONThing) backReference).getEntity());
         } else {
-            Assert.notNull(null, INVALID_INLINE_ENTITY + "Thing");
+            Assert.notNull(null, INVALID_INLINE_ENTITY_MISSING + "Thing");
         }
 
         if (Sensor != null) {
@@ -256,7 +258,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
         } else if (backReference instanceof JSONSensor) {
             self.setProcedure(((JSONSensor) backReference).getEntity());
         } else {
-            Assert.notNull(null, INVALID_INLINE_ENTITY + "Sensor");
+            Assert.notNull(null, INVALID_INLINE_ENTITY_MISSING + "Sensor");
         }
 
         if (ObservedProperty != null) {
@@ -265,7 +267,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
         } else if (backReference instanceof JSONObservedProperty) {
             self.setObservableProperty(((JSONObservedProperty) backReference).getEntity());
         } else {
-            Assert.notNull(null, INVALID_INLINE_ENTITY + "ObservedProperty");
+            Assert.notNull(null, INVALID_INLINE_ENTITY_MISSING + "ObservedProperty");
         }
 
         if (Observations != null) {

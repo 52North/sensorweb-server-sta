@@ -66,7 +66,7 @@ public class JSONHistoricalLocation extends JSONBase.JSONwithIdTime<HistoricalLo
     public HistoricalLocationEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
         case FULL:
-            Assert.notNull(date, INVALID_INLINE_ENTITY + "time");
+            Assert.notNull(date, INVALID_INLINE_ENTITY_MISSING + "time");
 
             self.setIdentifier(identifier);
             self.setStaIdentifier(identifier);
@@ -77,7 +77,7 @@ public class JSONHistoricalLocation extends JSONBase.JSONwithIdTime<HistoricalLo
             } else if (backReference instanceof JSONThing) {
                 self.setThing(((JSONThing) backReference).getEntity());
             } else {
-                Assert.notNull(null, INVALID_INLINE_ENTITY + "Thing");
+                Assert.notNull(null, INVALID_INLINE_ENTITY_MISSING + "Thing");
             }
 
             if (Locations != null) {
@@ -88,7 +88,7 @@ public class JSONHistoricalLocation extends JSONBase.JSONwithIdTime<HistoricalLo
             } else if (backReference instanceof JSONLocation) {
                 self.setLocations(Collections.singleton(((JSONLocation) backReference).getEntity()));
             } else {
-                Assert.notNull(null, INVALID_INLINE_ENTITY + "Location");
+                Assert.notNull(null, INVALID_INLINE_ENTITY_MISSING + "Location");
             }
 
             return self;

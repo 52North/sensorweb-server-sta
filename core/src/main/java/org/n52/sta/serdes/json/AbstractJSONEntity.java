@@ -33,9 +33,12 @@ public interface AbstractJSONEntity {
     String INVALID_REFERENCED_ENTITY =
             "Invalid Entity. Only @iot.id may be present when referencing an existing entity!";
 
-    String INVALID_INLINE_ENTITY =
+    String INVALID_INLINE_ENTITY_MISSING =
             "Invalid Entity. Not all required properties present! Missing: ";
 
+    String INVALID_INLINE_ENTITY_INVALID_VALUE =
+            "Invalid Entity. Invalid Value: ";
+
     String INVALID_BACKREFERENCE =
-            "Invalid nesting of Entites!";
+            "Invalid nesting of Entities!";
 }

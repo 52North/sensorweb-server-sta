@@ -55,9 +55,9 @@ public class JSONObservedProperty extends JSONBase.JSONwithIdNameDescription<Obs
     public ObservablePropertyEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
             case FULL:
-                Assert.notNull(name, INVALID_INLINE_ENTITY + "name");
-                Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
-                Assert.notNull(definition, INVALID_INLINE_ENTITY + "definition");
+                Assert.notNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
+                Assert.notNull(description, INVALID_INLINE_ENTITY_MISSING + "description");
+                Assert.notNull(definition, INVALID_INLINE_ENTITY_MISSING + "definition");
 
                 self.setIdentifier(definition);
                 self.setStaIdentifier(identifier);

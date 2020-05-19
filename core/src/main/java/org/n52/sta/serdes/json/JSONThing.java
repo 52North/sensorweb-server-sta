@@ -58,8 +58,8 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
     public PlatformEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
         case FULL:
-            Assert.notNull(name, INVALID_INLINE_ENTITY + "name");
-            Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
+            Assert.notNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
+            Assert.notNull(description, INVALID_INLINE_ENTITY_MISSING + "description");
 
             self.setIdentifier(identifier);
             self.setStaIdentifier(identifier);

@@ -82,20 +82,20 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
         GeoJsonReader reader;
         switch (type) {
         case FULL:
-            Assert.notNull(name, INVALID_INLINE_ENTITY + "name");
-            Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
-            Assert.notNull(encodingType, INVALID_INLINE_ENTITY + "encodingType");
+            Assert.notNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
+            Assert.notNull(description, INVALID_INLINE_ENTITY_MISSING + "description");
+            Assert.notNull(encodingType, INVALID_INLINE_ENTITY_MISSING + "encodingType");
             Assert.notNull(encodingType, INVALID_ENCODINGTYPE);
             Assert.isTrue(Objects.equals(encodingType, ENCODINGTYPE_GEOJSON), INVALID_ENCODINGTYPE);
 
-            Assert.notNull(location, INVALID_INLINE_ENTITY + "location");
+            Assert.notNull(location, INVALID_INLINE_ENTITY_MISSING + "location");
             //TODO: check what is actually allowed here.
             if (location.has(GEOMETRY)) {
-                Assert.isTrue("Feature".equals(location.get(TYPE).asText()), INVALID_INLINE_ENTITY + LOCATION_TYPE);
-                Assert.notNull(location.get(GEOMETRY), INVALID_INLINE_ENTITY + LOCATION_GEOM);
+                Assert.isTrue("Feature".equals(location.get(TYPE).asText()), INVALID_INLINE_ENTITY_MISSING + LOCATION_TYPE);
+                Assert.notNull(location.get(GEOMETRY), INVALID_INLINE_ENTITY_MISSING + LOCATION_GEOM);
             } else {
-                Assert.isTrue("Point".equals(location.get(TYPE).asText()), INVALID_INLINE_ENTITY + LOCATION_TYPE);
-                Assert.notNull(location.get(COORDINATES), INVALID_INLINE_ENTITY + LOCATION_GEOM);
+                Assert.isTrue("Point".equals(location.get(TYPE).asText()), INVALID_INLINE_ENTITY_MISSING + LOCATION_TYPE);
+                Assert.notNull(location.get(COORDINATES), INVALID_INLINE_ENTITY_MISSING + LOCATION_GEOM);
             }
             self.setIdentifier(identifier);
             self.setStaIdentifier(identifier);

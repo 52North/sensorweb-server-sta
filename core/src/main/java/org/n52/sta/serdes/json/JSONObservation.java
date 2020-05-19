@@ -76,7 +76,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
     public ObservationEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
         case FULL:
-            Assert.notNull(result, INVALID_INLINE_ENTITY + "result");
+            Assert.notNull(result, INVALID_INLINE_ENTITY_MISSING + "result");
             return createPostEntity();
         case PATCH:
             return createPatchEntity();
@@ -200,7 +200,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
         } else if (backReference instanceof JSONDatastream) {
             self.setDatastream(((JSONDatastream) backReference).getEntity());
         } else {
-            Assert.notNull(null, INVALID_INLINE_ENTITY + "Datastream");
+            Assert.notNull(null, INVALID_INLINE_ENTITY_MISSING + "Datastream");
         }
 
         // Link to FOI

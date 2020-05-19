@@ -67,10 +67,10 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorEntity>
     public SensorEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
         case FULL:
-            Assert.notNull(name, INVALID_INLINE_ENTITY + "name");
-            Assert.notNull(description, INVALID_INLINE_ENTITY + "description");
-            Assert.notNull(encodingType, INVALID_INLINE_ENTITY + "encodingType");
-            Assert.notNull(metadata, INVALID_INLINE_ENTITY + "metadata");
+            Assert.notNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
+            Assert.notNull(description, INVALID_INLINE_ENTITY_MISSING + "description");
+            Assert.notNull(encodingType, INVALID_INLINE_ENTITY_MISSING + "encodingType");
+            Assert.notNull(metadata, INVALID_INLINE_ENTITY_MISSING + "metadata");
             self.setIdentifier(identifier);
             self.setStaIdentifier(identifier);
             self.setName(name);
