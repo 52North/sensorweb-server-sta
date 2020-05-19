@@ -108,6 +108,16 @@ public class DatasetQuerySpecifications {
     }
 
     /**
+     * Matches datasets having OMObservationType with given id.
+     *
+     * @param id the id to match
+     * @return a specification
+     */
+    public Specification<DatasetEntity> matchOmObservationTypeId(final Long id) {
+        return (root, query, builder) -> builder.equal(root.get("omObservationType"), id);
+    }
+
+    /**
      * Matches datasets having platform with given id.
      *
      * @param id the id to match

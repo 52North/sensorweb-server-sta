@@ -491,11 +491,12 @@ public class ObservationService extends
         dataset.setPlatform(datastream.getThing());
         dataset.setUnit(datastream.getUnit());
         dataset.setOmObservationType(datastream.getObservationType());
-        Specification<DatasetEntity> query = dQS.matchProcedureIdentifier(datastream.getProcedure().getIdentifier())
-                                                .and(dQS.matchPhenomenaIdentifier(datastream.getObservableProperty()
-                                                                                            .getIdentifier())
-                                                        .and(dQS.matchFeatureIdentifier(feature.getIdentifier()))
-                                                        .and(dQS.matchOfferingsIdentifier(offering.getIdentifier())));
+        Specification<DatasetEntity> query =
+                dQS.matchProcedureIdentifier(datastream.getProcedure().getIdentifier())
+                   .and(dQS.matchPhenomenaIdentifier(datastream.getObservableProperty().getIdentifier())
+                           .and(dQS.matchFeatureIdentifier(feature.getIdentifier()))
+                           .and(dQS.matchOfferingsIdentifier(offering.getIdentifier()))
+                           .and(dQS.matchOmObservationTypeId(datastream.getObservationType().getId())));
         synchronized (getLock(datastream.getStaIdentifier())) {
             Optional<DatasetEntity> queried =
                     datasetRepository.findOne(query,
