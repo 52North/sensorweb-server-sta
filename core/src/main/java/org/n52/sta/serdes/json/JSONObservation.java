@@ -38,7 +38,6 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.geojson.GeoJsonReader;
-import org.n52.series.db.beans.GeometryEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.parameter.ParameterJsonEntity;
 import org.n52.series.db.beans.sta.ObservationEntity;
@@ -248,12 +247,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
                     JsonNode jsonNode = param.get(VALUE);
                     GeoJsonReader reader = new GeoJsonReader(factory);
                     try {
-                        GeometryEntity geometryEntity = new GeometryEntity();
-                        geometryEntity.setGeometry(reader.read(jsonNode.toString()));
-                        //TODO: implement geometryEntity on ObservationEntity
-                        /*
-                        self.setGeometryEntity(geometryEntity);
-                         */
+                        self.setSamplingGeometry(reader.read(jsonNode.toString()));
                     } catch (ParseException e) {
                         Assert.notNull(null, "Could not parse" + e.getMessage());
                     }
