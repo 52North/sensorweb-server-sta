@@ -155,7 +155,7 @@ public class LocationService
     @Override
     public LocationEntity createEntity(LocationEntity newLocation) throws STACRUDException {
         LocationEntity location = newLocation;
-        if (!location.isProcesssed()) {
+        if (!location.isProcessed()) {
             if (location.getStaIdentifier() != null && !location.isSetName()) {
                 Optional<LocationEntity> optionalEntity =
                         getRepository().findByStaIdentifier(location.getStaIdentifier());
@@ -180,7 +180,7 @@ public class LocationService
                 if (getRepository().existsByStaIdentifier(location.getStaIdentifier())) {
                     throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
                 }
-                location.setProcesssed(true);
+                location.setProcessed(true);
                 checkLocationEncoding(location);
                 location = getRepository().save(location);
                 processThings(location);

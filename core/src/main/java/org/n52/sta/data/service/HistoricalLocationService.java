@@ -149,7 +149,7 @@ public class HistoricalLocationService
     public HistoricalLocationEntity createEntity(HistoricalLocationEntity historicalLocation)
             throws STACRUDException {
         synchronized (getLock(historicalLocation.getStaIdentifier())) {
-            if (!historicalLocation.isProcesssed()) {
+            if (!historicalLocation.isProcessed()) {
                 check(historicalLocation);
                 HistoricalLocationEntity created = processThing(historicalLocation);
                 processLocations(created);
@@ -170,7 +170,7 @@ public class HistoricalLocationService
         PlatformEntity thing = getThingService().createOrUpdate(historicalLocation.getThing());
         historicalLocation.setThing(thing);
         HistoricalLocationEntity created = getRepository().save(historicalLocation);
-        created.setProcesssed(true);
+        created.setProcessed(true);
         getThingService().updateEntity(thing.addHistoricalLocation(created));
         return created.setLocations(historicalLocation.getLocations());
     }

@@ -77,6 +77,7 @@ public class ObservationSerDes {
             this.entity = entity;
         }
 
+        @Override
         public ObservationEntity getEntity() {
             return entity;
         }
@@ -196,11 +197,11 @@ public class ObservationSerDes {
                             }
                             break;
                         case ObservationEntityDefinition.FEATURE_OF_INTEREST:
-                            if (observation.getFeatureOfInterest() == null) {
+                            if (observation.getFeature() == null) {
                                 writeNavigationProp(gen, navigationProperty, observation.getStaIdentifier());
                             } else {
                                 gen.writeFieldName(navigationProperty);
-                                writeNestedEntity(observation.getFeatureOfInterest(),
+                                writeNestedEntity(observation.getFeature(),
                                                   fieldsToExpand.get(navigationProperty),
                                                   gen,
                                                   serializers);

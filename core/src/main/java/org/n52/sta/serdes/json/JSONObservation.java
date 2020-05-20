@@ -156,7 +156,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
 
         // Link to FOI
         if (FeatureOfInterest != null) {
-            self.setFeatureOfInterest(FeatureOfInterest.toEntity(JSONBase.EntityType.REFERENCE));
+            self.setFeature(FeatureOfInterest.toEntity(JSONBase.EntityType.REFERENCE));
         }
 
         return self;
@@ -219,10 +219,10 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
 
         // Link to FOI
         if (FeatureOfInterest != null) {
-            self.setFeatureOfInterest(
+            self.setFeature(
                     FeatureOfInterest.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
         } else if (backReference instanceof JSONFeatureOfInterest) {
-            self.setFeatureOfInterest(((JSONFeatureOfInterest) backReference).getEntity());
+            self.setFeature(((JSONFeatureOfInterest) backReference).getEntity());
         }
 
         return self;

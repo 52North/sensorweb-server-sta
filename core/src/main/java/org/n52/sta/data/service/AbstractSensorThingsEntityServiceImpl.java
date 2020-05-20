@@ -38,6 +38,7 @@ import org.n52.series.db.beans.HibernateRelations.HasName;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
+import org.n52.series.db.beans.sta.AbstractObservationEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
@@ -540,9 +541,9 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     }
 
     @SuppressWarnings("unchecked")
-    protected AbstractSensorThingsEntityServiceImpl<?, ObservationEntity<?>, ObservationEntity<?>>
+    protected AbstractSensorThingsEntityServiceImpl<?, AbstractObservationEntity<?>, AbstractObservationEntity<?>>
     getObservationService() {
-        return (AbstractSensorThingsEntityServiceImpl<?, ObservationEntity<?>, ObservationEntity<?>>)
+        return (AbstractSensorThingsEntityServiceImpl<?, AbstractObservationEntity<?>, AbstractObservationEntity<?>>)
                 getEntityService(EntityTypes.Observation);
 
     }

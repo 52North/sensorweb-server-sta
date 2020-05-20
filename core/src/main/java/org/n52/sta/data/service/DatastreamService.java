@@ -36,6 +36,7 @@ import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.UnitEntity;
+import org.n52.series.db.beans.sta.AbstractObservationEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.shetland.filter.ExpandFilter;
@@ -206,7 +207,7 @@ public class DatastreamService
     @Override
     public DatastreamEntity createEntity(DatastreamEntity datastream) throws STACRUDException {
         DatastreamEntity entity = datastream;
-        if (!datastream.isProcesssed()) {
+        if (!datastream.isProcessed()) {
             // Getting by reference
             if (datastream.getStaIdentifier() != null && !datastream.isSetName()) {
                 Optional<DatastreamEntity> optionalEntity =
@@ -227,7 +228,7 @@ public class DatastreamService
                 if (getRepository().existsByStaIdentifier(datastream.getStaIdentifier())) {
                     throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
                 }
-                datastream.setProcesssed(true);
+                datastream.setProcessed(true);
                 checkObservationType(datastream);
                 checkUnit(datastream);
                 datastream.setObservableProperty(getObservedPropertyService()
@@ -446,14 +447,14 @@ public class DatastreamService
     }
 
     private DatastreamEntity processObservation(DatastreamEntity datastream,
-                                                Set<ObservationEntity> observations) throws STACRUDException {
+                                                Set<AbstractObservationEntity> observations) throws STACRUDException {
         if (observations != null && !observations.isEmpty()) {
             Set<DatasetEntity> datasets = new LinkedHashSet<>();
             if (datastream.getDatasets() != null) {
                 datasets.addAll(datastream.getDatasets());
             }
-            for (ObservationEntity observation : observations) {
-                ObservationEntity<?> data = getObservationService().createEntity(observation);
+            for (AbstractObservationEntity observation : observations) {
+                AbstractObservationEntity<?> data = getObservationService().createEntity(observation);
                 if (data != null) {
                     datasets.add(data.getDataset());
                 }
