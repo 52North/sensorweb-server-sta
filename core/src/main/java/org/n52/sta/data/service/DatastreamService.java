@@ -206,7 +206,7 @@ public class DatastreamService
     @Override
     public DatastreamEntity createEntity(DatastreamEntity datastream) throws STACRUDException {
         DatastreamEntity entity = datastream;
-        if (!datastream.isProcesssed()) {
+        if (!datastream.isProcessed()) {
             // Getting by reference
             if (datastream.getStaIdentifier() != null && !datastream.isSetName()) {
                 Optional<DatastreamEntity> optionalEntity =
@@ -227,7 +227,7 @@ public class DatastreamService
                 if (getRepository().existsByStaIdentifier(datastream.getStaIdentifier())) {
                     throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
                 }
-                datastream.setProcesssed(true);
+                datastream.setProcessed(true);
                 checkObservationType(datastream);
                 checkUnit(datastream);
                 datastream.setObservableProperty(getObservedPropertyService()

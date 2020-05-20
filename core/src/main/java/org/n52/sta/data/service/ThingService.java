@@ -152,7 +152,7 @@ public class ThingService
     @Override
     public PlatformEntity createEntity(PlatformEntity newThing) throws STACRUDException {
         PlatformEntity thing = newThing;
-        if (!thing.isProcesssed()) {
+        if (!thing.isProcessed()) {
             if (thing.getStaIdentifier() != null && !thing.isSetName()) {
                 Optional<PlatformEntity> optionalEntity =
                         getRepository().findByStaIdentifier(thing.getStaIdentifier());
@@ -176,7 +176,7 @@ public class ThingService
                 if (getRepository().existsByStaIdentifier(thing.getStaIdentifier())) {
                     throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
                 } else {
-                    thing.setProcesssed(true);
+                    thing.setProcessed(true);
                     processLocations(thing, thing.getLocations());
                     thing = getRepository().intermediateSave(thing);
                     processHistoricalLocations(thing);
@@ -325,7 +325,7 @@ public class ThingService
             historicalLocation.setIdentifier(UUID.randomUUID().toString());
             historicalLocation.setThing(thing);
             historicalLocation.setTime(DateTime.now().toDate());
-            historicalLocation.setProcesssed(true);
+            historicalLocation.setProcessed(true);
             HistoricalLocationEntity createdHistoricalLocation =
                     getHistoricalLocationService().createOrUpdate(historicalLocation);
             if (createdHistoricalLocation != null) {
