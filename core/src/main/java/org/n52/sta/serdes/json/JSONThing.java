@@ -58,6 +58,7 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
     public PlatformEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
         case FULL:
+            parseReferencedFrom();
             Assert.notNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
             Assert.notNull(description, INVALID_INLINE_ENTITY_MISSING + "description");
 
@@ -102,6 +103,7 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
 
             return self;
         case PATCH:
+            parseReferencedFrom();
             self.setIdentifier(identifier);
             self.setStaIdentifier(identifier);
             self.setName(name);
@@ -138,6 +140,21 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
             return self;
         default:
             return null;
+        }
+    }
+
+    @Override protected void parseReferencedFrom() {
+        if (referencedFromType != null) {
+            switch (referencedFromType) {
+            case "Locations":
+                Assert.isNull(Locations, INVALID_DUPLICATE_REFERENCE);
+                this.Locations = new JSONLocation[1];
+                this.Locations[0] = new JSONLocation();
+                this.Locations[0].identifier = referencedFromID;
+                return;
+            default:
+                throw new IllegalArgumentException(INVALID_BACKREFERENCE);
+            }
         }
     }
 }

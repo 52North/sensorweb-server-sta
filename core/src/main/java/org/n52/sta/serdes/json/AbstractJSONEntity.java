@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.serdes.json;
 
 public interface AbstractJSONEntity {
@@ -41,4 +42,8 @@ public interface AbstractJSONEntity {
 
     String INVALID_BACKREFERENCE =
             "Invalid nesting of Entities!";
+
+    String INVALID_DUPLICATE_REFERENCE =
+            "Duplicate references to related Entity provided! Either specify reference to related Entity in JSON " +
+                    "Payload OR inside Request URL";
 }

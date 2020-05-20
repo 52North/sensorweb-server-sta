@@ -29,6 +29,7 @@
 
 package org.n52.sta.utils;
 
+import org.geolatte.geom.M;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
@@ -63,6 +64,12 @@ public interface STARequestUtils extends StaConstants {
     QueryOptionsFactory QUERY_OPTIONS_FACTORY = new QueryOptionsFactory();
 
     String INTERNAL_CLIENT_ID = "POC";
+
+    // Used to store information about referenced entity during related POST
+    String REFERENCED_FROM_TYPE = "referencedFromType";
+
+    // Used to store information about referenced entity during related POST
+    String REFERENCED_FROM_ID = "referencedFromID";
 
     // Used for identifying/referencing source Entity Type
     // e.g. "Datastreams" in /Datastreams(52)/Thing

@@ -121,10 +121,11 @@ public class STACollectionRequestHandler implements STARequestUtils {
     }
 
     /**
-     * Matches all requests on Entities not referenced directly via id but via referenced entity.
+     * Matches all requests on Entities not referenced directly via id but via related entity.
      * e.g. /Datastreams(52)/Thing
      *
-     * @param entity  composite of entity and referenced entity. Automatically set by Spring via @PathVariable
+     * @param entity  requested entity. Automatically set by Spring via @PathVariable
+     * @param target  related entity. Automatically set by Spring via @PathVariable
      * @param request full request
      * @return CollectionWrapper Requested collection
      */

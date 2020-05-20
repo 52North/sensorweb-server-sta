@@ -76,9 +76,11 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
     public ObservationEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
         case FULL:
+            parseReferencedFrom();
             Assert.notNull(result, INVALID_INLINE_ENTITY_MISSING + "result");
             return createPostEntity();
         case PATCH:
+            parseReferencedFrom();
             return createPatchEntity();
         case REFERENCE:
             Assert.isNull(phenomenonTime, INVALID_REFERENCED_ENTITY);
@@ -93,6 +95,19 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
             return self;
         default:
             return null;
+        }
+    }
+
+    @Override
+    protected void parseReferencedFrom() {
+        if (referencedFromType != null) {
+            if ("Datastreams".equals(referencedFromType)) {
+                Assert.isNull(Datastream, INVALID_DUPLICATE_REFERENCE);
+                this.Datastream = new JSONDatastream();
+                this.Datastream.identifier = referencedFromID;
+                return;
+            }
+            throw new IllegalArgumentException(INVALID_BACKREFERENCE);
         }
     }
 

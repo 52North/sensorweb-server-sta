@@ -66,6 +66,7 @@ public class JSONHistoricalLocation extends JSONBase.JSONwithIdTime<HistoricalLo
     public HistoricalLocationEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
         case FULL:
+            parseReferencedFrom();
             Assert.notNull(date, INVALID_INLINE_ENTITY_MISSING + "time");
 
             self.setIdentifier(identifier);
@@ -93,6 +94,7 @@ public class JSONHistoricalLocation extends JSONBase.JSONwithIdTime<HistoricalLo
 
             return self;
         case PATCH:
+            parseReferencedFrom();
             self.setIdentifier(identifier);
             self.setStaIdentifier(identifier);
             self.setTime(date);
@@ -118,6 +120,26 @@ public class JSONHistoricalLocation extends JSONBase.JSONwithIdTime<HistoricalLo
             return self;
         default:
             return null;
+        }
+    }
+
+    @Override protected void parseReferencedFrom() {
+        if (referencedFromType != null) {
+            switch (referencedFromType) {
+            case "Locations":
+                Assert.isNull(Locations, INVALID_DUPLICATE_REFERENCE);
+                this.Locations = new JSONLocation[1];
+                this.Locations[0] = new JSONLocation();
+                this.Locations[0].identifier = referencedFromID;
+                return;
+            case "Things":
+                Assert.isNull(Thing, INVALID_DUPLICATE_REFERENCE);
+                this.Thing = new JSONThing();
+                this.Thing.identifier = referencedFromID;
+                return;
+            default:
+                throw new IllegalArgumentException(INVALID_BACKREFERENCE);
+            }
         }
     }
 

@@ -32,6 +32,7 @@ package org.n52.sta.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.n52.series.db.beans.IdEntity;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
@@ -71,18 +72,68 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
         this.mapper = mapper;
     }
 
+    /**
+     * Matches all POST requests on Collections referenced directly
+     * e.g. ../Datastreams
+     *
+     * @param collectionName name of entity. Automatically set by Spring via @PathVariable
+     * @param body           request Body. Automatically set by Spring via @RequestBody
+     */
     @PostMapping(
             consumes = "application/json",
             value = "/{collectionName:" + BASE_COLLECTION_REGEX + "$}",
             produces = "application/json")
     @SuppressWarnings("unchecked")
-    public ElementWithQueryOptions<?> handlePost(@PathVariable String collectionName,
-                                                 @RequestBody String body)
+    public ElementWithQueryOptions<?> handlePostDirect(@PathVariable String collectionName,
+                                                       @RequestBody String body)
             throws IOException, STACRUDException {
 
         Class<T> clazz = collectionNameToClass(collectionName);
         return ((AbstractSensorThingsEntityService<?, T, ? extends T>)
                 serviceRepository.getEntityService(collectionName)).create(mapper.readValue(body, clazz));
+    }
+
+    /**
+     * Matches all POST requests on Collections not referenced directly via id but via referenced entity.
+     * e.g. ../Datastreams(52)/Observations
+     *
+     * @param entity  name and id of related entity. Automatically set by Spring via @PathVariable
+     * @param target  type of entity POSTed. Automatically set by Spring via @PathVariable
+     * @param body    request Body. Automatically set by Spring via @RequestBody
+     * @param request full request
+     */
+    @PostMapping(
+            value = {
+                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_THING_PATH_VARIABLE,
+                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_LOCATION_PATH_VARIABLE,
+                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH_VARIABLE,
+                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH_VARIABLE,
+                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_SENSOR_PATH_VARIABLE,
+                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
+                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_HIST_LOCATION_PATH_VARIABLE
+            },
+            produces = "application/json"
+    )
+    @SuppressWarnings("unchecked")
+    public ElementWithQueryOptions<?> handlePostRelated(@PathVariable String entity,
+                                                        @PathVariable String target,
+                                                        @RequestBody String body,
+                                                        HttpServletRequest request)
+            throws Exception {
+        String url = request.getRequestURI().substring(request.getContextPath().length());
+        validateResource(url, serviceRepository);
+
+        // Add information about the related Entity to json payload to be used during deserialization
+        String[] split = splitId(entity);
+        String sourceType = split[0];
+        String sourceId = split[1].replace(")", "");
+        ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
+        jsonBody.put(REFERENCED_FROM_TYPE, sourceType);
+        jsonBody.put(REFERENCED_FROM_ID, sourceId);
+
+        Class<T> clazz = collectionNameToClass(target);
+        return ((AbstractSensorThingsEntityService<?, T, ? extends T>)
+                serviceRepository.getEntityService(target)).create(mapper.readValue(jsonBody.toString(), clazz));
     }
 
     /**

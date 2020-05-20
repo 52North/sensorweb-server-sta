@@ -93,10 +93,35 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
         self = new DatastreamEntity();
     }
 
+    @Override protected void parseReferencedFrom() {
+        if (referencedFromType != null) {
+            switch (referencedFromType) {
+            case "Sensors":
+                Assert.isNull(Sensor, INVALID_DUPLICATE_REFERENCE);
+                this.Sensor = new JSONSensor();
+                this.Sensor.identifier = referencedFromID;
+                return;
+            case "ObservedProperties":
+                Assert.isNull(ObservedProperty, INVALID_DUPLICATE_REFERENCE);
+                this.ObservedProperty = new JSONObservedProperty();
+                this.ObservedProperty.identifier = referencedFromID;
+                return;
+            case "Things":
+                Assert.isNull(Thing, INVALID_DUPLICATE_REFERENCE);
+                this.Thing = new JSONThing();
+                this.Thing.identifier = referencedFromID;
+                return;
+            default:
+                throw new IllegalArgumentException(INVALID_BACKREFERENCE);
+            }
+        }
+    }
+
     @Override
     public DatastreamEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
         case FULL:
+            parseReferencedFrom();
             Assert.notNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
             Assert.notNull(description, INVALID_INLINE_ENTITY_MISSING + "description");
             Assert.notNull(observationType, INVALID_INLINE_ENTITY_MISSING + obsType);
@@ -119,6 +144,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
             }
             return createPostEntity();
         case PATCH:
+            parseReferencedFrom();
             return createPatchEntity();
 
         case REFERENCE:
