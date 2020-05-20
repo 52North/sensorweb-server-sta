@@ -126,13 +126,6 @@ public class HistoricalLocationSerDes {
             // navigation properties
             for (String navigationProperty : HistoricalLocationEntityDefinition.NAVIGATION_PROPERTIES) {
                 if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
-                    writeNavigationProp(gen, navigationProperty, histLoc.getStaIdentifier());
-                }
-            }
-
-            // navigation properties
-            for (String navigationProperty : HistoricalLocationEntityDefinition.NAVIGATION_PROPERTIES) {
-                if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
                     if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
                         writeNavigationProp(gen, navigationProperty, histLoc.getStaIdentifier());
                     } else {
