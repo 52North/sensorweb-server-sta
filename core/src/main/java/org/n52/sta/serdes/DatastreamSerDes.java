@@ -189,12 +189,12 @@ public class DatastreamSerDes {
                     if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
                         writeNavigationProp(gen, navigationProperty, datastream.getStaIdentifier());
                     } else {
-                        gen.writeFieldName(navigationProperty);
                         switch (navigationProperty) {
                         case STAEntityDefinition.OBSERVATIONS:
                             if (datastream.getObservations() == null) {
                                 writeNavigationProp(gen, navigationProperty, datastream.getStaIdentifier());
                             } else {
+                                gen.writeFieldName(navigationProperty);
                                 writeNestedCollection(Collections.unmodifiableSet(datastream.getObservations()),
                                                       fieldsToExpand.get(navigationProperty),
                                                       gen,
@@ -202,9 +202,10 @@ public class DatastreamSerDes {
                             }
                             break;
                         case STAEntityDefinition.OBSERVED_PROPERTY:
-                            if (datastream.getObservations() == null) {
+                            if (datastream.getObservableProperty() == null) {
                                 writeNavigationProp(gen, navigationProperty, datastream.getStaIdentifier());
                             } else {
+                                gen.writeFieldName(navigationProperty);
                                 writeNestedEntity(datastream.getObservableProperty(),
                                                   fieldsToExpand.get(navigationProperty),
                                                   gen,
@@ -212,9 +213,10 @@ public class DatastreamSerDes {
                             }
                             break;
                         case STAEntityDefinition.THING:
-                            if (datastream.getObservations() == null) {
+                            if (datastream.getThing() == null) {
                                 writeNavigationProp(gen, navigationProperty, datastream.getStaIdentifier());
                             } else {
+                                gen.writeFieldName(navigationProperty);
                                 writeNestedEntity(datastream.getThing(),
                                                   fieldsToExpand.get(navigationProperty),
                                                   gen,
@@ -222,9 +224,10 @@ public class DatastreamSerDes {
                             }
                             break;
                         case STAEntityDefinition.SENSOR:
-                            if (datastream.getObservations() == null) {
+                            if (datastream.getProcedure() == null) {
                                 writeNavigationProp(gen, navigationProperty, datastream.getStaIdentifier());
                             } else {
+                                gen.writeFieldName(navigationProperty);
                                 writeNestedEntity(datastream.getProcedure(),
                                                   fieldsToExpand.get(navigationProperty),
                                                   gen,
