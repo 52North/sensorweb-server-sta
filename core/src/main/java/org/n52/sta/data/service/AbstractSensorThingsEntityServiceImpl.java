@@ -90,6 +90,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     // protected static final String IDENTIFIER = "identifier";
     protected static final String STAIDENTIFIER = "staIdentifier";
     protected static final String ENCODINGTYPE = "encodingType";
+    protected static final String RESULT = "result";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSensorThingsEntityServiceImpl.class);
 
@@ -378,38 +379,43 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
      * Create {@link PageRequest}
      *
      * @param queryOptions           {@link QueryOptions} to create {@link PageRequest}
-     * @param defaultSortingProperty Teh defualt sorting property
      * @return {@link PageRequest} of type {@link OffsetLimitBasedPageRequest}
      */
-    OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions,
-                                                      String defaultSortingProperty) {
+    OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions) {
         long offset = queryOptions.hasSkipFilter() ? queryOptions.getSkipFilter().getValue() : 0;
-        Sort sort = Sort.by(Sort.Direction.ASC, defaultSortingProperty);
+        Sort sort;
         if (queryOptions.hasOrderByFilter()) {
-            boolean first = true;
-            for (OrderProperty sortProperty :
-                    queryOptions.getOrderByFilter().getSortProperties()) {
-                if (first) {
-                    sort = Sort.by(sortProperty.isSetSortOrder() &&
-                                           sortProperty.getSortOrder().equals(FilterConstants.SortOrder.DESC) ?
-                                           Sort.Direction.DESC : Sort.Direction.ASC,
-                                   checkPropertyName(sortProperty.getValueReference()));
-                    first = false;
-                } else {
-                    sort = sort.and(Sort.by(sortProperty.isSetSortOrder() &&
-                                                    sortProperty.getSortOrder().equals(FilterConstants.SortOrder.DESC) ?
-                                                    Sort.Direction.DESC : Sort.Direction.ASC,
-                                            checkPropertyName(sortProperty.getValueReference())));
-                }
+            sort = Sort.unsorted();
+            for (OrderProperty sortProperty : queryOptions.getOrderByFilter().getSortProperties()) {
+                Sort.Direction direction =
+                        sortProperty.isSetSortOrder() &&
+                                sortProperty.getSortOrder().equals(FilterConstants.SortOrder.DESC) ?
+                                Sort.Direction.DESC : Sort.Direction.ASC;
+                sort = sort.and(sortProperty.getValueReference().equals(RESULT) ? handleResultSort(direction) :
+                                        Sort.by(direction, checkPropertyName(sortProperty.getValueReference())));
             }
+        } else {
+            sort = Sort.by(Sort.Direction.ASC, STAIDENTIFIER);
         }
         return new OffsetLimitBasedPageRequest((int) offset,
                                                queryOptions.getTopFilter().getValue().intValue(),
                                                sort);
     }
 
-    protected OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions) {
-        return this.createPageableRequest(queryOptions, STAIDENTIFIER);
+    /**
+     * Sort Observation->Result with different valueTypes.
+     *
+     * @param direction sort direction. either ascending or descending
+     * @return Sort for results
+     */
+    private Sort handleResultSort(Sort.Direction direction) {
+        Sort sort;
+        sort = Sort.by(direction, ObservationEntity.PROPERTY_VALUE_BOOLEAN);
+        sort = sort.and(Sort.by(direction, ObservationEntity.PROPERTY_VALUE_CATEGORY));
+        sort = sort.and(Sort.by(direction, ObservationEntity.PROPERTY_VALUE_COUNT));
+        sort = sort.and(Sort.by(direction, ObservationEntity.PROPERTY_VALUE_TEXT));
+        sort = sort.and(Sort.by(direction, ObservationEntity.PROPERTY_VALUE_QUANTITY));
+        return sort;
     }
 
     /**

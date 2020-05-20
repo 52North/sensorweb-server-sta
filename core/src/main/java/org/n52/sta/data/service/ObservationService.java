@@ -277,8 +277,9 @@ public class ObservationService extends
         case "phenomenonTime":
             // TODO: proper ISO8601 comparison
             return ObservationEntity.PROPERTY_SAMPLING_TIME_END;
-        case "result":
-            return ObservationEntity.PROPERTY_VALUE;
+        // This is handled separately as result is split up over multiple columns
+        //case "result":
+        //    return "valueBoolean";
         default:
             return super.checkPropertyName(property);
         }
