@@ -235,7 +235,7 @@ public class ObservationService extends
                                                          STAEntityDefinition.OBSERVATIONS,
                                                          null,
                                                          expandItem.getQueryOptions());
-                    returned.setFeatureOfInterest(foi);
+                    returned.setFeature(foi);
                     break;
                 default:
                     throw new RuntimeException("This can never happen!");
@@ -518,7 +518,7 @@ public class ObservationService extends
 
     private AbstractFeatureEntity<?> checkFeature(ObservationEntity observation, DatastreamEntity datastream)
             throws STACRUDException {
-        if (!observation.hasFeatureOfInterest()) {
+        if (!observation.hasFeature()) {
             AbstractFeatureEntity<?> feature = null;
             for (LocationEntity location : datastream.getThing().getLocations()) {
                 if (feature == null) {
@@ -533,11 +533,11 @@ public class ObservationService extends
                 throw new STACRUDException("The observation to create is invalid." +
                                                    " Missing feature or thing.location!", HTTPStatus.BAD_REQUEST);
             }
-            observation.setFeatureOfInterest(feature);
+            observation.setFeature(feature);
         }
         AbstractFeatureEntity<?> feature = getFeatureOfInterestService()
-                .createEntity(observation.getFeatureOfInterest());
-        observation.setFeatureOfInterest(feature);
+                .createEntity(observation.getFeature());
+        observation.setFeature(feature);
         return feature;
     }
 

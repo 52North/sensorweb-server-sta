@@ -36,6 +36,7 @@ import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.UnitEntity;
+import org.n52.series.db.beans.sta.AbstractObservationEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.shetland.filter.ExpandFilter;
@@ -446,14 +447,14 @@ public class DatastreamService
     }
 
     private DatastreamEntity processObservation(DatastreamEntity datastream,
-                                                Set<ObservationEntity> observations) throws STACRUDException {
+                                                Set<AbstractObservationEntity> observations) throws STACRUDException {
         if (observations != null && !observations.isEmpty()) {
             Set<DatasetEntity> datasets = new LinkedHashSet<>();
             if (datastream.getDatasets() != null) {
                 datasets.addAll(datastream.getDatasets());
             }
-            for (ObservationEntity observation : observations) {
-                ObservationEntity<?> data = getObservationService().createEntity(observation);
+            for (AbstractObservationEntity observation : observations) {
+                AbstractObservationEntity<?> data = getObservationService().createEntity(observation);
                 if (data != null) {
                     datasets.add(data.getDataset());
                 }
