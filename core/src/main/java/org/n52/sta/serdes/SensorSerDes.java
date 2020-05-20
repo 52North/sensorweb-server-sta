@@ -156,13 +156,17 @@ public class SensorSerDes {
                     if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
                         writeNavigationProp(gen, navigationProperty, sensor.getStaIdentifier());
                     } else {
-                        gen.writeFieldName(navigationProperty);
                         switch (navigationProperty) {
                         case SensorEntityDefinition.DATASTREAMS:
-                            writeNestedCollection(Collections.unmodifiableSet(sensor.getDatastreams()),
-                                                  fieldsToExpand.get(navigationProperty),
-                                                  gen,
-                                                  serializers);
+                            if (sensor.getDatastreams() == null) {
+                                writeNavigationProp(gen, navigationProperty, sensor.getStaIdentifier());
+                            } else {
+                                gen.writeFieldName(navigationProperty);
+                                writeNestedCollection(Collections.unmodifiableSet(sensor.getDatastreams()),
+                                                      fieldsToExpand.get(navigationProperty),
+                                                      gen,
+                                                      serializers);
+                            }
                             break;
                         default:
                             throw new IllegalStateException("Unexpected value: " + navigationProperty);

@@ -66,17 +66,17 @@ public abstract class AbstractSTASerializer<T> extends StdSerializer<T> {
                              rootUrl + entitySetName + "(" + escaped + ")/" + navigationProperty);
     }
 
-    protected static void writeNestedEntity(Object expandedElement,
-                                            QueryOptions queryOptions,
-                                            JsonGenerator gen,
-                                            SerializerProvider serializers) throws IOException {
+    protected void writeNestedEntity(Object expandedElement,
+                                     QueryOptions queryOptions,
+                                     JsonGenerator gen,
+                                     SerializerProvider serializers) throws IOException {
         serializers.defaultSerializeValue(ElementWithQueryOptions.from(expandedElement, queryOptions), gen);
     }
 
-    protected static void writeNestedCollection(Set<Object> expandedElements,
-                                                QueryOptions queryOptions,
-                                                JsonGenerator gen,
-                                                SerializerProvider serializers) throws IOException {
+    protected void writeNestedCollection(Set<Object> expandedElements,
+                                         QueryOptions queryOptions,
+                                         JsonGenerator gen,
+                                         SerializerProvider serializers) throws IOException {
         serializers.defaultSerializeValue(
                 expandedElements
                         .stream()

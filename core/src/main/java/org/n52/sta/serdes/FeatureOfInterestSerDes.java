@@ -149,13 +149,17 @@ public class FeatureOfInterestSerDes {
                     if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
                         writeNavigationProp(gen, navigationProperty, feature.getStaIdentifier());
                     } else {
-                        gen.writeFieldName(navigationProperty);
                         switch (navigationProperty) {
                         case STAEntityDefinition.OBSERVATIONS:
-                            writeNestedCollection(Collections.unmodifiableSet(feature.getObservations()),
-                                                  fieldsToExpand.get(navigationProperty),
-                                                  gen,
-                                                  serializers);
+                            if (feature.getObservations() == null) {
+                                writeNavigationProp(gen, navigationProperty, feature.getStaIdentifier());
+                            } else {
+                                gen.writeFieldName(navigationProperty);
+                                writeNestedCollection(Collections.unmodifiableSet(feature.getObservations()),
+                                                      fieldsToExpand.get(navigationProperty),
+                                                      gen,
+                                                      serializers);
+                            }
                             break;
                         default:
                             throw new IllegalStateException("Unexpected value: " + navigationProperty);

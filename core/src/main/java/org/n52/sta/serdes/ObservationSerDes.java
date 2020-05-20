@@ -82,6 +82,7 @@ public class ObservationSerDes {
         }
     }
 
+
     public static class ObservationSerializer extends AbstractSTASerializer<ObservationWithQueryOptions> {
 
         private static final long serialVersionUID = -4575044340713191285L;
@@ -182,19 +183,28 @@ public class ObservationSerDes {
                     if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
                         writeNavigationProp(gen, navigationProperty, observation.getStaIdentifier());
                     } else {
-                        gen.writeFieldName(navigationProperty);
                         switch (navigationProperty) {
                         case ObservationEntityDefinition.DATASTREAM:
-                            writeNestedEntity(observation.getDatastream(),
-                                              fieldsToExpand.get(navigationProperty),
-                                              gen,
-                                              serializers);
+                            if (observation.getDatastream() == null) {
+                                writeNavigationProp(gen, navigationProperty, observation.getStaIdentifier());
+                            } else {
+                                gen.writeFieldName(navigationProperty);
+                                writeNestedEntity(observation.getDatastream(),
+                                                  fieldsToExpand.get(navigationProperty),
+                                                  gen,
+                                                  serializers);
+                            }
                             break;
                         case ObservationEntityDefinition.FEATURE_OF_INTEREST:
-                            writeNestedEntity(observation.getFeatureOfInterest(),
-                                              fieldsToExpand.get(navigationProperty),
-                                              gen,
-                                              serializers);
+                            if (observation.getFeatureOfInterest() == null) {
+                                writeNavigationProp(gen, navigationProperty, observation.getStaIdentifier());
+                            } else {
+                                gen.writeFieldName(navigationProperty);
+                                writeNestedEntity(observation.getFeatureOfInterest(),
+                                                  fieldsToExpand.get(navigationProperty),
+                                                  gen,
+                                                  serializers);
+                            }
                             break;
                         default:
                             throw new IllegalStateException("Unexpected value: " + navigationProperty);
@@ -262,7 +272,8 @@ public class ObservationSerDes {
 
         @Override
         public ObservationEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return new ObservationEntityPatch(p.readValueAs(JSONObservation.class).toEntity(JSONBase.EntityType.PATCH));
+            return new ObservationEntityPatch(p.readValueAs(JSONObservation.class)
+                                               .toEntity(JSONBase.EntityType.PATCH));
         }
     }
 }

@@ -61,6 +61,7 @@ public class DatastreamSerDes {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatastreamSerDes.class);
 
+
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     public static class DatastreamEntityPatch extends DatastreamEntity implements EntityPatch<DatastreamEntity> {
 
@@ -191,28 +192,44 @@ public class DatastreamSerDes {
                         gen.writeFieldName(navigationProperty);
                         switch (navigationProperty) {
                         case STAEntityDefinition.OBSERVATIONS:
-                            writeNestedCollection(Collections.unmodifiableSet(datastream.getObservations()),
+                            if (datastream.getObservations() == null) {
+                                writeNavigationProp(gen, navigationProperty, datastream.getStaIdentifier());
+                            } else {
+                                writeNestedCollection(Collections.unmodifiableSet(datastream.getObservations()),
+                                                      fieldsToExpand.get(navigationProperty),
+                                                      gen,
+                                                      serializers);
+                            }
+                            break;
+                        case STAEntityDefinition.OBSERVED_PROPERTY:
+                            if (datastream.getObservations() == null) {
+                                writeNavigationProp(gen, navigationProperty, datastream.getStaIdentifier());
+                            } else {
+                                writeNestedEntity(datastream.getObservableProperty(),
                                                   fieldsToExpand.get(navigationProperty),
                                                   gen,
                                                   serializers);
-                            break;
-                        case STAEntityDefinition.OBSERVED_PROPERTY:
-                            writeNestedEntity(datastream.getObservableProperty(),
-                                              fieldsToExpand.get(navigationProperty),
-                                              gen,
-                                              serializers);
+                            }
                             break;
                         case STAEntityDefinition.THING:
-                            writeNestedEntity(datastream.getThing(),
-                                              fieldsToExpand.get(navigationProperty),
-                                              gen,
-                                              serializers);
+                            if (datastream.getObservations() == null) {
+                                writeNavigationProp(gen, navigationProperty, datastream.getStaIdentifier());
+                            } else {
+                                writeNestedEntity(datastream.getThing(),
+                                                  fieldsToExpand.get(navigationProperty),
+                                                  gen,
+                                                  serializers);
+                            }
                             break;
                         case STAEntityDefinition.SENSOR:
-                            writeNestedEntity(datastream.getProcedure(),
-                                              fieldsToExpand.get(navigationProperty),
-                                              gen,
-                                              serializers);
+                            if (datastream.getObservations() == null) {
+                                writeNavigationProp(gen, navigationProperty, datastream.getStaIdentifier());
+                            } else {
+                                writeNestedEntity(datastream.getProcedure(),
+                                                  fieldsToExpand.get(navigationProperty),
+                                                  gen,
+                                                  serializers);
+                            }
                             break;
                         default:
                             throw new IllegalStateException("Unexpected value: " + navigationProperty);

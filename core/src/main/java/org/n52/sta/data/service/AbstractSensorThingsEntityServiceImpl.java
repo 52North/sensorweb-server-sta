@@ -202,7 +202,9 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
             throws STACRUDException {
         try {
             Optional<S> elem =
-                    getRepository().findOne(byRelatedEntityFilter(relatedId, relatedType, ownId), defaultFetchGraphs);
+                    getRepository().findOne(byRelatedEntityFilter(relatedId, relatedType, ownId)
+                                                    .and(getFilterPredicate(entityClass, queryOptions)),
+                                            defaultFetchGraphs);
             if (elem.isPresent()) {
                 if (queryOptions.hasExpandFilter()) {
                     return fetchExpandEntities(elem.get(), queryOptions.getExpandFilter());
@@ -378,7 +380,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     /**
      * Create {@link PageRequest}
      *
-     * @param queryOptions           {@link QueryOptions} to create {@link PageRequest}
+     * @param queryOptions {@link QueryOptions} to create {@link PageRequest}
      * @return {@link PageRequest} of type {@link OffsetLimitBasedPageRequest}
      */
     OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions) {

@@ -133,13 +133,17 @@ public class ObservedPropertySerDes {
                     if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
                         writeNavigationProp(gen, navigationProperty, obsProp.getStaIdentifier());
                     } else {
-                        gen.writeFieldName(navigationProperty);
                         switch (navigationProperty) {
                         case ObservedPropertyEntityDefinition.DATASTREAMS:
-                            writeNestedCollection(Collections.unmodifiableSet(obsProp.getDatastreams()),
-                                                  fieldsToExpand.get(navigationProperty),
-                                                  gen,
-                                                  serializers);
+                            if (obsProp.getDatastreams() == null) {
+                                writeNavigationProp(gen, navigationProperty, obsProp.getStaIdentifier());
+                            } else {
+                                gen.writeFieldName(navigationProperty);
+                                writeNestedCollection(Collections.unmodifiableSet(obsProp.getDatastreams()),
+                                                      fieldsToExpand.get(navigationProperty),
+                                                      gen,
+                                                      serializers);
+                            }
                             break;
                         default:
                             throw new IllegalStateException("Unexpected value: " + navigationProperty);
