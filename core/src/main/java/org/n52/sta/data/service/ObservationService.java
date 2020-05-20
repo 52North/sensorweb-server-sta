@@ -541,50 +541,51 @@ public class ObservationService extends
         return feature;
     }
 
-    private OfferingEntity checkOffering(DatastreamEntity datastream) {
-        OfferingEntity offering = new OfferingEntity();
+    private OfferingEntity checkOffering(DatastreamEntity datastream) throws STACRUDException {
         ProcedureEntity procedure = datastream.getProcedure();
-        offering.setIdentifier(procedure.getIdentifier());
-        offering.setStaIdentifier(procedure.getStaIdentifier());
-        offering.setName(procedure.getName());
-        offering.setDescription(procedure.getDescription());
-        if (datastream.hasSamplingTimeStart()) {
-            offering.setSamplingTimeStart(datastream.getSamplingTimeStart());
-        }
-        if (datastream.hasSamplingTimeEnd()) {
-            offering.setSamplingTimeEnd(datastream.getSamplingTimeEnd());
-        }
-        if (datastream.getResultTimeStart() != null) {
-            offering.setResultTimeStart(datastream.getResultTimeStart());
-        }
-        if (datastream.getResultTimeEnd() != null) {
-            offering.setResultTimeEnd(datastream.getResultTimeEnd());
-        }
-        if (datastream.isSetGeometry()) {
-            offering.setGeometryEntity(datastream.getGeometryEntity());
-        }
-        HashSet<FormatEntity> set = new HashSet<>();
-        set.add(datastream.getObservationType());
-        offering.setObservationTypes(set);
-
-        if (!offeringRepository.existsByIdentifier(offering.getIdentifier())) {
-            return offeringRepository.save(offering);
-        } else {
-            // TODO expand time and geometry if necessary
-            return offeringRepository.findByIdentifier(offering.getIdentifier()).get();
+        synchronized (getLock(procedure.getIdentifier())) {
+            if (!offeringRepository.existsByIdentifier(procedure.getIdentifier())) {
+                OfferingEntity offering = new OfferingEntity();
+                offering.setIdentifier(procedure.getIdentifier());
+                offering.setStaIdentifier(procedure.getStaIdentifier());
+                offering.setName(procedure.getName());
+                offering.setDescription(procedure.getDescription());
+                if (datastream.hasSamplingTimeStart()) {
+                    offering.setSamplingTimeStart(datastream.getSamplingTimeStart());
+                }
+                if (datastream.hasSamplingTimeEnd()) {
+                    offering.setSamplingTimeEnd(datastream.getSamplingTimeEnd());
+                }
+                if (datastream.getResultTimeStart() != null) {
+                    offering.setResultTimeStart(datastream.getResultTimeStart());
+                }
+                if (datastream.getResultTimeEnd() != null) {
+                    offering.setResultTimeEnd(datastream.getResultTimeEnd());
+                }
+                if (datastream.isSetGeometry()) {
+                    offering.setGeometryEntity(datastream.getGeometryEntity());
+                }
+                HashSet<FormatEntity> set = new HashSet<>();
+                set.add(datastream.getObservationType());
+                offering.setObservationTypes(set);
+                return offeringRepository.save(offering);
+            } else {
+                // TODO expand time and geometry if necessary
+                return offeringRepository.findByIdentifier(procedure.getIdentifier()).get();
+            }
         }
     }
 
     private CategoryEntity checkCategory() throws STACRUDException {
-        CategoryEntity category = new CategoryEntity();
-        category.setIdentifier(STA);
-        category.setName(STA);
-        category.setDescription("Default SOS category");
-        synchronized (getLock(category.getIdentifier())) {
-            if (!categoryRepository.existsByIdentifier(category.getIdentifier())) {
+        synchronized (getLock(STA)) {
+            if (!categoryRepository.existsByIdentifier(STA)) {
+                CategoryEntity category = new CategoryEntity();
+                category.setIdentifier(STA);
+                category.setName(STA);
+                category.setDescription("Default SOS category");
                 return categoryRepository.save(category);
             } else {
-                return categoryRepository.findByIdentifier(category.getIdentifier()).get();
+                return categoryRepository.findByIdentifier(STA).get();
             }
         }
     }
@@ -601,23 +602,26 @@ public class ObservationService extends
     private DatasetEntity updateDataset(DatasetEntity dataset, ObservationEntity<?> data) throws STACRUDException {
         Optional<DataEntity<?>> rawObservation = dataRepository.findById(data.getId());
         if (rawObservation.isPresent()) {
-            if (!dataset.isSetFirstValueAt()
-                    || (dataset.isSetFirstValueAt() && data.getSamplingTimeStart().before(dataset.getFirstValueAt()))) {
-                dataset.setFirstValueAt(data.getSamplingTimeStart());
-                dataset.setFirstObservation(rawObservation.get());
-                if (data instanceof QuantityObservationEntity) {
-                    dataset.setFirstQuantityValue(((QuantityObservationEntity) data).getValue());
+            synchronized (getLock(dataset.getIdentifier())) {
+                if (!dataset.isSetFirstValueAt()
+                        || (dataset.isSetFirstValueAt() &&
+                        data.getSamplingTimeStart().before(dataset.getFirstValueAt()))) {
+                    dataset.setFirstValueAt(data.getSamplingTimeStart());
+                    dataset.setFirstObservation(rawObservation.get());
+                    if (data instanceof QuantityObservationEntity) {
+                        dataset.setFirstQuantityValue(((QuantityObservationEntity) data).getValue());
+                    }
                 }
-            }
-            if (!dataset.isSetLastValueAt()
-                    || (dataset.isSetLastValueAt() && data.getSamplingTimeEnd().after(dataset.getLastValueAt()))) {
-                dataset.setLastValueAt(data.getSamplingTimeEnd());
-                dataset.setLastObservation(rawObservation.get());
-                if (data instanceof QuantityObservationEntity) {
-                    dataset.setLastQuantityValue(((QuantityObservationEntity) data).getValue());
+                if (!dataset.isSetLastValueAt()
+                        || (dataset.isSetLastValueAt() && data.getSamplingTimeEnd().after(dataset.getLastValueAt()))) {
+                    dataset.setLastValueAt(data.getSamplingTimeEnd());
+                    dataset.setLastObservation(rawObservation.get());
+                    if (data instanceof QuantityObservationEntity) {
+                        dataset.setLastQuantityValue(((QuantityObservationEntity) data).getValue());
+                    }
                 }
+                return datasetRepository.save(dataset);
             }
-            return datasetRepository.save(dataset);
         } else {
             throw new STACRUDException("Could not update Dataset->firstObservation or Dataset->firstObservation. " +
                                                "Unable to find Observation with Id:" + data.getId());
