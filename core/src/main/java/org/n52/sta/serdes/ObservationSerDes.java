@@ -32,12 +32,14 @@ package org.n52.sta.serdes;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.n52.series.db.beans.parameter.ParameterEntity;
+import org.n52.series.db.beans.parameter.ParameterJsonEntity;
 import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
@@ -84,6 +86,8 @@ public class ObservationSerDes {
     public static class ObservationSerializer extends AbstractSTASerializer<ObservationWithQueryOptions> {
 
         private static final long serialVersionUID = -4575044340713191285L;
+
+        private final String VALUE = "value";
 
         public ObservationSerializer(String rootUrl) {
             super(ObservationWithQueryOptions.class);
@@ -161,7 +165,12 @@ public class ObservationSerDes {
                     for (ParameterEntity<?> parameter : observation.getParameters()) {
                         gen.writeStartObject();
                         gen.writeStringField("name", parameter.getName());
-                        gen.writeStringField("value", parameter.getValueAsString());
+                        if (parameter instanceof ParameterJsonEntity) {
+                            ObjectMapper mapper = new ObjectMapper();
+                            gen.writeObjectField(VALUE, mapper.readTree(parameter.getValueAsString()));
+                        } else {
+                            gen.writeStringField(VALUE, parameter.getValueAsString());
+                        }
                         gen.writeEndObject();
                     }
                 }
