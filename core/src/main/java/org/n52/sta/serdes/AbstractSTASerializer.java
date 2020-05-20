@@ -41,11 +41,11 @@ import java.util.stream.Collectors;
 
 public abstract class AbstractSTASerializer<T> extends StdSerializer<T> {
 
+    private static final String ENCODEDSLASH = "%2F";
+    private static final String SLASH = "/";
+
     protected String rootUrl;
     protected String entitySetName;
-
-    private final String ENCODEDSLASH = "%2F";
-    private final String SLASH = "/";
 
     protected AbstractSTASerializer(Class<T> t) {
         super(t);

@@ -82,12 +82,11 @@ public class ObservationSerDes {
         }
     }
 
-
     public static class ObservationSerializer extends AbstractSTASerializer<ObservationWithQueryOptions> {
 
         private static final long serialVersionUID = -4575044340713191285L;
 
-        private final String VALUE = "value";
+        private static final String VALUE = "value";
 
         public ObservationSerializer(String rootUrl) {
             super(ObservationWithQueryOptions.class);

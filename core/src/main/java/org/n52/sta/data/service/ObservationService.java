@@ -288,44 +288,41 @@ public class ObservationService extends
     @Override
     public ObservationEntity<?> createEntity(ObservationEntity<?> entity) throws STACRUDException {
         synchronized (getLock(entity.getStaIdentifier())) {
-            if (entity instanceof ObservationEntity) {
-                ObservationEntity observation = entity;
-                if (!observation.isProcessed()) {
-                    observation.setProcessed(true);
-                    check(observation);
+            ObservationEntity observation = entity;
+            if (!observation.isProcessed()) {
+                observation.setProcessed(true);
+                check(observation);
 
-                    DatastreamEntity datastream = getDatastreamService().createEntity(observation.getDatastream());
-                    observation.setDatastream(datastream);
+                DatastreamEntity datastream = getDatastreamService().createEntity(observation.getDatastream());
+                observation.setDatastream(datastream);
 
-                    // Fetch with all needed associations
-                    datastream = datastreamRepository
-                            .findByStaIdentifier(datastream.getStaIdentifier(),
-                                                 EntityGraphRepository.FetchGraph.FETCHGRAPH_THINGLOCATION,
-                                                 EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDURE,
-                                                 EntityGraphRepository.FetchGraph.FETCHGRAPH_UOM,
-                                                 EntityGraphRepository.FetchGraph.FETCHGRAPH_OBS_TYPE,
-                                                 EntityGraphRepository.FetchGraph.FETCHGRAPH_OBSERVABLE_PROP,
-                                                 EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS
-                            ).orElseThrow(() -> new STACRUDException("Unable to find Datastream!"));
+                // Fetch with all needed associations
+                datastream = datastreamRepository
+                        .findByStaIdentifier(datastream.getStaIdentifier(),
+                                             EntityGraphRepository.FetchGraph.FETCHGRAPH_THINGLOCATION,
+                                             EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDURE,
+                                             EntityGraphRepository.FetchGraph.FETCHGRAPH_UOM,
+                                             EntityGraphRepository.FetchGraph.FETCHGRAPH_OBS_TYPE,
+                                             EntityGraphRepository.FetchGraph.FETCHGRAPH_OBSERVABLE_PROP,
+                                             EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS
+                        ).orElseThrow(() -> new STACRUDException("Unable to find Datastream!"));
 
-                    AbstractFeatureEntity<?> feature = checkFeature(observation, datastream);
-                    // category (obdProp)
-                    CategoryEntity category = checkCategory();
-                    // offering (sensor)
-                    OfferingEntity offering = checkOffering(datastream);
-                    // dataset
-                    DatasetEntity dataset = checkDataset(datastream, feature, category, offering);
-                    // observation
-                    ObservationEntity<?> data = checkData(observation, dataset);
-                    if (data != null) {
-                        updateDataset(dataset, data);
-                        updateDatastream(datastream, dataset, data);
-                    }
-                    return data;
+                AbstractFeatureEntity<?> feature = checkFeature(observation, datastream);
+                // category (obdProp)
+                CategoryEntity category = checkCategory();
+                // offering (sensor)
+                OfferingEntity offering = checkOffering(datastream);
+                // dataset
+                DatasetEntity dataset = checkDataset(datastream, feature, category, offering);
+                // observation
+                ObservationEntity<?> data = checkData(observation, dataset);
+                if (data != null) {
+                    updateDataset(dataset, data);
+                    updateDatastream(datastream, dataset, data);
                 }
-                return observation;
+                return data;
             }
-            return entity;
+            return observation;
         }
     }
 

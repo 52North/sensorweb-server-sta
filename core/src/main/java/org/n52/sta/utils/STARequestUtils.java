@@ -29,7 +29,6 @@
 
 package org.n52.sta.utils;
 
-import org.geolatte.geom.M;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;

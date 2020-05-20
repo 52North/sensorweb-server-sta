@@ -61,7 +61,8 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
     private final String INVALID_ENCODINGTYPE =
             "Invalid encodingType supplied. Only GeoJSON (application/vnd.geo+json) is supported!";
 
-    private final GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
+    private final GeometryFactory factory =
+            new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
 
     private final String TYPE = "type";
     private final String GEOMETRY = "geometry";
@@ -100,7 +101,8 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
                     Assert.notNull(feature.get(GEOMETRY), INVALID_INLINE_ENTITY_MISSING + FEATURE_GEOM);
                     geo = feature.get(GEOMETRY).toString();
                 } else {
-                    Assert.isTrue(POINT.equals(feature.get(TYPE).asText()), INVALID_INLINE_ENTITY_MISSING + FEATURE_TYPE);
+                    Assert.isTrue(POINT.equals(feature.get(TYPE).asText()),
+                                  INVALID_INLINE_ENTITY_MISSING + FEATURE_TYPE);
                     Assert.isTrue(feature.has(COORDINATES), INVALID_INLINE_ENTITY_MISSING + FEATURE_COORDS);
                     geo = feature.toString();
                 }
@@ -137,7 +139,8 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
                     Assert.notNull(feature.get(GEOMETRY), INVALID_INLINE_ENTITY_MISSING + FEATURE_GEOM);
                     geo = feature.get(GEOMETRY).toString();
                 } else {
-                    Assert.isTrue(POINT.equals(feature.get(TYPE).asText()), INVALID_INLINE_ENTITY_MISSING + FEATURE_TYPE);
+                    Assert.isTrue(POINT.equals(feature.get(TYPE).asText()),
+                                  INVALID_INLINE_ENTITY_MISSING + FEATURE_TYPE);
                     Assert.isTrue(feature.has(COORDINATES), INVALID_INLINE_ENTITY_MISSING + FEATURE_COORDS);
                     geo = feature.toString();
                 }
