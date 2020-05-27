@@ -30,7 +30,7 @@ spring:
     properties:
       hibernate:
         # the name of the schema in the database
-        default_schema: sensorweb4
+        default_schema: public
         hbm2ddl:
           # hbm2ddl values: validate | update | create | create-drop | none
           auto: validate
