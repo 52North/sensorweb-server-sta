@@ -45,10 +45,15 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
 
     // JSON Properties. Matched by Annotation or variable name
     public JsonNode properties;
+
     @JsonManagedReference
     public JSONLocation[] Locations;
+
     @JsonManagedReference
     public JSONDatastream[] Datastreams;
+
+    @JsonManagedReference
+    public JSONHistoricalLocation[] HistoricalLocations;
 
     public JSONThing() {
         self = new PlatformEntity();
@@ -84,6 +89,13 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
                                           .map(ds -> ds.toEntity(JSONBase.EntityType.FULL,
                                                                  JSONBase.EntityType.REFERENCE))
                                           .collect(Collectors.toSet()));
+            }
+
+            if (HistoricalLocations != null) {
+                self.setHistoricalLocations(Arrays.stream(HistoricalLocations)
+                                                  .map(hloc -> hloc.toEntity(JSONBase.EntityType.FULL,
+                                                                         JSONBase.EntityType.REFERENCE))
+                                                  .collect(Collectors.toSet()));
             }
 
             // Deal with back reference during deep insert
@@ -126,6 +138,12 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
                                           .collect(Collectors.toSet()));
             }
 
+            if (HistoricalLocations != null) {
+                self.setHistoricalLocations(Arrays.stream(HistoricalLocations)
+                                                  .map(ds -> ds.toEntity(JSONBase.EntityType.FULL,
+                                                                         JSONBase.EntityType.REFERENCE))
+                                                  .collect(Collectors.toSet()));
+            }
             return self;
         case REFERENCE:
             Assert.isNull(name, INVALID_REFERENCED_ENTITY);

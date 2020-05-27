@@ -213,7 +213,8 @@ public class ObservedPropertyService
         synchronized (getLock(observableProperty.getStaIdentifier())) {
             // Check for duplicate definition
             if (getRepository().existsByIdentifier(observableProperty.getIdentifier())) {
-                throw new STACRUDException("Entity with given Definition already exists!", HTTPStatus.CONFLICT);
+                throw new STACRUDException("Observed Property with given Definition already exists!",
+                                           HTTPStatus.CONFLICT);
             }
             if (getRepository().existsByStaIdentifier(observableProperty.getStaIdentifier())) {
                 throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);

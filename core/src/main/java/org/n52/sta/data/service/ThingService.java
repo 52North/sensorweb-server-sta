@@ -29,13 +29,6 @@
 
 package org.n52.sta.data.service;
 
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 import org.joda.time.DateTime;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.PlatformEntity;
@@ -61,6 +54,15 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
@@ -177,9 +179,11 @@ public class ThingService
                     throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
                 } else {
                     thing.setProcessed(true);
-                    processLocations(thing, thing.getLocations());
+                    boolean locationChanged = processLocations(thing, thing.getLocations());
                     thing = getRepository().intermediateSave(thing);
-                    processHistoricalLocations(thing);
+                    if (locationChanged) {
+                        generateHistoricalLocation(thing);
+                    }
                     processDatastreams(thing);
                     thing = getRepository().save(thing);
                 }
@@ -190,20 +194,22 @@ public class ThingService
 
     @Override
     @Transactional
-    public PlatformEntity updateEntity(String id, PlatformEntity entity, HttpMethod method) throws STACRUDException {
-        checkUpdate(entity);
+    public PlatformEntity updateEntity(String id, PlatformEntity newEntity, HttpMethod method) throws STACRUDException {
+        // checkUpdate(entity);
         if (HttpMethod.PATCH.equals(method)) {
             synchronized (getLock(id)) {
                 Optional<PlatformEntity> existing =
                         getRepository().findByStaIdentifier(id,
-                                                         IdentifierRepository.FetchGraph.FETCHGRAPH_LOCATION,
-                                                         IdentifierRepository.FetchGraph.FETCHGRAPH_HIST_LOCATION);
+                                                            IdentifierRepository.FetchGraph.FETCHGRAPH_LOCATION,
+                                                            IdentifierRepository.FetchGraph.FETCHGRAPH_HIST_LOCATION);
                 if (existing.isPresent()) {
-                    PlatformEntity merged = merge(existing.get(), entity);
-                    if (entity.hasLocationEntities()) {
-                        processLocations(merged, entity.getLocations());
+                    PlatformEntity merged = merge(existing.get(), newEntity);
+                    if (newEntity.hasLocationEntities()) {
+                        boolean changedLocations = processLocations(merged, newEntity.getLocations());
                         merged = getRepository().save(merged);
-                        processHistoricalLocations(merged);
+                        if (changedLocations) {
+                            generateHistoricalLocation(merged);
+                        }
                     }
                     return getRepository().save(merged);
                 } else {
@@ -250,8 +256,8 @@ public class ThingService
             if (getRepository().existsByStaIdentifier(identifier)) {
                 PlatformEntity thing =
                         getRepository().findByStaIdentifier(identifier,
-                                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASTREAMS,
-                                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATION)
+                                                            EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASTREAMS,
+                                                            EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATION)
                                        .get();
                 // delete datastreams
                 thing.getDatastreams().forEach(d -> {
@@ -303,21 +309,45 @@ public class ThingService
         }
     }
 
-    private void processLocations(PlatformEntity thing, Set<LocationEntity> oldLocations) throws
+    private boolean processLocations(PlatformEntity thing, Set<LocationEntity> oldLocations) throws
             STACRUDException {
+        boolean didPersist = false;
         if (oldLocations != null) {
             Set<LocationEntity> locations = new HashSet<>();
             thing.setLocations(new HashSet<>());
             for (LocationEntity location : oldLocations) {
-                LocationEntity optionalLocation = getLocationService().createEntity(location);
-                locations.add(optionalLocation != null ? optionalLocation : location);
+                Long id = location.getId();
+                LocationEntity persistedLoc = getLocationService().createEntity(location);
+                locations.add(persistedLoc);
+                if (!Objects.equals(id, persistedLoc.getId())) {
+                    didPersist = true;
+                }
             }
             thing.setLocations(locations);
         }
+        return didPersist;
     }
 
-    private void processHistoricalLocations(PlatformEntity thing) throws STACRUDException {
-        if (thing != null && thing.hasLocationEntities()) {
+    private void generateHistoricalLocation(PlatformEntity thing) throws STACRUDException {
+        if (thing == null) {
+            throw new STACRUDException("Error processing HistoricalLocations. Thing does not exist!");
+        }
+        // Persist nested HistoricalLocations
+        Set<HistoricalLocationEntity> transientHLocs = new HashSet<>();
+        Set<HistoricalLocationEntity> detachedHlocs = thing.getHistoricalLocations();
+        if (thing.hasHistoricalLocations()) {
+            thing.setHistoricalLocations(null);
+            for (HistoricalLocationEntity historicalLocation : detachedHlocs) {
+                // Check if historicalLocation is not already persisted
+                if (historicalLocation.getId() == null) {
+                    transientHLocs.add(historicalLocation);
+                    getHistoricalLocationService().createOrUpdate(historicalLocation);
+                }
+            }
+        }
+
+        // Create new HistoricalLocation based on current location
+        if (thing.hasLocationEntities()) {
             Set<HistoricalLocationEntity> historicalLocations = thing.hasHistoricalLocations()
                     ? new LinkedHashSet<>(thing.getHistoricalLocations())
                     : new LinkedHashSet<>();
@@ -332,7 +362,7 @@ public class ThingService
                 historicalLocations.add(createdHistoricalLocation);
             }
             for (LocationEntity location : thing.getLocations()) {
-                location.setHistoricalLocations(historicalLocations);
+                location.setHistoricalLocations(Collections.singleton(createdHistoricalLocation));
                 getLocationService().createOrUpdate(location);
             }
             thing.setHistoricalLocations(historicalLocations);

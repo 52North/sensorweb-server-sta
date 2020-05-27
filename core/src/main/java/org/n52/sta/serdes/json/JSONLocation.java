@@ -138,7 +138,8 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
                         self.setThings(Collections.singleton(((JSONThing) backReference).getEntity()));
                     }
                 } else {
-                    self.addHistoricalLocation(((JSONHistoricalLocation) backReference).getEntity());
+                    JSONHistoricalLocation backRef = (JSONHistoricalLocation) backReference;
+                    self.addHistoricalLocation(backRef.getEntity());
                 }
             }
             return self;

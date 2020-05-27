@@ -181,8 +181,13 @@ public class HistoricalLocationService
             Optional<LocationEntity> location =
                     locationRepository.findByStaIdentifier(l.getStaIdentifier(),
                                                            EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATION);
-            location.get().addHistoricalLocation(historicalLocation);
-            locations.add(getLocationService().createOrUpdate(location.get()));
+            if (location.isPresent()) {
+                location.get().addHistoricalLocation(historicalLocation);
+                locations.add(getLocationService().createOrUpdate(location.get()));
+            } else {
+                // We assume that l has historicalLocation linked to it correctly already and just was not persisted
+                locations.add(getLocationService().createOrUpdate(l));
+            }
         }
         historicalLocation.setLocations(locations);
     }

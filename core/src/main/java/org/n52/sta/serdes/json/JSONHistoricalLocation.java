@@ -77,6 +77,7 @@ public class JSONHistoricalLocation extends JSONBase.JSONwithIdTime<HistoricalLo
                 self.setThing(Thing.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
             } else if (backReference instanceof JSONThing) {
                 self.setThing(((JSONThing) backReference).getEntity());
+                this.Thing = (JSONThing) backReference;
             } else {
                 Assert.notNull(null, INVALID_INLINE_ENTITY_MISSING + "Thing");
             }
