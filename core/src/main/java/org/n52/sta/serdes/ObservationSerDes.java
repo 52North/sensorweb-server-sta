@@ -57,7 +57,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -133,10 +132,9 @@ public class ObservationSerDes {
                 gen.writeStringField(STAEntityDefinition.PROP_RESULT, observation.getValue().toString());
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_RESULT_TIME)) {
-                Date resultTime = observation.getResultTime();
-                Date samplingTime = observation.getSamplingTimeEnd();
-                if (!resultTime.equals(samplingTime)) {
-                    gen.writeStringField(STAEntityDefinition.PROP_RESULT_TIME, resultTime.toInstant().toString());
+                if (observation.hasResultTime()) {
+                    gen.writeStringField(STAEntityDefinition.PROP_RESULT_TIME,
+                            observation.getResultTime().toInstant().toString());
                 } else {
                     gen.writeFieldName(STAEntityDefinition.PROP_RESULT_TIME);
                     gen.writeNull();
@@ -185,30 +183,30 @@ public class ObservationSerDes {
                         writeNavigationProp(gen, navigationProperty, observation.getStaIdentifier());
                     } else {
                         switch (navigationProperty) {
-                        case ObservationEntityDefinition.DATASTREAM:
-                            if (observation.getDatastream() == null) {
-                                writeNavigationProp(gen, navigationProperty, observation.getStaIdentifier());
-                            } else {
-                                gen.writeFieldName(navigationProperty);
-                                writeNestedEntity(observation.getDatastream(),
-                                                  fieldsToExpand.get(navigationProperty),
-                                                  gen,
-                                                  serializers);
-                            }
-                            break;
-                        case ObservationEntityDefinition.FEATURE_OF_INTEREST:
-                            if (observation.getFeature() == null) {
-                                writeNavigationProp(gen, navigationProperty, observation.getStaIdentifier());
-                            } else {
-                                gen.writeFieldName(navigationProperty);
-                                writeNestedEntity(observation.getFeature(),
-                                                  fieldsToExpand.get(navigationProperty),
-                                                  gen,
-                                                  serializers);
-                            }
-                            break;
-                        default:
-                            throw new IllegalStateException("Unexpected value: " + navigationProperty);
+                            case ObservationEntityDefinition.DATASTREAM:
+                                if (observation.getDatastream() == null) {
+                                    writeNavigationProp(gen, navigationProperty, observation.getStaIdentifier());
+                                } else {
+                                    gen.writeFieldName(navigationProperty);
+                                    writeNestedEntity(observation.getDatastream(),
+                                                      fieldsToExpand.get(navigationProperty),
+                                                      gen,
+                                                      serializers);
+                                }
+                                break;
+                            case ObservationEntityDefinition.FEATURE_OF_INTEREST:
+                                if (observation.getFeature() == null) {
+                                    writeNavigationProp(gen, navigationProperty, observation.getStaIdentifier());
+                                } else {
+                                    gen.writeFieldName(navigationProperty);
+                                    writeNestedEntity(observation.getFeature(),
+                                                      fieldsToExpand.get(navigationProperty),
+                                                      gen,
+                                                      serializers);
+                                }
+                                break;
+                            default:
+                                throw new IllegalStateException("Unexpected value: " + navigationProperty);
                         }
                     }
                 }
