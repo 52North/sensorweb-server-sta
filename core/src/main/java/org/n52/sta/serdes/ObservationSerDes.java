@@ -57,7 +57,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -133,13 +132,11 @@ public class ObservationSerDes {
                 gen.writeStringField(STAEntityDefinition.PROP_RESULT, observation.getValue().toString());
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_RESULT_TIME)) {
-                Date resultTime = observation.getResultTime();
-                Date samplingTime = observation.getSamplingTimeEnd();
-                if (!resultTime.equals(samplingTime)) {
-                    gen.writeStringField(STAEntityDefinition.PROP_RESULT_TIME, resultTime.toInstant().toString());
+                if (observation.hasResultTime()) {
+                    gen.writeStringField(STAEntityDefinition.PROP_RESULT_TIME,
+                                         observation.getResultTime().toInstant().toString());
                 } else {
-                    gen.writeFieldName(STAEntityDefinition.PROP_RESULT_TIME);
-                    gen.writeNull();
+                    gen.writeNullField(STAEntityDefinition.PROP_RESULT_TIME);
                 }
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_PHENOMENON_TIME)) {

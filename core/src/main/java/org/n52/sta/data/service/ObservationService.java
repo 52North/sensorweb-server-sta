@@ -737,11 +737,7 @@ public class ObservationService extends
             }
             data.setSamplingTimeStart(observation.getSamplingTimeStart());
             data.setSamplingTimeEnd(observation.getSamplingTimeEnd());
-            if (observation.getResultTime() != null) {
-                data.setResultTime(observation.getResultTime());
-            } else {
-                data.setResultTime(observation.getSamplingTimeEnd());
-            }
+            data.setResultTime(observation.getResultTime());
             data.setValidTimeStart(observation.getValidTimeStart());
             data.setValidTimeEnd(observation.getValidTimeEnd());
             data.setSamplingGeometry(observation.getSamplingGeometry());
