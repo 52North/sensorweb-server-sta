@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.webapp;
 
 import org.n52.sta.data.repositories.MessageBusRepository;
@@ -34,21 +35,15 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.ComponentScan.Filter;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
 @EnableJpaRepositories(repositoryBaseClass = MessageBusRepository.class,
-        basePackages = {"org.n52.series.db", "org.n52.sta.data.repositories"},
-        excludeFilters = @Filter(type = FilterType.REGEX, pattern = "org\\.n52\\.series\\.db\\.old\\..*"))
-@ComponentScan(basePackages = {"org.n52.series.db", "org.n52.sta"},
-        excludeFilters = {@Filter(type = FilterType.REGEX, pattern = "org\\.n52\\.series\\.db\\.old\\..*"),
-                @Filter(type = FilterType.REGEX, pattern = "org\\.n52\\.series\\.srv\\..*"),
-                @Filter(type = FilterType.REGEX, pattern = "org\\.n52\\.series\\.db\\.assembler\\..*")})
+                       basePackages = {"org.n52.series.db", "org.n52.sta.data.repositories"})
 @EnableConfigurationProperties
+@EnableAsync
 @EnableTransactionManagement
 @SuppressWarnings("uncommentedmain")
 public class Application extends SpringBootServletInitializer {
