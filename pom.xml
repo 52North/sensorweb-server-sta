@@ -36,10 +36,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.source>1.8</maven.compiler.source>col
         <maven.compiler.target>1.8</maven.compiler.target>
-        <db-model.version>1.3.1-SNAPSHOT</db-model.version>
-        <arctic-sea.version>7.5.0-SNAPSHOT</arctic-sea.version>
+        <db-model.version>2.0.0</db-model.version>
+        <arctic-sea.version>7.5.0</arctic-sea.version>
         <spring-boot.version>2.2.6.RELEASE</spring-boot.version>
         <geolatte-geom.version>1.5.1</geolatte-geom.version>
         <hibernate.version>5.4.12.Final</hibernate.version>
