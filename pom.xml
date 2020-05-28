@@ -53,6 +53,7 @@
         <spotbugs.version>4.0.3</spotbugs.version>
         <paho.version>1.2.4</paho.version>
         <antlr-runtime.version>4.8-1</antlr-runtime.version>
+        <joda.version>2.10.6</joda.version>
     </properties>
 
     <dependencyManagement>
@@ -208,6 +209,11 @@
                 <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-annotations</artifactId>
                 <version>${spotbugs.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>joda-time</groupId>
+                <artifactId>joda-time</artifactId>
+                <version>${joda.version}</version>
             </dependency>
 
             <dependency>
