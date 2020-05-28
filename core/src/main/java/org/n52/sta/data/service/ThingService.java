@@ -181,7 +181,7 @@ public class ThingService
                     thing.setProcessed(true);
                     boolean locationChanged = processLocations(thing, thing.getLocations());
                     thing = getRepository().intermediateSave(thing);
-                    if (locationChanged) {
+                    if (locationChanged || thing.getHistoricalLocations().stream().anyMatch(p -> p.getId() == null)) {
                         generateHistoricalLocation(thing);
                     }
                     processDatastreams(thing);
