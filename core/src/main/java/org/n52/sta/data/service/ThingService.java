@@ -333,14 +333,11 @@ public class ThingService
             throw new STACRUDException("Error processing HistoricalLocations. Thing does not exist!");
         }
         // Persist nested HistoricalLocations
-        Set<HistoricalLocationEntity> transientHLocs = new HashSet<>();
-        Set<HistoricalLocationEntity> detachedHlocs = thing.getHistoricalLocations();
         if (thing.hasHistoricalLocations()) {
             thing.setHistoricalLocations(null);
-            for (HistoricalLocationEntity historicalLocation : detachedHlocs) {
+            for (HistoricalLocationEntity historicalLocation : thing.getHistoricalLocations()) {
                 // Check if historicalLocation is not already persisted
                 if (historicalLocation.getId() == null) {
-                    transientHLocs.add(historicalLocation);
                     getHistoricalLocationService().createOrUpdate(historicalLocation);
                 }
             }
