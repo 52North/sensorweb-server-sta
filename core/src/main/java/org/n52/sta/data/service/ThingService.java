@@ -336,8 +336,9 @@ public class ThingService
         }
         // Persist nested HistoricalLocations
         if (thing.hasHistoricalLocations()) {
+            Set<HistoricalLocationEntity> historicalLocations = thing.getHistoricalLocations();
             thing.setHistoricalLocations(null);
-            for (HistoricalLocationEntity historicalLocation : thing.getHistoricalLocations()) {
+            for (HistoricalLocationEntity historicalLocation : historicalLocations) {
                 // Check if historicalLocation is not already persisted
                 if (historicalLocation.getId() == null) {
                     getHistoricalLocationService().createOrUpdate(historicalLocation);
