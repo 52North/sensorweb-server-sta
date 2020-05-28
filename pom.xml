@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.n52</groupId>
@@ -40,13 +41,18 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <db-model.version>2.0.0</db-model.version>
         <arctic-sea.version>7.5.0</arctic-sea.version>
-        <spring-boot.version>2.2.6.RELEASE</spring-boot.version>
+        <spring-boot.version>2.3.0.RELEASE</spring-boot.version>
         <geolatte-geom.version>1.5.1</geolatte-geom.version>
         <hibernate.version>5.4.12.Final</hibernate.version>
-        <jackson.version>2.10.3</jackson.version>
+        <jackson.version>2.11.0</jackson.version>
         <hamcrest.version>2.2</hamcrest.version>
         <locationtech-jts.version>1.16.1</locationtech-jts.version>
         <h2database.version>1.4.200</h2database.version>
+        <testcontainers.postgres.version>1.14.2</testcontainers.postgres.version>
+        <testcontainers.jupiter.version>1.14.2</testcontainers.jupiter.version>
+        <spotbugs.version>4.0.3</spotbugs.version>
+        <paho.version>1.2.4</paho.version>
+        <antlr-runtime.version>4.8-1</antlr-runtime.version>
     </properties>
 
     <dependencyManagement>
@@ -149,7 +155,7 @@
             <dependency>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr4-runtime</artifactId>
-                <version>4.8-1</version>
+                <version>${antlr-runtime.version}</version>
             </dependency>
 
             <dependency>
@@ -183,20 +189,25 @@
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>junit-jupiter</artifactId>
-                <version>1.14.0</version>
+                <version>${testcontainers.jupiter.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>postgresql</artifactId>
-                <version>1.14.0</version>
+                <version>${testcontainers.postgres.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.paho</groupId>
                 <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-                <version>1.2.3</version>
+                <version>${paho.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-annotations</artifactId>
+                <version>${spotbugs.version}</version>
             </dependency>
 
             <dependency>
