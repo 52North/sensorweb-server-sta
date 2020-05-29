@@ -35,6 +35,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -44,6 +45,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
                        basePackages = {"org.n52.series.db", "org.n52.sta.data.repositories"})
 @EnableConfigurationProperties
 @EnableAsync
+@ComponentScan(basePackages = {"org.n52.series.db", "org.n52.sta"})
 @EnableTransactionManagement
 @SuppressWarnings("uncommentedmain")
 public class Application extends SpringBootServletInitializer {

@@ -111,6 +111,6 @@ logging:
 #    org.hibernate.type: INFO
 #    org.hibernate: TRACE
 #    io.moquette: TRACE
-     org.n52: TRACE
+#    org.n52: TRACE
 #    org.springframework.orm.jpa: TRACE
-     org.springframework.web: DEBUG
+#    org.springframework.web: DEBUG
