@@ -1,4 +1,4 @@
-/*
+package org.n52.sta;/*
  * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
@@ -27,36 +27,24 @@
  * Public License for more details.
  */
 
-package org.n52.sta;
-
-import org.n52.sta.data.repositories.MessageBusRepository;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.stereotype.Component;
 
-@SpringBootApplication
-@EnableJpaRepositories(repositoryBaseClass = MessageBusRepository.class,
-                       basePackages = {"org.n52.sta.data.repositories"})
-@EnableConfigurationProperties
-@EnableTransactionManagement
-@EnableAsync
-@SuppressWarnings("uncommentedmain")
-public class Application {
+/**
+ * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
+ */
+@Component
+public class VersionInfoConfig {
 
-    static {
-        String TRUE = "true";
-        System.setProperty("tomcat.util.http.parser.HttpParser.requestTargetAllow", "%");
-        System.setProperty("org.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH", TRUE);
-        System.setProperty("org.apache.catalina.connector.CoyoteAdapter.ALLOW_BACKSLASH", TRUE);
-    }
-
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+    @Bean
+    public static PropertySourcesPlaceholderConfigurer placeholderConfigurer() {
+        PropertySourcesPlaceholderConfigurer propsConfig
+                = new PropertySourcesPlaceholderConfigurer();
+        propsConfig.setLocation(new ClassPathResource("git.properties"));
+        propsConfig.setIgnoreResourceNotFound(true);
+        propsConfig.setIgnoreUnresolvablePlaceholders(true);
+        return propsConfig;
     }
 }
