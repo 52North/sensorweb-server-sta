@@ -1,4 +1,4 @@
-package org.n52.sta;/*
+/*
  * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
@@ -26,6 +26,7 @@ package org.n52.sta;/*
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+package org.n52.sta;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
