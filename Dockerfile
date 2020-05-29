@@ -11,7 +11,7 @@
 
 FROM maven:3.6.1-jdk-8-slim as buildstage
 WORKDIR /app
-COPY --from=gitstage /app /app
+#COPY --from=gitstage /app /app
 COPY . /app/sensorweb-server-sta/
 
 #RUN cd arctic-sea \
