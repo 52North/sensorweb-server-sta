@@ -95,7 +95,10 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSensorThingsEntityServiceImpl.class);
 
-    @Autowired
+    public void setServiceRepository(EntityServiceRepository serviceRepository) {
+        this.serviceRepository = serviceRepository;
+    }
+
     private EntityServiceRepository serviceRepository;
 
     @Autowired
@@ -112,11 +115,6 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         this.entityClass = entityClass;
         this.repository = repository;
         this.defaultFetchGraphs = defaultFetchGraphs;
-    }
-
-    @PostConstruct
-    public void init() {
-        serviceRepository.addEntityService(this);
     }
 
     /**

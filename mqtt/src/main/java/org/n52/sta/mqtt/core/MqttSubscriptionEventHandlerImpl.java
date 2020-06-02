@@ -78,7 +78,7 @@ public class MqttSubscriptionEventHandlerImpl implements MqttSubscriptionEventHa
             0);
 
     private final MqttUtil config;
-    private final EntityServiceRepository serviceRepository;
+    private EntityServiceRepository serviceRepository;
     private Server mqttBroker;
     private Map<AbstractMqttSubscription, HashSet<String>> subscriptions = new HashMap<>();
 
@@ -90,16 +90,19 @@ public class MqttSubscriptionEventHandlerImpl implements MqttSubscriptionEventHa
     private Set<String> watchedEntityTypes = new HashSet<>();
 
     public MqttSubscriptionEventHandlerImpl(MqttUtil config,
-                                            EntityServiceRepository serviceRepository,
                                             ObjectMapper mapper) {
         this.config = config;
-        this.serviceRepository = serviceRepository;
         this.mapper = mapper;
     }
 
     @Override
     public Set<String> getWatchedEntityTypes() {
         return watchedEntityTypes;
+    }
+
+    @Override
+    public void setServiceRepository(EntityServiceRepository serviceRepository) {
+        this.serviceRepository = serviceRepository;
     }
 
     @Override

@@ -26,12 +26,19 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.service;
 
+import org.n52.sta.data.STAEventHandler;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
+import java.sql.SQLOutput;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import org.springframework.stereotype.Component;
 
 /**
  * Repository for all Sensor Things entity data services
@@ -43,14 +50,66 @@ public class EntityServiceRepository {
 
     private Map<EntityTypes, AbstractSensorThingsEntityService<?, ?, ?>> entityServices = new LinkedHashMap<>();
 
-    public EntityServiceRepository() {
+    @Autowired private ThingService thingService;
 
-    }
+    @Autowired private LocationService locationService;
 
+    @Autowired private HistoricalLocationService historicalLocationService;
+
+    @Autowired private SensorService sensorService;
+
+    @Autowired private DatastreamService datastreamService;
+
+    @Autowired private ObservationService observationService;
+
+    @Autowired private ObservedPropertyService observedPropertyService;
+
+    @Autowired private FeatureOfInterestService featureOfInterestService;
+
+    @Autowired private STAEventHandler mqttSubscriptionEventHandler;
+
+    /*
     public void addEntityService(AbstractSensorThingsEntityServiceImpl<?, ?, ?> entityService) {
         for (EntityTypes entityType : entityService.getTypes()) {
             entityServices.put(entityType, entityService);
         }
+    }*/
+
+    @PostConstruct
+    public void postConstruct() {
+        this.thingService.setServiceRepository(this);
+        entityServices.put(EntityTypes.Thing, thingService);
+        entityServices.put(EntityTypes.Things, thingService);
+
+        this.locationService.setServiceRepository(this);
+        entityServices.put(EntityTypes.Location, locationService);
+        entityServices.put(EntityTypes.Locations, locationService);
+
+        this.historicalLocationService.setServiceRepository(this);
+        entityServices.put(EntityTypes.HistoricalLocation, historicalLocationService);
+        entityServices.put(EntityTypes.HistoricalLocations, historicalLocationService);
+
+        this.sensorService.setServiceRepository(this);
+        entityServices.put(EntityTypes.Sensor, sensorService);
+        entityServices.put(EntityTypes.Sensors, sensorService);
+
+        this.datastreamService.setServiceRepository(this);
+        entityServices.put(EntityTypes.Datastream, datastreamService);
+        entityServices.put(EntityTypes.Datastreams, datastreamService);
+
+        this.observationService.setServiceRepository(this);
+        entityServices.put(EntityTypes.Observation, observationService);
+        entityServices.put(EntityTypes.Observations, observationService);
+
+        this.observedPropertyService.setServiceRepository(this);
+        entityServices.put(EntityTypes.ObservedProperty, observedPropertyService);
+        entityServices.put(EntityTypes.ObservedProperties, observedPropertyService);
+
+        this.featureOfInterestService.setServiceRepository(this);
+        entityServices.put(EntityTypes.FeatureOfInterest, featureOfInterestService);
+        entityServices.put(EntityTypes.FeaturesOfInterest, featureOfInterestService);
+
+        this.mqttSubscriptionEventHandler.setServiceRepository(this);
     }
 
     /**

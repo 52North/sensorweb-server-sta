@@ -29,6 +29,7 @@
 
 package org.n52.sta.data;
 
+import org.n52.sta.data.service.EntityServiceRepository;
 import org.springframework.scheduling.annotation.Async;
 
 import java.util.Map;
@@ -60,4 +61,6 @@ public interface STAEventHandler {
      * @return Set of all watched Entity Types. Empty if Handler is inactive.
      */
     Set<String> getWatchedEntityTypes();
+
+    void setServiceRepository(EntityServiceRepository serviceRepository);
 }
