@@ -179,6 +179,7 @@ public class ThingService
                     throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
                 } else {
                     thing.setProcessed(true);
+                    processDatastreams(thing);
                     boolean locationChanged = processLocations(thing, thing.getLocations());
                     thing = getRepository().intermediateSave(thing);
                     boolean hasUnpersistedHLocs = thing.hasHistoricalLocations() &&
@@ -186,7 +187,6 @@ public class ThingService
                     if (locationChanged || hasUnpersistedHLocs) {
                         generateHistoricalLocation(thing);
                     }
-                    processDatastreams(thing);
                     thing = getRepository().save(thing);
                 }
             }
