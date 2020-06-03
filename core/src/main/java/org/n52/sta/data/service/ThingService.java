@@ -179,9 +179,9 @@ public class ThingService
                     throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
                 } else {
                     thing.setProcessed(true);
-                    processDatastreams(thing);
                     boolean locationChanged = processLocations(thing, thing.getLocations());
                     thing = getRepository().intermediateSave(thing);
+                    processDatastreams(thing);
                     boolean hasUnpersistedHLocs = thing.hasHistoricalLocations() &&
                             thing.getHistoricalLocations().stream().anyMatch(p -> p.getId() == null);
                     if (locationChanged || hasUnpersistedHLocs) {
@@ -362,7 +362,9 @@ public class ThingService
                 historicalLocations.add(createdHistoricalLocation);
             }
             for (LocationEntity location : thing.getLocations()) {
-                location.setHistoricalLocations(Collections.singleton(createdHistoricalLocation));
+                HashSet<HistoricalLocationEntity> hlocs = new HashSet<>();
+                hlocs.add(createdHistoricalLocation);
+                location.setHistoricalLocations(hlocs);
                 getLocationService().createOrUpdate(location);
             }
             thing.setHistoricalLocations(historicalLocations);
