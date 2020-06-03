@@ -29,6 +29,8 @@
 
 package org.n52.sta.serdes.util;
 
+import org.hibernate.Hibernate;
+import org.hibernate.proxy.HibernateProxy;
 import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.HibernateRelations;
 import org.n52.series.db.beans.PhenomenonEntity;
@@ -57,36 +59,37 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
     }
 
     public static ElementWithQueryOptions from(Object entity, QueryOptions queryOptions) {
-        switch (entity.getClass().getSimpleName()) {
+        Object unwrapped = (entity instanceof HibernateProxy)? Hibernate.unproxy(entity) : entity;
+        switch (unwrapped.getClass().getSimpleName()) {
         case "PlatformEntity":
-            return new ThingWithQueryOptions((PlatformEntity) entity, queryOptions);
+            return new ThingWithQueryOptions((PlatformEntity) unwrapped, queryOptions);
         case "ProcedureEntity":
-            return new SensorWithQueryOptions(new SensorEntity((ProcedureEntity) entity), queryOptions);
+            return new SensorWithQueryOptions(new SensorEntity((ProcedureEntity) unwrapped), queryOptions);
         case "SensorEntity":
-            return new SensorWithQueryOptions((SensorEntity) entity, queryOptions);
+            return new SensorWithQueryOptions((SensorEntity) unwrapped, queryOptions);
         case "PhenomenonEntity":
-            return new ObservedPropertyWithQueryOptions(new ObservablePropertyEntity((PhenomenonEntity) entity),
+            return new ObservedPropertyWithQueryOptions(new ObservablePropertyEntity((PhenomenonEntity) unwrapped),
                                                         queryOptions);
         case "ObservablePropertyEntity":
-            return new ObservedPropertyWithQueryOptions((ObservablePropertyEntity) entity, queryOptions);
+            return new ObservedPropertyWithQueryOptions((ObservablePropertyEntity) unwrapped, queryOptions);
         case "LocationEntity":
-            return new LocationWithQueryOptions((LocationEntity) entity, queryOptions);
+            return new LocationWithQueryOptions((LocationEntity) unwrapped, queryOptions);
         case "HistoricalLocationEntity":
-            return new HistoricalLocationWithQueryOptions((HistoricalLocationEntity) entity, queryOptions);
+            return new HistoricalLocationWithQueryOptions((HistoricalLocationEntity) unwrapped, queryOptions);
         case "StaFeatureEntity":
-            return new FeatureOfInterestWithQueryOptions((StaFeatureEntity<?>) entity, queryOptions);
+            return new FeatureOfInterestWithQueryOptions((StaFeatureEntity<?>) unwrapped, queryOptions);
         case "FeatureEntity":
             return new FeatureOfInterestWithQueryOptions(
-                    new StaFeatureEntity<>((FeatureEntity) entity), queryOptions);
+                    new StaFeatureEntity<>((FeatureEntity) unwrapped), queryOptions);
         case "DatastreamEntity":
-            return new DatastreamWithQueryOptions((DatastreamEntity) entity, queryOptions);
+            return new DatastreamWithQueryOptions((DatastreamEntity) unwrapped, queryOptions);
         default:
-            if (entity instanceof ObservationEntity) {
-                return new ObservationWithQueryOptions((ObservationEntity<?>) entity, queryOptions);
+            if (unwrapped instanceof ObservationEntity) {
+                return new ObservationWithQueryOptions((ObservationEntity<?>) unwrapped, queryOptions);
             } else {
                 throw new RuntimeException(
                         "Error wrapping object with queryOptions. Could not find Wrapper for class: " +
-                                entity.getClass().getSimpleName());
+                                unwrapped.getClass().getSimpleName());
             }
         }
     }
