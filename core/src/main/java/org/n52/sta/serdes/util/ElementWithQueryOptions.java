@@ -59,7 +59,7 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
     }
 
     public static ElementWithQueryOptions from(Object entity, QueryOptions queryOptions) {
-        Object unwrapped = (entity instanceof HibernateProxy)? Hibernate.unproxy(entity) : entity;
+        Object unwrapped = (entity instanceof HibernateProxy) ? Hibernate.unproxy(entity) : entity;
         switch (unwrapped.getClass().getSimpleName()) {
         case "PlatformEntity":
             return new ThingWithQueryOptions((PlatformEntity) unwrapped, queryOptions);

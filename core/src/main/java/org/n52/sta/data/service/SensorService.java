@@ -223,9 +223,10 @@ public class SensorService
         if (HttpMethod.PATCH.equals(method)) {
             synchronized (getLock(id)) {
                 Optional<ProcedureEntity> existing =
-                        getRepository().findByStaIdentifier(id,
-                                                            EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT,
-                                                            EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDUREHISTORY);
+                        getRepository()
+                                .findByStaIdentifier(id,
+                                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT,
+                                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDUREHISTORY);
                 if (existing.isPresent()) {
                     ProcedureEntity merged = merge(existing.get(), entity);
                     if (entity instanceof SensorEntity) {

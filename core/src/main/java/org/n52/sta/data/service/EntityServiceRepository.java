@@ -31,12 +31,9 @@ package org.n52.sta.data.service;
 
 import org.n52.sta.data.STAEventHandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.sql.SQLOutput;
 import java.util.LinkedHashMap;
 import java.util.Map;
 

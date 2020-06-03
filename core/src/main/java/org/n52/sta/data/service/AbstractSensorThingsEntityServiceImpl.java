@@ -73,7 +73,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import javax.persistence.criteria.Predicate;
 import java.util.Optional;
 
@@ -94,10 +93,6 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     protected static final String RESULT = "result";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSensorThingsEntityServiceImpl.class);
-
-    public void setServiceRepository(EntityServiceRepository serviceRepository) {
-        this.serviceRepository = serviceRepository;
-    }
 
     private EntityServiceRepository serviceRepository;
 
@@ -548,5 +543,9 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         return (AbstractSensorThingsEntityServiceImpl<?, AbstractObservationEntity<?>, AbstractObservationEntity<?>>)
                 getEntityService(EntityTypes.Observation);
 
+    }
+
+    public void setServiceRepository(EntityServiceRepository serviceRepository) {
+        this.serviceRepository = serviceRepository;
     }
 }
