@@ -257,6 +257,11 @@ public class MessageBusRepository<T, I extends Serializable>
                 // Get original entity state from database to create differenceMap for matching MQTT Subscriptions on
                 // Entity properties
                 S oldEntity = (S) this.databaseEm.find(newEntity.getClass(), entityInformation.getId(newEntity));
+
+                // Entity was intermediateSaved and is not known to databaseEm
+                if (oldEntity == null) {
+                    oldEntity = (S) this.em.find(newEntity.getClass(), entityInformation.getId(newEntity));
+                }
                 Map<String, Object> oldProperties = getPropertyMap(oldEntity);
                 S entity = em.merge(newEntity);
                 em.flush();
@@ -264,10 +269,7 @@ public class MessageBusRepository<T, I extends Serializable>
                                              entityType,
                                              computeDifference(oldProperties, getPropertyMap(newEntity)),
                                              getRelatedCollections(entity));
-                // Entity was saved multiple times without changes. As reference is the same
-                if (oldEntity == entity) {
-                    return entity;
-                }
+                return entity;
             } else {
                 return em.merge(newEntity);
             }

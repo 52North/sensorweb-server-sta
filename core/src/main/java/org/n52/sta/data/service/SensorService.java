@@ -29,10 +29,6 @@
 
 package org.n52.sta.data.service;
 
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.ProcedureEntity;
@@ -62,6 +58,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -168,7 +168,7 @@ public class SensorService
         if (sensor.getStaIdentifier() != null && !sensor.isSetName()) {
             Optional<ProcedureEntity> optionalEntity =
                     getRepository().findByStaIdentifier(sensor.getStaIdentifier(),
-                                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT);
+                                                        EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT);
             if (optionalEntity.isPresent()) {
                 return optionalEntity.get();
             } else {
@@ -193,7 +193,7 @@ public class SensorService
                 throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
             }
             ProcedureEntity procedure = getAsProcedureEntity(sensor);
-            checkFormat(procedure);
+            checkFormat(procedure, procedure);
             // Intermediate save to allow DatastreamService->createOrUpdate to use this entity. Does not trigger
             // intercept handling (e.g. mqtt). Needed as Datastream<->Procedure connection is not yet set but
             // required by interceptors
@@ -224,8 +224,8 @@ public class SensorService
             synchronized (getLock(id)) {
                 Optional<ProcedureEntity> existing =
                         getRepository().findByStaIdentifier(id,
-                                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT,
-                                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDUREHISTORY);
+                                                            EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT,
+                                                            EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDUREHISTORY);
                 if (existing.isPresent()) {
                     ProcedureEntity merged = merge(existing.get(), entity);
                     if (entity instanceof SensorEntity) {
@@ -237,7 +237,7 @@ public class SensorService
                             }
                         }
                     }
-                    checkFormat(merged);
+                    checkFormat(merged, entity);
                     checkProcedureHistory(merged);
                     getRepository().save(getAsProcedureEntity(merged));
                     return merged;
@@ -300,18 +300,20 @@ public class SensorService
         return createEntity(entity);
     }
 
-    private void checkFormat(ProcedureEntity sensor) throws STACRUDException {
+    private void checkFormat(ProcedureEntity mergedSensor, ProcedureEntity newSensor) throws STACRUDException {
         FormatEntity format;
-        synchronized (getLock(sensor.getFormat().getFormat())) {
-            if (!formatRepository.existsByFormat(sensor.getFormat().getFormat())) {
-                format = formatRepository.save(sensor.getFormat());
-            } else {
-                format = formatRepository.findByFormat(sensor.getFormat().getFormat());
+        synchronized (getLock(mergedSensor.getFormat().getFormat())) {
+            if (newSensor.getFormat() != null) {
+                if (!formatRepository.existsByFormat(newSensor.getFormat().getFormat())) {
+                    format = formatRepository.save(newSensor.getFormat());
+                } else {
+                    format = formatRepository.findByFormat(newSensor.getFormat().getFormat());
+                }
+                mergedSensor.setFormat(format);
+                if (mergedSensor.hasProcedureHistory()) {
+                    mergedSensor.getProcedureHistory().forEach(pf -> pf.setFormat(format));
+                }
             }
-        }
-        sensor.setFormat(format);
-        if (sensor.hasProcedureHistory()) {
-            sensor.getProcedureHistory().forEach(pf -> pf.setFormat(format));
         }
     }
 
@@ -334,9 +336,11 @@ public class SensorService
         if (toMerge.isSetDescriptionFile()) {
             existing.setDescriptionFile(toMerge.getDescriptionFile());
         }
+        /*
         if (toMerge.isSetFormat()) {
             existing.setFormat(toMerge.getFormat());
         }
+        */
 
         return existing;
     }
