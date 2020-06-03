@@ -966,6 +966,9 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
         urlParameters = "{\"description\": \"Patched Description\"}";
         diffs = new HashMap<>();
         diffs.put("description", "Patched Description");
+        // We have added an Observation so phenomenonTime has changed since dataStreamEntity was fetched.
+        // So we have to refetch again before patching
+        datastreamEntity = getEntity(EntityType.DATASTREAM, datastreamEntity.get(idKey).asText());
         updatedEntity = patchEntity(EntityType.DATASTREAM, urlParameters, datastreamId);
         checkPatch(EntityType.DATASTREAM, datastreamEntity, updatedEntity, diffs);
 
