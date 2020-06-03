@@ -6,9 +6,9 @@ trace: false
 server:
   port: 8081
   ## Used for response serialization + url parsing. Must be set correctly!
-  rootUrl: "http://localhost:8081/v2/"
+  rootUrl: "http://localhost:8081/sta/"
   servlet:
-    context-path: "/v2"
+    context-path: "/sta"
 
   ## Used for enabling/disabling custom 52N-STA Features
   feature:
