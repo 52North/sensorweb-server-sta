@@ -126,7 +126,11 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
      * @return Object used for holding the lock
      */
     protected Object getLock(String key) throws STACRUDException {
-        return lock.getLock(key + entityClass.getSimpleName());
+        if (key == null) {
+            throw new STACRUDException("Unable to aquire lock. Invalid key provided!");
+        } else {
+            return lock.getLock(key + entityClass.getSimpleName());
+        }
     }
 
     public abstract EntityTypes[] getTypes();
