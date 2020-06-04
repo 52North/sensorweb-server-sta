@@ -311,7 +311,7 @@ public interface TestUtil {
         }
         Assertions.assertEquals(iotCount,
                                 response.get("@iot.count").asDouble(),
-                                "@iot.id count is not" + iotCount + " although it should be");
+                                "@iot.id count is not " + iotCount + " although it should be");
         Assertions.assertFalse(
                 response.get("value").isEmpty(),
                 "Entity is not returned although it should"

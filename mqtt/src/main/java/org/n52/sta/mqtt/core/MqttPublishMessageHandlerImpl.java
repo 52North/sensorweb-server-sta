@@ -30,6 +30,7 @@
 package org.n52.sta.mqtt.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.moquette.interception.messages.InterceptPublishMessage;
 import org.n52.series.db.beans.IdEntity;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
@@ -110,16 +111,34 @@ public class MqttPublishMessageHandlerImpl implements MqttPublishMessageHandler 
 
             // Check if topic references valid Collection
             boolean valid = false;
+            String collection = "";
             for (String publishTopic : publishTopics) {
                 if (topic.endsWith(publishTopic)) {
                     valid = true;
+                    collection = publishTopic;
                     break;
                 }
             }
             if (valid) {
-                Class<T> clazz = collectionNameToClass(topic);
-                ((AbstractSensorThingsEntityService<?, T, ? extends T>) serviceRepository.getEntityService(topic))
-                        .create(mapper.readValue(msg.getPayload().toString(Charset.defaultCharset()), clazz));
+                String payload;
+                // Check whether we are posted via a related collection
+                if (topic.contains("/")) {
+                    String[] split = topic.split("/");
+                    String[] reference = split[split.length - 2].split("\\(");
+                    String sourceType = reference[0];
+                    String sourceId = reference[1].replace(")", "");
+                    ObjectNode jsonBody =
+                            (ObjectNode) mapper.readTree(msg.getPayload().toString(Charset.defaultCharset()));
+                    jsonBody.put(REFERENCED_FROM_TYPE, sourceType);
+                    jsonBody.put(REFERENCED_FROM_ID, sourceId);
+                    payload = jsonBody.toString();
+                } else {
+                    payload = msg.getPayload().toString(Charset.defaultCharset());
+                }
+
+                Class<T> clazz = collectionNameToClass(collection);
+                ((AbstractSensorThingsEntityService<?, T, ? extends T>) serviceRepository.getEntityService(collection))
+                        .create(mapper.readValue(payload, clazz));
             } else {
                 throw new STAInvalidUrlException("Topic does not reference a Collection allowed for POSTing via mqtt");
             }

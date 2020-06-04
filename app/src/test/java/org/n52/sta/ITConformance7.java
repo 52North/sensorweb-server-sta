@@ -158,7 +158,7 @@ public class ITConformance7 extends ConformanceTests implements TestUtil {
     }
 
     @Test
-    public void postObservation() throws Exception {
+    public void postObservationDirect() throws Exception {
         init();
         String observation = "{\n" +
                 "    \"result\": 0.29,\n" +
@@ -184,6 +184,54 @@ public class ITConformance7 extends ConformanceTests implements TestUtil {
                 "    }\n" +
                 "}";
         mqttClient.publish("Observations", observation.getBytes(), 1, false);
+
+        JsonNode response = getCollection(EntityType.OBSERVATION);
+        Assertions.assertTrue(response.has(value));
+        Assertions.assertTrue(response.has(countKey));
+
+        assertResponseCount(
+                response,
+                3,
+                3
+        );
+    }
+
+    @Test
+    public void postObservationRelatedDatastream() throws Exception {
+        init();
+        String observation = "{\n" +
+                "    \"result\": 0.29,\n" +
+                "    \"phenomenonTime\": \"2019-03-10T17:45:09Z\",\n" +
+                "    \"resultTime\": \"2019-03-10T16:58:09Z\",\n" +
+                "    \"FeatureOfInterest\": {\n" +
+                "        \"@iot.id\": \"ITConformance7FOI\"\n" +
+                "    }\n" +
+                "}";
+        mqttClient.publish("Datastreams(ITConformance7Datastream)/Observations", observation.getBytes(), 1, false);
+
+        JsonNode response = getCollection(EntityType.OBSERVATION);
+        Assertions.assertTrue(response.has(value));
+        Assertions.assertTrue(response.has(countKey));
+
+        assertResponseCount(
+                response,
+                3,
+                3
+        );
+    }
+
+    @Test
+    public void postObservationRelatedFOI() throws Exception {
+        init();
+        String observation = "{\n" +
+                "    \"result\": 0.29,\n" +
+                "    \"phenomenonTime\": \"2019-03-10T17:45:09Z\",\n" +
+                "    \"resultTime\": \"2019-03-10T16:58:09Z\",\n" +
+                "    \"Datastream\": {\n" +
+                "        \"@iot.id\": \"ITConformance7Datastream\"\n" +
+                "    }\n" +
+                "}";
+        mqttClient.publish("FeaturesOfInterest(ITConformance7FOI)/Observations", observation.getBytes(), 1, false);
 
         JsonNode response = getCollection(EntityType.OBSERVATION);
         Assertions.assertTrue(response.has(value));

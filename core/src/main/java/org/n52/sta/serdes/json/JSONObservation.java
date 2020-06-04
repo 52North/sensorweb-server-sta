@@ -100,13 +100,20 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
     @Override
     protected void parseReferencedFrom() {
         if (referencedFromType != null) {
-            if ("Datastreams".equals(referencedFromType)) {
+            switch (referencedFromType) {
+            case "Datastreams":
                 Assert.isNull(Datastream, INVALID_DUPLICATE_REFERENCE);
                 this.Datastream = new JSONDatastream();
                 this.Datastream.identifier = referencedFromID;
                 return;
+            case "FeaturesOfInterest":
+                Assert.isNull(FeatureOfInterest, INVALID_DUPLICATE_REFERENCE);
+                this.FeatureOfInterest = new JSONFeatureOfInterest();
+                this.FeatureOfInterest.identifier = referencedFromID;
+                return;
+            default:
+                throw new IllegalArgumentException(INVALID_BACKREFERENCE);
             }
-            throw new IllegalArgumentException(INVALID_BACKREFERENCE);
         }
     }
 
