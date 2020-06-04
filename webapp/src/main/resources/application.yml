@@ -110,8 +110,9 @@ mqtt:
     
 # Logging
 logging:
-  file: logs/52n-sensorthings-webapp.log
-  logging.file.max-history: 10
+  file:
+    name: 52n-sta-webapp.log
+    
   level:
     # root: TRACE
     org.apache.coyote.http11.Http11InputBuffer: INFO
