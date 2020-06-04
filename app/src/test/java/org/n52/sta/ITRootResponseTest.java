@@ -46,6 +46,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Profile;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
 
@@ -53,7 +54,7 @@ import java.io.IOException;
  * This class tests various different things not covered directly by the official cite tests
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@Profile("test")
+@Testcontainers
 public class ITRootResponseTest {
 
     protected final static String jsonMimeType = "application/json";
