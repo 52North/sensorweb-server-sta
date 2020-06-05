@@ -35,12 +35,9 @@ import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
-import org.n52.shetland.ogc.filter.FilterConstants.ComparisonOperator;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
@@ -130,27 +127,61 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Ob
                 case "id":
                     return handleDirectStringPropertyFilter(root.get(ObservationEntity.PROPERTY_STA_IDENTIFIER),
                                                             propertyValue, operator, builder, false);
-                case "value":
-                    String type = propertyValue.getJavaType().getName();
-                    if (type.equals(Double.class.getName())
-                            || type.equals(Long.class.getName())
-                            || type.equals(Integer.class.getName())) {
-                        return createNumericPredicate(root,
-                                                      query,
-                                                      builder,
-                                                      ObservationEntity.class,
-                                                      propertyName,
-                                                      propertyValue,
-                                                      operator
+                case "result":
+                    if (propertyValue.getJavaType().isAssignableFrom(Double.class)
+                            || propertyValue.getJavaType().isAssignableFrom(Integer.class)) {
+                        Predicate countPred = handleDirectNumberPropertyFilter(
+                                root.<Double>get(ObservationEntity.PROPERTY_VALUE_COUNT),
+                                propertyValue,
+                                operator,
+                                builder);
+
+                        Predicate quantityPred = handleDirectNumberPropertyFilter(
+                                root.<Double>get(ObservationEntity.PROPERTY_VALUE_QUANTITY),
+                                propertyValue,
+                                operator,
+                                builder);
+                        // Check for quantity or count as those are numeric
+                        // Do not return observations with non-numeric result type
+                        return builder.and(
+                                builder.or(countPred, root.get(ObservationEntity.PROPERTY_VALUE_COUNT).isNull()),
+                                builder.or(quantityPred, root.get(ObservationEntity.PROPERTY_VALUE_QUANTITY).isNull()),
+                                root.get(ObservationEntity.PROPERTY_VALUE_CATEGORY).isNull(),
+                                root.get(ObservationEntity.PROPERTY_VALUE_TEXT).isNull(),
+                                root.get(ObservationEntity.PROPERTY_VALUE_BOOLEAN).isNull()
                         );
-                    } else if (type.equals(String.class.getName())) {
-                        return createStringPredicate(root,
-                                                     query,
-                                                     builder,
-                                                     ObservationEntity.class,
-                                                     propertyName,
-                                                     propertyValue,
-                                                     operator
+                    } else if (propertyValue.getJavaType().isAssignableFrom(String.class)) {
+                        Predicate categoryPred = handleDirectStringPropertyFilter(
+                                root.get(ObservationEntity.PROPERTY_VALUE_CATEGORY),
+                                propertyValue,
+                                operator,
+                                builder,
+                                false);
+
+                        Predicate textPred = handleDirectStringPropertyFilter(
+                                root.get(ObservationEntity.PROPERTY_VALUE_TEXT),
+                                propertyValue,
+                                operator,
+                                builder,
+                                false);
+
+                        /*
+                        Predicate boolPred = handleDirectStringPropertyFilter(
+                                root.get(ObservationEntity.PROPERTY_VALUE_BOOLEAN),
+                                propertyValue,
+                                operator,
+                                builder,
+                                false);
+                        */
+
+                        // Check for category, text, boolean as those represented by String in query
+                        // Do not return observations with numeric result type as we are filtering on string
+                        return builder.and(
+                                builder.or(categoryPred, root.get(ObservationEntity.PROPERTY_VALUE_CATEGORY).isNull()),
+                                builder.or(textPred, root.get(ObservationEntity.PROPERTY_VALUE_TEXT).isNull()),
+                                // builder.or(boolPred, root.get(ObservationEntity.PROPERTY_VALUE_BOOLEAN).isNull()),
+                                root.get(ObservationEntity.PROPERTY_VALUE_COUNT).isNull(),
+                                root.get(ObservationEntity.PROPERTY_VALUE_QUANTITY).isNull()
                         );
                     } else {
                         throw new STAInvalidFilterExpressionException("Value type not supported!");
@@ -196,41 +227,5 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Ob
                 throw new RuntimeException(e);
             }
         };
-    }
-
-    private <T extends ObservationEntity> Predicate createNumericPredicate(Root<ObservationEntity<?>> root,
-                                                                           CriteriaQuery<?> query,
-                                                                           CriteriaBuilder builder,
-                                                                           Class<T> clazz,
-                                                                           String propertyName,
-                                                                           Expression<?> propertyValue,
-                                                                           ComparisonOperator operator)
-            throws STAInvalidFilterExpressionException {
-        Subquery<T> sq = query.subquery(clazz);
-        Root<T> entity = sq.from(clazz);
-        Predicate predicate =
-                handleDirectNumberPropertyFilter(entity.get(propertyName), propertyValue, operator, builder);
-        sq.select(entity.get(ObservationEntity.PROPERTY_ID)).where(predicate);
-        return builder.in(root.get(ObservationEntity.PROPERTY_ID)).value(sq);
-    }
-
-    private <T extends ObservationEntity> Predicate createStringPredicate(Root<ObservationEntity<?>> root,
-                                                                          CriteriaQuery<?> query,
-                                                                          CriteriaBuilder builder,
-                                                                          Class<T> clazz,
-                                                                          String propertyName,
-                                                                          Expression<?> propertyValue,
-                                                                          ComparisonOperator operator)
-            throws STAInvalidFilterExpressionException {
-        Subquery<T> sq = query.subquery(clazz);
-        Root<T> entity = sq.from(clazz);
-        Predicate predicate =
-                handleDirectStringPropertyFilter(entity.get(propertyName),
-                                                 propertyValue,
-                                                 operator,
-                                                 builder,
-                                                 false);
-        sq.select(entity.get(ObservationEntity.PROPERTY_ID)).where(predicate);
-        return builder.in(root.get(ObservationEntity.PROPERTY_ID)).value(sq);
     }
 }
