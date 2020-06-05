@@ -217,8 +217,6 @@ public class ITExpand extends ConformanceTests implements TestUtil {
         JsonNode response = getEntity(type, id, "$expand=" + expanded);
         Assertions.assertTrue(response.has(idKey));
         Assertions.assertTrue(response.has(expanded));
-        System.out.println(expanded);
-        System.out.println(response.toPrettyString());
         if (response.get(expanded).isArray()) {
             for (JsonNode node : response.get(expanded)) {
                 Assertions.assertTrue(node.has(idKey));
