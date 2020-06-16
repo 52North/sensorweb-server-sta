@@ -212,6 +212,45 @@ public class ObservationService extends
         }
     }
 
+    protected Page getEntityCollectionByRelatedEntityRaw(String relatedId,
+                                                         String relatedType,
+                                                         QueryOptions queryOptions)
+            throws STACRUDException {
+        try {
+            OffsetLimitBasedPageRequest pageableRequest = createPageableRequest(queryOptions);
+            Specification<ObservationEntity<?>> spec =
+                    byRelatedStaIdentifier(relatedId, relatedType, null)
+                            .and(getFilterPredicate(ObservationEntity.class, queryOptions));
+
+            List<String> identifierList = getRepository().identifierList(spec,
+                                                                         createPageableRequest(queryOptions),
+                                                                         STAIDENTIFIER);
+            if (identifierList.isEmpty()) {
+                return Page.empty();
+            } else {
+                Page<ObservationEntity<?>> pages = getRepository().findAll(
+                        oQS.withStaIdentifier(identifierList),
+                        new OffsetLimitBasedPageRequest(0,
+                                                        pageableRequest.getPageSize(),
+                                                        pageableRequest.getSort()),
+                        EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
+                if (queryOptions.hasExpandFilter()) {
+                    return pages.map(e -> {
+                        try {
+                            return fetchExpandEntities(e, queryOptions.getExpandFilter());
+                        } catch (STACRUDException | STAInvalidQueryException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    });
+                } else {
+                    return pages;
+                }
+            }
+        } catch (RuntimeException e) {
+            throw new STACRUDException(e.getMessage(), e);
+        }
+    }
+
     @Override
     protected ObservationEntity<?> fetchExpandEntities(ObservationEntity<?> returned,
                                                        ExpandFilter expandOption)
