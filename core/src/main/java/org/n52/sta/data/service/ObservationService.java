@@ -230,11 +230,9 @@ public class ObservationService extends
                     returned.setDatastream(datastream);
                     break;
                 case STAEntityDefinition.FEATURE_OF_INTEREST:
-                    AbstractFeatureEntity<?> foi = getFeatureOfInterestService()
-                            .getEntityByRelatedEntityRaw(returned.getStaIdentifier(),
-                                                         STAEntityDefinition.OBSERVATIONS,
-                                                         null,
-                                                         expandItem.getQueryOptions());
+                    AbstractFeatureEntity<?> foi = ((FeatureOfInterestService)
+                            getFeatureOfInterestService()).getEntityByDatasetIdRaw(returned.getDataset().getId(),
+                                                                                   expandItem.getQueryOptions());
                     returned.setFeature(foi);
                     break;
                 default:

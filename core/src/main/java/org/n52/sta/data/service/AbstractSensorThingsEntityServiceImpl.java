@@ -150,6 +150,19 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         }
     }
 
+    public S getEntityByIdRaw(Long id, QueryOptions queryOptions) throws STACRUDException {
+        try {
+            S entity = getRepository().findById(id).get();
+            if (queryOptions.hasExpandFilter()) {
+                return fetchExpandEntities(entity, queryOptions.getExpandFilter());
+            } else {
+                return entity;
+            }
+        } catch (RuntimeException | STAInvalidQueryException e) {
+            throw new STACRUDException(e.getMessage(), e);
+        }
+    }
+
     @Override public CollectionWrapper getEntityCollection(QueryOptions queryOptions) throws STACRUDException {
         try {
             Page<S> pages = getRepository().findAll(getFilterPredicate(entityClass, queryOptions),
