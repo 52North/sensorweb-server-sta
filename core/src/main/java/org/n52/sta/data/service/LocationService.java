@@ -195,9 +195,10 @@ public class LocationService
     public LocationEntity updateEntity(String id, LocationEntity entity, HttpMethod method) throws STACRUDException {
         if (HttpMethod.PATCH.equals(method)) {
             synchronized (getLock(id)) {
-                Optional<LocationEntity> existing = getRepository().findByStaIdentifier(id,
-                                                                                        EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATION,
-                                                                                        EntityGraphRepository.FetchGraph.FETCHGRAPH_THINGS);
+                Optional<LocationEntity> existing = getRepository()
+                        .findByStaIdentifier(id,
+                                             EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATION,
+                                             EntityGraphRepository.FetchGraph.FETCHGRAPH_THINGS);
                 if (existing.isPresent()) {
                     LocationEntity merged = merge(existing.get(), entity);
                     LocationEntity result = getRepository().save(merged);

@@ -117,7 +117,8 @@ public class FeatureOfInterestService
         return new EntityTypes[] {EntityTypes.FeatureOfInterest, EntityTypes.FeaturesOfInterest};
     }
 
-    public AbstractFeatureEntity<?> getEntityByDatasetIdRaw(Long id, QueryOptions queryOptions) throws STACRUDException {
+    public AbstractFeatureEntity<?> getEntityByDatasetIdRaw(Long id, QueryOptions queryOptions)
+            throws STACRUDException {
         try {
             Long foiId = datasetRepository.findById(id).get().getFeature().getId();
             AbstractFeatureEntity<?> entity = getRepository().findById(foiId).get();

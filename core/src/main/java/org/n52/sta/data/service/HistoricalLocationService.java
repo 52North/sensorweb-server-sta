@@ -104,7 +104,7 @@ public class HistoricalLocationService
                     break;
                 case STAEntityDefinition.THING:
                     entity.setThing(getThingService()
-                            .getEntityByIdRaw(entity.getThing().getId(),expandItem.getQueryOptions()));
+                                            .getEntityByIdRaw(entity.getThing().getId(), expandItem.getQueryOptions()));
                     break;
                 default:
                     throw new RuntimeException("This can never happen!");
