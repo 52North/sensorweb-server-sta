@@ -43,6 +43,7 @@ import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.series.db.beans.sta.StaFeatureEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.FeatureOfInterestEntityDefinition;
@@ -114,6 +115,20 @@ public class FeatureOfInterestService
     @Override
     public EntityTypes[] getTypes() {
         return new EntityTypes[] {EntityTypes.FeatureOfInterest, EntityTypes.FeaturesOfInterest};
+    }
+
+    public AbstractFeatureEntity<?> getEntityByDatasetIdRaw(Long id, QueryOptions queryOptions) throws STACRUDException {
+        try {
+            Long foiId = datasetRepository.findById(id).get().getFeature().getId();
+            AbstractFeatureEntity<?> entity = getRepository().findById(foiId).get();
+            if (queryOptions.hasExpandFilter()) {
+                return fetchExpandEntities(entity, queryOptions.getExpandFilter());
+            } else {
+                return entity;
+            }
+        } catch (RuntimeException | STAInvalidQueryException e) {
+            throw new STACRUDException(e.getMessage(), e);
+        }
     }
 
     @Override

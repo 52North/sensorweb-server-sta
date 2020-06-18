@@ -32,9 +32,6 @@ package org.n52.sta.data.service;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
-import org.n52.series.db.beans.PhenomenonEntity;
-import org.n52.series.db.beans.PlatformEntity;
-import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.UnitEntity;
 import org.n52.series.db.beans.sta.AbstractObservationEntity;
 import org.n52.series.db.beans.sta.DatastreamEntity;
@@ -118,28 +115,19 @@ public class DatastreamService
             if (DatastreamEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
                 switch (expandProperty) {
                 case STAEntityDefinition.SENSOR:
-                    ProcedureEntity sensor = getSensorService()
-                            .getEntityByRelatedEntityRaw(entity.getStaIdentifier(),
-                                                         STAEntityDefinition.DATASTREAMS,
-                                                         null,
-                                                         expandItem.getQueryOptions());
-                    entity.setProcedure(sensor);
+                    entity.setProcedure(getSensorService()
+                            .getEntityByIdRaw(entity.getProcedure().getId(), expandItem.getQueryOptions())
+                    );
                     break;
                 case STAEntityDefinition.THING:
-                    PlatformEntity thing = getThingService()
-                            .getEntityByRelatedEntityRaw(entity.getStaIdentifier(),
-                                                         STAEntityDefinition.DATASTREAMS,
-                                                         null,
-                                                         expandItem.getQueryOptions());
-                    entity.setThing(thing);
+                    entity.setThing(getThingService()
+                            .getEntityByIdRaw(entity.getThing().getId(), expandItem.getQueryOptions())
+                    );
                     break;
                 case STAEntityDefinition.OBSERVED_PROPERTY:
-                    PhenomenonEntity obsProp = getObservedPropertyService()
-                            .getEntityByRelatedEntityRaw(entity.getStaIdentifier(),
-                                                         STAEntityDefinition.DATASTREAMS,
-                                                         null,
-                                                         expandItem.getQueryOptions());
-                    entity.setObservableProperty(obsProp);
+                    entity.setObservableProperty(getObservedPropertyService()
+                            .getEntityByIdRaw(entity.getObservableProperty().getId(), expandItem.getQueryOptions())
+                    );
                     break;
                 case STAEntityDefinition.OBSERVATIONS:
                     Page<ObservationEntity<?>> observations = getObservationService()

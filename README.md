@@ -23,8 +23,8 @@ A [Postman](https://www.getpostman.com/) Collection with a multitude of demo req
 | Batch Requests                        | A.4       | No          |   0 / ?    |
 | MultiDatastream Extension             | A.5       | No          |   0 / ?    |
 | DataArray Extension                   | A.6       | No          |   0 / ?    |
-| Observation Creation via MQTT         | A.7       | Yes         |   0 / 1    |
-| Receiving Updates via MQTT            | A.8       | Yes         |   0 / 5    |
+| Observation Creation via MQTT         | A.7       | Yes         |   1 / 1    |
+| Receiving Updates via MQTT            | A.8       | Yes         |   5 / 5    |
 
 ## Notes:
 #### MQTT Extension

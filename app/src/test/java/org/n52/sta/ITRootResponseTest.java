@@ -55,14 +55,15 @@ import java.io.IOException;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Testcontainers
-public class ITRootResponseTest {
+public class ITRootResponseTest extends ConformanceTests {
 
     protected final static String jsonMimeType = "application/json";
 
-    @Value("${server.rootUrl}")
-    private String rootUrl;
-
     private ObjectMapper mapper = new ObjectMapper();
+
+    ITRootResponseTest(@Value("${server.rootUrl}") String rootUrl) {
+        super(rootUrl);
+    }
 
     @Test
     public void rootResponseIsCorrect() throws IOException {

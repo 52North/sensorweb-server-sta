@@ -48,6 +48,18 @@ import java.util.Optional;
 @NoRepositoryBean
 public interface EntityGraphRepository<T, I> extends JpaSpecificationExecutor<T>, JpaRepository<T, I> {
 
+
+    /**
+     * Retrieves an entity by its id. Additionally fetches all related entities given by the provided EntityGraph.
+     * All provided Graphs are merged internally.
+     *
+     * @param id must not be {@literal null}.
+     * @param fetchGraphs string representation of EntityGraph.
+     * @return the entity with the given id or {@literal Optional#empty()} if none found.
+     * @throws IllegalArgumentException if {@literal id} is {@literal null}.
+     */
+     Optional<T> findById(Long id, FetchGraph... fetchGraphs);
+
     /**
      * Returns a single entity matching the given {@link Specification} or {@link Optional#empty()} if none found.
      * Additionally fetches all related entities given by the provided EntityGraph. All provided Graphs are merged
