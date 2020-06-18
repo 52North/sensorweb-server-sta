@@ -26,7 +26,7 @@ services:
     - database
 
   database:
-    image: mdillon/postgis
+    image: postgis/postgis:12-master
     restart: on-failure
     environment:
       - POSTGRES_DB=sta
