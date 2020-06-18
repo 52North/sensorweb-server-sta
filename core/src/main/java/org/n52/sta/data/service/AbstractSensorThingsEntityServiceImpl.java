@@ -152,7 +152,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
 
     public S getEntityByIdRaw(Long id, QueryOptions queryOptions) throws STACRUDException {
         try {
-            S entity = getRepository().findById(id).get();
+            S entity = getRepository().findById(id, defaultFetchGraphs).get();
             if (queryOptions.hasExpandFilter()) {
                 return fetchExpandEntities(entity, queryOptions.getExpandFilter());
             } else {

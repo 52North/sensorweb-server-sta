@@ -56,6 +56,7 @@ import org.hibernate.graph.GraphParser;
 import org.hibernate.graph.RootGraph;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DescribableEntity;
+import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
@@ -93,6 +94,7 @@ public class MessageBusRepository<T, I extends Serializable>
     private final String FETCHGRAPH_HINT = "javax.persistence.fetchgraph";
     private final String IDENTIFIER = DescribableEntity.PROPERTY_IDENTIFIER;
     private final String STAIDENTIFIER = DescribableEntity.PROPERTY_STA_IDENTIFIER;
+    private final String ID = IdEntity.PROPERTY_ID;
 
     private final JpaEntityInformation entityInformation;
     private final STAEventHandler mqttHandler;
@@ -199,6 +201,17 @@ public class MessageBusRepository<T, I extends Serializable>
     @Transactional
     public Optional<T> findByIdentifier(String identifier, EntityGraphRepository.FetchGraph... entityGraphs) {
         return findByQuery(createIdentifierQuery(identifier, IDENTIFIER), entityGraphs);
+    }
+
+    @Transactional
+    public Optional<T> findById(Long id, EntityGraphRepository.FetchGraph... entityGraphs) {
+        CriteriaQuery<T> criteriaQuery = criteriaBuilder.createQuery(entityClass);
+        Root<T> root = criteriaQuery.from(entityClass);
+
+        ParameterExpression<Long> params = criteriaBuilder.parameter(Long.class);
+        criteriaQuery.where(criteriaBuilder.equal(root.get(ID), params));
+
+        return findByQuery(em.createQuery(criteriaQuery).setParameter(params, id), entityGraphs);
     }
 
     @Transactional
