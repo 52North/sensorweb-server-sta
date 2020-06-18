@@ -219,7 +219,7 @@ public class ObservationService extends
         try {
             OffsetLimitBasedPageRequest pageableRequest = createPageableRequest(queryOptions);
             Specification<ObservationEntity<?>> spec =
-                    byRelatedStaIdentifier(relatedId, relatedType, null)
+                    byRelatedEntityFilter(relatedId, relatedType, null)
                             .and(getFilterPredicate(ObservationEntity.class, queryOptions));
 
             List<String> identifierList = getRepository().identifierList(spec,
