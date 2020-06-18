@@ -109,7 +109,7 @@ public abstract class EntityQuerySpecifications<T> {
 
     public Specification<T> withStaIdentifier(final List<String> identifiers) {
         return (root, query, builder) -> builder.in(root.get(DescribableEntity.PROPERTY_STA_IDENTIFIER))
-                .value(identifiers);
+                                                .value(identifiers);
     }
 
     // Wrapper
@@ -129,17 +129,13 @@ public abstract class EntityQuerySpecifications<T> {
     }
 
     @SuppressWarnings("unchecked")
-    protected Predicate handleDirectNumberPropertyFilter(Path<Double> numberPath,
-                                                         Expression<?> propertyValue,
-                                                         FilterConstants.ComparisonOperator operator,
-                                                         CriteriaBuilder builder)
+    protected <K extends Comparable<? super K>>
+    Predicate handleDirectNumberPropertyFilter(Path<K> numberPath,
+                                               Expression<?> propertyValue,
+                                               FilterConstants.ComparisonOperator operator,
+                                               CriteriaBuilder builder)
             throws STAInvalidFilterExpressionException {
-        if (propertyValue.getJavaType().equals(Double.class)) {
-            return this.handleComparableFilter(numberPath, (Expression<Double>) propertyValue, operator, builder);
-        } else {
-            throw new STAInvalidFilterExpressionException(
-                    INVALID_DATATYPE_CANNOT_CAST + propertyValue.getJavaType() + " to Double.class");
-        }
+        return this.handleComparableFilter(numberPath, (Expression<K>) propertyValue, operator, builder);
     }
 
     @SuppressWarnings("unchecked")

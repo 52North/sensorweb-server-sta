@@ -103,12 +103,8 @@ public class HistoricalLocationService
                     entity.setLocations(locations.get().collect(Collectors.toSet()));
                     break;
                 case STAEntityDefinition.THING:
-                    PlatformEntity things = getThingService()
-                            .getEntityByRelatedEntityRaw(entity.getStaIdentifier(),
-                                                         STAEntityDefinition.HISTORICAL_LOCATIONS,
-                                                         null,
-                                                         expandItem.getQueryOptions());
-                    entity.setThing(things);
+                    entity.setThing(getThingService()
+                                            .getEntityByIdRaw(entity.getThing().getId(), expandItem.getQueryOptions()));
                     break;
                 default:
                     throw new RuntimeException("This can never happen!");

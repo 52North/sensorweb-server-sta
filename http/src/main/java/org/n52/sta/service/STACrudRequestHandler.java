@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.n52.series.db.beans.IdEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
+import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
@@ -85,7 +86,7 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
     @SuppressWarnings("unchecked")
     public ElementWithQueryOptions<?> handlePostDirect(@PathVariable String collectionName,
                                                        @RequestBody String body)
-            throws IOException, STACRUDException {
+            throws IOException, STACRUDException, STAInvalidUrlException {
 
         Class<T> clazz = collectionNameToClass(collectionName);
         return ((AbstractSensorThingsEntityService<?, T, ? extends T>)

@@ -443,7 +443,7 @@ public interface STARequestUtils extends StaConstants {
         }
     }
 
-    default Class collectionNameToClass(String collectionName) {
+    default Class collectionNameToClass(String collectionName) throws STAInvalidUrlException {
         switch (collectionName) {
         case THINGS:
             return PlatformEntity.class;
@@ -462,7 +462,7 @@ public interface STARequestUtils extends StaConstants {
         case FEATURES_OF_INTEREST:
             return AbstractFeatureEntity.class;
         default:
-            return null;
+            throw new STAInvalidUrlException("Could not resolve CollectionName to Entity class!");
         }
     }
 

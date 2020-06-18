@@ -42,6 +42,8 @@ database:
   jpa:
     persistence-location: classpath:META-INF/sensorthings-persistence.xml
 spring:
+  main:
+    show-banner: false
   datasource:
     platform: postgres
     username: ${DB_USERNAME}
