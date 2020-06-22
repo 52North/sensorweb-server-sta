@@ -43,9 +43,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Implements Conformance Tests according to Section A.3 in OGC SensorThings API Part 1: Sensing (15-078r6)
@@ -516,7 +518,7 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
                 + "  ]\n"
                 + "}";
         postInvalidEntity(EntityType.THING, urlParameters);
-        List<EntityType> entityTypesToCheck = new ArrayList<>();
+        Set<EntityType> entityTypesToCheck = new HashSet<>();
         entityTypesToCheck.add(EntityType.THING);
         entityTypesToCheck.add(EntityType.LOCATION);
         entityTypesToCheck.add(EntityType.HISTORICAL_LOCATION);
@@ -1003,7 +1005,7 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
     public void deleteEntities() throws Exception {
         Map<EntityType, String[]> entitiesForDelete = createEntitiesForDelete();
         deleteEntity(EntityType.THING, entitiesForDelete.get(EntityType.THING)[0], false);
-        List<EntityType> entityTypes = new ArrayList<>();
+        Set<EntityType> entityTypes = new HashSet<>();
         entityTypes.add(EntityType.THING);
         entityTypes.add(EntityType.DATASTREAM);
         entityTypes.add(EntityType.HISTORICAL_LOCATION);
@@ -1477,30 +1479,5 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
                 }
             }
         });
-    }
-
-    /**
-     * Check the database is empty of certain entity types
-     *
-     * @param entityTypes List of entity types
-     */
-    private void checkNotExisting(List<EntityType> entityTypes) throws Exception {
-        for (EntityType entityType : entityTypes) {
-            JsonNode response = getEntity(endpoints.get(entityType));
-            Assertions.assertTrue(
-                    response.get("value").isEmpty(),
-                    "Entity with type: " + entityType.name() + " is created although it shouldn't"
-            );
-        }
-    }
-
-    private void checkExisting(List<EntityType> entityTypes) throws Exception {
-        for (EntityType entityType : entityTypes) {
-            JsonNode response = getEntity(endpoints.get(entityType));
-            Assertions.assertTrue(
-                    !response.get("value").isEmpty(),
-                    "No Entity with type: " + entityType.name() + " is present"
-            );
-        }
     }
 }

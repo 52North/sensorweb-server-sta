@@ -142,12 +142,8 @@ public class JSONBase {
                 // We have errored out on type 2
                 secondEx = e;
             }
-            String couldNotParse = "Could not parse as ";
-            String entityError = " Entity. Error: ";
             // We have errored out on both types so return error message
-            throw new IllegalStateException(
-                    couldNotParse + type1.name() + entityError + ex.getMessage() + "! " +
-                            couldNotParse + type2.name() + entityError + secondEx.getMessage());
+            throw new IllegalStateException(ex.getMessage() + secondEx.getMessage());
         }
     }
 

@@ -52,6 +52,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -413,6 +414,31 @@ abstract class ConformanceTests implements TestUtil {
                                              + response.toPrettyString()
                                              + "does not have mandatory property:"
                                              + property);
+        }
+    }
+
+    /**
+     * Check the database is empty of certain entity types
+     *
+     * @param entityTypes List of entity types
+     */
+    protected void checkNotExisting(Set<EntityType> entityTypes) throws Exception {
+        for (EntityType entityType : entityTypes) {
+            JsonNode response = getEntity(endpoints.get(entityType));
+            Assertions.assertTrue(
+                    response.get("value").isEmpty(),
+                    "Entity with type: " + entityType.name() + " is created although it shouldn't"
+            );
+        }
+    }
+
+    protected void checkExisting(Set<EntityType> entityTypes) throws Exception {
+        for (EntityType entityType : entityTypes) {
+            JsonNode response = getEntity(endpoints.get(entityType));
+            Assertions.assertTrue(
+                    !response.get("value").isEmpty(),
+                    "No Entity with type: " + entityType.name() + " is present"
+            );
         }
     }
 
