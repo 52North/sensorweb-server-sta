@@ -210,7 +210,8 @@ public abstract class EntityQuerySpecifications<T> {
     }
 
     protected abstract Specification<T> handleRelatedPropertyFilter(String propertyName,
-                                                                    Specification<?> propertyValue);
+                                                                    Specification<?> propertyValue)
+            throws STAInvalidFilterExpressionException;
 
     protected abstract Specification<T> handleDirectPropertyFilter(String propertyName,
                                                                    Expression<?> propertyValue,

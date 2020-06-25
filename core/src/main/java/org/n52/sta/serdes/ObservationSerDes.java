@@ -40,7 +40,7 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.parameter.ParameterJsonEntity;
-import org.n52.series.db.beans.sta.ObservationEntity;
+import org.n52.series.db.beans.sta.mapped.ObservationEntity;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.gml.time.Time;

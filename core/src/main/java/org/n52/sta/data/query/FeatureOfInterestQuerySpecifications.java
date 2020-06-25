@@ -33,7 +33,7 @@ import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
-import org.n52.series.db.beans.sta.ObservationEntity;
+import org.n52.series.db.beans.sta.mapped.ObservationEntity;
 import org.n52.shetland.oasis.odata.ODataConstants;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;

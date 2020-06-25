@@ -36,7 +36,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.locationtech.jts.io.geojson.GeoJsonWriter;
-import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.gml.time.Time;

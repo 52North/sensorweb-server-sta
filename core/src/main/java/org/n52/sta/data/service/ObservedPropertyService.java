@@ -32,7 +32,7 @@ package org.n52.sta.data.service;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
-import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.series.db.beans.sta.ObservablePropertyEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;

@@ -80,8 +80,11 @@ public class QuerySpecificationRepository {
         case "ObservedProperties": {
             return new ObservedPropertyQuerySpecifications();
         }
+        case "parameters":
+        case "ParameterEntity":
+            return new ParameterQuerySpecifications();
         default:
-            throw new STAInvalidFilterExpressionException("Unable to find QuerySpecification for type:" + name);
+            throw new STAInvalidFilterExpressionException("Unable to find QuerySpecification for type: " + name);
         }
     }
 

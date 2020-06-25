@@ -40,7 +40,7 @@ import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.geojson.GeoJsonReader;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.parameter.ParameterJsonEntity;
-import org.n52.series.db.beans.sta.ObservationEntity;
+import org.n52.series.db.beans.sta.mapped.ObservationEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;

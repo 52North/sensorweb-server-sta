@@ -29,6 +29,7 @@
 
 package org.n52.sta.data.service.util;
 
+import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.shetland.oasis.odata.ODataConstants;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
@@ -67,7 +68,7 @@ import java.util.Date;
 public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, STAInvalidQueryException> {
 
     private static final String ERROR_NOT_IMPLEMENTED = "not implemented yet!";
-    private static final String ERROR_NOT_EVALUABLE = "Could not evaluate Methodcall to :";
+    private static final String ERROR_NOT_EVALUABLE = "Could not evaluate Methodcall to: ";
     private static final String ERROR_NOT_SPATIAL = "Entity does not have spatial property!";
 
     private static final String SLASH = "/";
@@ -367,7 +368,7 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
     @SuppressWarnings("unchecked")
     private Expression<?> visitMethodCallBinary(MethodCallExpr expr) throws STAInvalidQueryException {
         Expression<?> firstParam = expr.getParameters().get(0).accept(this);
-        Expression<?> secondParam = expr.getParameters().get(1).accept(this);
+        Expression<?> secondParam;
         switch (expr.getName()) {
 
         // String Functions
@@ -377,6 +378,7 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
             // return builder.like((Expression<String>) firstParam, "%" + secondParam);
             throw new STAInvalidQueryException(ERROR_NOT_IMPLEMENTED);
         case ODataConstants.StringFunctions.SUBSTRINGOF:
+            secondParam = expr.getParameters().get(1).accept(this);
             return builder.function(
                     "CONTAINS",
                     Boolean.class,
@@ -384,12 +386,15 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
                     secondParam
             );
         case ODataConstants.StringFunctions.INDEXOF:
+            secondParam = expr.getParameters().get(1).accept(this);
             return builder.locate((Expression<String>) firstParam,
                                   (Expression<String>) secondParam);
         case ODataConstants.StringFunctions.SUBSTRING:
+            secondParam = expr.getParameters().get(1).accept(this);
             return builder.substring((Expression<String>) firstParam,
                                      (Expression<Integer>) secondParam);
         case ODataConstants.StringFunctions.CONCAT:
+            secondParam = expr.getParameters().get(1).accept(this);
             return builder.concat((Expression<String>) firstParam,
                                   (Expression<String>) secondParam);
 
@@ -437,6 +442,21 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
                 } else {
                     throw new STAInvalidQueryException(ERROR_NOT_SPATIAL);
                 }
+            }
+        case ODataConstants.CollectionFunctions.CONTAINS:
+            /**
+             * Contains is unary as the two conditions are already merged into a single condition
+             */
+            if (expr.getParameters().get(0).toString().contains(SLASH)) {
+                throw new STAInvalidQueryException(ERROR_NOT_EVALUABLE + expr.getName());
+            } else {
+                Root<ParameterEntity> parameterEntityRoot = query.from(ParameterEntity.class);
+                Expression<?> cond = expr.getParameters().get(1).accept(new FilterExprVisitor<>(
+                        parameterEntityRoot,
+                        query,
+                        builder
+                ));
+                return cond;
             }
         default:
             throw new STAInvalidQueryException(ERROR_NOT_EVALUABLE + expr.getName());

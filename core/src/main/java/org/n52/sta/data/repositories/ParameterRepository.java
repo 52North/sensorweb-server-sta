@@ -37,6 +37,6 @@ import org.springframework.stereotype.Repository;
 
 @Transactional
 @Repository
-public interface ParameterRepository extends JpaRepository<ParameterEntity, Long> {
+public interface ParameterRepository extends JpaRepository<ParameterEntity<?>, Long> {
 
 }

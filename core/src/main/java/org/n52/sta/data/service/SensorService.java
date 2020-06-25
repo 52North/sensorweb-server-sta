@@ -33,7 +33,7 @@ import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
-import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;

@@ -32,7 +32,7 @@ package org.n52.sta.data.query;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.ProcedureEntity;
-import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.springframework.data.jpa.domain.Specification;

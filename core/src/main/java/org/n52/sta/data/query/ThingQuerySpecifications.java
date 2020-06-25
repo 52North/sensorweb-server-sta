@@ -31,7 +31,7 @@ package org.n52.sta.data.query;
 
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.PlatformEntity;
-import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;

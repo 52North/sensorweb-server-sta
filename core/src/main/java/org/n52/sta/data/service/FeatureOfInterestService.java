@@ -39,7 +39,7 @@ import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
-import org.n52.series.db.beans.sta.ObservationEntity;
+import org.n52.series.db.beans.sta.mapped.ObservationEntity;
 import org.n52.series.db.beans.sta.StaFeatureEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
