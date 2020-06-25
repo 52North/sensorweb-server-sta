@@ -30,6 +30,7 @@
 package org.n52.sta;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.exception.DataException;
@@ -101,6 +102,15 @@ public class ErrorHandler {
         return new ResponseEntity<>(msg,
                                     headers,
                                     HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(value = MismatchedInputException.class)
+    public ResponseEntity<Object> jacksonMismatchedInputException(MismatchedInputException exception) {
+        String msg = createErrorMessage(exception.getClass().getName(), exception.getMessage());
+        LOGGER.debug(msg, exception);
+        return new ResponseEntity<>(msg,
+                                    headers,
+                                    HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = STAInvalidUrlException.class)
