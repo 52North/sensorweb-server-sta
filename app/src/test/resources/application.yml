@@ -40,7 +40,11 @@ server:
 # Database Configuration
 database:
   jpa:
-    persistence-location: classpath:META-INF/sensorthings-persistence.xml
+    # Mappings to be loaded. See https://github.com/52North/sensorweb-server-sta/wiki for details
+    # Options:
+    # - Vanilla STA: sta-vanilla.xml
+    # - STA with additional User table: sta-user-extension.xml
+    persistence-location: classpath:META-INF/sta-vanilla.xml
 spring:
   main:
     show-banner: false
