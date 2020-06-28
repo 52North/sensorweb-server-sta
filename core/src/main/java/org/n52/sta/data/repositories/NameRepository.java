@@ -36,7 +36,7 @@ import java.util.Optional;
 
 @NoRepositoryBean
 @Transactional
-public interface NameRepository<T extends AbstractStaEntity> extends AbstractStaRepository<T> {
+public interface NameRepository<T> extends AbstractStaRepository<T> {
 
     boolean existsByName(String name);
 

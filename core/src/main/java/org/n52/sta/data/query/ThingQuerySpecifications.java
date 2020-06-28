@@ -30,6 +30,7 @@
 package org.n52.sta.data.query;
 
 import org.n52.series.db.beans.DescribableEntity;
+import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
@@ -85,7 +86,7 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
                             .where(((Specification<DatastreamEntity>) propertyValue).toPredicate(datastream,
                                                                                                  query,
                                                                                                  builder));
-                    return builder.in(root.get(PlatformEntity.PROPERTY_ID)).value(subquery);
+                    return builder.in(root.get(IdEntity.PROPERTY_ID)).value(subquery);
                 }
                 case LOCATIONS: {
                     Subquery<LocationEntity> subquery = query.subquery(LocationEntity.class);

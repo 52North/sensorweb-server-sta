@@ -31,6 +31,7 @@ package org.n52.sta.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.n52.series.db.beans.HibernateRelations;
 import org.n52.series.db.beans.IdEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
@@ -60,7 +61,7 @@ import java.io.IOException;
  */
 @RestController
 @ConditionalOnProperty(value = "server.feature.httpReadOnly", havingValue = "false", matchIfMissing = true)
-public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtils {
+public class STACrudRequestHandler<T extends HibernateRelations.HasId> implements STARequestUtils {
 
     private static final String COULD_NOT_FIND_RELATED_ENTITY = "Could not find related Entity!";
     private final EntityServiceRepository serviceRepository;

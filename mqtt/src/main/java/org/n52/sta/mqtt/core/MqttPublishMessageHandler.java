@@ -30,6 +30,7 @@
 package org.n52.sta.mqtt.core;
 
 import io.moquette.interception.messages.InterceptPublishMessage;
+import org.n52.series.db.beans.HibernateRelations;
 import org.n52.series.db.beans.IdEntity;
 import org.n52.sta.utils.STARequestUtils;
 
@@ -37,5 +38,5 @@ import org.n52.sta.utils.STARequestUtils;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 public interface MqttPublishMessageHandler extends STARequestUtils {
-    <T extends IdEntity> void processPublishMessage(InterceptPublishMessage msg);
+    <T extends HibernateRelations.HasId> void processPublishMessage(InterceptPublishMessage msg);
 }

@@ -32,7 +32,7 @@ package org.n52.sta.mqtt.core;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.moquette.interception.messages.InterceptPublishMessage;
-import org.n52.series.db.beans.IdEntity;
+import org.n52.series.db.beans.HibernateRelations;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
@@ -97,7 +97,7 @@ public class MqttPublishMessageHandlerImpl implements MqttPublishMessageHandler 
         return valid;
     }
 
-    @Override public <T extends IdEntity> void processPublishMessage(InterceptPublishMessage msg) {
+    public <T extends HibernateRelations.HasId> void processPublishMessage(InterceptPublishMessage msg) {
         try {
             if (msg.getClientID().equals(INTERNAL_CLIENT_ID) || readOnly) {
                 return;

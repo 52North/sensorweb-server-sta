@@ -38,7 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @NoRepositoryBean
 @Transactional
-public interface AbstractStaRepository<T extends AbstractStaEntity> extends StaIdentifierRepository<T> {
+public interface AbstractStaRepository<T> extends StaIdentifierRepository<T> {
 
 }
 
