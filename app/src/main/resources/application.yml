@@ -45,6 +45,8 @@ database:
     # - STA with additional User table: sta-user-extension.xml
     persistence-location: classpath:META-INF/sta-vanilla.xml
 spring:
+  profiles:
+    active: citSciExtension
   datasource:
     platform: postgres
     username: postgres

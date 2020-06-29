@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -44,15 +45,19 @@ import org.springframework.web.bind.annotation.RestController;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @RestController
-public class STARootRequestHandler {
+public class RootRequestHandler {
 
     private final String rootUrl;
     private final ObjectMapper mapper;
+    private final boolean citSciExtensionActive;
 
-    public STARootRequestHandler(@Value("${server.rootUrl}") String rootUrl,
-                                 ObjectMapper mapper) {
+    public RootRequestHandler(@Value("${server.rootUrl}") String rootUrl,
+                              ObjectMapper mapper,
+                              Environment environment) {
         this.rootUrl = rootUrl;
         this.mapper = mapper;
+        //TODO: refactor into global constant
+        this.citSciExtensionActive = environment.acceptsProfiles("citSciExtension");
     }
 
     /**
@@ -70,6 +75,14 @@ public class STARootRequestHandler {
     private String createRootResponse(String uri) {
         ArrayNode arrayNode = mapper.createArrayNode();
         for (String collection : STAEntityDefinition.ALLCOLLECTIONS) {
+            ObjectNode node = mapper.createObjectNode();
+            node.put("name", collection);
+            node.put("url", uri + collection);
+            arrayNode.add(node);
+        }
+
+        if (citSciExtensionActive) {
+            String collection = "ObservationGroups";
             ObjectNode node = mapper.createObjectNode();
             node.put("name", collection);
             node.put("url", uri + collection);

@@ -44,9 +44,10 @@ import java.util.Map;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @RestController
-public class STAVersionRequestHandler {
+public class VersionRequestHandler {
 
     private final BuildProperties buildProperties;
+
     @Value("${project.version}")
     private String projectVersion;
 
@@ -68,7 +69,7 @@ public class STAVersionRequestHandler {
     @Value("${git.commit.message.short}")
     private String commitMessage;
 
-    public STAVersionRequestHandler(BuildProperties buildProperties) {
+    public VersionRequestHandler(BuildProperties buildProperties) {
         this.buildProperties = buildProperties;
     }
 

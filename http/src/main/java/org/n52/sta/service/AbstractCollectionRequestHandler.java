@@ -35,34 +35,24 @@ import org.n52.shetland.ogc.filter.FilterClause;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.data.service.util.CollectionWrapper;
-import org.n52.sta.utils.STARequestUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.n52.sta.utils.CoreRequestUtils;
+import org.n52.sta.utils.RequestUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashSet;
 
 /**
- * Handles all requests to Entity Collections and Entity Collections association Links
- * e.g. /Things
- * e.g. /Datastreams(52)/Observations
- * e.g. /Things/$ref
- * e.g. /Datastreams(52)/Observations/$ref
- *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@RestController
-public class STACollectionRequestHandler implements STARequestUtils {
+public abstract class AbstractCollectionRequestHandler implements RequestUtils {
 
-    private final EntityServiceRepository serviceRepository;
-    private final String rootUrl;
+    protected final EntityServiceRepository serviceRepository;
+    protected final String rootUrl;
 
-    public STACollectionRequestHandler(@Value("${server.rootUrl}") String rootUrl,
-                                       EntityServiceRepository serviceRepository) {
-        this.rootUrl = rootUrl;
+    public AbstractCollectionRequestHandler(
+            EntityServiceRepository serviceRepository, String rootUrl) {
         this.serviceRepository = serviceRepository;
+        this.rootUrl = rootUrl;
     }
 
     /**
@@ -73,11 +63,7 @@ public class STACollectionRequestHandler implements STARequestUtils {
      * @param request        Full request
      * @return CollectionWrapper Requested collection
      */
-    @GetMapping(
-            value = "/{collectionName:" + BASE_COLLECTION_REGEX + "}",
-            produces = "application/json"
-    )
-    public CollectionWrapper readCollectionDirect(@PathVariable String collectionName,
+    public CollectionWrapper readCollectionDirect(String collectionName,
                                                   HttpServletRequest request)
             throws STACRUDException {
         QueryOptions options = decodeQueryString(request);
@@ -95,11 +81,7 @@ public class STACollectionRequestHandler implements STARequestUtils {
      * @param request        Full request
      * @return CollectionWrapper Requested collection
      */
-    @GetMapping(
-            value = "/{collectionName:" + BASE_COLLECTION_REGEX + "}" + SLASHREF,
-            produces = "application/json"
-    )
-    public CollectionWrapper readCollectionRefDirect(@PathVariable String collectionName,
+    public CollectionWrapper readCollectionRefDirect(String collectionName,
                                                      HttpServletRequest request)
             throws STACRUDException {
         HashSet<FilterClause> filters = new HashSet<>();
@@ -113,10 +95,10 @@ public class STACollectionRequestHandler implements STARequestUtils {
             filters.add(options.getFilterFilter());
         }
         // Overwrite select filter with filter only returning id
-        filters.add(new SelectFilter(ID));
+        filters.add(new SelectFilter(RequestUtils.ID));
         return serviceRepository
                 .getEntityService(collectionName)
-                .getEntityCollection(QUERY_OPTIONS_FACTORY.createQueryOptions(filters))
+                .getEntityCollection(RequestUtils.QUERY_OPTIONS_FACTORY.createQueryOptions(filters))
                 .setRequestURL(rootUrl + collectionName);
     }
 
@@ -129,20 +111,8 @@ public class STACollectionRequestHandler implements STARequestUtils {
      * @param request full request
      * @return CollectionWrapper Requested collection
      */
-    @GetMapping(
-            value = {
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_THING_PATH_VARIABLE,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_LOCATION_PATH_VARIABLE,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH_VARIABLE,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH_VARIABLE,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_SENSOR_PATH_VARIABLE,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_HIST_LOCATION_PATH_VARIABLE
-            },
-            produces = "application/json"
-    )
-    public CollectionWrapper readCollectionRelated(@PathVariable String entity,
-                                                   @PathVariable String target,
+    public CollectionWrapper readCollectionRelated(String entity,
+                                                   String target,
                                                    HttpServletRequest request)
             throws Exception {
 
@@ -169,20 +139,8 @@ public class STACollectionRequestHandler implements STARequestUtils {
      * @param request full request
      * @return CollectionWrapper Requested collection
      */
-    @GetMapping(
-            value = {
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_THING_PATH_VARIABLE + SLASHREF,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_LOCATION_PATH_VARIABLE + SLASHREF,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH_VARIABLE + SLASHREF,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH_VARIABLE + SLASHREF,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_SENSOR_PATH_VARIABLE + SLASHREF,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE + SLASHREF,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_HIST_LOCATION_PATH_VARIABLE + SLASHREF
-            },
-            produces = "application/json"
-    )
-    public CollectionWrapper readCollectionRelatedRef(@PathVariable String entity,
-                                                      @PathVariable String target,
+    public CollectionWrapper readCollectionRelatedRef(String entity,
+                                                      String target,
                                                       HttpServletRequest request)
             throws Exception {
 
@@ -205,11 +163,12 @@ public class STACollectionRequestHandler implements STARequestUtils {
             filters.add(options.getFilterFilter());
         }
         // Overwrite select filter with filter only returning id
-        filters.add(new SelectFilter(ID));
+        filters.add(new SelectFilter(RequestUtils.ID));
         return serviceRepository.getEntityService(target)
                                 .getEntityCollectionByRelatedEntity(sourceId,
                                                                     sourceType,
-                                                                    QUERY_OPTIONS_FACTORY.createQueryOptions(filters))
+                                                                    RequestUtils.QUERY_OPTIONS_FACTORY.createQueryOptions(
+                                                                            filters))
                                 .setRequestURL(rootUrl + entity + "/" + target);
     }
 }

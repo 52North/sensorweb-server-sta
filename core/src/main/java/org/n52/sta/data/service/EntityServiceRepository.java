@@ -43,7 +43,7 @@ import java.util.Map;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
-public class EntityServiceRepository {
+public class CoreServiceRepository {
 
     private Map<EntityTypes, AbstractSensorThingsEntityService<?, ?, ?>> entityServices = new LinkedHashMap<>();
 
@@ -64,13 +64,6 @@ public class EntityServiceRepository {
     @Autowired private FeatureOfInterestService featureOfInterestService;
 
     @Autowired private STAEventHandler mqttSubscriptionEventHandler;
-
-    /*
-    public void addEntityService(AbstractSensorThingsEntityServiceImpl<?, ?, ?> entityService) {
-        for (EntityTypes entityType : entityService.getTypes()) {
-            entityServices.put(entityType, entityService);
-        }
-    }*/
 
     @PostConstruct
     public void postConstruct() {

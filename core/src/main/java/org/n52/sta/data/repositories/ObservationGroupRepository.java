@@ -27,23 +27,14 @@
  * Public License for more details.
  */
 
-package org.n52.sta.mqtt.core;
+package org.n52.sta.data.repositories;
 
-import io.moquette.broker.Server;
-import io.moquette.interception.messages.InterceptSubscribeMessage;
-import io.moquette.interception.messages.InterceptUnsubscribeMessage;
-import org.n52.sta.data.STAEventHandler;
-import org.n52.sta.mqtt.MqttHandlerException;
-import org.n52.sta.utils.CoreRequestUtils;
+import org.n52.series.db.beans.sta.mapped.extension.ObservationGroup;
+import org.springframework.stereotype.Repository;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public interface MqttSubscriptionEventHandler extends CoreRequestUtils, STAEventHandler {
-
-    void processSubscribeMessage(InterceptSubscribeMessage msg) throws MqttHandlerException;
-
-    void processUnsubscribeMessage(InterceptUnsubscribeMessage msg) throws MqttHandlerException;
-
-    void setMqttBroker(Server mqttBroker);
+@Repository
+public interface ObservationGroupRepository extends NameRepository<ObservationGroup> {
 }

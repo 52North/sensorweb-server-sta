@@ -27,23 +27,10 @@
  * Public License for more details.
  */
 
-package org.n52.sta.mqtt.core;
-
-import io.moquette.broker.Server;
-import io.moquette.interception.messages.InterceptSubscribeMessage;
-import io.moquette.interception.messages.InterceptUnsubscribeMessage;
-import org.n52.sta.data.STAEventHandler;
-import org.n52.sta.mqtt.MqttHandlerException;
-import org.n52.sta.utils.CoreRequestUtils;
+package org.n52.sta.data.service;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public interface MqttSubscriptionEventHandler extends CoreRequestUtils, STAEventHandler {
-
-    void processSubscribeMessage(InterceptSubscribeMessage msg) throws MqttHandlerException;
-
-    void processUnsubscribeMessage(InterceptUnsubscribeMessage msg) throws MqttHandlerException;
-
-    void setMqttBroker(Server mqttBroker);
+public class ObservationGroupService {
 }

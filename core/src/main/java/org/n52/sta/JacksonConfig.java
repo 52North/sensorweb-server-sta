@@ -38,24 +38,29 @@ import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
-import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
-import org.n52.series.db.beans.sta.mapped.ObservationEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
+import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
+import org.n52.series.db.beans.sta.mapped.ObservationEntity;
+import org.n52.series.db.beans.sta.mapped.extension.ObservationGroup;
 import org.n52.sta.data.service.util.CollectionWrapper;
 import org.n52.sta.serdes.CollectionSer;
 import org.n52.sta.serdes.DatastreamSerDes;
 import org.n52.sta.serdes.FeatureOfInterestSerDes;
 import org.n52.sta.serdes.HistoricalLocationSerDes;
 import org.n52.sta.serdes.LocationSerDes;
+import org.n52.sta.serdes.ObservationGroupSerDes;
 import org.n52.sta.serdes.ObservationSerDes;
 import org.n52.sta.serdes.ObservedPropertySerDes;
 import org.n52.sta.serdes.SensorSerDes;
 import org.n52.sta.serdes.ThingSerDes;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import java.util.ArrayList;
@@ -68,7 +73,6 @@ public class JacksonConfig {
                                      @Value("${server.feature.variableEncodingType:false}")
                                              boolean variableSensorEncodingTypeEnabled) {
         ArrayList<Module> modules = new ArrayList<>();
-
         SimpleModule module = new SimpleModule();
 
         // Register Serializers/Deserializers for all custom types
@@ -126,4 +130,29 @@ public class JacksonConfig {
                                           .modules(modules)
                                           .build();
     }
+
+    @Bean
+    @Primary
+    @Profile("citSciExtension")
+    public ObjectMapper citSciMapper(@Qualifier("customMapper") ObjectMapper mapper,
+                                     @Value("${server.rootUrl}") String rootUrl) {
+        SimpleModule module = new SimpleModule();
+
+        // Register Serializers/Deserializers for all custom types
+        SimpleSerializers serializers = new SimpleSerializers();
+        SimpleDeserializers deserializers = new SimpleDeserializers();
+
+        serializers.addSerializer(new ObservationGroupSerDes.ObservationGroupSerializer(rootUrl));
+
+        deserializers.addDeserializer(ObservationGroup.class,
+                                      new ObservationGroupSerDes.ObservationGroupDeserializer());
+        deserializers.addDeserializer(ObservationGroupSerDes.ObservationGroupPatch.class,
+                                      new ObservationGroupSerDes.ObservationGroupPatchDeserializer());
+
+        module.setSerializers(serializers);
+        module.setDeserializers(deserializers);
+        mapper.registerModule(module);
+        return mapper;
+    }
+
 }

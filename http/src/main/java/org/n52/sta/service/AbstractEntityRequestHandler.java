@@ -34,29 +34,19 @@ import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.filter.FilterClause;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
-import org.n52.sta.utils.STARequestUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.n52.sta.utils.RequestUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashSet;
 
 /**
- * Handles all requests to Entities and to Entity association links
- * e.g. /Things(52)
- * e.g. /Datastreams(52)/Thing
- * e.g. /Things(52)/$ref
- * e.g. /Datastreams(52)/Thing/$ref
- *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@RestController
-public class STAEntityRequestHandler implements STARequestUtils {
+public abstract class AbstractEntityRequestHandler implements RequestUtils {
 
-    private final EntityServiceRepository serviceRepository;
+    protected final EntityServiceRepository serviceRepository;
 
-    public STAEntityRequestHandler(EntityServiceRepository serviceRepository) {
+    public AbstractEntityRequestHandler(EntityServiceRepository serviceRepository) {
         this.serviceRepository = serviceRepository;
     }
 
@@ -68,12 +58,8 @@ public class STAEntityRequestHandler implements STARequestUtils {
      * @param id      id of entity. Automatically set by Spring via @PathVariable
      * @param request full request
      */
-    @GetMapping(
-            value = MAPPING_PREFIX + ENTITY_IDENTIFIED_DIRECTLY,
-            produces = "application/json"
-    )
-    public ElementWithQueryOptions<?> readEntityDirect(@PathVariable String entity,
-                                                       @PathVariable String id,
+    public ElementWithQueryOptions<?> readEntityDirect(String entity,
+                                                       String id,
                                                        HttpServletRequest request) throws Exception {
         validateResource(request.getRequestURI().substring(request.getContextPath().length()), serviceRepository);
 
@@ -91,12 +77,8 @@ public class STAEntityRequestHandler implements STARequestUtils {
      * @param id      id of entity. Automatically set by Spring via @PathVariable
      * @param request full request
      */
-    @GetMapping(
-            value = MAPPING_PREFIX + ENTITY_IDENTIFIED_DIRECTLY + SLASHREF,
-            produces = "application/json"
-    )
-    public ElementWithQueryOptions<?> readEntityRefDirect(@PathVariable String entity,
-                                                          @PathVariable String id,
+    public ElementWithQueryOptions<?> readEntityRefDirect(String entity,
+                                                          String id,
                                                           HttpServletRequest request) throws Exception {
         String requestURI = request.getRequestURI();
         validateResource(requestURI.substring(request.getContextPath().length(),
@@ -118,16 +100,8 @@ public class STAEntityRequestHandler implements STARequestUtils {
      * @param request full request
      * @return JSON String representing Entity
      */
-    @GetMapping(
-            value = {
-                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
-                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE,
-                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE
-            },
-            produces = "application/json"
-    )
-    public ElementWithQueryOptions<?> readRelatedEntity(@PathVariable String entity,
-                                                        @PathVariable String target,
+    public ElementWithQueryOptions<?> readRelatedEntity(String entity,
+                                                        String target,
                                                         HttpServletRequest request)
             throws Exception {
 
@@ -153,16 +127,8 @@ public class STAEntityRequestHandler implements STARequestUtils {
      * @param request full request
      * @return JSON String representing Entity
      */
-    @GetMapping(
-            value = {
-                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE + SLASHREF,
-                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE + SLASHREF,
-                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE + SLASHREF
-            },
-            produces = "application/json"
-    )
-    public ElementWithQueryOptions<?> readRelatedEntityRef(@PathVariable String entity,
-                                                           @PathVariable String target,
+    public ElementWithQueryOptions<?> readRelatedEntityRef(String entity,
+                                                           String target,
                                                            HttpServletRequest request)
             throws Exception {
         String requestURI = request.getRequestURI();

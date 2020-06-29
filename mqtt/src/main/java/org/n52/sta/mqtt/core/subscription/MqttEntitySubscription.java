@@ -35,7 +35,7 @@
 package org.n52.sta.mqtt.core.subscription;
 
 import org.n52.series.db.beans.HibernateRelations;
-import org.n52.sta.utils.STARequestUtils;
+import org.n52.sta.utils.CoreRequestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
@@ -67,18 +67,18 @@ public class MqttEntitySubscription extends AbstractMqttSubscription {
     private void init(Matcher mt) {
         // Referenced Entity
         // E.g. /Datastream(52)/Sensor
-        if (mt.group(STARequestUtils.GROUPNAME_WANTED_IDENTIFIER) == null) {
-            sourceEntityType = mt.group(STARequestUtils.GROUPNAME_SOURCE_NAME);
-            sourceId = mt.group(STARequestUtils.GROUPNAME_SOURCE_IDENTIFIER);
+        if (mt.group(CoreRequestUtils.GROUPNAME_WANTED_IDENTIFIER) == null) {
+            sourceEntityType = mt.group(CoreRequestUtils.GROUPNAME_SOURCE_NAME);
+            sourceId = mt.group(CoreRequestUtils.GROUPNAME_SOURCE_IDENTIFIER);
             sourceId = sourceId.substring(1, sourceId.length() - 1);
-            wantedEntityType = mt.group(STARequestUtils.GROUPNAME_WANTED_NAME);
+            wantedEntityType = mt.group(CoreRequestUtils.GROUPNAME_WANTED_NAME);
             Assert.notNull(sourceId, "Unable to parse topic. Could not extract sourceId");
             Assert.notNull(sourceEntityType, "Unable to parse topic. Could not extract sourceEntityType");
         } else {
             // Direct Entity
             // E.g. /Things(52)
-            wantedEntityType = mt.group(STARequestUtils.GROUPNAME_WANTED_NAME);
-            wantedIdentifier = mt.group(STARequestUtils.GROUPNAME_WANTED_IDENTIFIER);
+            wantedEntityType = mt.group(CoreRequestUtils.GROUPNAME_WANTED_NAME);
+            wantedIdentifier = mt.group(CoreRequestUtils.GROUPNAME_WANTED_IDENTIFIER);
             wantedIdentifier = wantedIdentifier.substring(1, wantedIdentifier.length() - 1);
             Assert.notNull(wantedIdentifier, "Unable to parse topic. Could not extract wantedIdentifier");
         }

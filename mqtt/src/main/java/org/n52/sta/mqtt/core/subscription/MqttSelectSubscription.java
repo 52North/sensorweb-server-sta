@@ -32,7 +32,7 @@ package org.n52.sta.mqtt.core.subscription;
 import org.n52.shetland.filter.SelectFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.filter.FilterClause;
-import org.n52.sta.utils.STARequestUtils;
+import org.n52.sta.utils.CoreRequestUtils;
 import org.n52.svalbard.odata.core.QueryOptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,13 +56,13 @@ public class MqttSelectSubscription extends MqttEntityCollectionSubscription {
     public MqttSelectSubscription(String topic, Matcher mt) {
         super(topic, mt, true);
 
-        selectOption = mt.group(STARequestUtils.GROUPNAME_SELECT);
+        selectOption = mt.group(CoreRequestUtils.GROUPNAME_SELECT);
         Assert.notNull(selectOption, "Unable to parse topic. Could not extract selectOption");
 
         QueryOptionsFactory qof = new QueryOptionsFactory();
         HashSet<FilterClause> filters = new HashSet<>();
         HashSet<String> filterItems = new HashSet<>();
-        Collections.addAll(filterItems, mt.group(STARequestUtils.GROUPNAME_SELECT).split(","));
+        Collections.addAll(filterItems, mt.group(CoreRequestUtils.GROUPNAME_SELECT).split(","));
         filters.add(new SelectFilter(filterItems));
         queryOptions = qof.createQueryOptions(filters);
         LOGGER.debug(this.toString());

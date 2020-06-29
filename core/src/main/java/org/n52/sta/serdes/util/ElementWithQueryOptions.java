@@ -36,13 +36,14 @@ import org.n52.series.db.beans.HibernateRelations;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
-import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ObservablePropertyEntity;
-import org.n52.series.db.beans.sta.mapped.ObservationEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.series.db.beans.sta.StaFeatureEntity;
+import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
+import org.n52.series.db.beans.sta.mapped.ObservationEntity;
+import org.n52.series.db.beans.sta.mapped.extension.ObservationGroup;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 
 public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId> {
@@ -165,5 +166,17 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
             this.queryOptions = queryOptions;
         }
     }
+
+
+    public static class ObservationGroupWithQueryOptions extends ElementWithQueryOptions<ObservationGroup> {
+
+        ObservationGroupWithQueryOptions(ObservationGroup thing, QueryOptions queryOptions) {
+            this.entity = thing;
+            this.queryOptions = queryOptions;
+        }
+    }
+
+
+
 
 }

@@ -32,7 +32,6 @@ package org.n52.sta.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.n52.series.db.beans.HibernateRelations;
-import org.n52.series.db.beans.IdEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
@@ -40,35 +39,25 @@ import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
 import org.n52.sta.serdes.util.EntityPatch;
-import org.n52.sta.utils.STARequestUtils;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.n52.sta.utils.RequestUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 /**
- * Handles all CUD requests (POST, PUT, DELETE)
- *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@RestController
-@ConditionalOnProperty(value = "server.feature.httpReadOnly", havingValue = "false", matchIfMissing = true)
-public class STACrudRequestHandler<T extends HibernateRelations.HasId> implements STARequestUtils {
+public abstract class AbstractCudRequestHandler<T extends HibernateRelations.HasId> implements RequestUtils {
 
     private static final String COULD_NOT_FIND_RELATED_ENTITY = "Could not find related Entity!";
-    private final EntityServiceRepository serviceRepository;
-    private final ObjectMapper mapper;
+    protected final EntityServiceRepository serviceRepository;
+    protected final ObjectMapper mapper;
 
-    public STACrudRequestHandler(EntityServiceRepository serviceRepository,
-                                 ObjectMapper mapper) {
+    public AbstractCudRequestHandler(EntityServiceRepository serviceRepository, ObjectMapper mapper) {
         this.serviceRepository = serviceRepository;
         this.mapper = mapper;
     }
@@ -80,13 +69,9 @@ public class STACrudRequestHandler<T extends HibernateRelations.HasId> implement
      * @param collectionName name of entity. Automatically set by Spring via @PathVariable
      * @param body           request Body. Automatically set by Spring via @RequestBody
      */
-    @PostMapping(
-            consumes = "application/json",
-            value = "/{collectionName:" + BASE_COLLECTION_REGEX + "$}",
-            produces = "application/json")
     @SuppressWarnings("unchecked")
-    public ElementWithQueryOptions<?> handlePostDirect(@PathVariable String collectionName,
-                                                       @RequestBody String body)
+    public ElementWithQueryOptions<?> handlePostDirect(String collectionName,
+                                                       String body)
             throws IOException, STACRUDException, STAInvalidUrlException {
 
         Class<T> clazz = collectionNameToClass(collectionName);
@@ -103,22 +88,10 @@ public class STACrudRequestHandler<T extends HibernateRelations.HasId> implement
      * @param body    request Body. Automatically set by Spring via @RequestBody
      * @param request full request
      */
-    @PostMapping(
-            value = {
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_THING_PATH_VARIABLE,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_LOCATION_PATH_VARIABLE,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH_VARIABLE,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH_VARIABLE,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_SENSOR_PATH_VARIABLE,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_HIST_LOCATION_PATH_VARIABLE
-            },
-            produces = "application/json"
-    )
     @SuppressWarnings("unchecked")
-    public ElementWithQueryOptions<?> handlePostRelated(@PathVariable String entity,
-                                                        @PathVariable String target,
-                                                        @RequestBody String body,
+    public ElementWithQueryOptions<?> handlePostRelated(String entity,
+                                                        String target,
+                                                        String body,
                                                         HttpServletRequest request)
             throws Exception {
         String url = request.getRequestURI().substring(request.getContextPath().length());
@@ -129,8 +102,8 @@ public class STACrudRequestHandler<T extends HibernateRelations.HasId> implement
         String sourceType = split[0];
         String sourceId = split[1].replace(")", "");
         ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
-        jsonBody.put(REFERENCED_FROM_TYPE, sourceType);
-        jsonBody.put(REFERENCED_FROM_ID, sourceId);
+        jsonBody.put(RequestUtils.REFERENCED_FROM_TYPE, sourceType);
+        jsonBody.put(RequestUtils.REFERENCED_FROM_ID, sourceId);
 
         Class<T> clazz = collectionNameToClass(target);
         return ((AbstractSensorThingsEntityService<?, T, ? extends T>)
@@ -145,14 +118,10 @@ public class STACrudRequestHandler<T extends HibernateRelations.HasId> implement
      * @param id             id of entity. Automatically set by Spring via @PathVariable
      * @param request        full request
      */
-    @PatchMapping(
-            value = "**/{collectionName:" + BASE_COLLECTION_REGEX + "}{id:" + IDENTIFIER_REGEX + "$}",
-            produces = "application/json"
-    )
     @SuppressWarnings("unchecked")
-    public ElementWithQueryOptions<?> handleDirectPatch(@PathVariable String collectionName,
-                                                        @PathVariable String id,
-                                                        @RequestBody String body,
+    public ElementWithQueryOptions<?> handleDirectPatch(String collectionName,
+                                                        String id,
+                                                        String body,
                                                         HttpServletRequest request)
             throws Exception {
         String url = request.getRequestURI().substring(request.getContextPath().length());
@@ -176,18 +145,10 @@ public class STACrudRequestHandler<T extends HibernateRelations.HasId> implement
      * @param target  name of entity. Automatically set by Spring via @PathVariable
      * @param request full request
      */
-    @PatchMapping(
-            value = {
-                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
-                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE,
-                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE
-            },
-            produces = "application/json"
-    )
     @SuppressWarnings("unchecked")
-    public ElementWithQueryOptions<?> handleRelatedPatch(@PathVariable String entity,
-                                                         @PathVariable String target,
-                                                         @RequestBody String body,
+    public ElementWithQueryOptions<?> handleRelatedPatch(String entity,
+                                                         String target,
+                                                         String body,
                                                          HttpServletRequest request)
             throws Exception {
         String url = request.getRequestURI().substring(request.getContextPath().length());
@@ -223,12 +184,8 @@ public class STACrudRequestHandler<T extends HibernateRelations.HasId> implement
      * @param id             id of entity. Automatically set by Spring via @PathVariable
      * @param request        full request
      */
-    @DeleteMapping(
-            value = "**/{collectionName:" + BASE_COLLECTION_REGEX + "}{id:" + IDENTIFIER_REGEX + "$}",
-            produces = "application/json"
-    )
-    public Object handleDelete(@PathVariable String collectionName,
-                               @PathVariable String id,
+    public Object handleDelete(String collectionName,
+                               String id,
                                HttpServletRequest request)
             throws Exception {
         String url = request.getRequestURI().substring(request.getContextPath().length());
@@ -245,18 +202,10 @@ public class STACrudRequestHandler<T extends HibernateRelations.HasId> implement
      * @param target  name of entity. Automatically set by Spring via @PathVariable
      * @param request full request
      */
-    @DeleteMapping(
-            value = {
-                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
-                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE,
-                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE
-            },
-            produces = "application/json"
-    )
     @SuppressWarnings("unchecked")
-    public Object handleRelatedDelete(@PathVariable String entity,
-                                      @PathVariable String target,
-                                      @RequestBody String body,
+    public Object handleRelatedDelete(String entity,
+                                      String target,
+                                      String body,
                                       HttpServletRequest request)
             throws Exception {
 

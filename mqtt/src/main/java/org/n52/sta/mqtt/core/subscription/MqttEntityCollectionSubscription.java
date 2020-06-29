@@ -35,7 +35,7 @@
 package org.n52.sta.mqtt.core.subscription;
 
 import org.n52.series.db.beans.HibernateRelations;
-import org.n52.sta.utils.STARequestUtils;
+import org.n52.sta.utils.CoreRequestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
@@ -67,15 +67,15 @@ public class MqttEntityCollectionSubscription extends AbstractMqttSubscription {
     private void init(Matcher mt) {
         // Root collection
         // E.g. /Things
-        if (!mt.pattern().pattern().contains(STARequestUtils.GROUPNAME_SOURCE_IDENTIFIER)) {
+        if (!mt.pattern().pattern().contains(CoreRequestUtils.GROUPNAME_SOURCE_IDENTIFIER)) {
             wantedEntityType = mt.group(1);
         } else {
             // Related collection
             // E.g. /Things(52)/Datastreams
-            sourceEntityType = mt.group(STARequestUtils.GROUPNAME_SOURCE_NAME);
-            sourceId = mt.group(STARequestUtils.GROUPNAME_SOURCE_IDENTIFIER);
+            sourceEntityType = mt.group(CoreRequestUtils.GROUPNAME_SOURCE_NAME);
+            sourceId = mt.group(CoreRequestUtils.GROUPNAME_SOURCE_IDENTIFIER);
             sourceId = sourceId.substring(1, sourceId.length() - 1);
-            wantedEntityType = mt.group(STARequestUtils.GROUPNAME_WANTED_NAME);
+            wantedEntityType = mt.group(CoreRequestUtils.GROUPNAME_WANTED_NAME);
             Assert.notNull(sourceEntityType, "Unable to parse topic. Could not extract sourceEntityType");
             Assert.notNull(sourceId, "Unable to parse topic. Could not extract sourceId");
         }
