@@ -479,7 +479,7 @@ public class ObservationService extends
     }
 
     @Override
-    protected ObservationEntity<?> createOrUpdate(ObservationEntity<?> entity) throws STACRUDException {
+    public ObservationEntity<?> createOrUpdate(ObservationEntity<?> entity) throws STACRUDException {
         synchronized (getLock(entity.getStaIdentifier())) {
             if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
                 return updateEntity(entity.getStaIdentifier(), entity, HttpMethod.PATCH);

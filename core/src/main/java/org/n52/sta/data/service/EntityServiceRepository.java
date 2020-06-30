@@ -29,7 +29,11 @@
 
 package org.n52.sta.data.service;
 
+import org.n52.series.db.beans.sta.mapped.extension.ObservationGroup;
 import org.n52.sta.data.STAEventHandler;
+import org.n52.sta.data.service.extension.CSObservationService;
+import org.n52.sta.data.service.extension.ObservationGroupService;
+import org.n52.sta.data.service.extension.ObservationRelationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -43,7 +47,7 @@ import java.util.Map;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
-public class CoreServiceRepository {
+public class EntityServiceRepository {
 
     private Map<EntityTypes, AbstractSensorThingsEntityService<?, ?, ?>> entityServices = new LinkedHashMap<>();
 
@@ -62,6 +66,15 @@ public class CoreServiceRepository {
     @Autowired private ObservedPropertyService observedPropertyService;
 
     @Autowired private FeatureOfInterestService featureOfInterestService;
+
+    @Autowired(required = false)
+    private ObservationGroupService obsGroupService;
+
+    @Autowired(required = false)
+    private ObservationRelationService obsRelationService;
+
+    @Autowired(required = false)
+    private CSObservationService csObservationService;
 
     @Autowired private STAEventHandler mqttSubscriptionEventHandler;
 
@@ -99,6 +112,20 @@ public class CoreServiceRepository {
         entityServices.put(EntityTypes.FeatureOfInterest, featureOfInterestService);
         entityServices.put(EntityTypes.FeaturesOfInterest, featureOfInterestService);
 
+        if (obsGroupService != null) {
+            this.obsGroupService.setServiceRepository(this);
+            entityServices.put(EntityTypes.ObservationGroup, obsGroupService);
+            entityServices.put(EntityTypes.ObservationGroups, obsGroupService);
+
+            this.obsRelationService.setServiceRepository(this);
+            entityServices.put(EntityTypes.ObservationRelation, obsRelationService);
+            entityServices.put(EntityTypes.ObservationRelations, obsRelationService);
+
+            this.csObservationService.setServiceRepository(this);
+            entityServices.put(EntityTypes.CSObservation, csObservationService);
+            entityServices.put(EntityTypes.CSObservations, csObservationService);
+
+        }
         this.mqttSubscriptionEventHandler.setServiceRepository(this);
     }
 
@@ -125,7 +152,8 @@ public class CoreServiceRepository {
     public enum EntityTypes {
         Thing, Location, HistoricalLocation, Sensor, Datastream, Observation, ObservedProperty, FeatureOfInterest,
         Things, Locations, HistoricalLocations, Sensors, Datastreams, Observations, ObservedProperties,
-        FeaturesOfInterest
+        FeaturesOfInterest, ObservationGroup, ObservationGroups, ObservationRelation, ObservationRelations,
+        CSObservation, CSObservations
     }
 
 }

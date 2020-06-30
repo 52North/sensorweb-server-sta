@@ -1,0 +1,148 @@
+/*
+ * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
+ * Software GmbH
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation.
+ *
+ * If the program is linked with libraries which are licensed under one of
+ * the following licenses, the combination of the program with the linked
+ * library is not considered a "derivative work" of the program:
+ *
+ *     - Apache License, version 2.0
+ *     - Apache Software License, version 1.0
+ *     - GNU Lesser General Public License, version 3
+ *     - Mozilla Public License, versions 1.0, 1.1 and 2.0
+ *     - Common Development and Distribution License (CDDL), version 1.0
+ *
+ * Therefore the distribution of the program linked with libraries licensed
+ * under the aforementioned licenses, is permitted by the copyright holders
+ * if the distribution is compliant with both the GNU General Public
+ * License version 2 and the aforementioned licenses.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details.
+ */
+
+package org.n52.sta.data.service.extension;
+
+import org.n52.janmayen.http.HTTPStatus;
+import org.n52.series.db.beans.sta.mapped.extension.ObservationGroup;
+import org.n52.shetland.filter.ExpandFilter;
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
+import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
+import org.n52.sta.data.repositories.ObservationGroupRepository;
+import org.n52.sta.data.service.AbstractSensorThingsEntityServiceImpl;
+import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.Profile;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpMethod;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
+import java.util.UUID;
+
+/**
+ * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
+ */
+@Component
+@DependsOn({"springApplicationContext"})
+@Transactional
+@Profile("citSciExtension")
+public class ObservationGroupService
+        extends AbstractSensorThingsEntityServiceImpl<ObservationGroupRepository, ObservationGroup, ObservationGroup> {
+
+    public ObservationGroupService(ObservationGroupRepository repository) {
+        super(repository, ObservationGroup.class);
+    }
+
+    @Override public EntityTypes[] getTypes() {
+        return new EntityTypes[] {EntityTypes.ObservationGroup, EntityTypes.ObservationGroups};
+    }
+
+    @Override protected ObservationGroup fetchExpandEntities(ObservationGroup entity, ExpandFilter expandOption)
+            throws STACRUDException, STAInvalidQueryException {
+        return null;
+    }
+
+    @Override protected Specification<ObservationGroup> byRelatedEntityFilter(String relatedId,
+                                                                              String relatedType,
+                                                                              String ownId) {
+        return null;
+    }
+
+    @Override protected ObservationGroup createEntity(ObservationGroup entity) throws STACRUDException {
+        ObservationGroup obsGroup = entity;
+        if (!obsGroup.isProcessed()) {
+            if (obsGroup.getStaIdentifier() != null && !obsGroup.isSetName()) {
+                Optional<ObservationGroup> optionalEntity =
+                        getRepository().findByStaIdentifier(obsGroup.getStaIdentifier());
+                if (optionalEntity.isPresent()) {
+                    return optionalEntity.get();
+                } else {
+                    throw new STACRUDException("No ObservationGroup with id '"
+                                                       + obsGroup.getStaIdentifier() + "' "
+                                                       + "found");
+                }
+            }
+            if (obsGroup.getIdentifier() == null) {
+                if (getRepository().existsByName(obsGroup.getName())) {
+                    return getRepository().findByName(obsGroup.getName()).orElse(null);
+                } else {
+                    // Autogenerate Identifier
+                    String uuid = UUID.randomUUID().toString();
+                    obsGroup.setIdentifier(uuid);
+                    obsGroup.setStaIdentifier(uuid);
+                }
+            }
+            synchronized (getLock(obsGroup.getStaIdentifier())) {
+                if (getRepository().existsByStaIdentifier(obsGroup.getStaIdentifier())) {
+                    throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
+                } else {
+                    obsGroup.setProcessed(true);
+                    getRepository().save(obsGroup);
+                }
+            }
+        }
+        return obsGroup;
+    }
+
+    @Override protected ObservationGroup updateEntity(String id, ObservationGroup entity, HttpMethod method)
+            throws STACRUDException {
+        throw new STACRUDException("not implemented yet");
+    }
+
+    @Override protected ObservationGroup updateEntity(ObservationGroup entity) throws STACRUDException {
+        throw new STACRUDException("not implemented yet");
+    }
+
+    @Override protected void delete(ObservationGroup entity) throws STACRUDException {
+        throw new STACRUDException("not implemented yet");
+
+    }
+
+    @Override public ObservationGroup createOrUpdate(ObservationGroup entity) throws STACRUDException {
+        if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
+            return updateEntity(entity.getStaIdentifier(), entity, HttpMethod.PATCH);
+        }
+        return createEntity(entity);
+    }
+
+    @Override public String checkPropertyName(String property) {
+        return property;
+    }
+
+    @Override protected ObservationGroup merge(ObservationGroup existing, ObservationGroup toMerge)
+            throws STACRUDException {
+        throw new STACRUDException("not implemented yet");
+    }
+
+    @Override public void delete(String id) throws STACRUDException {
+        getRepository().deleteByIdentifier(id);
+    }
+}

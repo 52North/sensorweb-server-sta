@@ -88,7 +88,8 @@ public class CitSciCollectionRequestHandler extends AbstractCollectionRequestHan
     @Override
     @GetMapping(
             value = {
-                    MAPPING_PREFIX + CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE
+                    MAPPING_PREFIX + CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_CSOBSERVATION_PATH_VARIABLE,
+                    MAPPING_PREFIX + CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVATIONGROUP_PATH_VARIABLE
             },
             produces = "application/json"
     )
@@ -103,7 +104,10 @@ public class CitSciCollectionRequestHandler extends AbstractCollectionRequestHan
     @GetMapping(
             value = {
                     MAPPING_PREFIX
-                            + CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE
+                            + CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_CSOBSERVATION_PATH_VARIABLE
+                            + SLASHREF,
+                    MAPPING_PREFIX
+                            + CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVATIONGROUP_PATH_VARIABLE
                             + SLASHREF
             },
             produces = "application/json"

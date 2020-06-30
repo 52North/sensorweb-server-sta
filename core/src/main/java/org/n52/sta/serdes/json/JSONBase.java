@@ -52,7 +52,7 @@ public class JSONBase {
     }
 
 
-    abstract static class JSONwithId<T> {
+    public abstract static class JSONwithId<T> {
 
         private static Logger LOGGER = LoggerFactory.getLogger(JSONwithId.class);
 
@@ -149,20 +149,20 @@ public class JSONBase {
 
 
     @SuppressFBWarnings("UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD")
-    abstract static class JSONwithIdNameDescription<T> extends JSONwithId<T> {
+    public abstract static class JSONwithIdNameDescription<T> extends JSONwithId<T> {
         public String name;
         public String description;
     }
 
 
     @SuppressFBWarnings("UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD")
-    abstract static class JSONwithIdNameDescriptionTime<T> extends JSONwithIdTime<T> {
+    public abstract static class JSONwithIdNameDescriptionTime<T> extends JSONwithIdTime<T> {
         public String name;
         public String description;
     }
 
 
-    abstract static class JSONwithIdTime<T> extends JSONwithId<T> {
+    public abstract static class JSONwithIdTime<T> extends JSONwithId<T> {
 
         protected Time createTime(DateTime time) {
             return new TimeInstant(time);

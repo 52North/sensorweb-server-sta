@@ -285,7 +285,7 @@ public class ObservedPropertyService
     }
 
     @Override
-    protected PhenomenonEntity createOrUpdate(PhenomenonEntity entity) throws STACRUDException {
+    public PhenomenonEntity createOrUpdate(PhenomenonEntity entity) throws STACRUDException {
         if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
             return updateEntity(entity.getStaIdentifier(), entity, HttpMethod.PATCH);
         }

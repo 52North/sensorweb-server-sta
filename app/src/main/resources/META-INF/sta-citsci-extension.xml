@@ -29,16 +29,26 @@
         <mapping-file>/hbm/transactional/core/LocationResource.hbm.xml</mapping-file>
 
         <!-- Load Classes annoted by @Entity-->
-        <class>org.n52.series.db.beans.sta.QuantityObservationEntity</class>
-        <class>org.n52.series.db.beans.sta.TextObservationEntity</class>
-        <class>org.n52.series.db.beans.sta.CountObservationEntity</class>
-        <class>org.n52.series.db.beans.sta.CategoryObservationEntity</class>
-        <class>org.n52.series.db.beans.sta.BooleanObservationEntity</class>
+        <class>org.n52.series.db.beans.sta.mapped.QuantityObservationEntity</class>
+        <class>org.n52.series.db.beans.sta.mapped.TextObservationEntity</class>
+        <class>org.n52.series.db.beans.sta.mapped.CountObservationEntity</class>
+        <class>org.n52.series.db.beans.sta.mapped.CategoryObservationEntity</class>
+        <class>org.n52.series.db.beans.sta.mapped.BooleanObservationEntity</class>
 
         <class>org.n52.series.db.beans.PlatformEntity</class>
+        <class>org.n52.series.db.beans.sta.mapped.DatastreamEntity</class>
 
-        <class>org.n52.series.db.beans.sta.extension.User</class>
-        <class>org.n52.series.db.beans.sta.extension.DatastreamWithUser</class>
+        <class>org.n52.series.db.beans.parameter.ParameterJsonEntity</class>
+        <class>org.n52.series.db.beans.parameter.ParameterTextEntity</class>
+        <class>org.n52.series.db.beans.parameter.ParameterBooleanEntity</class>
+        <class>org.n52.series.db.beans.parameter.ParameterCategoryEntity</class>
+        <class>org.n52.series.db.beans.parameter.ParameterCountEntity</class>
+        <class>org.n52.series.db.beans.parameter.ParameterQuantityEntity</class>
+        <class>org.n52.series.db.beans.parameter.ParameterXmlEntity</class>
+
+        <class>org.n52.series.db.beans.sta.mapped.extension.ObservationGroup</class>
+        <class>org.n52.series.db.beans.sta.mapped.extension.ObservationRelation</class>
+        <class>org.n52.series.db.beans.sta.mapped.extension.CSObservation</class>
 
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>

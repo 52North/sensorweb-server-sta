@@ -29,11 +29,10 @@
 
 package org.n52.sta.utils;
 
+import org.n52.series.db.beans.sta.mapped.extension.CSObservation;
 import org.n52.series.db.beans.sta.mapped.extension.ObservationGroup;
+import org.n52.series.db.beans.sta.mapped.extension.ObservationRelation;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
-import org.n52.shetland.ogc.sta.exception.STANotFoundException;
-import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.serdes.ObservationGroupSerDes;
 
 import java.util.regex.Pattern;
@@ -46,43 +45,85 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
     String OBSERVATIONGROUP = "ObservationGroup";
     String OBSERVATIONGROUPS = "ObservationGroups";
 
+    String CSOBSERVATION = "CSObservation";
+    String CSOBSERVATIONS = "CSObservations";
+
+    String OBSERVATIONRELATION = "ObservationRelation";
+    String OBSERVATIONRELATIONS = "ObservationRelations";
+
     String BASE_COLLECTION_REGEX_NAMED_GROUPS =
             WANTED_NAME_GROUP_START
                     + OBSERVATIONGROUPS
+                    + OR + CSOBSERVATIONS
+                    + OR + OBSERVATIONRELATIONS
                     + WANTED_NAME_GROUP_END;
 
-    String BASE_COLLECTION_REGEX = OBSERVATIONGROUPS;
+    String BASE_COLLECTION_REGEX = OBSERVATIONGROUPS + OR + CSOBSERVATIONS + OR + OBSERVATIONRELATIONS;
 
-    String IDENTIFIED_BY_OBSERVATION_REGEX =
-            OBSERVATIONS + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN + OBSERVATIONGROUPS + ROUND_BRACKET_CLOSE;
+    String IDENTIFIED_BY_CSOBSERVATION_REGEX =
+            CSOBSERVATIONS + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN + OBSERVATIONRELATIONS + ROUND_BRACKET_CLOSE;
+
+    String IDENTIFIED_BY_OBSERVATIONGROUP_REGEX =
+            OBSERVATIONGROUPS + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN + OBSERVATIONRELATIONS +
+                    ROUND_BRACKET_CLOSE;
 
     // /ObservationGroups(52)
     String ENTITY_IDENTIFIED_DIRECTLY =
             PATH_ENTITY + BASE_COLLECTION_REGEX + CURLY_BRACKET_CLOSE + PATH_ID + IDENTIFIER_REGEX + DOLLAR +
                     CURLY_BRACKET_CLOSE;
 
-    // /Locations(52)/Things
-    // /Locations(52)/HistoricalLocations
-    String COLLECTION_IDENTIFIED_BY_OBSERVATION =
-            SOURCE_NAME_GROUP_START + OBSERVATIONS + SOURCE_NAME_GROUP_END
+    // /Observation(52)/ObservationRelations
+    String COLLECTION_IDENTIFIED_BY_CSOBSERVATION =
+            SOURCE_NAME_GROUP_START + CSOBSERVATIONS + SOURCE_NAME_GROUP_END
                     + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
                     + SLASH
-                    + WANTED_NAME_GROUP_START + OBSERVATIONGROUPS + WANTED_NAME_GROUP_END;
+                    + WANTED_NAME_GROUP_START + OBSERVATIONRELATIONS + WANTED_NAME_GROUP_END;
 
-    String COLLECTION_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE =
-            PATH_ENTITY + OBSERVATIONS + IDENTIFIER_REGEX + CURLY_BRACKET_CLOSE + PATH_TARGET + OBSERVATIONGROUPS +
+    String COLLECTION_IDENTIFIED_BY_CSOBSERVATION_PATH_VARIABLE =
+            PATH_ENTITY + CSOBSERVATIONS + IDENTIFIER_REGEX + CURLY_BRACKET_CLOSE + PATH_TARGET + OBSERVATIONRELATIONS +
                     CURLY_BRACKET_CLOSE;
+
+    // /Observation(52)/ObservationRelations
+    String COLLECTION_IDENTIFIED_BY_OBSERVATIONGROUP =
+            SOURCE_NAME_GROUP_START + OBSERVATIONGROUP + SOURCE_NAME_GROUP_END
+                    + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
+                    + SLASH
+                    + WANTED_NAME_GROUP_START + OBSERVATIONRELATIONS + WANTED_NAME_GROUP_END;
+
+    String COLLECTION_IDENTIFIED_BY_OBSERVATIONGROUP_PATH_VARIABLE =
+            PATH_ENTITY + OBSERVATIONGROUP + IDENTIFIER_REGEX + CURLY_BRACKET_CLOSE + PATH_TARGET +
+                    OBSERVATIONRELATIONS +
+                    CURLY_BRACKET_CLOSE;
+
+    // /ObservationRelations(52)/ObservationGroup
+    // /ObservationRelations(52)/Observation
+    String ENTITY_IDENTIFIED_BY_OBSERVATIONRELATION =
+            SOURCE_NAME_GROUP_START + OBSERVATIONRELATIONS + SOURCE_NAME_GROUP_END
+                    + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
+                    + SLASH
+                    + WANTED_NAME_GROUP_START + SENSOR + OR + CSOBSERVATION + OR + OBSERVATIONGROUP +
+                    WANTED_NAME_GROUP_END;
+
+    String ENTITY_IDENTIFIED_BY_OBSERVATIONRELATION_PATH_VARIABLE =
+            PATH_ENTITY + OBSERVATIONRELATIONS + IDENTIFIER_REGEX
+                    + CURLY_BRACKET_CLOSE + PATH_TARGET + SENSOR + OR + CSOBSERVATION + OR + OBSERVATIONGROUP +
+                    CURLY_BRACKET_CLOSE;
+
+    String ENTITY_PROPERTY_IDENTIFIED_BY_OBSERVATIONRELATION_PATH_VARIABLE =
+            ENTITY_IDENTIFIED_BY_OBSERVATIONRELATION_PATH_VARIABLE + SLASH + PATH_PROPERTY;
 
     // Patterns used for matching Paths in mqtt with named groups
     // Java does not support duplicate names so patterns are handled separately
     // OGC-15-078r6 14.2.1
     Pattern CP_BASE = Pattern.compile(BASE_COLLECTION_REGEX_NAMED_GROUPS + DOLLAR);
-    Pattern CP_IDENT_BY_OBSERVATION = Pattern.compile(COLLECTION_IDENTIFIED_BY_OBSERVATION + DOLLAR);
+    Pattern CP_IDENT_BY_CSOBSERVATION = Pattern.compile(COLLECTION_IDENTIFIED_BY_CSOBSERVATION + DOLLAR);
+    Pattern CP_IDENT_BY_OBSERVATIONGROUP = Pattern.compile(COLLECTION_IDENTIFIED_BY_OBSERVATIONGROUP + DOLLAR);
 
     Pattern[] NAMED_COLL_PATTERNS =
             new Pattern[] {
                     CP_BASE,
-                    CP_IDENT_BY_OBSERVATION
+                    CP_IDENT_BY_CSOBSERVATION,
+                    CP_IDENT_BY_OBSERVATIONGROUP
             };
 
     // OGC-15-078r6 14.2.3
@@ -95,26 +136,42 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
                     PROP_PATTERN_BASE
             };
 
+    Pattern EP_BASE = Pattern.compile(
+            BASE_COLLECTION_REGEX_NAMED_GROUPS + WANTED_ID_GROUP_START + IDENTIFIER_REGEX + WANTED_ID_GROUP_END +
+                    DOLLAR);
+    Pattern EP_IDENT_BY_OBSERVATIONRELATION = Pattern.compile(ENTITY_IDENTIFIED_BY_OBSERVATIONRELATION + DOLLAR);
+
+    Pattern[] NAMED_ENTITY_PATTERNS =
+            new Pattern[] {
+                    EP_BASE,
+                    EP_IDENT_BY_OBSERVATIONRELATION
+            };
+
     // OGC-15-078r6 14.2.4
     Pattern NAMED_SELECT_PATTER_BASE =
             Pattern.compile(BASE_COLLECTION_REGEX_NAMED_GROUPS + SELECT_REGEX_NAMED_GROUPS + DOLLAR);
-    Pattern NAMED_SELECT_PATTER_IDENT_BY_OBSERVATION =
-            Pattern.compile(COLLECTION_IDENTIFIED_BY_OBSERVATION + SELECT_REGEX_NAMED_GROUPS + DOLLAR);
+    Pattern NAMED_SELECT_PATTER_IDENT_BY_CSOBSERVATION =
+            Pattern.compile(COLLECTION_IDENTIFIED_BY_CSOBSERVATION + SELECT_REGEX_NAMED_GROUPS + DOLLAR);
 
     Pattern[] NAMED_SELECT_PATTERNS =
             new Pattern[] {
                     NAMED_SELECT_PATTER_BASE,
-                    NAMED_SELECT_PATTER_IDENT_BY_OBSERVATION
+                    NAMED_SELECT_PATTER_IDENT_BY_CSOBSERVATION
             };
 
     Pattern BY_ID_PATTERN = Pattern.compile(
             ROUND_BRACKET_OPEN + BASE_COLLECTION_REGEX_NAMED_GROUPS + ROUND_BRACKET_CLOSE + IDENTIFIER_REGEX);
-    Pattern BY_OBSERVATION_PATTERN = Pattern.compile(IDENTIFIED_BY_OBSERVATION_REGEX);
+    Pattern BY_CSOBSERVATION_PATTERN = Pattern.compile(IDENTIFIED_BY_CSOBSERVATION_REGEX);
+    Pattern BY_OBSERVATIONGROUP_PATTERN = Pattern.compile(IDENTIFIED_BY_OBSERVATIONGROUP_REGEX);
 
     default Class collectionNameToClass(String collectionName) throws STAInvalidUrlException {
         switch (collectionName) {
-        case OBSERVATIONGROUP:
+        case OBSERVATIONGROUPS:
             return ObservationGroup.class;
+        case OBSERVATIONRELATIONS:
+            return ObservationRelation.class;
+        case CSOBSERVATIONS:
+            return CSObservation.class;
         default:
             throw new STAInvalidUrlException("Could not resolve CollectionName to Entity class!");
         }
@@ -148,7 +205,8 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
                     if (i > 0) {
                         // Look back at last resource and check if association is valid
                         String resource = uriResources[i - 1] + SLASH + uriResources[i];
-                        if (!BY_OBSERVATION_PATTERN.matcher(resource).matches()) {
+                        if (!(BY_CSOBSERVATION_PATTERN.matcher(resource).matches() ||
+                                BY_OBSERVATIONGROUP_PATTERN.matcher(resource).matches())) {
                             return new STAInvalidUrlException(URL_INVALID
                                                                       + uriResources[i - 1]
                                                                       + SLASH + uriResources[i]

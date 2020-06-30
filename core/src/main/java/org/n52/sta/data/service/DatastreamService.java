@@ -346,7 +346,7 @@ public class DatastreamService
     }
 
     @Override
-    protected DatastreamEntity createOrUpdate(DatastreamEntity entity) throws STACRUDException {
+    public DatastreamEntity createOrUpdate(DatastreamEntity entity) throws STACRUDException {
         if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
             return updateEntity(entity.getStaIdentifier(), entity, HttpMethod.PATCH);
         }

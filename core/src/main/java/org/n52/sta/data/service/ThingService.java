@@ -291,7 +291,7 @@ public class ThingService
     }
 
     @Override
-    protected PlatformEntity createOrUpdate(PlatformEntity entity) throws STACRUDException {
+    public PlatformEntity createOrUpdate(PlatformEntity entity) throws STACRUDException {
         if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
             return updateEntity(entity.getStaIdentifier(), entity, HttpMethod.PATCH);
         }

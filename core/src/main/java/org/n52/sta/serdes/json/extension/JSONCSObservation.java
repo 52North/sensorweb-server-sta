@@ -27,17 +27,48 @@
  * Public License for more details.
  */
 
-package org.n52.sta.serdes.json;
+package org.n52.sta.serdes.json.extension;
 
-import org.n52.series.db.beans.sta.mapped.ObservationEntity;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import org.n52.series.db.beans.sta.mapped.extension.CSObservation;
+import org.n52.series.db.beans.sta.mapped.extension.ObservationRelation;
+import org.n52.sta.serdes.json.AbstractJSONObservation;
+import org.n52.sta.serdes.json.JSONBase;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public class JSONObservation extends AbstractJSONObservation<ObservationEntity> {
+public class JSONCSObservation extends AbstractJSONObservation<CSObservation> {
 
-    public JSONObservation() {
-        self = new ObservationEntity();
+    @JsonManagedReference
+    public JSONObservationRelation[] Relations;
+
+    public JSONCSObservation() {
+        self = new CSObservation();
     }
 
+    @Override protected CSObservation createPatchEntity() {
+        super.createPatchEntity();
+        handleRelations();
+        return self;
+    }
+
+    @Override protected CSObservation createPostEntity() {
+        super.createPostEntity();
+        handleRelations();
+        return self;
+    }
+
+    private void handleRelations() {
+        if (Relations != null) {
+            Set<ObservationRelation> rel = new HashSet<>();
+            for (JSONObservationRelation relation : Relations) {
+                rel.add(relation.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+            }
+            self.setRelations(rel);
+        }
+    }
 }

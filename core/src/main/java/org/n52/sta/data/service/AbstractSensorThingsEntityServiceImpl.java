@@ -39,13 +39,15 @@ import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.AbstractObservationEntity;
-import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ObservablePropertyEntity;
-import org.n52.series.db.beans.sta.mapped.ObservationEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.series.db.beans.sta.StaFeatureEntity;
+import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
+import org.n52.series.db.beans.sta.mapped.ObservationEntity;
+import org.n52.series.db.beans.sta.mapped.extension.ObservationGroup;
+import org.n52.series.db.beans.sta.mapped.extension.ObservationRelation;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.FilterFilter;
 import org.n52.shetland.filter.OrderProperty;
@@ -360,8 +362,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
      * @return updated entity
      * @throws STACRUDException if an error occurred
      */
-
-    protected abstract S createOrUpdate(S entity) throws STACRUDException;
+    public abstract S createOrUpdate(S entity) throws STACRUDException;
     //protected S createOrUpdate(S entity) throws STACRUDException {
     //    if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
     //        return update(entity, HttpMethod.PATCH);
@@ -462,9 +463,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
      * @param property name of the property in STA
      * @return name of the property in database
      */
-    public String checkPropertyName(String property) {
-        return property;
-    }
+    public abstract String checkPropertyName(String property);
 
     protected abstract S merge(S existing, S toMerge) throws STACRUDException;
 
@@ -555,7 +554,20 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     getObservationService() {
         return (AbstractSensorThingsEntityServiceImpl<?, AbstractObservationEntity<?>, AbstractObservationEntity<?>>)
                 getEntityService(EntityTypes.Observation);
+    }
 
+    @SuppressWarnings("unchecked")
+    protected AbstractSensorThingsEntityServiceImpl<?, ObservationGroup, ObservationGroup>
+    getObservationGroupService() {
+        return (AbstractSensorThingsEntityServiceImpl<?, ObservationGroup, ObservationGroup>)
+                getEntityService(EntityTypes.ObservationGroup);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected AbstractSensorThingsEntityServiceImpl<?, ObservationRelation, ObservationRelation>
+    getObservationRelationService() {
+        return (AbstractSensorThingsEntityServiceImpl<?, ObservationRelation, ObservationRelation>)
+                getEntityService(EntityTypes.ObservationRelation);
     }
 
     public void setServiceRepository(EntityServiceRepository serviceRepository) {

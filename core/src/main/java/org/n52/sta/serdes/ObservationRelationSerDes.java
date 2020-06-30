@@ -35,14 +35,13 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.n52.series.db.beans.sta.mapped.extension.ObservationGroup;
 import org.n52.series.db.beans.sta.mapped.extension.ObservationRelation;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
-import org.n52.sta.serdes.json.extension.JSONObservationGroup;
-import org.n52.sta.serdes.util.ElementWithQueryOptions.ObservationGroupWithQueryOptions;
+import org.n52.sta.serdes.json.extension.JSONObservationRelation;
+import org.n52.sta.serdes.util.ElementWithQueryOptions.ObservationRelationWithQueryOptions;
 import org.n52.sta.serdes.util.EntityPatch;
 
 import java.io.IOException;
@@ -53,40 +52,47 @@ import java.util.Set;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public class ObservationGroupSerDes {
+public class ObservationRelationSerDes {
 
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
-    public static class ObservationGroupPatch extends ObservationGroup implements EntityPatch<ObservationGroup> {
+    public static class ObservationRelationPatch extends ObservationRelation
+            implements EntityPatch<ObservationRelation> {
 
         private static final long serialVersionUID = -2233037380407692718L;
-        private final ObservationGroup entity;
+        private final ObservationRelation entity;
 
-        ObservationGroupPatch(ObservationGroup entity) {
+        ObservationRelationPatch(ObservationRelation entity) {
             this.entity = entity;
         }
 
-        public ObservationGroup getEntity() {
+        public ObservationRelation getEntity() {
             return entity;
         }
     }
 
 
-    public static class ObservationGroupSerializer extends AbstractSTASerializer<ObservationGroupWithQueryOptions> {
+    public static class ObservationRelationSerializer
+            extends AbstractSTASerializer<ObservationRelationWithQueryOptions> {
 
         private static final long serialVersionUID = -1618289129123682794L;
 
-        public ObservationGroupSerializer(String rootUrl) {
-            super(ObservationGroupWithQueryOptions.class);
+        private static final String PROP_GROUP = "Group";
+        private static final String PROP_TYPE = "type";
+
+        public ObservationRelationSerializer(String rootUrl) {
+            super(ObservationRelationWithQueryOptions.class);
             this.rootUrl = rootUrl;
-            this.entitySetName = "ObservationGroups";
+            this.entitySetName = "ObservationRelations";
         }
 
         @Override
-        public void serialize(ObservationGroupWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers)
+        public void serialize(ObservationRelationWithQueryOptions value,
+                              JsonGenerator gen,
+                              SerializerProvider serializers)
                 throws IOException {
             gen.writeStartObject();
 
-            ObservationGroup obsGroup = value.getEntity();
+            ObservationRelation obsRel = value.getEntity();
             QueryOptions options = value.getQueryOptions();
 
             Set<String> fieldsToSerialize = null;
@@ -107,35 +113,38 @@ public class ObservationGroupSerDes {
             }
             // olingo @iot links
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
-                writeId(gen, obsGroup.getStaIdentifier());
+                writeId(gen, obsRel.getStaIdentifier());
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_SELF_LINK)) {
-                writeSelfLink(gen, obsGroup.getStaIdentifier());
+                writeSelfLink(gen, obsRel.getStaIdentifier());
             }
 
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_NAME)) {
-                gen.writeStringField(STAEntityDefinition.PROP_NAME, obsGroup.getName());
+            if (!hasSelectOption || fieldsToSerialize.contains(PROP_TYPE)) {
+                gen.writeStringField(PROP_TYPE, obsRel.getType());
             }
 
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_DESCRIPTION)) {
-                gen.writeStringField(STAEntityDefinition.PROP_NAME, obsGroup.getDescription());
-            }
-
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.OBSERVATIONS)) {
-                writeNavigationProp(gen, STAEntityDefinition.OBSERVATIONS, obsGroup.getStaIdentifier());
-                /*
-                for (ObservationRelation entity : obsGroup.getEntities()) {
-                    if (!hasExpandOption || fieldsToExpand.get(STAEntityDefinition.OBSERVATIONS) == null) {
-                        writeNavigationProp(gen, STAEntityDefinition.OBSERVATIONS, obsGroup.getStaIdentifier());
-                    } else {
-                        gen.writeFieldName(STAEntityDefinition.OBSERVATIONS);
-                        writeNestedEntity(entity,
-                                          fieldsToExpand.get(STAEntityDefinition.OBSERVATIONS),
-                                          gen,
-                                          serializers);
-                    }
+            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.OBSERVATION)) {
+                if (!hasExpandOption || fieldsToExpand.get(STAEntityDefinition.OBSERVATION) == null) {
+                    writeNavigationProp(gen, STAEntityDefinition.OBSERVATION, obsRel.getStaIdentifier());
+                } else {
+                    gen.writeFieldName(STAEntityDefinition.OBSERVATION);
+                    writeNestedEntity(obsRel.getObservation(),
+                                      fieldsToExpand.get(STAEntityDefinition.OBSERVATION),
+                                      gen,
+                                      serializers);
                 }
-                */
+            }
+
+            if (!hasSelectOption || fieldsToSerialize.contains(PROP_GROUP)) {
+                if (!hasExpandOption || fieldsToExpand.get(PROP_GROUP) == null) {
+                    writeNavigationProp(gen, PROP_GROUP, obsRel.getStaIdentifier());
+                } else {
+                    gen.writeFieldName(PROP_GROUP);
+                    writeNestedEntity(obsRel.getGroup(),
+                                      fieldsToExpand.get(PROP_GROUP),
+                                      gen,
+                                      serializers);
+                }
             }
             gen.writeEndObject();
         }
@@ -143,35 +152,35 @@ public class ObservationGroupSerDes {
     }
 
 
-    public static class ObservationGroupDeserializer extends StdDeserializer<ObservationGroup> {
+    public static class ObservationRelationDeserializer extends StdDeserializer<ObservationRelation> {
 
         private static final long serialVersionUID = 3942005672394573517L;
 
-        public ObservationGroupDeserializer() {
-            super(ObservationGroup.class);
+        public ObservationRelationDeserializer() {
+            super(ObservationRelation.class);
         }
 
         @Override
-        public ObservationGroup deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return p.readValueAs(JSONObservationGroup.class).toEntity(JSONBase.EntityType.FULL);
+        public ObservationRelation deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+            return p.readValueAs(JSONObservationRelation.class).toEntity(JSONBase.EntityType.FULL);
         }
     }
 
 
-    public static class ObservationGroupPatchDeserializer
-            extends StdDeserializer<ObservationGroupSerDes.ObservationGroupPatch> {
+    public static class ObservationRelationPatchDeserializer
+            extends StdDeserializer<ObservationRelationSerDes.ObservationRelationPatch> {
 
         private static final long serialVersionUID = -6355786322787893665L;
 
-        public ObservationGroupPatchDeserializer() {
+        public ObservationRelationPatchDeserializer() {
             super(ThingSerDes.PlatformEntityPatch.class);
         }
 
         @Override
-        public ObservationGroupSerDes.ObservationGroupPatch deserialize(JsonParser p, DeserializationContext ctxt)
+        public ObservationRelationSerDes.ObservationRelationPatch deserialize(JsonParser p, DeserializationContext ctxt)
                 throws IOException {
-            return new ObservationGroupSerDes.ObservationGroupPatch(p.readValueAs(JSONObservationGroup.class)
-                                                                     .toEntity(JSONBase.EntityType.PATCH));
+            return new ObservationRelationSerDes.ObservationRelationPatch(p.readValueAs(JSONObservationRelation.class)
+                                                                           .toEntity(JSONBase.EntityType.PATCH));
         }
     }
 }

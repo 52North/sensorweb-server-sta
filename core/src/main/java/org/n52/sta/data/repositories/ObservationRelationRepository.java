@@ -27,28 +27,16 @@
  * Public License for more details.
  */
 
-package org.n52.sta.serdes.json;
+package org.n52.sta.data.repositories;
 
-import org.n52.series.db.beans.FormatEntity;
+import org.n52.series.db.beans.sta.mapped.extension.ObservationRelation;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Repository;
 
 /**
- * Extends the STA Standard spec by allowing more diverse encodingTypes (e.g. html links) for Sensors
- *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public class JSONSensorVariableEncoding extends JSONSensor {
-
-    public JSONSensorVariableEncoding() {
-        super();
-    }
-
-    @Override
-    protected void handleEncodingType() {
-        if (encodingType.equalsIgnoreCase(STA_SENSORML_2) || encodingType.equalsIgnoreCase(PDF)) {
-            super.handleEncodingType();
-        } else {
-            self.setFormat(new FormatEntity().setFormat(encodingType));
-            self.setDescriptionFile(metadata);
-        }
-    }
+@Repository
+@Profile("citSciExtension")
+public interface ObservationRelationRepository extends StaIdentifierRepository<ObservationRelation> {
 }

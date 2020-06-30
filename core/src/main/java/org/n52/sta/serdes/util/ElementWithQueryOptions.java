@@ -43,7 +43,9 @@ import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.series.db.beans.sta.StaFeatureEntity;
 import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.series.db.beans.sta.mapped.ObservationEntity;
+import org.n52.series.db.beans.sta.mapped.extension.CSObservation;
 import org.n52.series.db.beans.sta.mapped.extension.ObservationGroup;
+import org.n52.series.db.beans.sta.mapped.extension.ObservationRelation;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 
 public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId> {
@@ -84,6 +86,10 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
                     new StaFeatureEntity<>((FeatureEntity) unwrapped), queryOptions);
         case "DatastreamEntity":
             return new DatastreamWithQueryOptions((DatastreamEntity) unwrapped, queryOptions);
+        case "ObservationGroup":
+            return new ObservationGroupWithQueryOptions((ObservationGroup) unwrapped, queryOptions);
+        case "ObservationRelation":
+            return new ObservationRelationWithQueryOptions((ObservationRelation) unwrapped, queryOptions);
         default:
             if (unwrapped instanceof ObservationEntity) {
                 return new ObservationWithQueryOptions((ObservationEntity<?>) unwrapped, queryOptions);
@@ -176,7 +182,21 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
         }
     }
 
+    public static class ObservationRelationWithQueryOptions extends ElementWithQueryOptions<ObservationRelation> {
 
+        ObservationRelationWithQueryOptions(ObservationRelation thing, QueryOptions queryOptions) {
+            this.entity = thing;
+            this.queryOptions = queryOptions;
+        }
+    }
+
+    public static class CSObservationWithQueryOptions extends ElementWithQueryOptions<CSObservation> {
+
+        CSObservationWithQueryOptions(CSObservation thing, QueryOptions queryOptions) {
+            this.entity = thing;
+            this.queryOptions = queryOptions;
+        }
+    }
 
 
 }

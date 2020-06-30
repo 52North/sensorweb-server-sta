@@ -43,7 +43,7 @@ import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.shetland.ogc.sta.model.SensorEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONSensor;
-import org.n52.sta.serdes.json.JSONSensorVariableEncoding;
+import org.n52.sta.serdes.json.extension.JSONSensorVariableEncoding;
 import org.n52.sta.serdes.util.ElementWithQueryOptions.SensorWithQueryOptions;
 import org.n52.sta.serdes.util.EntityPatch;
 import org.slf4j.Logger;

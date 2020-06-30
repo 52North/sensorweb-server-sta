@@ -30,11 +30,13 @@
 package org.n52.sta.data.repositories;
 
 import org.n52.series.db.beans.sta.mapped.extension.ObservationGroup;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Repository
+@Profile("citSciExtension")
 public interface ObservationGroupRepository extends NameRepository<ObservationGroup> {
 }

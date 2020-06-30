@@ -235,7 +235,7 @@ public class HistoricalLocationService
     }
 
     @Override
-    protected HistoricalLocationEntity createOrUpdate(HistoricalLocationEntity entity)
+    public HistoricalLocationEntity createOrUpdate(HistoricalLocationEntity entity)
             throws STACRUDException {
         if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
             return updateEntity(entity.getStaIdentifier(), entity, HttpMethod.PATCH);

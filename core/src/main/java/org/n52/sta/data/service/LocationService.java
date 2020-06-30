@@ -250,7 +250,7 @@ public class LocationService
     }
 
     @Override
-    protected LocationEntity createOrUpdate(LocationEntity entity) throws STACRUDException {
+    public LocationEntity createOrUpdate(LocationEntity entity) throws STACRUDException {
         if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
             return updateEntity(entity.getStaIdentifier(), entity, HttpMethod.PATCH);
         }

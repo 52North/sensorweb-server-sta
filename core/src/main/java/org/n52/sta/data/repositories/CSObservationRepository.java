@@ -27,10 +27,17 @@
  * Public License for more details.
  */
 
-package org.n52.sta.data.service;
+package org.n52.sta.data.repositories;
+
+import org.n52.series.db.beans.sta.mapped.extension.CSObservation;
+import org.n52.series.db.beans.sta.mapped.extension.ObservationGroup;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Repository;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public class ObservationGroupService {
+@Repository
+@Profile("citSciExtension")
+public interface CSObservationRepository extends StaIdentifierRepository<CSObservation> {
 }

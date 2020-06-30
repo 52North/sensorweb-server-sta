@@ -294,7 +294,7 @@ public class SensorService
     }
 
     @Override
-    protected ProcedureEntity createOrUpdate(ProcedureEntity entity) throws STACRUDException {
+    public ProcedureEntity createOrUpdate(ProcedureEntity entity) throws STACRUDException {
         if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
             return updateEntity(entity.getStaIdentifier(), entity, HttpMethod.PATCH);
         }

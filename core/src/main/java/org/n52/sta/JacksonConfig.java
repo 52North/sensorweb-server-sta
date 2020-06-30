@@ -43,14 +43,18 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.series.db.beans.sta.mapped.ObservationEntity;
+import org.n52.series.db.beans.sta.mapped.extension.CSObservation;
 import org.n52.series.db.beans.sta.mapped.extension.ObservationGroup;
+import org.n52.series.db.beans.sta.mapped.extension.ObservationRelation;
 import org.n52.sta.data.service.util.CollectionWrapper;
+import org.n52.sta.serdes.CSObservationSerDes;
 import org.n52.sta.serdes.CollectionSer;
 import org.n52.sta.serdes.DatastreamSerDes;
 import org.n52.sta.serdes.FeatureOfInterestSerDes;
 import org.n52.sta.serdes.HistoricalLocationSerDes;
 import org.n52.sta.serdes.LocationSerDes;
 import org.n52.sta.serdes.ObservationGroupSerDes;
+import org.n52.sta.serdes.ObservationRelationSerDes;
 import org.n52.sta.serdes.ObservationSerDes;
 import org.n52.sta.serdes.ObservedPropertySerDes;
 import org.n52.sta.serdes.SensorSerDes;
@@ -143,11 +147,16 @@ public class JacksonConfig {
         SimpleDeserializers deserializers = new SimpleDeserializers();
 
         serializers.addSerializer(new ObservationGroupSerDes.ObservationGroupSerializer(rootUrl));
+        serializers.addSerializer(new ObservationRelationSerDes.ObservationRelationSerializer(rootUrl));
+        serializers.addSerializer(new CSObservationSerDes.CSObservationSerializer(rootUrl));
 
         deserializers.addDeserializer(ObservationGroup.class,
                                       new ObservationGroupSerDes.ObservationGroupDeserializer());
-        deserializers.addDeserializer(ObservationGroupSerDes.ObservationGroupPatch.class,
-                                      new ObservationGroupSerDes.ObservationGroupPatchDeserializer());
+
+        deserializers.addDeserializer(ObservationRelation.class,
+                                      new ObservationRelationSerDes.ObservationRelationDeserializer());
+        deserializers.addDeserializer(CSObservation.class,
+                                      new CSObservationSerDes.CSObservationDeserializer());
 
         module.setSerializers(serializers);
         module.setDeserializers(deserializers);

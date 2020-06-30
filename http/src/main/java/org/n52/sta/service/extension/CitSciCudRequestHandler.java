@@ -80,7 +80,8 @@ public class CitSciCudRequestHandler<T extends HibernateRelations.HasId>
     @PostMapping(
             value = {
                     RequestUtils.MAPPING_PREFIX +
-                            CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE
+                            CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVATIONGROUP_PATH_VARIABLE,
+                            CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_CSOBSERVATION_PATH_VARIABLE
             },
             produces = "application/json"
     )
@@ -104,7 +105,6 @@ public class CitSciCudRequestHandler<T extends HibernateRelations.HasId>
         return super.handleDirectPatch(collectionName, id, body, request);
     }
 
-    // There are no singular References so no patching via reference is possible!
     /*
     @PatchMapping(
             value = {
@@ -132,7 +132,6 @@ public class CitSciCudRequestHandler<T extends HibernateRelations.HasId>
         return super.handleDelete(collectionName, id, request);
     }
 
-    // There are no singular References so no deletion via reference is possible!
     /*
     @DeleteMapping(
             value = {
