@@ -54,6 +54,17 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
 
     private static final String LOCATION = "location";
 
+    @Override
+    public String checkPropertyName(String property) {
+        if (property.equals("encodingType")) {
+            return LocationEntity.PROPERTY_NAME;
+        } else if (property.equals("location")) {
+            return "name desc";
+        } else {
+            return property;
+        }
+    }
+
     public Specification<LocationEntity> withHistoricalLocationStaIdentifier(String historicalLocationIdentifier) {
         return (root, query, builder) -> {
             Subquery<LocationEntity> sq = query.subquery(LocationEntity.class);

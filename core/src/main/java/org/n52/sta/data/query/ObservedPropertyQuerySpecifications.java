@@ -47,6 +47,18 @@ import javax.persistence.criteria.Subquery;
  */
 public class ObservedPropertyQuerySpecifications extends EntityQuerySpecifications<PhenomenonEntity> {
 
+    @Override
+    public String checkPropertyName(String property) {
+        switch (property) {
+        case "definition":
+            return PhenomenonEntity.PROPERTY_IDENTIFIER;
+        case "identifier":
+            return PhenomenonEntity.STA_IDENTIFIER;
+        default:
+            return super.checkPropertyName(property);
+        }
+    }
+
     public Specification<PhenomenonEntity> withDatastreamStaIdentifier(final String datastreamIdentifier) {
         return (root, query, builder) -> {
             final Join<PhenomenonEntity, DatastreamEntity> join =

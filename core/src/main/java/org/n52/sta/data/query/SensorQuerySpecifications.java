@@ -47,6 +47,19 @@ import javax.persistence.criteria.Subquery;
  */
 public class SensorQuerySpecifications extends EntityQuerySpecifications<ProcedureEntity> {
 
+    @Override
+    public String checkPropertyName(String property) {
+        switch (property) {
+        case "encodingType":
+            return ProcedureEntity.PROPERTY_PROCEDURE_DESCRIPTION_FORMAT;
+        case "metadata":
+            // TODO: Add sorting by HistoricalLocation that replaces Description if it is not present
+            return "descriptionFile";
+        default:
+            return super.checkPropertyName(property);
+        }
+    }
+
     public Specification<ProcedureEntity> withDatastreamStaIdentifier(final String datastreamIdentifier) {
         return (root, query, builder) -> {
             Subquery<ProcedureEntity> sq = query.subquery(ProcedureEntity.class);

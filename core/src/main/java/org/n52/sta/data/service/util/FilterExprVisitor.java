@@ -58,7 +58,6 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import java.time.Instant;
 import java.util.Date;
 import java.util.function.BiFunction;
 
@@ -303,9 +302,9 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
         case ODataConstants.DateAndTimeFunctions.NOW:
             return builder.currentTimestamp();
         case ODataConstants.DateAndTimeFunctions.MINDATETIME:
-            return builder.literal(Date.from(Instant.MIN));
+            return builder.literal(new Date(0L));
         case ODataConstants.DateAndTimeFunctions.MAXDATETIME:
-            return builder.literal(Date.from(Instant.MAX));
+            return builder.literal(new Date(Long.MAX_VALUE));
         default:
             throw new STAInvalidQueryException(ERROR_NOT_EVALUABLE + expr.getName());
         }
@@ -387,7 +386,6 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
     @SuppressWarnings("unchecked")
     private Expression<?> visitMethodCallBinary(MethodCallExpr expr) throws STAInvalidQueryException {
         Path firstParam = (Path<?>) expr.getParameters().get(0).accept(this);
-
         Expression<?> secondParam;
         switch (expr.getName()) {
 
@@ -587,7 +585,11 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
      */
     @Override public Expression<Date> visitTime(TimeValueExpr expr) throws STAInvalidQueryException {
         // This is always literal as we handle member Expressions seperately
-        return builder.literal(((TimeInstant) expr.getTime()).getValue().toDate());
+        if (expr.getTime() instanceof String) {
+            return root.get(rootQS.checkPropertyName((String) expr.getTime()));
+        } else {
+            return builder.literal(((TimeInstant) expr.getTime()).getValue().toDate());
+        }
     }
 
     /**

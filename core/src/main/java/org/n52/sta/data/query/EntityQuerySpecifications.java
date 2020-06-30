@@ -217,4 +217,14 @@ public abstract class EntityQuerySpecifications<T> {
                                                                    Expression<?> propertyValue,
                                                                    FilterConstants.ComparisonOperator operator,
                                                                    boolean switched);
+
+    /**
+     * Translate STA property name to Database property name
+     *
+     * @param property name of the property in STA
+     * @return name of the property in database
+     */
+    public String checkPropertyName(String property) {
+        return property;
+    }
 }

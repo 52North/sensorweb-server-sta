@@ -182,14 +182,7 @@ public class DatastreamService
 
     @Override
     public String checkPropertyName(String property) {
-        switch (property) {
-        case "phenomenonTime":
-            return DatastreamEntity.PROPERTY_SAMPLING_TIME_START;
-        case "resultTime":
-            return DatastreamEntity.PROPERTY_RESULT_TIME_START;
-        default:
-            return super.checkPropertyName(property);
-        }
+        return dQS.checkPropertyName(property);
     }
 
     @Override

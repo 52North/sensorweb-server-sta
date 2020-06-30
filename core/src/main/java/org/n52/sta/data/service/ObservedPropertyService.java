@@ -177,14 +177,7 @@ public class ObservedPropertyService
 
     @Override
     public String checkPropertyName(String property) {
-        switch (property) {
-        case "definition":
-            return PhenomenonEntity.PROPERTY_IDENTIFIER;
-        case "identifier":
-            return PhenomenonEntity.STA_IDENTIFIER;
-        default:
-            return super.checkPropertyName(property);
-        }
+        return oQS.checkPropertyName(property);
     }
 
     @Override

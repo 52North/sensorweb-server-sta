@@ -259,13 +259,7 @@ public class LocationService
 
     @Override
     public String checkPropertyName(String property) {
-        if (property.equals(ENCODINGTYPE)) {
-            return LocationEntity.PROPERTY_NAME;
-        } else if (property.equals("location")) {
-            return "name desc";
-        } else {
-            return property;
-        }
+        return lQS.checkPropertyName(property);
     }
 
     private void checkLocationEncoding(LocationEntity location) throws STACRUDException {

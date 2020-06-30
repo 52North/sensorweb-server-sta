@@ -298,6 +298,10 @@ public class ThingService
         return createEntity(entity);
     }
 
+    @Override public String checkPropertyName(String property) {
+        return tQS.checkPropertyName(property);
+    }
+
     private void processDatastreams(PlatformEntity thing) throws STACRUDException {
         if (thing.hasDatastreams()) {
             Set<DatastreamEntity> datastreams = new LinkedHashSet<>();

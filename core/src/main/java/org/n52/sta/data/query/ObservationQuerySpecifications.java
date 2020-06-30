@@ -52,6 +52,20 @@ import javax.persistence.criteria.Subquery;
  */
 public class ObservationQuerySpecifications extends EntityQuerySpecifications<ObservationEntity<?>> {
 
+    @Override
+    public String checkPropertyName(String property) {
+        switch (property) {
+        case "phenomenonTime":
+            // TODO: proper ISO8601 comparison
+            return ObservationEntity.PROPERTY_SAMPLING_TIME_END;
+        // This is handled separately as result is split up over multiple columns
+        //case "result":
+        //    return "valueBoolean";
+        default:
+            return super.checkPropertyName(property);
+        }
+    }
+
     public static Specification<ObservationEntity<?>> withFeatureOfInterestStaIdentifier(final String featureIdentifier) {
         return (root, query, builder) -> {
             Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);

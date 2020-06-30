@@ -174,12 +174,7 @@ public class FeatureOfInterestService
 
     @Override
     public String checkPropertyName(String property) {
-        switch (property) {
-        case "encodingType":
-            return AbstractFeatureEntity.PROPERTY_FEATURE_TYPE;
-        default:
-            return property;
-        }
+        return foiQS.checkPropertyName(property);
     }
 
     @Override

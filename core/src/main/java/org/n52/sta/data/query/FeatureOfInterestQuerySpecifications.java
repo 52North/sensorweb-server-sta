@@ -53,6 +53,16 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
 
     private static final String FEATURE = "feature";
 
+    @Override
+    public String checkPropertyName(String property) {
+        switch (property) {
+        case "encodingType":
+            return AbstractFeatureEntity.PROPERTY_FEATURE_TYPE;
+        default:
+            return property;
+        }
+    }
+
     public Specification<AbstractFeatureEntity<?>> withObservationStaIdentifier(final String observationIdentifier) {
         return (root, query, builder) -> {
             Subquery<Long> sqFeature = query.subquery(Long.class);

@@ -146,15 +146,7 @@ public class SensorService
 
     @Override
     public String checkPropertyName(String property) {
-        switch (property) {
-        case "encodingType":
-            return ProcedureEntity.PROPERTY_PROCEDURE_DESCRIPTION_FORMAT;
-        case "metadata":
-            // TODO: Add sorting by HistoricalLocation that replaces Description if it is not present
-            return "descriptionFile";
-        default:
-            return super.checkPropertyName(property);
-        }
+        return sQS.checkPropertyName(property);
     }
 
     private ProcedureEntity getAsProcedureEntity(ProcedureEntity sensor) {

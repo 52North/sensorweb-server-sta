@@ -310,16 +310,7 @@ public class ObservationService extends
 
     @Override
     public String checkPropertyName(String property) {
-        switch (property) {
-        case "phenomenonTime":
-            // TODO: proper ISO8601 comparison
-            return ObservationEntity.PROPERTY_SAMPLING_TIME_END;
-        // This is handled separately as result is split up over multiple columns
-        //case "result":
-        //    return "valueBoolean";
-        default:
-            return super.checkPropertyName(property);
-        }
+        return oQS.checkPropertyName(property);
     }
 
     @Override

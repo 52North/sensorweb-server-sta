@@ -243,6 +243,10 @@ public class HistoricalLocationService
         return createEntity(entity);
     }
 
+    @Override public String checkPropertyName(String property) {
+        return hlQS.checkPropertyName(property);
+    }
+
     private void updateLocations(HistoricalLocationEntity historicalLocation) throws STACRUDException {
         for (LocationEntity location : historicalLocation.getLocations()) {
             location.getHistoricalLocations().remove(historicalLocation);
