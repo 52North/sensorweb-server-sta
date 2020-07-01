@@ -34,6 +34,7 @@ import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -47,12 +48,13 @@ import javax.persistence.criteria.Subquery;
  */
 public class SensorQuerySpecifications extends EntityQuerySpecifications<ProcedureEntity> {
 
+
     @Override
     public String checkPropertyName(String property) {
         switch (property) {
-        case "encodingType":
+        case StaConstants.PROP_ENCODINGTYPE:
             return ProcedureEntity.PROPERTY_PROCEDURE_DESCRIPTION_FORMAT;
-        case "metadata":
+        case StaConstants.PROP_METADATA:
             // TODO: Add sorting by HistoricalLocation that replaces Description if it is not present
             return "descriptionFile";
         default:
@@ -116,7 +118,7 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications<Procedu
                             builder,
                             switched);
                 case "format":
-                case "encodingType":
+                case StaConstants.PROP_ENCODINGTYPE:
                     Join<ProcedureEntity, FormatEntity> join =
                             root.join(ProcedureEntity.PROPERTY_PROCEDURE_DESCRIPTION_FORMAT);
                     return handleDirectStringPropertyFilter(join.get(FormatEntity.FORMAT),
@@ -124,7 +126,7 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications<Procedu
                                                             operator,
                                                             builder,
                                                             switched);
-                case "metadata":
+                case StaConstants.PROP_METADATA:
                     return handleDirectStringPropertyFilter(
                             root.get(ProcedureEntity.PROPERTY_DESCRIPTION_FILE),
                             propertyValue,

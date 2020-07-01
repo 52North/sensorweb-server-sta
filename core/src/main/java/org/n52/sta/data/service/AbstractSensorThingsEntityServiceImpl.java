@@ -96,14 +96,12 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSensorThingsEntityServiceImpl.class);
 
+    protected final Class<S> entityClass;
     private EntityServiceRepository serviceRepository;
 
     @Autowired
     private MutexFactory lock;
-
-    protected final Class<S> entityClass;
     private final EntityGraphRepository.FetchGraph[] defaultFetchGraphs;
-
     private T repository;
 
     public AbstractSensorThingsEntityServiceImpl(T repository,

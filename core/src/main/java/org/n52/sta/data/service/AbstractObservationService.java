@@ -96,8 +96,6 @@ public abstract class AbstractObservationService<T extends StaIdentifierReposito
     private static final DatastreamQuerySpecifications dsQS = new DatastreamQuerySpecifications();
     private static final String STA = "STA";
 
-    private final EntityQuerySpecifications<I> oQS;
-
     protected final boolean isMobileFeatureEnabled;
     protected final DataRepository<DataEntity<?>> dataRepository;
     protected final CategoryRepository categoryRepository;
@@ -106,6 +104,7 @@ public abstract class AbstractObservationService<T extends StaIdentifierReposito
     protected final DatasetRepository datasetRepository;
     protected final ParameterRepository parameterRepository;
 
+    private final EntityQuerySpecifications<I> oQS;
     private final Pattern isMobilePattern = Pattern.compile(".*\"isMobile\":true.*");
 
     public AbstractObservationService(

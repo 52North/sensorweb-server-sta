@@ -60,6 +60,7 @@ public class ObservationGroupService
         extends AbstractSensorThingsEntityServiceImpl<ObservationGroupRepository, ObservationGroup, ObservationGroup> {
 
     private static final ObservationGroupQuerySpecifications ogQS = new ObservationGroupQuerySpecifications();
+    private static final String NOT_IMPLEMENTED = "not implemented yet!";
 
     public ObservationGroupService(ObservationGroupRepository repository) {
         super(repository, ObservationGroup.class);
@@ -125,16 +126,11 @@ public class ObservationGroupService
 
     @Override protected ObservationGroup updateEntity(String id, ObservationGroup entity, HttpMethod method)
             throws STACRUDException {
-        throw new STACRUDException("not implemented yet");
+        throw new STACRUDException(NOT_IMPLEMENTED);
     }
 
     @Override protected ObservationGroup updateEntity(ObservationGroup entity) throws STACRUDException {
-        throw new STACRUDException("not implemented yet");
-    }
-
-    @Override protected void delete(ObservationGroup entity) throws STACRUDException {
-        throw new STACRUDException("not implemented yet");
-
+        throw new STACRUDException(NOT_IMPLEMENTED);
     }
 
     @Override public ObservationGroup createOrUpdate(ObservationGroup entity) throws STACRUDException {
@@ -150,7 +146,11 @@ public class ObservationGroupService
 
     @Override protected ObservationGroup merge(ObservationGroup existing, ObservationGroup toMerge)
             throws STACRUDException {
-        throw new STACRUDException("not implemented yet");
+        throw new STACRUDException(NOT_IMPLEMENTED);
+    }
+
+    @Override protected void delete(ObservationGroup entity) throws STACRUDException {
+        throw new STACRUDException(NOT_IMPLEMENTED);
     }
 
     @Override public void delete(String id) throws STACRUDException {

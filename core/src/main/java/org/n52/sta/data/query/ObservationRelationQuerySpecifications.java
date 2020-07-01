@@ -31,7 +31,6 @@ package org.n52.sta.data.query;
 
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.sta.mapped.extension.CSObservation;
-import org.n52.series.db.beans.sta.mapped.extension.ObservationGroup;
 import org.n52.series.db.beans.sta.mapped.extension.ObservationRelation;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
@@ -63,7 +62,7 @@ public class ObservationRelationQuerySpecifications extends EntityQuerySpecifica
     }
 
     @Override protected Specification<ObservationRelation> handleRelatedPropertyFilter(String propertyName,
-                                                                                    Specification<?> propertyValue) {
+                                                                                       Specification<?> propertyValue) {
         return (root, query, builder) -> {
             try {
                 switch (propertyName) {

@@ -31,6 +31,7 @@ package org.n52.sta.data.query;
 
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -47,14 +48,15 @@ public class ParameterQuerySpecifications extends EntityQuerySpecifications<Para
         throw new STAInvalidFilterExpressionException("Parameters do not have related properties");
     }
 
-    @Override protected Specification<ParameterEntity<?>> handleDirectPropertyFilter(String propertyName,
-                                                                                     Expression<?> propertyValue,
-                                                                                     FilterConstants.ComparisonOperator operator,
-                                                                                     boolean switched) {
+    @Override protected Specification<ParameterEntity<?>> handleDirectPropertyFilter(
+            String propertyName,
+            Expression<?> propertyValue,
+            FilterConstants.ComparisonOperator operator,
+            boolean switched) {
         return (Specification<ParameterEntity<?>>) (root, query, builder) -> {
             try {
                 switch (propertyName) {
-                case "name": {
+                case StaConstants.PROP_NAME: {
                     return handleDirectStringPropertyFilter(
                             root.get(ParameterEntity.NAME),
                             propertyValue,

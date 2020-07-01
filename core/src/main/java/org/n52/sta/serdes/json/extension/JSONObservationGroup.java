@@ -30,8 +30,11 @@
 package org.n52.sta.serdes.json.extension;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.sta.mapped.extension.ObservationGroup;
 import org.n52.series.db.beans.sta.mapped.extension.ObservationRelation;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.serdes.json.AbstractJSONEntity;
 import org.n52.sta.serdes.json.JSONBase;
 import org.springframework.util.Assert;
@@ -42,11 +45,14 @@ import java.util.Set;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
+@SuppressWarnings("VisibilityModifier")
+@SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
 public class JSONObservationGroup extends JSONBase.JSONwithIdNameDescription<ObservationGroup>
         implements AbstractJSONEntity {
 
     @JsonManagedReference
-    public JSONObservationRelation[] Relations;
+    @JsonProperty(StaConstants.OBSERVATION_RELATIONS)
+    public JSONObservationRelation[] relations;
 
     public JSONObservationGroup() {
         self = new ObservationGroup();
@@ -70,7 +76,7 @@ public class JSONObservationGroup extends JSONBase.JSONwithIdNameDescription<Obs
         case REFERENCE:
             Assert.isNull(name, INVALID_REFERENCED_ENTITY);
             Assert.isNull(description, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(Relations, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(relations, INVALID_REFERENCED_ENTITY);
             self.setStaIdentifier(identifier);
             self.setIdentifier(identifier);
             return self;
@@ -85,9 +91,9 @@ public class JSONObservationGroup extends JSONBase.JSONwithIdNameDescription<Obs
         self.setName(name);
         self.setDescription(description);
 
-        if (Relations != null) {
+        if (relations != null) {
             Set<ObservationRelation> related = new HashSet<>();
-            for (JSONObservationRelation observation : Relations) {
+            for (JSONObservationRelation observation : relations) {
                 related.add(observation.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
             }
             self.setEntities(related);

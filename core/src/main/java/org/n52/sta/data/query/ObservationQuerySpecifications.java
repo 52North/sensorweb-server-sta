@@ -32,11 +32,11 @@ package org.n52.sta.data.query;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.FeatureEntity;
-import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.series.db.beans.sta.mapped.ObservationEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -55,7 +55,7 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Ob
     @Override
     public String checkPropertyName(String property) {
         switch (property) {
-        case "phenomenonTime":
+        case StaConstants.PROP_PHENOMENON_TIME:
             // TODO: proper ISO8601 comparison
             return ObservationEntity.PROPERTY_SAMPLING_TIME_END;
         // This is handled separately as result is split up over multiple columns
@@ -66,7 +66,8 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Ob
         }
     }
 
-    public static Specification<ObservationEntity<?>> withFeatureOfInterestStaIdentifier(final String featureIdentifier) {
+    public static Specification<ObservationEntity<?>> withFeatureOfInterestStaIdentifier(
+            final String featureIdentifier) {
         return (root, query, builder) -> {
             Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
             Root<DatasetEntity> dataset = sq.from(DatasetEntity.class);
@@ -149,10 +150,10 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Ob
         return (root, query, builder) -> {
             try {
                 switch (propertyName) {
-                case "id":
+                case StaConstants.PROP_ID:
                     return handleDirectStringPropertyFilter(root.get(ObservationEntity.PROPERTY_STA_IDENTIFIER),
                                                             propertyValue, operator, builder, false);
-                case "result":
+                case StaConstants.PROP_RESULT:
                     if (propertyValue.getJavaType().isAssignableFrom(Double.class)
                             || propertyValue.getJavaType().isAssignableFrom(Integer.class)) {
                         Predicate countPred = handleDirectNumberPropertyFilter(
@@ -211,10 +212,10 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Ob
                     } else {
                         throw new STAInvalidFilterExpressionException("Value type not supported!");
                     }
-                case "resultTime":
+                case StaConstants.PROP_RESULT_TIME:
                     return this.handleDirectDateTimePropertyFilter(
                             root.get(ObservationEntity.PROPERTY_RESULT_TIME), propertyValue, operator, builder);
-                case "phenomenonTime":
+                case StaConstants.PROP_PHENOMENON_TIME:
                     switch (operator) {
                     case PropertyIsLessThan:
                     case PropertyIsLessThanOrEqualTo:

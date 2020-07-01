@@ -62,6 +62,7 @@ public class ObservationRelationService
         ObservationRelation> {
 
     private static final ObservationRelationQuerySpecifications orQS = new ObservationRelationQuerySpecifications();
+    private static final String NOT_IMPLEMENTED = "not implemented yet";
 
     public ObservationRelationService(ObservationRelationRepository repository) {
         super(repository, ObservationRelation.class);
@@ -73,7 +74,7 @@ public class ObservationRelationService
 
     @Override protected ObservationRelation fetchExpandEntities(ObservationRelation entity, ExpandFilter expandOption)
             throws STACRUDException, STAInvalidQueryException {
-        throw new STACRUDException("not implemented yet");
+        throw new STACRUDException(NOT_IMPLEMENTED);
     }
 
     @Override protected Specification<ObservationRelation> byRelatedEntityFilter(String relatedId,
@@ -129,16 +130,11 @@ public class ObservationRelationService
 
     @Override protected ObservationRelation updateEntity(String id, ObservationRelation entity, HttpMethod method)
             throws STACRUDException {
-        throw new STACRUDException("not implemented yet");
+        throw new STACRUDException(NOT_IMPLEMENTED);
     }
 
     @Override protected ObservationRelation updateEntity(ObservationRelation entity) throws STACRUDException {
-        throw new STACRUDException("not implemented yet");
-    }
-
-    @Override protected void delete(ObservationRelation entity) throws STACRUDException {
-        throw new STACRUDException("not implemented yet");
-
+        throw new STACRUDException(NOT_IMPLEMENTED);
     }
 
     @Override public ObservationRelation createOrUpdate(ObservationRelation entity) throws STACRUDException {
@@ -154,7 +150,11 @@ public class ObservationRelationService
 
     @Override protected ObservationRelation merge(ObservationRelation existing, ObservationRelation toMerge)
             throws STACRUDException {
-        throw new STACRUDException("not implemented yet");
+        throw new STACRUDException(NOT_IMPLEMENTED);
+    }
+
+    @Override protected void delete(ObservationRelation entity) throws STACRUDException {
+        throw new STACRUDException(NOT_IMPLEMENTED);
     }
 
     @Override public void delete(String id) throws STACRUDException {

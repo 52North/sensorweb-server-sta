@@ -35,7 +35,6 @@ import org.n52.shetland.ogc.filter.FilterClause;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.data.service.util.CollectionWrapper;
-import org.n52.sta.utils.CoreRequestUtils;
 import org.n52.sta.utils.RequestUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -165,10 +164,11 @@ public abstract class AbstractCollectionRequestHandler implements RequestUtils {
         // Overwrite select filter with filter only returning id
         filters.add(new SelectFilter(RequestUtils.ID));
         return serviceRepository.getEntityService(target)
-                                .getEntityCollectionByRelatedEntity(sourceId,
-                                                                    sourceType,
-                                                                    RequestUtils.QUERY_OPTIONS_FACTORY.createQueryOptions(
-                                                                            filters))
+                                .getEntityCollectionByRelatedEntity(
+                                        sourceId,
+                                        sourceType,
+                                        RequestUtils.QUERY_OPTIONS_FACTORY.createQueryOptions(
+                                                filters))
                                 .setRequestURL(rootUrl + entity + "/" + target);
     }
 }

@@ -42,8 +42,6 @@ import org.n52.sta.serdes.util.EntityPatch;
 import org.n52.sta.utils.RequestUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;

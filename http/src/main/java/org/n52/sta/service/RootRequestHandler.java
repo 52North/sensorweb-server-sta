@@ -52,6 +52,9 @@ public class RootRequestHandler {
     private final ObjectMapper mapper;
     private final boolean citSciExtensionActive;
 
+    private final String NAME = "name";
+    private final String URL = "url";
+
     public RootRequestHandler(@Value("${server.rootUrl}") String rootUrl,
                               ObjectMapper mapper,
                               Environment environment) {
@@ -77,16 +80,16 @@ public class RootRequestHandler {
         ArrayNode arrayNode = mapper.createArrayNode();
         for (String collection : STAEntityDefinition.ALLCOLLECTIONS) {
             ObjectNode node = mapper.createObjectNode();
-            node.put("name", collection);
-            node.put("url", uri + collection);
+            node.put(NAME, collection);
+            node.put(URL, uri + collection);
             arrayNode.add(node);
         }
 
         if (citSciExtensionActive) {
             for (String collection : CitSciExtensionEntityDefinition.ALLCOLLECTIONS) {
                 ObjectNode node = mapper.createObjectNode();
-                node.put("name", collection);
-                node.put("url", uri + collection);
+                node.put(NAME, collection);
+                node.put(URL, uri + collection);
                 arrayNode.add(node);
             }
         }

@@ -29,7 +29,6 @@
 
 package org.n52.sta.data.repositories;
 
-import org.n52.series.db.beans.sta.AbstractStaEntity;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.transaction.annotation.Transactional;
 

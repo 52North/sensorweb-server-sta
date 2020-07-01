@@ -36,6 +36,7 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.mapped.ObservationEntity;
 import org.n52.shetland.oasis.odata.ODataConstants;
 import org.n52.shetland.ogc.filter.FilterConstants;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.sta.data.service.util.HibernateSpatialCriteriaBuilder;
 import org.n52.svalbard.odata.core.expr.GeoValueExpr;
@@ -56,7 +57,7 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
     @Override
     public String checkPropertyName(String property) {
         switch (property) {
-        case "encodingType":
+        case StaConstants.PROP_ENCODINGTYPE:
             return AbstractFeatureEntity.PROPERTY_FEATURE_TYPE;
         default:
             return property;
@@ -103,7 +104,7 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
                             operator,
                             builder,
                             switched);
-                case "encodingType":
+                case StaConstants.PROP_ENCODINGTYPE:
                 case "featureType":
                     //TODO: check if this works correctly
                     if (operator.equals(FilterConstants.ComparisonOperator.PropertyIsEqualTo)) {
@@ -132,8 +133,8 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
                 Root<ObservationEntity> data = sqDataset.from(ObservationEntity.class);
                 sqDataset.select(dataset)
                          .where(((Specification<ObservationEntity>) propertyValue).toPredicate(data,
-                                                                                        query,
-                                                                                        builder));
+                                                                                               query,
+                                                                                               builder));
 
                 sqFeature.select(dataset.get(DatasetEntity.PROPERTY_FEATURE))
                          .where(builder.in(dataset).value(sqDataset));

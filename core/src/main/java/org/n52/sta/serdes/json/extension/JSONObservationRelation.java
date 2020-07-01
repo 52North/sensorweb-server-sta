@@ -30,8 +30,7 @@
 package org.n52.sta.serdes.json.extension;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import org.n52.series.db.beans.sta.mapped.ObservationEntity;
-import org.n52.series.db.beans.sta.mapped.extension.CSObservation;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.sta.mapped.extension.ObservationRelation;
 import org.n52.sta.serdes.json.AbstractJSONEntity;
 import org.n52.sta.serdes.json.JSONBase;
@@ -40,6 +39,8 @@ import org.springframework.util.Assert;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
+@SuppressWarnings("VisibilityModifier")
+@SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
 public class JSONObservationRelation extends JSONBase.JSONwithId<ObservationRelation> implements AbstractJSONEntity {
 
     public String type;

@@ -36,19 +36,13 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.sta.mapped.extension.CSObservation;
-import org.n52.shetland.filter.ExpandItem;
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
-import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.extension.JSONCSObservation;
 import org.n52.sta.serdes.util.ElementWithQueryOptions.CSObservationWithQueryOptions;
 import org.n52.sta.serdes.util.EntityPatch;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -77,8 +71,6 @@ public class CSObservationSerDes {
 
         private static final long serialVersionUID = -1618289129123682794L;
 
-        private static final String PROP_Relations = StaConstants.OBSERVATION_RELATIONS;
-
         public CSObservationSerializer(String rootUrl) {
             super(CSObservationWithQueryOptions.class);
             this.rootUrl = rootUrl;
@@ -90,11 +82,12 @@ public class CSObservationSerDes {
                 throws IOException {
             gen.writeStartObject();
             super.serialize(value, gen, serializers);
-            writeNavigationProp(gen, PROP_Relations, value.getEntity().getStaIdentifier());
+            writeNavigationProp(gen, StaConstants.OBSERVATION_RELATIONS, value.getEntity().getStaIdentifier());
             gen.writeEndObject();
         }
 
     }
+
 
     public static class CSObservationDeserializer extends StdDeserializer<CSObservation> {
 
@@ -124,7 +117,7 @@ public class CSObservationSerDes {
         public CSObservationSerDes.CSObservationPatch deserialize(JsonParser p, DeserializationContext ctxt)
                 throws IOException {
             return new CSObservationSerDes.CSObservationPatch(p.readValueAs(JSONCSObservation.class)
-                                                                     .toEntity(JSONBase.EntityType.PATCH));
+                                                               .toEntity(JSONBase.EntityType.PATCH));
         }
     }
 }

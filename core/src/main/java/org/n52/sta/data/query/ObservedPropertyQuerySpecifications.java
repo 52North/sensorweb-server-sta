@@ -33,6 +33,7 @@ import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -47,12 +48,14 @@ import javax.persistence.criteria.Subquery;
  */
 public class ObservedPropertyQuerySpecifications extends EntityQuerySpecifications<PhenomenonEntity> {
 
+    private final String IDENTIFIER = "identifier";
+
     @Override
     public String checkPropertyName(String property) {
         switch (property) {
-        case "definition":
+        case StaConstants.PROP_DEFINITION:
             return PhenomenonEntity.PROPERTY_IDENTIFIER;
-        case "identifier":
+        case IDENTIFIER:
             return PhenomenonEntity.STA_IDENTIFIER;
         default:
             return super.checkPropertyName(property);
@@ -110,8 +113,8 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
                             operator,
                             builder,
                             switched);
-                case "definition":
-                case "identifier":
+                case StaConstants.PROP_DEFINITION:
+                case IDENTIFIER:
                     return handleDirectStringPropertyFilter(
                             root.get(DescribableEntity.PROPERTY_IDENTIFIER),
                             propertyValue,

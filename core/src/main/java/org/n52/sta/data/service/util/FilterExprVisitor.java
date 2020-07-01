@@ -372,10 +372,10 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
      * wraps function evaluation to handle function on Observation->value or Observation->parameters->value as the
      * value is split over multiple columns
      *
-     * @param firstParam
-     * @param secondParam
-     * @param fkt
-     * @return
+     * @param firstParam path to property
+     * @param secondParam value to be checked against
+     * @param fkt function to be used for check
+     * @return evaluated Predicate
      */
     private Predicate evalStringFuncOnMember(Path<String> firstParam,
                                              String secondParam,
