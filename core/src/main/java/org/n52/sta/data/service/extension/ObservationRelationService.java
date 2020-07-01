@@ -35,6 +35,8 @@ import org.n52.series.db.beans.sta.mapped.extension.ObservationRelation;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.sta.data.query.ObservationRelationQuerySpecifications;
 import org.n52.sta.data.repositories.ObservationRelationRepository;
 import org.n52.sta.data.service.AbstractSensorThingsEntityServiceImpl;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
@@ -59,6 +61,8 @@ public class ObservationRelationService
         extends AbstractSensorThingsEntityServiceImpl<ObservationRelationRepository, ObservationRelation,
         ObservationRelation> {
 
+    private static final ObservationRelationQuerySpecifications orQS = new ObservationRelationQuerySpecifications();
+
     public ObservationRelationService(ObservationRelationRepository repository) {
         super(repository, ObservationRelation.class);
     }
@@ -75,7 +79,22 @@ public class ObservationRelationService
     @Override protected Specification<ObservationRelation> byRelatedEntityFilter(String relatedId,
                                                                                  String relatedType,
                                                                                  String ownId) {
-        return null;
+        Specification<ObservationRelation> filter;
+        switch (relatedType) {
+        case STAEntityDefinition.OBSERVATION_GROUPS:
+            filter = orQS.withGroupStaIdentifier(relatedId);
+            break;
+        case STAEntityDefinition.CSOBSERVATIONS:
+            filter = orQS.withCSObservationStaIdentifier(relatedId);
+            break;
+        default:
+            throw new IllegalStateException("Trying to filter by unrelated type: " + relatedType + "not found!");
+        }
+
+        if (ownId != null) {
+            filter = filter.and(orQS.withStaIdentifier(ownId));
+        }
+        return filter;
     }
 
     @Override protected ObservationRelation createEntity(ObservationRelation entity) throws STACRUDException {

@@ -80,8 +80,8 @@ public class CitSciCudRequestHandler<T extends HibernateRelations.HasId>
     @PostMapping(
             value = {
                     RequestUtils.MAPPING_PREFIX +
-                            CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVATIONGROUP_PATH_VARIABLE,
-                            CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_CSOBSERVATION_PATH_VARIABLE
+                            CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVATION_GROUP_PATH_VARIABLE,
+                    CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_CSOBSERVATION_PATH_VARIABLE
             },
             produces = "application/json"
     )

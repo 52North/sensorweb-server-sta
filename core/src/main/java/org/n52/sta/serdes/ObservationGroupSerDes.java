@@ -39,6 +39,7 @@ import org.n52.series.db.beans.sta.mapped.extension.ObservationGroup;
 import org.n52.series.db.beans.sta.mapped.extension.ObservationRelation;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.extension.JSONObservationGroup;
@@ -78,7 +79,7 @@ public class ObservationGroupSerDes {
         public ObservationGroupSerializer(String rootUrl) {
             super(ObservationGroupWithQueryOptions.class);
             this.rootUrl = rootUrl;
-            this.entitySetName = "ObservationGroups";
+            this.entitySetName = StaConstants.OBSERVATION_GROUPS;
         }
 
         @Override

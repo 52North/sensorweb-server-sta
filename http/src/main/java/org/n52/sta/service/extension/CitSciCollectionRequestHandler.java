@@ -34,7 +34,6 @@ import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.data.service.util.CollectionWrapper;
 import org.n52.sta.service.AbstractCollectionRequestHandler;
 import org.n52.sta.utils.CitSciExtensionRequestUtils;
-import org.n52.sta.utils.RequestUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,7 +45,6 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * Handles all requests to Entity Collections and Entity Collections association Links defined in the CitizenScience
  * STA Extension
- *
  * e.g. /ObservationGroups
  * e.g. /Observations(52)/ObservationGroups
  * e.g. /ObservationGroups/$ref
@@ -89,7 +87,8 @@ public class CitSciCollectionRequestHandler extends AbstractCollectionRequestHan
     @GetMapping(
             value = {
                     MAPPING_PREFIX + CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_CSOBSERVATION_PATH_VARIABLE,
-                    MAPPING_PREFIX + CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVATIONGROUP_PATH_VARIABLE
+                    MAPPING_PREFIX +
+                            CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVATION_GROUP_PATH_VARIABLE
             },
             produces = "application/json"
     )
@@ -107,7 +106,7 @@ public class CitSciCollectionRequestHandler extends AbstractCollectionRequestHan
                             + CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_CSOBSERVATION_PATH_VARIABLE
                             + SLASHREF,
                     MAPPING_PREFIX
-                            + CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVATIONGROUP_PATH_VARIABLE
+                            + CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVATION_GROUP_PATH_VARIABLE
                             + SLASHREF
             },
             produces = "application/json"

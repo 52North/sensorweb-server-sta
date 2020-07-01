@@ -30,14 +30,16 @@
 package org.n52.sta.data.repositories;
 
 import org.n52.series.db.beans.sta.mapped.extension.CSObservation;
-import org.n52.series.db.beans.sta.mapped.extension.ObservationGroup;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Repository
 @Profile("citSciExtension")
-public interface CSObservationRepository extends StaIdentifierRepository<CSObservation> {
+@Transactional
+public interface CSObservationRepository<T extends CSObservation<?>>
+        extends IdentifierRepository<T, Long>, StaIdentifierRepository<T> {
 }

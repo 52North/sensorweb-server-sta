@@ -395,7 +395,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
      * @param queryOptions {@link QueryOptions} to create {@link PageRequest}
      * @return {@link PageRequest} of type {@link OffsetLimitBasedPageRequest}
      */
-    OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions) {
+    protected OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions) {
         long offset = queryOptions.hasSkipFilter() ? queryOptions.getSkipFilter().getValue() : 0;
         Sort sort;
         if (queryOptions.hasOrderByFilter()) {

@@ -34,6 +34,8 @@ import org.n52.series.db.beans.sta.mapped.extension.ObservationGroup;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.sta.data.query.ObservationGroupQuerySpecifications;
 import org.n52.sta.data.repositories.ObservationGroupRepository;
 import org.n52.sta.data.service.AbstractSensorThingsEntityServiceImpl;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
@@ -57,6 +59,8 @@ import java.util.UUID;
 public class ObservationGroupService
         extends AbstractSensorThingsEntityServiceImpl<ObservationGroupRepository, ObservationGroup, ObservationGroup> {
 
+    private static final ObservationGroupQuerySpecifications ogQS = new ObservationGroupQuerySpecifications();
+
     public ObservationGroupService(ObservationGroupRepository repository) {
         super(repository, ObservationGroup.class);
     }
@@ -73,7 +77,19 @@ public class ObservationGroupService
     @Override protected Specification<ObservationGroup> byRelatedEntityFilter(String relatedId,
                                                                               String relatedType,
                                                                               String ownId) {
-        return null;
+        Specification<ObservationGroup> filter;
+        switch (relatedType) {
+        case STAEntityDefinition.OBSERVATION_RELATIONS:
+            filter = ogQS.withRelationStaIdentifier(relatedId);
+            break;
+        default:
+            throw new IllegalStateException("Trying to filter by unrelated type: " + relatedType + "not found!");
+        }
+
+        if (ownId != null) {
+            filter = filter.and(ogQS.withStaIdentifier(ownId));
+        }
+        return filter;
     }
 
     @Override protected ObservationGroup createEntity(ObservationGroup entity) throws STACRUDException {

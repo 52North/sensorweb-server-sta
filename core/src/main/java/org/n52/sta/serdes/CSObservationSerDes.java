@@ -38,6 +38,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.sta.mapped.extension.CSObservation;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.extension.JSONCSObservation;
@@ -72,56 +73,28 @@ public class CSObservationSerDes {
 
 
     public static class CSObservationSerializer
-            extends AbstractSTASerializer<CSObservationWithQueryOptions> {
+            extends AbstractObservationSerializer<CSObservationWithQueryOptions> {
 
         private static final long serialVersionUID = -1618289129123682794L;
 
-        private static final String PROP_Relations = "Relations";
+        private static final String PROP_Relations = StaConstants.OBSERVATION_RELATIONS;
 
         public CSObservationSerializer(String rootUrl) {
             super(CSObservationWithQueryOptions.class);
             this.rootUrl = rootUrl;
-            this.entitySetName = "CSObservations";
+            this.entitySetName = StaConstants.CSOBSERVATIONS;
         }
 
         @Override
-        public void serialize(CSObservationWithQueryOptions value,
-                              JsonGenerator gen,
-                              SerializerProvider serializers)
+        public void serialize(CSObservationWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers)
                 throws IOException {
             gen.writeStartObject();
-
-            CSObservation obsRel = value.getEntity();
-            QueryOptions options = value.getQueryOptions();
-
-            Set<String> fieldsToSerialize = null;
-            Map<String, QueryOptions> fieldsToExpand = new HashMap<>();
-            boolean hasSelectOption = false;
-            boolean hasExpandOption = false;
-            if (options != null) {
-                if (options.hasSelectFilter()) {
-                    hasSelectOption = true;
-                    fieldsToSerialize = options.getSelectFilter().getItems();
-                }
-                if (options.hasExpandFilter()) {
-                    hasExpandOption = true;
-                    for (ExpandItem item : options.getExpandFilter().getItems()) {
-                        fieldsToExpand.put(item.getPath(), item.getQueryOptions());
-                    }
-                }
-            }
-            // olingo @iot links
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
-                writeId(gen, obsRel.getStaIdentifier());
-            }
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_SELF_LINK)) {
-                writeSelfLink(gen, obsRel.getStaIdentifier());
-            }
+            super.serialize(value, gen, serializers);
+            writeNavigationProp(gen, PROP_Relations, value.getEntity().getStaIdentifier());
             gen.writeEndObject();
         }
 
     }
-
 
     public static class CSObservationDeserializer extends StdDeserializer<CSObservation> {
 

@@ -33,7 +33,6 @@ import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.shetland.ogc.sta.exception.STANotFoundException;
-import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.svalbard.odata.core.QueryOptionsFactory;
 import org.springframework.web.util.UriUtils;
@@ -137,7 +136,6 @@ public interface RequestUtils extends StaConstants {
     String PROPERTY_REGEX_NAMED_GROUPS =
             SLASH + PROPERTY_GROUP_START + SQUARE_BRACKET_OPEN + "A-z," + SQUARE_BRACKET_CLOSE + PLUS +
                     PROPERTY_GROUP_END;
-
 
     default QueryOptions decodeQueryString(HttpServletRequest request) {
         if (request.getQueryString() != null) {
@@ -271,12 +269,5 @@ public interface RequestUtils extends StaConstants {
      * @param property Property of the Entity
      * @throws STAInvalidUrlException when the URL is invalid
      */
-    default void validateProperty(String entity, String property) throws STAInvalidUrlException {
-        STAEntityDefinition definition = STAEntityDefinition.definitions.get(entity);
-
-        if (!definition.getEntityPropsMandatory().contains(property) &&
-                !definition.getEntityPropsOptional().contains(property)) {
-            throw new STAInvalidUrlException("Entity: " + entity + " does not have property: " + property);
-        }
-    }
+    void validateProperty(String entity, String property) throws STAInvalidUrlException;
 }

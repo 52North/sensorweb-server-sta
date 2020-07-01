@@ -39,6 +39,7 @@ import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.series.db.beans.sta.mapped.ObservationEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.serdes.DatastreamSerDes;
 import org.n52.sta.serdes.FeatureOfInterestSerDes;
 import org.n52.sta.serdes.HistoricalLocationSerDes;
@@ -444,5 +445,14 @@ public interface CoreRequestUtils extends RequestUtils {
             }
         }
         return null;
+    }
+
+    default void validateProperty(String entity, String property) throws STAInvalidUrlException {
+        STAEntityDefinition definition = STAEntityDefinition.definitions.get(entity);
+
+        if (!definition.getEntityPropsMandatory().contains(property) &&
+                !definition.getEntityPropsOptional().contains(property)) {
+            throw new STAInvalidUrlException("Entity: " + entity + " does not have property: " + property);
+        }
     }
 }

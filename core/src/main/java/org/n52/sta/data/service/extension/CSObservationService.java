@@ -34,17 +34,25 @@ import org.n52.series.db.beans.sta.mapped.ObservationEntity;
 import org.n52.series.db.beans.sta.mapped.extension.CSObservation;
 import org.n52.series.db.beans.sta.mapped.extension.ObservationRelation;
 import org.n52.shetland.filter.ExpandFilter;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.sta.data.query.CSObservationQuerySpecifications;
 import org.n52.sta.data.repositories.CSObservationRepository;
 import org.n52.sta.data.service.AbstractSensorThingsEntityServiceImpl;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
+import org.n52.sta.data.service.util.CollectionWrapper;
+import org.n52.sta.serdes.util.ElementWithQueryOptions;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -54,8 +62,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Profile("citSciExtension")
 public class CSObservationService
-        extends AbstractSensorThingsEntityServiceImpl<CSObservationRepository, CSObservation,
-        CSObservation> {
+        extends AbstractSensorThingsEntityServiceImpl<CSObservationRepository<CSObservation<?>>, CSObservation<?>,
+        CSObservation<?>> {
+
+    private static final CSObservationQuerySpecifications csoQS = new CSObservationQuerySpecifications();
 
     public CSObservationService(CSObservationRepository repository) {
         super(repository, CSObservation.class);
@@ -65,15 +75,40 @@ public class CSObservationService
         return new EntityTypes[] {EntityTypes.CSObservation, EntityTypes.CSObservations};
     }
 
+    @Override
+    public CollectionWrapper getEntityCollection(QueryOptions queryOptions) throws STACRUDException {
+        CollectionWrapper observationCollection = getObservationService().getEntityCollection(queryOptions);
+        List<ElementWithQueryOptions> recoded = new ArrayList<>();
+        for (ElementWithQueryOptions entity : observationCollection.getEntities()) {
+            CSObservation obs = new CSObservation((ObservationEntity) entity.getEntity());
+            recoded.add(new ElementWithQueryOptions.CSObservationWithQueryOptions(obs, queryOptions));
+        }
+        return new CollectionWrapper(observationCollection.getTotalEntityCount(),
+                                     recoded,
+                                     observationCollection.hasNextPage());
+    }
+
     @Override protected CSObservation fetchExpandEntities(CSObservation entity, ExpandFilter expandOption)
             throws STACRUDException, STAInvalidQueryException {
         return null;
     }
 
-    @Override protected Specification<CSObservation> byRelatedEntityFilter(String relatedId,
-                                                                           String relatedType,
-                                                                           String ownId) {
-        return null;
+    @Override protected Specification<CSObservation<?>> byRelatedEntityFilter(String relatedId,
+                                                                              String relatedType,
+                                                                              String ownId) {
+        Specification<CSObservation<?>> filter;
+        switch (relatedType) {
+        case STAEntityDefinition.OBSERVATION_RELATIONS:
+            filter = csoQS.withRelationStaIdentifier(relatedId);
+            break;
+        default:
+            throw new IllegalStateException("Trying to filter by unrelated type: " + relatedType + "not found!");
+        }
+
+        if (ownId != null) {
+            filter = filter.and(csoQS.withStaIdentifier(ownId));
+        }
+        return filter;
     }
 
     @Override protected CSObservation createEntity(CSObservation entity) throws STACRUDException {

@@ -77,11 +77,10 @@ public class CitSciEntityRequestHandler extends AbstractEntityRequestHandler imp
         return super.readEntityRefDirect(entity, id, request);
     }
 
-
     // There are no singular References so no getting via reference is possible!
-    /*
     @GetMapping(
             value = {
+                    MAPPING_PREFIX + CitSciExtensionRequestUtils.ENTITY_IDENTIFIED_BY_OBSERVATIONRELATION_PATH_VARIABLE
             },
             produces = "application/json"
     )
@@ -94,6 +93,9 @@ public class CitSciEntityRequestHandler extends AbstractEntityRequestHandler imp
 
     @GetMapping(
             value = {
+                    MAPPING_PREFIX
+                            + CitSciExtensionRequestUtils.ENTITY_IDENTIFIED_BY_OBSERVATIONRELATION_PATH_VARIABLE
+                            + SLASHREF
             },
             produces = "application/json"
     )
@@ -103,5 +105,4 @@ public class CitSciEntityRequestHandler extends AbstractEntityRequestHandler imp
             throws Exception {
         return super.readRelatedEntityRef(entity, target, request);
     }
-    */
 }

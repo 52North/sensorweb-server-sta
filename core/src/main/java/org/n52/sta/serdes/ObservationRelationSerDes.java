@@ -38,6 +38,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.sta.mapped.extension.ObservationRelation;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.extension.JSONObservationRelation;
@@ -76,13 +77,10 @@ public class ObservationRelationSerDes {
 
         private static final long serialVersionUID = -1618289129123682794L;
 
-        private static final String PROP_GROUP = "Group";
-        private static final String PROP_TYPE = "type";
-
         public ObservationRelationSerializer(String rootUrl) {
             super(ObservationRelationWithQueryOptions.class);
             this.rootUrl = rootUrl;
-            this.entitySetName = "ObservationRelations";
+            this.entitySetName = StaConstants.OBSERVATION_RELATIONS;
         }
 
         @Override
@@ -119,29 +117,29 @@ public class ObservationRelationSerDes {
                 writeSelfLink(gen, obsRel.getStaIdentifier());
             }
 
-            if (!hasSelectOption || fieldsToSerialize.contains(PROP_TYPE)) {
-                gen.writeStringField(PROP_TYPE, obsRel.getType());
+            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_TYPE)) {
+                gen.writeStringField(STAEntityDefinition.PROP_TYPE, obsRel.getType());
             }
 
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.OBSERVATION)) {
-                if (!hasExpandOption || fieldsToExpand.get(STAEntityDefinition.OBSERVATION) == null) {
-                    writeNavigationProp(gen, STAEntityDefinition.OBSERVATION, obsRel.getStaIdentifier());
+            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.CSOBSERVATION)) {
+                if (!hasExpandOption || fieldsToExpand.get(STAEntityDefinition.CSOBSERVATION) == null) {
+                    writeNavigationProp(gen, STAEntityDefinition.CSOBSERVATION, obsRel.getStaIdentifier());
                 } else {
-                    gen.writeFieldName(STAEntityDefinition.OBSERVATION);
+                    gen.writeFieldName(STAEntityDefinition.CSOBSERVATION);
                     writeNestedEntity(obsRel.getObservation(),
-                                      fieldsToExpand.get(STAEntityDefinition.OBSERVATION),
+                                      fieldsToExpand.get(STAEntityDefinition.CSOBSERVATION),
                                       gen,
                                       serializers);
                 }
             }
 
-            if (!hasSelectOption || fieldsToSerialize.contains(PROP_GROUP)) {
-                if (!hasExpandOption || fieldsToExpand.get(PROP_GROUP) == null) {
-                    writeNavigationProp(gen, PROP_GROUP, obsRel.getStaIdentifier());
+            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.OBSERVATION_GROUP)) {
+                if (!hasExpandOption || fieldsToExpand.get(STAEntityDefinition.OBSERVATION_GROUP) == null) {
+                    writeNavigationProp(gen, STAEntityDefinition.OBSERVATION_GROUP, obsRel.getStaIdentifier());
                 } else {
-                    gen.writeFieldName(PROP_GROUP);
+                    gen.writeFieldName(STAEntityDefinition.OBSERVATION_GROUP);
                     writeNestedEntity(obsRel.getGroup(),
-                                      fieldsToExpand.get(PROP_GROUP),
+                                      fieldsToExpand.get(STAEntityDefinition.OBSERVATION_GROUP),
                                       gen,
                                       serializers);
                 }

@@ -49,6 +49,11 @@
         <class>org.n52.series.db.beans.sta.mapped.extension.ObservationGroup</class>
         <class>org.n52.series.db.beans.sta.mapped.extension.ObservationRelation</class>
         <class>org.n52.series.db.beans.sta.mapped.extension.CSObservation</class>
+        <class>org.n52.series.db.beans.sta.mapped.extension.QuantityCSObservation</class>
+        <class>org.n52.series.db.beans.sta.mapped.extension.TextCSObservation</class>
+        <class>org.n52.series.db.beans.sta.mapped.extension.CountCSObservation</class>
+        <class>org.n52.series.db.beans.sta.mapped.extension.CategoryCSObservation</class>
+        <class>org.n52.series.db.beans.sta.mapped.extension.BooleanCSObservation</class>
 
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>

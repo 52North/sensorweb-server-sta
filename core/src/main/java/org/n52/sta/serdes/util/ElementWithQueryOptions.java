@@ -93,7 +93,10 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
         default:
             if (unwrapped instanceof ObservationEntity) {
                 return new ObservationWithQueryOptions((ObservationEntity<?>) unwrapped, queryOptions);
-            } else {
+            } if (unwrapped instanceof CSObservation) {
+            return new CSObservationWithQueryOptions((CSObservation<?>) unwrapped, queryOptions);
+
+        }else {
                 throw new RuntimeException(
                         "Error wrapping object with queryOptions. Could not find Wrapper for class: " +
                                 unwrapped.getClass().getSimpleName());
@@ -192,7 +195,7 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
 
     public static class CSObservationWithQueryOptions extends ElementWithQueryOptions<CSObservation> {
 
-        CSObservationWithQueryOptions(CSObservation thing, QueryOptions queryOptions) {
+        public CSObservationWithQueryOptions(CSObservation thing, QueryOptions queryOptions) {
             this.entity = thing;
             this.queryOptions = queryOptions;
         }
