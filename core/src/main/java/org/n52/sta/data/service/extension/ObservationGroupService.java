@@ -105,16 +105,11 @@ public class ObservationGroupService
                                                        + obsGroup.getStaIdentifier() + "' "
                                                        + "found");
                 }
-            }
-            if (obsGroup.getIdentifier() == null) {
-                if (getRepository().existsByName(obsGroup.getName())) {
-                    return getRepository().findByName(obsGroup.getName()).orElse(null);
-                } else {
-                    // Autogenerate Identifier
-                    String uuid = UUID.randomUUID().toString();
-                    obsGroup.setIdentifier(uuid);
-                    obsGroup.setStaIdentifier(uuid);
-                }
+            } else if (obsGroup.getIdentifier() == null) {
+                // Autogenerate Identifier
+                String uuid = UUID.randomUUID().toString();
+                obsGroup.setIdentifier(uuid);
+                obsGroup.setStaIdentifier(uuid);
             }
             synchronized (getLock(obsGroup.getStaIdentifier())) {
                 if (getRepository().existsByStaIdentifier(obsGroup.getStaIdentifier())) {

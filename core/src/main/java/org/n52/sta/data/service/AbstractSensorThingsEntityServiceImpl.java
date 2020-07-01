@@ -101,7 +101,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     @Autowired
     private MutexFactory lock;
 
-    private final Class<S> entityClass;
+    protected final Class<S> entityClass;
     private final EntityGraphRepository.FetchGraph[] defaultFetchGraphs;
 
     private T repository;

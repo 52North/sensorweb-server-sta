@@ -29,30 +29,41 @@
 
 package org.n52.sta.data.service.extension;
 
+import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.sta.AbstractObservationEntity;
-import org.n52.series.db.beans.sta.mapped.ObservationEntity;
+import org.n52.series.db.beans.sta.mapped.extension.BooleanCSObservation;
 import org.n52.series.db.beans.sta.mapped.extension.CSObservation;
+import org.n52.series.db.beans.sta.mapped.extension.CategoryCSObservation;
+import org.n52.series.db.beans.sta.mapped.extension.CountCSObservation;
 import org.n52.series.db.beans.sta.mapped.extension.ObservationRelation;
+import org.n52.series.db.beans.sta.mapped.extension.QuantityCSObservation;
+import org.n52.series.db.beans.sta.mapped.extension.TextCSObservation;
 import org.n52.shetland.filter.ExpandFilter;
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.om.OmConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.CSObservationQuerySpecifications;
 import org.n52.sta.data.repositories.CSObservationRepository;
-import org.n52.sta.data.service.AbstractSensorThingsEntityServiceImpl;
+import org.n52.sta.data.repositories.CategoryRepository;
+import org.n52.sta.data.repositories.DataRepository;
+import org.n52.sta.data.repositories.DatasetRepository;
+import org.n52.sta.data.repositories.DatastreamRepository;
+import org.n52.sta.data.repositories.EntityGraphRepository;
+import org.n52.sta.data.repositories.OfferingRepository;
+import org.n52.sta.data.repositories.ParameterRepository;
+import org.n52.sta.data.service.AbstractObservationService;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
-import org.n52.sta.data.service.util.CollectionWrapper;
-import org.n52.sta.serdes.util.ElementWithQueryOptions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.math.BigDecimal;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -62,30 +73,37 @@ import java.util.List;
 @Transactional
 @Profile("citSciExtension")
 public class CSObservationService
-        extends AbstractSensorThingsEntityServiceImpl<CSObservationRepository<CSObservation<?>>, CSObservation<?>,
+        extends AbstractObservationService<CSObservationRepository<CSObservation<?>>, CSObservation<?>,
         CSObservation<?>> {
 
     private static final CSObservationQuerySpecifications csoQS = new CSObservationQuerySpecifications();
 
-    public CSObservationService(CSObservationRepository repository) {
-        super(repository, CSObservation.class);
+    @Autowired
+    public CSObservationService(CSObservationRepository<CSObservation<?>> repository,
+                                DataRepository<DataEntity<?>> dataRepository,
+                                CategoryRepository categoryRepository,
+                                OfferingRepository offeringRepository,
+                                DatastreamRepository datastreamRepository,
+                                DatasetRepository datasetRepository,
+                                ParameterRepository parameterRepository,
+                                @Value("${server.feature.isMobile:false}") boolean isMobileFeatureEnabled) {
+        super(repository,
+              CSObservation.class,
+              csoQS,
+              isMobileFeatureEnabled,
+              dataRepository,
+              categoryRepository,
+              offeringRepository,
+              datastreamRepository,
+              datasetRepository,
+              parameterRepository,
+              EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS,
+              EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASET
+        );
     }
 
     @Override public EntityTypes[] getTypes() {
         return new EntityTypes[] {EntityTypes.CSObservation, EntityTypes.CSObservations};
-    }
-
-    @Override
-    public CollectionWrapper getEntityCollection(QueryOptions queryOptions) throws STACRUDException {
-        CollectionWrapper observationCollection = getObservationService().getEntityCollection(queryOptions);
-        List<ElementWithQueryOptions> recoded = new ArrayList<>();
-        for (ElementWithQueryOptions entity : observationCollection.getEntities()) {
-            CSObservation obs = new CSObservation((ObservationEntity) entity.getEntity());
-            recoded.add(new ElementWithQueryOptions.CSObservationWithQueryOptions(obs, queryOptions));
-        }
-        return new CollectionWrapper(observationCollection.getTotalEntityCount(),
-                                     recoded,
-                                     observationCollection.hasNextPage());
     }
 
     @Override protected CSObservation fetchExpandEntities(CSObservation entity, ExpandFilter expandOption)
@@ -111,47 +129,63 @@ public class CSObservationService
         return filter;
     }
 
-    @Override protected CSObservation createEntity(CSObservation entity) throws STACRUDException {
-        AbstractObservationEntity<?> obs = getObservationService().createOrUpdate(entity);
+    @Override public CSObservation createEntity(CSObservation entity) throws STACRUDException {
+        CSObservation<?> persisted = super.createEntity(entity);
         for (Object relation : entity.getRelations()) {
             ObservationRelation rel = (ObservationRelation) relation;
-            rel.setObservation((ObservationEntity) obs);
+            rel.setObservation(persisted);
             getObservationRelationService().createOrUpdate((ObservationRelation) relation);
         }
-        return new CSObservation(obs);
+        return persisted;
     }
 
-    @Override protected CSObservation updateEntity(String id, CSObservation entity, HttpMethod method)
-            throws STACRUDException {
-        throw new STACRUDException("not implemented yet");
-    }
-
-    @Override protected CSObservation updateEntity(CSObservation entity) throws STACRUDException {
-        throw new STACRUDException("not implemented yet");
-    }
-
-    @Override protected void delete(CSObservation entity) throws STACRUDException {
-        throw new STACRUDException("not implemented yet");
-
-    }
-
-    @Override public CSObservation createOrUpdate(CSObservation entity) throws STACRUDException {
-        if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
-            return updateEntity(entity.getStaIdentifier(), entity, HttpMethod.PATCH);
+    @Override protected CSObservation<?> castToConcreteObservationType(AbstractObservationEntity observation,
+                                                                       DatasetEntity dataset) throws STACRUDException {
+        CSObservation data = null;
+        String value = (String) observation.getValue();
+        switch (dataset.getOmObservationType().getFormat()) {
+        case OmConstants.OBS_TYPE_MEASUREMENT:
+            QuantityCSObservation quantityObservationEntity = new QuantityCSObservation();
+            if (observation.hasValue()) {
+                if (value.equals("NaN") || value.equals("Inf") || value.equals("-Inf")) {
+                    quantityObservationEntity.setValue(null);
+                } else {
+                    quantityObservationEntity.setValue(BigDecimal.valueOf(Double.parseDouble(value)));
+                }
+            }
+            data = quantityObservationEntity;
+            break;
+        case OmConstants.OBS_TYPE_CATEGORY_OBSERVATION:
+            CategoryCSObservation categoryObservationEntity = new CategoryCSObservation();
+            if (observation.hasValue()) {
+                categoryObservationEntity.setValue(value);
+            }
+            data = categoryObservationEntity;
+            break;
+        case OmConstants.OBS_TYPE_COUNT_OBSERVATION:
+            CountCSObservation countObservationEntity = new CountCSObservation();
+            if (observation.hasValue()) {
+                countObservationEntity.setValue(Integer.parseInt(value));
+            }
+            data = countObservationEntity;
+            break;
+        case OmConstants.OBS_TYPE_TEXT_OBSERVATION:
+            TextCSObservation textObservationEntity = new TextCSObservation();
+            if (observation.hasValue()) {
+                textObservationEntity.setValue(value);
+            }
+            data = textObservationEntity;
+            break;
+        case OmConstants.OBS_TYPE_TRUTH_OBSERVATION:
+            BooleanCSObservation booleanObservationEntity = new BooleanCSObservation();
+            if (observation.hasValue()) {
+                booleanObservationEntity.setValue(Boolean.parseBoolean(value));
+            }
+            data = booleanObservationEntity;
+            break;
+        default:
+            break;
         }
-        return createEntity(entity);
-    }
-
-    @Override public String checkPropertyName(String property) {
-        return property;
-    }
-
-    @Override protected CSObservation merge(CSObservation existing, CSObservation toMerge)
-            throws STACRUDException {
-        throw new STACRUDException("not implemented yet");
-    }
-
-    @Override public void delete(String id) throws STACRUDException {
-        getRepository().deleteByIdentifier(id);
+        return fillConcreteObservationType(data, observation, dataset);
     }
 }

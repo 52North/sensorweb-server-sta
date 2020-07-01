@@ -29,12 +29,15 @@
 
 package org.n52.sta.data.repositories;
 
-import org.n52.series.db.beans.sta.mapped.ObservationEntity;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
 
-@Transactional
-@DependsOn("DatastreamRepository")
-public interface ObservationRepository<T extends ObservationEntity<?>>
-        extends IdentifierRepository<T, Long>, StaIdentifierRepository<T>, GetFirstLastObservation<T> {
+/**
+ *
+ * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
+ */
+public interface GetFirstLastObservation<T> {
+
+    T findFirstByDataset_idInOrderBySamplingTimeStartAsc(List<Long> datasetIdentifiers);
+
+    T findFirstByDataset_idInOrderBySamplingTimeEndDesc(List<Long> datasetIdentifiers);
 }

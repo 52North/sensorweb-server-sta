@@ -119,11 +119,11 @@ public class ObservationGroupSerDes {
             }
 
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_DESCRIPTION)) {
-                gen.writeStringField(STAEntityDefinition.PROP_NAME, obsGroup.getDescription());
+                gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, obsGroup.getDescription());
             }
 
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.OBSERVATIONS)) {
-                writeNavigationProp(gen, STAEntityDefinition.OBSERVATIONS, obsGroup.getStaIdentifier());
+            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.OBSERVATION_RELATIONS)) {
+                writeNavigationProp(gen, STAEntityDefinition.OBSERVATION_RELATIONS, obsGroup.getStaIdentifier());
                 /*
                 for (ObservationRelation entity : obsGroup.getEntities()) {
                     if (!hasExpandOption || fieldsToExpand.get(STAEntityDefinition.OBSERVATIONS) == null) {

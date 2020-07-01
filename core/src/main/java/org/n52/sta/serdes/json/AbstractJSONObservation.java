@@ -40,6 +40,7 @@ import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.geojson.GeoJsonReader;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.parameter.ParameterJsonEntity;
+import org.n52.series.db.beans.sta.AbstractObservationEntity;
 import org.n52.series.db.beans.sta.mapped.ObservationEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
@@ -52,7 +53,7 @@ import java.util.HashSet;
 
 @SuppressWarnings("VisibilityModifier")
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
-public abstract class AbstractJSONObservation<T extends ObservationEntity> extends JSONBase.JSONwithIdTime<T>
+public abstract class AbstractJSONObservation<T extends AbstractObservationEntity> extends JSONBase.JSONwithIdTime<T>
         implements AbstractJSONEntity {
 
     // JSON Properties. Matched by Annotation or variable name

@@ -72,6 +72,7 @@ public class JSONObservationGroup extends JSONBase.JSONwithIdNameDescription<Obs
             Assert.isNull(description, INVALID_REFERENCED_ENTITY);
             Assert.isNull(Relations, INVALID_REFERENCED_ENTITY);
             self.setStaIdentifier(identifier);
+            self.setIdentifier(identifier);
             return self;
         default:
             return null;
@@ -80,6 +81,7 @@ public class JSONObservationGroup extends JSONBase.JSONwithIdNameDescription<Obs
 
     private ObservationGroup createPostEntity() {
         self.setStaIdentifier(identifier);
+        self.setIdentifier(identifier);
         self.setName(name);
         self.setDescription(description);
 

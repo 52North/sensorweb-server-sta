@@ -41,5 +41,5 @@ import org.springframework.transaction.annotation.Transactional;
 @Profile("citSciExtension")
 @Transactional
 public interface CSObservationRepository<T extends CSObservation<?>>
-        extends IdentifierRepository<T, Long>, StaIdentifierRepository<T> {
+        extends IdentifierRepository<T, Long>, StaIdentifierRepository<T>, GetFirstLastObservation<T> {
 }

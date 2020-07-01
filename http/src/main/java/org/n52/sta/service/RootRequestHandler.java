@@ -33,6 +33,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.shetland.ogc.sta.model.extension.CitSciExtensionEntityDefinition;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -82,11 +83,12 @@ public class RootRequestHandler {
         }
 
         if (citSciExtensionActive) {
-            String collection = "ObservationGroups";
-            ObjectNode node = mapper.createObjectNode();
-            node.put("name", collection);
-            node.put("url", uri + collection);
-            arrayNode.add(node);
+            for (String collection : CitSciExtensionEntityDefinition.ALLCOLLECTIONS) {
+                ObjectNode node = mapper.createObjectNode();
+                node.put("name", collection);
+                node.put("url", uri + collection);
+                arrayNode.add(node);
+            }
         }
 
         ObjectNode node = mapper.createObjectNode();

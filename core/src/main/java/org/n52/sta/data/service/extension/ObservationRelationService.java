@@ -109,12 +109,11 @@ public class ObservationRelationService
                                                    + obsRel.getStaIdentifier() + "' "
                                                    + "found");
             }
-        } else {
+        } else if (obsRel.getStaIdentifier() == null) {
             // Autogenerate Identifier
             String uuid = UUID.randomUUID().toString();
             obsRel.setIdentifier(uuid);
             obsRel.setStaIdentifier(uuid);
-
         }
         synchronized (getLock(obsRel.getStaIdentifier())) {
             if (getRepository().existsByStaIdentifier(obsRel.getStaIdentifier())) {
