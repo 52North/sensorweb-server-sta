@@ -31,7 +31,9 @@ package org.n52.sta.data.query;
 
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.sta.mapped.extension.CSDatastream;
+import org.n52.series.db.beans.sta.mapped.extension.License;
 import org.n52.series.db.beans.sta.mapped.extension.Party;
+import org.n52.series.db.beans.sta.mapped.extension.Project;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.springframework.data.jpa.domain.Specification;
@@ -43,23 +45,39 @@ import javax.persistence.criteria.JoinType;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public class PartyQuerySpecifications extends EntityQuerySpecifications<Party> {
+public class CSDatastreamQuerySpecifications extends EntityQuerySpecifications<CSDatastream> {
 
-    public Specification<Party> withDatastreamStaIdentifier(final String identifier) {
+    public Specification<CSDatastream> withPartyStaIdentifier(final String identifier) {
         return (root, query, builder) -> {
-            final Join<Party, CSDatastream> join =
-                    root.join(Party.PROPERTY_DATASTREAMS, JoinType.INNER);
+            final Join<CSDatastream, Party> join =
+                    root.join(CSDatastream.PROPERTY_PARTY, JoinType.INNER);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), identifier);
+        };
+    }
+
+    public Specification<CSDatastream> withProjectStaIdentifier(final String identifier) {
+        return (root, query, builder) -> {
+            final Join<CSDatastream, Project> join =
+                    root.join(CSDatastream.PROPERTY_PROJECT, JoinType.INNER);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), identifier);
+        };
+    }
+
+    public Specification<CSDatastream> withLicenseStaIdentifier(final String identifier) {
+        return (root, query, builder) -> {
+            final Join<CSDatastream, License> join =
+                    root.join(CSDatastream.PROPERTY_LICENSE, JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), identifier);
         };
     }
 
     @Override
-    protected Specification<Party> handleRelatedPropertyFilter(String propertyName, Specification<?> propertyValue)
+    protected Specification<CSDatastream> handleRelatedPropertyFilter(String propertyName, Specification<?> propertyValue)
             throws STAInvalidFilterExpressionException {
         return null;
     }
 
-    @Override protected Specification<Party> handleDirectPropertyFilter(String propertyName,
+    @Override protected Specification<CSDatastream> handleDirectPropertyFilter(String propertyName,
                                                                         Expression<?> propertyValue,
                                                                         FilterConstants.ComparisonOperator operator,
                                                                         boolean switched) {

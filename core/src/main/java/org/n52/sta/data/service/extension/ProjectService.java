@@ -59,7 +59,7 @@ import java.util.UUID;
 public class ProjectService
         extends AbstractSensorThingsEntityServiceImpl<ProjectRepository, Project, Project> {
 
-    private static final ProjectQuerySpecifications lQS = new ProjectQuerySpecifications();
+    private static final ProjectQuerySpecifications pQS = new ProjectQuerySpecifications();
     private static final String NOT_IMPLEMENTED = "not implemented yet!";
 
     public ProjectService(ProjectRepository repository) {
@@ -81,14 +81,14 @@ public class ProjectService
         Specification<Project> filter;
         switch (relatedType) {
         case STAEntityDefinition.CSDATASTREAMS:
-            filter = lQS.withRelationStaIdentifier(relatedId);
+            filter = pQS.withDatastreamStaIdentifier(relatedId);
             break;
         default:
             throw new IllegalStateException("Trying to filter by unrelated type: " + relatedType + "not found!");
         }
 
         if (ownId != null) {
-            filter = filter.and(lQS.withStaIdentifier(ownId));
+            filter = filter.and(pQS.withStaIdentifier(ownId));
         }
         return filter;
     }

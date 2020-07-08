@@ -81,7 +81,7 @@ public class LicenseService
         Specification<License> filter;
         switch (relatedType) {
         case STAEntityDefinition.CSDATASTREAMS:
-            filter = lQS.withRelationStaIdentifier(relatedId);
+            filter = lQS.withDatstreamStaIdentifier(relatedId);
             break;
         default:
             throw new IllegalStateException("Trying to filter by unrelated type: " + relatedType + "not found!");

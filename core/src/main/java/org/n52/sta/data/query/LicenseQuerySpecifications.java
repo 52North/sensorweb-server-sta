@@ -45,11 +45,11 @@ import javax.persistence.criteria.JoinType;
  */
 public class LicenseQuerySpecifications extends EntityQuerySpecifications<License> {
 
-    public Specification<License> withRelationStaIdentifier(final String relationIdentifier) {
+    public Specification<License> withDatstreamStaIdentifier(final String identifier) {
         return (root, query, builder) -> {
             final Join<License, CSDatastream> join =
                     root.join(License.PROPERTY_DATASTREAMS, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), relationIdentifier);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), identifier);
         };
     }
 

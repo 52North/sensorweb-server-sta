@@ -59,7 +59,7 @@ import java.util.UUID;
 public class PartyService
         extends AbstractSensorThingsEntityServiceImpl<PartyRepository, Party, Party> {
 
-    private static final PartyQuerySpecifications lQS = new PartyQuerySpecifications();
+    private static final PartyQuerySpecifications pQS = new PartyQuerySpecifications();
     private static final String NOT_IMPLEMENTED = "not implemented yet!";
 
     public PartyService(PartyRepository repository) {
@@ -81,14 +81,14 @@ public class PartyService
         Specification<Party> filter;
         switch (relatedType) {
         case STAEntityDefinition.CSDATASTREAMS:
-            filter = lQS.withRelationStaIdentifier(relatedId);
+            filter = pQS.withDatastreamStaIdentifier(relatedId);
             break;
         default:
             throw new IllegalStateException("Trying to filter by unrelated type: " + relatedType + "not found!");
         }
 
         if (ownId != null) {
-            filter = filter.and(lQS.withStaIdentifier(ownId));
+            filter = filter.and(pQS.withStaIdentifier(ownId));
         }
         return filter;
     }

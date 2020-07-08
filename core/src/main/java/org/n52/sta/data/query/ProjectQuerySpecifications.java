@@ -45,11 +45,11 @@ import javax.persistence.criteria.JoinType;
  */
 public class ProjectQuerySpecifications extends EntityQuerySpecifications<Project> {
 
-    public Specification<Project> withRelationStaIdentifier(final String relationIdentifier) {
+    public Specification<Project> withDatastreamStaIdentifier(final String identifier) {
         return (root, query, builder) -> {
             final Join<Project, CSDatastream> join =
                     root.join(Project.PROPERTY_DATASTREAMS, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), relationIdentifier);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), identifier);
         };
     }
 

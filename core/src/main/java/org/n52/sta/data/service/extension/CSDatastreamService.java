@@ -30,13 +30,13 @@
 package org.n52.sta.data.service.extension;
 
 import org.n52.janmayen.http.HTTPStatus;
-import org.n52.series.db.beans.sta.mapped.extension.License;
+import org.n52.series.db.beans.sta.mapped.extension.CSDatastream;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.data.query.LicenseQuerySpecifications;
-import org.n52.sta.data.repositories.LicenseRepository;
+import org.n52.sta.data.query.CSDatastreamQuerySpecifications;
+import org.n52.sta.data.repositories.CSDatastreamRepository;
 import org.n52.sta.data.service.AbstractSensorThingsEntityServiceImpl;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.springframework.context.annotation.DependsOn;
@@ -57,52 +57,59 @@ import java.util.UUID;
 @Transactional
 @Profile("citSciExtension")
 public class CSDatastreamService
-        extends AbstractSensorThingsEntityServiceImpl<LicenseRepository, License, License> {
+        extends AbstractSensorThingsEntityServiceImpl<CSDatastreamRepository, CSDatastream, CSDatastream> {
 
-    private static final LicenseQuerySpecifications lQS = new LicenseQuerySpecifications();
+    private static final CSDatastreamQuerySpecifications csdQS = new CSDatastreamQuerySpecifications();
+
     private static final String NOT_IMPLEMENTED = "not implemented yet!";
 
-    public CSDatastreamService(LicenseRepository repository) {
-        super(repository, License.class);
+    public CSDatastreamService(CSDatastreamRepository repository) {
+        super(repository, CSDatastream.class);
     }
 
     @Override public EntityTypes[] getTypes() {
-        return new EntityTypes[] {EntityTypes.License, EntityTypes.Licenses};
+        return new EntityTypes[] {EntityTypes.CSDatastream, EntityTypes.CSDatastreams};
     }
 
-    @Override protected License fetchExpandEntities(License entity, ExpandFilter expandOption)
+    @Override protected CSDatastream fetchExpandEntities(CSDatastream entity, ExpandFilter expandOption)
             throws STACRUDException, STAInvalidQueryException {
         return null;
     }
 
-    @Override protected Specification<License> byRelatedEntityFilter(String relatedId,
-                                                                     String relatedType,
-                                                                     String ownId) {
-        Specification<License> filter;
+    @Override protected Specification<CSDatastream> byRelatedEntityFilter(String relatedId,
+                                                                          String relatedType,
+                                                                          String ownId) {
+        Specification<CSDatastream> filter;
         switch (relatedType) {
-        case STAEntityDefinition.CSDATASTREAMS:
-            filter = lQS.withRelationStaIdentifier(relatedId);
+        case STAEntityDefinition.LICENSES:
+            filter = csdQS.withLicenseStaIdentifier(relatedId);
+            break;
+        case STAEntityDefinition.PROJECTS:
+            filter = csdQS.withProjectStaIdentifier(relatedId);
+            break;
+        case STAEntityDefinition.PARTIES:
+            filter = csdQS.withPartyStaIdentifier(relatedId);
             break;
         default:
             throw new IllegalStateException("Trying to filter by unrelated type: " + relatedType + "not found!");
         }
 
         if (ownId != null) {
-            filter = filter.and(lQS.withStaIdentifier(ownId));
+            filter = filter.and(csdQS.withStaIdentifier(ownId));
         }
         return filter;
     }
 
-    @Override protected License createEntity(License entity) throws STACRUDException {
-        License license = entity;
+    @Override protected CSDatastream createEntity(CSDatastream entity) throws STACRUDException {
+        CSDatastream license = entity;
         //if (!license.isProcessed()) {
         if (license.getStaIdentifier() != null && !license.isSetName()) {
-            Optional<License> optionalEntity =
+            Optional<CSDatastream> optionalEntity =
                     getRepository().findByStaIdentifier(license.getStaIdentifier());
             if (optionalEntity.isPresent()) {
                 return optionalEntity.get();
             } else {
-                throw new STACRUDException("No License with id '"
+                throw new STACRUDException("No CSDatastream with id '"
                                                    + license.getStaIdentifier() + "' "
                                                    + "found");
             }
@@ -122,16 +129,16 @@ public class CSDatastreamService
         return license;
     }
 
-    @Override protected License updateEntity(String id, License entity, HttpMethod method)
+    @Override protected CSDatastream updateEntity(String id, CSDatastream entity, HttpMethod method)
             throws STACRUDException {
         throw new STACRUDException(NOT_IMPLEMENTED);
     }
 
-    @Override protected License updateEntity(License entity) throws STACRUDException {
+    @Override protected CSDatastream updateEntity(CSDatastream entity) throws STACRUDException {
         throw new STACRUDException(NOT_IMPLEMENTED);
     }
 
-    @Override public License createOrUpdate(License entity) throws STACRUDException {
+    @Override public CSDatastream createOrUpdate(CSDatastream entity) throws STACRUDException {
         if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
             return updateEntity(entity.getStaIdentifier(), entity, HttpMethod.PATCH);
         }
@@ -142,12 +149,12 @@ public class CSDatastreamService
         return property;
     }
 
-    @Override protected License merge(License existing, License toMerge)
+    @Override protected CSDatastream merge(CSDatastream existing, CSDatastream toMerge)
             throws STACRUDException {
         throw new STACRUDException(NOT_IMPLEMENTED);
     }
 
-    @Override protected void delete(License entity) throws STACRUDException {
+    @Override protected void delete(CSDatastream entity) throws STACRUDException {
         throw new STACRUDException(NOT_IMPLEMENTED);
     }
 
