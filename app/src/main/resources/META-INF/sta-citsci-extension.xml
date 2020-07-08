@@ -28,6 +28,8 @@
 
         <mapping-file>/hbm/transactional/core/LocationResource.hbm.xml</mapping-file>
 
+        <class>org.n52.series.db.beans.PlatformEntity</class>
+
         <!-- Load Classes annoted by @Entity-->
         <class>org.n52.series.db.beans.sta.mapped.QuantityObservationEntity</class>
         <class>org.n52.series.db.beans.sta.mapped.TextObservationEntity</class>
@@ -35,7 +37,6 @@
         <class>org.n52.series.db.beans.sta.mapped.CategoryObservationEntity</class>
         <class>org.n52.series.db.beans.sta.mapped.BooleanObservationEntity</class>
 
-        <class>org.n52.series.db.beans.PlatformEntity</class>
         <class>org.n52.series.db.beans.sta.mapped.DatastreamEntity</class>
 
         <class>org.n52.series.db.beans.parameter.ParameterJsonEntity</class>
@@ -49,11 +50,10 @@
         <class>org.n52.series.db.beans.sta.mapped.extension.ObservationGroup</class>
         <class>org.n52.series.db.beans.sta.mapped.extension.ObservationRelation</class>
         <class>org.n52.series.db.beans.sta.mapped.extension.CSObservation</class>
-        <class>org.n52.series.db.beans.sta.mapped.extension.QuantityCSObservation</class>
-        <class>org.n52.series.db.beans.sta.mapped.extension.TextCSObservation</class>
-        <class>org.n52.series.db.beans.sta.mapped.extension.CountCSObservation</class>
-        <class>org.n52.series.db.beans.sta.mapped.extension.CategoryCSObservation</class>
-        <class>org.n52.series.db.beans.sta.mapped.extension.BooleanCSObservation</class>
+        <class>org.n52.series.db.beans.sta.mapped.extension.License</class>
+        <class>org.n52.series.db.beans.sta.mapped.extension.CSDatastream</class>
+        <class>org.n52.series.db.beans.sta.mapped.extension.Party</class>
+        <class>org.n52.series.db.beans.sta.mapped.extension.Project</class>
 
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>

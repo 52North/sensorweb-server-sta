@@ -43,9 +43,13 @@ import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.series.db.beans.sta.StaFeatureEntity;
 import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.series.db.beans.sta.mapped.ObservationEntity;
+import org.n52.series.db.beans.sta.mapped.extension.CSDatastream;
 import org.n52.series.db.beans.sta.mapped.extension.CSObservation;
+import org.n52.series.db.beans.sta.mapped.extension.License;
 import org.n52.series.db.beans.sta.mapped.extension.ObservationGroup;
 import org.n52.series.db.beans.sta.mapped.extension.ObservationRelation;
+import org.n52.series.db.beans.sta.mapped.extension.Party;
+import org.n52.series.db.beans.sta.mapped.extension.Project;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 
 public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId> {
@@ -90,6 +94,14 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
             return new ObservationGroupWithQueryOptions((ObservationGroup) unwrapped, queryOptions);
         case "ObservationRelation":
             return new ObservationRelationWithQueryOptions((ObservationRelation) unwrapped, queryOptions);
+        case "CSDatastream":
+            return new CSDatastreamWithQueryOptions((CSDatastream) unwrapped, queryOptions);
+        case "License":
+            return new LicenseWithQueryOptions((License) unwrapped, queryOptions);
+        case "Party":
+            return new PartyWithQueryOptions((Party) unwrapped, queryOptions);
+        case "Project":
+            return new ProjectWithQueryOptions((Project) unwrapped, queryOptions);
         default:
             if (unwrapped instanceof ObservationEntity) {
                 return new ObservationWithQueryOptions((ObservationEntity<?>) unwrapped, queryOptions);
@@ -107,8 +119,8 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
 
     public static class ThingWithQueryOptions extends ElementWithQueryOptions<PlatformEntity> {
 
-        ThingWithQueryOptions(PlatformEntity thing, QueryOptions queryOptions) {
-            this.entity = thing;
+        ThingWithQueryOptions(PlatformEntity entity, QueryOptions queryOptions) {
+            this.entity = entity;
             this.queryOptions = queryOptions;
         }
     }
@@ -116,8 +128,8 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
 
     public static class SensorWithQueryOptions extends ElementWithQueryOptions<SensorEntity> {
 
-        SensorWithQueryOptions(SensorEntity thing, QueryOptions queryOptions) {
-            this.entity = thing;
+        SensorWithQueryOptions(SensorEntity entity, QueryOptions queryOptions) {
+            this.entity = entity;
             this.queryOptions = queryOptions;
         }
     }
@@ -125,8 +137,8 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
 
     public static class ObservedPropertyWithQueryOptions extends ElementWithQueryOptions<ObservablePropertyEntity> {
 
-        ObservedPropertyWithQueryOptions(ObservablePropertyEntity thing, QueryOptions queryOptions) {
-            this.entity = thing;
+        ObservedPropertyWithQueryOptions(ObservablePropertyEntity entity, QueryOptions queryOptions) {
+            this.entity = entity;
             this.queryOptions = queryOptions;
         }
     }
@@ -134,8 +146,8 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
 
     public static class ObservationWithQueryOptions extends ElementWithQueryOptions<ObservationEntity<?>> {
 
-        ObservationWithQueryOptions(ObservationEntity<?> thing, QueryOptions queryOptions) {
-            this.entity = thing;
+        ObservationWithQueryOptions(ObservationEntity<?> entity, QueryOptions queryOptions) {
+            this.entity = entity;
             this.queryOptions = queryOptions;
         }
     }
@@ -143,8 +155,8 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
 
     public static class LocationWithQueryOptions extends ElementWithQueryOptions<LocationEntity> {
 
-        LocationWithQueryOptions(LocationEntity thing, QueryOptions queryOptions) {
-            this.entity = thing;
+        LocationWithQueryOptions(LocationEntity entity, QueryOptions queryOptions) {
+            this.entity = entity;
             this.queryOptions = queryOptions;
         }
     }
@@ -153,8 +165,8 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
     public static class HistoricalLocationWithQueryOptions
             extends ElementWithQueryOptions<HistoricalLocationEntity> {
 
-        HistoricalLocationWithQueryOptions(HistoricalLocationEntity thing, QueryOptions queryOptions) {
-            this.entity = thing;
+        HistoricalLocationWithQueryOptions(HistoricalLocationEntity entity, QueryOptions queryOptions) {
+            this.entity = entity;
             this.queryOptions = queryOptions;
         }
     }
@@ -162,8 +174,8 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
 
     public static class FeatureOfInterestWithQueryOptions extends ElementWithQueryOptions<StaFeatureEntity<?>> {
 
-        FeatureOfInterestWithQueryOptions(StaFeatureEntity<?> thing, QueryOptions queryOptions) {
-            this.entity = thing;
+        FeatureOfInterestWithQueryOptions(StaFeatureEntity<?> entity, QueryOptions queryOptions) {
+            this.entity = entity;
             this.queryOptions = queryOptions;
         }
     }
@@ -171,8 +183,8 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
 
     public static class DatastreamWithQueryOptions extends ElementWithQueryOptions<DatastreamEntity> {
 
-        DatastreamWithQueryOptions(DatastreamEntity thing, QueryOptions queryOptions) {
-            this.entity = thing;
+        DatastreamWithQueryOptions(DatastreamEntity entity, QueryOptions queryOptions) {
+            this.entity = entity;
             this.queryOptions = queryOptions;
         }
     }
@@ -180,8 +192,8 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
 
     public static class ObservationGroupWithQueryOptions extends ElementWithQueryOptions<ObservationGroup> {
 
-        ObservationGroupWithQueryOptions(ObservationGroup thing, QueryOptions queryOptions) {
-            this.entity = thing;
+        ObservationGroupWithQueryOptions(ObservationGroup entity, QueryOptions queryOptions) {
+            this.entity = entity;
             this.queryOptions = queryOptions;
         }
     }
@@ -189,8 +201,8 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
 
     public static class ObservationRelationWithQueryOptions extends ElementWithQueryOptions<ObservationRelation> {
 
-        ObservationRelationWithQueryOptions(ObservationRelation thing, QueryOptions queryOptions) {
-            this.entity = thing;
+        ObservationRelationWithQueryOptions(ObservationRelation entity, QueryOptions queryOptions) {
+            this.entity = entity;
             this.queryOptions = queryOptions;
         }
     }
@@ -198,8 +210,44 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
 
     public static class CSObservationWithQueryOptions extends ElementWithQueryOptions<CSObservation> {
 
-        public CSObservationWithQueryOptions(CSObservation thing, QueryOptions queryOptions) {
-            this.entity = thing;
+        public CSObservationWithQueryOptions(CSObservation entity, QueryOptions queryOptions) {
+            this.entity = entity;
+            this.queryOptions = queryOptions;
+        }
+    }
+
+
+    public static class CSDatastreamWithQueryOptions extends ElementWithQueryOptions<CSDatastream> {
+
+        public CSDatastreamWithQueryOptions(CSDatastream entity, QueryOptions queryOptions) {
+            this.entity = entity;
+            this.queryOptions = queryOptions;
+        }
+    }
+
+
+    public static class LicenseWithQueryOptions extends ElementWithQueryOptions<License> {
+
+        public LicenseWithQueryOptions(License entity, QueryOptions queryOptions) {
+            this.entity = entity;
+            this.queryOptions = queryOptions;
+        }
+    }
+
+
+    public static class PartyWithQueryOptions extends ElementWithQueryOptions<Party> {
+
+        public PartyWithQueryOptions(Party entity, QueryOptions queryOptions) {
+            this.entity = entity;
+            this.queryOptions = queryOptions;
+        }
+    }
+
+
+    public static class ProjectWithQueryOptions extends ElementWithQueryOptions<Project> {
+
+        public ProjectWithQueryOptions(Project entity, QueryOptions queryOptions) {
+            this.entity = entity;
             this.queryOptions = queryOptions;
         }
     }

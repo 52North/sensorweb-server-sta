@@ -30,14 +30,13 @@
 package org.n52.sta.data.service.extension;
 
 import org.n52.janmayen.http.HTTPStatus;
-import org.n52.series.db.beans.sta.mapped.extension.ObservationGroup;
-import org.n52.series.db.beans.sta.mapped.extension.ObservationRelation;
+import org.n52.series.db.beans.sta.mapped.extension.License;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.data.query.ObservationRelationQuerySpecifications;
-import org.n52.sta.data.repositories.ObservationRelationRepository;
+import org.n52.sta.data.query.LicenseQuerySpecifications;
+import org.n52.sta.data.repositories.LicenseRepository;
 import org.n52.sta.data.service.AbstractSensorThingsEntityServiceImpl;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.springframework.context.annotation.DependsOn;
@@ -57,86 +56,82 @@ import java.util.UUID;
 @DependsOn({"springApplicationContext"})
 @Transactional
 @Profile("citSciExtension")
-public class ObservationRelationService
-        extends AbstractSensorThingsEntityServiceImpl<ObservationRelationRepository, ObservationRelation,
-        ObservationRelation> {
+public class CSDatastreamService
+        extends AbstractSensorThingsEntityServiceImpl<LicenseRepository, License, License> {
 
-    private static final ObservationRelationQuerySpecifications orQS = new ObservationRelationQuerySpecifications();
-    private static final String NOT_IMPLEMENTED = "not implemented yet";
+    private static final LicenseQuerySpecifications lQS = new LicenseQuerySpecifications();
+    private static final String NOT_IMPLEMENTED = "not implemented yet!";
 
-    public ObservationRelationService(ObservationRelationRepository repository) {
-        super(repository, ObservationRelation.class);
+    public CSDatastreamService(LicenseRepository repository) {
+        super(repository, License.class);
     }
 
     @Override public EntityTypes[] getTypes() {
-        return new EntityTypes[] {EntityTypes.ObservationRelation, EntityTypes.ObservationRelations};
+        return new EntityTypes[] {EntityTypes.License, EntityTypes.Licenses};
     }
 
-    @Override protected ObservationRelation fetchExpandEntities(ObservationRelation entity, ExpandFilter expandOption)
+    @Override protected License fetchExpandEntities(License entity, ExpandFilter expandOption)
             throws STACRUDException, STAInvalidQueryException {
-        throw new STACRUDException(NOT_IMPLEMENTED);
+        return null;
     }
 
-    @Override protected Specification<ObservationRelation> byRelatedEntityFilter(String relatedId,
-                                                                                 String relatedType,
-                                                                                 String ownId) {
-        Specification<ObservationRelation> filter;
+    @Override protected Specification<License> byRelatedEntityFilter(String relatedId,
+                                                                     String relatedType,
+                                                                     String ownId) {
+        Specification<License> filter;
         switch (relatedType) {
-        case STAEntityDefinition.OBSERVATION_GROUPS:
-            filter = orQS.withGroupStaIdentifier(relatedId);
-            break;
-        case STAEntityDefinition.CSOBSERVATIONS:
-            filter = orQS.withCSObservationStaIdentifier(relatedId);
+        case STAEntityDefinition.CSDATASTREAMS:
+            filter = lQS.withRelationStaIdentifier(relatedId);
             break;
         default:
             throw new IllegalStateException("Trying to filter by unrelated type: " + relatedType + "not found!");
         }
 
         if (ownId != null) {
-            filter = filter.and(orQS.withStaIdentifier(ownId));
+            filter = filter.and(lQS.withStaIdentifier(ownId));
         }
         return filter;
     }
 
-    @Override protected ObservationRelation createEntity(ObservationRelation entity) throws STACRUDException {
-        ObservationRelation obsRel = entity;
-        if (obsRel.getStaIdentifier() != null && obsRel.getType() == null) {
-            Optional<ObservationRelation> optionalEntity =
-                    getRepository().findByStaIdentifier(obsRel.getStaIdentifier());
+    @Override protected License createEntity(License entity) throws STACRUDException {
+        License license = entity;
+        //if (!license.isProcessed()) {
+        if (license.getStaIdentifier() != null && !license.isSetName()) {
+            Optional<License> optionalEntity =
+                    getRepository().findByStaIdentifier(license.getStaIdentifier());
             if (optionalEntity.isPresent()) {
                 return optionalEntity.get();
             } else {
-                throw new STACRUDException("No ObservationRelation with id '"
-                                                   + obsRel.getStaIdentifier() + "' "
+                throw new STACRUDException("No License with id '"
+                                                   + license.getStaIdentifier() + "' "
                                                    + "found");
             }
-        } else if (obsRel.getStaIdentifier() == null) {
+        } else if (license.getStaIdentifier() == null) {
             // Autogenerate Identifier
             String uuid = UUID.randomUUID().toString();
-            obsRel.setStaIdentifier(uuid);
+            license.setStaIdentifier(uuid);
         }
-        synchronized (getLock(obsRel.getStaIdentifier())) {
-            if (getRepository().existsByStaIdentifier(obsRel.getStaIdentifier())) {
+        synchronized (getLock(license.getStaIdentifier())) {
+            if (getRepository().existsByStaIdentifier(license.getStaIdentifier())) {
                 throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
             } else {
-
-                ObservationGroup orUpdate = getObservationGroupService().createOrUpdate(obsRel.getGroup());
-                obsRel.setGroup(orUpdate);
-                return getRepository().save(obsRel);
+                getRepository().save(license);
             }
         }
+        //}
+        return license;
     }
 
-    @Override protected ObservationRelation updateEntity(String id, ObservationRelation entity, HttpMethod method)
+    @Override protected License updateEntity(String id, License entity, HttpMethod method)
             throws STACRUDException {
         throw new STACRUDException(NOT_IMPLEMENTED);
     }
 
-    @Override protected ObservationRelation updateEntity(ObservationRelation entity) throws STACRUDException {
+    @Override protected License updateEntity(License entity) throws STACRUDException {
         throw new STACRUDException(NOT_IMPLEMENTED);
     }
 
-    @Override public ObservationRelation createOrUpdate(ObservationRelation entity) throws STACRUDException {
+    @Override public License createOrUpdate(License entity) throws STACRUDException {
         if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
             return updateEntity(entity.getStaIdentifier(), entity, HttpMethod.PATCH);
         }
@@ -147,12 +142,12 @@ public class ObservationRelationService
         return property;
     }
 
-    @Override protected ObservationRelation merge(ObservationRelation existing, ObservationRelation toMerge)
+    @Override protected License merge(License existing, License toMerge)
             throws STACRUDException {
         throw new STACRUDException(NOT_IMPLEMENTED);
     }
 
-    @Override protected void delete(ObservationRelation entity) throws STACRUDException {
+    @Override protected void delete(License entity) throws STACRUDException {
         throw new STACRUDException(NOT_IMPLEMENTED);
     }
 

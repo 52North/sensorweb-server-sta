@@ -32,8 +32,8 @@ package org.n52.sta.serdes.json.extension;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.n52.series.db.beans.sta.mapped.extension.ObservationGroup;
-import org.n52.series.db.beans.sta.mapped.extension.ObservationRelation;
+import org.n52.series.db.beans.sta.mapped.extension.CSDatastream;
+import org.n52.series.db.beans.sta.mapped.extension.Party;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.serdes.json.AbstractJSONEntity;
 import org.n52.sta.serdes.json.JSONBase;
@@ -47,25 +47,25 @@ import java.util.Set;
  */
 @SuppressWarnings("VisibilityModifier")
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
-public class JSONObservationGroup extends JSONBase.JSONwithIdNameDescription<ObservationGroup>
-        implements AbstractJSONEntity {
+public class JSONParty extends JSONBase.JSONwithId<Party> implements AbstractJSONEntity {
+
+    public String nickName;
+    public Party.Role role;
 
     @JsonManagedReference
-    @JsonProperty(StaConstants.OBSERVATION_RELATIONS)
-    public JSONObservationRelation[] relations;
+    @JsonProperty(StaConstants.CSDATASTREAMS)
+    public JSONCSDatastream[] datastreams;
 
-    public JSONObservationGroup() {
-        self = new ObservationGroup();
+    public JSONParty() {
+        self = new Party();
     }
 
-    @Override public ObservationGroup toEntity(JSONBase.EntityType type) {
+    @Override public Party toEntity(JSONBase.EntityType type) {
         switch (type) {
         case FULL:
             parseReferencedFrom();
-            Assert.notNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
-            Assert.notNull(description, INVALID_INLINE_ENTITY_MISSING + "description");
-            // This might be set via backreference
-            // Assert.notNull(Relations, INVALID_INLINE_ENTITY_MISSING + "observations");
+            Assert.notNull(nickName, INVALID_INLINE_ENTITY_MISSING + "nickName");
+            Assert.notNull(role, INVALID_INLINE_ENTITY_MISSING + "role");
 
             return createPostEntity();
         case PATCH:
@@ -74,9 +74,8 @@ public class JSONObservationGroup extends JSONBase.JSONwithIdNameDescription<Obs
             // return self;
 
         case REFERENCE:
-            Assert.isNull(name, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(description, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(relations, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(nickName, INVALID_REFERENCED_ENTITY);
+            Assert.isNull(role, INVALID_REFERENCED_ENTITY);
             self.setStaIdentifier(identifier);
             return self;
         default:
@@ -84,23 +83,24 @@ public class JSONObservationGroup extends JSONBase.JSONwithIdNameDescription<Obs
         }
     }
 
-    private ObservationGroup createPostEntity() {
+    private Party createPostEntity() {
         self.setStaIdentifier(identifier);
-        self.setName(name);
-        self.setDescription(description);
+        self.setRole(role);
 
-        if (relations != null) {
-            Set<ObservationRelation> related = new HashSet<>();
-            for (JSONObservationRelation observation : relations) {
-                related.add(observation.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+        if (nickName != null) {
+            self.setNickname(nickName);
+        }
+
+        if (datastreams != null) {
+            Set<CSDatastream> related = new HashSet<>();
+            for (JSONCSDatastream datastream : datastreams) {
+                related.add(datastream.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
             }
-            self.setEntities(related);
-        } else if (backReference instanceof JSONObservationRelation) {
-            Set<ObservationRelation> related = new HashSet<>();
-            related.add(((JSONObservationRelation) backReference).getEntity());
-            self.setEntities(related);
-        } else {
-            Assert.notNull(null, INVALID_INLINE_ENTITY_MISSING + "Relations");
+            self.setDatastreams(related);
+        } else if (backReference instanceof JSONCSDatastream) {
+            Set<CSDatastream> related = new HashSet<>();
+            related.add(((JSONCSDatastream) backReference).getEntity());
+            self.setDatastreams(related);
         }
 
         return self;

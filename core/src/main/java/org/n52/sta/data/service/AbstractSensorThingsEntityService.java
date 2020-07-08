@@ -42,7 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public interface AbstractSensorThingsEntityService<T extends IdentifierRepository<S, Long>,
+public interface AbstractSensorThingsEntityService<T,
         S extends HibernateRelations.HasId,
         E extends S> {
     /**

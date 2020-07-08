@@ -43,7 +43,7 @@ database:
     # Mappings to be loaded. See https://github.com/52North/sensorweb-server-sta/wiki for details
     # Options:
     # - Vanilla STA: sta-vanilla.xml
-    # - STA with additional User table: sta-user-extension.xml
+    # - STA with additional User table: sta-citsci-extension.xml
     persistence-location: classpath:META-INF/sta-vanilla.xml
 spring:
   main:
@@ -112,7 +112,7 @@ logging:
     #    org.hibernate.type: INFO
     #     org.hibernate: DEBUG
     #     io.moquette: OFF
-    #org.n52: TRACE
+    org.n52: TRACE
     #org.hibernate.type: TRACE
     #org.hibernate.SQL: DEBUG
 #     org.springframework.transaction: TRACE

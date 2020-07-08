@@ -87,7 +87,8 @@ import java.util.stream.Collectors;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public abstract class AbstractObservationService<T extends StaIdentifierRepository<I> & GetFirstLastObservation<I>,
+public abstract class AbstractObservationService<
+        T extends StaIdentifierRepository<I>,
         I extends AbstractObservationEntity, O extends I>
         extends AbstractSensorThingsEntityServiceImpl<T, I, O> {
 
@@ -136,9 +137,9 @@ public abstract class AbstractObservationService<T extends StaIdentifierReposito
             OffsetLimitBasedPageRequest pageableRequest = createPageableRequest(queryOptions);
             Specification<I> spec = getFilterPredicate(ObservationEntity.class, queryOptions);
             List<String> identifierList = getRepository()
-                    .identifierList(spec,
-                                    pageableRequest,
-                                    STAIDENTIFIER);
+                    .getColumnList(spec,
+                                   pageableRequest,
+                                   STAIDENTIFIER);
             if (identifierList.isEmpty()) {
                 return new CollectionWrapper(0, Collections.emptyList(), false);
             } else {
@@ -160,9 +161,9 @@ public abstract class AbstractObservationService<T extends StaIdentifierReposito
                     byRelatedEntityFilter(relatedId, relatedType, null)
                             .and(getFilterPredicate(entityClass, queryOptions));
 
-            List<String> identifierList = getRepository().identifierList(spec,
-                                                                         createPageableRequest(queryOptions),
-                                                                         STAIDENTIFIER);
+            List<String> identifierList = getRepository().getColumnList(spec,
+                                                                        createPageableRequest(queryOptions),
+                                                                        STAIDENTIFIER);
             if (identifierList.isEmpty()) {
                 return new CollectionWrapper(0, Collections.emptyList(), false);
             } else {
@@ -206,9 +207,9 @@ public abstract class AbstractObservationService<T extends StaIdentifierReposito
                     byRelatedEntityFilter(relatedId, relatedType, null)
                             .and(getFilterPredicate(ObservationEntity.class, queryOptions));
 
-            List<String> identifierList = getRepository().identifierList(spec,
-                                                                         createPageableRequest(queryOptions),
-                                                                         STAIDENTIFIER);
+            List<String> identifierList = getRepository().getColumnList(spec,
+                                                                        createPageableRequest(queryOptions),
+                                                                        STAIDENTIFIER);
             if (identifierList.isEmpty()) {
                 return Page.empty();
             } else {
@@ -292,46 +293,8 @@ public abstract class AbstractObservationService<T extends StaIdentifierReposito
      * Handles updating the phenomenonTime field of the associated Datastream when Observation phenomenonTime is
      * updated or deleted
      */
-    private void updateDatastreamPhenomenonTimeOnObservationUpdate(
-            List<DatastreamEntity> datastreams, I observation) {
-        for (DatastreamEntity datastreamEntity : datastreams) {
-            if (datastreamEntity.getPhenomenonTimeStart() == null ||
-                    datastreamEntity.getPhenomenonTimeEnd() == null ||
-                    observation.getPhenomenonTimeStart().compareTo(datastreamEntity.getPhenomenonTimeStart()) != 1 ||
-                    observation.getPhenomenonTimeEnd().compareTo(datastreamEntity.getPhenomenonTimeEnd()) != -1
-            ) {
-                List<Long> datasetIds = datastreamEntity
-                        .getDatasets()
-                        .stream()
-                        .map(datasetEntity -> datasetEntity.getId())
-                        .collect(Collectors.toList());
-                // Setting new phenomenonTimeStart
-                I firstObservation = getRepository()
-                        .findFirstByDataset_idInOrderBySamplingTimeStartAsc(datasetIds);
-                Date newPhenomenonStart = (firstObservation == null) ? null : firstObservation.getPhenomenonTimeStart();
-
-                // Set Start and End to null if there is no observation.
-                if (newPhenomenonStart == null) {
-                    datastreamEntity.setPhenomenonTimeStart(null);
-                    datastreamEntity.setPhenomenonTimeEnd(null);
-                } else {
-                    datastreamEntity.setPhenomenonTimeStart(newPhenomenonStart);
-
-                    // Setting new phenomenonTimeEnd
-                    I lastObservation = getRepository()
-                            .findFirstByDataset_idInOrderBySamplingTimeEndDesc(datasetIds);
-                    Date newPhenomenonEnd = (lastObservation == null) ? null : lastObservation.getPhenomenonTimeEnd();
-                    if (newPhenomenonEnd != null) {
-                        datastreamEntity.setPhenomenonTimeEnd(newPhenomenonEnd);
-                    } else {
-                        datastreamEntity.setPhenomenonTimeStart(null);
-                        datastreamEntity.setPhenomenonTimeEnd(null);
-                    }
-                }
-                datastreamRepository.save(datastreamEntity);
-            }
-        }
-    }
+    protected abstract void updateDatastreamPhenomenonTimeOnObservationUpdate(
+            List<DatastreamEntity> datastreams, I observation);
 
     @Override
     public I updateEntity(String id, I entity, HttpMethod method)

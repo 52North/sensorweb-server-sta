@@ -106,10 +106,9 @@ public class ObservationGroupService
                                                        + obsGroup.getStaIdentifier() + "' "
                                                        + "found");
                 }
-            } else if (obsGroup.getIdentifier() == null) {
+            } else if (obsGroup.getStaIdentifier() == null) {
                 // Autogenerate Identifier
                 String uuid = UUID.randomUUID().toString();
-                obsGroup.setIdentifier(uuid);
                 obsGroup.setStaIdentifier(uuid);
             }
             synchronized (getLock(obsGroup.getStaIdentifier())) {
@@ -154,6 +153,6 @@ public class ObservationGroupService
     }
 
     @Override public void delete(String id) throws STACRUDException {
-        getRepository().deleteByIdentifier(id);
+        getRepository().deleteByStaIdentifier(id);
     }
 }

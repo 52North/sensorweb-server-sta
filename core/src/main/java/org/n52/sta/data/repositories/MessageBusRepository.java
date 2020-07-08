@@ -40,11 +40,11 @@ import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
-import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
-import org.n52.series.db.beans.sta.mapped.ObservationEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
+import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
+import org.n52.series.db.beans.sta.mapped.ObservationEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.SpringApplicationContext;
@@ -160,7 +160,7 @@ public class MessageBusRepository<T, I extends Serializable>
     }
 
     @Transactional(readOnly = true)
-    public Optional<String> identifier(Specification<T> spec, String columnName) {
+    public Optional<String> getColumn(Specification<T> spec, String columnName) {
         CriteriaQuery<Object> query = criteriaBuilder.createQuery(Object.class);
         Root<T> root = query.from(getDomainClass());
         if (spec != null) {
@@ -180,7 +180,7 @@ public class MessageBusRepository<T, I extends Serializable>
     }
 
     @Transactional(readOnly = true)
-    public List<String> identifierList(Specification<T> spec, Pageable pageable, String columnName) {
+    public List<String> getColumnList(Specification<T> spec, Pageable pageable, String columnName) {
         CriteriaQuery<String> query = criteriaBuilder.createQuery(String.class);
         Root<T> root = query.from(getDomainClass());
         if (spec != null) {
@@ -462,7 +462,7 @@ public class MessageBusRepository<T, I extends Serializable>
             result.put(DESCRIPTION, ((DatastreamEntity) entity).getDescription());
             result.put(NAME, ((DatastreamEntity) entity).getName());
             result.put(OBSERVATIONTYPE, ((DatastreamEntity) entity).getObservationType().getFormat());
-            result.put(UOM, ((DatastreamEntity) entity).getUnitOfMeasurement());
+            result.put(UOM, ((DatastreamEntity) entity).getUnit());
             result.put(OBSERVEDAREA,
                        (((DatastreamEntity) entity).getGeometryEntity() != null) ?
                                ((DatastreamEntity) entity).getGeometryEntity().getGeometry() : null);

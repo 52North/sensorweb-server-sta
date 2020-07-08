@@ -43,20 +43,28 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.series.db.beans.sta.mapped.ObservationEntity;
+import org.n52.series.db.beans.sta.mapped.extension.CSDatastream;
 import org.n52.series.db.beans.sta.mapped.extension.CSObservation;
+import org.n52.series.db.beans.sta.mapped.extension.License;
 import org.n52.series.db.beans.sta.mapped.extension.ObservationGroup;
 import org.n52.series.db.beans.sta.mapped.extension.ObservationRelation;
+import org.n52.series.db.beans.sta.mapped.extension.Party;
+import org.n52.series.db.beans.sta.mapped.extension.Project;
 import org.n52.sta.data.service.util.CollectionWrapper;
+import org.n52.sta.serdes.CSDatastreamSerDes;
 import org.n52.sta.serdes.CSObservationSerDes;
 import org.n52.sta.serdes.CollectionSer;
 import org.n52.sta.serdes.DatastreamSerDes;
 import org.n52.sta.serdes.FeatureOfInterestSerDes;
 import org.n52.sta.serdes.HistoricalLocationSerDes;
+import org.n52.sta.serdes.LicenseSerDes;
 import org.n52.sta.serdes.LocationSerDes;
 import org.n52.sta.serdes.ObservationGroupSerDes;
 import org.n52.sta.serdes.ObservationRelationSerDes;
 import org.n52.sta.serdes.ObservationSerDes;
 import org.n52.sta.serdes.ObservedPropertySerDes;
+import org.n52.sta.serdes.PartySerDes;
+import org.n52.sta.serdes.ProjectSerDes;
 import org.n52.sta.serdes.SensorSerDes;
 import org.n52.sta.serdes.ThingSerDes;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -67,6 +75,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
+import javax.mail.Part;
 import java.util.ArrayList;
 
 @Configuration
@@ -142,21 +151,34 @@ public class JacksonConfig {
                                      @Value("${server.rootUrl}") String rootUrl) {
         SimpleModule module = new SimpleModule();
 
-        // Register Serializers/Deserializers for all custom types
         SimpleSerializers serializers = new SimpleSerializers();
         SimpleDeserializers deserializers = new SimpleDeserializers();
 
         serializers.addSerializer(new ObservationGroupSerDes.ObservationGroupSerializer(rootUrl));
         serializers.addSerializer(new ObservationRelationSerDes.ObservationRelationSerializer(rootUrl));
         serializers.addSerializer(new CSObservationSerDes.CSObservationSerializer(rootUrl));
+        serializers.addSerializer(new LicenseSerDes.LicenseSerializer(rootUrl));
+        serializers.addSerializer(new PartySerDes.PartySerializer(rootUrl));
+        serializers.addSerializer(new ProjectSerDes.ProjectSerializer(rootUrl));
+        serializers.addSerializer(new CSDatastreamSerDes.CSDatastreamSerializer(rootUrl));
 
         deserializers.addDeserializer(ObservationGroup.class,
                                       new ObservationGroupSerDes.ObservationGroupDeserializer());
-
         deserializers.addDeserializer(ObservationRelation.class,
                                       new ObservationRelationSerDes.ObservationRelationDeserializer());
+        deserializers.addDeserializer(License.class,
+                                      new LicenseSerDes.LicenseDeserializer());
+        deserializers.addDeserializer(Party.class,
+                                      new PartySerDes.PartyDeserializer());
+        deserializers.addDeserializer(Project.class,
+                                      new ProjectSerDes.ProjectDeserializer());
+        deserializers.addDeserializer(CSDatastream.class,
+                                      new CSDatastreamSerDes.CSDatastreamDeserializer());
+
         deserializers.addDeserializer(CSObservation.class,
                                       new CSObservationSerDes.CSObservationDeserializer());
+
+        //TODO: Add patch deserializers here
 
         module.setSerializers(serializers);
         module.setDeserializers(deserializers);

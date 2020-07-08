@@ -65,6 +65,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -213,5 +216,46 @@ public class ObservationService
             break;
         }
         return fillConcreteObservationType(data, observation, dataset);
+    }
+
+    protected void updateDatastreamPhenomenonTimeOnObservationUpdate(
+            List<DatastreamEntity> datastreams, ObservationEntity<?> observation) {
+        for (DatastreamEntity datastreamEntity : datastreams) {
+            if (datastreamEntity.getPhenomenonTimeStart() == null ||
+                    datastreamEntity.getPhenomenonTimeEnd() == null ||
+                    observation.getPhenomenonTimeStart().compareTo(datastreamEntity.getPhenomenonTimeStart()) != 1 ||
+                    observation.getPhenomenonTimeEnd().compareTo(datastreamEntity.getPhenomenonTimeEnd()) != -1
+            ) {
+                List<Long> datasetIds = datastreamEntity
+                        .getDatasets()
+                        .stream()
+                        .map(datasetEntity -> datasetEntity.getId())
+                        .collect(Collectors.toList());
+                // Setting new phenomenonTimeStart
+                ObservationEntity<?> firstObservation = getRepository()
+                        .findFirstByDataset_idInOrderBySamplingTimeStartAsc(datasetIds);
+                Date newPhenomenonStart = (firstObservation == null) ? null : firstObservation.getPhenomenonTimeStart();
+
+                // Set Start and End to null if there is no observation.
+                if (newPhenomenonStart == null) {
+                    datastreamEntity.setPhenomenonTimeStart(null);
+                    datastreamEntity.setPhenomenonTimeEnd(null);
+                } else {
+                    datastreamEntity.setPhenomenonTimeStart(newPhenomenonStart);
+
+                    // Setting new phenomenonTimeEnd
+                    ObservationEntity<?> lastObservation = getRepository()
+                            .findFirstByDataset_idInOrderBySamplingTimeEndDesc(datasetIds);
+                    Date newPhenomenonEnd = (lastObservation == null) ? null : lastObservation.getPhenomenonTimeEnd();
+                    if (newPhenomenonEnd != null) {
+                        datastreamEntity.setPhenomenonTimeEnd(newPhenomenonEnd);
+                    } else {
+                        datastreamEntity.setPhenomenonTimeStart(null);
+                        datastreamEntity.setPhenomenonTimeEnd(null);
+                    }
+                }
+                datastreamRepository.save(datastreamEntity);
+            }
+        }
     }
 }

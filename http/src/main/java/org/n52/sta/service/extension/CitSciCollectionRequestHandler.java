@@ -86,9 +86,16 @@ public class CitSciCollectionRequestHandler extends AbstractCollectionRequestHan
     @Override
     @GetMapping(
             value = {
-                    MAPPING_PREFIX + CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_CSOBSERVATION_PATH_VARIABLE,
                     MAPPING_PREFIX +
-                            CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVATION_GROUP_PATH_VARIABLE
+                            CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_CSOBSERVATION_PATH_VARIABLE,
+                    MAPPING_PREFIX +
+                            CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVATION_GROUP_PATH_VARIABLE,
+                    MAPPING_PREFIX +
+                            CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_PROJECT_PATH_VARIABLE,
+                    MAPPING_PREFIX +
+                            CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_LICENSE_PATH_VARIABLE,
+                    MAPPING_PREFIX +
+                            CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_PARTY_PATH_VARIABLE,
             },
             produces = "application/json"
     )
@@ -107,7 +114,16 @@ public class CitSciCollectionRequestHandler extends AbstractCollectionRequestHan
                             + SLASHREF,
                     MAPPING_PREFIX
                             + CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVATION_GROUP_PATH_VARIABLE
-                            + SLASHREF
+                            + SLASHREF,
+                    MAPPING_PREFIX
+                            + CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_PROJECT_PATH_VARIABLE
+                            + SLASHREF,
+                    MAPPING_PREFIX
+                            + CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_LICENSE_PATH_VARIABLE
+                            + SLASHREF,
+                    MAPPING_PREFIX
+                            + CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_PARTY_PATH_VARIABLE
+                            + SLASHREF,
             },
             produces = "application/json"
     )

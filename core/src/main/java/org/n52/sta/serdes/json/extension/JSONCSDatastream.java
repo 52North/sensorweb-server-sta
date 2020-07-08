@@ -27,33 +27,56 @@
  * Public License for more details.
  */
 
-package org.n52.sta.serdes.json;
+package org.n52.sta.serdes.json.extension;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.PrecisionModel;
-import org.locationtech.jts.io.ParseException;
-import org.locationtech.jts.io.geojson.GeoJsonReader;
-import org.n52.series.db.beans.FormatEntity;
-import org.n52.series.db.beans.UnitEntity;
-import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
-import org.n52.shetland.ogc.gml.time.Time;
-import org.n52.shetland.ogc.gml.time.TimeInstant;
-import org.n52.shetland.ogc.gml.time.TimePeriod;
+import org.n52.series.db.beans.sta.mapped.extension.CSDatastream;
+import org.n52.series.db.beans.sta.mapped.extension.CSObservation;
+import org.n52.series.db.beans.sta.mapped.extension.ObservationGroup;
+import org.n52.series.db.beans.sta.mapped.extension.ObservationRelation;
+import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.sta.serdes.json.AbstractJSONDatastream;
+import org.n52.sta.serdes.json.AbstractJSONEntity;
+import org.n52.sta.serdes.json.JSONBase;
 import org.springframework.util.Assert;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.stream.Collectors;
+import java.util.HashSet;
+import java.util.Set;
 
+/**
+ * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
+ */
 @SuppressWarnings("VisibilityModifier")
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
-public class JSONDatastream extends AbstractJSONDatastream<DatastreamEntity> {
+public class JSONCSDatastream extends AbstractJSONDatastream<CSDatastream> {
 
-    public JSONDatastream() {
-        self = new DatastreamEntity();
+    @JsonManagedReference
+    @JsonProperty(StaConstants.LICENSE)
+    public JSONLicense[] license;
+
+    @JsonManagedReference
+    @JsonProperty(StaConstants.PARTY)
+    public JSONParty[] party;
+
+    @JsonManagedReference
+    @JsonProperty(StaConstants.PROJECT)
+    public JSONProject[] project;
+
+
+    public JSONCSDatastream() {
+        self = new CSDatastream();
     }
 
+    @Override protected CSDatastream createPatchEntity() {
+        super.createPatchEntity();
+        return self;
+    }
+
+    @Override protected CSDatastream createPostEntity() {
+        super.createPostEntity();
+        return self;
+    }
 }
+

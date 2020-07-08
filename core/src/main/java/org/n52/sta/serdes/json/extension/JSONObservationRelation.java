@@ -75,7 +75,6 @@ public class JSONObservationRelation extends JSONBase.JSONwithId<ObservationRela
             Assert.isNull(Observation, INVALID_REFERENCED_ENTITY);
             Assert.isNull(type, INVALID_REFERENCED_ENTITY);
             self.setStaIdentifier(identifier);
-            self.setIdentifier(identifier);
             return self;
         default:
             return null;
@@ -84,7 +83,6 @@ public class JSONObservationRelation extends JSONBase.JSONwithId<ObservationRela
 
     private ObservationRelation createPostEntity() {
         self.setStaIdentifier(identifier);
-        self.setIdentifier(identifier);
         self.setType(type);
 
         if (Observation != null) {

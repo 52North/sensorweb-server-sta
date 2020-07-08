@@ -32,15 +32,10 @@ package org.n52.sta.data.service.extension;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.sta.AbstractObservationEntity;
-import org.n52.series.db.beans.sta.mapped.extension.BooleanCSObservation;
+import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.series.db.beans.sta.mapped.extension.CSObservation;
-import org.n52.series.db.beans.sta.mapped.extension.CategoryCSObservation;
-import org.n52.series.db.beans.sta.mapped.extension.CountCSObservation;
 import org.n52.series.db.beans.sta.mapped.extension.ObservationRelation;
-import org.n52.series.db.beans.sta.mapped.extension.QuantityCSObservation;
-import org.n52.series.db.beans.sta.mapped.extension.TextCSObservation;
 import org.n52.shetland.filter.ExpandFilter;
-import org.n52.shetland.ogc.om.OmConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
@@ -63,7 +58,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -139,53 +134,12 @@ public class CSObservationService
         return persisted;
     }
 
+    @Override protected void updateDatastreamPhenomenonTimeOnObservationUpdate(List<DatastreamEntity> datastreams,
+                                                                               CSObservation<?> observation) {
+    }
+
     @Override protected CSObservation<?> castToConcreteObservationType(AbstractObservationEntity observation,
                                                                        DatasetEntity dataset) throws STACRUDException {
-        CSObservation data = null;
-        String value = (String) observation.getValue();
-        switch (dataset.getOmObservationType().getFormat()) {
-        case OmConstants.OBS_TYPE_MEASUREMENT:
-            QuantityCSObservation quantityObservationEntity = new QuantityCSObservation();
-            if (observation.hasValue()) {
-                if (value.equals("NaN") || value.equals("Inf") || value.equals("-Inf")) {
-                    quantityObservationEntity.setValue(null);
-                } else {
-                    quantityObservationEntity.setValue(BigDecimal.valueOf(Double.parseDouble(value)));
-                }
-            }
-            data = quantityObservationEntity;
-            break;
-        case OmConstants.OBS_TYPE_CATEGORY_OBSERVATION:
-            CategoryCSObservation categoryObservationEntity = new CategoryCSObservation();
-            if (observation.hasValue()) {
-                categoryObservationEntity.setValue(value);
-            }
-            data = categoryObservationEntity;
-            break;
-        case OmConstants.OBS_TYPE_COUNT_OBSERVATION:
-            CountCSObservation countObservationEntity = new CountCSObservation();
-            if (observation.hasValue()) {
-                countObservationEntity.setValue(Integer.parseInt(value));
-            }
-            data = countObservationEntity;
-            break;
-        case OmConstants.OBS_TYPE_TEXT_OBSERVATION:
-            TextCSObservation textObservationEntity = new TextCSObservation();
-            if (observation.hasValue()) {
-                textObservationEntity.setValue(value);
-            }
-            data = textObservationEntity;
-            break;
-        case OmConstants.OBS_TYPE_TRUTH_OBSERVATION:
-            BooleanCSObservation booleanObservationEntity = new BooleanCSObservation();
-            if (observation.hasValue()) {
-                booleanObservationEntity.setValue(Boolean.parseBoolean(value));
-            }
-            data = booleanObservationEntity;
-            break;
-        default:
-            break;
-        }
-        return fillConcreteObservationType(data, observation, dataset);
+        return null;
     }
 }

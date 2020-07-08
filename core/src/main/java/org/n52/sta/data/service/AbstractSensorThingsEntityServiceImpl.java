@@ -85,7 +85,8 @@ import java.util.Optional;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Transactional
-public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentifierRepository<S>,
+public abstract class AbstractSensorThingsEntityServiceImpl<
+        T extends StaIdentifierRepository<S>,
         S extends HibernateRelations.HasId,
         E extends S> implements AbstractSensorThingsEntityService<T, S, E> {
 
@@ -275,7 +276,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     }
 
     @Override public String getEntityIdByRelatedEntity(String relatedId, String relatedType) {
-        Optional<String> entity = getRepository().identifier(
+        Optional<String> entity = getRepository().getColumn(
                 this.byRelatedEntityFilter(relatedId, relatedType, null),
                 STAIDENTIFIER);
         return entity.orElse(null);

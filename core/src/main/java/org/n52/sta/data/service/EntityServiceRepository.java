@@ -29,11 +29,16 @@
 
 package org.n52.sta.data.service;
 
+import org.n52.series.db.beans.sta.mapped.extension.CSDatastream;
 import org.n52.series.db.beans.sta.mapped.extension.ObservationGroup;
 import org.n52.sta.data.STAEventHandler;
+import org.n52.sta.data.service.extension.CSDatastreamService;
 import org.n52.sta.data.service.extension.CSObservationService;
+import org.n52.sta.data.service.extension.LicenseService;
 import org.n52.sta.data.service.extension.ObservationGroupService;
 import org.n52.sta.data.service.extension.ObservationRelationService;
+import org.n52.sta.data.service.extension.PartyService;
+import org.n52.sta.data.service.extension.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -75,6 +80,18 @@ public class EntityServiceRepository {
 
     @Autowired(required = false)
     private CSObservationService csObservationService;
+
+    @Autowired(required = false)
+    private CSDatastreamService csDatastreamService;
+
+    @Autowired(required = false)
+    private LicenseService licenseService;
+
+    @Autowired(required = false)
+    private PartyService partyService;
+
+    @Autowired(required = false)
+    private ProjectService projectService;
 
     @Autowired private STAEventHandler mqttSubscriptionEventHandler;
 
@@ -125,6 +142,22 @@ public class EntityServiceRepository {
             entityServices.put(EntityTypes.CSObservation, csObservationService);
             entityServices.put(EntityTypes.CSObservations, csObservationService);
 
+            this.csDatastreamService.setServiceRepository(this);
+            entityServices.put(EntityTypes.CSDatastream, csDatastreamService);
+            entityServices.put(EntityTypes.CSDatastreams, csDatastreamService);
+
+            this.licenseService.setServiceRepository(this);
+            entityServices.put(EntityTypes.License, licenseService);
+            entityServices.put(EntityTypes.Licenses, licenseService);
+
+            this.partyService.setServiceRepository(this);
+            entityServices.put(EntityTypes.Party, partyService);
+            entityServices.put(EntityTypes.Parties, partyService);
+
+            this.projectService.setServiceRepository(this);
+            entityServices.put(EntityTypes.Project, projectService);
+            entityServices.put(EntityTypes.Projects, projectService);
+
         }
         this.mqttSubscriptionEventHandler.setServiceRepository(this);
     }
@@ -153,7 +186,7 @@ public class EntityServiceRepository {
         Thing, Location, HistoricalLocation, Sensor, Datastream, Observation, ObservedProperty, FeatureOfInterest,
         Things, Locations, HistoricalLocations, Sensors, Datastreams, Observations, ObservedProperties,
         FeaturesOfInterest, ObservationGroup, ObservationGroups, ObservationRelation, ObservationRelations,
-        CSObservation, CSObservations
+        CSObservation, CSObservations, CSDatastream, CSDatastreams, License, Licenses, Party, Parties, Project, Projects
     }
 
 }
