@@ -29,12 +29,12 @@ services:
     image: postgis/postgis:12-master
     restart: on-failure
     environment:
-      - POSTGRES_DB=sta
+      - POSTGRES_DB=sta-dev
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - ALLOW_IP_RANGE=0.0.0.0/0
       - POSTGRES_MULTIPLE_EXTENSIONS=postgis
 
     # For debug/show purposes!
-    #ports:
-    #  - 5000:5432
+    ports:
+      - 5000:5432
