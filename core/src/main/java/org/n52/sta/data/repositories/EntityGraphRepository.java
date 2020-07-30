@@ -141,6 +141,7 @@ public interface EntityGraphRepository<T, I> extends JpaSpecificationExecutor<T>
         FETCHGRAPH_UOM("unitOfMeasurement"),
         FETCHGRAPH_OBS_TYPE("observationType"),
         FETCHGRAPH_PARAMETERS("parameters"),
+        FETCHGRAPH_OBS_PARAMETERS("observation(parameters)"),
         FETCHGRAPH_FORMAT("format"),
         FETCHGRAPH_FEATURETYPE("featureType"),
         FETCHGRAPH_PROCEDURE("procedure"),

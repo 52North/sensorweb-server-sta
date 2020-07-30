@@ -30,6 +30,7 @@
 package org.n52.sta.data.service.extension;
 
 import org.n52.janmayen.http.HTTPStatus;
+import org.n52.series.db.beans.sta.mapped.extension.CSDatastream;
 import org.n52.series.db.beans.sta.mapped.extension.Project;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
@@ -93,33 +94,36 @@ public class ProjectService
         return filter;
     }
 
-    @Override protected Project createEntity(Project entity) throws STACRUDException {
-        Project license = entity;
-        //if (!license.isProcessed()) {
-        if (license.getStaIdentifier() != null && !license.isSetName()) {
+    @Override public Project createEntity(Project entity) throws STACRUDException {
+        Project project = entity;
+        //if (!project.isProcessed()) {
+        if (project.getStaIdentifier() != null && !project.isSetName()) {
             Optional<Project> optionalEntity =
-                    getRepository().findByStaIdentifier(license.getStaIdentifier());
+                    getRepository().findByStaIdentifier(project.getStaIdentifier());
             if (optionalEntity.isPresent()) {
                 return optionalEntity.get();
             } else {
                 throw new STACRUDException("No Project with id '"
-                                                   + license.getStaIdentifier() + "' "
+                                                   + project.getStaIdentifier() + "' "
                                                    + "found");
             }
-        } else if (license.getStaIdentifier() == null) {
+        } else if (project.getStaIdentifier() == null) {
             // Autogenerate Identifier
             String uuid = UUID.randomUUID().toString();
-            license.setStaIdentifier(uuid);
+            project.setStaIdentifier(uuid);
         }
-        synchronized (getLock(license.getStaIdentifier())) {
-            if (getRepository().existsByStaIdentifier(license.getStaIdentifier())) {
+        synchronized (getLock(project.getStaIdentifier())) {
+            if (getRepository().existsByStaIdentifier(project.getStaIdentifier())) {
                 throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
             } else {
-                getRepository().save(license);
+                for (CSDatastream datastream : project.getDatastreams()) {
+                    getCSDatastreamService().create(datastream);
+                }
+                getRepository().save(project);
             }
         }
         //}
-        return license;
+        return project;
     }
 
     @Override protected Project updateEntity(String id, Project entity, HttpMethod method)

@@ -27,31 +27,16 @@
  * Public License for more details.
  */
 
-package org.n52.sta.serdes.json;
-
-import org.n52.series.db.beans.sta.mapped.ObservationEntity;
-import org.springframework.util.Assert;
+package org.n52.sta.serdes.json.extension;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public class JSONObservation extends AbstractJSONObservation<ObservationEntity> {
+public class JSONUnitOfMeasurement {
 
-    public JSONObservation() {
-        self = new ObservationEntity();
-    }
+    public String symbol;
 
-    @Override protected ObservationEntity createPostEntity() {
-        // Link to Datastream
-        if (Datastream != null) {
-            self.setDatastream(
-                    Datastream.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
-        } else if (backReference instanceof JSONDatastream) {
-            self.setDatastream(((JSONDatastream) backReference).getEntity());
-        } else {
-            Assert.notNull(null, INVALID_INLINE_ENTITY_MISSING + "Datastream");
-        }
+    public String name;
 
-        return super.createPostEntity();
-    }
+    public String definition;
 }

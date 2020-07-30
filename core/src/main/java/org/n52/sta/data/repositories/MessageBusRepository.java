@@ -40,6 +40,7 @@ import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
+import org.n52.series.db.beans.sta.AbstractDatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
@@ -300,7 +301,7 @@ public class MessageBusRepository<T, I extends Serializable>
                     collections.put(STAEntityDefinition.DATASTREAMS,
                                     entity.getDatastreams()
                                           .stream()
-                                          .map(DatastreamEntity::getStaIdentifier)
+                                          .map(AbstractDatastreamEntity::getStaIdentifier)
                                           .collect(Collectors.toSet()));
                 }
             } else {
@@ -354,7 +355,7 @@ public class MessageBusRepository<T, I extends Serializable>
                 collections.put(STAEntityDefinition.DATASTREAMS,
                                 entity.getDatastreams()
                                       .stream()
-                                      .map(DatastreamEntity::getStaIdentifier)
+                                      .map(AbstractDatastreamEntity::getStaIdentifier)
                                       .collect(Collectors.toSet()));
             }
         } else if (rawObject instanceof DatastreamEntity) {

@@ -30,13 +30,18 @@
 package org.n52.sta.serdes.json;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.PlatformEntity;
+import org.n52.series.db.beans.sta.AbstractDatastreamEntity;
+import org.n52.sta.serdes.json.extension.JSONCSDatastream;
 import org.springframework.util.Assert;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("VisibilityModifier")
@@ -44,6 +49,7 @@ import java.util.stream.Collectors;
 public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity> implements AbstractJSONEntity {
 
     // JSON Properties. Matched by Annotation or variable name
+    @JsonProperty
     public JsonNode properties;
 
     @JsonManagedReference
@@ -51,6 +57,9 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
 
     @JsonManagedReference
     public JSONDatastream[] Datastreams;
+
+    @JsonManagedReference
+    public JSONCSDatastream[] CSDatastreams;
 
     @JsonManagedReference
     public JSONHistoricalLocation[] HistoricalLocations;
@@ -89,6 +98,20 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
                                           .map(ds -> ds.toEntity(JSONBase.EntityType.FULL,
                                                                  JSONBase.EntityType.REFERENCE))
                                           .collect(Collectors.toSet()));
+            }
+
+            if (CSDatastreams != null) {
+                Set<AbstractDatastreamEntity> joinedDatastreams;
+                if (self.getDatastreams() != null) {
+                    joinedDatastreams =self.getDatastreams();
+                } else {
+                    joinedDatastreams = new HashSet<>();
+                }
+                joinedDatastreams.addAll(Arrays.stream(CSDatastreams)
+                                          .map(ds -> ds.toEntity(JSONBase.EntityType.FULL,
+                                                                 JSONBase.EntityType.REFERENCE))
+                                          .collect(Collectors.toSet()));
+                self.setDatastreams(joinedDatastreams);
             }
 
             if (HistoricalLocations != null) {

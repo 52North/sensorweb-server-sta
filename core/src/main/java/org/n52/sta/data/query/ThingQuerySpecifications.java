@@ -35,6 +35,7 @@ import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.series.db.beans.sta.mapped.extension.CSDatastream;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.springframework.data.jpa.domain.Specification;
@@ -69,6 +70,14 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
     public Specification<PlatformEntity> withDatastreamStaIdentifier(final String datastreamIdentifier) {
         return (root, query, builder) -> {
             final Join<PlatformEntity, DatastreamEntity> join =
+                    root.join(PlatformEntity.PROPERTY_DATASTREAMS, JoinType.INNER);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), datastreamIdentifier);
+        };
+    }
+
+    public Specification<PlatformEntity> withCSDatastreamStaIdentifier(final String datastreamIdentifier) {
+        return (root, query, builder) -> {
+            final Join<PlatformEntity, CSDatastream> join =
                     root.join(PlatformEntity.PROPERTY_DATASTREAMS, JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), datastreamIdentifier);
         };

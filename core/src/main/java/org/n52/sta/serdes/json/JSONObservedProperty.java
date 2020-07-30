@@ -31,6 +31,7 @@ package org.n52.sta.serdes.json;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.sta.ObservablePropertyEntity;
+import org.n52.sta.serdes.json.extension.JSONCSDatastream;
 import org.springframework.util.Assert;
 
 import java.util.Arrays;
@@ -71,7 +72,11 @@ public class JSONObservedProperty extends JSONBase.JSONwithIdNameDescription<Obs
                 }
                 // Deal with back reference during deep insert
                 if (backReference != null) {
-                    self.addDatastream(((JSONDatastream) backReference).getEntity());
+                    if (backReference instanceof JSONDatastream) {
+                        self.addDatastream(((JSONDatastream) backReference).getEntity());
+                    } else {
+                        self.addDatastream(((JSONCSDatastream) backReference).getEntity());
+                    }
                 }
 
                 return self;

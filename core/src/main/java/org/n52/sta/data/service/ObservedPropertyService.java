@@ -32,6 +32,7 @@ package org.n52.sta.data.service;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
+import org.n52.series.db.beans.sta.AbstractDatastreamEntity;
 import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.series.db.beans.sta.ObservablePropertyEntity;
 import org.n52.shetland.filter.ExpandFilter;
@@ -244,7 +245,7 @@ public class ObservedPropertyService
         if (entity instanceof ObservablePropertyEntity) {
             ObservablePropertyEntity observableProperty = (ObservablePropertyEntity) entity;
             if (observableProperty.hasDatastreams()) {
-                for (DatastreamEntity datastream : observableProperty.getDatastreams()) {
+                for (AbstractDatastreamEntity datastream : observableProperty.getDatastreams()) {
                     checkInlineDatastream(datastream);
                 }
             }

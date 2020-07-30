@@ -45,8 +45,14 @@ database:
     # - STA with additional User table: sta-citsci-extension.xml
     persistence-location: classpath:META-INF/sta-citsci-extension.xml
 spring:
+  # Profile of the application.
+  # Options:
+  # - Vanilla STA: vanilla
+  # - STA with Citizen Science Extension: citSciExtension
+  # [not implemented yet] STA with MultiDatastream Extension - multiDatastreamExtension
   profiles:
     active: citSciExtension
+    default: vanilla
   datasource:
     platform: postgres
     username: postgres
@@ -59,7 +65,7 @@ spring:
       hibernate: 
         hbm2ddl:
           # hbm2ddl values: validate | update | create | create-drop | none
-          auto: update
+          auto: create
         jdbc:
           time_zone: UTC
           # https://hibernate.atlassian.net/browse/HHH-12368

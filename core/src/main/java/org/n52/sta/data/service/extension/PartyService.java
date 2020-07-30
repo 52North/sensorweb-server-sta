@@ -30,6 +30,7 @@
 package org.n52.sta.data.service.extension;
 
 import org.n52.janmayen.http.HTTPStatus;
+import org.n52.series.db.beans.sta.mapped.extension.CSDatastream;
 import org.n52.series.db.beans.sta.mapped.extension.Party;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
@@ -93,33 +94,36 @@ public class PartyService
         return filter;
     }
 
-    @Override protected Party createEntity(Party entity) throws STACRUDException {
-        Party license = entity;
-        //if (!license.isProcessed()) {
-        if (license.getStaIdentifier() != null && license.getRole() == null) {
+    @Override public Party createEntity(Party entity) throws STACRUDException {
+        Party party = entity;
+        //if (!party.isProcessed()) {
+        if (party.getStaIdentifier() != null && party.getRole() == null) {
             Optional<Party> optionalEntity =
-                    getRepository().findByStaIdentifier(license.getStaIdentifier());
+                    getRepository().findByStaIdentifier(party.getStaIdentifier());
             if (optionalEntity.isPresent()) {
                 return optionalEntity.get();
             } else {
                 throw new STACRUDException("No Party with id '"
-                                                   + license.getStaIdentifier() + "' "
+                                                   + party.getStaIdentifier() + "' "
                                                    + "found");
             }
-        } else if (license.getStaIdentifier() == null) {
+        } else if (party.getStaIdentifier() == null) {
             // Autogenerate Identifier
             String uuid = UUID.randomUUID().toString();
-            license.setStaIdentifier(uuid);
+            party.setStaIdentifier(uuid);
         }
-        synchronized (getLock(license.getStaIdentifier())) {
-            if (getRepository().existsByStaIdentifier(license.getStaIdentifier())) {
+        synchronized (getLock(party.getStaIdentifier())) {
+            if (getRepository().existsByStaIdentifier(party.getStaIdentifier())) {
                 throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
             } else {
-                getRepository().save(license);
+                for (CSDatastream datastream : party.getDatastreams()) {
+                    getCSDatastreamService().create(datastream);
+                }
+                getRepository().save(party);
             }
         }
         //}
-        return license;
+        return party;
     }
 
     @Override protected Party updateEntity(String id, Party entity, HttpMethod method)

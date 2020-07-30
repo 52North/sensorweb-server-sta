@@ -42,6 +42,7 @@ import org.n52.series.db.beans.sta.AbstractDatastreamEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
+import org.n52.sta.serdes.json.extension.JSONUnitOfMeasurement;
 import org.springframework.util.Assert;
 
 import java.util.Arrays;
@@ -305,13 +306,5 @@ public class AbstractJSONDatastream<T extends AbstractDatastreamEntity>
             self.setObservations(Collections.singleton(((JSONObservation) backReference).self));
         }
         return self;
-    }
-
-    static class JSONUnitOfMeasurement {
-        public String symbol;
-
-        public String name;
-
-        public String definition;
     }
 }

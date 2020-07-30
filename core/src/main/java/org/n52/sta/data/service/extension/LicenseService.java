@@ -30,6 +30,7 @@
 package org.n52.sta.data.service.extension;
 
 import org.n52.janmayen.http.HTTPStatus;
+import org.n52.series.db.beans.sta.mapped.extension.CSDatastream;
 import org.n52.series.db.beans.sta.mapped.extension.License;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
@@ -93,7 +94,7 @@ public class LicenseService
         return filter;
     }
 
-    @Override protected License createEntity(License entity) throws STACRUDException {
+    @Override public License createEntity(License entity) throws STACRUDException {
         License license = entity;
         //if (!license.isProcessed()) {
         if (license.getStaIdentifier() != null && !license.isSetName()) {
@@ -115,6 +116,9 @@ public class LicenseService
             if (getRepository().existsByStaIdentifier(license.getStaIdentifier())) {
                 throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
             } else {
+                for (CSDatastream datastream : license.getDatastreams()) {
+                    getCSDatastreamService().create(datastream);
+                }
                 getRepository().save(license);
             }
         }

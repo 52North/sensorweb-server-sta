@@ -100,33 +100,38 @@ public class CSDatastreamService
         return filter;
     }
 
-    @Override protected CSDatastream createEntity(CSDatastream entity) throws STACRUDException {
-        CSDatastream license = entity;
-        //if (!license.isProcessed()) {
-        if (license.getStaIdentifier() != null && !license.isSetName()) {
-            Optional<CSDatastream> optionalEntity =
-                    getRepository().findByStaIdentifier(license.getStaIdentifier());
-            if (optionalEntity.isPresent()) {
-                return optionalEntity.get();
-            } else {
-                throw new STACRUDException("No CSDatastream with id '"
-                                                   + license.getStaIdentifier() + "' "
-                                                   + "found");
+    @Override public CSDatastream createEntity(CSDatastream entity) throws STACRUDException {
+        CSDatastream csdatastream = entity;
+        if (!csdatastream.isProcessed()) {
+            if (csdatastream.getStaIdentifier() != null && !csdatastream.isSetName()) {
+                Optional<CSDatastream> optionalEntity =
+                        getRepository().findByStaIdentifier(csdatastream.getStaIdentifier());
+                if (optionalEntity.isPresent()) {
+                    return optionalEntity.get();
+                } else {
+                    throw new STACRUDException("No CSDatastream with id '"
+                                                       + csdatastream.getStaIdentifier() + "' "
+                                                       + "found");
+                }
+            } else if (csdatastream.getStaIdentifier() == null) {
+                // Autogenerate Identifier
+                String uuid = UUID.randomUUID().toString();
+                csdatastream.setStaIdentifier(uuid);
             }
-        } else if (license.getStaIdentifier() == null) {
-            // Autogenerate Identifier
-            String uuid = UUID.randomUUID().toString();
-            license.setStaIdentifier(uuid);
-        }
-        synchronized (getLock(license.getStaIdentifier())) {
-            if (getRepository().existsByStaIdentifier(license.getStaIdentifier())) {
-                throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
-            } else {
-                getRepository().save(license);
+            synchronized (getLock(csdatastream.getStaIdentifier())) {
+                if (getRepository().existsByStaIdentifier(csdatastream.getStaIdentifier())) {
+                    throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
+                } else {
+                    csdatastream.setProcessed(true);
+                    getDatastreamService().create(csdatastream.getDatastream());
+                    getLicenseService().create(csdatastream.getLicense());
+                    getPartyService().create(csdatastream.getParty());
+                    getProjectService().create(csdatastream.getProject());
+                    getRepository().save(csdatastream);
+                }
             }
         }
-        //}
-        return license;
+        return csdatastream;
     }
 
     @Override protected CSDatastream updateEntity(String id, CSDatastream entity, HttpMethod method)

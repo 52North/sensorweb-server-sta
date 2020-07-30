@@ -116,17 +116,19 @@ public class DatastreamService
                 switch (expandProperty) {
                 case STAEntityDefinition.SENSOR:
                     entity.setProcedure(getSensorService()
-                            .getEntityByIdRaw(entity.getProcedure().getId(), expandItem.getQueryOptions())
+                                                .getEntityByIdRaw(entity.getProcedure().getId(),
+                                                                  expandItem.getQueryOptions())
                     );
                     break;
                 case STAEntityDefinition.THING:
                     entity.setThing(getThingService()
-                            .getEntityByIdRaw(entity.getThing().getId(), expandItem.getQueryOptions())
+                                            .getEntityByIdRaw(entity.getThing().getId(), expandItem.getQueryOptions())
                     );
                     break;
                 case STAEntityDefinition.OBSERVED_PROPERTY:
                     entity.setObservableProperty(getObservedPropertyService()
-                            .getEntityByIdRaw(entity.getObservableProperty().getId(), expandItem.getQueryOptions())
+                                                         .getEntityByIdRaw(entity.getObservableProperty().getId(),
+                                                                           expandItem.getQueryOptions())
                     );
                     break;
                 case STAEntityDefinition.OBSERVATIONS:
@@ -221,11 +223,14 @@ public class DatastreamService
                 processObservation(entity, entity.getObservations());
                 entity = getRepository().save(entity);
             }
+            return getRepository().findByStaIdentifier(entity.getStaIdentifier(),
+                                                       EntityGraphRepository.FetchGraph.FETCHGRAPH_UOM,
+                                                       EntityGraphRepository.FetchGraph.FETCHGRAPH_OBS_TYPE)
+                                  .orElseThrow(() -> new STACRUDException("Datastream requested but still " +
+                                                                                  "processing!"));
+        } else {
+            return entity;
         }
-        return getRepository().findByStaIdentifier(entity.getStaIdentifier(),
-                                                   EntityGraphRepository.FetchGraph.FETCHGRAPH_UOM,
-                                                   EntityGraphRepository.FetchGraph.FETCHGRAPH_OBS_TYPE)
-                              .orElseThrow(() -> new STACRUDException("Datastream requested but still processing!"));
     }
 
     private Specification<DatastreamEntity> createQuery(DatastreamEntity datastream) {
@@ -435,7 +440,8 @@ public class DatastreamService
                 datasets.addAll(datastream.getDatasets());
             }
             for (AbstractObservationEntity observation : observations) {
-                AbstractObservationEntity<?> data = getObservationService().createEntity(observation);
+                AbstractObservationEntity<?> data =
+                        getAbstractObservationService(observation).createEntity(observation);
                 if (data != null) {
                     datasets.add(data.getDataset());
                 }

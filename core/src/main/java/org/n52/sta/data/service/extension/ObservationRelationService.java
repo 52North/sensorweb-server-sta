@@ -98,7 +98,7 @@ public class ObservationRelationService
         return filter;
     }
 
-    @Override protected ObservationRelation createEntity(ObservationRelation entity) throws STACRUDException {
+    @Override public ObservationRelation createEntity(ObservationRelation entity) throws STACRUDException {
         ObservationRelation obsRel = entity;
         if (obsRel.getStaIdentifier() != null && obsRel.getType() == null) {
             Optional<ObservationRelation> optionalEntity =

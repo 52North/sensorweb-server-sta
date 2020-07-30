@@ -33,17 +33,15 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.sta.mapped.extension.CSDatastream;
-import org.n52.series.db.beans.sta.mapped.extension.CSObservation;
-import org.n52.series.db.beans.sta.mapped.extension.ObservationGroup;
-import org.n52.series.db.beans.sta.mapped.extension.ObservationRelation;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.serdes.json.AbstractJSONDatastream;
-import org.n52.sta.serdes.json.AbstractJSONEntity;
 import org.n52.sta.serdes.json.JSONBase;
+import org.n52.sta.serdes.json.JSONObservation;
 import org.springframework.util.Assert;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -54,16 +52,19 @@ public class JSONCSDatastream extends AbstractJSONDatastream<CSDatastream> {
 
     @JsonManagedReference
     @JsonProperty(StaConstants.LICENSE)
-    public JSONLicense[] license;
+    public JSONLicense license;
 
     @JsonManagedReference
     @JsonProperty(StaConstants.PARTY)
-    public JSONParty[] party;
+    public JSONParty party;
 
     @JsonManagedReference
     @JsonProperty(StaConstants.PROJECT)
-    public JSONProject[] project;
+    public JSONProject project;
 
+    @JsonManagedReference
+    @JsonProperty(StaConstants.CSOBSERVATIONS)
+    public JSONCSObservation[] observations;
 
     public JSONCSDatastream() {
         self = new CSDatastream();
@@ -71,11 +72,64 @@ public class JSONCSDatastream extends AbstractJSONDatastream<CSDatastream> {
 
     @Override protected CSDatastream createPatchEntity() {
         super.createPatchEntity();
+
+        if (license != null) {
+            self.setLicense(license.toEntity(JSONBase.EntityType.REFERENCE));
+        }
+
+        if (party != null) {
+            self.setParty(party.toEntity(JSONBase.EntityType.REFERENCE));
+        }
+
+        if (project != null) {
+            self.setProject(project.toEntity(JSONBase.EntityType.REFERENCE));
+        }
+
+        if (observations != null) {
+            self.setObservations(Arrays.stream(observations)
+                                       .map(obs -> obs.toEntity(JSONBase.EntityType.REFERENCE))
+                                       .collect(Collectors.toSet()));
+        }
+
         return self;
     }
 
     @Override protected CSDatastream createPostEntity() {
         super.createPostEntity();
+
+        if (license != null) {
+            self.setLicense(license.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+        } else if (backReference instanceof JSONLicense) {
+            self.setLicense(((JSONLicense) backReference).getEntity());
+        } else {
+            Assert.notNull(null, INVALID_INLINE_ENTITY_MISSING + "License");
+        }
+
+        if (party != null) {
+            self.setParty(party.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+        } else if (backReference instanceof JSONParty) {
+            self.setParty(((JSONParty) backReference).getEntity());
+        } else {
+            Assert.notNull(null, INVALID_INLINE_ENTITY_MISSING + "Party");
+        }
+
+        if (project != null) {
+            self.setProject(project.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+        } else if (backReference instanceof JSONProject) {
+            self.setProject(((JSONProject) backReference).getEntity());
+        } else {
+            Assert.notNull(null, INVALID_INLINE_ENTITY_MISSING + "Project");
+        }
+
+        if (observations != null) {
+            self.setObservations(Arrays.stream(observations)
+                                       .map(obs -> obs.toEntity(JSONBase.EntityType.FULL,
+                                                                JSONBase.EntityType.REFERENCE))
+                                       .collect(Collectors.toSet()));
+        } else if (backReference instanceof JSONCSObservation) {
+            self.setObservations(Collections.singleton(((JSONCSObservation) backReference).self));
+        }
+
         return self;
     }
 }

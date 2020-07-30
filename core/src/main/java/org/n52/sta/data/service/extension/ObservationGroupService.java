@@ -93,7 +93,7 @@ public class ObservationGroupService
         return filter;
     }
 
-    @Override protected ObservationGroup createEntity(ObservationGroup entity) throws STACRUDException {
+    @Override public ObservationGroup createEntity(ObservationGroup entity) throws STACRUDException {
         ObservationGroup obsGroup = entity;
         if (!obsGroup.isProcessed()) {
             if (obsGroup.getStaIdentifier() != null && !obsGroup.isSetName()) {

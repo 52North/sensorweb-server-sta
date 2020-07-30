@@ -38,6 +38,8 @@ import org.n52.series.db.beans.sta.mapped.extension.ObservationRelation;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.serdes.json.AbstractJSONObservation;
 import org.n52.sta.serdes.json.JSONBase;
+import org.n52.sta.serdes.json.JSONDatastream;
+import org.springframework.util.Assert;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -53,6 +55,10 @@ public class JSONCSObservation extends AbstractJSONObservation<CSObservation>{
     @JsonProperty(StaConstants.OBSERVATION_RELATIONS)
     public JSONObservationRelation[] relations;
 
+    @JsonManagedReference
+    @JsonProperty(StaConstants.CSDATASTREAMS)
+    public JSONCSDatastream csdatastreams;
+
     public JSONCSObservation() {
         self = new CSObservation();
     }
@@ -66,6 +72,17 @@ public class JSONCSObservation extends AbstractJSONObservation<CSObservation>{
     @Override protected CSObservation createPostEntity() {
         super.createPostEntity();
         handleRelations();
+
+        // Link to Datastream
+        if (csdatastreams != null) {
+            self.setDatastream(
+                    csdatastreams.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+        } else if (backReference instanceof JSONCSDatastream) {
+            self.setDatastream(((JSONCSDatastream) backReference).getEntity());
+        } else {
+            Assert.notNull(null, INVALID_INLINE_ENTITY_MISSING + "CSDatastream");
+        }
+
         return self;
     }
 

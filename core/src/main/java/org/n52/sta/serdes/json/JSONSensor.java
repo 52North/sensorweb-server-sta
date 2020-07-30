@@ -35,6 +35,8 @@ import org.joda.time.DateTime;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
+import org.n52.series.db.beans.sta.mapped.extension.CSDatastream;
+import org.n52.sta.serdes.json.extension.JSONCSDatastream;
 import org.springframework.util.Assert;
 
 import java.util.Arrays;
@@ -87,7 +89,11 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorEntity>
 
             // Deal with back reference during deep insert
             if (backReference != null) {
-                self.addDatastream(((JSONDatastream) backReference).getEntity());
+                if (backReference instanceof JSONDatastream) {
+                    self.addDatastream(((JSONDatastream) backReference).getEntity());
+                } else {
+                    self.addDatastream(((JSONCSDatastream) backReference).getEntity());
+                }
             }
 
             return self;

@@ -33,8 +33,9 @@ import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
-import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
+import org.n52.series.db.beans.sta.AbstractDatastreamEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
+import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
@@ -194,12 +195,8 @@ public class SensorService
             if (sensor instanceof SensorEntity && ((SensorEntity) sensor).hasDatastreams()) {
                 AbstractSensorThingsEntityServiceImpl<?, DatastreamEntity, DatastreamEntity> dsService =
                         getDatastreamService();
-                for (DatastreamEntity datastreamEntity : ((SensorEntity) sensor).getDatastreams()) {
-                    try {
-                        dsService.createOrUpdate(datastreamEntity);
-                    } catch (STACRUDException e) {
-                        // Datastream might be currently processing.
-                    }
+                for (AbstractDatastreamEntity datastreamEntity : ((SensorEntity) sensor).getDatastreams()) {
+                    getAbstractDatastreamService(datastreamEntity).createOrUpdate(datastreamEntity);
                 }
             }
             // Save with Interception as procedure is now linked to Datastream
@@ -225,8 +222,8 @@ public class SensorService
                         if (((SensorEntity) entity).hasDatastreams()) {
                             AbstractSensorThingsEntityServiceImpl<?, DatastreamEntity, DatastreamEntity> dsService =
                                     getDatastreamService();
-                            for (DatastreamEntity datastreamEntity : ((SensorEntity) entity).getDatastreams()) {
-                                dsService.createOrUpdate(datastreamEntity);
+                            for (AbstractDatastreamEntity datastreamEntity : ((SensorEntity) entity).getDatastreams()) {
+                                getAbstractDatastreamService(datastreamEntity).createOrUpdate(datastreamEntity);
                             }
                         }
                     }
@@ -252,7 +249,7 @@ public class SensorService
         if (entity instanceof SensorEntity) {
             SensorEntity sensor = (SensorEntity) entity;
             if (sensor.hasDatastreams()) {
-                for (DatastreamEntity datastream : sensor.getDatastreams()) {
+                for (AbstractDatastreamEntity datastream : sensor.getDatastreams()) {
                     checkInlineDatastream(datastream);
                 }
             }

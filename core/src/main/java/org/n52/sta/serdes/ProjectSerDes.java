@@ -86,7 +86,7 @@ public class ProjectSerDes {
         public ProjectSerializer(String rootUrl) {
             super(ProjectWithQueryOptions.class);
             this.rootUrl = rootUrl;
-            this.entitySetName = StaConstants.PARTIES;
+            this.entitySetName = StaConstants.PROJECTS;
         }
 
         @Override

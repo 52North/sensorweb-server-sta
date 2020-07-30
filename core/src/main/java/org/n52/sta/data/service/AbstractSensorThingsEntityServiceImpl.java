@@ -38,6 +38,7 @@ import org.n52.series.db.beans.HibernateRelations.HasName;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
+import org.n52.series.db.beans.sta.AbstractDatastreamEntity;
 import org.n52.series.db.beans.sta.AbstractObservationEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
@@ -46,8 +47,13 @@ import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.series.db.beans.sta.StaFeatureEntity;
 import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.series.db.beans.sta.mapped.ObservationEntity;
+import org.n52.series.db.beans.sta.mapped.extension.CSDatastream;
+import org.n52.series.db.beans.sta.mapped.extension.CSObservation;
+import org.n52.series.db.beans.sta.mapped.extension.License;
 import org.n52.series.db.beans.sta.mapped.extension.ObservationGroup;
 import org.n52.series.db.beans.sta.mapped.extension.ObservationRelation;
+import org.n52.series.db.beans.sta.mapped.extension.Party;
+import org.n52.series.db.beans.sta.mapped.extension.Project;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.FilterFilter;
 import org.n52.shetland.filter.OrderProperty;
@@ -249,9 +255,9 @@ public abstract class AbstractSensorThingsEntityServiceImpl<
      * @return List of Entities that match
      * @throws STACRUDException if the queryOptions are invalid
      */
-    protected Page getEntityCollectionByRelatedEntityRaw(String relatedId,
-                                                         String relatedType,
-                                                         QueryOptions queryOptions)
+    public Page getEntityCollectionByRelatedEntityRaw(String relatedId,
+                                                      String relatedType,
+                                                      QueryOptions queryOptions)
             throws STACRUDException {
         try {
             Page<S> pages = getRepository()
@@ -337,7 +343,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<
     }
 
     @Transactional(rollbackFor = Exception.class)
-    protected abstract S createEntity(S entity) throws STACRUDException;
+    public abstract S createEntity(S entity) throws STACRUDException;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -369,7 +375,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<
     //    return create(entity);
     //}
 
-    protected void checkInlineDatastream(DatastreamEntity datastream) throws STACRUDException {
+    protected void checkInlineDatastream(AbstractDatastreamEntity datastream) throws STACRUDException {
         if (datastream.getStaIdentifier() == null
                 || datastream.isSetName()
                 || datastream.isSetDescription()
@@ -556,6 +562,18 @@ public abstract class AbstractSensorThingsEntityServiceImpl<
     }
 
     @SuppressWarnings("unchecked")
+    protected AbstractSensorThingsEntityServiceImpl<?, AbstractObservationEntity, AbstractObservationEntity>
+    getAbstractObservationService(AbstractObservationEntity model) {
+        if (model instanceof CSObservation) {
+            return (AbstractSensorThingsEntityServiceImpl<?, AbstractObservationEntity, AbstractObservationEntity>)
+                    getEntityService(EntityTypes.CSObservation);
+        } else {
+            return (AbstractSensorThingsEntityServiceImpl<?, AbstractObservationEntity, AbstractObservationEntity>)
+                    getEntityService(EntityTypes.Observation);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     protected AbstractSensorThingsEntityServiceImpl<?, ObservationGroup, ObservationGroup>
     getObservationGroupService() {
         return (AbstractSensorThingsEntityServiceImpl<?, ObservationGroup, ObservationGroup>)
@@ -567,6 +585,46 @@ public abstract class AbstractSensorThingsEntityServiceImpl<
     getObservationRelationService() {
         return (AbstractSensorThingsEntityServiceImpl<?, ObservationRelation, ObservationRelation>)
                 getEntityService(EntityTypes.ObservationRelation);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected AbstractSensorThingsEntityServiceImpl<?, License, License>
+    getLicenseService() {
+        return (AbstractSensorThingsEntityServiceImpl<?, License, License>)
+                getEntityService(EntityTypes.License);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected AbstractSensorThingsEntityServiceImpl<?, Party, Party>
+    getPartyService() {
+        return (AbstractSensorThingsEntityServiceImpl<?, Party, Party>)
+                getEntityService(EntityTypes.Party);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected AbstractSensorThingsEntityServiceImpl<?, Project, Project>
+    getProjectService() {
+        return (AbstractSensorThingsEntityServiceImpl<?, Project, Project>)
+                getEntityService(EntityTypes.Project);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected AbstractSensorThingsEntityServiceImpl<?, CSDatastream, CSDatastream>
+    getCSDatastreamService() {
+        return (AbstractSensorThingsEntityServiceImpl<?, CSDatastream, CSDatastream>)
+                getEntityService(EntityTypes.CSDatastream);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected AbstractSensorThingsEntityServiceImpl<?, AbstractDatastreamEntity, AbstractDatastreamEntity>
+    getAbstractDatastreamService(AbstractDatastreamEntity model) {
+        if (model instanceof CSDatastream) {
+            return (AbstractSensorThingsEntityServiceImpl<?, AbstractDatastreamEntity, AbstractDatastreamEntity>)
+                    getEntityService(EntityTypes.CSDatastream);
+        } else {
+            return (AbstractSensorThingsEntityServiceImpl<?, AbstractDatastreamEntity, AbstractDatastreamEntity>)
+                    getEntityService(EntityTypes.Datastream);
+        }
     }
 
     public void setServiceRepository(EntityServiceRepository serviceRepository) {

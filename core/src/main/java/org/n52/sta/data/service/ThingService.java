@@ -32,9 +32,10 @@ package org.n52.sta.data.service;
 import org.joda.time.DateTime;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.PlatformEntity;
-import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
+import org.n52.series.db.beans.sta.AbstractDatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
@@ -49,6 +50,7 @@ import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
@@ -69,11 +71,12 @@ import java.util.stream.Collectors;
 @Component
 @DependsOn({"springApplicationContext"})
 @Transactional
+@Profile("vanilla")
 public class ThingService
         extends AbstractSensorThingsEntityServiceImpl<ThingRepository, PlatformEntity, PlatformEntity> {
 
     private static final Logger logger = LoggerFactory.getLogger(ThingService.class);
-    private static final ThingQuerySpecifications tQS = new ThingQuerySpecifications();
+    protected static final ThingQuerySpecifications tQS = new ThingQuerySpecifications();
 
     public ThingService(ThingRepository repository) {
         super(repository, PlatformEntity.class);
@@ -238,6 +241,7 @@ public class ThingService
         return existing;
     }
 
+    /*
     private void checkUpdate(PlatformEntity thing) throws STACRUDException {
         if (thing.hasLocationEntities()) {
             for (LocationEntity location : thing.getLocations()) {
@@ -250,6 +254,7 @@ public class ThingService
             }
         }
     }
+    */
 
     @Override
     public void delete(String identifier) throws STACRUDException {
@@ -263,7 +268,7 @@ public class ThingService
                 // delete datastreams
                 thing.getDatastreams().forEach(d -> {
                     try {
-                        getDatastreamService().delete(d);
+                        getDatastreamService().delete((DatastreamEntity) d);
                     } catch (STACRUDException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
@@ -302,13 +307,15 @@ public class ThingService
         return tQS.checkPropertyName(property);
     }
 
-    private void processDatastreams(PlatformEntity thing) throws STACRUDException {
+    protected void processDatastreams(PlatformEntity thing) throws STACRUDException {
         if (thing.hasDatastreams()) {
-            Set<DatastreamEntity> datastreams = new LinkedHashSet<>();
-            for (DatastreamEntity datastream : thing.getDatastreams()) {
-                datastream.setThing(thing);
-                DatastreamEntity optionalDatastream = getDatastreamService().createEntity(datastream);
-                datastreams.add(optionalDatastream != null ? optionalDatastream : datastream);
+            Set<AbstractDatastreamEntity> datastreams = new LinkedHashSet<>();
+            for (AbstractDatastreamEntity datastream : thing.getDatastreams()) {
+                if (datastream instanceof DatastreamEntity) {
+                    datastream.setThing(thing);
+                    DatastreamEntity saved = getDatastreamService().createEntity((DatastreamEntity) datastream);
+                    datastreams.add(saved);
+                }
             }
             thing.setDatastreams(datastreams);
         }

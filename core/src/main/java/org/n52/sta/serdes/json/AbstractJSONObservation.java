@@ -211,16 +211,6 @@ public abstract class AbstractJSONObservation<T extends AbstractObservationEntit
         // result
         self.setValue(result);
 
-        // Link to Datastream
-        if (Datastream != null) {
-            self.setDatastream(
-                    Datastream.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
-        } else if (backReference instanceof JSONDatastream) {
-            self.setDatastream(((JSONDatastream) backReference).getEntity());
-        } else {
-            Assert.notNull(null, INVALID_INLINE_ENTITY_MISSING + "Datastream");
-        }
-
         // Link to FOI
         if (FeatureOfInterest != null) {
             self.setFeature(

@@ -41,6 +41,7 @@ import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.dataset.DatasetType;
 import org.n52.series.db.beans.dataset.ObservationType;
 import org.n52.series.db.beans.dataset.ValueType;
+import org.n52.series.db.beans.sta.AbstractDatastreamEntity;
 import org.n52.series.db.beans.sta.AbstractObservationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.mapped.BooleanObservationEntity;
@@ -55,6 +56,7 @@ import org.n52.shetland.ogc.om.OmConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.data.OffsetLimitBasedPageRequest;
+import org.n52.sta.data.query.CSObservationQuerySpecifications;
 import org.n52.sta.data.query.DatasetQuerySpecifications;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.EntityQuerySpecifications;
@@ -63,7 +65,6 @@ import org.n52.sta.data.repositories.DataRepository;
 import org.n52.sta.data.repositories.DatasetRepository;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.EntityGraphRepository;
-import org.n52.sta.data.repositories.GetFirstLastObservation;
 import org.n52.sta.data.repositories.OfferingRepository;
 import org.n52.sta.data.repositories.ParameterRepository;
 import org.n52.sta.data.repositories.StaIdentifierRepository;
@@ -76,13 +77,11 @@ import org.springframework.http.HttpMethod;
 
 import java.math.BigDecimal;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -183,7 +182,9 @@ public abstract class AbstractObservationService<
                 new OffsetLimitBasedPageRequest(0,
                                                 pageableRequest.getPageSize(),
                                                 pageableRequest.getSort()),
-                EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
+                (oQS instanceof CSObservationQuerySpecifications) ?
+                        EntityGraphRepository.FetchGraph.FETCHGRAPH_OBS_PARAMETERS :
+                        EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
 
         CollectionWrapper wrapper = getCollectionWrapper(queryOptions, pages);
         // Create Page manually as we used Database Pagination and are not sure how many Entities there are in
@@ -197,9 +198,9 @@ public abstract class AbstractObservationService<
         }
     }
 
-    protected Page getEntityCollectionByRelatedEntityRaw(String relatedId,
-                                                         String relatedType,
-                                                         QueryOptions queryOptions)
+    public Page getEntityCollectionByRelatedEntityRaw(String relatedId,
+                                                      String relatedType,
+                                                      QueryOptions queryOptions)
             throws STACRUDException {
         try {
             OffsetLimitBasedPageRequest pageableRequest = createPageableRequest(queryOptions);
@@ -249,7 +250,9 @@ public abstract class AbstractObservationService<
                 observation.setProcessed(true);
                 check(observation);
 
-                DatastreamEntity datastream = getDatastreamService().createEntity(observation.getDatastream());
+                AbstractDatastreamEntity datastream =
+                        getAbstractDatastreamService(observation.getDatastream())
+                                .createEntity(observation.getDatastream());
                 observation.setDatastream(datastream);
 
                 // Fetch with all needed associations
@@ -389,7 +392,7 @@ public abstract class AbstractObservationService<
     }
 
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
-    private DatasetEntity checkDataset(DatastreamEntity datastream,
+    private DatasetEntity checkDataset(AbstractDatastreamEntity datastream,
                                        AbstractFeatureEntity<?> feature,
                                        CategoryEntity category,
                                        OfferingEntity offering) throws STACRUDException {
@@ -428,13 +431,15 @@ public abstract class AbstractObservationService<
         }
     }
 
-    DatastreamEntity checkDatastream(ObservationEntity observation) throws STACRUDException {
-        DatastreamEntity datastream = getDatastreamService().createEntity(observation.getDatastream());
+    AbstractDatastreamEntity checkDatastream(ObservationEntity observation) throws STACRUDException {
+        AbstractDatastreamEntity datastream =
+                getAbstractDatastreamService(observation.getDatastream()).createEntity(observation.getDatastream());
         observation.setDatastream(datastream);
         return datastream;
     }
 
-    private AbstractFeatureEntity<?> checkFeature(AbstractObservationEntity observation, DatastreamEntity datastream)
+    private AbstractFeatureEntity<?> checkFeature(AbstractObservationEntity observation,
+                                                  AbstractDatastreamEntity datastream)
             throws STACRUDException {
         if (!observation.hasFeature()) {
             AbstractFeatureEntity<?> feature = null;
@@ -459,7 +464,7 @@ public abstract class AbstractObservationService<
         return feature;
     }
 
-    private OfferingEntity checkOffering(DatastreamEntity datastream) throws STACRUDException {
+    private OfferingEntity checkOffering(AbstractDatastreamEntity datastream) throws STACRUDException {
         ProcedureEntity procedure = datastream.getProcedure();
         synchronized (getLock(procedure.getIdentifier())) {
             if (!offeringRepository.existsByIdentifier(procedure.getIdentifier())) {
@@ -546,12 +551,12 @@ public abstract class AbstractObservationService<
         }
     }
 
-    private void updateDatastream(DatastreamEntity datastream, DatasetEntity dataset, I data)
+    private void updateDatastream(AbstractDatastreamEntity datastream, DatasetEntity dataset, I data)
             throws STACRUDException {
         if (datastream.getDatasets() != null) {
             if (!datastream.getDatasets().contains(dataset)) {
-                datastream.addDataset(dataset);
-                getDatastreamService().updateEntity(datastream);
+                datastream.getDatasets().add(dataset);
+                getAbstractDatastreamService(datastream).updateEntity(datastream);
             }
         }
         if (datastream.getPhenomenonTimeStart() == null) {
