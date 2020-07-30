@@ -32,13 +32,11 @@ package org.n52.sta.serdes.json.extension;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.n52.series.db.beans.sta.mapped.ObservationEntity;
 import org.n52.series.db.beans.sta.mapped.extension.CSObservation;
 import org.n52.series.db.beans.sta.mapped.extension.ObservationRelation;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.serdes.json.AbstractJSONObservation;
 import org.n52.sta.serdes.json.JSONBase;
-import org.n52.sta.serdes.json.JSONDatastream;
 import org.springframework.util.Assert;
 
 import java.util.HashSet;
@@ -49,7 +47,7 @@ import java.util.Set;
  */
 @SuppressWarnings("VisibilityModifier")
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
-public class JSONCSObservation extends AbstractJSONObservation<CSObservation>{
+public class JSONCSObservation extends AbstractJSONObservation<CSObservation> {
 
     @JsonManagedReference
     @JsonProperty(StaConstants.OBSERVATION_RELATIONS)

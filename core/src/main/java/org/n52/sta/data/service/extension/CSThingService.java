@@ -31,7 +31,6 @@ package org.n52.sta.data.service.extension;
 
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.AbstractDatastreamEntity;
-import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.series.db.beans.sta.mapped.extension.CSDatastream;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;

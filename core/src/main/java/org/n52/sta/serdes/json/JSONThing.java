@@ -103,21 +103,21 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
             if (CSDatastreams != null) {
                 Set<AbstractDatastreamEntity> joinedDatastreams;
                 if (self.getDatastreams() != null) {
-                    joinedDatastreams =self.getDatastreams();
+                    joinedDatastreams = self.getDatastreams();
                 } else {
                     joinedDatastreams = new HashSet<>();
                 }
                 joinedDatastreams.addAll(Arrays.stream(CSDatastreams)
-                                          .map(ds -> ds.toEntity(JSONBase.EntityType.FULL,
-                                                                 JSONBase.EntityType.REFERENCE))
-                                          .collect(Collectors.toSet()));
+                                               .map(ds -> ds.toEntity(JSONBase.EntityType.FULL,
+                                                                      JSONBase.EntityType.REFERENCE))
+                                               .collect(Collectors.toSet()));
                 self.setDatastreams(joinedDatastreams);
             }
 
             if (HistoricalLocations != null) {
                 self.setHistoricalLocations(Arrays.stream(HistoricalLocations)
                                                   .map(hloc -> hloc.toEntity(JSONBase.EntityType.FULL,
-                                                                         JSONBase.EntityType.REFERENCE))
+                                                                             JSONBase.EntityType.REFERENCE))
                                                   .collect(Collectors.toSet()));
             }
 

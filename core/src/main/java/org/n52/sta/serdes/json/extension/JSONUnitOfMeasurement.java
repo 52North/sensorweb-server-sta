@@ -29,9 +29,13 @@
 
 package org.n52.sta.serdes.json.extension;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
+@SuppressWarnings("VisibilityModifier")
+@SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
 public class JSONUnitOfMeasurement {
 
     public String symbol;

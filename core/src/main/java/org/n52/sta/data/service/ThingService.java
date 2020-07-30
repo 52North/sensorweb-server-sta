@@ -75,8 +75,8 @@ import java.util.stream.Collectors;
 public class ThingService
         extends AbstractSensorThingsEntityServiceImpl<ThingRepository, PlatformEntity, PlatformEntity> {
 
-    private static final Logger logger = LoggerFactory.getLogger(ThingService.class);
     protected static final ThingQuerySpecifications tQS = new ThingQuerySpecifications();
+    private static final Logger logger = LoggerFactory.getLogger(ThingService.class);
 
     public ThingService(ThingRepository repository) {
         super(repository, PlatformEntity.class);

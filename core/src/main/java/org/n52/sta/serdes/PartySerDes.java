@@ -35,17 +35,13 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.n52.series.db.beans.sta.mapped.extension.License;
 import org.n52.series.db.beans.sta.mapped.extension.Party;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
-import org.n52.sta.serdes.json.extension.JSONLicense;
 import org.n52.sta.serdes.json.extension.JSONParty;
-import org.n52.sta.serdes.util.ElementWithQueryOptions;
-import org.n52.sta.serdes.util.ElementWithQueryOptions.LicenseWithQueryOptions;
 import org.n52.sta.serdes.util.ElementWithQueryOptions.PartyWithQueryOptions;
 import org.n52.sta.serdes.util.EntityPatch;
 
@@ -74,6 +70,7 @@ public class PartySerDes {
             return entity;
         }
     }
+
 
     public static class PartySerializer
             extends AbstractSTASerializer<PartyWithQueryOptions> {
@@ -172,7 +169,7 @@ public class PartySerDes {
         public PartySerDes.PartyPatch deserialize(JsonParser p, DeserializationContext ctxt)
                 throws IOException {
             return new PartySerDes.PartyPatch(p.readValueAs(JSONParty.class)
-                                                 .toEntity(JSONBase.EntityType.PATCH));
+                                               .toEntity(JSONBase.EntityType.PATCH));
         }
     }
 }

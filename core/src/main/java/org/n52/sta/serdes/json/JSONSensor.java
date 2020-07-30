@@ -35,7 +35,6 @@ import org.joda.time.DateTime;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
-import org.n52.series.db.beans.sta.mapped.extension.CSDatastream;
 import org.n52.sta.serdes.json.extension.JSONCSDatastream;
 import org.springframework.util.Assert;
 

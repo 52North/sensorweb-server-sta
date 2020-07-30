@@ -75,7 +75,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
-import javax.mail.Part;
 import java.util.ArrayList;
 
 @Configuration

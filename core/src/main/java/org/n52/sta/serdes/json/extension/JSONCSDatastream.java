@@ -36,7 +36,6 @@ import org.n52.series.db.beans.sta.mapped.extension.CSDatastream;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.serdes.json.AbstractJSONDatastream;
 import org.n52.sta.serdes.json.JSONBase;
-import org.n52.sta.serdes.json.JSONObservation;
 import org.springframework.util.Assert;
 
 import java.util.Arrays;

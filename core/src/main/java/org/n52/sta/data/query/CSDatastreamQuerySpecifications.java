@@ -72,15 +72,17 @@ public class CSDatastreamQuerySpecifications extends EntityQuerySpecifications<C
     }
 
     @Override
-    protected Specification<CSDatastream> handleRelatedPropertyFilter(String propertyName, Specification<?> propertyValue)
+    protected Specification<CSDatastream> handleRelatedPropertyFilter(String propertyName,
+                                                                      Specification<?> propertyValue)
             throws STAInvalidFilterExpressionException {
         return null;
     }
 
-    @Override protected Specification<CSDatastream> handleDirectPropertyFilter(String propertyName,
-                                                                        Expression<?> propertyValue,
-                                                                        FilterConstants.ComparisonOperator operator,
-                                                                        boolean switched) {
+    @Override protected Specification<CSDatastream> handleDirectPropertyFilter(
+            String propertyName,
+            Expression<?> propertyValue,
+            FilterConstants.ComparisonOperator operator,
+            boolean switched) {
         return null;
     }
 }

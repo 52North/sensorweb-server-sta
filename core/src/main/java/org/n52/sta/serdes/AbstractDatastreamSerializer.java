@@ -54,12 +54,12 @@ import java.util.Set;
 public abstract class AbstractDatastreamSerializer<T extends ElementWithQueryOptions>
         extends AbstractSTASerializer<T> {
 
+    private static final GeoJsonWriter GEO_JSON_WRITER = new GeoJsonWriter();
+    private static final long serialVersionUID = -6555417490577181829L;
+
     protected AbstractDatastreamSerializer(Class<T> t) {
         super(t);
     }
-
-    private static final GeoJsonWriter GEO_JSON_WRITER = new GeoJsonWriter();
-    private static final long serialVersionUID = -6555417490577181829L;
 
     @Override
     public void serialize(T value,
