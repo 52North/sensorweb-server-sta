@@ -74,7 +74,7 @@ public class CSDatastreamSerDes {
         public CSDatastreamSerializer(String rootUrl) {
             super(CSDatastreamWithQueryOptions.class);
             this.rootUrl = rootUrl;
-            this.entitySetName = StaConstants.CSOBSERVATIONS;
+            this.entitySetName = StaConstants.CSDATASTREAMS;
         }
 
         @Override
