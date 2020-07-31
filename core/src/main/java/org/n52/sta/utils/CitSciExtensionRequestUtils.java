@@ -193,15 +193,26 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
     // /CSDatastreams(52)/License
     // /CSDatastreams(52)/Project
     String ENTITY_IDENTIFIED_BY_CSDATASTREAM =
-            SOURCE_NAME_GROUP_START + CSDATASTREAM + SOURCE_NAME_GROUP_END
-                    + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
-                    + SLASH
-                    + WANTED_NAME_GROUP_START + PROJECT + OR + PARTY + OR + LICENSE + WANTED_NAME_GROUP_END;
+            SOURCE_NAME_GROUP_START + CSDATASTREAMS + SOURCE_NAME_GROUP_END
+                    + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END + SLASH + WANTED_NAME_GROUP_START
+                    + PROJECT
+                    + OR + PARTY
+                    + OR + LICENSE
+                    + OR + SENSOR
+                    + OR + OBSERVED_PROPERTY
+                    + OR + THING
+                    + WANTED_NAME_GROUP_END;
 
     String ENTITY_IDENTIFIED_BY_CSDATASTREAM_PATH_VARIABLE =
-            PATH_ENTITY + CSDATASTREAM + IDENTIFIER_REGEX
-                    + CURLY_BRACKET_CLOSE + PATH_TARGET + PROJECT + OR + PARTY + OR + LICENSE +
-                    CURLY_BRACKET_CLOSE;
+            PATH_ENTITY + CSDATASTREAMS + IDENTIFIER_REGEX
+                    + CURLY_BRACKET_CLOSE + PATH_TARGET
+                    + PROJECT
+                    + OR + PARTY
+                    + OR + LICENSE
+                    + OR + SENSOR
+                    + OR + OBSERVED_PROPERTY
+                    + OR + THING
+                    + CURLY_BRACKET_CLOSE;
 
     String ENTITY_PROPERTY_IDENTIFIED_BY_CSDATASTREAM_PATH_VARIABLE =
             ENTITY_IDENTIFIED_BY_CSDATASTREAM_PATH_VARIABLE + SLASH + PATH_PROPERTY;
