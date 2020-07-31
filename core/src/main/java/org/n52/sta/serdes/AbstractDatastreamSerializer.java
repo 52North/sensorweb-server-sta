@@ -66,7 +66,6 @@ public abstract class AbstractDatastreamSerializer<T extends ElementWithQueryOpt
                           JsonGenerator gen,
                           SerializerProvider serializers)
             throws IOException {
-        gen.writeStartObject();
         AbstractDatastreamEntity datastream = (AbstractDatastreamEntity) value.getEntity();
         QueryOptions options = value.getQueryOptions();
 
@@ -210,6 +209,5 @@ public abstract class AbstractDatastreamSerializer<T extends ElementWithQueryOpt
                 }
             }
         }
-        gen.writeEndObject();
     }
 }
