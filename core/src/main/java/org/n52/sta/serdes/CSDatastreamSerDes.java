@@ -122,7 +122,7 @@ public class CSDatastreamSerDes {
         public CSDatastreamSerDes.CSDatastreamPatch deserialize(JsonParser p, DeserializationContext ctxt)
                 throws IOException {
             return new CSDatastreamSerDes.CSDatastreamPatch(p.readValueAs(JSONCSDatastream.class)
-                                                              .toEntity(JSONBase.EntityType.PATCH));
+                                                             .toEntity(JSONBase.EntityType.PATCH));
         }
     }
 }

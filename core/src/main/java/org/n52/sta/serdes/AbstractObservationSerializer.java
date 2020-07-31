@@ -37,8 +37,6 @@ import org.joda.time.DateTimeZone;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.parameter.ParameterJsonEntity;
 import org.n52.series.db.beans.sta.AbstractObservationEntity;
-import org.n52.shetland.filter.ExpandItem;
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
@@ -48,15 +46,12 @@ import org.n52.shetland.util.DateTimeHelper;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public abstract class AbstractObservationSerializer<T extends ElementWithQueryOptions>
-        extends AbstractSTASerializer<T> {
+public abstract class AbstractObservationSerializer<T extends ElementWithQueryOptions<AbstractObservationEntity<?>>>
+        extends AbstractSTASerializer<T, AbstractObservationEntity<?>> {
 
     private static final String VALUE = "value";
 
@@ -67,25 +62,7 @@ public abstract class AbstractObservationSerializer<T extends ElementWithQueryOp
     @Override
     public void serialize(T value, JsonGenerator gen, SerializerProvider serializers)
             throws IOException {
-        AbstractObservationEntity<?> observation = (AbstractObservationEntity<?>) value.getEntity();
-        QueryOptions options = value.getQueryOptions();
-
-        Set<String> fieldsToSerialize = null;
-        Map<String, QueryOptions> fieldsToExpand = new HashMap<>();
-        boolean hasSelectOption = false;
-        boolean hasExpandOption = false;
-        if (options != null) {
-            if (options.hasSelectFilter()) {
-                hasSelectOption = true;
-                fieldsToSerialize = options.getSelectFilter().getItems();
-            }
-            if (options.hasExpandFilter()) {
-                hasExpandOption = true;
-                for (ExpandItem item : options.getExpandFilter().getItems()) {
-                    fieldsToExpand.put(item.getPath(), item.getQueryOptions());
-                }
-            }
-        }
+        AbstractObservationEntity<?> observation = unwrap(value);
 
         // olingo @iot links
         if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {

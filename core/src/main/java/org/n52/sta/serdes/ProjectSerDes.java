@@ -38,8 +38,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.n52.series.db.beans.sta.mapped.extension.Project;
-import org.n52.shetland.filter.ExpandItem;
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
@@ -52,9 +50,6 @@ import org.n52.sta.serdes.util.ElementWithQueryOptions.ProjectWithQueryOptions;
 import org.n52.sta.serdes.util.EntityPatch;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -78,8 +73,7 @@ public class ProjectSerDes {
     }
 
 
-    public static class ProjectSerializer
-            extends AbstractSTASerializer<ProjectWithQueryOptions> {
+    public static class ProjectSerializer extends AbstractSTASerializer<ProjectWithQueryOptions, Project> {
 
         private static final long serialVersionUID = -1618289129123682794L;
 
@@ -95,26 +89,8 @@ public class ProjectSerDes {
                               SerializerProvider serializers)
                 throws IOException {
             gen.writeStartObject();
+            Project project = unwrap(value);
 
-            Project project = value.getEntity();
-            QueryOptions options = value.getQueryOptions();
-
-            Set<String> fieldsToSerialize = null;
-            Map<String, QueryOptions> fieldsToExpand = new HashMap<>();
-            boolean hasSelectOption = false;
-            boolean hasExpandOption = false;
-            if (options != null) {
-                if (options.hasSelectFilter()) {
-                    hasSelectOption = true;
-                    fieldsToSerialize = options.getSelectFilter().getItems();
-                }
-                if (options.hasExpandFilter()) {
-                    hasExpandOption = true;
-                    for (ExpandItem item : options.getExpandFilter().getItems()) {
-                        fieldsToExpand.put(item.getPath(), item.getQueryOptions());
-                    }
-                }
-            }
             // olingo @iot links
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
                 writeId(gen, project.getStaIdentifier());

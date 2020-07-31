@@ -36,8 +36,6 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.sta.mapped.extension.License;
-import org.n52.shetland.filter.ExpandItem;
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
@@ -46,9 +44,6 @@ import org.n52.sta.serdes.util.ElementWithQueryOptions.LicenseWithQueryOptions;
 import org.n52.sta.serdes.util.EntityPatch;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -71,8 +66,9 @@ public class LicenseSerDes {
         }
     }
 
+
     public static class LicenseSerializer
-            extends AbstractSTASerializer<LicenseWithQueryOptions> {
+            extends AbstractSTASerializer<LicenseWithQueryOptions, License> {
 
         private static final long serialVersionUID = -1618289129123682794L;
 
@@ -88,26 +84,8 @@ public class LicenseSerDes {
                               SerializerProvider serializers)
                 throws IOException {
             gen.writeStartObject();
+            License license = unwrap(value);
 
-            License license = value.getEntity();
-            QueryOptions options = value.getQueryOptions();
-
-            Set<String> fieldsToSerialize = null;
-            Map<String, QueryOptions> fieldsToExpand = new HashMap<>();
-            boolean hasSelectOption = false;
-            boolean hasExpandOption = false;
-            if (options != null) {
-                if (options.hasSelectFilter()) {
-                    hasSelectOption = true;
-                    fieldsToSerialize = options.getSelectFilter().getItems();
-                }
-                if (options.hasExpandFilter()) {
-                    hasExpandOption = true;
-                    for (ExpandItem item : options.getExpandFilter().getItems()) {
-                        fieldsToExpand.put(item.getPath(), item.getQueryOptions());
-                    }
-                }
-            }
             // olingo @iot links
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
                 writeId(gen, license.getStaIdentifier());

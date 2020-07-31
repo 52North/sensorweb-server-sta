@@ -36,8 +36,6 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.sta.mapped.extension.ObservationGroup;
-import org.n52.shetland.filter.ExpandItem;
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
@@ -46,9 +44,6 @@ import org.n52.sta.serdes.util.ElementWithQueryOptions.ObservationGroupWithQuery
 import org.n52.sta.serdes.util.EntityPatch;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -71,7 +66,8 @@ public class ObservationGroupSerDes {
     }
 
 
-    public static class ObservationGroupSerializer extends AbstractSTASerializer<ObservationGroupWithQueryOptions> {
+    public static class ObservationGroupSerializer
+            extends AbstractSTASerializer<ObservationGroupWithQueryOptions, ObservationGroup> {
 
         private static final long serialVersionUID = -1618289129123682794L;
 
@@ -86,25 +82,7 @@ public class ObservationGroupSerDes {
                 throws IOException {
             gen.writeStartObject();
 
-            ObservationGroup obsGroup = value.getEntity();
-            QueryOptions options = value.getQueryOptions();
-
-            Set<String> fieldsToSerialize = null;
-            Map<String, QueryOptions> fieldsToExpand = new HashMap<>();
-            boolean hasSelectOption = false;
-            boolean hasExpandOption = false;
-            if (options != null) {
-                if (options.hasSelectFilter()) {
-                    hasSelectOption = true;
-                    fieldsToSerialize = options.getSelectFilter().getItems();
-                }
-                if (options.hasExpandFilter()) {
-                    hasExpandOption = true;
-                    for (ExpandItem item : options.getExpandFilter().getItems()) {
-                        fieldsToExpand.put(item.getPath(), item.getQueryOptions());
-                    }
-                }
-            }
+            ObservationGroup obsGroup = unwrap(value);
             // olingo @iot links
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
                 writeId(gen, obsGroup.getStaIdentifier());

@@ -36,6 +36,8 @@ import org.n52.series.db.beans.HibernateRelations;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
+import org.n52.series.db.beans.sta.AbstractDatastreamEntity;
+import org.n52.series.db.beans.sta.AbstractObservationEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ObservablePropertyEntity;
@@ -144,9 +146,9 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
     }
 
 
-    public static class ObservationWithQueryOptions extends ElementWithQueryOptions<ObservationEntity<?>> {
+    public static class ObservationWithQueryOptions extends ElementWithQueryOptions<AbstractObservationEntity<?>> {
 
-        ObservationWithQueryOptions(ObservationEntity<?> entity, QueryOptions queryOptions) {
+        ObservationWithQueryOptions(AbstractObservationEntity<?> entity, QueryOptions queryOptions) {
             this.entity = entity;
             this.queryOptions = queryOptions;
         }
@@ -181,7 +183,7 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
     }
 
 
-    public static class DatastreamWithQueryOptions extends ElementWithQueryOptions<DatastreamEntity> {
+    public static class DatastreamWithQueryOptions extends ElementWithQueryOptions<AbstractDatastreamEntity<?>> {
 
         DatastreamWithQueryOptions(DatastreamEntity entity, QueryOptions queryOptions) {
             this.entity = entity;
@@ -208,16 +210,16 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
     }
 
 
-    public static class CSObservationWithQueryOptions extends ElementWithQueryOptions<CSObservation> {
+    public static class CSObservationWithQueryOptions extends ElementWithQueryOptions<AbstractObservationEntity<?>> {
 
-        public CSObservationWithQueryOptions(CSObservation entity, QueryOptions queryOptions) {
+        public CSObservationWithQueryOptions(CSObservation<?> entity, QueryOptions queryOptions) {
             this.entity = entity;
             this.queryOptions = queryOptions;
         }
     }
 
 
-    public static class CSDatastreamWithQueryOptions extends ElementWithQueryOptions<CSDatastream> {
+    public static class CSDatastreamWithQueryOptions extends ElementWithQueryOptions<AbstractDatastreamEntity<?>> {
 
         public CSDatastreamWithQueryOptions(CSDatastream entity, QueryOptions queryOptions) {
             this.entity = entity;

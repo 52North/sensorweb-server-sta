@@ -37,8 +37,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.PlatformEntity;
-import org.n52.shetland.filter.ExpandItem;
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.shetland.ogc.sta.model.ThingEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
@@ -50,9 +49,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 public class ThingSerDes {
 
@@ -75,12 +71,12 @@ public class ThingSerDes {
     }
 
 
-    public static class ThingSerializer extends AbstractSTASerializer<ThingWithQueryOptions> {
+    public static class ThingSerializer extends AbstractSTASerializer<ThingWithQueryOptions, PlatformEntity> {
 
         private static final long serialVersionUID = -1618289129123682794L;
 
-        public ThingSerializer(String rootUrl) {
-            super(ThingWithQueryOptions.class);
+        public ThingSerializer(String rootUrl, String... activeExtensions) {
+            super(ThingWithQueryOptions.class, activeExtensions);
             this.rootUrl = rootUrl;
             this.entitySetName = ThingEntityDefinition.ENTITY_SET_NAME;
         }
@@ -89,25 +85,8 @@ public class ThingSerDes {
         public void serialize(ThingWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers)
                 throws IOException {
             gen.writeStartObject();
-            PlatformEntity thing = value.getEntity();
-            QueryOptions options = value.getQueryOptions();
+            PlatformEntity thing = unwrap(value);
 
-            Set<String> fieldsToSerialize = null;
-            Map<String, QueryOptions> fieldsToExpand = new HashMap<>();
-            boolean hasSelectOption = false;
-            boolean hasExpandOption = false;
-            if (options != null) {
-                if (options.hasSelectFilter()) {
-                    hasSelectOption = true;
-                    fieldsToSerialize = options.getSelectFilter().getItems();
-                }
-                if (options.hasExpandFilter()) {
-                    hasExpandOption = true;
-                    for (ExpandItem item : options.getExpandFilter().getItems()) {
-                        fieldsToExpand.put(item.getPath(), item.getQueryOptions());
-                    }
-                }
-            }
             // olingo @iot links
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
                 writeId(gen, thing.getStaIdentifier());
@@ -144,10 +123,11 @@ public class ThingSerDes {
                                 writeNavigationProp(gen, navigationProperty, thing.getStaIdentifier());
                             } else {
                                 gen.writeFieldName(navigationProperty);
-                                writeNestedCollection(Collections.unmodifiableSet(thing.getDatastreams()),
-                                                      fieldsToExpand.get(navigationProperty),
-                                                      gen,
-                                                      serializers);
+                                writeNestedCollectionOfType(Collections.unmodifiableSet(thing.getDatastreams()),
+                                                            DatastreamEntity.class,
+                                                            fieldsToExpand.get(navigationProperty),
+                                                            gen,
+                                                            serializers);
                             }
                             break;
                         case ThingEntityDefinition.HISTORICAL_LOCATIONS:
@@ -178,9 +158,9 @@ public class ThingSerDes {
                     }
                 }
             }
+            handleExtensions(thing, gen, serializers);
             gen.writeEndObject();
         }
-
     }
 
 

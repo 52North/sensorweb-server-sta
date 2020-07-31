@@ -73,6 +73,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import java.util.ArrayList;
@@ -83,18 +84,21 @@ public class JacksonConfig {
     @Bean
     public ObjectMapper customMapper(@Value("${server.rootUrl}") String rootUrl,
                                      @Value("${server.feature.variableEncodingType:false}")
-                                             boolean variableSensorEncodingTypeEnabled) {
+                                             boolean variableSensorEncodingTypeEnabled,
+                                     Environment environment) {
         ArrayList<Module> modules = new ArrayList<>();
         SimpleModule module = new SimpleModule();
 
         // Register Serializers/Deserializers for all custom types
         SimpleSerializers serializers = new SimpleSerializers();
         serializers.addSerializer(new CollectionSer(CollectionWrapper.class));
-        serializers.addSerializer(new ThingSerDes.ThingSerializer(rootUrl));
+        serializers.addSerializer(new ThingSerDes.ThingSerializer(rootUrl, environment.getActiveProfiles()));
         serializers.addSerializer(new LocationSerDes.LocationSerializer(rootUrl));
-        serializers.addSerializer(new SensorSerDes.SensorSerializer(rootUrl));
+        serializers.addSerializer(new SensorSerDes.SensorSerializer(rootUrl, environment.getActiveProfiles()));
         serializers.addSerializer(new ObservationSerDes.ObservationSerializer(rootUrl));
-        serializers.addSerializer(new ObservedPropertySerDes.ObservedPropertySerializer(rootUrl));
+        serializers.addSerializer(
+                new ObservedPropertySerDes.ObservedPropertySerializer(rootUrl,
+                                                                      environment.getActiveProfiles()));
         serializers.addSerializer(new FeatureOfInterestSerDes.FeatureOfInterestSerializer(rootUrl));
         serializers.addSerializer(new HistoricalLocationSerDes.HistoricalLocationSerializer(rootUrl));
         serializers.addSerializer(new DatastreamSerDes.DatastreamSerializer(rootUrl));

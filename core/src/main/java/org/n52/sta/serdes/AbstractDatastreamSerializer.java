@@ -33,8 +33,6 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.series.db.beans.sta.AbstractDatastreamEntity;
-import org.n52.shetland.filter.ExpandItem;
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.sta.model.DatastreamEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
@@ -44,15 +42,12 @@ import org.n52.sta.utils.TimeUtil;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public abstract class AbstractDatastreamSerializer<T extends ElementWithQueryOptions>
-        extends AbstractSTASerializer<T> {
+public abstract class AbstractDatastreamSerializer<T extends ElementWithQueryOptions<AbstractDatastreamEntity<?>>>
+        extends AbstractSTASerializer<T, AbstractDatastreamEntity<?>> {
 
     private static final GeoJsonWriter GEO_JSON_WRITER = new GeoJsonWriter();
     private static final long serialVersionUID = -6555417490577181829L;
@@ -66,25 +61,7 @@ public abstract class AbstractDatastreamSerializer<T extends ElementWithQueryOpt
                           JsonGenerator gen,
                           SerializerProvider serializers)
             throws IOException {
-        AbstractDatastreamEntity datastream = (AbstractDatastreamEntity) value.getEntity();
-        QueryOptions options = value.getQueryOptions();
-
-        Set<String> fieldsToSerialize = null;
-        Map<String, QueryOptions> fieldsToExpand = new HashMap<>();
-        boolean hasSelectOption = false;
-        boolean hasExpandOption = false;
-        if (options != null) {
-            if (options.hasSelectFilter()) {
-                hasSelectOption = true;
-                fieldsToSerialize = options.getSelectFilter().getItems();
-            }
-            if (options.hasExpandFilter()) {
-                hasExpandOption = true;
-                for (ExpandItem item : options.getExpandFilter().getItems()) {
-                    fieldsToExpand.put(item.getPath(), item.getQueryOptions());
-                }
-            }
-        }
+        AbstractDatastreamEntity datastream = unwrap(value);
 
         // olingo @iot links
         if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {

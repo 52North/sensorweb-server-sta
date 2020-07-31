@@ -37,8 +37,6 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.series.db.beans.sta.LocationEntity;
-import org.n52.shetland.filter.ExpandItem;
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.model.LocationEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
@@ -50,9 +48,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 public class LocationSerDes {
 
@@ -75,7 +70,7 @@ public class LocationSerDes {
     }
 
 
-    public static class LocationSerializer extends AbstractSTASerializer<LocationWithQueryOptions> {
+    public static class LocationSerializer extends AbstractSTASerializer<LocationWithQueryOptions, LocationEntity> {
 
         private static final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
 
@@ -92,25 +87,7 @@ public class LocationSerDes {
         public void serialize(LocationWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers)
                 throws IOException {
             gen.writeStartObject();
-            LocationEntity location = value.getEntity();
-            QueryOptions options = value.getQueryOptions();
-
-            Set<String> fieldsToSerialize = null;
-            Map<String, QueryOptions> fieldsToExpand = new HashMap<>();
-            boolean hasSelectOption = false;
-            boolean hasExpandOption = false;
-            if (options != null) {
-                if (options.hasSelectFilter()) {
-                    hasSelectOption = true;
-                    fieldsToSerialize = options.getSelectFilter().getItems();
-                }
-                if (options.hasExpandFilter()) {
-                    hasExpandOption = true;
-                    for (ExpandItem item : options.getExpandFilter().getItems()) {
-                        fieldsToExpand.put(item.getPath(), item.getQueryOptions());
-                    }
-                }
-            }
+            LocationEntity location = unwrap(value);
 
             // olingo @iot links
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
