@@ -123,10 +123,10 @@ public class CSDatastreamService
                     throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
                 } else {
                     csdatastream.setProcessed(true);
-                    getDatastreamService().create(csdatastream.getDatastream());
-                    getLicenseService().create(csdatastream.getLicense());
-                    getPartyService().create(csdatastream.getParty());
-                    getProjectService().create(csdatastream.getProject());
+                    csdatastream.setDatastream(getDatastreamService().createOrUpdate(csdatastream.getDatastream()));
+                    csdatastream.setLicense(getLicenseService().createOrUpdate(csdatastream.getLicense()));
+                    csdatastream.setParty(getPartyService().createOrUpdate(csdatastream.getParty()));
+                    csdatastream.setProject(getProjectService().createOrUpdate(csdatastream.getProject()));
                     getRepository().save(csdatastream);
                 }
             }
