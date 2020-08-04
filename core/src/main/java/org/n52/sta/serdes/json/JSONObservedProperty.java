@@ -48,6 +48,9 @@ public class JSONObservedProperty extends JSONBase.JSONwithIdNameDescription<Obs
     @JsonManagedReference
     public JSONDatastream[] Datastreams;
 
+    @JsonManagedReference
+    public JSONCSDatastream[] CSDatastreams;
+
     public JSONObservedProperty() {
         self = new ObservablePropertyEntity();
     }
@@ -65,11 +68,9 @@ public class JSONObservedProperty extends JSONBase.JSONwithIdNameDescription<Obs
                 self.setName(name);
                 self.setDescription(description);
 
-                if (Datastreams != null) {
-                    self.setDatastreams(Arrays.stream(Datastreams)
-                            .map(ds -> ds.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE))
-                            .collect(Collectors.toSet()));
-                }
+                parseDatastreams(self, Datastreams);
+                parseCSDatastreams(self, CSDatastreams);
+
                 // Deal with back reference during deep insert
                 if (backReference != null) {
                     if (backReference instanceof JSONDatastream) {
@@ -86,11 +87,8 @@ public class JSONObservedProperty extends JSONBase.JSONwithIdNameDescription<Obs
                 self.setName(name);
                 self.setDescription(description);
 
-                if (Datastreams != null) {
-                    self.setDatastreams(Arrays.stream(Datastreams)
-                            .map(ds -> ds.toEntity(JSONBase.EntityType.REFERENCE))
-                            .collect(Collectors.toSet()));
-                }
+                parseDatastreams(self, Datastreams);
+                parseCSDatastreams(self, CSDatastreams);
 
                 return self;
             case REFERENCE:

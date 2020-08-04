@@ -37,6 +37,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.sta.mapped.extension.CSDatastream;
 import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.shetland.ogc.sta.model.extension.CSDatastreamEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.extension.JSONCSDatastream;
 import org.n52.sta.serdes.util.ElementWithQueryOptions.CSDatastreamWithQueryOptions;
@@ -81,7 +82,7 @@ public class CSDatastreamSerDes {
         public void serialize(CSDatastreamWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers)
                 throws IOException {
             gen.writeStartObject();
-            super.serialize(value, gen, serializers);
+            super.serialize(value, gen, serializers, new CSDatastreamEntityDefinition());
 
             //TODO: Make this $expand-able
             writeNavigationProp(gen, StaConstants.LICENSE, value.getEntity().getStaIdentifier());

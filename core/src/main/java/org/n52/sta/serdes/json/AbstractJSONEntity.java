@@ -29,6 +29,15 @@
 
 package org.n52.sta.serdes.json;
 
+import org.n52.series.db.beans.sta.AbstractDatastreamEntity;
+import org.n52.series.db.beans.sta.StaRelations;
+import org.n52.sta.serdes.json.extension.JSONCSDatastream;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 public interface AbstractJSONEntity {
 
     String INVALID_REFERENCED_ENTITY =
@@ -46,4 +55,29 @@ public interface AbstractJSONEntity {
     String INVALID_DUPLICATE_REFERENCE =
             "Duplicate references to related Entity provided! Either specify reference to related Entity in JSON " +
                     "Payload OR inside Request URL";
+
+    default void parseCSDatastreams(StaRelations.HasDatastreams self, JSONCSDatastream[] csdatastreams) {
+        if (csdatastreams != null) {
+            Set<AbstractDatastreamEntity> joinedDatastreams;
+            if (self.getDatastreams() != null) {
+                joinedDatastreams = self.getDatastreams();
+            } else {
+                joinedDatastreams = new HashSet<>();
+            }
+            joinedDatastreams.addAll(Arrays.stream(csdatastreams)
+                                           .map(ds -> ds.toEntity(JSONBase.EntityType.FULL,
+                                                                  JSONBase.EntityType.REFERENCE))
+                                           .collect(Collectors.toSet()));
+            self.setDatastreams(joinedDatastreams);
+        }
+    }
+
+    default void parseDatastreams(StaRelations.HasDatastreams self, JSONDatastream[] datastreams){
+        if (datastreams != null) {
+            self.setDatastreams(Arrays.stream(datastreams)
+                                      .map(ds -> ds.toEntity(JSONBase.EntityType.FULL,
+                                                             JSONBase.EntityType.REFERENCE))
+                                      .collect(Collectors.toSet()));
+        }
+    }
 }

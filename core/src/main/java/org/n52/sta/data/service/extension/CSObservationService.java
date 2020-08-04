@@ -119,6 +119,12 @@ public class CSObservationService
                                                                               String ownId) {
         Specification<CSObservation<?>> filter;
         switch (relatedType) {
+        case STAEntityDefinition.CSDATASTREAMS:
+            filter = csoQS.withCSDatastreamStaIdentifier(relatedId);
+            break;
+        case STAEntityDefinition.FEATURES_OF_INTEREST:
+            filter = csoQS.withFOIStaIdentifier(relatedId);
+            break;
         case STAEntityDefinition.OBSERVATION_RELATIONS:
             filter = csoQS.withRelationStaIdentifier(relatedId);
             break;

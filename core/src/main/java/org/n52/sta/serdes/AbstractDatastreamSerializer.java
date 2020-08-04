@@ -34,7 +34,6 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.series.db.beans.sta.AbstractDatastreamEntity;
 import org.n52.shetland.ogc.gml.time.Time;
-import org.n52.shetland.ogc.sta.model.DatastreamEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.shetland.util.DateTimeHelper;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
@@ -42,6 +41,8 @@ import org.n52.sta.utils.TimeUtil;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -56,10 +57,10 @@ public abstract class AbstractDatastreamSerializer<T extends ElementWithQueryOpt
         super(t);
     }
 
-    @Override
     public void serialize(T value,
                           JsonGenerator gen,
-                          SerializerProvider serializers)
+                          SerializerProvider serializers,
+                          STAEntityDefinition definition)
             throws IOException {
         AbstractDatastreamEntity datastream = unwrap(value);
 
@@ -130,7 +131,10 @@ public abstract class AbstractDatastreamSerializer<T extends ElementWithQueryOpt
         }
 
         // navigation properties
-        for (String navigationProperty : DatastreamEntityDefinition.NAVIGATION_PROPERTIES) {
+        Set<String> navProps = new HashSet<>();
+        navProps.addAll(definition.getNavPropsMandatory());
+        navProps.addAll(definition.getNavPropsOptional());
+        for (String navigationProperty : navProps) {
             if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
                 if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
                     writeNavigationProp(gen, navigationProperty, datastream.getStaIdentifier());

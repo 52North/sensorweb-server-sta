@@ -100,19 +100,7 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
                                           .collect(Collectors.toSet()));
             }
 
-            if (CSDatastreams != null) {
-                Set<AbstractDatastreamEntity> joinedDatastreams;
-                if (self.getDatastreams() != null) {
-                    joinedDatastreams = self.getDatastreams();
-                } else {
-                    joinedDatastreams = new HashSet<>();
-                }
-                joinedDatastreams.addAll(Arrays.stream(CSDatastreams)
-                                               .map(ds -> ds.toEntity(JSONBase.EntityType.FULL,
-                                                                      JSONBase.EntityType.REFERENCE))
-                                               .collect(Collectors.toSet()));
-                self.setDatastreams(joinedDatastreams);
-            }
+            parseCSDatastreams(self, CSDatastreams);
 
             if (HistoricalLocations != null) {
                 self.setHistoricalLocations(Arrays.stream(HistoricalLocations)

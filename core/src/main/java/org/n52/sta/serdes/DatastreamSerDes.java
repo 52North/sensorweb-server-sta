@@ -81,7 +81,7 @@ public class DatastreamSerDes {
         public void serialize(DatastreamWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers)
                 throws IOException {
             gen.writeStartObject();
-            super.serialize(value, gen, serializers);
+            super.serialize(value, gen, serializers, new DatastreamEntityDefinition());
             gen.writeEndObject();
         }
     }

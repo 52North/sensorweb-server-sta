@@ -64,9 +64,14 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
 
     public Specification<PhenomenonEntity> withDatastreamStaIdentifier(final String datastreamIdentifier) {
         return (root, query, builder) -> {
-            final Join<PhenomenonEntity, DatastreamEntity> join =
-                    root.join(DatastreamEntity.PROPERTY_OBSERVABLE_PROPERTY, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), datastreamIdentifier);
+            Subquery<PhenomenonEntity> sq = query.subquery(PhenomenonEntity.class);
+            Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
+            Join<DatastreamEntity, PhenomenonEntity> join =
+                    datastream.join(DatastreamEntity.PROPERTY_OBSERVABLE_PROPERTY);
+            sq.select(join)
+              .where(builder.equal(datastream.get(DescribableEntity.PROPERTY_IDENTIFIER), datastreamIdentifier));
+
+            return builder.in(root).value(sq);
         };
     }
 

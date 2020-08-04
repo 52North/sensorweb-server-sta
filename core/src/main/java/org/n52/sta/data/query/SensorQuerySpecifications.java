@@ -73,6 +73,17 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications<Procedu
         };
     }
 
+    public Specification<ProcedureEntity> withCSDatastreamStaIdentifier(final String datastreamIdentifier) {
+        return (root, query, builder) -> {
+            Subquery<ProcedureEntity> sq = query.subquery(ProcedureEntity.class);
+            Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
+            Join<DatastreamEntity, ProcedureEntity> join = datastream.join(DatastreamEntity.PROPERTY_SENSOR);
+            sq.select(join)
+              .where(builder.equal(datastream.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), datastreamIdentifier));
+            return builder.in(root).value(sq);
+        };
+    }
+
     @Override protected Specification<ProcedureEntity> handleRelatedPropertyFilter(String propertyName,
                                                                                    Specification<?> propertyValue) {
         return (root, query, builder) -> {

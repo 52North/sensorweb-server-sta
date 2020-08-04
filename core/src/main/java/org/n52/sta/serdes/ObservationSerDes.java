@@ -37,6 +37,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.sta.mapped.ObservationEntity;
 import org.n52.shetland.ogc.sta.model.ObservationEntityDefinition;
+import org.n52.shetland.ogc.sta.model.extension.CSObservationEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONObservation;
 import org.n52.sta.serdes.util.ElementWithQueryOptions.ObservationWithQueryOptions;
@@ -82,7 +83,7 @@ public class ObservationSerDes {
         public void serialize(ObservationWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers)
                 throws IOException {
             gen.writeStartObject();
-            super.serialize(value, gen, serializers);
+            super.serialize(value, gen, serializers, new ObservationEntityDefinition());
             gen.writeEndObject();
         }
     }

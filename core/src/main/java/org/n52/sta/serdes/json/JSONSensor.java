@@ -38,10 +38,8 @@ import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.sta.serdes.json.extension.JSONCSDatastream;
 import org.springframework.util.Assert;
 
-import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @SuppressWarnings("VisibilityModifier")
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
@@ -59,6 +57,9 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorEntity>
 
     @JsonManagedReference
     public JSONDatastream[] Datastreams;
+
+    @JsonManagedReference
+    public JSONCSDatastream[] CSDatastreams;
 
     public JSONSensor() {
         self = new SensorEntity();
@@ -78,13 +79,8 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorEntity>
             self.setDescription(description);
 
             handleEncodingType();
-
-            if (Datastreams != null) {
-                self.setDatastreams(Arrays.stream(Datastreams)
-                                          .map(ds -> ds.toEntity(JSONBase.EntityType.FULL,
-                                                                 JSONBase.EntityType.REFERENCE))
-                                          .collect(Collectors.toSet()));
-            }
+            parseDatastreams(self, Datastreams);
+            parseCSDatastreams(self, CSDatastreams);
 
             // Deal with back reference during deep insert
             if (backReference != null) {
@@ -109,11 +105,9 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorEntity>
                 self.setDescriptionFile(metadata);
             }
 
-            if (Datastreams != null) {
-                self.setDatastreams(Arrays.stream(Datastreams)
-                                          .map(ds -> ds.toEntity(JSONBase.EntityType.REFERENCE))
-                                          .collect(Collectors.toSet()));
-            }
+            parseDatastreams(self, Datastreams);
+            parseCSDatastreams(self, CSDatastreams);
+
             return self;
         case REFERENCE:
             Assert.isNull(name, INVALID_REFERENCED_ENTITY);

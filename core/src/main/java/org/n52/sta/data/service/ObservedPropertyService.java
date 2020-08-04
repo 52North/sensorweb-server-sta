@@ -30,11 +30,10 @@
 package org.n52.sta.data.service;
 
 import org.n52.janmayen.http.HTTPStatus;
-import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.sta.AbstractDatastreamEntity;
-import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.series.db.beans.sta.ObservablePropertyEntity;
+import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
@@ -58,9 +57,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -130,7 +126,8 @@ public class ObservedPropertyService
                                                                STAEntityDefinition.OBSERVED_PROPERTIES,
                                                                expandItem.getQueryOptions());
                 ObservablePropertyEntity obsProp = new ObservablePropertyEntity(entity);
-                return obsProp.setDatastreams(obsP.get().collect(Collectors.toSet()));
+                obsProp.setDatastreams(obsP.get().collect(Collectors.toSet()));
+                return obsProp;
             } else {
                 throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty +
                                                            " on Entity of type 'ObservableProperty'");
@@ -154,26 +151,20 @@ public class ObservedPropertyService
     public Specification<PhenomenonEntity> byRelatedEntityFilter(String relatedId,
                                                                  String relatedType,
                                                                  String ownId) {
+        Specification<PhenomenonEntity> filter;
         switch (relatedType) {
+        case STAEntityDefinition.CSDATASTREAMS:
         case STAEntityDefinition.DATASTREAMS: {
-            return (root, query, builder) -> {
-                Subquery<PhenomenonEntity> sq = query.subquery(PhenomenonEntity.class);
-                Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
-                Join<DatastreamEntity, PhenomenonEntity> join =
-                        datastream.join(DatastreamEntity.PROPERTY_OBSERVABLE_PROPERTY);
-                sq.select(join)
-                  .where(builder.equal(datastream.get(DescribableEntity.PROPERTY_IDENTIFIER), relatedId));
-                if (ownId != null) {
-                    return builder.and(builder.in(root).value(sq),
-                                       builder.equal(root.get(PhenomenonEntity.PROPERTY_STA_IDENTIFIER),
-                                                     ownId));
-                }
-                return builder.in(root).value(sq);
-            };
+            filter = oQS.withDatastreamStaIdentifier(relatedId);
+            break;
         }
         default:
-            throw new IllegalStateException("Trying to filter by unrelated type: " + relatedType + "not found!");
+            throw new IllegalStateException("Trying to filter by unrelated type: " + relatedType + " not found!");
         }
+        if (ownId != null) {
+            filter = filter.and(oQS.withStaIdentifier(ownId));
+        }
+        return filter;
     }
 
     @Override

@@ -37,6 +37,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.sta.ObservablePropertyEntity;
+import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.shetland.ogc.sta.model.ObservedPropertyEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
@@ -117,10 +118,11 @@ public class ObservedPropertySerDes {
                                 writeNavigationProp(gen, navigationProperty, obsProp.getStaIdentifier());
                             } else {
                                 gen.writeFieldName(navigationProperty);
-                                writeNestedCollection(Collections.unmodifiableSet(obsProp.getDatastreams()),
-                                                      fieldsToExpand.get(navigationProperty),
-                                                      gen,
-                                                      serializers);
+                                writeNestedCollectionOfType(Collections.unmodifiableSet(obsProp.getDatastreams()),
+                                                            DatastreamEntity.class,
+                                                            fieldsToExpand.get(navigationProperty),
+                                                            gen,
+                                                            serializers);
                             }
                             break;
                         default:

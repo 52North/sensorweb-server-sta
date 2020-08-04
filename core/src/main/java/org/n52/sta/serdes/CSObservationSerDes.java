@@ -37,6 +37,8 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.sta.mapped.extension.CSObservation;
 import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.shetland.ogc.sta.model.extension.CSObservationEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.extension.JSONCSObservation;
 import org.n52.sta.serdes.util.ElementWithQueryOptions.CSObservationWithQueryOptions;
@@ -81,7 +83,7 @@ public class CSObservationSerDes {
         public void serialize(CSObservationWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers)
                 throws IOException {
             gen.writeStartObject();
-            super.serialize(value, gen, serializers);
+            super.serialize(value, gen, serializers, new CSObservationEntityDefinition());
             writeNavigationProp(gen, StaConstants.OBSERVATION_RELATIONS, value.getEntity().getStaIdentifier());
             gen.writeEndObject();
         }

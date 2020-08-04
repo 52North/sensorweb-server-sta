@@ -29,7 +29,11 @@
 
 package org.n52.sta.data.query;
 
+import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
+import org.n52.series.db.beans.FeatureEntity;
+import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
+import org.n52.series.db.beans.sta.mapped.ObservationEntity;
 import org.n52.series.db.beans.sta.mapped.extension.CSObservation;
 import org.n52.series.db.beans.sta.mapped.extension.ObservationRelation;
 import org.n52.shetland.ogc.filter.FilterConstants;
@@ -39,6 +43,8 @@ import org.springframework.data.jpa.domain.Specification;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -50,6 +56,40 @@ public class CSObservationQuerySpecifications extends EntityQuerySpecifications<
             final Join<CSObservation, ObservationRelation> join =
                     root.join("relation", JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), relationIdentifier);
+        };
+    }
+
+    public static Specification<CSObservation<?>> withCSDatastreamStaIdentifier(final String datastreamIdentifier) {
+        return (root, query, builder) -> {
+            Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
+            Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
+            Join<DatastreamEntity, DatasetEntity> join = datastream.join(DatastreamEntity.PROPERTY_DATASETS);
+            sq.select(join.get(DatasetEntity.PROPERTY_ID)).where(
+                    builder.equal(datastream.get(DatastreamEntity.PROPERTY_STA_IDENTIFIER), datastreamIdentifier));
+
+            Subquery<ObservationEntity> subquery = query.subquery(ObservationEntity.class);
+            Root<ObservationEntity> observation = subquery.from(ObservationEntity.class);
+
+            subquery.select(observation.get(ObservationEntity.PROPERTY_ID))
+                    .where(builder.in(observation.get(ObservationEntity.PROPERTY_DATASET)).value(sq));
+
+            return builder.in(root.get("observation")).value(subquery);
+        };
+    }
+
+    public static Specification<CSObservation<?>> withFOIStaIdentifier(
+            final String featureIdentifier) {
+
+        return (root, query, builder) -> {
+            Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
+            Root<DatasetEntity> dataset = sq.from(DatasetEntity.class);
+            Subquery<FeatureEntity> subquery = query.subquery(FeatureEntity.class);
+            Root<FeatureEntity> feature = subquery.from(FeatureEntity.class);
+            subquery.select(feature.get(FeatureEntity.PROPERTY_ID))
+                    .where(builder.equal(feature.get(FeatureEntity.PROPERTY_STA_IDENTIFIER), featureIdentifier));
+            sq.select(dataset.get(DatasetEntity.PROPERTY_ID))
+              .where(builder.equal(dataset.get(DatasetEntity.PROPERTY_FEATURE), subquery));
+            return builder.in(root.get(ObservationEntity.PROPERTY_DATASET)).value(sq);
         };
     }
 
