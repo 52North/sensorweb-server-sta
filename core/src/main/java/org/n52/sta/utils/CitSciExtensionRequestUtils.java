@@ -57,6 +57,9 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
                     + OR + PARTIES
                     + OR + PROJECTS
                     + OR + LICENSES
+                    + OR + THINGS
+                    + OR + SENSORS
+                    + OR + OBSERVED_PROPERTIES
                     + WANTED_NAME_GROUP_END;
 
     String BASE_COLLECTION_REGEX = OBSERVATION_GROUPS
@@ -109,12 +112,18 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
                     OBSERVATION_GROUP +
                     ROUND_BRACKET_CLOSE;
 
-    // /ObservationGroups(52)
-    String ENTITY_IDENTIFIED_DIRECTLY =
-            PATH_ENTITY + BASE_COLLECTION_REGEX + CURLY_BRACKET_CLOSE + PATH_ID + IDENTIFIER_REGEX + DOLLAR +
-                    CURLY_BRACKET_CLOSE;
+    String IDENTIFIED_BY_THING_REGEX =
+            THINGS + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN + CSDATASTREAMS + ROUND_BRACKET_CLOSE;
 
-    // /Observation(52)/ObservationRelations
+    String IDENTIFIED_BY_SENSOR_REGEX = SENSORS + IDENTIFIER_REGEX + SLASH + CSDATASTREAMS;
+
+    String IDENTIFIED_BY_OBSERVED_PROPERTY_REGEX =
+            OBSERVED_PROPERTIES + IDENTIFIER_REGEX + SLASH + CSDATASTREAMS;
+
+    String IDENTIFIED_BY_FEATURE_OF_INTEREST_REGEX =
+            FEATURES_OF_INTEREST + IDENTIFIER_REGEX + SLASH + CSDATASTREAMS;
+
+    // /CSObservations(52)/ObservationRelations
     String COLLECTION_IDENTIFIED_BY_CSOBSERVATION =
             SOURCE_NAME_GROUP_START + CSOBSERVATIONS + SOURCE_NAME_GROUP_END
                     + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
@@ -138,7 +147,7 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
                     OBSERVATION_RELATIONS +
                     CURLY_BRACKET_CLOSE;
 
-    // /Party(52)/CSDatastreams
+    // /Parties(52)/CSDatastreams
     String COLLECTION_IDENTIFIED_BY_PARTY =
             SOURCE_NAME_GROUP_START + PARTIES + SOURCE_NAME_GROUP_END
                     + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
@@ -181,6 +190,44 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
 
     String COLLECTION_IDENTIFIED_BY_CSDATASTREAM_PATH_VARIABLE =
             PATH_ENTITY + CSDATASTREAMS + IDENTIFIER_REGEX + CURLY_BRACKET_CLOSE + PATH_TARGET + CSOBSERVATIONS +
+                    CURLY_BRACKET_CLOSE;
+
+    // /Things(52)/CSDatastreams
+    String COLLECTION_IDENTIFIED_BY_THING =
+            SOURCE_NAME_GROUP_START + THINGS + SOURCE_NAME_GROUP_END
+                    + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
+                    + SLASH
+                    + WANTED_NAME_GROUP_START + CSDATASTREAMS + WANTED_NAME_GROUP_END;
+
+    String COLLECTION_IDENTIFIED_BY_THING_PATH_VARIABLE =
+            PATH_ENTITY + THINGS + IDENTIFIER_REGEX + CURLY_BRACKET_CLOSE + PATH_TARGET
+                    + CSDATASTREAMS + CURLY_BRACKET_CLOSE;
+
+    // /Sensors(52)/CSDatastreams
+    String COLLECTION_IDENTIFIED_BY_SENSOR =
+            SOURCE_NAME_GROUP_START + SENSORS + SOURCE_NAME_GROUP_END
+                    + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
+                    + SLASH
+                    + WANTED_NAME_GROUP_START + CSDATASTREAMS + WANTED_NAME_GROUP_END;
+
+    String COLLECTION_IDENTIFIED_BY_SENSOR_PATH_VARIABLE =
+            PATH_ENTITY + SENSORS + IDENTIFIER_REGEX + CURLY_BRACKET_CLOSE + PATH_TARGET + CSDATASTREAMS +
+                    CURLY_BRACKET_CLOSE;
+
+    // /ObservedProperties(52)/CSDatastreams
+    String COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY =
+            SOURCE_NAME_GROUP_START + OBSERVED_PROPERTIES + SOURCE_NAME_GROUP_END
+                    + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
+                    + SLASH
+                    + WANTED_NAME_GROUP_START + CSDATASTREAMS + WANTED_NAME_GROUP_END;
+
+    String COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH_VARIABLE =
+            PATH_ENTITY + OBSERVED_PROPERTIES + IDENTIFIER_REGEX + CURLY_BRACKET_CLOSE + PATH_TARGET + CSDATASTREAMS +
+                    CURLY_BRACKET_CLOSE;
+
+    // /ObservationGroups(52)
+    String ENTITY_IDENTIFIED_DIRECTLY =
+            PATH_ENTITY + BASE_COLLECTION_REGEX + CURLY_BRACKET_CLOSE + PATH_ID + IDENTIFIER_REGEX + DOLLAR +
                     CURLY_BRACKET_CLOSE;
 
     // /ObservationRelations(52)/ObservationGroup
@@ -238,6 +285,9 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
     Pattern CP_IDENT_BY_LICENSE = Pattern.compile(COLLECTION_IDENTIFIED_BY_LICENSE + DOLLAR);
     Pattern CP_IDENT_BY_PARTY = Pattern.compile(COLLECTION_IDENTIFIED_BY_PARTY + DOLLAR);
     Pattern CP_IDENT_BY_PROJECT = Pattern.compile(COLLECTION_IDENTIFIED_BY_PROJECT + DOLLAR);
+    Pattern CP_IDENT_BY_THING = Pattern.compile(COLLECTION_IDENTIFIED_BY_THING + DOLLAR);
+    Pattern CP_IDENT_BY_SENSOR = Pattern.compile(COLLECTION_IDENTIFIED_BY_SENSOR + DOLLAR);
+    Pattern CP_IDENT_BY_OBSPROP = Pattern.compile(COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY + DOLLAR);
 
     Pattern[] NAMED_COLL_PATTERNS =
             new Pattern[] {
@@ -247,7 +297,10 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
                     CP_IDENT_BY_OBSERVATION_GROUP,
                     CP_IDENT_BY_LICENSE,
                     CP_IDENT_BY_PARTY,
-                    CP_IDENT_BY_PROJECT
+                    CP_IDENT_BY_PROJECT,
+                    CP_IDENT_BY_THING,
+                    CP_IDENT_BY_SENSOR,
+                    CP_IDENT_BY_OBSPROP
             };
 
     // OGC-15-078r6 14.2.3
@@ -294,6 +347,9 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
     Pattern BY_LICENSE_PATTERN = Pattern.compile(IDENTIFIED_BY_LICENSE_REGEX);
     Pattern BY_PARTY_PATTERN = Pattern.compile(IDENTIFIED_BY_PARTY_REGEX);
     Pattern BY_PROJECT_PATTERN = Pattern.compile(IDENTIFIED_BY_PROJECT_REGEX);
+    Pattern BY_THING_PATTERN = Pattern.compile(IDENTIFIED_BY_THING_REGEX);
+    Pattern BY_SENSOR_PATTERN = Pattern.compile(IDENTIFIED_BY_SENSOR_REGEX);
+    Pattern BY_OBSPROP_PATTERN = Pattern.compile(IDENTIFIED_BY_OBSERVED_PROPERTY_REGEX);
 
     default Class collectionNameToClass(String collectionName) throws STAInvalidUrlException {
         switch (collectionName) {
@@ -350,6 +406,9 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
                                 || BY_LICENSE_PATTERN.matcher(resource).matches()
                                 || BY_PARTY_PATTERN.matcher(resource).matches()
                                 || BY_PROJECT_PATTERN.matcher(resource).matches()
+                                || BY_THING_PATTERN.matcher(resource).matches()
+                                || BY_SENSOR_PATTERN.matcher(resource).matches()
+                                || BY_OBSPROP_PATTERN.matcher(resource).matches()
                                 || BY_OBSERVATION_RELATION_PATTERN.matcher(resource).matches())) {
                             return new STAInvalidUrlException(URL_INVALID
                                                                       + uriResources[i - 1]

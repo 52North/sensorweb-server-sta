@@ -98,6 +98,12 @@ public class CitSciCollectionRequestHandler extends AbstractCollectionRequestHan
                             CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_PARTY_PATH_VARIABLE,
                     MAPPING_PREFIX +
                             CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_CSDATASTREAM_PATH_VARIABLE,
+                    MAPPING_PREFIX +
+                            CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH_VARIABLE,
+                    MAPPING_PREFIX +
+                            CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_SENSOR_PATH_VARIABLE,
+                    MAPPING_PREFIX +
+                            CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_THING_PATH_VARIABLE,
             },
             produces = "application/json"
     )
@@ -128,6 +134,15 @@ public class CitSciCollectionRequestHandler extends AbstractCollectionRequestHan
                             + SLASHREF,
                     MAPPING_PREFIX
                             + CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_CSDATASTREAM_PATH_VARIABLE
+                            + SLASHREF,
+                    MAPPING_PREFIX
+                            + CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH_VARIABLE
+                            + SLASHREF,
+                    MAPPING_PREFIX
+                            + CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_SENSOR_PATH_VARIABLE
+                            + SLASHREF,
+                    MAPPING_PREFIX
+                            + CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_THING_PATH_VARIABLE
                             + SLASHREF,
             },
             produces = "application/json"

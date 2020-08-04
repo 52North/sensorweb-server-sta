@@ -90,6 +90,15 @@ public class CSDatastreamService
         case STAEntityDefinition.PARTIES:
             filter = csdQS.withPartyStaIdentifier(relatedId);
             break;
+        case STAEntityDefinition.SENSORS:
+            filter = csdQS.withSensorStaIdentifier(relatedId);
+            break;
+        case STAEntityDefinition.THINGS:
+            filter = csdQS.withThingStaIdentifier(relatedId);
+            break;
+        case STAEntityDefinition.OBSERVED_PROPERTIES:
+            filter = csdQS.withObsPropStaIdentifier(relatedId);
+            break;
         default:
             throw new IllegalStateException("Trying to filter by unrelated type: " + relatedType + "not found!");
         }

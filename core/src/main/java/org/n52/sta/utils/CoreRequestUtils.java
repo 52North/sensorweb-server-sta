@@ -229,7 +229,7 @@ public interface CoreRequestUtils extends RequestUtils {
             PATH_ENTITY + FEATURES_OF_INTEREST + IDENTIFIER_REGEX + CURLY_BRACKET_CLOSE + PATH_TARGET + OBSERVATIONS +
                     CURLY_BRACKET_CLOSE;
 
-    // /FeaturesOfInterest(52)/Observations
+    // /HistoricalLocations(52)/Locations
     String COLLECTION_IDENTIFIED_BY_HIST_LOCATION =
             SOURCE_NAME_GROUP_START + HISTORICAL_LOCATIONS + SOURCE_NAME_GROUP_END
                     + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END

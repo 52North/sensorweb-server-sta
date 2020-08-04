@@ -135,6 +135,7 @@ public class ThingService
             filter = tQS.withHistoricalLocationStaIdentifier(relatedId);
             break;
         }
+        case STAEntityDefinition.CSDATASTREAMS:
         case STAEntityDefinition.DATASTREAMS: {
             filter = tQS.withDatastreamStaIdentifier(relatedId);
             break;

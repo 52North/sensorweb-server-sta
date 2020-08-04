@@ -30,6 +30,10 @@
 package org.n52.sta.data.query;
 
 import org.n52.series.db.beans.DescribableEntity;
+import org.n52.series.db.beans.PlatformEntity;
+import org.n52.series.db.beans.ProcedureEntity;
+import org.n52.series.db.beans.sta.ObservablePropertyEntity;
+import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.series.db.beans.sta.mapped.extension.CSDatastream;
 import org.n52.series.db.beans.sta.mapped.extension.License;
 import org.n52.series.db.beans.sta.mapped.extension.Party;
@@ -68,6 +72,34 @@ public class CSDatastreamQuerySpecifications extends EntityQuerySpecifications<C
             final Join<CSDatastream, License> join =
                     root.join(CSDatastream.PROPERTY_LICENSE, JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), identifier);
+        };
+    }
+
+    public Specification<CSDatastream> withThingStaIdentifier(final String identifier) {
+        return (root, query, builder) -> {
+            final Join<CSDatastream, DatastreamEntity> join =
+                    root.join(CSDatastream.PROPERTY_DATASTREAM, JoinType.INNER);
+            return builder.equal(join.get(DatastreamEntity.PROPERTY_THING)
+                                     .get(PlatformEntity.STA_IDENTIFIER), identifier);
+        };
+    }
+
+    public Specification<CSDatastream> withSensorStaIdentifier(final String identifier) {
+        return (root, query, builder) -> {
+            final Join<CSDatastream, DatastreamEntity> join =
+                    root.join(CSDatastream.PROPERTY_DATASTREAM, JoinType.INNER);
+            return builder.equal(join.get(DatastreamEntity.PROPERTY_SENSOR)
+                                     .get(ProcedureEntity.STA_IDENTIFIER), identifier);
+        };
+    }
+
+    public Specification<CSDatastream> withObsPropStaIdentifier(final String identifier) {
+        return (root, query, builder) -> {
+            final Join<CSDatastream, DatastreamEntity> join =
+                    root.join(CSDatastream.PROPERTY_DATASTREAM, JoinType.INNER);
+            return builder.equal(join.get(DatastreamEntity.PROPERTY_OBSERVABLE_PROPERTY)
+                                     .get(ObservablePropertyEntity.STA_IDENTIFIER),
+                                 identifier);
         };
     }
 

@@ -85,7 +85,9 @@ public class CitSciCudRequestHandler<T extends HibernateRelations.HasId>
                     CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_CSDATASTREAM_PATH_VARIABLE,
                     CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_PARTY_PATH_VARIABLE,
                     CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_PROJECT_PATH_VARIABLE,
-                    CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_PROJECT_PATH_VARIABLE,
+                    CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_THING_PATH_VARIABLE,
+                    CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_SENSOR_PATH_VARIABLE,
+                    CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH_VARIABLE,
             },
             produces = "application/json"
     )
