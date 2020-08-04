@@ -172,6 +172,17 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
                     CSDATASTREAMS +
                     CURLY_BRACKET_CLOSE;
 
+    // /CSDatastreams(52)/Observations
+    String COLLECTION_IDENTIFIED_BY_CSDATASTREAM =
+            SOURCE_NAME_GROUP_START + CSDATASTREAMS + ROUND_BRACKET_CLOSE
+                    + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
+                    + SLASH
+                    + WANTED_NAME_GROUP_START + CSOBSERVATIONS + WANTED_NAME_GROUP_END;
+
+    String COLLECTION_IDENTIFIED_BY_CSDATASTREAM_PATH_VARIABLE =
+            PATH_ENTITY + CSDATASTREAMS + IDENTIFIER_REGEX + CURLY_BRACKET_CLOSE + PATH_TARGET + CSOBSERVATIONS +
+                    CURLY_BRACKET_CLOSE;
+
     // /ObservationRelations(52)/ObservationGroup
     // /ObservationRelations(52)/Observation
     String ENTITY_IDENTIFIED_BY_OBSERVATIONRELATION =
@@ -222,6 +233,7 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
     // OGC-15-078r6 14.2.1
     Pattern CP_BASE = Pattern.compile(BASE_COLLECTION_REGEX_NAMED_GROUPS + DOLLAR);
     Pattern CP_IDENT_BY_CSOBSERVATION = Pattern.compile(COLLECTION_IDENTIFIED_BY_CSOBSERVATION + DOLLAR);
+    Pattern CP_IDENT_BY_CSDATASTREAM = Pattern.compile(COLLECTION_IDENTIFIED_BY_CSDATASTREAM + DOLLAR);
     Pattern CP_IDENT_BY_OBSERVATION_GROUP = Pattern.compile(COLLECTION_IDENTIFIED_BY_OBSERVATION_GROUP + DOLLAR);
     Pattern CP_IDENT_BY_LICENSE = Pattern.compile(COLLECTION_IDENTIFIED_BY_LICENSE + DOLLAR);
     Pattern CP_IDENT_BY_PARTY = Pattern.compile(COLLECTION_IDENTIFIED_BY_PARTY + DOLLAR);
@@ -231,6 +243,7 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
             new Pattern[] {
                     CP_BASE,
                     CP_IDENT_BY_CSOBSERVATION,
+                    CP_IDENT_BY_CSDATASTREAM,
                     CP_IDENT_BY_OBSERVATION_GROUP,
                     CP_IDENT_BY_LICENSE,
                     CP_IDENT_BY_PARTY,

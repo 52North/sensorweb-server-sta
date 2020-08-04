@@ -425,7 +425,6 @@ public interface CoreRequestUtils extends RequestUtils {
                                 || BY_THING_PATTERN.matcher(resource).matches()
                                 || BY_FOI_PATTERN.matcher(resource).matches()
                                 || BY_OBSERVATION_PATTERN.matcher(resource).matches()
-                                || BY_OBSER_PROP_PATTERN.matcher(resource).matches()
                                 || BY_SENSOR_PATTERN.matcher(resource).matches()
                                 || BY_OBSER_PROP_PATTERN.matcher(resource).matches())) {
                             return new STAInvalidUrlException(URL_INVALID
