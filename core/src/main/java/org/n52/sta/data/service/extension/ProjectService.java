@@ -30,6 +30,7 @@
 package org.n52.sta.data.service.extension;
 
 import org.n52.janmayen.http.HTTPStatus;
+import org.n52.series.db.beans.sta.AbstractDatastreamEntity;
 import org.n52.series.db.beans.sta.mapped.extension.CSDatastream;
 import org.n52.series.db.beans.sta.mapped.extension.Project;
 import org.n52.shetland.filter.ExpandFilter;
@@ -116,8 +117,8 @@ public class ProjectService
             if (getRepository().existsByStaIdentifier(project.getStaIdentifier())) {
                 throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
             } else {
-                for (CSDatastream datastream : project.getDatastreams()) {
-                    getCSDatastreamService().create(datastream);
+                for (AbstractDatastreamEntity datastream : project.getDatastreams()) {
+                    getCSDatastreamService().create((CSDatastream) datastream);
                 }
                 getRepository().save(project);
             }
@@ -128,7 +129,19 @@ public class ProjectService
 
     @Override protected Project updateEntity(String id, Project entity, HttpMethod method)
             throws STACRUDException {
-        throw new STACRUDException(NOT_IMPLEMENTED);
+        if (HttpMethod.PATCH.equals(method)) {
+            synchronized (getLock(id)) {
+                Optional<Project> existing = getRepository().findByStaIdentifier(id);
+                if (existing.isPresent()) {
+                    Project merged = merge(existing.get(), entity);
+                    return getRepository().save(merged);
+                }
+                throw new STACRUDException("Unable to update. Entity not found.", HTTPStatus.NOT_FOUND);
+            }
+        } else if (HttpMethod.PUT.equals(method)) {
+            throw new STACRUDException("Http PUT is not yet supported!", HTTPStatus.NOT_IMPLEMENTED);
+        }
+        throw new STACRUDException("Invalid http method for updating entity!", HTTPStatus.BAD_REQUEST);
     }
 
     @Override protected Project updateEntity(Project entity) throws STACRUDException {
@@ -148,7 +161,28 @@ public class ProjectService
 
     @Override protected Project merge(Project existing, Project toMerge)
             throws STACRUDException {
-        throw new STACRUDException(NOT_IMPLEMENTED);
+
+        if (toMerge.getStaIdentifier() != null) {
+            existing.setStaIdentifier(toMerge.getStaIdentifier());
+        }
+        if (toMerge.getName() != null) {
+            existing.setName(toMerge.getName());
+        }
+        if (toMerge.getRuntimeStart() != null) {
+            existing.setRuntimeStart(toMerge.getRuntimeStart());
+        }
+        if (toMerge.getRuntimeEnd() != null) {
+            existing.setRuntimeEnd(toMerge.getRuntimeEnd());
+        }
+        if (toMerge.getDescription() != null) {
+            existing.setDescription(toMerge.getDescription());
+        }
+        if (toMerge.getUrl() != null) {
+            existing.setUrl(toMerge.getUrl());
+        }
+
+        mergeDatastreams(existing, toMerge);
+        return existing;
     }
 
     @Override protected void delete(Project entity) throws STACRUDException {

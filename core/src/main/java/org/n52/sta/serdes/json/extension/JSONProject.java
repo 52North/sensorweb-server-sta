@@ -32,12 +32,14 @@ package org.n52.sta.serdes.json.extension;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.n52.series.db.beans.sta.AbstractDatastreamEntity;
 import org.n52.series.db.beans.sta.mapped.extension.CSDatastream;
 import org.n52.series.db.beans.sta.mapped.extension.Project;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
 import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.sta.serdes.json.AbstractJSONDatastream;
 import org.n52.sta.serdes.json.AbstractJSONEntity;
 import org.n52.sta.serdes.json.JSONBase;
 import org.springframework.util.Assert;
@@ -102,13 +104,13 @@ public class JSONProject extends JSONBase.JSONwithIdNameDescriptionTime<Project>
         }
 
         if (datastreams != null) {
-            Set<CSDatastream> related = new HashSet<>();
+            Set<AbstractDatastreamEntity> related = new HashSet<>();
             for (JSONCSDatastream datastream : datastreams) {
                 related.add(datastream.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
             }
             self.setDatastreams(related);
         } else if (backReference instanceof JSONCSDatastream) {
-            Set<CSDatastream> related = new HashSet<>();
+            Set<AbstractDatastreamEntity> related = new HashSet<>();
             related.add(((JSONCSDatastream) backReference).getEntity());
             self.setDatastreams(related);
         }

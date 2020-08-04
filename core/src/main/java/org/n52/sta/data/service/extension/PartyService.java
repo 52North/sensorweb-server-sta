@@ -30,8 +30,10 @@
 package org.n52.sta.data.service.extension;
 
 import org.n52.janmayen.http.HTTPStatus;
+import org.n52.series.db.beans.sta.AbstractDatastreamEntity;
 import org.n52.series.db.beans.sta.mapped.extension.CSDatastream;
 import org.n52.series.db.beans.sta.mapped.extension.Party;
+import org.n52.series.db.beans.sta.mapped.extension.Project;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
@@ -116,8 +118,8 @@ public class PartyService
             if (getRepository().existsByStaIdentifier(party.getStaIdentifier())) {
                 throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
             } else {
-                for (CSDatastream datastream : party.getDatastreams()) {
-                    getCSDatastreamService().create(datastream);
+                for (AbstractDatastreamEntity datastream : party.getDatastreams()) {
+                    getCSDatastreamService().create((CSDatastream) datastream);
                 }
                 getRepository().save(party);
             }
@@ -128,7 +130,19 @@ public class PartyService
 
     @Override protected Party updateEntity(String id, Party entity, HttpMethod method)
             throws STACRUDException {
-        throw new STACRUDException(NOT_IMPLEMENTED);
+        if (HttpMethod.PATCH.equals(method)) {
+            synchronized (getLock(id)) {
+                Optional<Party> existing = getRepository().findByStaIdentifier(id);
+                if (existing.isPresent()) {
+                    Party merged = merge(existing.get(), entity);
+                    return getRepository().save(merged);
+                }
+                throw new STACRUDException("Unable to update. Entity not found.", HTTPStatus.NOT_FOUND);
+            }
+        } else if (HttpMethod.PUT.equals(method)) {
+            throw new STACRUDException("Http PUT is not yet supported!", HTTPStatus.NOT_IMPLEMENTED);
+        }
+        throw new STACRUDException("Invalid http method for updating entity!", HTTPStatus.BAD_REQUEST);
     }
 
     @Override protected Party updateEntity(Party entity) throws STACRUDException {
@@ -148,7 +162,18 @@ public class PartyService
 
     @Override protected Party merge(Party existing, Party toMerge)
             throws STACRUDException {
-        throw new STACRUDException(NOT_IMPLEMENTED);
+
+        if (toMerge.getStaIdentifier() != null) {
+            existing.setStaIdentifier(toMerge.getStaIdentifier());
+        }
+        if (toMerge.getNickname() != null) {
+            existing.setNickname(toMerge.getNickname());
+        }
+        if (toMerge.getRole() != null) {
+            existing.setRole(toMerge.getRole());
+        }
+        mergeDatastreams(existing, toMerge);
+        return existing;
     }
 
     @Override protected void delete(Party entity) throws STACRUDException {

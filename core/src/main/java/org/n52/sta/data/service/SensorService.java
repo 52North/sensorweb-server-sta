@@ -116,7 +116,8 @@ public class SensorService
                                                                STAEntityDefinition.SENSORS,
                                                                expandItem.getQueryOptions());
                 SensorEntity sensor = new SensorEntity(entity);
-                return sensor.setDatastreams(observedProps.get().collect(Collectors.toSet()));
+                sensor.setDatastreams(observedProps.get().collect(Collectors.toSet()));
+                return sensor;
             } else {
                 throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty +
                                                            " on Entity of type 'Sensor'");
@@ -131,12 +132,13 @@ public class SensorService
                                                                    String ownId) {
         Specification<ProcedureEntity> filter;
         switch (relatedType) {
+        case STAEntityDefinition.CSDATASTREAMS:
         case STAEntityDefinition.DATASTREAMS: {
             filter = sQS.withDatastreamStaIdentifier(relatedId);
             break;
         }
         default:
-            throw new IllegalStateException("Trying to filter by unrelated type: " + relatedType + "not found!");
+            throw new IllegalStateException("Trying to filter by unrelated type: " + relatedType + " not found!");
         }
 
         if (ownId != null) {
@@ -193,8 +195,6 @@ public class SensorService
             getRepository().intermediateSave(procedure);
             checkProcedureHistory(procedure);
             if (sensor instanceof SensorEntity && ((SensorEntity) sensor).hasDatastreams()) {
-                AbstractSensorThingsEntityServiceImpl<?, DatastreamEntity, DatastreamEntity> dsService =
-                        getDatastreamService();
                 for (AbstractDatastreamEntity datastreamEntity : ((SensorEntity) sensor).getDatastreams()) {
                     getAbstractDatastreamService(datastreamEntity).createOrUpdate(datastreamEntity);
                 }

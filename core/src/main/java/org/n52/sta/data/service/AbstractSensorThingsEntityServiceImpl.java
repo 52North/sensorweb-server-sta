@@ -31,10 +31,11 @@ package org.n52.sta.data.service;
 
 import org.hibernate.query.criteria.internal.CriteriaBuilderImpl;
 import org.n52.series.db.beans.AbstractFeatureEntity;
-import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.HibernateRelations;
 import org.n52.series.db.beans.HibernateRelations.HasDescription;
+import org.n52.series.db.beans.HibernateRelations.HasIdentifier;
 import org.n52.series.db.beans.HibernateRelations.HasName;
+import org.n52.series.db.beans.HibernateRelations.HasStaIdentifier;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
@@ -45,6 +46,7 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ObservablePropertyEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.series.db.beans.sta.StaFeatureEntity;
+import org.n52.series.db.beans.sta.StaRelations;
 import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.series.db.beans.sta.mapped.ObservationEntity;
 import org.n52.series.db.beans.sta.mapped.extension.CSDatastream;
@@ -83,6 +85,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.Predicate;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Interface for requesting Sensor Things entities
@@ -472,7 +475,8 @@ public abstract class AbstractSensorThingsEntityServiceImpl<
 
     protected abstract S merge(S existing, S toMerge) throws STACRUDException;
 
-    protected void mergeIdentifierNameDescription(DescribableEntity existing, DescribableEntity toMerge) {
+    protected <U extends HasIdentifier & HasStaIdentifier & HasName & HasDescription>
+    void mergeIdentifierNameDescription(U existing, U toMerge) {
         if (toMerge.isSetIdentifier()) {
             existing.setIdentifier(toMerge.getIdentifier());
         }
@@ -482,7 +486,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<
         mergeNameDescription(existing, toMerge);
     }
 
-    protected void mergeNameDescription(DescribableEntity existing, DescribableEntity toMerge) {
+    protected <U extends HasName & HasDescription> void mergeNameDescription(U existing, U toMerge) {
         mergeName(existing, toMerge);
         mergeDescription(existing, toMerge);
     }
@@ -506,6 +510,18 @@ public abstract class AbstractSensorThingsEntityServiceImpl<
         if (toMerge.hasSamplingTimeStart() && toMerge.hasSamplingTimeEnd()) {
             existing.setSamplingTimeStart(toMerge.getSamplingTimeStart());
             existing.setSamplingTimeEnd(toMerge.getSamplingTimeEnd());
+        }
+    }
+
+    protected void mergeDatastreams(StaRelations.HasDatastreams existing, StaRelations.HasDatastreams toMerge)
+            throws STACRUDException {
+        if (toMerge.getDatastreams() != null) {
+            for (AbstractDatastreamEntity datastream : toMerge.getDatastreams()) {
+                checkInlineDatastream(datastream);
+            }
+            Set<AbstractDatastreamEntity> ex = existing.getDatastreams();
+            ex.addAll(toMerge.getDatastreams());
+            existing.setDatastreams(ex);
         }
     }
 

@@ -30,6 +30,7 @@
 package org.n52.sta.data.service.extension;
 
 import org.n52.janmayen.http.HTTPStatus;
+import org.n52.series.db.beans.sta.AbstractDatastreamEntity;
 import org.n52.series.db.beans.sta.mapped.extension.CSDatastream;
 import org.n52.series.db.beans.sta.mapped.extension.License;
 import org.n52.shetland.filter.ExpandFilter;
@@ -116,8 +117,8 @@ public class LicenseService
             if (getRepository().existsByStaIdentifier(license.getStaIdentifier())) {
                 throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
             } else {
-                for (CSDatastream datastream : license.getDatastreams()) {
-                    getCSDatastreamService().create(datastream);
+                for (AbstractDatastreamEntity datastream : license.getDatastreams()) {
+                    getCSDatastreamService().create((CSDatastream) datastream);
                 }
                 getRepository().save(license);
             }
@@ -128,7 +129,19 @@ public class LicenseService
 
     @Override protected License updateEntity(String id, License entity, HttpMethod method)
             throws STACRUDException {
-        throw new STACRUDException(NOT_IMPLEMENTED);
+        if (HttpMethod.PATCH.equals(method)) {
+            synchronized (getLock(id)) {
+                Optional<License> existing = getRepository().findByStaIdentifier(id);
+                if (existing.isPresent()) {
+                    License merged = merge(existing.get(), entity);
+                    return getRepository().save(merged);
+                }
+                throw new STACRUDException("Unable to update. Entity not found.", HTTPStatus.NOT_FOUND);
+            }
+        } else if (HttpMethod.PUT.equals(method)) {
+            throw new STACRUDException("Http PUT is not yet supported!", HTTPStatus.NOT_IMPLEMENTED);
+        }
+        throw new STACRUDException("Invalid http method for updating entity!", HTTPStatus.BAD_REQUEST);
     }
 
     @Override protected License updateEntity(License entity) throws STACRUDException {
@@ -148,7 +161,22 @@ public class LicenseService
 
     @Override protected License merge(License existing, License toMerge)
             throws STACRUDException {
-        throw new STACRUDException(NOT_IMPLEMENTED);
+
+        if (toMerge.getStaIdentifier() != null) {
+            existing.setStaIdentifier(toMerge.getStaIdentifier());
+        }
+        if (toMerge.getName() != null) {
+            existing.setName(toMerge.getName());
+        }
+        if (toMerge.getDefinition() != null) {
+            existing.setDefinition(toMerge.getDefinition());
+        }
+        if (toMerge.getLogo() != null) {
+            existing.setLogo(toMerge.getLogo());
+        }
+
+        mergeDatastreams(existing, toMerge);
+        return existing;
     }
 
     @Override protected void delete(License entity) throws STACRUDException {
