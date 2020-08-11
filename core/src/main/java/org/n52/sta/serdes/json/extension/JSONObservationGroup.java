@@ -99,9 +99,10 @@ public class JSONObservationGroup extends JSONBase.JSONwithIdNameDescription<Obs
             Set<ObservationRelation> related = new HashSet<>();
             related.add(((JSONObservationRelation) backReference).getEntity());
             self.setEntities(related);
-        } else {
-            Assert.notNull(null, INVALID_INLINE_ENTITY_MISSING + "Relations");
-        }
+        } 
+//        else {
+//            Assert.notNull(null, INVALID_INLINE_ENTITY_MISSING + "Relations");
+//        }
 
         return self;
     }

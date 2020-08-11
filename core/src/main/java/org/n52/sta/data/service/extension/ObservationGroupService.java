@@ -30,6 +30,7 @@
 package org.n52.sta.data.service.extension;
 
 import org.n52.janmayen.http.HTTPStatus;
+import org.n52.series.db.beans.sta.mapped.extension.License;
 import org.n52.series.db.beans.sta.mapped.extension.ObservationGroup;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
@@ -125,7 +126,19 @@ public class ObservationGroupService
 
     @Override protected ObservationGroup updateEntity(String id, ObservationGroup entity, HttpMethod method)
             throws STACRUDException {
-        throw new STACRUDException(NOT_IMPLEMENTED);
+        if (HttpMethod.PATCH.equals(method)) {
+            synchronized (getLock(id)) {
+                Optional<ObservationGroup> existing = getRepository().findByStaIdentifier(id);
+                if (existing.isPresent()) {
+                    ObservationGroup merged = merge(existing.get(), entity);
+                    return getRepository().save(merged);
+                }
+                throw new STACRUDException("Unable to update. Entity not found.", HTTPStatus.NOT_FOUND);
+            }
+        } else if (HttpMethod.PUT.equals(method)) {
+            throw new STACRUDException("Http PUT is not yet supported!", HTTPStatus.NOT_IMPLEMENTED);
+        }
+        throw new STACRUDException("Invalid http method for updating entity!", HTTPStatus.BAD_REQUEST);
     }
 
     @Override protected ObservationGroup updateEntity(ObservationGroup entity) throws STACRUDException {
@@ -145,7 +158,14 @@ public class ObservationGroupService
 
     @Override protected ObservationGroup merge(ObservationGroup existing, ObservationGroup toMerge)
             throws STACRUDException {
-        throw new STACRUDException(NOT_IMPLEMENTED);
+        
+        if (toMerge.getStaIdentifier() != null) {
+            existing.setStaIdentifier(toMerge.getStaIdentifier());
+        }
+        mergeName(existing, toMerge);
+        mergeDescription(existing, toMerge);
+        mergeObservationRelations(existing, toMerge);
+        return existing;
     }
 
     @Override protected void delete(ObservationGroup entity) throws STACRUDException {
@@ -154,5 +174,17 @@ public class ObservationGroupService
 
     @Override public void delete(String id) throws STACRUDException {
         getRepository().deleteByStaIdentifier(id);
+    }
+
+    private void mergeObservationRelations(ObservationGroup existing,
+            ObservationGroup toMerge) {
+        
+        if (existing.getEntities() == null) {
+            existing.setEntities(toMerge.getEntities());
+        } else {
+            if (toMerge.getEntities() != null) {
+                existing.getEntities().addAll(toMerge.getEntities());
+            }
+        }
     }
 }
