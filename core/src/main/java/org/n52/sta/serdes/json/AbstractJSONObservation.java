@@ -49,6 +49,7 @@ import org.springframework.util.Assert;
 
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Random;
 
 @SuppressWarnings("VisibilityModifier")
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
@@ -170,6 +171,8 @@ public abstract class AbstractJSONObservation<T extends AbstractObservationEntit
         self.setIdentifier(identifier);
         self.setStaIdentifier(identifier);
 
+        self.setId(new Random().nextLong());
+        
         // phenomenonTime
         if (phenomenonTime != null) {
             Time time = parseTime(phenomenonTime);
