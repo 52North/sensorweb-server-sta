@@ -55,7 +55,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Objects;
@@ -181,12 +180,12 @@ public class ThingService
                     thing.setProcessed(true);
                     boolean locationChanged = processLocations(thing, thing.getLocations());
                     thing = getRepository().intermediateSave(thing);
+                    processDatastreams(thing);
                     boolean hasUnpersistedHLocs = thing.hasHistoricalLocations() &&
                             thing.getHistoricalLocations().stream().anyMatch(p -> p.getId() == null);
                     if (locationChanged || hasUnpersistedHLocs) {
                         generateHistoricalLocation(thing);
                     }
-                    processDatastreams(thing);
                     thing = getRepository().save(thing);
                 }
             }
@@ -362,7 +361,9 @@ public class ThingService
                 historicalLocations.add(createdHistoricalLocation);
             }
             for (LocationEntity location : thing.getLocations()) {
-                location.setHistoricalLocations(Collections.singleton(createdHistoricalLocation));
+                HashSet<HistoricalLocationEntity> hlocs = new HashSet<>();
+                hlocs.add(createdHistoricalLocation);
+                location.setHistoricalLocations(hlocs);
                 getLocationService().createOrUpdate(location);
             }
             thing.setHistoricalLocations(historicalLocations);

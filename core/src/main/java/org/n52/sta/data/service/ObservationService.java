@@ -639,7 +639,7 @@ public class ObservationService extends
     private DatasetEntity updateDataset(DatasetEntity dataset, ObservationEntity<?> data) throws STACRUDException {
         Optional<DataEntity<?>> rawObservation = dataRepository.findById(data.getId());
         if (rawObservation.isPresent()) {
-            synchronized (getLock(dataset.getIdentifier())) {
+            synchronized (getLock(dataset.getId().toString() + "Dataset")) {
                 if (!dataset.isSetFirstValueAt()
                         || (dataset.isSetFirstValueAt() &&
                         data.getSamplingTimeStart().before(dataset.getFirstValueAt()))) {

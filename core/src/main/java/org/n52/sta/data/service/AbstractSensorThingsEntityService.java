@@ -52,6 +52,7 @@ public interface AbstractSensorThingsEntityService<T extends IdentifierRepositor
      *            the id of the Entity
      * @return true if an Entity with given id exists
      */
+    @Transactional(rollbackFor = Exception.class)
     boolean existsEntity(String id);
 
     /**
@@ -65,6 +66,7 @@ public interface AbstractSensorThingsEntityService<T extends IdentifierRepositor
      * @throws STACRUDException
      *             if an error occurred
      */
+    @Transactional(rollbackFor = Exception.class)
     ElementWithQueryOptions getEntity(String id, QueryOptions queryOptions) throws STACRUDException;
 
     /**
@@ -76,6 +78,7 @@ public interface AbstractSensorThingsEntityService<T extends IdentifierRepositor
      * @throws STACRUDException
      *             if the queryOptions are invalid
      */
+    @Transactional(rollbackFor = Exception.class)
     CollectionWrapper getEntityCollection(QueryOptions queryOptions) throws STACRUDException;
 
     /**
@@ -94,6 +97,7 @@ public interface AbstractSensorThingsEntityService<T extends IdentifierRepositor
      * @throws STACRUDException
      *             if an error occurred
      */
+    @Transactional(rollbackFor = Exception.class)
     ElementWithQueryOptions<?> getEntityByRelatedEntity(String relatedId, String relatedType, String ownId,
             QueryOptions queryOptions) throws STACRUDException;
 
@@ -110,6 +114,7 @@ public interface AbstractSensorThingsEntityService<T extends IdentifierRepositor
      * @throws STACRUDException
      *             if the queryOptions are invalid
      */
+    @Transactional(rollbackFor = Exception.class)
     CollectionWrapper getEntityCollectionByRelatedEntity(String relatedId, String relatedType,
             QueryOptions queryOptions) throws STACRUDException;
 
@@ -123,6 +128,7 @@ public interface AbstractSensorThingsEntityService<T extends IdentifierRepositor
      *            EntityType of the related Entity
      * @return Id of the Entity. Null if no entity is present
      */
+    @Transactional(rollbackFor = Exception.class)
     String getEntityIdByRelatedEntity(String relatedId, String relatedType);
 
     /**
@@ -137,6 +143,7 @@ public interface AbstractSensorThingsEntityService<T extends IdentifierRepositor
      *            ID of the requested Entity. Can be null.
      * @return true if an Entity exists
      */
+    @Transactional(rollbackFor = Exception.class)
     boolean existsEntityByRelatedEntity(String relatedId, String relatedType, String ownId);
 
     /**

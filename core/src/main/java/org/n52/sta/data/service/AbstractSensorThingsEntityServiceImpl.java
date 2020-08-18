@@ -73,7 +73,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import javax.persistence.criteria.Predicate;
 import java.util.Optional;
 
@@ -95,7 +94,6 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSensorThingsEntityServiceImpl.class);
 
-    @Autowired
     private EntityServiceRepository serviceRepository;
 
     @Autowired
@@ -114,11 +112,6 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         this.defaultFetchGraphs = defaultFetchGraphs;
     }
 
-    @PostConstruct
-    public void init() {
-        serviceRepository.addEntityService(this);
-    }
-
     /**
      * Gets a lock with given name from global lockMap. Name is unique per EntityType.
      * Uses weak references so Map is automatically cleared by GC.
@@ -128,7 +121,11 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
      * @return Object used for holding the lock
      */
     protected Object getLock(String key) throws STACRUDException {
-        return lock.getLock(key + entityClass.getSimpleName());
+        if (key == null) {
+            throw new STACRUDException("Unable to aquire lock. Invalid key provided!");
+        } else {
+            return lock.getLock(key + entityClass.getSimpleName());
+        }
     }
 
     public abstract EntityTypes[] getTypes();
@@ -559,5 +556,9 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         return (AbstractSensorThingsEntityServiceImpl<?, AbstractObservationEntity<?>, AbstractObservationEntity<?>>)
                 getEntityService(EntityTypes.Observation);
 
+    }
+
+    public void setServiceRepository(EntityServiceRepository serviceRepository) {
+        this.serviceRepository = serviceRepository;
     }
 }

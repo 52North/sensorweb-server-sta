@@ -29,27 +29,6 @@
 
 package org.n52.sta.data.repositories;
 
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.persistence.EntityGraph;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.ParameterExpression;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
 import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.graph.EntityGraphs;
 import org.hibernate.graph.GraphParser;
@@ -85,6 +64,27 @@ import org.springframework.lang.Nullable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import javax.persistence.EntityGraph;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.NoResultException;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.ParameterExpression;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 public class MessageBusRepository<T, I extends Serializable>
         extends SimpleJpaRepository<T, I> implements RepositoryConstants {
 
@@ -98,7 +98,9 @@ public class MessageBusRepository<T, I extends Serializable>
 
     private final JpaEntityInformation entityInformation;
     private final STAEventHandler mqttHandler;
+    // Used actively by the
     private final EntityManager em;
+    private final EntityManager databaseEm;
     private final Class<T> entityClass;
     private final CriteriaBuilder criteriaBuilder;
 
@@ -111,6 +113,12 @@ public class MessageBusRepository<T, I extends Serializable>
                          EntityManager entityManager) {
         super(entityInformation, entityManager);
         this.em = entityManager;
+
+        EntityManagerFactory factory =
+                (EntityManagerFactory) SpringApplicationContext.getBean(EntityManagerFactory.class);
+        Assert.notNull(factory, "Could not autowire EntityManagerFactory!");
+        this.databaseEm = factory.createEntityManager();
+
         this.entityInformation = entityInformation;
         this.entityClass = entityInformation.getJavaType();
         this.entityTypeToStaType = this.createEntityTypeToStaTypeMapping();
@@ -259,7 +267,14 @@ public class MessageBusRepository<T, I extends Serializable>
             }
         } else {
             if (intercept) {
-                S oldEntity = (S) em.find(newEntity.getClass(), entityInformation.getId(newEntity));
+                // Get original entity state from database to create differenceMap for matching MQTT Subscriptions on
+                // Entity properties
+                S oldEntity = (S) this.databaseEm.find(newEntity.getClass(), entityInformation.getId(newEntity));
+
+                // Entity was intermediateSaved and is not known to databaseEm
+                if (oldEntity == null) {
+                    oldEntity = (S) this.em.find(newEntity.getClass(), entityInformation.getId(newEntity));
+                }
                 Map<String, Object> oldProperties = getPropertyMap(oldEntity);
                 S entity = em.merge(newEntity);
                 em.flush();
@@ -267,10 +282,7 @@ public class MessageBusRepository<T, I extends Serializable>
                                              entityType,
                                              computeDifference(oldProperties, getPropertyMap(newEntity)),
                                              getRelatedCollections(entity));
-                // Entity was saved multiple times without changes. As reference is the same
-                if (oldEntity == entity) {
-                    return entity;
-                }
+                return entity;
             } else {
                 return em.merge(newEntity);
             }
