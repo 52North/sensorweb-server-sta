@@ -135,11 +135,11 @@ public class ObservedPropertySerDes {
                     } else {
                         switch (navigationProperty) {
                         case ObservedPropertyEntityDefinition.DATASTREAMS:
-                            if (obsProp.getDatastreams() == null) {
+                            if (obsProp.getDatasets() == null) {
                                 writeNavigationProp(gen, navigationProperty, obsProp.getStaIdentifier());
                             } else {
                                 gen.writeFieldName(navigationProperty);
-                                writeNestedCollection(Collections.unmodifiableSet(obsProp.getDatastreams()),
+                                writeNestedCollection(Collections.unmodifiableSet(obsProp.getDatasets()),
                                                       fieldsToExpand.get(navigationProperty),
                                                       gen,
                                                       serializers);

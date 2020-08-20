@@ -36,9 +36,9 @@ import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
-import org.n52.shetland.ogc.sta.model.LocationEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.LocationQuerySpecifications;
 import org.n52.sta.data.repositories.EntityGraphRepository;
@@ -105,28 +105,24 @@ public class LocationService
             throws STACRUDException, STAInvalidQueryException {
         for (ExpandItem expandItem : expandOption.getItems()) {
             String expandProperty = expandItem.getPath();
-            if (LocationEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
-                switch (expandProperty) {
-                case STAEntityDefinition.HISTORICAL_LOCATIONS:
-                    Page<HistoricalLocationEntity> hLocs = getHistoricalLocationService()
-                            .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
-                                                                   STAEntityDefinition.LOCATIONS,
-                                                                   expandItem.getQueryOptions());
-                    entity.setHistoricalLocations(hLocs.get().collect(Collectors.toSet()));
-                    break;
-                case STAEntityDefinition.THINGS:
-                    Page<PlatformEntity> things =
-                            getThingService().getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
-                                                                                    STAEntityDefinition.LOCATIONS,
-                                                                                    expandItem.getQueryOptions());
-                    entity.setThings(things.get().collect(Collectors.toSet()));
-                    break;
-                default:
-                    throw new RuntimeException("This can never happen!");
-                }
-            } else {
-                throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty
-                                                           + " on Entity of type 'Location'");
+            switch (expandProperty) {
+            case STAEntityDefinition.HISTORICAL_LOCATIONS:
+                Page<HistoricalLocationEntity> hLocs = getHistoricalLocationService()
+                        .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
+                                                               STAEntityDefinition.LOCATIONS,
+                                                               expandItem.getQueryOptions());
+                entity.setHistoricalLocations(hLocs.get().collect(Collectors.toSet()));
+                break;
+            case STAEntityDefinition.THINGS:
+                Page<PlatformEntity> things =
+                        getThingService().getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
+                                                                                STAEntityDefinition.LOCATIONS,
+                                                                                expandItem.getQueryOptions());
+                entity.setThings(things.get().collect(Collectors.toSet()));
+                break;
+            default:
+                throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED, expandProperty,
+                                                                 StaConstants.LOCATION));
             }
         }
         return entity;
@@ -145,7 +141,7 @@ public class LocationService
             break;
         }
         default:
-            throw new IllegalStateException("Trying to filter by unrelated type: " + relatedType + "not found!");
+            throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
         }
 
         if (ownId != null) {
@@ -155,7 +151,7 @@ public class LocationService
     }
 
     @Override
-    public LocationEntity createEntity(LocationEntity newLocation) throws STACRUDException {
+    public LocationEntity createOrfetch(LocationEntity newLocation) throws STACRUDException {
         LocationEntity location = newLocation;
         if (!location.isProcessed()) {
             if (location.getStaIdentifier() != null && !location.isSetName()) {
@@ -164,7 +160,9 @@ public class LocationService
                 if (optionalEntity.isPresent()) {
                     return optionalEntity.get();
                 } else {
-                    throw new STACRUDException("No Location with id '" + location.getStaIdentifier() + "' found");
+                    throw new STACRUDException(String.format(NO_S_WITH_ID_S_FOUND,
+                                                             StaConstants.LOCATION,
+                                                             location.getStaIdentifier()));
                 }
             }
             if (location.getStaIdentifier() == null) {
@@ -180,7 +178,7 @@ public class LocationService
             }
             synchronized (getLock(location.getStaIdentifier())) {
                 if (getRepository().existsByStaIdentifier(location.getStaIdentifier())) {
-                    throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
+                    throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS, HTTPStatus.CONFLICT);
                 }
                 location.setProcessed(true);
                 checkLocationEncoding(location);
@@ -207,14 +205,9 @@ public class LocationService
                 throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }
         } else if (HttpMethod.PUT.equals(method)) {
-            throw new STACRUDException("Http PUT is not yet supported!", HTTPStatus.NOT_IMPLEMENTED);
+            throw new STACRUDException(HTTP_PUT_IS_NOT_YET_SUPPORTED, HTTPStatus.NOT_IMPLEMENTED);
         }
-        throw new STACRUDException("Invalid http method for updating entity!", HTTPStatus.BAD_REQUEST);
-    }
-
-    @Override
-    public LocationEntity updateEntity(LocationEntity entity) {
-        return getRepository().save(entity);
+        throw new STACRUDException(INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY, HTTPStatus.BAD_REQUEST);
     }
 
     @Override
@@ -231,7 +224,7 @@ public class LocationService
                     if (location.getHistoricalLocations() != null) {
                         thing.getHistoricalLocations().removeAll(location.getHistoricalLocations());
                     }
-                    getThingService().updateEntity(thing);
+                    getThingService().save(thing);
                 }
                 // delete all historical locations
                 for (HistoricalLocationEntity historicalLocation : location.getHistoricalLocations()) {
@@ -250,22 +243,16 @@ public class LocationService
     }
 
     @Override
-    protected LocationEntity createOrUpdate(LocationEntity entity) throws STACRUDException {
+    public LocationEntity createOrUpdate(LocationEntity entity) throws STACRUDException {
         if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
             return updateEntity(entity.getStaIdentifier(), entity, HttpMethod.PATCH);
         }
-        return createEntity(entity);
+        return createOrfetch(entity);
     }
 
     @Override
     public String checkPropertyName(String property) {
-        if (property.equals(ENCODINGTYPE)) {
-            return LocationEntity.PROPERTY_NAME;
-        } else if (property.equals("location")) {
-            return "name desc";
-        } else {
-            return property;
-        }
+        return lQS.checkPropertyName(property);
     }
 
     private void checkLocationEncoding(LocationEntity location) throws STACRUDException {

@@ -32,10 +32,14 @@ package org.n52.sta.data.repositories;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Set;
+
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Transactional
 public interface LocationRepository extends NameRepository<LocationEntity> {
+
+    Set<LocationEntity> findAllByThingsIdEquals(Long id);
 
 }

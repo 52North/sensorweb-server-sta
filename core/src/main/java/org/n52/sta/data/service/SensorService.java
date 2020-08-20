@@ -30,13 +30,14 @@
 package org.n52.sta.data.service;
 
 import org.n52.janmayen.http.HTTPStatus;
+import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
-import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
@@ -107,21 +108,24 @@ public class SensorService
 
     @Override protected SensorEntity fetchExpandEntities(ProcedureEntity entity, ExpandFilter expandOption)
             throws STACRUDException, STAInvalidQueryException {
+        SensorEntity sensor = new SensorEntity(entity);
         for (ExpandItem expandItem : expandOption.getItems()) {
             String expandProperty = expandItem.getPath();
-            if (SensorEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
-                Page<DatastreamEntity> observedProps = getDatastreamService()
+            switch (expandProperty) {
+            case SensorEntityDefinition.DATASTREAMS:
+                Page<AbstractDatasetEntity> datastreams = getDatastreamService()
                         .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
                                                                STAEntityDefinition.SENSORS,
                                                                expandItem.getQueryOptions());
-                SensorEntity sensor = new SensorEntity(entity);
-                return sensor.setDatastreams(observedProps.get().collect(Collectors.toSet()));
-            } else {
-                throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty +
-                                                           " on Entity of type 'Sensor'");
+                sensor.setDatasets(datastreams.get().collect(Collectors.toSet()));
+                break;
+            default:
+                throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
+                                                                 expandProperty,
+                                                                 StaConstants.SENSOR));
             }
         }
-        return new SensorEntity(entity);
+        return sensor;
     }
 
     @Override
@@ -135,7 +139,7 @@ public class SensorService
             break;
         }
         default:
-            throw new IllegalStateException("Trying to filter by unrelated type: " + relatedType + "not found!");
+            throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
         }
 
         if (ownId != null) {
@@ -146,15 +150,7 @@ public class SensorService
 
     @Override
     public String checkPropertyName(String property) {
-        switch (property) {
-        case "encodingType":
-            return ProcedureEntity.PROPERTY_PROCEDURE_DESCRIPTION_FORMAT;
-        case "metadata":
-            // TODO: Add sorting by HistoricalLocation that replaces Description if it is not present
-            return "descriptionFile";
-        default:
-            return super.checkPropertyName(property);
-        }
+        return sQS.checkPropertyName(property);
     }
 
     private ProcedureEntity getAsProcedureEntity(ProcedureEntity sensor) {
@@ -164,7 +160,7 @@ public class SensorService
     }
 
     @Override
-    public ProcedureEntity createEntity(ProcedureEntity sensor) throws STACRUDException {
+    public ProcedureEntity createOrfetch(ProcedureEntity sensor) throws STACRUDException {
         if (sensor.getStaIdentifier() != null && !sensor.isSetName()) {
             Optional<ProcedureEntity> optionalEntity =
                     getRepository().findByStaIdentifier(sensor.getStaIdentifier(),
@@ -172,13 +168,16 @@ public class SensorService
             if (optionalEntity.isPresent()) {
                 return optionalEntity.get();
             } else {
-                throw new STACRUDException("No Sensor with id '" + sensor.getStaIdentifier() + "' found");
+                throw new STACRUDException(String.format(NO_S_WITH_ID_S_FOUND,
+                                                         StaConstants.SENSOR,
+                                                         sensor.getStaIdentifier()));
             }
         }
         if (sensor.getStaIdentifier() == null) {
             if (getRepository().existsByName(sensor.getName())) {
                 Optional<ProcedureEntity> optional = getRepository()
-                        .findOne(sQS.withStaIdentifier(sensor.getStaIdentifier()).or(sQS.withName(sensor.getName())));
+                        .findOne(sQS.withStaIdentifier(sensor.getStaIdentifier())
+                                    .or(sQS.withName(sensor.getName())));
                 return optional.isPresent() ? optional.get() : null;
             } else {
                 // Autogenerate Identifier
@@ -190,7 +189,7 @@ public class SensorService
 
         synchronized (getLock(sensor.getStaIdentifier())) {
             if (getRepository().existsByStaIdentifier(sensor.getStaIdentifier())) {
-                throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
+                throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS, HTTPStatus.CONFLICT);
             }
             ProcedureEntity procedure = getAsProcedureEntity(sensor);
             checkFormat(procedure, procedure);
@@ -200,13 +199,12 @@ public class SensorService
             getRepository().intermediateSave(procedure);
             checkProcedureHistory(procedure);
             if (sensor instanceof SensorEntity && ((SensorEntity) sensor).hasDatastreams()) {
-                AbstractSensorThingsEntityServiceImpl<?, DatastreamEntity, DatastreamEntity> dsService =
-                        getDatastreamService();
-                for (DatastreamEntity datastreamEntity : ((SensorEntity) sensor).getDatastreams()) {
+                for (AbstractDatasetEntity datastreamEntity : ((SensorEntity) sensor).getDatasets()) {
                     try {
-                        dsService.createOrUpdate(datastreamEntity);
+                        getDatastreamService().createOrUpdate(datastreamEntity);
                     } catch (STACRUDException e) {
                         // Datastream might be currently processing.
+                        //TODO: check if we need to do something here
                     }
                 }
             }
@@ -231,9 +229,10 @@ public class SensorService
                     ProcedureEntity merged = merge(existing.get(), entity);
                     if (entity instanceof SensorEntity) {
                         if (((SensorEntity) entity).hasDatastreams()) {
-                            AbstractSensorThingsEntityServiceImpl<?, DatastreamEntity, DatastreamEntity> dsService =
-                                    getDatastreamService();
-                            for (DatastreamEntity datastreamEntity : ((SensorEntity) entity).getDatastreams()) {
+                            AbstractSensorThingsEntityServiceImpl<?, AbstractDatasetEntity, AbstractDatasetEntity>
+                                    dsService = getDatastreamService();
+                            for (AbstractDatasetEntity datastreamEntity :
+                                    ((SensorEntity) entity).getDatasets()) {
                                 dsService.createOrUpdate(datastreamEntity);
                             }
                         }
@@ -244,15 +243,15 @@ public class SensorService
                     return merged;
                 }
             }
-            throw new STACRUDException("Unable to update. Entity not found.", HTTPStatus.NOT_FOUND);
+            throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
         } else if (HttpMethod.PUT.equals(method)) {
-            throw new STACRUDException("Http PUT is not yet supported!", HTTPStatus.NOT_IMPLEMENTED);
+            throw new STACRUDException(HTTP_PUT_IS_NOT_YET_SUPPORTED, HTTPStatus.NOT_IMPLEMENTED);
         }
-        throw new STACRUDException("Invalid http method for updating entity!", HTTPStatus.BAD_REQUEST);
+        throw new STACRUDException(INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY, HTTPStatus.BAD_REQUEST);
     }
 
     @Override
-    protected ProcedureEntity updateEntity(ProcedureEntity entity) {
+    protected ProcedureEntity save(ProcedureEntity entity) {
         return getRepository().save(getAsProcedureEntity(entity));
     }
 
@@ -260,7 +259,7 @@ public class SensorService
         if (entity instanceof SensorEntity) {
             SensorEntity sensor = (SensorEntity) entity;
             if (sensor.hasDatastreams()) {
-                for (DatastreamEntity datastream : sensor.getDatastreams()) {
+                for (AbstractDatasetEntity datastream : sensor.getDatasets()) {
                     checkInlineDatastream(datastream);
                 }
             }
@@ -272,18 +271,12 @@ public class SensorService
         synchronized (getLock(identifier)) {
             if (getRepository().existsByStaIdentifier(identifier)) {
                 // delete datastreams
-                datastreamRepository.findAll(dQS.withSensorStaIdentifier(identifier)).forEach(d -> {
-                    try {
-                        // TODO delete observation and datasets ...
-                        getDatastreamService().delete(d);
-                    } catch (STACRUDException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                });
+                for (AbstractDatasetEntity ds : datastreamRepository.findAll(dQS.withSensorStaIdentifier(identifier))) {
+                    getDatastreamService().delete(ds);
+                }
                 getRepository().deleteByStaIdentifier(identifier);
             } else {
-                throw new STACRUDException("Unable to delete. Entity not found.", HTTPStatus.NOT_FOUND);
+                throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }
         }
     }
@@ -294,11 +287,11 @@ public class SensorService
     }
 
     @Override
-    protected ProcedureEntity createOrUpdate(ProcedureEntity entity) throws STACRUDException {
+    public ProcedureEntity createOrUpdate(ProcedureEntity entity) throws STACRUDException {
         if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
             return updateEntity(entity.getStaIdentifier(), entity, HttpMethod.PATCH);
         }
-        return createEntity(entity);
+        return createOrfetch(entity);
     }
 
     private void checkFormat(ProcedureEntity mergedSensor, ProcedureEntity newSensor) throws STACRUDException {

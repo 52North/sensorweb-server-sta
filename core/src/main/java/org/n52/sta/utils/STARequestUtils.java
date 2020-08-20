@@ -29,10 +29,10 @@
 
 package org.n52.sta.utils;
 
+import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
-import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ObservationEntity;
@@ -450,7 +450,7 @@ public interface STARequestUtils extends StaConstants {
         case LOCATIONS:
             return LocationEntity.class;
         case DATASTREAMS:
-            return DatastreamEntity.class;
+            return AbstractDatasetEntity.class;
         case HISTORICAL_LOCATIONS:
             return HistoricalLocationEntity.class;
         case SENSORS:

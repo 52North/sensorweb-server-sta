@@ -74,7 +74,7 @@ public interface IdentifierRepository<T, I> extends EntityGraphRepository<T, I> 
      * @param columnName Name of Column
      * @return Content of the column with columnName if spec matches. Optional.empty() otherwise
      */
-    Optional<String> identifier(Specification<T> spec, String columnName);
+    Optional<String> getColumn(Specification<T> spec, String columnName);
 
     /**
      * Gets content of columnName of entity that is specified by spec. Used for fetching only identifier instead of
@@ -85,5 +85,5 @@ public interface IdentifierRepository<T, I> extends EntityGraphRepository<T, I> 
      * @param columnName Name of Column
      * @return Content of the column with columnName if spec matches. Optional.empty() otherwise
      */
-    List<String> identifierList(Specification<T> spec, Pageable pageable, String columnName);
+    List<String> getColumnList(Specification<T> spec, Pageable pageable, String columnName);
 }

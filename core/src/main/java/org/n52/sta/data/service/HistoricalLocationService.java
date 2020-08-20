@@ -35,9 +35,9 @@ import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
-import org.n52.shetland.ogc.sta.model.HistoricalLocationEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.HistoricalLocationQuerySpecifications;
 import org.n52.sta.data.repositories.EntityGraphRepository;
@@ -93,25 +93,22 @@ public class HistoricalLocationService
             throws STACRUDException, STAInvalidQueryException {
         for (ExpandItem expandItem : expandOption.getItems()) {
             String expandProperty = expandItem.getPath();
-            if (HistoricalLocationEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
-                switch (expandProperty) {
-                case STAEntityDefinition.LOCATIONS:
-                    Page<LocationEntity> locations = getLocationService()
-                            .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
-                                                                   STAEntityDefinition.HISTORICAL_LOCATIONS,
-                                                                   expandItem.getQueryOptions());
-                    entity.setLocations(locations.get().collect(Collectors.toSet()));
-                    break;
-                case STAEntityDefinition.THING:
-                    entity.setThing(getThingService()
-                                            .getEntityByIdRaw(entity.getThing().getId(), expandItem.getQueryOptions()));
-                    break;
-                default:
-                    throw new RuntimeException("This can never happen!");
-                }
-            } else {
-                throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty +
-                                                           " on Entity of type 'HistoricalLocation'");
+            switch (expandProperty) {
+            case STAEntityDefinition.LOCATIONS:
+                Page<LocationEntity> locations = getLocationService()
+                        .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
+                                                               STAEntityDefinition.HISTORICAL_LOCATIONS,
+                                                               expandItem.getQueryOptions());
+                entity.setLocations(locations.get().collect(Collectors.toSet()));
+                break;
+            case STAEntityDefinition.THING:
+                entity.setThing(getThingService()
+                                        .getEntityByIdRaw(entity.getThing().getId(), expandItem.getQueryOptions()));
+                break;
+            default:
+                throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
+                                                                 expandProperty,
+                                                                 StaConstants.HISTORICAL_LOCATION));
             }
         }
         return entity;
@@ -132,7 +129,7 @@ public class HistoricalLocationService
             break;
         }
         default:
-            throw new IllegalStateException("Trying to filter by unrelated type: " + relatedType + "not found!");
+            throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
         }
 
         if (ownId != null) {
@@ -142,7 +139,7 @@ public class HistoricalLocationService
     }
 
     @Override
-    public HistoricalLocationEntity createEntity(HistoricalLocationEntity historicalLocation)
+    public HistoricalLocationEntity createOrfetch(HistoricalLocationEntity historicalLocation)
             throws STACRUDException {
         synchronized (getLock(historicalLocation.getStaIdentifier())) {
             if (!historicalLocation.isProcessed()) {
@@ -167,8 +164,9 @@ public class HistoricalLocationService
         historicalLocation.setThing(thing);
         HistoricalLocationEntity created = getRepository().save(historicalLocation);
         created.setProcessed(true);
-        getThingService().updateEntity(thing.addHistoricalLocation(created));
-        return created.setLocations(historicalLocation.getLocations());
+        getThingService().save(thing.addHistoricalLocation(created));
+        created.setLocations(historicalLocation.getLocations());
+        return created;
     }
 
     private void processLocations(HistoricalLocationEntity historicalLocation) throws STACRUDException {
@@ -198,17 +196,12 @@ public class HistoricalLocationService
                     HistoricalLocationEntity merged = merge(existing.get(), entity);
                     return getRepository().save(merged);
                 }
-                throw new STACRUDException("Unable to update. Entity not found.", HTTPStatus.NOT_FOUND);
+                throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }
         } else if (HttpMethod.PUT.equals(method)) {
-            throw new STACRUDException("Http PUT is not yet supported!", HTTPStatus.NOT_IMPLEMENTED);
+            throw new STACRUDException(HTTP_PUT_IS_NOT_YET_SUPPORTED, HTTPStatus.NOT_IMPLEMENTED);
         }
-        throw new STACRUDException("Invalid http method for updating entity!", HTTPStatus.BAD_REQUEST);
-    }
-
-    @Override
-    public HistoricalLocationEntity updateEntity(HistoricalLocationEntity entity) {
-        return getRepository().save(entity);
+        throw new STACRUDException(INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY, HTTPStatus.BAD_REQUEST);
     }
 
     @Override
@@ -224,7 +217,7 @@ public class HistoricalLocationService
                 updateThing(historicalLocation);
                 getRepository().deleteByStaIdentifier(id);
             } else {
-                throw new STACRUDException("Unable to delete. Entity not found.", HTTPStatus.NOT_FOUND);
+                throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }
         }
     }
@@ -235,23 +228,27 @@ public class HistoricalLocationService
     }
 
     @Override
-    protected HistoricalLocationEntity createOrUpdate(HistoricalLocationEntity entity)
+    public HistoricalLocationEntity createOrUpdate(HistoricalLocationEntity entity)
             throws STACRUDException {
         if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
             return updateEntity(entity.getStaIdentifier(), entity, HttpMethod.PATCH);
         }
-        return createEntity(entity);
+        return createOrfetch(entity);
+    }
+
+    @Override public String checkPropertyName(String property) {
+        return hlQS.checkPropertyName(property);
     }
 
     private void updateLocations(HistoricalLocationEntity historicalLocation) throws STACRUDException {
         for (LocationEntity location : historicalLocation.getLocations()) {
             location.getHistoricalLocations().remove(historicalLocation);
-            getLocationService().updateEntity(location);
+            getLocationService().save(location);
         }
     }
 
     private void updateThing(HistoricalLocationEntity historicalLocation) throws STACRUDException {
-        getThingService().updateEntity(historicalLocation.getThing().setHistoricalLocations(null));
+        getThingService().save(historicalLocation.getThing().setHistoricalLocations(null));
     }
 
     @Override

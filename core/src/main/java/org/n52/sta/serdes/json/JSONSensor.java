@@ -79,10 +79,10 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorEntity>
             handleEncodingType();
 
             if (Datastreams != null) {
-                self.setDatastreams(Arrays.stream(Datastreams)
-                                          .map(ds -> ds.toEntity(JSONBase.EntityType.FULL,
-                                                                 JSONBase.EntityType.REFERENCE))
-                                          .collect(Collectors.toSet()));
+                self.setDatasets(Arrays.stream(Datastreams)
+                                       .map(ds -> ds.toEntity(JSONBase.EntityType.FULL,
+                                                              JSONBase.EntityType.REFERENCE))
+                                       .collect(Collectors.toSet()));
             }
 
             // Deal with back reference during deep insert
@@ -105,9 +105,9 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorEntity>
             }
 
             if (Datastreams != null) {
-                self.setDatastreams(Arrays.stream(Datastreams)
-                                          .map(ds -> ds.toEntity(JSONBase.EntityType.REFERENCE))
-                                          .collect(Collectors.toSet()));
+                self.setDatasets(Arrays.stream(Datastreams)
+                                       .map(ds -> ds.toEntity(JSONBase.EntityType.REFERENCE))
+                                       .collect(Collectors.toSet()));
             }
             return self;
         case REFERENCE:

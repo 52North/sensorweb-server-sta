@@ -85,7 +85,7 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
             }
 
             if (Datastreams != null) {
-                self.setDatastreams(Arrays.stream(Datastreams)
+                self.setDatasets(Arrays.stream(Datastreams)
                                           .map(ds -> ds.toEntity(JSONBase.EntityType.FULL,
                                                                  JSONBase.EntityType.REFERENCE))
                                           .collect(Collectors.toSet()));
@@ -103,10 +103,10 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
                 if (backReference instanceof JSONLocation) {
                     self.addLocationEntity(((JSONLocation) backReference).getEntity());
                 } else if (backReference instanceof JSONDatastream) {
-                    if (self.getDatastreams() != null) {
-                        self.getDatastreams().add(((JSONDatastream) backReference).getEntity());
+                    if (self.getDatasets() != null) {
+                        self.getDatasets().add(((JSONDatastream) backReference).getEntity());
                     } else {
-                        self.setDatastreams(Collections.singleton(((JSONDatastream) backReference).getEntity()));
+                        self.setDatasets(Collections.singleton(((JSONDatastream) backReference).getEntity()));
                     }
                 } else {
                     self.addHistoricalLocation(((JSONHistoricalLocation) backReference).getEntity());
@@ -133,7 +133,7 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
             }
 
             if (Datastreams != null) {
-                self.setDatastreams(Arrays.stream(Datastreams)
+                self.setDatasets(Arrays.stream(Datastreams)
                                           .map(ds -> ds.toEntity(JSONBase.EntityType.REFERENCE))
                                           .collect(Collectors.toSet()));
             }

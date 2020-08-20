@@ -158,11 +158,11 @@ public class SensorSerDes {
                     } else {
                         switch (navigationProperty) {
                         case SensorEntityDefinition.DATASTREAMS:
-                            if (sensor.getDatastreams() == null) {
+                            if (sensor.getDatasets() == null) {
                                 writeNavigationProp(gen, navigationProperty, sensor.getStaIdentifier());
                             } else {
                                 gen.writeFieldName(navigationProperty);
-                                writeNestedCollection(Collections.unmodifiableSet(sensor.getDatastreams()),
+                                writeNestedCollection(Collections.unmodifiableSet(sensor.getDatasets()),
                                                       fieldsToExpand.get(navigationProperty),
                                                       gen,
                                                       serializers);

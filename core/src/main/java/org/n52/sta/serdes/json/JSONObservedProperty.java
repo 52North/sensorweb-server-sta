@@ -65,7 +65,7 @@ public class JSONObservedProperty extends JSONBase.JSONwithIdNameDescription<Obs
                 self.setDescription(description);
 
                 if (Datastreams != null) {
-                    self.setDatastreams(Arrays.stream(Datastreams)
+                    self.setDatasets(Arrays.stream(Datastreams)
                             .map(ds -> ds.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE))
                             .collect(Collectors.toSet()));
                 }
@@ -82,7 +82,7 @@ public class JSONObservedProperty extends JSONBase.JSONwithIdNameDescription<Obs
                 self.setDescription(description);
 
                 if (Datastreams != null) {
-                    self.setDatastreams(Arrays.stream(Datastreams)
+                    self.setDatasets(Arrays.stream(Datastreams)
                             .map(ds -> ds.toEntity(JSONBase.EntityType.REFERENCE))
                             .collect(Collectors.toSet()));
                 }

@@ -29,7 +29,6 @@
 
 package org.n52.sta.data.repositories;
 
-import org.n52.series.db.beans.sta.AbstractStaEntity;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,7 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @NoRepositoryBean
 @Transactional
-public interface AbstractStaRepository<T extends AbstractStaEntity> extends StaIdentifierRepository<T> {
+public interface AbstractStaRepository<T> extends StaIdentifierRepository<T> {
 
 }
 

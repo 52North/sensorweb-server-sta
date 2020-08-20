@@ -158,7 +158,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
 
         // Link to Datastream
         if (Datastream != null) {
-            self.setDatastream(Datastream.toEntity(JSONBase.EntityType.REFERENCE));
+            self.setDataset(Datastream.toEntity(JSONBase.EntityType.REFERENCE));
         }
 
         // Link to FOI
@@ -216,10 +216,10 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
 
         // Link to Datastream
         if (Datastream != null) {
-            self.setDatastream(
+            self.setDataset(
                     Datastream.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
         } else if (backReference instanceof JSONDatastream) {
-            self.setDatastream(((JSONDatastream) backReference).getEntity());
+            self.setDataset(((JSONDatastream) backReference).getEntity());
         } else {
             Assert.notNull(null, INVALID_INLINE_ENTITY_MISSING + "Datastream");
         }

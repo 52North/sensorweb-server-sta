@@ -28,6 +28,7 @@
  */
 package org.n52.sta.data.query;
 
+import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.CategoryEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
@@ -71,9 +72,9 @@ public class DatasetQuerySpecifications {
         };
     }
 
-    public Specification<DatasetEntity> matchFeatureStaIdentifier(final String staIdentifier) {
+    public Specification<AbstractDatasetEntity> matchFeatureStaIdentifier(final String staIdentifier) {
         return (root, query, builder) -> {
-            final Join<DatasetEntity, FeatureEntity> join =
+            final Join<AbstractDatasetEntity, FeatureEntity> join =
                     root.join(DatasetEntity.PROPERTY_FEATURE, JoinType.INNER);
             return builder.equal(join.get(FeatureEntity.PROPERTY_STA_IDENTIFIER), staIdentifier);
         };

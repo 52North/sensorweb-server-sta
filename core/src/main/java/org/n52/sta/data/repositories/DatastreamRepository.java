@@ -29,9 +29,12 @@
 
 package org.n52.sta.data.repositories;
 
-import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.AbstractDatasetEntity;
+import org.n52.series.db.beans.sta.AbstractDatastreamEntity;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Set;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -39,7 +42,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @DependsOn("ObservationRepository")
 public interface DatastreamRepository
-        extends NameRepository<DatastreamEntity>, StaIdentifierRepository<DatastreamEntity> {
+        extends NameRepository<AbstractDatasetEntity>, StaIdentifierRepository<AbstractDatasetEntity> {
 
-    <S extends DatastreamEntity> S intermediateSave(S entity);
+    <S extends AbstractDatasetEntity> S intermediateSave(S entity);
+
+    Set<AbstractDatasetEntity> findAllByAggregationId(Long id);
+
 }

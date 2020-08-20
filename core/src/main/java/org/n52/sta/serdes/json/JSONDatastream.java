@@ -36,9 +36,9 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.geojson.GeoJsonReader;
+import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.UnitEntity;
-import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("VisibilityModifier")
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
-public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<DatastreamEntity>
+public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<AbstractDatasetEntity>
         implements AbstractJSONEntity {
     private static final String COULD_NOT_PARSE_OBS_AREA = "Could not parse observedArea to GeoJSON. Error was: ";
 
@@ -90,7 +90,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
     private final String uomDef = "unitOfMeasurement->definition";
 
     public JSONDatastream() {
-        self = new DatastreamEntity();
+        self = new AbstractDatasetEntity();
     }
 
     @Override protected void parseReferencedFrom() {
@@ -118,7 +118,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
     }
 
     @Override
-    public DatastreamEntity toEntity(JSONBase.EntityType type) {
+    public AbstractDatasetEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
         case FULL:
             parseReferencedFrom();
@@ -169,14 +169,14 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
         }
     }
 
-    private DatastreamEntity createPatchEntity() {
+    private AbstractDatasetEntity createPatchEntity() {
         self.setIdentifier(identifier);
         self.setStaIdentifier(identifier);
         self.setName(name);
         self.setDescription(description);
 
         if (observationType != null) {
-            self.setObservationType(new FormatEntity().setFormat(observationType));
+            self.setOMObservationType(new FormatEntity().setFormat(observationType));
         }
 
         if (observedArea != null) {
@@ -236,12 +236,12 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
         return self;
     }
 
-    private DatastreamEntity createPostEntity() {
+    private AbstractDatasetEntity createPostEntity() {
         self.setIdentifier(identifier);
         self.setStaIdentifier(identifier);
         self.setName(name);
         self.setDescription(description);
-        self.setObservationType(new FormatEntity().setFormat(observationType));
+        self.setOMObservationType(new FormatEntity().setFormat(observationType));
 
         if (observedArea != null) {
             GeoJsonReader reader = new GeoJsonReader(factory);

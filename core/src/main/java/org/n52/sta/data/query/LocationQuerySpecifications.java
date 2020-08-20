@@ -36,6 +36,7 @@ import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.oasis.odata.ODataConstants;
 import org.n52.shetland.ogc.filter.FilterConstants;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.sta.data.service.util.HibernateSpatialCriteriaBuilder;
 import org.n52.svalbard.odata.core.expr.GeoValueExpr;
@@ -52,7 +53,16 @@ import javax.persistence.criteria.Subquery;
 public class LocationQuerySpecifications extends EntityQuerySpecifications<LocationEntity> implements
         SpatialQuerySpecifications {
 
-    private static final String LOCATION = "location";
+    @Override
+    public String checkPropertyName(String property) {
+        if (property.equals(StaConstants.PROP_ENCODINGTYPE)) {
+            return LocationEntity.PROPERTY_NAME;
+        } else if (property.equals(StaConstants.PROP_LOCATION)) {
+            return "name desc";
+        } else {
+            return property;
+        }
+    }
 
     public Specification<LocationEntity> withHistoricalLocationStaIdentifier(String historicalLocationIdentifier) {
         return (root, query, builder) -> {
@@ -86,31 +96,32 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
         return (Specification<LocationEntity>) (root, query, builder) -> {
             try {
                 switch (propertyName) {
-                case "id":
-                    return handleDirectStringPropertyFilter(root.get(LocationEntity.PROPERTY_STA_IDENTIFIER),
+                case StaConstants.PROP_ID:
+                    return handleDirectStringPropertyFilter(root.get(LocationEntity.STA_IDENTIFIER),
                                                             propertyValue,
                                                             operator,
                                                             builder,
                                                             false);
-                case "name":
-                    return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
-                                                            propertyValue, operator, builder, switched);
-                case "description":
-                    return handleDirectStringPropertyFilter(
-                            root.get(DescribableEntity.PROPERTY_DESCRIPTION),
-                            propertyValue,
-                            operator,
-                            builder,
-                            switched);
-                case "encodingType":
+                case StaConstants.PROP_NAME:
+                    return handleDirectStringPropertyFilter(root.get(LocationEntity.NAME),
+                                                            propertyValue,
+                                                            operator,
+                                                            builder,
+                                                            switched);
+                case StaConstants.PROP_DESCRIPTION:
+                    return handleDirectStringPropertyFilter(root.get(LocationEntity.DESCRIPTION),
+                                                            propertyValue,
+                                                            operator,
+                                                            builder,
+                                                            switched);
+                case StaConstants.PROP_ENCODINGTYPE:
                     Join<LocationEntity, FormatEntity> join =
                             root.join(LocationEntity.PROPERTY_LOCATION_ENCODINT);
-                    return handleDirectStringPropertyFilter(
-                            join.get(FormatEntity.FORMAT),
-                            propertyValue,
-                            operator,
-                            builder,
-                            switched);
+                    return handleDirectStringPropertyFilter(join.get(FormatEntity.FORMAT),
+                                                            propertyValue,
+                                                            operator,
+                                                            builder,
+                                                            switched);
                 default:
                     throw new RuntimeException("Error getting filter for Property: \"" + propertyName
                                                        + "\". No such property in Entity.");
@@ -134,7 +145,7 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
             String spatialFunctionName,
             String... arguments) {
         return (Specification<LocationEntity>) (root, query, builder) -> {
-            if (!LOCATION.equals(propertyName)) {
+            if (!StaConstants.PROP_LOCATION.equals(propertyName)) {
                 throw new RuntimeException("Could not find property: " + propertyName);
             }
             if (builder instanceof HibernateSpatialCriteriaBuilder) {
@@ -192,7 +203,7 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
                                                         String argument,
                                                         HibernateSpatialCriteriaBuilder builder,
                                                         Root root) {
-        if (LOCATION.equals(expr.getGeometry())) {
+        if (StaConstants.PROP_LOCATION.equals(expr.getGeometry())) {
             switch (spatialFunctionName) {
             case ODataConstants.GeoFunctions.GEO_DISTANCE:
                 return builder.st_distance(
@@ -221,7 +232,7 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
     @Override protected Specification<LocationEntity> handleRelatedPropertyFilter(String propertyName,
                                                                                   Specification<?> propertyValue) {
         return (root, query, builder) -> {
-            if (THINGS.equals(propertyName)) {
+            if (StaConstants.THINGS.equals(propertyName)) {
                 Subquery<LocationEntity> sq = query.subquery(LocationEntity.class);
                 Root<PlatformEntity> thing = sq.from(PlatformEntity.class);
                 Join<PlatformEntity, LocationEntity> join = thing.join(PlatformEntity.PROPERTY_LOCATIONS);
@@ -230,7 +241,7 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
                                                                                      query,
                                                                                      builder));
                 return builder.in(root).value(sq);
-            } else if (HISTORICAL_LOCATIONS.equals(propertyName)) {
+            } else if (StaConstants.HISTORICAL_LOCATIONS.equals(propertyName)) {
                 Subquery<LocationEntity> sq = query.subquery(LocationEntity.class);
                 Root<HistoricalLocationEntity> historicalLocation = sq.from(HistoricalLocationEntity.class);
                 Join<HistoricalLocationEntity, LocationEntity> joinFeature =

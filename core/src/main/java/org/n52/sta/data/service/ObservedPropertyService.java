@@ -30,13 +30,13 @@
 package org.n52.sta.data.service;
 
 import org.n52.janmayen.http.HTTPStatus;
-import org.n52.series.db.beans.DescribableEntity;
+import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
-import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.ObservablePropertyEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.ObservedPropertyEntityDefinition;
@@ -57,9 +57,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -121,21 +118,24 @@ public class ObservedPropertyService
 
     @Override protected ObservablePropertyEntity fetchExpandEntities(PhenomenonEntity entity, ExpandFilter expandOption)
             throws STACRUDException, STAInvalidQueryException {
+        ObservablePropertyEntity obsProp = new ObservablePropertyEntity(entity);
         for (ExpandItem expandItem : expandOption.getItems()) {
             String expandProperty = expandItem.getPath();
-            if (ObservedPropertyEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
-                Page<DatastreamEntity> obsP = getDatastreamService()
+            switch (expandProperty) {
+            case ObservedPropertyEntityDefinition.DATASTREAMS:
+                Page<AbstractDatasetEntity> datastreams = getDatastreamService()
                         .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
                                                                STAEntityDefinition.OBSERVED_PROPERTIES,
                                                                expandItem.getQueryOptions());
-                ObservablePropertyEntity obsProp = new ObservablePropertyEntity(entity);
-                return obsProp.setDatastreams(obsP.get().collect(Collectors.toSet()));
-            } else {
-                throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty +
-                                                           " on Entity of type 'ObservableProperty'");
+                obsProp.setDatasets(datastreams.get().collect(Collectors.toSet()));
+                break;
+            default:
+                throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
+                                                                 expandProperty,
+                                                                 StaConstants.OBSERVED_PROPERTY));
             }
         }
-        return new ObservablePropertyEntity(entity);
+        return obsProp;
     }
 
     @Override
@@ -153,50 +153,37 @@ public class ObservedPropertyService
     public Specification<PhenomenonEntity> byRelatedEntityFilter(String relatedId,
                                                                  String relatedType,
                                                                  String ownId) {
+        Specification<PhenomenonEntity> filter;
         switch (relatedType) {
         case STAEntityDefinition.DATASTREAMS: {
-            return (root, query, builder) -> {
-                Subquery<PhenomenonEntity> sq = query.subquery(PhenomenonEntity.class);
-                Root<DatastreamEntity> datastream = sq.from(DatastreamEntity.class);
-                Join<DatastreamEntity, PhenomenonEntity> join =
-                        datastream.join(DatastreamEntity.PROPERTY_OBSERVABLE_PROPERTY);
-                sq.select(join)
-                  .where(builder.equal(datastream.get(DescribableEntity.PROPERTY_IDENTIFIER), relatedId));
-                if (ownId != null) {
-                    return builder.and(builder.in(root).value(sq),
-                                       builder.equal(root.get(PhenomenonEntity.PROPERTY_STA_IDENTIFIER),
-                                                     ownId));
-                }
-                return builder.in(root).value(sq);
-            };
+            filter = oQS.withDatastreamStaIdentifier(relatedId);
+            break;
         }
         default:
-            throw new IllegalStateException("Trying to filter by unrelated type: " + relatedType + "not found!");
+            throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
         }
+        if (ownId != null) {
+            filter = filter.and(oQS.withStaIdentifier(ownId));
+        }
+        return filter;
     }
 
     @Override
     public String checkPropertyName(String property) {
-        switch (property) {
-        case "definition":
-            return PhenomenonEntity.PROPERTY_IDENTIFIER;
-        case "identifier":
-            return PhenomenonEntity.STA_IDENTIFIER;
-        default:
-            return super.checkPropertyName(property);
-        }
+        return oQS.checkPropertyName(property);
     }
 
     @Override
-    public PhenomenonEntity createEntity(PhenomenonEntity observableProperty) throws STACRUDException {
+    public PhenomenonEntity createOrfetch(PhenomenonEntity observableProperty) throws STACRUDException {
         if (observableProperty.getStaIdentifier() != null && !observableProperty.isSetName()) {
             Optional<PhenomenonEntity> optionalEntity =
                     getRepository().findByStaIdentifier(observableProperty.getStaIdentifier());
             if (optionalEntity.isPresent()) {
                 return optionalEntity.get();
             } else {
-                throw new STACRUDException("No ObservedProperty with id '" + observableProperty.getStaIdentifier() +
-                                                   "' found");
+                throw new STACRUDException(String.format(NO_S_WITH_ID_S_FOUND,
+                                                         StaConstants.OBSERVED_PROPERTY,
+                                                         observableProperty.getStaIdentifier()));
             }
         }
 
@@ -217,7 +204,7 @@ public class ObservedPropertyService
                                            HTTPStatus.CONFLICT);
             }
             if (getRepository().existsByStaIdentifier(observableProperty.getStaIdentifier())) {
-                throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
+                throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS, HTTPStatus.CONFLICT);
             }
             return getRepository().save(getAsPhenomenonEntity(observableProperty));
         }
@@ -234,16 +221,16 @@ public class ObservedPropertyService
                     PhenomenonEntity merged = merge(existing.get(), entity);
                     return getRepository().save(getAsPhenomenonEntity(merged));
                 }
-                throw new STACRUDException("Unable to update. Entity not found.", HTTPStatus.NOT_FOUND);
+                throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }
         } else if (HttpMethod.PUT.equals(method)) {
-            throw new STACRUDException("Http PUT is not yet supported!", HTTPStatus.NOT_IMPLEMENTED);
+            throw new STACRUDException(HTTP_PUT_IS_NOT_YET_SUPPORTED, HTTPStatus.NOT_IMPLEMENTED);
         }
-        throw new STACRUDException("Invalid http method for updating entity!", HTTPStatus.BAD_REQUEST);
+        throw new STACRUDException(INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY, HTTPStatus.BAD_REQUEST);
     }
 
     @Override
-    protected PhenomenonEntity updateEntity(PhenomenonEntity entity) {
+    protected PhenomenonEntity save(PhenomenonEntity entity) {
         return getRepository().save(getAsPhenomenonEntity(entity));
     }
 
@@ -251,7 +238,7 @@ public class ObservedPropertyService
         if (entity instanceof ObservablePropertyEntity) {
             ObservablePropertyEntity observableProperty = (ObservablePropertyEntity) entity;
             if (observableProperty.hasDatastreams()) {
-                for (DatastreamEntity datastream : observableProperty.getDatastreams()) {
+                for (AbstractDatasetEntity datastream : observableProperty.getDatasets()) {
                     checkInlineDatastream(datastream);
                 }
             }
@@ -263,18 +250,13 @@ public class ObservedPropertyService
         synchronized (getLock(id)) {
             if (getRepository().existsByStaIdentifier(id)) {
                 // delete datastreams
-                datastreamRepository.findAll(dQS.withObservedPropertyStaIdentifier(id)).forEach(d -> {
-                    try {
-                        getDatastreamService().delete(d);
-                    } catch (STACRUDException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                });
+                for (AbstractDatasetEntity datastreamEntity :
+                        datastreamRepository.findAll(dQS.withObservedPropertyStaIdentifier(id))) {
+                    getDatastreamService().delete(datastreamEntity);
+                }
                 getRepository().deleteByStaIdentifier(id);
             } else {
-                throw new STACRUDException(
-                        "Unable to delete. Entity not found.", HTTPStatus.NOT_FOUND);
+                throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }
         }
     }
@@ -285,11 +267,11 @@ public class ObservedPropertyService
     }
 
     @Override
-    protected PhenomenonEntity createOrUpdate(PhenomenonEntity entity) throws STACRUDException {
+    public PhenomenonEntity createOrUpdate(PhenomenonEntity entity) throws STACRUDException {
         if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
             return updateEntity(entity.getStaIdentifier(), entity, HttpMethod.PATCH);
         }
-        return createEntity(entity);
+        return createOrfetch(entity);
     }
 
     private PhenomenonEntity getAsPhenomenonEntity(PhenomenonEntity observableProperty) {
@@ -308,7 +290,7 @@ public class ObservedPropertyService
     public ObservablePropertyEntity mergeObservablePropertyEntity(ObservablePropertyEntity existing,
                                                                   ObservablePropertyEntity toMerge) {
         if (toMerge.hasDatastreams()) {
-            toMerge.getDatastreams().forEach(d -> existing.addDatastream(d));
+            toMerge.getDatasets().forEach(d -> existing.addDatastream(d));
         }
         return (ObservablePropertyEntity) merge(existing, toMerge);
     }

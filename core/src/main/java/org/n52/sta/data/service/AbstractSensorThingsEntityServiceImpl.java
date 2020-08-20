@@ -30,6 +30,7 @@
 package org.n52.sta.data.service;
 
 import org.hibernate.query.criteria.internal.CriteriaBuilderImpl;
+import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.HibernateRelations;
@@ -39,7 +40,6 @@ import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.AbstractObservationEntity;
-import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ObservablePropertyEntity;
@@ -91,6 +91,17 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     protected static final String STAIDENTIFIER = "staIdentifier";
     protected static final String ENCODINGTYPE = "encodingType";
     protected static final String RESULT = "result";
+
+    protected static final String HTTP_PUT_IS_NOT_YET_SUPPORTED = "Http PUT is not yet supported!";
+    protected static final String IDENTIFIER_ALREADY_EXISTS = "Identifier already exists!";
+    protected static final String UNABLE_TO_UPDATE_ENTITY_NOT_FOUND = "Unable to update. Entity not found.";
+    protected static final String UNABLE_TO_DELETE_ENTITY_NOT_FOUND = "Unable to delete. Entity not found.";
+    protected static final String INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY = "Invalid http method for updating entity!";
+    protected static final String TRYING_TO_FILTER_BY_UNRELATED_TYPE =
+            "Trying to filter by unrelated type: %s not found!";
+    protected static final String INVALID_EXPAND_OPTION_SUPPLIED =
+            "Invalid expandOption supplied. Cannot find %s on Entity of type '%s'";
+    protected static final String NO_S_WITH_ID_S_FOUND = "No %s with id %s found.";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSensorThingsEntityServiceImpl.class);
 
@@ -275,7 +286,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     }
 
     @Override public String getEntityIdByRelatedEntity(String relatedId, String relatedType) {
-        Optional<String> entity = getRepository().identifier(
+        Optional<String> entity = getRepository().getColumn(
                 this.byRelatedEntityFilter(relatedId, relatedType, null),
                 STAIDENTIFIER);
         return entity.orElse(null);
@@ -332,11 +343,11 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ElementWithQueryOptions create(S entity) throws STACRUDException {
-        return this.createWrapper(createEntity(entity), null);
+        return this.createWrapper(createOrfetch(entity), null);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    protected abstract S createEntity(S entity) throws STACRUDException;
+    protected abstract S createOrfetch(S entity) throws STACRUDException;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -348,7 +359,9 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     protected abstract S updateEntity(String id, S entity, HttpMethod method) throws STACRUDException;
 
     @Transactional(rollbackFor = Exception.class)
-    protected abstract S updateEntity(S entity) throws STACRUDException;
+    protected S save(S entity) throws STACRUDException {
+        return getRepository().save(entity);
+    }
 
     protected abstract void delete(S entity) throws STACRUDException;
 
@@ -369,7 +382,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     //    return create(entity);
     //}
 
-    protected void checkInlineDatastream(DatastreamEntity datastream) throws STACRUDException {
+    protected void checkInlineDatastream(AbstractDatasetEntity datastream) throws STACRUDException {
         if (datastream.getStaIdentifier() == null
                 || datastream.isSetName()
                 || datastream.isSetDescription()
@@ -506,56 +519,43 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     }
 
     @SuppressWarnings("unchecked")
-    protected AbstractSensorThingsEntityServiceImpl<?, LocationEntity, LocationEntity> getLocationService() {
-        return (AbstractSensorThingsEntityServiceImpl<?, LocationEntity, LocationEntity>)
-                getEntityService(EntityTypes.Location);
+    LocationService getLocationService() {
+        return (LocationService) getEntityService(EntityTypes.Location);
     }
 
     @SuppressWarnings("unchecked")
-    protected AbstractSensorThingsEntityServiceImpl<?, HistoricalLocationEntity, HistoricalLocationEntity>
-    getHistoricalLocationService() {
-        return (AbstractSensorThingsEntityServiceImpl<?, HistoricalLocationEntity, HistoricalLocationEntity>)
-                getEntityService(EntityTypes.HistoricalLocation);
+    HistoricalLocationService getHistoricalLocationService() {
+        return (HistoricalLocationService) getEntityService(EntityTypes.HistoricalLocation);
     }
 
     @SuppressWarnings("unchecked")
-    protected AbstractSensorThingsEntityServiceImpl<?, DatastreamEntity, DatastreamEntity> getDatastreamService() {
-        return (AbstractSensorThingsEntityServiceImpl<?, DatastreamEntity, DatastreamEntity>)
-                getEntityService(EntityTypes.Datastream);
+    DatastreamService getDatastreamService() {
+        return (DatastreamService) getEntityService(EntityTypes.Datastream);
     }
 
     @SuppressWarnings("unchecked")
-    protected AbstractSensorThingsEntityServiceImpl<?, AbstractFeatureEntity<?>, StaFeatureEntity<?>>
-    getFeatureOfInterestService() {
-        return (AbstractSensorThingsEntityServiceImpl<?, AbstractFeatureEntity<?>, StaFeatureEntity<?>>)
-                getEntityService(EntityTypes.FeatureOfInterest);
+    FeatureOfInterestService getFeatureOfInterestService() {
+        return (FeatureOfInterestService) getEntityService(EntityTypes.FeatureOfInterest);
     }
 
     @SuppressWarnings("unchecked")
-    protected AbstractSensorThingsEntityServiceImpl<?, PlatformEntity, PlatformEntity> getThingService() {
-        return (AbstractSensorThingsEntityServiceImpl<?, PlatformEntity, PlatformEntity>)
-                getEntityService(EntityTypes.Thing);
+    ThingService getThingService() {
+        return (ThingService) getEntityService(EntityTypes.Thing);
     }
 
     @SuppressWarnings("unchecked")
-    protected AbstractSensorThingsEntityServiceImpl<?, ProcedureEntity, SensorEntity> getSensorService() {
-        return (AbstractSensorThingsEntityServiceImpl<?, ProcedureEntity, SensorEntity>)
-                getEntityService(EntityTypes.Sensor);
+    SensorService getSensorService() {
+        return (SensorService) getEntityService(EntityTypes.Sensor);
     }
 
     @SuppressWarnings("unchecked")
-    protected AbstractSensorThingsEntityServiceImpl<?, PhenomenonEntity, ObservablePropertyEntity>
-    getObservedPropertyService() {
-        return (AbstractSensorThingsEntityServiceImpl<?, PhenomenonEntity, ObservablePropertyEntity>)
-                getEntityService(EntityTypes.ObservedProperty);
+    ObservedPropertyService getObservedPropertyService() {
+        return (ObservedPropertyService) getEntityService(EntityTypes.ObservedProperty);
     }
 
     @SuppressWarnings("unchecked")
-    protected AbstractSensorThingsEntityServiceImpl<?, AbstractObservationEntity<?>, AbstractObservationEntity<?>>
-    getObservationService() {
-        return (AbstractSensorThingsEntityServiceImpl<?, AbstractObservationEntity<?>, AbstractObservationEntity<?>>)
-                getEntityService(EntityTypes.Observation);
-
+    ObservationService getObservationService() {
+        return (ObservationService) getEntityService(EntityTypes.Observation);
     }
 
     public void setServiceRepository(EntityServiceRepository serviceRepository) {

@@ -43,4 +43,5 @@ public interface ObservationRepository<T extends ObservationEntity<?>>
     ObservationEntity<T> findFirstByDataset_idInOrderBySamplingTimeStartAsc(List<Long> datasetIdentifiers);
 
     ObservationEntity<T> findFirstByDataset_idInOrderBySamplingTimeEndDesc(List<Long> datasetIdentifiers);
+
 }

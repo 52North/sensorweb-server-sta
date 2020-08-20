@@ -183,11 +183,11 @@ public class ObservationSerDes {
                     } else {
                         switch (navigationProperty) {
                         case ObservationEntityDefinition.DATASTREAM:
-                            if (observation.getDatastream() == null) {
+                            if (observation.getDataset() == null) {
                                 writeNavigationProp(gen, navigationProperty, observation.getStaIdentifier());
                             } else {
                                 gen.writeFieldName(navigationProperty);
-                                writeNestedEntity(observation.getDatastream(),
+                                writeNestedEntity(observation.getDataset(),
                                                   fieldsToExpand.get(navigationProperty),
                                                   gen,
                                                   serializers);

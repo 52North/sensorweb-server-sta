@@ -31,12 +31,12 @@ package org.n52.sta.serdes.util;
 
 import org.hibernate.Hibernate;
 import org.hibernate.proxy.HibernateProxy;
+import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.HibernateRelations;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
-import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ObservablePropertyEntity;
@@ -81,8 +81,9 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
         case "FeatureEntity":
             return new FeatureOfInterestWithQueryOptions(
                     new StaFeatureEntity<>((FeatureEntity) unwrapped), queryOptions);
-        case "DatastreamEntity":
-            return new DatastreamWithQueryOptions((DatastreamEntity) unwrapped, queryOptions);
+        case "DatasetEntity":
+        case "AbstractDatasetEntity":
+            return new DatastreamWithQueryOptions((AbstractDatasetEntity) unwrapped, queryOptions);
         default:
             if (unwrapped instanceof ObservationEntity) {
                 return new ObservationWithQueryOptions((ObservationEntity<?>) unwrapped, queryOptions);
@@ -142,8 +143,8 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
     public static class HistoricalLocationWithQueryOptions
             extends ElementWithQueryOptions<HistoricalLocationEntity> {
 
-        HistoricalLocationWithQueryOptions(HistoricalLocationEntity thing, QueryOptions queryOptions) {
-            this.entity = thing;
+        HistoricalLocationWithQueryOptions(HistoricalLocationEntity hloc, QueryOptions queryOptions) {
+            this.entity = hloc;
             this.queryOptions = queryOptions;
         }
     }
@@ -151,17 +152,17 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
 
     public static class FeatureOfInterestWithQueryOptions extends ElementWithQueryOptions<StaFeatureEntity<?>> {
 
-        FeatureOfInterestWithQueryOptions(StaFeatureEntity<?> thing, QueryOptions queryOptions) {
-            this.entity = thing;
+        FeatureOfInterestWithQueryOptions(StaFeatureEntity<?> foi, QueryOptions queryOptions) {
+            this.entity = foi;
             this.queryOptions = queryOptions;
         }
     }
 
 
-    public static class DatastreamWithQueryOptions extends ElementWithQueryOptions<DatastreamEntity> {
+    public static class DatastreamWithQueryOptions extends ElementWithQueryOptions<AbstractDatasetEntity> {
 
-        DatastreamWithQueryOptions(DatastreamEntity thing, QueryOptions queryOptions) {
-            this.entity = thing;
+        DatastreamWithQueryOptions(AbstractDatasetEntity datastream, QueryOptions queryOptions) {
+            this.entity = datastream;
             this.queryOptions = queryOptions;
         }
     }

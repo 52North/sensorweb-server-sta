@@ -36,6 +36,7 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.shetland.oasis.odata.ODataConstants;
 import org.n52.shetland.ogc.filter.FilterConstants;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.sta.data.service.util.HibernateSpatialCriteriaBuilder;
 import org.n52.svalbard.odata.core.expr.GeoValueExpr;
@@ -52,6 +53,16 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
         implements SpatialQuerySpecifications {
 
     private static final String FEATURE = "feature";
+
+    @Override
+    public String checkPropertyName(String property) {
+        switch (property) {
+        case StaConstants.PROP_ENCODINGTYPE:
+            return AbstractFeatureEntity.PROPERTY_FEATURE_TYPE;
+        default:
+            return property;
+        }
+    }
 
     public Specification<AbstractFeatureEntity<?>> withObservationStaIdentifier(final String observationIdentifier) {
         return (root, query, builder) -> {
@@ -74,28 +85,26 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
         return (Specification<AbstractFeatureEntity<?>>) (root, query, builder) -> {
             try {
                 switch (propertyName) {
-                case "id":
-                    return handleDirectStringPropertyFilter(root.get(AbstractFeatureEntity.PROPERTY_STA_IDENTIFIER),
+                case StaConstants.PROP_ID:
+                    return handleDirectStringPropertyFilter(root.get(AbstractFeatureEntity.STA_IDENTIFIER),
                                                             propertyValue,
                                                             operator,
                                                             builder,
                                                             false);
-                case "name":
-                    return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
+                case StaConstants.PROP_NAME:
+                    return handleDirectStringPropertyFilter(root.get(AbstractFeatureEntity.NAME),
                                                             propertyValue,
                                                             operator,
                                                             builder,
                                                             switched);
-                case "description":
-                    return handleDirectStringPropertyFilter(
-                            root.get(DescribableEntity.PROPERTY_DESCRIPTION),
-                            propertyValue,
-                            operator,
-                            builder,
-                            switched);
-                case "encodingType":
+                case StaConstants.PROP_DESCRIPTION:
+                    return handleDirectStringPropertyFilter(root.get(AbstractFeatureEntity.DESCRIPTION),
+                                                            propertyValue,
+                                                            operator,
+                                                            builder,
+                                                            switched);
+                case StaConstants.PROP_ENCODINGTYPE:
                 case "featureType":
-                    //TODO: check if this works correctly
                     if (operator.equals(FilterConstants.ComparisonOperator.PropertyIsEqualTo)) {
                         return builder.or(builder.equal(propertyValue, "application/vnd.geo+json"),
                                           builder.equal(propertyValue, "application/vnd.geo json"));
@@ -115,15 +124,15 @@ public class FeatureOfInterestQuerySpecifications extends EntityQuerySpecificati
             String propertyName,
             Specification<?> propertyValue) {
         return (root, query, builder) -> {
-            if (OBSERVATIONS.equals(propertyName)) {
+            if (StaConstants.OBSERVATIONS.equals(propertyName)) {
                 Subquery<Long> sqFeature = query.subquery(Long.class);
                 Root<DatasetEntity> dataset = sqFeature.from(DatasetEntity.class);
                 Subquery<DatasetEntity> sqDataset = query.subquery(DatasetEntity.class);
                 Root<ObservationEntity> data = sqDataset.from(ObservationEntity.class);
                 sqDataset.select(dataset)
                          .where(((Specification<ObservationEntity>) propertyValue).toPredicate(data,
-                                                                                        query,
-                                                                                        builder));
+                                                                                               query,
+                                                                                               builder));
 
                 sqFeature.select(dataset.get(DatasetEntity.PROPERTY_FEATURE))
                          .where(builder.in(dataset).value(sqDataset));

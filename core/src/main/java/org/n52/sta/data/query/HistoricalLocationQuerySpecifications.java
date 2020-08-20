@@ -34,6 +34,7 @@ import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -68,7 +69,7 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
             String propertyName,
             Specification<?> propertyValue) {
         return (root, query, builder) -> {
-            if (THING.equals(propertyName)) {
+            if (StaConstants.THING.equals(propertyName)) {
                 Subquery<HistoricalLocationEntity> sq = query.subquery(HistoricalLocationEntity.class);
                 Root<PlatformEntity> thing = sq.from(PlatformEntity.class);
                 sq.select(thing.get(DescribableEntity.PROPERTY_ID))
@@ -76,7 +77,7 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
                                                                                      query,
                                                                                      builder));
                 return builder.in(root.get(HistoricalLocationEntity.PROPERTY_THING)).value(sq);
-            } else if (LOCATIONS.equals(propertyName)) {
+            } else if (StaConstants.LOCATIONS.equals(propertyName)) {
                 Subquery<HistoricalLocationEntity> sq = query.subquery(HistoricalLocationEntity.class);
                 Root<LocationEntity> location = sq.from(LocationEntity.class);
                 Join<Object, Object> join = root.join(HistoricalLocationEntity.PROPERTY_LOCATIONS);
@@ -99,18 +100,17 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
         return (Specification<HistoricalLocationEntity>) (root, query, builder) -> {
             try {
                 switch (propertyName) {
-                case "id":
-                    return handleDirectStringPropertyFilter(root.get(HistoricalLocationEntity.PROPERTY_STA_IDENTIFIER),
+                case StaConstants.PROP_ID:
+                    return handleDirectStringPropertyFilter(root.get(HistoricalLocationEntity.STA_IDENTIFIER),
                                                             propertyValue,
                                                             operator,
                                                             builder,
                                                             false);
-                case "time":
-                    return handleDirectDateTimePropertyFilter(
-                            root.get(HistoricalLocationEntity.PROPERTY_TIME),
-                            propertyValue,
-                            operator,
-                            builder);
+                case StaConstants.PROP_TIME:
+                    return handleDirectDateTimePropertyFilter(root.get(HistoricalLocationEntity.PROPERTY_TIME),
+                                                              propertyValue,
+                                                              operator,
+                                                              builder);
                 default:
                     throw new RuntimeException("Error getting filter for Property: \"" + propertyName
                                                        + "\". No such property in Entity.");

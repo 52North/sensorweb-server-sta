@@ -57,9 +57,12 @@ public abstract class EntityQuerySpecifications<T> {
     protected static final String LOCATIONS = "Locations";
     protected static final String HISTORICAL_LOCATIONS = "HistoricalLocations";
     protected static final String OBSERVATIONS = "Observations";
+    protected static final String COULD_NOT_FIND_RELATED_PROPERTY = "Could not find related property: ";
 
     private static final String ERROR_TEMPLATE = "Operator \"%s\" is not supported for given arguments.";
     private static final String INVALID_DATATYPE_CANNOT_CAST = "Invalid Datatypes found. Cannot cast ";
+    protected static final String ERROR_GETTING_FILTER_NO_PROP = "Error getting filter for Property: '%s'. No such " +
+                                                     "property in Entity.";
 
     /**
      * Gets Entity-specific Filter for relation with given name.
@@ -96,15 +99,11 @@ public abstract class EntityQuerySpecifications<T> {
     }
 
     public Specification<T> withName(final String name) {
-        return (root, query, builder) -> {
-            return builder.equal(root.get(DescribableEntity.PROPERTY_NAME), name);
-        };
+        return (root, query, builder) -> builder.equal(root.get(DescribableEntity.PROPERTY_NAME), name);
     }
 
     public Specification<T> withStaIdentifier(final String name) {
-        return (root, query, builder) -> {
-            return builder.equal(root.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), name);
-        };
+        return (root, query, builder) -> builder.equal(root.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), name);
     }
 
     public Specification<T> withStaIdentifier(final List<String> identifiers) {
@@ -216,4 +215,14 @@ public abstract class EntityQuerySpecifications<T> {
                                                                    Expression<?> propertyValue,
                                                                    FilterConstants.ComparisonOperator operator,
                                                                    boolean switched);
+
+    /**
+     * Translate STA property name to Database property name
+     *
+     * @param property name of the property in STA
+     * @return name of the property in database
+     */
+    public String checkPropertyName(String property) {
+        return property;
+    }
 }

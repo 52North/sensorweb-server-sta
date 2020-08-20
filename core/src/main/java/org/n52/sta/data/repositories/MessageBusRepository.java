@@ -33,6 +33,7 @@ import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.graph.EntityGraphs;
 import org.hibernate.graph.GraphParser;
 import org.hibernate.graph.RootGraph;
+import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.IdEntity;
@@ -40,7 +41,6 @@ import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
-import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ObservationEntity;
@@ -160,7 +160,7 @@ public class MessageBusRepository<T, I extends Serializable>
     }
 
     @Transactional(readOnly = true)
-    public Optional<String> identifier(Specification<T> spec, String columnName) {
+    public Optional<String> getColumn(Specification<T> spec, String columnName) {
         CriteriaQuery<Object> query = criteriaBuilder.createQuery(Object.class);
         Root<T> root = query.from(getDomainClass());
         if (spec != null) {
@@ -180,7 +180,7 @@ public class MessageBusRepository<T, I extends Serializable>
     }
 
     @Transactional(readOnly = true)
-    public List<String> identifierList(Specification<T> spec, Pageable pageable, String columnName) {
+    public List<String> getColumnList(Specification<T> spec, Pageable pageable, String columnName) {
         CriteriaQuery<String> query = criteriaBuilder.createQuery(String.class);
         Root<T> root = query.from(getDomainClass());
         if (spec != null) {
@@ -298,9 +298,9 @@ public class MessageBusRepository<T, I extends Serializable>
                 SensorEntity entity = (SensorEntity) rawObject;
                 if (entity.hasDatastreams()) {
                     collections.put(STAEntityDefinition.DATASTREAMS,
-                                    entity.getDatastreams()
+                                    entity.getDatasets()
                                           .stream()
-                                          .map(DatastreamEntity::getStaIdentifier)
+                                          .map(AbstractDatasetEntity::getStaIdentifier)
                                           .collect(Collectors.toSet()));
                 }
             } else {
@@ -309,7 +309,7 @@ public class MessageBusRepository<T, I extends Serializable>
                                 datastreamRepository
                                         .findAll(dQs.withSensorStaIdentifier(entity.getStaIdentifier()))
                                         .stream()
-                                        .map(DatastreamEntity::getStaIdentifier)
+                                        .map(AbstractDatasetEntity::getStaIdentifier)
                                         .collect(Collectors.toSet())
                 );
             }
@@ -352,13 +352,13 @@ public class MessageBusRepository<T, I extends Serializable>
 
             if (entity.hasDatastreams()) {
                 collections.put(STAEntityDefinition.DATASTREAMS,
-                                entity.getDatastreams()
+                                entity.getDatasets()
                                       .stream()
-                                      .map(DatastreamEntity::getStaIdentifier)
+                                      .map(AbstractDatasetEntity::getStaIdentifier)
                                       .collect(Collectors.toSet()));
             }
-        } else if (rawObject instanceof DatastreamEntity) {
-            DatastreamEntity entity = (DatastreamEntity) rawObject;
+        } else if (rawObject instanceof AbstractDatasetEntity) {
+            AbstractDatasetEntity entity = (AbstractDatasetEntity) rawObject;
 
             if (entity.hasThing()) {
                 collections.put(STAEntityDefinition.THINGS,
@@ -397,7 +397,7 @@ public class MessageBusRepository<T, I extends Serializable>
                                 Collections.singleton(entity.getDataset().getFeature().getStaIdentifier()));
             }
 
-            Optional<DatastreamEntity> datastreamEntity =
+            Optional<AbstractDatasetEntity> datastreamEntity =
                     datastreamRepository.findOne(dQs.withObservationStaIdentifier(entity.getStaIdentifier()));
             if (datastreamEntity.isPresent()) {
                 collections.put(STAEntityDefinition.DATASTREAMS,
@@ -410,13 +410,13 @@ public class MessageBusRepository<T, I extends Serializable>
         } else if (rawObject instanceof PhenomenonEntity) {
             PhenomenonEntity entity = (PhenomenonEntity) rawObject;
 
-            List<DatastreamEntity> observations = datastreamRepository
+            List<AbstractDatasetEntity> observations = datastreamRepository
                     .findAll(dQs.withObservedPropertyStaIdentifier(entity.getStaIdentifier()));
             collections.put(
                     STAEntityDefinition.DATASTREAMS,
                     observations
                             .stream()
-                            .map(DatastreamEntity::getStaIdentifier)
+                            .map(AbstractDatasetEntity::getStaIdentifier)
                             .collect(Collectors.toSet()));
         } else {
             LOGGER.error("Error while computing related Collections: Could not identify Entity Type");
@@ -458,18 +458,18 @@ public class MessageBusRepository<T, I extends Serializable>
             result.put(DESCRIPTION, ((PlatformEntity) entity).getDescription());
             result.put(NAME, ((PlatformEntity) entity).getName());
             result.put(PROPERTIES, ((PlatformEntity) entity).getProperties());
-        } else if (entity instanceof DatastreamEntity) {
-            result.put(DESCRIPTION, ((DatastreamEntity) entity).getDescription());
-            result.put(NAME, ((DatastreamEntity) entity).getName());
-            result.put(OBSERVATIONTYPE, ((DatastreamEntity) entity).getObservationType().getFormat());
-            result.put(UOM, ((DatastreamEntity) entity).getUnitOfMeasurement());
+        } else if (entity instanceof AbstractDatasetEntity) {
+            result.put(DESCRIPTION, ((AbstractDatasetEntity) entity).getDescription());
+            result.put(NAME, ((AbstractDatasetEntity) entity).getName());
+            result.put(OBSERVATIONTYPE, ((AbstractDatasetEntity) entity).getOMObservationType().getFormat());
+            result.put(UOM, ((AbstractDatasetEntity) entity).getUnit());
             result.put(OBSERVEDAREA,
-                       (((DatastreamEntity) entity).getGeometryEntity() != null) ?
-                               ((DatastreamEntity) entity).getGeometryEntity().getGeometry() : null);
-            result.put(SAMPLINGTIMESTART, ((DatastreamEntity) entity).getSamplingTimeStart());
-            result.put(SAMPLINGTIMEEND, ((DatastreamEntity) entity).getSamplingTimeEnd());
-            result.put(RESULTTIMESTART, ((DatastreamEntity) entity).getResultTimeStart());
-            result.put(RESULTTIMEEND, ((DatastreamEntity) entity).getResultTimeEnd());
+                       (((AbstractDatasetEntity) entity).getGeometryEntity() != null) ?
+                               ((AbstractDatasetEntity) entity).getGeometryEntity().getGeometry() : null);
+            result.put(SAMPLINGTIMESTART, ((AbstractDatasetEntity) entity).getSamplingTimeStart());
+            result.put(SAMPLINGTIMEEND, ((AbstractDatasetEntity) entity).getSamplingTimeEnd());
+            result.put(RESULTTIMESTART, ((AbstractDatasetEntity) entity).getResultTimeStart());
+            result.put(RESULTTIMEEND, ((AbstractDatasetEntity) entity).getResultTimeEnd());
         } else if (entity instanceof HistoricalLocationEntity) {
             result.put(TIME, ((HistoricalLocationEntity) entity).getTime());
         } else if (entity instanceof ObservationEntity<?>) {

@@ -36,7 +36,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.locationtech.jts.io.geojson.GeoJsonWriter;
-import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.gml.time.Time;
@@ -63,17 +63,18 @@ public class DatastreamSerDes {
 
 
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
-    public static class DatastreamEntityPatch extends DatastreamEntity implements EntityPatch<DatastreamEntity> {
+    public static class DatastreamEntityPatch extends AbstractDatasetEntity
+            implements EntityPatch<AbstractDatasetEntity> {
 
         private static final long serialVersionUID = -8968753678464145994L;
-        private final DatastreamEntity entity;
+        private final AbstractDatasetEntity entity;
 
-        DatastreamEntityPatch(DatastreamEntity entity) {
+        DatastreamEntityPatch(AbstractDatasetEntity entity) {
             this.entity = entity;
         }
 
         @Override
-        public DatastreamEntity getEntity() {
+        public AbstractDatasetEntity getEntity() {
             return entity;
         }
     }
@@ -97,7 +98,7 @@ public class DatastreamSerDes {
                               SerializerProvider serializers)
                 throws IOException {
             gen.writeStartObject();
-            DatastreamEntity datastream = value.getEntity();
+            AbstractDatasetEntity datastream = value.getEntity();
             QueryOptions options = value.getQueryOptions();
 
             Set<String> fieldsToSerialize = null;
@@ -135,16 +136,16 @@ public class DatastreamSerDes {
 
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_OBSERVATION_TYPE)) {
                 gen.writeObjectField(STAEntityDefinition.PROP_OBSERVATION_TYPE,
-                                     datastream.getObservationType().getFormat());
+                                     datastream.getOMObservationType().getFormat());
             }
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_UOM)) {
                 gen.writeObjectFieldStart(STAEntityDefinition.PROP_UOM);
-                if (datastream.getUnitOfMeasurement() != null) {
-                    gen.writeStringField(STAEntityDefinition.PROP_NAME, datastream.getUnitOfMeasurement().getName());
+                if (datastream.getUnit() != null) {
+                    gen.writeStringField(STAEntityDefinition.PROP_NAME, datastream.getUnit().getName());
                     gen.writeStringField(STAEntityDefinition.PROP_SYMBOL,
-                                         datastream.getUnitOfMeasurement().getSymbol());
+                                         datastream.getUnit().getSymbol());
                     gen.writeStringField(STAEntityDefinition.PROP_DEFINITION,
-                                         datastream.getUnitOfMeasurement().getLink());
+                                         datastream.getUnit().getLink());
                 } else {
                     gen.writeNullField(STAEntityDefinition.PROP_NAME);
                     gen.writeNullField(STAEntityDefinition.PROP_SYMBOL);
@@ -245,16 +246,16 @@ public class DatastreamSerDes {
     }
 
 
-    public static class DatastreamDeserializer extends StdDeserializer<DatastreamEntity> {
+    public static class DatastreamDeserializer extends StdDeserializer<AbstractDatasetEntity> {
 
         private static final long serialVersionUID = 7491123624385588769L;
 
         public DatastreamDeserializer() {
-            super(DatastreamEntity.class);
+            super(AbstractDatasetEntity.class);
         }
 
         @Override
-        public DatastreamEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+        public AbstractDatasetEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return p.readValueAs(JSONDatastream.class).toEntity(JSONBase.EntityType.FULL);
         }
     }

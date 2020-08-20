@@ -35,10 +35,10 @@ import com.fasterxml.jackson.databind.module.SimpleDeserializers;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.module.SimpleSerializers;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
+import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
-import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ObservationEntity;
@@ -98,7 +98,7 @@ public class JacksonConfig {
                                       new FeatureOfInterestSerDes.FeatureOfInterestDeserializer());
         deserializers.addDeserializer(HistoricalLocationEntity.class,
                                       new HistoricalLocationSerDes.HistoricalLocationDeserializer());
-        deserializers.addDeserializer(DatastreamEntity.class,
+        deserializers.addDeserializer(AbstractDatasetEntity.class,
                                       new DatastreamSerDes.DatastreamDeserializer());
 
         deserializers.addDeserializer(ThingSerDes.PlatformEntityPatch.class,
