@@ -32,6 +32,7 @@ package org.n52.sta.data.query;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
+import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
@@ -53,7 +54,6 @@ import java.util.List;
  */
 public class DatastreamQuerySpecifications extends EntityQuerySpecifications<AbstractDatasetEntity> {
 
-
     @Override
     public Specification<AbstractDatasetEntity> withName(final String name) {
         return (root, query, builder) ->
@@ -74,6 +74,14 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Abs
                 builder.and(builder.isNull(root.get(AbstractDatasetEntity.PROPERTY_AGGREGATION)),
                             builder.in(root.get(DescribableEntity.PROPERTY_STA_IDENTIFIER))
                                    .value(identifiers));
+    }
+
+    public Specification<AbstractDatasetEntity> withFeatureStaIdentifier(final String staIdentifier) {
+        return (root, query, builder) -> {
+            final Join<AbstractDatasetEntity, FeatureEntity> join =
+                    root.join(AbstractDatasetEntity.PROPERTY_FEATURE, JoinType.INNER);
+            return builder.equal(join.get(FeatureEntity.PROPERTY_STA_IDENTIFIER), staIdentifier);
+        };
     }
 
     public Specification<AbstractDatasetEntity> withObservedPropertyStaIdentifier(
@@ -187,8 +195,9 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Abs
      * @param propertyValue Supposed value of Property
      * @return BooleanExpression evaluating to true if Entity is not filtered out
      */
-    @Override protected Specification<AbstractDatasetEntity> handleRelatedPropertyFilter(String propertyName,
-                                                                                         Specification<?> propertyValue) {
+    @Override protected Specification<AbstractDatasetEntity> handleRelatedPropertyFilter(
+            String propertyName,
+            Specification<?> propertyValue) {
         return (root, query, builder) -> {
             try {
                 switch (propertyName) {

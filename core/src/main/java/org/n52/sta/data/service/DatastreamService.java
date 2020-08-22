@@ -277,7 +277,7 @@ public class DatastreamService
      * @param datastream Existing Aggregation or Dataset
      * @param feature    Feature to be used for the new Dataset
      * @return specific Dataset that was created (not the aggregation)
-     * @throws STACRUDException
+     * @throws STACRUDException if an error occurred
      */
     DatasetEntity createOrExpandAggregation(AbstractDatasetEntity datastream,
                                             AbstractFeatureEntity<?> feature)

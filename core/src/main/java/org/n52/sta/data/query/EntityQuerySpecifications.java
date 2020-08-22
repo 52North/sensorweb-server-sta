@@ -58,11 +58,11 @@ public abstract class EntityQuerySpecifications<T> {
     protected static final String HISTORICAL_LOCATIONS = "HistoricalLocations";
     protected static final String OBSERVATIONS = "Observations";
     protected static final String COULD_NOT_FIND_RELATED_PROPERTY = "Could not find related property: ";
+    protected static final String ERROR_GETTING_FILTER_NO_PROP = "Error getting filter for Property: '%s'. No such " +
+            "property in Entity.";
 
     private static final String ERROR_TEMPLATE = "Operator \"%s\" is not supported for given arguments.";
     private static final String INVALID_DATATYPE_CANNOT_CAST = "Invalid Datatypes found. Cannot cast ";
-    protected static final String ERROR_GETTING_FILTER_NO_PROP = "Error getting filter for Property: '%s'. No such " +
-                                                     "property in Entity.";
 
     /**
      * Gets Entity-specific Filter for relation with given name.

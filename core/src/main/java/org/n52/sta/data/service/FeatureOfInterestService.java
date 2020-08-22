@@ -48,7 +48,6 @@ import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.data.query.DatasetQuerySpecifications;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.FeatureOfInterestQuerySpecifications;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
@@ -91,7 +90,6 @@ public class FeatureOfInterestService
 
     private static final ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
     private static final FeatureOfInterestQuerySpecifications foiQS = new FeatureOfInterestQuerySpecifications();
-    private static final DatasetQuerySpecifications dQS = new DatasetQuerySpecifications();
     private static final DatastreamQuerySpecifications dsQS = new DatastreamQuerySpecifications();
 
     private final FormatRepository formatRepository;
@@ -308,7 +306,7 @@ public class FeatureOfInterestService
         // set dataset first/last to null
         synchronized (getLock(featureId)) {
             Iterable<AbstractDatasetEntity> datasets =
-                    datastreamRepository.findAll(dQS.matchFeatureStaIdentifier(featureId));
+                    datastreamRepository.findAll(dsQS.withFeatureStaIdentifier(featureId));
             // update datasets
             datasets.forEach(d -> {
                 d.setFirstObservation(null);

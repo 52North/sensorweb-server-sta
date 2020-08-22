@@ -29,7 +29,6 @@
 
 package org.n52.sta.data.repositories;
 
-import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.sta.ObservationEntity;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.transaction.annotation.Transactional;
