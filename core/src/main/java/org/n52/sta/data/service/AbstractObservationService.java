@@ -32,14 +32,8 @@ package org.n52.sta.data.service;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.AbstractFeatureEntity;
-import org.n52.series.db.beans.CategoryEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetAggregationEntity;
-import org.n52.series.db.beans.DatasetEntity;
-import org.n52.series.db.beans.OfferingEntity;
-import org.n52.series.db.beans.dataset.DatasetType;
-import org.n52.series.db.beans.dataset.ObservationType;
-import org.n52.series.db.beans.dataset.ValueType;
 import org.n52.series.db.beans.sta.AbstractObservationEntity;
 import org.n52.series.db.beans.sta.BooleanObservationEntity;
 import org.n52.series.db.beans.sta.CategoryObservationEntity;
@@ -49,17 +43,16 @@ import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.series.db.beans.sta.QuantityObservationEntity;
 import org.n52.series.db.beans.sta.TextObservationEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
-import org.n52.shetland.ogc.om.OmConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.data.OffsetLimitBasedPageRequest;
-import org.n52.sta.data.query.DatasetQuerySpecifications;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.EntityQuerySpecifications;
 import org.n52.sta.data.repositories.DataRepository;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.LocationRepository;
+import org.n52.sta.data.repositories.ObservationRepository;
 import org.n52.sta.data.repositories.ParameterRepository;
 import org.n52.sta.data.repositories.StaIdentifierRepository;
 import org.n52.sta.data.service.util.CollectionWrapper;
@@ -71,11 +64,11 @@ import org.springframework.http.HttpMethod;
 
 import java.math.BigDecimal;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.regex.Pattern;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -238,7 +231,7 @@ public abstract class AbstractObservationService<
 
                 // Check all subdatasets for a matching  dataset
                 Set<AbstractDatasetEntity> datasets;
-                if (datastream.getAggregation() == null) {
+                if (datastream.getAggregation() == null && !(datastream instanceof DatasetAggregationEntity)) {
                     // We are not an aggregate so there is only one dataset to check for fit
                     datasets = Collections.singleton(datastream);
                 } else {
@@ -252,7 +245,7 @@ public abstract class AbstractObservationService<
                         // We have a dataset without a feature
                         LOGGER.debug("Reusing existing dataset without FOI.");
                         dataset.setFeature(feature);
-                        observation.setDataset(datastreamRepository.intermediateSave(dataset));
+                        observation.setDataset(datastreamRepository.save(dataset));
                         found = true;
                         break;
                     } else if (feature.getId().equals(dataset.getFeature().getId())) {
@@ -271,7 +264,7 @@ public abstract class AbstractObservationService<
                 }
 
                 // Save Observation
-                I data = saveObservation(observation, datastream);
+                I data = saveObservation(observation, observation.getDataset());
 
                 // Update FirstValue/LastValue + FirstObservation/LastObservation of Dataset + Aggregation
                 updateDataset(observation.getDataset(), data);
@@ -292,10 +285,47 @@ public abstract class AbstractObservationService<
      * Handles updating the phenomenonTime field of the associated Datastream when Observation phenomenonTime is
      * updated or deleted
      */
-    /*
-    protected abstract void updateDatastreamPhenomenonTimeOnObservationUpdate(
-            List<DatastreamEntity> datastreams, I observation);
-    */
+    protected void updateDatastreamPhenomenonTimeOnObservationUpdate(AbstractDatasetEntity datastreamEntity,
+                                                                     I observation) {
+        if (datastreamEntity.getPhenomenonTimeStart() == null ||
+                datastreamEntity.getPhenomenonTimeEnd() == null ||
+                observation.getPhenomenonTimeStart().compareTo(datastreamEntity.getPhenomenonTimeStart()) != 1 ||
+                observation.getPhenomenonTimeEnd().compareTo(datastreamEntity.getPhenomenonTimeEnd()) != -1
+        ) {
+            // Setting new phenomenonTimeStart
+            ObservationEntity<?> firstObservation = ((ObservationRepository) getRepository())
+                    .findFirstByDataset_idOrderBySamplingTimeStartAsc(datastreamEntity.getId());
+            Date newPhenomenonStart = (firstObservation == null) ? null : firstObservation.getPhenomenonTimeStart();
+
+            // Set Start and End to null if there is no observation.
+            if (newPhenomenonStart == null) {
+                datastreamEntity.setPhenomenonTimeStart(null);
+                datastreamEntity.setPhenomenonTimeEnd(null);
+            } else {
+                datastreamEntity.setPhenomenonTimeStart(newPhenomenonStart);
+
+                // Setting new phenomenonTimeEnd
+                ObservationEntity<?> lastObservation = ((ObservationRepository) getRepository())
+                        .findFirstByDataset_idOrderBySamplingTimeEndDesc(datastreamEntity.getId());
+                Date newPhenomenonEnd = (lastObservation == null) ? null : lastObservation.getPhenomenonTimeEnd();
+                if (newPhenomenonEnd != null) {
+                    datastreamEntity.setPhenomenonTimeEnd(newPhenomenonEnd);
+                } else {
+                    datastreamEntity.setPhenomenonTimeStart(null);
+                    datastreamEntity.setPhenomenonTimeEnd(null);
+                }
+            }
+            datastreamRepository.save(datastreamEntity);
+            // update parent if its part of the aggregation
+            if (datastreamEntity.isSetAggregation()) {
+                updateDatastreamPhenomenonTimeOnObservationUpdate(
+                        datastreamRepository.findById(datastreamEntity.getAggregation()
+                                                                      .getId()).get(),
+                        observation);
+            }
+        }
+    }
+
     @Override
     public I updateEntity(String id, I entity, HttpMethod method)
             throws STACRUDException {
@@ -311,12 +341,10 @@ public abstract class AbstractObservationService<
                     I merged = merge(existing.get(), entity);
                     I saved = getRepository().save(merged);
 
-                    List<AbstractDatasetEntity> datastreamEntity =
-                            datastreamRepository.findAll(dsQS.withObservationStaIdentifier(saved.getStaIdentifier()),
-                                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS);
+                    AbstractDatasetEntity datastreamEntity =
+                            datastreamRepository.findById(saved.getDataset().getId()).get();
 
-                    //TODO: reimplement
-                    // updateDatastreamPhenomenonTimeOnObservationUpdate(datastreamEntity, observation);
+                    updateDatastreamPhenomenonTimeOnObservationUpdate(datastreamEntity, saved);
                     return saved;
                 }
                 throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
@@ -337,14 +365,11 @@ public abstract class AbstractObservationService<
                                 EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASET_FIRSTLAST_OBSERVATION)
                                        .get();
                 updateDatasetFirstLast(observation);
-                List<AbstractDatasetEntity> datastreamEntity =
-                        datastreamRepository.findAll(dsQS.withObservationStaIdentifier(observation.getStaIdentifier()),
-                                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS);
+
                 // Important! Delete first and then update else we find
                 // ourselves again in search for new latest/earliest obs.
                 getRepository().deleteByStaIdentifier(observation.getStaIdentifier());
-                //TODO: reimplement
-                // updateDatastreamPhenomenonTimeOnObservationUpdate(datastreamEntity, observation);
+                updateDatastreamPhenomenonTimeOnObservationUpdate(observation.getDataset(), observation);
             } else {
                 throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }
@@ -384,15 +409,6 @@ public abstract class AbstractObservationService<
         }
         observation.setDataset(datastreamRepository.saveAndFlush(dataset));
     }
-
-    /*
-    AbstractDatastreamEntity checkDatastream(ObservationEntity observation) throws STACRUDException {
-        AbstractDatastreamEntity datastream =
-                getAbstractDatastreamService(observation.getDatastream()).createEntity(observation.getDatastream());
-        observation.setDatastream(datastream);
-        return datastream;
-    }
-    */
 
     private AbstractFeatureEntity<?> createOrfetchFeature(AbstractObservationEntity observation,
                                                           Long thingId)

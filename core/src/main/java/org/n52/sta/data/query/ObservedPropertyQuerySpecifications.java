@@ -32,6 +32,7 @@ package org.n52.sta.data.query;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
+import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
@@ -62,15 +63,14 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
         }
     }
 
-    public Specification<PhenomenonEntity> withDatastreamStaIdentifier(final String datastreamIdentifier) {
+    public Specification<PhenomenonEntity> withDatastreamStaIdentifier(final String datastreamStaIdentifier) {
         return (root, query, builder) -> {
             Subquery<PhenomenonEntity> sq = query.subquery(PhenomenonEntity.class);
             Root<AbstractDatasetEntity> datastream = sq.from(AbstractDatasetEntity.class);
             Join<AbstractDatasetEntity, PhenomenonEntity> join =
                     datastream.join(AbstractDatasetEntity.PROPERTY_PHENOMENON);
             sq.select(join)
-              .where(builder.equal(datastream.get(DescribableEntity.PROPERTY_IDENTIFIER), datastreamIdentifier));
-
+              .where(builder.equal(datastream.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), datastreamStaIdentifier));
             return builder.in(root).value(sq);
         };
     }

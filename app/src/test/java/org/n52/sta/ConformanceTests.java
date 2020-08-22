@@ -104,13 +104,13 @@ abstract class ConformanceTests implements TestUtil {
                 "Response has invalid MIME Type"
         );
 
-        Assertions.assertEquals(200, response.getStatusLine().getStatusCode());
-
         JsonNode result = mapper.readTree(response.getEntity().getContent());
         if (logger.isTraceEnabled()) {
             System.out.printf("RETURNED by Server: %s\n", request.getURI());
             System.out.println(result.toPrettyString());
         }
+        Assertions.assertEquals(200, response.getStatusLine().getStatusCode());
+
         return result;
     }
 
@@ -301,7 +301,7 @@ abstract class ConformanceTests implements TestUtil {
 
         // Check Response MIME Type
         String mimeType = ContentType.getOrDefault(response.getEntity()).getMimeType();
-        Assertions.assertEquals(jsonMimeType, mimeType);
+        Assertions.assertEquals(jsonMimeType, mimeType, "Wrong MIME Type returned on path: " + path);
 
         Assertions.assertEquals(200,
                                 response.getStatusLine().getStatusCode(),

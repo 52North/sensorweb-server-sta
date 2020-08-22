@@ -116,7 +116,6 @@ public interface EntityGraphRepository<T, I> extends JpaSpecificationExecutor<T>
         FETCHGRAPH_LOCATION("locations"),
         FETCHGRAPH_LOCATIONHISTLOCATION("locations(historicalLocations)"),
         FETCHGRAPH_HIST_LOCATION("historicalLocations"),
-        FETCHGRAPH_DATASTREAMS("datastreams"),
         FETCHGRAPH_UOM("unit"),
         FETCHGRAPH_PARAMETERS("parameters"),
         FETCHGRAPH_FORMAT("format"),

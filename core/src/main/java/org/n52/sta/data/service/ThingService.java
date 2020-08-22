@@ -253,7 +253,7 @@ public class ThingService
             if (getRepository().existsByStaIdentifier(identifier)) {
                 PlatformEntity thing =
                         getRepository().findByStaIdentifier(identifier,
-                                                            EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASTREAMS,
+                                                            EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS,
                                                             EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATION)
                                        .get();
                 // delete datastreams

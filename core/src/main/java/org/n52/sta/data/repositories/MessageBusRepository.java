@@ -148,7 +148,8 @@ public class MessageBusRepository<T, I extends Serializable>
     private HashMap<String, String> createEntityTypeToStaTypeMapping() {
         HashMap<String, String> map = new HashMap<>(11);
         map.put(ENTITYNAME_OBSERVATION, StaConstants.OBSERVATIONS);
-        map.put(ENTITYNAME_DATASTREAM, StaConstants.DATASTREAMS);
+        map.put(ENTITYNAME_ABSTRACT_DATASET, StaConstants.DATASTREAMS);
+        map.put(ENTITYNAME_DATASET, StaConstants.DATASTREAMS);
         map.put(ENTITYNAME_FEATURE_OF_INTEREST, StaConstants.FEATURES_OF_INTEREST);
         map.put(ENTITYNAME_AFEATURE_OF_INTEREST, StaConstants.FEATURES_OF_INTEREST);
         map.put(ENTITYNAME_HIST_LOCATION, StaConstants.HISTORICAL_LOCATIONS);

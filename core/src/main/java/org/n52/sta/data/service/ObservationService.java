@@ -47,16 +47,13 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
-import org.n52.sta.data.repositories.CategoryRepository;
 import org.n52.sta.data.repositories.DataRepository;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.ObservationRepository;
-import org.n52.sta.data.repositories.OfferingRepository;
 import org.n52.sta.data.repositories.ParameterRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
@@ -135,11 +132,11 @@ public class ObservationService
         Specification<ObservationEntity<?>> filter;
         switch (relatedType) {
         case STAEntityDefinition.DATASTREAMS: {
-            filter = oQS.withDatastreamStaIdentifier(relatedId);
+            filter = ObservationQuerySpecifications.withDatastreamStaIdentifier(relatedId);
             break;
         }
         case STAEntityDefinition.FEATURES_OF_INTEREST: {
-            filter = oQS.withFeatureOfInterestStaIdentifier(relatedId);
+            filter = ObservationQuerySpecifications.withFeatureOfInterestStaIdentifier(relatedId);
             break;
         }
         default:
@@ -202,47 +199,4 @@ public class ObservationService
         }
         return fillConcreteObservationType(data, observation, dataset);
     }
-
-    /*
-    protected void updateDatastreamPhenomenonTimeOnObservationUpdate(
-            List<AbstractDatasetEntity> datastreams, ObservationEntity<?> observation) {
-        for (DatastreamEntity datastreamEntity : datastreams) {
-            if (datastreamEntity.getPhenomenonTimeStart() == null ||
-                    datastreamEntity.getPhenomenonTimeEnd() == null ||
-                    observation.getPhenomenonTimeStart().compareTo(datastreamEntity.getPhenomenonTimeStart()) != 1 ||
-                    observation.getPhenomenonTimeEnd().compareTo(datastreamEntity.getPhenomenonTimeEnd()) != -1
-            ) {
-                List<Long> datasetIds = datastreamEntity
-                        .getDatasets()
-                        .stream()
-                        .map(datasetEntity -> datasetEntity.getId())
-                        .collect(Collectors.toList());
-                // Setting new phenomenonTimeStart
-                ObservationEntity<?> firstObservation = getRepository()
-                        .findFirstByDataset_idInOrderBySamplingTimeStartAsc(datasetIds);
-                Date newPhenomenonStart = (firstObservation == null) ? null : firstObservation.getPhenomenonTimeStart();
-
-                // Set Start and End to null if there is no observation.
-                if (newPhenomenonStart == null) {
-                    datastreamEntity.setPhenomenonTimeStart(null);
-                    datastreamEntity.setPhenomenonTimeEnd(null);
-                } else {
-                    datastreamEntity.setPhenomenonTimeStart(newPhenomenonStart);
-
-                    // Setting new phenomenonTimeEnd
-                    ObservationEntity<?> lastObservation = getRepository()
-                            .findFirstByDataset_idInOrderBySamplingTimeEndDesc(datasetIds);
-                    Date newPhenomenonEnd = (lastObservation == null) ? null : lastObservation.getPhenomenonTimeEnd();
-                    if (newPhenomenonEnd != null) {
-                        datastreamEntity.setPhenomenonTimeEnd(newPhenomenonEnd);
-                    } else {
-                        datastreamEntity.setPhenomenonTimeStart(null);
-                        datastreamEntity.setPhenomenonTimeEnd(null);
-                    }
-                }
-                datastreamRepository.save(datastreamEntity);
-            }
-        }
-    }
-     */
 }

@@ -29,19 +29,22 @@
 
 package org.n52.sta.data.repositories;
 
+import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.sta.ObservationEntity;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.Set;
 
 @Transactional
 @DependsOn("DatastreamRepository")
 public interface ObservationRepository<T extends ObservationEntity<?>>
         extends IdentifierRepository<T, Long>, StaIdentifierRepository<T> {
 
-    ObservationEntity<T> findFirstByDataset_idInOrderBySamplingTimeStartAsc(List<Long> datasetIdentifiers);
+    ObservationEntity<T> findFirstByDataset_idOrderBySamplingTimeStartAsc(Long datasetIdentifier);
 
-    ObservationEntity<T> findFirstByDataset_idInOrderBySamplingTimeEndDesc(List<Long> datasetIdentifiers);
+    ObservationEntity<T> findFirstByDataset_idOrderBySamplingTimeEndDesc(Long datasetIdentifier);
+
+    void deleteAllByDatasetIdIn(Set<Long> datasetId);
 
 }

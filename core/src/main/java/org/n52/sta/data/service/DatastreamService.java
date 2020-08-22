@@ -37,6 +37,7 @@ import org.n52.series.db.beans.CategoryEntity;
 import org.n52.series.db.beans.DatasetAggregationEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
+import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.OfferingEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.UnitEntity;
@@ -81,6 +82,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.Predicate;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -258,7 +260,7 @@ public class DatastreamService
                 datastream.setProcedure(getSensorService().createOrfetch(datastream.getProcedure()));
                 datastream.setThing(getThingService().createOrfetch(datastream.getThing()));
 
-                DatasetEntity dataset = createDataset(datastream, null);
+                DatasetEntity dataset = createDataset(datastream, null, datastream.getStaIdentifier());
                 DatasetEntity saved = getRepository().save(dataset);
                 processObservation(saved, entity.getObservations());
             }
@@ -283,21 +285,33 @@ public class DatastreamService
         if (datastream.getAggregation() == null) {
             LOGGER.debug("Creating new DatasetAggregation");
             // We need to create a new aggregation and link the existing datastream with it
+
             DatasetAggregationEntity parent = new DatasetAggregationEntity();
             parent.copy(datastream);
-            AbstractDatasetEntity aggregation = getRepository().save(parent);
+            parent.setIdentifier(UUID.randomUUID().toString());
+            parent.setFeature(null);
+
+            // Free up staIdentifier
+            datastream.setStaIdentifier(null);
+            getRepository().saveAndFlush(datastream);
+
+            // Persist parent
+            AbstractDatasetEntity aggregation = getRepository().intermediateSave(parent);
 
             // update existing datastream with new parent
             datastream.setAggregation(aggregation);
-            getRepository().save(datastream);
+            getRepository().intermediateSave(datastream);
         }
 
         // We need to create a new dataset
-        return createDataset(datastream, feature);
+        //datastream.setIdentifier(UUID.randomUUID().toString());
+        //datastream.setStaIdentifier(null);
+        return createDataset(datastream, feature, null);
     }
 
     private DatasetEntity createDataset(AbstractDatasetEntity datastream,
-                                        AbstractFeatureEntity<?> feature) throws STACRUDException {
+                                        AbstractFeatureEntity<?> feature,
+                                        String staIdentifier) throws STACRUDException {
         CategoryEntity category = getDatastreamService().createOrFetchCategory();
         OfferingEntity offering = getDatastreamService().createOrFetchOffering(datastream);
         DatasetEntity dataset = createDatasetSkeleton(datastream.getOMObservationType().getFormat(),
@@ -307,9 +321,10 @@ public class DatastreamService
                                                                                                    .getProperties())
                                                                                 .matches());
         dataset.setProcedure(datastream.getProcedure());
-        dataset.setIdentifier(datastream.getIdentifier());
-        dataset.setStaIdentifier(datastream.getStaIdentifier());
-        dataset.setStaIdentifier(datastream.getStaIdentifier());
+        dataset.setIdentifier(UUID.randomUUID().toString());
+        dataset.setStaIdentifier(staIdentifier);
+        dataset.setName(datastream.getName());
+        dataset.setDescription(datastream.getDescription());
         dataset.setPhenomenon(datastream.getObservableProperty());
         dataset.setCategory(category);
         dataset.setFeature(feature);
@@ -440,15 +455,6 @@ public class DatastreamService
                 if (existing.isPresent()) {
                     AbstractDatasetEntity merged = merge(existing.get(), entity);
                     createOrfetchUnit(merged, entity);
-                    //TODO: check what this code did
-                    /*
-                    if (merged.getDatasets() != null) {
-                        merged.getDatasets().forEach(d -> {
-                            d.setUnit(merged.getUnit());
-                            datasetRepository.saveAndFlush(d);
-                        });
-                    }
-                    */
                     getRepository().save(merged);
                     return merged;
                 }
@@ -487,14 +493,33 @@ public class DatastreamService
     public void delete(String id) throws STACRUDException {
         synchronized (getLock(id)) {
             if (getRepository().existsByStaIdentifier(id)) {
-                Optional<AbstractDatasetEntity> datastream =
-                        getRepository().findByStaIdentifier(id,
-                                                            EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS);
-                // delete observations
-                observationRepository.deleteAll(observationRepository.findAll(
-                        oQS.withDatastreamStaIdentifier(datastream.get().getStaIdentifier())));
+                AbstractDatasetEntity datastream =
+                        getRepository().findByStaIdentifier(id).get();
 
-                // check observations
+                // Delete first/last to be able to delete observations
+                datastream.setFirstObservation(null);
+                datastream.setLastObservation(null);
+
+                // Delete subdatasets if we are aggregation
+                if (datastream instanceof DatasetAggregationEntity) {
+                    Set<AbstractDatasetEntity> allByAggregationId =
+                            getRepository().findAllByAggregationId(datastream.getId());
+                    Set<Long> datasetIds = allByAggregationId.stream()
+                                                          .map(IdEntity::getId)
+                                                          .collect(Collectors.toSet());
+                    allByAggregationId.forEach(dataset -> {
+                        dataset.setFirstObservation(null);
+                        dataset.setLastObservation(null);
+                    });
+                    // delete observations
+                    observationRepository.deleteAllByDatasetIdIn(datasetIds);
+                    // delete subdatastreams
+                    datasetIds.forEach(datasetId -> getRepository().deleteById(datasetId));
+                } else {
+                    // delete observations
+                    observationRepository.deleteAllByDatasetIdIn(Collections.singleton(datastream.getId()));
+                }
+                //delete main datastream
                 getRepository().deleteByStaIdentifier(id);
             } else {
                 throw new STACRUDException("Unable to delete. Entity not found.", HTTPStatus.NOT_FOUND);
@@ -515,14 +540,6 @@ public class DatastreamService
         return createOrfetch(entity);
     }
 
-    private void deleteRelatedObservations(AbstractDatasetEntity datastream) throws STACRUDException {
-        synchronized (getLock(datastream.getStaIdentifier())) {
-            // delete observations
-            observationRepository.deleteAll(observationRepository.findAll(
-                    oQS.withDatastreamStaIdentifier(datastream.getStaIdentifier())));
-        }
-    }
-
     private void createOrfetchUnit(AbstractDatasetEntity datastream) throws STACRUDException {
         UnitEntity unit;
         if (datastream.isSetUnit()) {
@@ -537,7 +554,8 @@ public class DatastreamService
         }
     }
 
-    private void createOrfetchUnit(AbstractDatasetEntity merged, AbstractDatasetEntity toMerge) throws STACRUDException {
+    private void createOrfetchUnit(AbstractDatasetEntity merged, AbstractDatasetEntity toMerge)
+            throws STACRUDException {
         if (toMerge.isSetUnit()) {
             createOrfetchUnit(toMerge);
             merged.setUnit(toMerge.getUnit());
@@ -604,7 +622,8 @@ public class DatastreamService
         }
 
         // observationType
-        if (!existing.getOMObservationType().getFormat().equals(toMerge.getOMObservationType().getFormat())
+        if (toMerge.isSetOMObservationType()
+                && !existing.getOMObservationType().getFormat().equals(toMerge.getOMObservationType().getFormat())
                 && !toMerge.getOMObservationType().getFormat().equalsIgnoreCase(UNKNOWN)) {
             existing.setOMObservationType(toMerge.getOMObservationType());
         }

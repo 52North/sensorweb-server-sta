@@ -54,7 +54,9 @@ public class QuerySpecificationRepository {
         case "HistoricalLocations": {
             return new HistoricalLocationQuerySpecifications();
         }
-        case "DatastreamEntity":
+        case "AbstractDatasetEntity":
+        case "DatasetEntity":
+        case "DatasetAggregationEntity":
         case "Datastream":
         case "Datastreams": {
             return new DatastreamQuerySpecifications();

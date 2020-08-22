@@ -96,6 +96,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     protected static final String IDENTIFIER_ALREADY_EXISTS = "Identifier already exists!";
     protected static final String UNABLE_TO_UPDATE_ENTITY_NOT_FOUND = "Unable to update. Entity not found.";
     protected static final String UNABLE_TO_DELETE_ENTITY_NOT_FOUND = "Unable to delete. Entity not found.";
+    protected static final String UNABLE_TO_GET_ENTITY_NOT_FOUND = "Unable to retrieve. Entity not found.";
     protected static final String INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY = "Invalid http method for updating entity!";
     protected static final String TRYING_TO_FILTER_BY_UNRELATED_TYPE =
             "Trying to filter by unrelated type: %s not found!";
@@ -234,7 +235,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
                     return elem.get();
                 }
             } else {
-                return null;
+                throw new STACRUDException(UNABLE_TO_GET_ENTITY_NOT_FOUND);
             }
         } catch (RuntimeException | STAInvalidQueryException e) {
             throw new STACRUDException(e.getMessage(), e);

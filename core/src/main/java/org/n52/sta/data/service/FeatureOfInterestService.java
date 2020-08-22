@@ -70,6 +70,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -316,28 +317,26 @@ public class FeatureOfInterestService
                 d.setLastObservation(null);
                 d.setLastQuantityValue(null);
                 d.setLastValueAt(null);
+                d.setFeature(null);
                 datastreamRepository.saveAndFlush(d);
                 // delete observations
-                observationRepository.deleteAll(observationRepository.findAll(oQS.withDatasetId(d.getId())));
+                observationRepository.deleteAllByDatasetIdIn(Collections.singleton(d.getId()));
                 getRepository().flush();
-                //TODO: delete datasets
-                /*
-                datastreamRepository.findAll(dsQS.withDatasetId(d.getId()),
-                                             EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS).forEach(ds -> {
-                    ds.getDatasets().removeIf(e -> e.getId().equals(d.getId()));
-                    datastreamRepository.saveAndFlush(ds);
-                });
-                 */
             });
-            // delete datasets
+            // delete
             datasets.forEach(d -> {
-                d.setFirstObservation(null);
-                d.setFirstQuantityValue(null);
-                d.setFirstValueAt(null);
-                d.setLastObservation(null);
-                d.setLastQuantityValue(null);
-                d.setLastValueAt(null);
-                datastreamRepository.delete(d);
+                // only delete if we are part of an aggregation
+                // if we are not part of an aggregation we must not delete as this would also delete the whole
+                // datastream
+                if (d.isSetAggregation()) {
+                    d.setFirstObservation(null);
+                    d.setFirstQuantityValue(null);
+                    d.setFirstValueAt(null);
+                    d.setLastObservation(null);
+                    d.setLastQuantityValue(null);
+                    d.setLastValueAt(null);
+                    datastreamRepository.delete(d);
+                }
             });
             getRepository().flush();
         }

@@ -1395,8 +1395,8 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
             );
         }
         Assertions.assertEquals(
-                result.get("feature").toString(),
                 locationObj.get("location").toString(),
+                result.get("feature").toString(),
                 "ERROR: Automatic created FeatureOfInterest does not match last Location of that Thing."
         );
         return id;
