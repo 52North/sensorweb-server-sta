@@ -59,14 +59,28 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 public class JacksonConfig {
 
     @Bean
-    public ObjectMapper customMapper(@Value("${server.rootUrl}") String rootUrl,
-                                     @Value("${server.feature.variableEncodingType:false}")
-                                             boolean variableSensorEncodingTypeEnabled) {
+    public ObjectMapper customMapper(
+            @Value("${server.rootUrl}") String rootUrl,
+            @Value("${server.feature.variableEncodingType:false}") boolean variableSensorEncodingTypeEnabled,
+            @Value("${server.feature.observation.samplingGeometry}") String samplingGeometryMapping,
+            @Value("${server.feature.observation.verticalFrom}") String verticalFromMapping,
+            @Value("${server.feature.observation.verticalTo}") String verticalToMapping,
+            @Value("${server.feature.observation.verticalFromTo}") String verticalFromToMapping
+    ) {
+
+        Map<String, String> parameterMapping = new HashMap<>();
+        parameterMapping.put("samplingGeometry", samplingGeometryMapping);
+        parameterMapping.put("verticalFrom", verticalFromMapping);
+        parameterMapping.put("verticalTo", verticalToMapping);
+        parameterMapping.put("verticalFromTo", verticalFromToMapping);
+
         ArrayList<Module> modules = new ArrayList<>();
 
         SimpleModule module = new SimpleModule();
@@ -91,7 +105,7 @@ public class JacksonConfig {
         deserializers.addDeserializer(SensorEntity.class,
                                       new SensorSerDes.SensorDeserializer(variableSensorEncodingTypeEnabled));
         deserializers.addDeserializer(ObservationEntity.class,
-                                      new ObservationSerDes.ObservationDeserializer());
+                                      new ObservationSerDes.ObservationDeserializer(parameterMapping));
         deserializers.addDeserializer(PhenomenonEntity.class,
                                       new ObservedPropertySerDes.ObservedPropertyDeserializer());
         deserializers.addDeserializer(AbstractFeatureEntity.class,
@@ -108,7 +122,7 @@ public class JacksonConfig {
         deserializers.addDeserializer(SensorSerDes.SensorEntityPatch.class,
                                       new SensorSerDes.SensorPatchDeserializer(variableSensorEncodingTypeEnabled));
         deserializers.addDeserializer(ObservationSerDes.ObservationEntityPatch.class,
-                                      new ObservationSerDes.ObservationPatchDeserializer());
+                                      new ObservationSerDes.ObservationPatchDeserializer(parameterMapping));
         deserializers.addDeserializer(ObservedPropertySerDes.PhenomenonEntityPatch.class,
                                       new ObservedPropertySerDes.ObservedPropertyPatchDeserializer());
         deserializers.addDeserializer(FeatureOfInterestSerDes.AbstractFeatureEntityPatch.class,

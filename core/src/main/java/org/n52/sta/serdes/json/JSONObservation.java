@@ -44,11 +44,13 @@ import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
-import org.n52.shetland.ogc.sos.Sos2Constants;
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.springframework.util.Assert;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Map;
 
 @SuppressWarnings("VisibilityModifier")
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
@@ -66,6 +68,9 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
     public JSONFeatureOfInterest FeatureOfInterest;
     @JsonManagedReference
     public JSONDatastream Datastream;
+
+    private final String NAME = "name";
+    private final String VALUE = "value";
 
     public JSONObservation() {
         self = new ObservationEntity();
@@ -122,7 +127,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
         self.setStaIdentifier(identifier);
 
         // parameters
-        handleParameters(parameters);
+        storeParameters(parameters);
 
         // phenomenonTime
         if (phenomenonTime != null) {
@@ -209,7 +214,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
         }
 
         // parameters
-        handleParameters(parameters);
+        storeParameters(parameters);
 
         // result
         self.setValue(result);
@@ -235,37 +240,67 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
         return self;
     }
 
-    private void handleParameters(ArrayNode parameters) {
+    protected void storeParameters(ArrayNode parameters) {
         // parameters
         if (parameters != null) {
-            final String NAME = "name";
-            final String VALUE = "value";
             HashSet<ParameterEntity<?>> parameterJsonEntities = new HashSet<>();
             for (JsonNode param : parameters) {
-
                 // Check that structure is correct
                 Assert.isTrue(param.has(NAME));
                 Assert.isTrue(param.has(VALUE));
                 Assert.isTrue(!param.has(2));
 
-                if (param.get(NAME).asText().equals(Sos2Constants.HREF_PARAMETER_SPATIAL_FILTERING_PROFILE)) {
-                    // Add as samplingGeometry to enable interoperability with SOS
-                    GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
-                    JsonNode jsonNode = param.get(VALUE);
-                    GeoJsonReader reader = new GeoJsonReader(factory);
-                    try {
-                        self.setSamplingGeometry(reader.read(jsonNode.toString()));
-                    } catch (ParseException e) {
-                        Assert.notNull(null, "Could not parse" + e.getMessage());
-                    }
+                String paramName = param.get(NAME).asText();
+                JsonNode jsonNode = param.get(VALUE);
 
-                }
                 ParameterJsonEntity parameterEntity = new ParameterJsonEntity();
-                parameterEntity.setName(param.get(NAME).asText());
-                parameterEntity.setValue(param.get(VALUE).toString());
+                parameterEntity.setName(paramName);
+                parameterEntity.setValue(jsonNode.toString());
                 parameterJsonEntities.add(parameterEntity);
             }
             self.setParameters(parameterJsonEntities);
         }
+    }
+
+    public JSONObservation parseParameters(Map<String, String> propertyMapping) {
+        if (parameters != null) {
+            for (Map.Entry<String, String> mapping : propertyMapping.entrySet()) {
+                for (JsonNode param : parameters) {
+                    String paramName = param.get(NAME).asText();
+                    if (paramName.equals(mapping.getValue())) {
+                        JsonNode jsonNode = param.get(VALUE);
+                        switch (mapping.getKey()) {
+                        case "samplingGeometry":
+                            // Add as samplingGeometry to enable interoperability with SOS
+                            GeometryFactory factory =
+                                    new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
+                            GeoJsonReader reader = new GeoJsonReader(factory);
+                            try {
+                                self.setSamplingGeometry(reader.read(jsonNode.toString()));
+                            } catch (ParseException e) {
+                                Assert.notNull(null, "Could not parse" + e.getMessage());
+                            }
+                            break;
+                        case "verticalFrom":
+                            // Add as verticalTo to enable interoperability with SOS
+                            self.setVerticalTo(BigDecimal.valueOf(jsonNode.asDouble()));
+                            break;
+                        case "verticalTo":
+                            // Add as verticalTo to enable interoperability with SOS
+                            self.setVerticalFrom(BigDecimal.valueOf(jsonNode.asDouble()));
+                            break;
+                        case "verticalFromTo":
+                            // Add as verticalTo to enable interoperability with SOS
+                            self.setVerticalTo(BigDecimal.valueOf(jsonNode.asDouble()));
+                            self.setVerticalFrom(BigDecimal.valueOf(jsonNode.asDouble()));
+                            break;
+                        default:
+                            throw new RuntimeException("Unable to parse Parameters!");
+                        }
+                    }
+                }
+            }
+        }
+        return this;
     }
 }
