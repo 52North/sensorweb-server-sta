@@ -70,7 +70,7 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
     public Specification<PlatformEntity> withDatastreamStaIdentifier(final String datastreamIdentifier) {
         return (root, query, builder) -> {
             final Join<PlatformEntity, AbstractDatasetEntity> join =
-                    root.join(PlatformEntity.PROPERTY_DATASTREAMS, JoinType.INNER);
+                    root.join(PlatformEntity.PROPERTY_DATASETS, JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), datastreamIdentifier);
         };
     }
