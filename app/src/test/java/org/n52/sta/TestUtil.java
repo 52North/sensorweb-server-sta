@@ -41,9 +41,10 @@ import org.locationtech.jts.io.geojson.GeoJsonReader;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -145,6 +146,13 @@ public interface TestUtil {
             "FeaturesOfInterest(%s)/Observations");
 
     }};
+
+    default Set<String> getRelatedEntityEndpointKeys(EntityType source) {
+        return relatedEntityEndpoints.values()
+                                     .stream()
+                                     .filter((val) -> val.startsWith(source.val))
+                                     .collect(Collectors.toSet());
+    }
 
     default String getRelatedEntityEndpoint(EntityType source, EntityType target) {
         return relatedEntityEndpoints.get(source.toString() + target.toString());

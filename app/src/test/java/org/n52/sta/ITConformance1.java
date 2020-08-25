@@ -48,7 +48,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -243,111 +243,38 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
      * specified level.
      */
     @Test
-    public void checkResourcePaths() {
-        readRelatedEntityOfEntityWithEntityType(EntityType.THING);
-        readRelatedEntityOfEntityWithEntityType(EntityType.LOCATION);
-        readRelatedEntityOfEntityWithEntityType(EntityType.HISTORICAL_LOCATION);
-        readRelatedEntityOfEntityWithEntityType(EntityType.DATASTREAM);
-        readRelatedEntityOfEntityWithEntityType(EntityType.OBSERVED_PROPERTY);
-        readRelatedEntityOfEntityWithEntityType(EntityType.SENSOR);
-        readRelatedEntityOfEntityWithEntityType(EntityType.OBSERVATION);
-        readRelatedEntityOfEntityWithEntityType(EntityType.FEATURE_OF_INTEREST);
+    public void checkResourcePaths() throws Exception {
+        Set<JsonNode> response;
+        response = readEntityWithEntityType(EntityType.THING);
+        checkRelatedEndpoints(EntityType.THING, ((JsonNode) response.toArray()[0]).get(idKey).asText());
+        response = readEntityWithEntityType(EntityType.LOCATION);
+        checkRelatedEndpoints(EntityType.LOCATION, ((JsonNode) response.toArray()[0]).get(idKey).asText());
+        response = readEntityWithEntityType(EntityType.HISTORICAL_LOCATION);
+        checkRelatedEndpoints(EntityType.HISTORICAL_LOCATION, ((JsonNode) response.toArray()[0]).get(idKey).asText());
+        response = readEntityWithEntityType(EntityType.DATASTREAM);
+        checkRelatedEndpoints(EntityType.DATASTREAM, ((JsonNode) response.toArray()[0]).get(idKey).asText());
+        response = readEntityWithEntityType(EntityType.SENSOR);
+        checkRelatedEndpoints(EntityType.SENSOR, ((JsonNode) response.toArray()[0]).get(idKey).asText());
+        response = readEntityWithEntityType(EntityType.OBSERVATION);
+        checkRelatedEndpoints(EntityType.OBSERVATION, ((JsonNode) response.toArray()[0]).get(idKey).asText());
+        response = readEntityWithEntityType(EntityType.OBSERVED_PROPERTY);
+        checkRelatedEndpoints(EntityType.OBSERVED_PROPERTY, ((JsonNode) response.toArray()[0]).get(idKey).asText());
+        response = readEntityWithEntityType(EntityType.FEATURE_OF_INTEREST);
+        checkRelatedEndpoints(EntityType.FEATURE_OF_INTEREST, ((JsonNode) response.toArray()[0]).get(idKey).asText());
     }
 
     /**
-     * This helper method is the start point for testing resource path. It adds
-     * the entity type to be tested to resource path chain and call the other
-     * method to test the chain.
+     * Checks that all related Endpoints return HTTP 200 OK
      *
-     * @param entityType Entity type from EntityType enum list
+     * @param type Type of Source Entity
+     * @param id   Id of Source Entity
+     * @throws IOException if an error occurred
      */
-    private void readRelatedEntityOfEntityWithEntityType(EntityType entityType) {
-        List<String> entityTypes = new ArrayList<>();
-        switch (entityType) {
-        case THING:
-            entityTypes.add("Things");
-            break;
-        case LOCATION:
-            entityTypes.add("Locations");
-            break;
-        case HISTORICAL_LOCATION:
-            entityTypes.add("HistoricalLocations");
-            break;
-        case DATASTREAM:
-            entityTypes.add("Datastreams");
-            break;
-        case SENSOR:
-            entityTypes.add("Sensors");
-            break;
-        case OBSERVATION:
-            entityTypes.add("Observations");
-            break;
-        case OBSERVED_PROPERTY:
-            entityTypes.add("ObservedProperties");
-            break;
-        case FEATURE_OF_INTEREST:
-            entityTypes.add("FeaturesOfInterest");
-            break;
-        default:
-            Assertions.fail("Entity type is not recognized in SensorThings API : " + entityType);
+    private void checkRelatedEndpoints(EntityType type, String id) throws IOException {
+        Set<String> relatedEntityEndpointKeys = getRelatedEntityEndpointKeys(type);
+        for (String relatedEntityEndpointKey : relatedEntityEndpointKeys) {
+            getEntity(String.format(relatedEntityEndpointKey, id));
         }
-        readRelatedEntity(entityTypes, new ArrayList<>());
-    }
-
-    /**
-     * This helper method is testing the chain to the specified level. It
-     * confirms that the response is 200.
-     *
-     * @param entityTypes List of entity type from EntityType enum list for the
-     *                    chain
-     * @param ids         List of ids for teh chain
-     */
-    private void readRelatedEntity(List<String> entityTypes, List<String> ids) {
-        //        if (entityTypes.size() > resourcePathLevel) {
-        //            return;
-        //        }
-        //        try {
-        //
-        //            getEntity()
-        //            String urlString = ServiceURLBuilder.buildURLString(rootUri, entityTypes, ids, null);
-        //            Map<String, Object> responseMap = HTTPMethods.doGet(urlString);
-        //            Assert.assertEquals(responseMap.get("response-code"),
-        //                                200,
-        //                                "Reading relation of the entity failed: " + entityTypes.toString());
-        //            String response = responseMap.get("response").toString();
-        //            if (!entityTypes.get(entityTypes.size() - 1).toLowerCase().equals("featuresofinterest") &&
-        //                    !entityTypes.get(entityTypes.size() - 1).endsWith("s")) {
-        //                return;
-        //            }
-        //            Long id = new JSONObject(response.toString()).getJSONArray(value)
-        //                                                         .getJSONObject(0)
-        //                                                         .getLong(ControlInformation.ID);
-        //
-        //            //check $ref
-        //            urlString = ServiceURLBuilder.buildURLString(rootUri, entityTypes, ids, "$ref");
-        //            responseMap = HTTPMethods.doGet(urlString);
-        //            Assert.assertEquals(responseMap.get("response-code"),
-        //                                200,
-        //                                "Reading relation of the entity failed: " + entityTypes.toString());
-        //            response = responseMap.get("response").toString();
-        //            checkAssociationLinks(response, entityTypes, ids);
-        //
-        //            if (entityTypes.size() == resourcePathLevel) {
-        //                return;
-        //            }
-        //            ids.add(id);
-        //            for (String relation : EntityRelations.getRelationsListFor(entityTypes.get(entityTypes.size() -
-        //            1))) {
-        //                entityTypes.add(relation);
-        //                readRelatedEntity(entityTypes, ids);
-        //                entityTypes.remove(entityTypes.size() - 1);
-        //            }
-        //            ids.remove(ids.size() - 1);
-        //        } catch (JSONException e) {
-        //            e.printStackTrace();
-        //            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
-        //        }
-
     }
 
     /**

@@ -296,6 +296,7 @@ abstract class ConformanceTests implements TestUtil {
     }
 
     protected JsonNode getEntity(String path) throws IOException {
+        logger.trace("Requesting:" + rootUrl + path);
         HttpGet request = new HttpGet(rootUrl + path);
         HttpResponse response = HttpClientBuilder.create().build().execute(request);
 
