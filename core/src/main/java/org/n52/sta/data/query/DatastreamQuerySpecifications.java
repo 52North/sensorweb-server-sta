@@ -39,6 +39,7 @@ import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -47,6 +48,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
+import javax.xml.crypto.Data;
 import java.util.List;
 
 /**
@@ -135,11 +137,19 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Abs
 
     public Specification<AbstractDatasetEntity> withObservationStaIdentifier(String observationIdentifier) {
         return (root, query, builder) -> {
-            Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
+            Subquery<AbstractDatasetEntity> sq = query.subquery(AbstractDatasetEntity.class);
             Root<ObservationEntity> data = sq.from(ObservationEntity.class);
-            sq.select(data.get(ObservationEntity.PROPERTY_DATASET))
+            sq.select(data.get(ObservationEntity.PROPERTY_DATASET_ID))
               .where(builder.equal(data.get(ObservationEntity.PROPERTY_STA_IDENTIFIER), observationIdentifier));
-            return builder.in(root.get(DatasetEntity.PROPERTY_ID)).value(sq);
+
+            Subquery<AbstractDatasetEntity> subquery = query.subquery(AbstractDatasetEntity.class);
+            Root<AbstractDatasetEntity> realDataset = subquery.from(AbstractDatasetEntity.class);
+            subquery.select(realDataset.get(AbstractDatasetEntity.PROPERTY_AGGREGATION))
+                    .where(builder.equal(realDataset.get(AbstractDatasetEntity.PROPERTY_ID), sq));
+
+            // Either id matches or aggregation id matches
+            return builder.or(builder.equal(root.get(AbstractDatasetEntity.PROPERTY_ID), sq),
+                              builder.equal(root.get(AbstractDatasetEntity.PROPERTY_ID), subquery));
         };
     }
 
@@ -151,26 +161,26 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Abs
         return (Specification<AbstractDatasetEntity>) (root, query, builder) -> {
             try {
                 switch (propertyName) {
-                case "id":
+                case StaConstants.PROP_ID:
                     return handleDirectStringPropertyFilter(root.get(AbstractDatasetEntity.PROPERTY_STA_IDENTIFIER),
                                                             propertyValue,
                                                             operator,
                                                             builder,
                                                             false);
-                case "name":
+                case StaConstants.PROP_NAME:
                     return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
                                                             propertyValue,
                                                             operator,
                                                             builder,
                                                             switched);
-                case "description":
+                case StaConstants.PROP_DESCRIPTION:
                     return handleDirectStringPropertyFilter(
                             root.get(DescribableEntity.PROPERTY_DESCRIPTION),
                             propertyValue,
                             operator,
                             builder,
                             switched);
-                case "observationType":
+                case StaConstants.PROP_OBSERVATION_TYPE:
                     Join<AbstractDatasetEntity, FormatEntity> join =
                             root.join(AbstractDatasetEntity.PROPERTY_OM_OBSERVATION_TYPE);
                     return handleDirectStringPropertyFilter(join.get(FormatEntity.FORMAT),

@@ -81,20 +81,26 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Ob
         };
     }
 
-    public static Specification<ObservationEntity<?>> withDatastreamStaIdentifier(final String datastreamIdentifier) {
+    public static Specification<ObservationEntity<?>> withDatastreamStaIdentifier(final String datastreamStaIdentifier) {
         return (root, query, builder) -> {
-            Join<AbstractDatasetEntity, ObservationEntity> join =
-                    root.join(ObservationEntity.PROPERTY_DATASET);
-            return builder.in(join.get(AbstractDatasetEntity.STA_IDENTIFIER)).value(datastreamIdentifier);
+            Subquery<AbstractDatasetEntity> sq = query.subquery(AbstractDatasetEntity.class);
+            Root<AbstractDatasetEntity> dataset = sq.from(AbstractDatasetEntity.class);
+            sq.select(dataset.get(AbstractDatasetEntity.PROPERTY_ID))
+              .where(builder.equal(dataset.get(AbstractDatasetEntity.PROPERTY_STA_IDENTIFIER),
+                                   datastreamStaIdentifier));
+
+            Subquery<AbstractDatasetEntity> subquery = query.subquery(AbstractDatasetEntity.class);
+            Root<AbstractDatasetEntity> realDataset = subquery.from(AbstractDatasetEntity.class);
+            subquery.select(realDataset.get(AbstractDatasetEntity.PROPERTY_ID))
+                    .where(builder.equal(realDataset.get(AbstractDatasetEntity.PROPERTY_AGGREGATION), sq));
+
+            return builder.or(builder.in(root.get(ObservationEntity.PROPERTY_DATASET_ID)).value(subquery),
+                              builder.in(root.get(ObservationEntity.PROPERTY_DATASET_ID)).value(sq));
         };
     }
 
     public static Specification<ObservationEntity<?>> withDatasetId(final long datasetId) {
-        return (root, query, builder) -> {
-            final Join<ObservationEntity, DatasetEntity> join =
-                    root.join(ObservationEntity.PROPERTY_DATASET, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_ID), datasetId);
-        };
+        return (root, query, builder) -> builder.equal(root.get("datasetId"), datasetId);
     }
 
     @Override protected Specification<ObservationEntity<?>> handleRelatedPropertyFilter(

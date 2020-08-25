@@ -83,6 +83,7 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
                     new StaFeatureEntity<>((FeatureEntity) unwrapped), queryOptions);
         case "DatasetEntity":
         case "AbstractDatasetEntity":
+        case "DatasetAggregationEntity":
             return new DatastreamWithQueryOptions((AbstractDatasetEntity) unwrapped, queryOptions);
         default:
             if (unwrapped instanceof ObservationEntity) {
