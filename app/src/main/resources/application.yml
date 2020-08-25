@@ -26,6 +26,18 @@ server:
     ## Note: This only influences encodingType when SensorEntity is posted/patched directly, not when it is inserted via nested insertion inside a Datastream
     variableEncodingType: false
 
+    ## Defines if/how Observation->Parameters should be parsed and handled. Enabled by default, empty String disables the key.
+    observation:
+      # Key that holds information about the samplingGeometry
+      samplingGeometry: http://www.opengis.net/def/param-name/OGC-OM/2.0/samplingGeometry
+      # Key that holds information about the lower limit of the vertical extend of the observation (e.g. depth under water).
+      verticalFrom: verticalFrom
+      # Key that holds information about the upper limit of the the vertical extend of the observation (e.g. depth under water).
+      verticalTo: verticalTo
+      # Key that holds information about the vertical extend of the observation (e.g. depth under water).
+      # Uses the same value for upper and lower limit.
+      verticalFromTo: vertical
+
     ## Toggle support for isMobile Feature
     ## When true DatasetType is set to trajectory if Thing->property contains KVP '"isMobile": "true"'
     isMobile: false

@@ -778,6 +778,8 @@ public class ObservationService extends
             data.setValidTimeStart(observation.getValidTimeStart());
             data.setValidTimeEnd(observation.getValidTimeEnd());
             data.setSamplingGeometry(observation.getSamplingGeometry());
+            data.setVerticalFrom(observation.getVerticalFrom());
+            data.setVerticalTo(observation.getVerticalTo());
 
             if (observation.getParameters() != null) {
                 parameterRepository.saveAll(observation.getParameters());

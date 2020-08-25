@@ -248,14 +248,18 @@ public class ObservationSerDes {
     public static class ObservationDeserializer extends StdDeserializer<ObservationEntity> {
 
         private static final long serialVersionUID = 2731654401126762133L;
+        private final Map<String, String> parameterMapping;
 
-        public ObservationDeserializer() {
+        public ObservationDeserializer(Map<String, String> parameterMapping) {
             super(ObservationEntity.class);
+            this.parameterMapping = parameterMapping;
         }
 
         @Override
         public ObservationEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return p.readValueAs(JSONObservation.class).toEntity(JSONBase.EntityType.FULL);
+            return p.readValueAs(JSONObservation.class)
+                    .parseParameters(parameterMapping)
+                    .toEntity(JSONBase.EntityType.FULL);
         }
     }
 
@@ -263,14 +267,17 @@ public class ObservationSerDes {
     public static class ObservationPatchDeserializer extends StdDeserializer<ObservationEntityPatch> {
 
         private static final long serialVersionUID = 9042768872493184420L;
+        private final Map<String, String> parameterMapping;
 
-        public ObservationPatchDeserializer() {
+        public ObservationPatchDeserializer(Map<String, String> parameterMapping) {
             super(ObservationEntityPatch.class);
+            this.parameterMapping = parameterMapping;
         }
 
         @Override
         public ObservationEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return new ObservationEntityPatch(p.readValueAs(JSONObservation.class)
+                                               .parseParameters(parameterMapping)
                                                .toEntity(JSONBase.EntityType.PATCH));
         }
     }
