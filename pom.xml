@@ -50,7 +50,7 @@
         <testcontainers.jupiter.version>1.14.3</testcontainers.jupiter.version>
         <testcontainers.postgres.version>1.14.3</testcontainers.postgres.version>
         <spotbugs.version>4.1.2</spotbugs.version>
-        <paho.version>1.2.4</paho.version>
+        <paho.version>1.2.5</paho.version>
         <antlr-runtime.version>4.8-1</antlr-runtime.version>
         <joda.version>2.10.6</joda.version>
     </properties>
