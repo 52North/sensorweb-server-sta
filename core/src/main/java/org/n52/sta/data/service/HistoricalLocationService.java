@@ -37,7 +37,6 @@ import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
-import org.n52.shetland.ogc.sta.model.HistoricalLocationEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.HistoricalLocationQuerySpecifications;
 import org.n52.sta.data.repositories.EntityGraphRepository;
@@ -93,23 +92,24 @@ public class HistoricalLocationService
             throws STACRUDException, STAInvalidQueryException {
         for (ExpandItem expandItem : expandOption.getItems()) {
             String expandProperty = expandItem.getPath();
-            if (HistoricalLocationEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
-                switch (expandProperty) {
-                case STAEntityDefinition.LOCATIONS:
-                    Page<LocationEntity> locations = getLocationService()
-                            .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
-                                                                   STAEntityDefinition.HISTORICAL_LOCATIONS,
-                                                                   expandItem.getQueryOptions());
-                    entity.setLocations(locations.get().collect(Collectors.toSet()));
-                    break;
-                case STAEntityDefinition.THING:
-                    entity.setThing(getThingService()
-                                            .getEntityByIdRaw(entity.getThing().getId(), expandItem.getQueryOptions()));
-                    break;
-                default:
-                    throw new RuntimeException("This can never happen!");
-                }
-            } else {
+            switch (expandProperty) {
+            case STAEntityDefinition.LOCATIONS:
+                Page<LocationEntity> locations = getLocationService()
+                        .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
+                                                               STAEntityDefinition.HISTORICAL_LOCATIONS,
+                                                               expandItem.getQueryOptions());
+                entity.setLocations(locations.get().collect(Collectors.toSet()));
+                break;
+            case STAEntityDefinition.THING:
+                // fallthru
+                // The UML in Section 8.2 of the OGC STA v1.0 defines the relations as "Things"
+                // The Definition in Section 8.2.3 of the OGC STA v1.0 defines the relations as "Thing"
+                // We will allow both for now
+            case STAEntityDefinition.THINGS:
+                entity.setThing(getThingService()
+                                        .getEntityByIdRaw(entity.getThing().getId(), expandItem.getQueryOptions()));
+                break;
+            default:
                 throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty +
                                                            " on Entity of type 'HistoricalLocation'");
             }
