@@ -12,6 +12,12 @@ server:
 
   ## Used for enabling/disabling custom 52N-STA Features
   feature:
+
+    # Controls whether Ids are escaped with single quotes e.g. Things('testThing')/Datastreams
+    # Note: This only controls inbound requests. navigationLinks+selfLinks are returned without single quotes always
+    # Note: This is currently not affecting MQTT Processing
+    escapeId: true
+
     ## Automatically updates a FeatureOfInterest linked in Thing->properties under
     ## key "updateFOI" with new Locations of the Thing
     updateFOI: false

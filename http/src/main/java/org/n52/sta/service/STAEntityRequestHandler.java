@@ -54,12 +54,12 @@ import java.util.HashSet;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @RestController
-public class STAEntityRequestHandler implements STARequestUtils {
+public class STAEntityRequestHandler extends AbstractSTARequestHandler {
 
-    private final EntityServiceRepository serviceRepository;
-
-    public STAEntityRequestHandler(EntityServiceRepository serviceRepository) {
-        this.serviceRepository = serviceRepository;
+    public STAEntityRequestHandler(@Value("${server.rootUrl}") String rootUrl,
+                                   @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
+                                   EntityServiceRepository serviceRepository) {
+        super(rootUrl, shouldEscapeId, serviceRepository);
     }
 
     /**

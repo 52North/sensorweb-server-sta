@@ -39,7 +39,8 @@ import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
 import org.n52.sta.serdes.util.EntityPatch;
-import org.n52.sta.utils.STARequestUtils;
+import org.n52.sta.utils.AbstractSTARequestHandler;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
@@ -61,15 +62,16 @@ import java.io.IOException;
  */
 @RestController
 @ConditionalOnProperty(value = "server.feature.httpReadOnly", havingValue = "false", matchIfMissing = true)
-public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtils {
+public class STACrudRequestHandler<T extends IdEntity> extends AbstractSTARequestHandler {
 
     private static final String COULD_NOT_FIND_RELATED_ENTITY = "Could not find related Entity!";
-    private final EntityServiceRepository serviceRepository;
     private final ObjectMapper mapper;
 
-    public STACrudRequestHandler(EntityServiceRepository serviceRepository,
+    public STACrudRequestHandler(@Value("${server.rootUrl}") String rootUrl,
+                                 @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
+                                 EntityServiceRepository serviceRepository,
                                  ObjectMapper mapper) {
-        this.serviceRepository = serviceRepository;
+        super(rootUrl, shouldEscapeId, serviceRepository);
         this.mapper = mapper;
     }
 
