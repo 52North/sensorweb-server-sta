@@ -49,6 +49,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.HandlerMapping;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -87,7 +88,6 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
     public ElementWithQueryOptions<?> handlePostDirect(@PathVariable String collectionName,
                                                        @RequestBody String body)
             throws IOException, STACRUDException, STAInvalidUrlException {
-
         Class<T> clazz = collectionNameToClass(collectionName);
         return ((AbstractSensorThingsEntityService<?, T, ? extends T>)
                 serviceRepository.getEntityService(collectionName)).create(mapper.readValue(body, clazz));
@@ -120,13 +120,13 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
                                                         @RequestBody String body,
                                                         HttpServletRequest request)
             throws Exception {
-        String url = request.getRequestURI().substring(request.getContextPath().length());
-        validateResource(url, serviceRepository);
+        String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
+        validateResource(lookupPath, serviceRepository);
 
         // Add information about the related Entity to json payload to be used during deserialization
         String[] split = splitId(entity);
         String sourceType = split[0];
-        String sourceId = split[1].replace(")", "");
+        String sourceId = split[1];
         ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
         jsonBody.put(REFERENCED_FROM_TYPE, sourceType);
         jsonBody.put(REFERENCED_FROM_ID, sourceId);
@@ -154,11 +154,12 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
                                                         @RequestBody String body,
                                                         HttpServletRequest request)
             throws Exception {
-        String url = request.getRequestURI().substring(request.getContextPath().length());
-        validateResource(url, serviceRepository);
+        String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
+        validateResource(lookupPath, serviceRepository);
+
         Class<EntityPatch> clazz = collectionNameToPatchClass(collectionName);
         ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
-        String strippedId = id.substring(1, id.length() - 1);
+        String strippedId = unescapeIdIfWanted(id.substring(1, id.length() - 1));
         jsonBody.put(StaConstants.AT_IOT_ID, strippedId);
         return ((AbstractSensorThingsEntityService<?, T, ? extends T>)
                 serviceRepository.getEntityService(collectionName)).update(strippedId,
@@ -189,11 +190,12 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
                                                          @RequestBody String body,
                                                          HttpServletRequest request)
             throws Exception {
-        String url = request.getRequestURI().substring(request.getContextPath().length());
-        validateResource(url, serviceRepository);
+        String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
+        validateResource(lookupPath, serviceRepository);
 
-        String sourceType = entity.substring(0, entity.indexOf("("));
-        String sourceId = entity.substring(sourceType.length() + 1, entity.length() - 1);
+        String[] split = splitId(entity);
+        String sourceType = split[0];
+        String sourceId = split[1];
         AbstractSensorThingsEntityService<?, T, ? extends T> entityService =
                 (AbstractSensorThingsEntityService<?, T, ? extends T>) serviceRepository.getEntityService(target);
 
@@ -230,9 +232,10 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
                                @PathVariable String id,
                                HttpServletRequest request)
             throws Exception {
-        String url = request.getRequestURI().substring(request.getContextPath().length());
-        validateResource(url, serviceRepository);
-        serviceRepository.getEntityService(collectionName).delete(id.substring(1, id.length() - 1));
+        String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
+        validateResource(lookupPath, serviceRepository);
+        serviceRepository.getEntityService(collectionName).delete(
+                unescapeIdIfWanted(id.substring(1, id.length() - 1)));
         return null;
     }
 
@@ -258,12 +261,12 @@ public class STACrudRequestHandler<T extends IdEntity> implements STARequestUtil
                                       @RequestBody String body,
                                       HttpServletRequest request)
             throws Exception {
+        String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
+        validateResource(lookupPath, serviceRepository);
 
-        String url = request.getRequestURI().substring(request.getContextPath().length());
-        validateResource(url, serviceRepository);
-
-        String sourceType = entity.substring(0, entity.indexOf("("));
-        String sourceId = entity.substring(sourceType.length() + 1, entity.length() - 1);
+        String[] split = splitId(entity);
+        String sourceType = split[0];
+        String sourceId = split[1];
         AbstractSensorThingsEntityService<?, T, ? extends T> entityService =
                 (AbstractSensorThingsEntityService<?, T, ? extends T>) serviceRepository.getEntityService(target);
 

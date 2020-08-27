@@ -35,11 +35,12 @@ import org.n52.shetland.ogc.filter.FilterClause;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.data.service.util.CollectionWrapper;
-import org.n52.sta.utils.STARequestUtils;
+import org.n52.sta.utils.AbstractSTARequestHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.HandlerMapping;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashSet;
@@ -145,12 +146,11 @@ public class STACollectionRequestHandler implements STARequestUtils {
                                                    @PathVariable String target,
                                                    HttpServletRequest request)
             throws Exception {
-
-        validateResource(request.getRequestURI().substring(request.getContextPath().length()), serviceRepository);
+        validateResource(((String) request.getAttribute(HandlerMapping.LOOKUP_PATH)), serviceRepository);
 
         String[] split = splitId(entity);
         String sourceType = split[0];
-        String sourceId = split[1].replace(")", "");
+        String sourceId = split[1];
 
         QueryOptions options = decodeQueryString(request);
         return serviceRepository.getEntityService(target)
@@ -185,14 +185,12 @@ public class STACollectionRequestHandler implements STARequestUtils {
                                                       @PathVariable String target,
                                                       HttpServletRequest request)
             throws Exception {
-
-        String requestURI = request.getRequestURI();
-        validateResource(requestURI.substring(request.getContextPath().length(), requestURI.length() - 5),
-                         serviceRepository);
+        String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
+        validateResource(lookupPath.substring(0, lookupPath.length() - 5), serviceRepository);
 
         String[] split = splitId(entity);
         String sourceType = split[0];
-        String sourceId = split[1].replace(")", "");
+        String sourceId = split[1];
 
         HashSet<FilterClause> filters = new HashSet<>();
         String queryString = request.getQueryString();
