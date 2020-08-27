@@ -93,7 +93,7 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
     private Set<String> watchedEntityTypes = new HashSet<>();
 
     public MqttSubscriptionEventHandlerImpl(@Value("${server.rootUrl}") String rootUrl,
-                                            @Value("${server.feature.escapeId}") boolean shouldEscapeId,
+                                            @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
                                             MqttUtil config,
                                             ObjectMapper mapper) {
         super(rootUrl, shouldEscapeId, null);

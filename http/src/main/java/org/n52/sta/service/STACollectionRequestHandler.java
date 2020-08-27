@@ -143,7 +143,7 @@ public class STACollectionRequestHandler extends AbstractSTARequestHandler {
                                                    @PathVariable String target,
                                                    HttpServletRequest request)
             throws Exception {
-        validateResource(((String) request.getAttribute(HandlerMapping.LOOKUP_PATH)), serviceRepository);
+        validateResource((String) request.getAttribute(HandlerMapping.LOOKUP_PATH), serviceRepository);
 
         String[] split = splitId(entity);
         String sourceType = split[0];

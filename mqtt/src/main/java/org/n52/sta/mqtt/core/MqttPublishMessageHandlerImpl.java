@@ -68,7 +68,7 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler imp
             @Value("${server.feature.mqttPublishTopics:Observations}") List<String> publishTopics,
             @Value("${server.feature.mqttReadOnly}") boolean readOnly,
             @Value("${server.rootUrl}") String rootUrl,
-            @Value("${server.feature.escapeId}") boolean shouldEscapeId,
+            @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
             EntityServiceRepository serviceRepository,
             ObjectMapper mapper) {
         super(rootUrl, shouldEscapeId, serviceRepository);
