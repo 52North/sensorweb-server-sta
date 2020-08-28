@@ -131,6 +131,11 @@ public class HistoricalLocationSerDes {
                     } else {
                         switch (navigationProperty) {
                         case HistoricalLocationEntityDefinition.THING:
+                            //fallthru
+                            // The UML in Section 8.2 of the OGC STA v1.0 defines the relations as "Things"
+                            // The Definition in Section 8.2.3 of the OGC STA v1.0 defines the relations as "Thing"
+                            // We will allow both for now
+                        case HistoricalLocationEntityDefinition.THINGS:
                             if (histLoc.getThing() == null) {
                                 writeNavigationProp(gen, navigationProperty, histLoc.getStaIdentifier());
                             } else {
