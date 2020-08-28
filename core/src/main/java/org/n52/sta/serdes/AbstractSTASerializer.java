@@ -79,7 +79,7 @@ public abstract class AbstractSTASerializer<T extends ElementWithQueryOptions<I>
         if (options != null) {
             if (options.hasSelectFilter()) {
                 hasSelectOption = true;
-                fieldsToSerialize = options.getSelectFilter().getItems();
+                fieldsToSerialize.addAll(options.getSelectFilter().getItems());
             }
             if (options.hasExpandFilter()) {
                 hasExpandOption = true;
