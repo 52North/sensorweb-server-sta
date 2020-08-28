@@ -75,8 +75,8 @@ public class HistoricalLocationSerDes {
 
         private static final long serialVersionUID = 8651925159358792370L;
 
-        public HistoricalLocationSerializer(String rootUrl) {
-            super(HistoricalLocationWithQueryOptions.class);
+        public HistoricalLocationSerializer(String rootUrl, boolean implicitExpand, String... activeExtensions) {
+            super(HistoricalLocationWithQueryOptions.class, implicitExpand, activeExtensions);
             this.rootUrl = rootUrl;
             this.entitySetName = HistoricalLocationEntityDefinition.ENTITY_SET_NAME;
         }
@@ -87,6 +87,13 @@ public class HistoricalLocationSerDes {
                               SerializerProvider serializers) throws IOException {
             gen.writeStartObject();
             HistoricalLocationEntity histLoc = unwrap(value);
+            // The UML in Section 8.2 of the OGC STA v1.0 defines the relations as "Things"
+            // The Definition in Section 8.2.3 of the OGC STA v1.0 defines the relations as "Thing"
+            // We will allow both for now
+            if (hasSelectOption && hasExpandOption && fieldsToExpand.containsKey(STAEntityDefinition.THINGS)) {
+                fieldsToSerialize.add(STAEntityDefinition.THING);
+                fieldsToExpand.put(STAEntityDefinition.THING, fieldsToExpand.get(STAEntityDefinition.THINGS));
+            }
 
             // olingo @iot links
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
@@ -109,11 +116,6 @@ public class HistoricalLocationSerDes {
                     } else {
                         switch (navigationProperty) {
                         case HistoricalLocationEntityDefinition.THING:
-                            //fallthru
-                            // The UML in Section 8.2 of the OGC STA v1.0 defines the relations as "Things"
-                            // The Definition in Section 8.2.3 of the OGC STA v1.0 defines the relations as "Thing"
-                            // We will allow both for now
-                        case HistoricalLocationEntityDefinition.THINGS:
                             if (histLoc.getThing() == null) {
                                 writeNavigationProp(gen, navigationProperty, histLoc.getStaIdentifier());
                             } else {

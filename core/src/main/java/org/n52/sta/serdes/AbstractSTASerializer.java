@@ -33,16 +33,13 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.n52.series.db.beans.HibernateRelations;
-import org.n52.series.db.beans.sta.StaRelations;
-import org.n52.series.db.beans.sta.mapped.extension.CSDatastream;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
-import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -56,19 +53,27 @@ public abstract class AbstractSTASerializer<T extends ElementWithQueryOptions<I>
     protected String rootUrl;
     protected String entitySetName;
 
-    protected Set<String> fieldsToSerialize;
+    protected Set<String> fieldsToSerialize = new HashSet<>();
     protected Map<String, QueryOptions> fieldsToExpand = new HashMap<>();
     protected final String[] activeExtensions;
     protected boolean hasSelectOption;
     protected boolean hasExpandOption;
+    private final boolean enableImplicitSelect;
 
-    protected AbstractSTASerializer(Class<T> t, String... activeExtensions) {
+    protected AbstractSTASerializer(Class<T> t,
+                                    boolean enableImplicitSelect,
+                                    String... activeExtensions) {
         super(t);
+        this.enableImplicitSelect = enableImplicitSelect;
         this.activeExtensions = activeExtensions;
     }
 
     protected I unwrap(T wrapped) {
         I unwrapped = wrapped.getEntity();
+        hasSelectOption = false;
+        hasExpandOption = false;
+        fieldsToSerialize.clear();
+        fieldsToExpand.clear();
         QueryOptions options = wrapped.getQueryOptions();
 
         if (options != null) {
@@ -80,6 +85,10 @@ public abstract class AbstractSTASerializer<T extends ElementWithQueryOptions<I>
                 hasExpandOption = true;
                 for (ExpandItem item : options.getExpandFilter().getItems()) {
                     fieldsToExpand.put(item.getPath(), item.getQueryOptions());
+                    // Add expanded items to $select replacing implicit selection with explicit selection
+                    if (hasSelectOption && enableImplicitSelect) {
+                        fieldsToSerialize.add(item.getPath());
+                    }
                 }
             }
         }

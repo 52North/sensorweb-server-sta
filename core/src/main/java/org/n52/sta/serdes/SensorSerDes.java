@@ -36,8 +36,8 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
+import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
-import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.shetland.ogc.sta.model.SensorEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
@@ -79,8 +79,8 @@ public class SensorSerDes {
         private static final String SENSORML_2 = "http://www.opengis.net/sensorml/2.0";
         private static final long serialVersionUID = -2190624056257407974L;
 
-        public SensorSerializer(String rootUrl, String... activeExtensions) {
-            super(SensorWithQueryOptions.class, activeExtensions);
+        public SensorSerializer(String rootUrl, boolean implicitExpand, String... activeExtensions) {
+            super(SensorWithQueryOptions.class, implicitExpand, activeExtensions);
             this.rootUrl = rootUrl;
             this.entitySetName = SensorEntityDefinition.ENTITY_SET_NAME;
         }

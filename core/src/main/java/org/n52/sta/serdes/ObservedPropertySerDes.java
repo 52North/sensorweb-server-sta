@@ -75,8 +75,8 @@ public class ObservedPropertySerDes {
 
         private static final long serialVersionUID = -393434867481235299L;
 
-        public ObservedPropertySerializer(String rootUrl, String... activeExtensions) {
-            super(ObservedPropertyWithQueryOptions.class, activeExtensions);
+        public ObservedPropertySerializer(String rootUrl, boolean implicitExpand, String... activeExtensions) {
+            super(ObservedPropertyWithQueryOptions.class, implicitExpand, activeExtensions);
             this.rootUrl = rootUrl;
             this.entitySetName = ObservedPropertyEntityDefinition.ENTITY_SET_NAME;
         }

@@ -82,8 +82,8 @@ public class FeatureOfInterestSerDes {
         private static final GeoJsonWriter GEO_JSON_WRITER = new GeoJsonWriter();
         private static final long serialVersionUID = -2476879916353087078L;
 
-        public FeatureOfInterestSerializer(String rootUrl) {
-            super(FeatureOfInterestWithQueryOptions.class);
+        public FeatureOfInterestSerializer(String rootUrl, boolean implicitExpand, String... activeExtensions) {
+            super(FeatureOfInterestWithQueryOptions.class, implicitExpand, activeExtensions);
             this.rootUrl = rootUrl;
             this.entitySetName = FeatureOfInterestEntityDefinition.ENTITY_SET_NAME;
         }

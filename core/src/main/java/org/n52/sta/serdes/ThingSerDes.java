@@ -37,7 +37,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.PlatformEntity;
-import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
+import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.shetland.ogc.sta.model.ThingEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
@@ -75,8 +75,8 @@ public class ThingSerDes {
 
         private static final long serialVersionUID = -1618289129123682794L;
 
-        public ThingSerializer(String rootUrl, String... activeExtensions) {
-            super(ThingWithQueryOptions.class, activeExtensions);
+        public ThingSerializer(String rootUrl, boolean implicitExpand, String... activeExtensions) {
+            super(ThingWithQueryOptions.class, implicitExpand, activeExtensions);
             this.rootUrl = rootUrl;
             this.entitySetName = ThingEntityDefinition.ENTITY_SET_NAME;
         }

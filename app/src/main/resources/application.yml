@@ -18,6 +18,11 @@ server:
     # Note: This is currently not affecting MQTT Processing
     escapeId: true
 
+    # Controls whether properties referenced from $expand need to be explicitly referenced from $select if $select is used or are implicitly included
+    # Resolves ambiguity as discussed in https://github.com/opengeospatial/sensorthings/issues/106
+    # Defaults to false.
+    implicitExpand: false
+
     ## Automatically updates a FeatureOfInterest linked in Thing->properties under
     ## key "updateFOI" with new Locations of the Thing
     updateFOI: false
@@ -68,7 +73,7 @@ spring:
   jpa:
     openInView: false
     properties:
-      hibernate: 
+      hibernate:
         hbm2ddl:
           # hbm2ddl values: validate | update | create | create-drop | none
           auto: update
@@ -118,11 +123,11 @@ mqtt:
       path: "" # Empty for default path (java "user.dir")
       filename: "52N-STA-MQTTBroker.h2"
       autosave_interval: "30"
-    
+
 # Logging
 logging:
   level:
-     root: INFO
+    root: INFO
 #    org.opengis.cite: TRACE
 #    org.apache.coyote.http11.Http11InputBuffer: TRACE
 #    org.hibernate: INFO

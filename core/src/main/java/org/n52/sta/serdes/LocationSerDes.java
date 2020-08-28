@@ -77,8 +77,8 @@ public class LocationSerDes {
         private static final GeoJsonWriter GEO_JSON_WRITER = new GeoJsonWriter();
         private static final long serialVersionUID = 5481294508394633788L;
 
-        public LocationSerializer(String rootUrl) {
-            super(LocationWithQueryOptions.class);
+        public LocationSerializer(String rootUrl, boolean implicitExpand, String... activeExtensions) {
+            super(LocationWithQueryOptions.class, implicitExpand, activeExtensions);
             this.rootUrl = rootUrl;
             this.entitySetName = LocationEntityDefinition.ENTITY_SET_NAME;
         }

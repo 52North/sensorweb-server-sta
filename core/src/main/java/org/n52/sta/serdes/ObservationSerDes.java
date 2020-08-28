@@ -83,14 +83,14 @@ public class ObservationSerDes {
     }
 
 
-    public static class ObservationSerializer extends AbstractSTASerializer<ObservationWithQueryOptions> {
+    public static class ObservationSerializer
+            extends AbstractSTASerializer<ObservationWithQueryOptions, ObservationEntity<?>> {
 
         private static final long serialVersionUID = -4575044340713191285L;
-
         private static final String VALUE = "value";
 
-        public ObservationSerializer(String rootUrl) {
-            super(ObservationWithQueryOptions.class);
+        public ObservationSerializer(String rootUrl, boolean implicitExpand, String... activeExtensions) {
+            super(ObservationWithQueryOptions.class, implicitExpand, activeExtensions);
             this.rootUrl = rootUrl;
             this.entitySetName = ObservationEntityDefinition.ENTITY_SET_NAME;
         }
