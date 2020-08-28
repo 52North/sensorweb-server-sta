@@ -37,8 +37,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
-import org.n52.shetland.filter.ExpandItem;
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.series.db.beans.sta.mapped.DatastreamEntity;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.shetland.ogc.sta.model.SensorEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
@@ -51,10 +50,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 public class SensorSerDes {
 
@@ -77,14 +73,14 @@ public class SensorSerDes {
     }
 
 
-    public static class SensorSerializer extends AbstractSTASerializer<SensorWithQueryOptions> {
+    public static class SensorSerializer extends AbstractSTASerializer<SensorWithQueryOptions, SensorEntity> {
 
         private static final String STA_SENSORML_2 = "http://www.opengis.net/doc/IS/SensorML/2.0";
         private static final String SENSORML_2 = "http://www.opengis.net/sensorml/2.0";
         private static final long serialVersionUID = -2190624056257407974L;
 
-        public SensorSerializer(String rootUrl) {
-            super(SensorWithQueryOptions.class);
+        public SensorSerializer(String rootUrl, String... activeExtensions) {
+            super(SensorWithQueryOptions.class, activeExtensions);
             this.rootUrl = rootUrl;
             this.entitySetName = SensorEntityDefinition.ENTITY_SET_NAME;
         }
@@ -93,25 +89,7 @@ public class SensorSerDes {
         public void serialize(SensorWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers)
                 throws IOException {
             gen.writeStartObject();
-            SensorEntity sensor = value.getEntity();
-            QueryOptions options = value.getQueryOptions();
-
-            Set<String> fieldsToSerialize = null;
-            Map<String, QueryOptions> fieldsToExpand = new HashMap<>();
-            boolean hasSelectOption = false;
-            boolean hasExpandOption = false;
-            if (options != null) {
-                if (options.hasSelectFilter()) {
-                    hasSelectOption = true;
-                    fieldsToSerialize = options.getSelectFilter().getItems();
-                }
-                if (options.hasExpandFilter()) {
-                    hasExpandOption = true;
-                    for (ExpandItem item : options.getExpandFilter().getItems()) {
-                        fieldsToExpand.put(item.getPath(), item.getQueryOptions());
-                    }
-                }
-            }
+            SensorEntity sensor = unwrap(value);
 
             // olingo @iot links
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
@@ -156,19 +134,18 @@ public class SensorSerDes {
                     if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
                         writeNavigationProp(gen, navigationProperty, sensor.getStaIdentifier());
                     } else {
-                        switch (navigationProperty) {
-                        case SensorEntityDefinition.DATASTREAMS:
+                        if (SensorEntityDefinition.DATASTREAMS.equals(navigationProperty)) {
                             if (sensor.getDatastreams() == null) {
                                 writeNavigationProp(gen, navigationProperty, sensor.getStaIdentifier());
                             } else {
                                 gen.writeFieldName(navigationProperty);
-                                writeNestedCollection(Collections.unmodifiableSet(sensor.getDatastreams()),
-                                                      fieldsToExpand.get(navigationProperty),
-                                                      gen,
-                                                      serializers);
+                                writeNestedCollectionOfType(Collections.unmodifiableSet(sensor.getDatastreams()),
+                                                            DatastreamEntity.class,
+                                                            fieldsToExpand.get(navigationProperty),
+                                                            gen,
+                                                            serializers);
                             }
-                            break;
-                        default:
+                        } else {
                             throw new IllegalStateException("Unexpected value: " + navigationProperty);
                         }
                     }

@@ -37,8 +37,6 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.sta.ObservablePropertyEntity;
-import org.n52.shetland.filter.ExpandItem;
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.model.ObservedPropertyEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
@@ -50,9 +48,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 public class ObservedPropertySerDes {
 
@@ -75,12 +70,13 @@ public class ObservedPropertySerDes {
     }
 
 
-    public static class ObservedPropertySerializer extends AbstractSTASerializer<ObservedPropertyWithQueryOptions> {
+    public static class ObservedPropertySerializer
+            extends AbstractSTASerializer<ObservedPropertyWithQueryOptions, ObservablePropertyEntity> {
 
         private static final long serialVersionUID = -393434867481235299L;
 
-        public ObservedPropertySerializer(String rootUrl) {
-            super(ObservedPropertyWithQueryOptions.class);
+        public ObservedPropertySerializer(String rootUrl, String... activeExtensions) {
+            super(ObservedPropertyWithQueryOptions.class, activeExtensions);
             this.rootUrl = rootUrl;
             this.entitySetName = ObservedPropertyEntityDefinition.ENTITY_SET_NAME;
         }
@@ -89,25 +85,7 @@ public class ObservedPropertySerDes {
         public void serialize(ObservedPropertyWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers)
                 throws IOException {
             gen.writeStartObject();
-            ObservablePropertyEntity obsProp = value.getEntity();
-            QueryOptions options = value.getQueryOptions();
-
-            Set<String> fieldsToSerialize = null;
-            Map<String, QueryOptions> fieldsToExpand = new HashMap<>();
-            boolean hasSelectOption = false;
-            boolean hasExpandOption = false;
-            if (options != null) {
-                if (options.hasSelectFilter()) {
-                    hasSelectOption = true;
-                    fieldsToSerialize = options.getSelectFilter().getItems();
-                }
-                if (options.hasExpandFilter()) {
-                    hasExpandOption = true;
-                    for (ExpandItem item : options.getExpandFilter().getItems()) {
-                        fieldsToExpand.put(item.getPath(), item.getQueryOptions());
-                    }
-                }
-            }
+            ObservablePropertyEntity obsProp = unwrap(value);
 
             // olingo @iot links
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {

@@ -88,11 +88,13 @@ public class JacksonConfig {
         // Register Serializers/Deserializers for all custom types
         SimpleSerializers serializers = new SimpleSerializers();
         serializers.addSerializer(new CollectionSer(CollectionWrapper.class));
-        serializers.addSerializer(new ThingSerDes.ThingSerializer(rootUrl));
+        serializers.addSerializer(new ThingSerDes.ThingSerializer(rootUrl, environment.getActiveProfiles()));
         serializers.addSerializer(new LocationSerDes.LocationSerializer(rootUrl));
-        serializers.addSerializer(new SensorSerDes.SensorSerializer(rootUrl));
+        serializers.addSerializer(new SensorSerDes.SensorSerializer(rootUrl, environment.getActiveProfiles()));
         serializers.addSerializer(new ObservationSerDes.ObservationSerializer(rootUrl));
-        serializers.addSerializer(new ObservedPropertySerDes.ObservedPropertySerializer(rootUrl));
+        serializers.addSerializer(
+                new ObservedPropertySerDes.ObservedPropertySerializer(rootUrl,
+                                                                      environment.getActiveProfiles()));
         serializers.addSerializer(new FeatureOfInterestSerDes.FeatureOfInterestSerializer(rootUrl));
         serializers.addSerializer(new HistoricalLocationSerDes.HistoricalLocationSerializer(rootUrl));
         serializers.addSerializer(new DatastreamSerDes.DatastreamSerializer(rootUrl));
