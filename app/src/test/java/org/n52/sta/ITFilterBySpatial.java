@@ -312,7 +312,7 @@ public class ITFilterBySpatial extends ConformanceTests implements TestUtil {
 
         response = getCollection(
                 EntityType.FEATURE_OF_INTEREST,
-                "$filter=geo.distance(feature, geography'POINT(0 0)') ne -99995");
+                "$filter=geo.distance(feature, geography'POINT(0 0)') ne 99995");
         assertResponseCount(response,1);
 
         response = getCollection(

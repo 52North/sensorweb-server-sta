@@ -81,13 +81,13 @@ public class DatastreamSerDes {
 
 
     public static class DatastreamSerializer
-            extends AbstractSTASerializer<DatastreamWithQueryOptions> {
+            extends AbstractSTASerializer<DatastreamWithQueryOptions, DatastreamEntity> {
 
         private static final GeoJsonWriter GEO_JSON_WRITER = new GeoJsonWriter();
         private static final long serialVersionUID = -6555417490577181829L;
 
-        public DatastreamSerializer(String rootUrl) {
-            super(DatastreamWithQueryOptions.class);
+        public DatastreamSerializer(String rootUrl, boolean implicitExpand, String... activeExtensions) {
+            super(DatastreamWithQueryOptions.class, implicitExpand, activeExtensions);
             this.rootUrl = rootUrl;
             this.entitySetName = DatastreamEntityDefinition.ENTITY_SET_NAME;
         }

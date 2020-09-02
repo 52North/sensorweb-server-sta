@@ -56,6 +56,7 @@ import org.n52.sta.serdes.ThingSerDes;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import java.util.ArrayList;
@@ -72,7 +73,9 @@ public class JacksonConfig {
             @Value("${server.feature.observation.samplingGeometry}") String samplingGeometryMapping,
             @Value("${server.feature.observation.verticalFrom}") String verticalFromMapping,
             @Value("${server.feature.observation.verticalTo}") String verticalToMapping,
-            @Value("${server.feature.observation.verticalFromTo}") String verticalFromToMapping
+            @Value("${server.feature.observation.verticalFromTo}") String verticalFromToMapping,
+            @Value("${server.feature.implicitExpand:false}") boolean implicitExpand,
+            Environment environment
     ) {
 
         Map<String, String> parameterMapping = new HashMap<>();
@@ -88,14 +91,38 @@ public class JacksonConfig {
         // Register Serializers/Deserializers for all custom types
         SimpleSerializers serializers = new SimpleSerializers();
         serializers.addSerializer(new CollectionSer(CollectionWrapper.class));
-        serializers.addSerializer(new ThingSerDes.ThingSerializer(rootUrl));
-        serializers.addSerializer(new LocationSerDes.LocationSerializer(rootUrl));
-        serializers.addSerializer(new SensorSerDes.SensorSerializer(rootUrl));
-        serializers.addSerializer(new ObservationSerDes.ObservationSerializer(rootUrl));
-        serializers.addSerializer(new ObservedPropertySerDes.ObservedPropertySerializer(rootUrl));
-        serializers.addSerializer(new FeatureOfInterestSerDes.FeatureOfInterestSerializer(rootUrl));
-        serializers.addSerializer(new HistoricalLocationSerDes.HistoricalLocationSerializer(rootUrl));
-        serializers.addSerializer(new DatastreamSerDes.DatastreamSerializer(rootUrl));
+        serializers.addSerializer(
+                new ThingSerDes.ThingSerializer(rootUrl,
+                                                implicitExpand,
+                                                environment.getActiveProfiles()));
+        serializers.addSerializer(
+                new LocationSerDes.LocationSerializer(rootUrl,
+                                                      implicitExpand,
+                                                      environment.getActiveProfiles()));
+        serializers.addSerializer(
+                new SensorSerDes.SensorSerializer(rootUrl,
+                                                  implicitExpand,
+                                                  environment.getActiveProfiles()));
+        serializers.addSerializer(
+                new ObservationSerDes.ObservationSerializer(rootUrl,
+                                                            implicitExpand,
+                                                            environment.getActiveProfiles()));
+        serializers.addSerializer(
+                new ObservedPropertySerDes.ObservedPropertySerializer(rootUrl,
+                                                                      implicitExpand,
+                                                                      environment.getActiveProfiles()));
+        serializers.addSerializer(
+                new FeatureOfInterestSerDes.FeatureOfInterestSerializer(rootUrl,
+                                                                        implicitExpand,
+                                                                        environment.getActiveProfiles()));
+        serializers.addSerializer(
+                new HistoricalLocationSerDes.HistoricalLocationSerializer(rootUrl,
+                                                                          implicitExpand,
+                                                                          environment.getActiveProfiles()));
+        serializers.addSerializer(
+                new DatastreamSerDes.DatastreamSerializer(rootUrl,
+                                                          implicitExpand,
+                                                          environment.getActiveProfiles()));
 
         SimpleDeserializers deserializers = new SimpleDeserializers();
         deserializers.addDeserializer(PlatformEntity.class,

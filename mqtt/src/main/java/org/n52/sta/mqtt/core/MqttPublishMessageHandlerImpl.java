@@ -37,6 +37,7 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
+import org.n52.sta.utils.AbstractSTARequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,11 +55,10 @@ import java.util.Set;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
-public class MqttPublishMessageHandlerImpl implements MqttPublishMessageHandler {
+public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler implements MqttPublishMessageHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttPublishMessageHandlerImpl.class);
 
-    private final EntityServiceRepository serviceRepository;
     private final ObjectMapper mapper;
     private final Set<String> publishTopics;
 
@@ -67,9 +67,11 @@ public class MqttPublishMessageHandlerImpl implements MqttPublishMessageHandler 
     public MqttPublishMessageHandlerImpl(
             @Value("${server.feature.mqttPublishTopics:Observations}") List<String> publishTopics,
             @Value("${server.feature.mqttReadOnly}") boolean readOnly,
+            @Value("${server.rootUrl}") String rootUrl,
+            @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
             EntityServiceRepository serviceRepository,
             ObjectMapper mapper) {
-        this.serviceRepository = serviceRepository;
+        super(rootUrl, shouldEscapeId, serviceRepository);
         this.mapper = mapper;
         this.readOnly = readOnly;
         Set topics = new HashSet<>(publishTopics);

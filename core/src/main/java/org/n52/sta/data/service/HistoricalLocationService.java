@@ -102,6 +102,11 @@ public class HistoricalLocationService
                 entity.setLocations(locations.get().collect(Collectors.toSet()));
                 break;
             case STAEntityDefinition.THING:
+                // fallthru
+                // The UML in Section 8.2 of the OGC STA v1.0 defines the relations as "Things"
+                // The Definition in Section 8.2.3 of the OGC STA v1.0 defines the relations as "Thing"
+                // We will allow both for now
+            case STAEntityDefinition.THINGS:
                 entity.setThing(getThingService()
                                         .getEntityByIdRaw(entity.getThing().getId(), expandItem.getQueryOptions()));
                 break;

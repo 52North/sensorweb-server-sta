@@ -50,8 +50,10 @@ import org.n52.sta.mqtt.core.subscription.MqttEntitySubscription;
 import org.n52.sta.mqtt.core.subscription.MqttPropertySubscription;
 import org.n52.sta.mqtt.core.subscription.MqttSelectSubscription;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
+import org.n52.sta.utils.AbstractSTARequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -66,7 +68,8 @@ import java.util.regex.Pattern;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Component
-public class MqttSubscriptionEventHandlerImpl implements MqttSubscriptionEventHandler {
+public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
+        implements MqttSubscriptionEventHandler {
 
     private static final String BASE_URL = "";
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttSubscriptionEventHandlerImpl.class);
@@ -89,8 +92,11 @@ public class MqttSubscriptionEventHandlerImpl implements MqttSubscriptionEventHa
      */
     private Set<String> watchedEntityTypes = new HashSet<>();
 
-    public MqttSubscriptionEventHandlerImpl(MqttUtil config,
+    public MqttSubscriptionEventHandlerImpl(@Value("${server.rootUrl}") String rootUrl,
+                                            @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
+                                            MqttUtil config,
                                             ObjectMapper mapper) {
+        super(rootUrl, shouldEscapeId, null);
         this.config = config;
         this.mapper = mapper;
     }

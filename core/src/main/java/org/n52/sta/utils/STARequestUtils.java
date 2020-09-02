@@ -37,12 +37,8 @@ import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.series.db.beans.sta.SensorEntity;
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
-import org.n52.shetland.ogc.sta.exception.STANotFoundException;
-import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.serdes.DatastreamSerDes;
 import org.n52.sta.serdes.FeatureOfInterestSerDes;
 import org.n52.sta.serdes.HistoricalLocationSerDes;
@@ -433,16 +429,6 @@ public interface STARequestUtils extends StaConstants {
     Pattern BY_OBSER_PROP_PATTERN = Pattern.compile(IDENTIFIED_BY_OBSERVED_PROPERTY_REGEX);
     Pattern BY_FOI_PATTERN = Pattern.compile(IDENTIFIED_BY_FEATURE_OF_INTEREST_REGEX);
 
-    default QueryOptions decodeQueryString(HttpServletRequest request) {
-        if (request.getQueryString() != null) {
-            // URLDecoder.decode(request.getQueryString())
-            String decoded = URLDecoder.decode(request.getQueryString());
-            return QUERY_OPTIONS_FACTORY.createQueryOptions(decoded);
-        } else {
-            return QUERY_OPTIONS_FACTORY.createDummy();
-        }
-    }
-
     default Class collectionNameToClass(String collectionName) throws STAInvalidUrlException {
         switch (collectionName) {
         case THINGS:
@@ -496,177 +482,4 @@ public interface STARequestUtils extends StaConstants {
             return null;
         }
     }
-
-    /**
-     * Validates a given Resource Path. Checks Syntax + Semantics
-     *
-     * @param requestURI        URL to the Resource.
-     * @param serviceRepository Backend Repository Factory
-     * @throws Exception if URL is not valid
-     */
-    default void validateResource(StringBuffer requestURI,
-                                  EntityServiceRepository serviceRepository)
-            throws Exception {
-        validateResource(requestURI.toString(), serviceRepository);
-    }
-
-    /**
-     * Validates a given Resource Path. Checks Syntax + Semantics
-     *
-     * @param requestURI        URL to the Resource.
-     * @param serviceRepository Backend Repository Factory
-     * @throws Exception if URL is not valid
-     */
-    default void validateResource(String requestURI,
-                                  EntityServiceRepository serviceRepository)
-            throws Exception {
-        String[] uriResources;
-        if (requestURI.startsWith("/")) {
-            uriResources = requestURI.substring(1).split(SLASH);
-        } else {
-            uriResources = requestURI.split(SLASH);
-        }
-
-        Exception ex;
-        ex = validateURISyntax(uriResources);
-        if (ex != null) {
-            throw ex;
-        }
-        ex = validateURISemantic(uriResources, serviceRepository);
-        if (ex != null) {
-            throw ex;
-        }
-    }
-
-    /**
-     * Validates whether an entity has given property.
-     *
-     * @param entity   Name of the Entity to be checked
-     * @param property Property of the Entity
-     * @throws STAInvalidUrlException when the URL is invalid
-     */
-    default void validateProperty(String entity, String property) throws STAInvalidUrlException {
-        STAEntityDefinition definition = STAEntityDefinition.definitions.get(entity);
-
-        if (!definition.getEntityPropsMandatory().contains(property) &&
-                !definition.getEntityPropsOptional().contains(property)) {
-            throw new STAInvalidUrlException("Entity: " + entity + " does not have property: " + property);
-        }
-    }
-
-    /**
-     * Validates a given URI syntactically.
-     *
-     * @param uriResources URI of the Request split by SLASH
-     * @return STAInvalidUrlException if URI is malformed
-     */
-    default STAInvalidUrlException validateURISyntax(String[] uriResources) {
-        // Validate URL syntax via Regex
-        // Skip validation if no navigationPath is provided as Spring already validated syntax
-        if (uriResources.length > 1) {
-            // check iteratively and fail-fast
-            for (int i = 0; i < uriResources.length; i++) {
-                if (!BY_ID_PATTERN.matcher(uriResources[i]).matches()) {
-                    // Resource is addressed by relation to other entity
-                    // e.g. Datastreams(1)/Thing
-                    if (i > 0) {
-                        // Look back at last resource and check if association is valid
-                        String resource = uriResources[i - 1] + SLASH + uriResources[i];
-                        if (!(BY_DATASTREAM_PATTERN.matcher(resource).matches()
-                                || BY_HIST_LOC_PATTERN.matcher(resource).matches()
-                                || BY_LOCATION_PATTERN.matcher(resource).matches()
-                                || BY_THING_PATTERN.matcher(resource).matches()
-                                || BY_FOI_PATTERN.matcher(resource).matches()
-                                || BY_OBSERVATION_PATTERN.matcher(resource).matches()
-                                || BY_OBSER_PROP_PATTERN.matcher(resource).matches()
-                                || BY_SENSOR_PATTERN.matcher(resource).matches()
-                                || BY_OBSER_PROP_PATTERN.matcher(resource).matches())) {
-                            return new STAInvalidUrlException(URL_INVALID
-                                                                      + uriResources[i - 1]
-                                                                      + SLASH + uriResources[i]
-                                                                      + " is not a valid resource path.");
-
-                        }
-                    } else {
-                        return new STAInvalidUrlException(URL_INVALID
-                                                                  + uriResources[i]
-                                                                  + " is not a valid resource.");
-                    }
-                }
-                // Resource is adressed by Id
-                // e.g. Things(1), no processing required
-            }
-        }
-        return null;
-    }
-
-    /**
-     * This function validates a given URI semantically by checking if all Entities referenced in the navigation
-     * exists. As URI is syntactically valid indices can be hard-coded.
-     *
-     * @param uriResources      URI of the Request split by SLASH
-     * @param serviceRepository Repository for EntityServices
-     * @return STAInvalidUrlException if URI is malformed
-     */
-    default Exception validateURISemantic(String[] uriResources,
-                                          EntityServiceRepository serviceRepository) {
-        // Check if this is Request to root collection. They are always valid
-        if (uriResources.length == 1 && !uriResources[0].contains(ROUND_BRACKET_OPEN)) {
-            return null;
-        }
-        // Parse first navigation Element
-        String[] sourceEntity = splitId(uriResources[0]);
-        String sourceId = sourceEntity[1].replace(ROUND_BRACKET_CLOSE, "");
-        sourceId = sourceId.replaceAll("%2F", "/");
-        String sourceType = sourceEntity[0];
-
-        if (!serviceRepository.getEntityService(sourceType).existsEntity(sourceId)) {
-            return createNotFoundExceptionNoEntity(uriResources[0]);
-        }
-
-        // Iterate over the rest of the uri validating each resource
-        for (int i = 1, uriResourcesLength = uriResources.length; i < uriResourcesLength - 1; i++) {
-            String[] targetEntity = splitId(uriResources[i]);
-            String targetType = targetEntity[0];
-            String targetId = null;
-            if (targetEntity.length == 1) {
-                // Resource is addressed by related Entity
-                // e.g. /Datastreams(1)/Thing/
-                // Getting id directly as it is needed for next iteration
-                targetId = serviceRepository.getEntityService(targetType)
-                                            .getEntityIdByRelatedEntity(sourceId, sourceType);
-                if (targetId == null) {
-                    return createInvalidUrlExceptionNoEntityAssociated(uriResources[i], uriResources[i - 1]);
-                }
-            } else {
-                // Resource is addressed by Id directly
-                // e.g. /Things(1)/
-                // Only checking exists as Id is already known
-                targetId = targetEntity[1].replace(ROUND_BRACKET_CLOSE, "");
-                if (!serviceRepository.getEntityService(targetType)
-                                      .existsEntityByRelatedEntity(sourceId, sourceType, targetId)) {
-                    return createInvalidUrlExceptionNoEntityAssociated(uriResources[i], uriResources[i - 1]);
-                }
-            }
-
-            // Store target as source for next iteration
-            sourceId = targetId;
-            sourceType = targetType;
-        }
-        // As no error is thrown the uri is valid
-        return null;
-    }
-
-    default STANotFoundException createNotFoundExceptionNoEntity(String entity) {
-        return new STANotFoundException("No Entity: " + entity + " found!");
-    }
-
-    default STAInvalidUrlException createInvalidUrlExceptionNoEntityAssociated(String first, String last) {
-        return new STAInvalidUrlException(first + " associated with " + last);
-    }
-
-    default String[] splitId(String entity) {
-        return entity.split("\\(");
-    }
-
 }

@@ -44,7 +44,6 @@ import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
-import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.springframework.util.Assert;
 
 import java.math.BigDecimal;

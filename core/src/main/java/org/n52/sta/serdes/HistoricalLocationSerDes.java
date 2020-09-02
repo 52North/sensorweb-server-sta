@@ -36,8 +36,6 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
-import org.n52.shetland.filter.ExpandItem;
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.model.HistoricalLocationEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
@@ -49,9 +47,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 public class HistoricalLocationSerDes {
 
@@ -75,12 +70,13 @@ public class HistoricalLocationSerDes {
     }
 
 
-    public static class HistoricalLocationSerializer extends AbstractSTASerializer<HistoricalLocationWithQueryOptions> {
+    public static class HistoricalLocationSerializer
+            extends AbstractSTASerializer<HistoricalLocationWithQueryOptions, HistoricalLocationEntity> {
 
         private static final long serialVersionUID = 8651925159358792370L;
 
-        public HistoricalLocationSerializer(String rootUrl) {
-            super(HistoricalLocationWithQueryOptions.class);
+        public HistoricalLocationSerializer(String rootUrl, boolean implicitExpand, String... activeExtensions) {
+            super(HistoricalLocationWithQueryOptions.class, implicitExpand, activeExtensions);
             this.rootUrl = rootUrl;
             this.entitySetName = HistoricalLocationEntityDefinition.ENTITY_SET_NAME;
         }
@@ -90,24 +86,13 @@ public class HistoricalLocationSerDes {
                               JsonGenerator gen,
                               SerializerProvider serializers) throws IOException {
             gen.writeStartObject();
-            HistoricalLocationEntity histLoc = value.getEntity();
-            QueryOptions options = value.getQueryOptions();
-
-            Set<String> fieldsToSerialize = null;
-            Map<String, QueryOptions> fieldsToExpand = new HashMap<>();
-            boolean hasSelectOption = false;
-            boolean hasExpandOption = false;
-            if (options != null) {
-                if (options.hasSelectFilter()) {
-                    hasSelectOption = true;
-                    fieldsToSerialize = options.getSelectFilter().getItems();
-                }
-                if (options.hasExpandFilter()) {
-                    hasExpandOption = true;
-                    for (ExpandItem item : options.getExpandFilter().getItems()) {
-                        fieldsToExpand.put(item.getPath(), item.getQueryOptions());
-                    }
-                }
+            HistoricalLocationEntity histLoc = unwrap(value);
+            // The UML in Section 8.2 of the OGC STA v1.0 defines the relations as "Things"
+            // The Definition in Section 8.2.3 of the OGC STA v1.0 defines the relations as "Thing"
+            // We will allow both for now
+            if (hasSelectOption && hasExpandOption && fieldsToExpand.containsKey(STAEntityDefinition.THINGS)) {
+                fieldsToSerialize.add(STAEntityDefinition.THING);
+                fieldsToExpand.put(STAEntityDefinition.THING, fieldsToExpand.get(STAEntityDefinition.THINGS));
             }
 
             // olingo @iot links
