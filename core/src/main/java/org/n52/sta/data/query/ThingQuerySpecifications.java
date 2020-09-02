@@ -127,8 +127,9 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
             FilterConstants.ComparisonOperator operator,
             boolean switched) {
         return (Specification<PlatformEntity>) (root, query, builder) -> {
+            String propName = propertyName.startsWith("properties/") ? "properties" : propertyName;
             try {
-                switch (propertyName) {
+                switch (propName) {
                 case StaConstants.PROP_ID:
                     return handleDirectStringPropertyFilter(root.get(PlatformEntity.STA_IDENTIFIER),
                                                             propertyValue,
@@ -148,11 +149,18 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
                                                             builder,
                                                             switched);
                 case StaConstants.PROP_PROPERTIES:
-                    return handleDirectStringPropertyFilter(root.get(PlatformEntity.PROPERTY_PROPERTIES),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            switched);
+                    Expression<String> first = builder.concat(String.format("%%\"%s\":\"",
+                                                                            propertyName.substring(11)),
+                                                              (Expression<String>) propertyValue);
+                    Expression<String> second = builder.concat(first, "\"%");
+                    switch (operator) {
+                    case PropertyIsEqualTo:
+                        return builder.like(root.get(PlatformEntity.PROPERTY_PROPERTIES), second);
+                    case PropertyIsNotEqualTo:
+                        return builder.notLike(root.get(PlatformEntity.PROPERTY_PROPERTIES), second);
+                    default:
+                        throw new RuntimeException("Error getting filter for properties. Operator not supported!");
+                    }
                 default:
                     throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP, propertyName));
                 }

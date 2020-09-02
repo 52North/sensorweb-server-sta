@@ -41,6 +41,7 @@ public class QuerySpecificationRepository {
         switch (name) {
         case "PlatformEntity":
         case "Thing":
+        case "properties":
         case "Things": {
             return new ThingQuerySpecifications();
         }

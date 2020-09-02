@@ -176,12 +176,13 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
                              .toPredicate(root, query, builder);
             }
         } else if (expr.getLeft().isMember()) {
-            if (expr.getLeft().asMember().get().getValue().contains(SLASH)) {
-                return convertToForeignExpression(expr.getLeft().asMember().get().getValue(),
+            String leftValue = expr.getLeft().asMember().get().getValue();
+            if (leftValue.contains(SLASH) && !leftValue.startsWith("properties/")) {
+                return convertToForeignExpression(leftValue,
                                                   expr.getRight().accept(this),
                                                   operator);
             } else {
-                return rootQS.getFilterForProperty(expr.getLeft().asMember().get().getValue(),
+                return rootQS.getFilterForProperty(leftValue,
                                                    expr.getRight().accept(this),
                                                    operator,
                                                    false)
