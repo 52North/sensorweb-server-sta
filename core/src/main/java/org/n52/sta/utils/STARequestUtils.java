@@ -52,10 +52,9 @@ import org.n52.sta.serdes.ObservedPropertySerDes;
 import org.n52.sta.serdes.SensorSerDes;
 import org.n52.sta.serdes.ThingSerDes;
 import org.n52.svalbard.odata.core.QueryOptionsFactory;
-import org.springframework.web.util.UriUtils;
 
 import javax.servlet.http.HttpServletRequest;
-import java.nio.charset.Charset;
+import java.net.URLDecoder;
 import java.util.regex.Pattern;
 
 public interface STARequestUtils extends StaConstants {
@@ -436,7 +435,8 @@ public interface STARequestUtils extends StaConstants {
 
     default QueryOptions decodeQueryString(HttpServletRequest request) {
         if (request.getQueryString() != null) {
-            String decoded = UriUtils.decode(request.getQueryString(), Charset.defaultCharset());
+            // URLDecoder.decode(request.getQueryString())
+            String decoded = URLDecoder.decode(request.getQueryString());
             return QUERY_OPTIONS_FACTORY.createQueryOptions(decoded);
         } else {
             return QUERY_OPTIONS_FACTORY.createDummy();
