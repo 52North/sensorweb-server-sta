@@ -282,7 +282,7 @@ public class DatastreamService
     DatasetEntity createOrExpandAggregation(AbstractDatasetEntity datastream,
                                             AbstractFeatureEntity<?> feature)
             throws STACRUDException {
-        if (datastream.getAggregation() == null) {
+        if (datastream.getAggregation() == null && !(datastream instanceof DatasetAggregationEntity)) {
             LOGGER.debug("Creating new DatasetAggregation");
             // We need to create a new aggregation and link the existing datastream with it
 
@@ -301,12 +301,14 @@ public class DatastreamService
             // update existing datastream with new parent
             datastream.setAggregation(aggregation);
             getRepository().intermediateSave(datastream);
+            return createDataset(parent, feature, null);
+        } else {
+            return createDataset(datastream, feature, null);
         }
 
         // We need to create a new dataset
         //datastream.setIdentifier(UUID.randomUUID().toString());
         //datastream.setStaIdentifier(null);
-        return createDataset(datastream, feature, null);
     }
 
     private DatasetEntity createDataset(AbstractDatasetEntity datastream,
@@ -332,7 +334,9 @@ public class DatastreamService
         dataset.setPlatform(datastream.getThing());
         dataset.setUnit(datastream.getUnit());
         dataset.setOMObservationType(datastream.getOMObservationType());
-        dataset.setAggregation(datastream.getAggregation());
+        if (datastream.getId() != null) {
+            dataset.setAggregation(datastream);
+        }
         return getRepository().save(dataset);
     }
 
@@ -505,12 +509,16 @@ public class DatastreamService
                     Set<AbstractDatasetEntity> allByAggregationId =
                             getRepository().findAllByAggregationId(datastream.getId());
                     Set<Long> datasetIds = allByAggregationId.stream()
-                                                          .map(IdEntity::getId)
-                                                          .collect(Collectors.toSet());
+                                                             .map(IdEntity::getId)
+                                                             .collect(Collectors.toSet());
                     allByAggregationId.forEach(dataset -> {
                         dataset.setFirstObservation(null);
                         dataset.setLastObservation(null);
                     });
+                    
+                    // Flush to disk
+                    getRepository().saveAll(allByAggregationId);
+                    getRepository().flush();
                     // delete observations
                     observationRepository.deleteAllByDatasetIdIn(datasetIds);
                     // delete subdatastreams
