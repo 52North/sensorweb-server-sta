@@ -417,7 +417,7 @@ public abstract class AbstractObservationService<
         if (!observation.hasFeature()) {
             AbstractFeatureEntity<?> feature = null;
             LocationRepository locationRepository = (LocationRepository) getLocationService().getRepository();
-            Set<LocationEntity> locations = locationRepository.findAllByThingsIdEquals(thingId);
+            Set<LocationEntity> locations = locationRepository.findAllByPlatformsIdEquals(thingId);
             for (LocationEntity location : locations) {
                 if (feature == null) {
                     feature = ServiceUtils.createFeatureOfInterest(location);

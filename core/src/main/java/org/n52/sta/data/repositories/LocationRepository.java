@@ -40,6 +40,6 @@ import java.util.Set;
 @Transactional
 public interface LocationRepository extends NameRepository<LocationEntity> {
 
-    Set<LocationEntity> findAllByThingsIdEquals(Long id);
+    Set<LocationEntity> findAllByPlatformsIdEquals(Long id);
 
 }
