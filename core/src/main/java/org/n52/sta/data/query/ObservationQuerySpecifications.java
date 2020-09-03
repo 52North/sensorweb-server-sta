@@ -42,7 +42,6 @@ import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
@@ -81,7 +80,8 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Ob
         };
     }
 
-    public static Specification<ObservationEntity<?>> withDatastreamStaIdentifier(final String datastreamStaIdentifier) {
+    public static Specification<ObservationEntity<?>> withDatastreamStaIdentifier(
+            final String datastreamStaIdentifier) {
         return (root, query, builder) -> {
             Subquery<AbstractDatasetEntity> sq = query.subquery(AbstractDatasetEntity.class);
             Root<AbstractDatasetEntity> dataset = sq.from(AbstractDatasetEntity.class);

@@ -49,8 +49,6 @@ import org.n52.sta.serdes.SensorSerDes;
 import org.n52.sta.serdes.ThingSerDes;
 import org.n52.svalbard.odata.core.QueryOptionsFactory;
 
-import javax.servlet.http.HttpServletRequest;
-import java.net.URLDecoder;
 import java.util.regex.Pattern;
 
 public interface STARequestUtils extends StaConstants {

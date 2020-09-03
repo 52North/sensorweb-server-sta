@@ -515,7 +515,7 @@ public class DatastreamService
                         dataset.setFirstObservation(null);
                         dataset.setLastObservation(null);
                     });
-                    
+
                     // Flush to disk
                     getRepository().saveAll(allByAggregationId);
                     getRepository().flush();

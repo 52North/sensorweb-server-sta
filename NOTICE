@@ -90,7 +90,7 @@ This project includes:
   odata-server-core under The Apache Software License, Version 2.0
   org.locationtech.jts.io:jts-io-common under Eclipse Publish License, Version 1.0 or Eclipse Distribution License - v 1.0
   org.locationtech.jts:jts-core under Eclipse Publish License, Version 1.0 or Eclipse Distribution License - v 1.0
-  PostgreSQL JDBC Driver - JDBC 4.2 under BSD-2-Clause
+  PostgreSQL JDBC Driver under BSD-2-Clause
   Sensor Web Server Database Model - Entities under The Apache Software License, Version 2.0
   Sensor Web Server Database Model - Hibernate Types under The Apache Software License, Version 2.0
   Sensor Web Server Database Model - Mappings under The Apache Software License, Version 2.0
