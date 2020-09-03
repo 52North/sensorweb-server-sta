@@ -1,5 +1,9 @@
 # Downloads
 
+## Docker
+
+[![Docker Pulls](https://img.shields.io/docker/pulls/52north/sensorweb-server-sta)](https://hub.docker.com/r/52north/sensorweb-server-sta)
+
 ## Releases
 
 ### 2.2.x
