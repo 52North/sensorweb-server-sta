@@ -29,28 +29,52 @@
 
 package org.n52.sta.data.service;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import javax.persistence.criteria.Predicate;
+
+import org.hibernate.Hibernate;
 import org.hibernate.query.criteria.internal.CriteriaBuilderImpl;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.AbstractFeatureEntity;
+import org.n52.series.db.beans.BooleanDataEntity;
+import org.n52.series.db.beans.CategoryDataEntity;
 import org.n52.series.db.beans.CategoryEntity;
+import org.n52.series.db.beans.CountDataEntity;
+import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetAggregationEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.OfferingEntity;
 import org.n52.series.db.beans.ProcedureEntity;
+import org.n52.series.db.beans.QuantityDataEntity;
+import org.n52.series.db.beans.TextDataEntity;
 import org.n52.series.db.beans.UnitEntity;
 import org.n52.series.db.beans.dataset.DatasetType;
 import org.n52.series.db.beans.dataset.ObservationType;
 import org.n52.series.db.beans.dataset.ValueType;
 import org.n52.series.db.beans.sta.AbstractDatastreamEntity;
 import org.n52.series.db.beans.sta.AbstractObservationEntity;
+import org.n52.series.db.beans.sta.BooleanObservationEntity;
+import org.n52.series.db.beans.sta.CategoryObservationEntity;
+import org.n52.series.db.beans.sta.CountObservationEntity;
 import org.n52.series.db.beans.sta.ObservationEntity;
+import org.n52.series.db.beans.sta.QuantityObservationEntity;
+import org.n52.series.db.beans.sta.TextObservationEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.filter.FilterFilter;
+import org.n52.shetland.filter.OrderProperty;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.filter.FilterConstants.SortOrder;
 import org.n52.shetland.ogc.om.OmConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
@@ -81,14 +105,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.criteria.Predicate;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import com.google.common.collect.Sets;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -96,9 +113,8 @@ import java.util.stream.Collectors;
 @Component
 @DependsOn({"springApplicationContext", "datastreamRepository"})
 @Transactional
-public class DatastreamService
-        extends AbstractSensorThingsEntityServiceImpl<DatastreamRepository, AbstractDatasetEntity,
-        AbstractDatasetEntity> {
+public class DatastreamService extends
+        AbstractSensorThingsEntityServiceImpl<DatastreamRepository, AbstractDatasetEntity, AbstractDatasetEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatastreamService.class);
     private static final DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
@@ -147,37 +163,42 @@ public class DatastreamService
             String expandProperty = expandItem.getPath();
             if (DatastreamEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
                 switch (expandProperty) {
-                case STAEntityDefinition.SENSOR:
-                    entity.setProcedure(getSensorService()
-                                                .getEntityByIdRaw(entity.getProcedure().getId(),
-                                                                  expandItem.getQueryOptions())
-                    );
-                    break;
-                case STAEntityDefinition.THING:
-                    entity.setThing(getThingService()
-                                            .getEntityByIdRaw(entity.getThing().getId(), expandItem.getQueryOptions())
-                    );
-                    break;
-                case STAEntityDefinition.OBSERVED_PROPERTY:
-                    entity.setObservableProperty(getObservedPropertyService()
-                                                         .getEntityByIdRaw(entity.getObservableProperty().getId(),
-                                                                           expandItem.getQueryOptions())
-                    );
-                    break;
-                case STAEntityDefinition.OBSERVATIONS:
-                    Page<ObservationEntity<?>> observations = getObservationService()
-                            .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
-                                                                   STAEntityDefinition.DATASTREAMS,
-                                                                   expandItem.getQueryOptions());
-                    entity.setObservations(observations.get().collect(Collectors.toSet()));
-                    break;
-                default:
-                    LOGGER.error("Trying to expand unrelated Entity!");
-                    throw new RuntimeException("This can never happen!");
+                    case STAEntityDefinition.SENSOR:
+                        entity.setProcedure(getSensorService().getEntityByIdRaw(entity.getProcedure().getId(),
+                                expandItem.getQueryOptions()));
+                        break;
+                    case STAEntityDefinition.THING:
+                        entity.setThing(getThingService().getEntityByIdRaw(entity.getThing().getId(),
+                                expandItem.getQueryOptions()));
+                        break;
+                    case STAEntityDefinition.OBSERVED_PROPERTY:
+                        entity.setObservableProperty(getObservedPropertyService().getEntityByIdRaw(
+                                entity.getObservableProperty().getId(), expandItem.getQueryOptions()));
+                        break;
+                    case STAEntityDefinition.OBSERVATIONS:
+                        if (checkForFirstLastObservation(expandItem)) {
+                            if (checkForFirstObservation(expandItem) && entity.getFirstObservation() != null) {
+                                entity.setObservations(Sets.newHashSet(
+                                        mapDataEntityToObservationEntity(entity.getFirstObservation(), expandItem)));
+                                break;
+                            } else if (checkForLastObservation(expandItem) && entity.getLastObservation() != null) {
+                                entity.setObservations(Sets.newHashSet(
+                                        mapDataEntityToObservationEntity(entity.getLastObservation(), expandItem)));
+                                break;
+                            }
+                        }
+                        Page<ObservationEntity<?>> observations = getObservationService()
+                                .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
+                                        STAEntityDefinition.DATASTREAMS, expandItem.getQueryOptions());
+                        entity.setObservations(observations.get().collect(Collectors.toSet()));
+                        break;
+                    default:
+                        LOGGER.error("Trying to expand unrelated Entity!");
+                        throw new RuntimeException("This can never happen!");
                 }
             } else {
-                throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty +
-                                                           " on Entity of type 'Datastream'");
+                throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty
+                        + " on Entity of type 'Datastream'");
             }
         }
         return entity;
@@ -189,24 +210,24 @@ public class DatastreamService
                                                                          String ownId) {
         Specification<AbstractDatasetEntity> filter;
         switch (relatedType) {
-        case STAEntityDefinition.THINGS: {
-            filter = dQS.withThingStaIdentifier(relatedId);
-            break;
-        }
-        case STAEntityDefinition.SENSORS: {
-            filter = dQS.withSensorStaIdentifier(relatedId);
-            break;
-        }
-        case STAEntityDefinition.OBSERVED_PROPERTIES: {
-            filter = dQS.withObservedPropertyStaIdentifier(relatedId);
-            break;
-        }
-        case STAEntityDefinition.OBSERVATIONS: {
-            filter = dQS.withObservationStaIdentifier(relatedId);
-            break;
-        }
-        default:
-            throw new IllegalStateException("Trying to filter by unrelated type: " + relatedType + "not found!");
+            case STAEntityDefinition.THINGS: {
+                filter = dQS.withThingStaIdentifier(relatedId);
+                break;
+            }
+            case STAEntityDefinition.SENSORS: {
+                filter = dQS.withSensorStaIdentifier(relatedId);
+                break;
+            }
+            case STAEntityDefinition.OBSERVED_PROPERTIES: {
+                filter = dQS.withObservedPropertyStaIdentifier(relatedId);
+                break;
+            }
+            case STAEntityDefinition.OBSERVATIONS: {
+                filter = dQS.withObservationStaIdentifier(relatedId);
+                break;
+            }
+            default:
+                throw new IllegalStateException("Trying to filter by unrelated type: " + relatedType + "not found!");
         }
 
         if (ownId != null) {
@@ -218,12 +239,12 @@ public class DatastreamService
     @Override
     public String checkPropertyName(String property) {
         switch (property) {
-        case StaConstants.PROP_PHENOMENON_TIME:
-            return AbstractDatasetEntity.PROPERTY_FIRST_VALUE_AT;
-        case StaConstants.PROP_RESULT_TIME:
-            return AbstractDatasetEntity.RESULT_TIME_START;
-        default:
-            return super.checkPropertyName(property);
+            case StaConstants.PROP_PHENOMENON_TIME:
+                return AbstractDatasetEntity.PROPERTY_FIRST_VALUE_AT;
+            case StaConstants.PROP_RESULT_TIME:
+                return AbstractDatasetEntity.RESULT_TIME_START;
+            default:
+                return super.checkPropertyName(property);
         }
     }
 
@@ -238,8 +259,8 @@ public class DatastreamService
                 if (optionalEntity.isPresent()) {
                     return optionalEntity.get();
                 } else {
-                    throw new STACRUDException("No Datastream with id '" + datastream.getStaIdentifier() + "' " +
-                                                       "found");
+                    throw new STACRUDException(
+                            "No Datastream with id '" + datastream.getStaIdentifier() + "' " + "found");
                 }
             }
             check(datastream);
@@ -255,8 +276,8 @@ public class DatastreamService
                 datastream.setProcessed(true);
                 createOrfetchObservationType(datastream);
                 createOrfetchUnit(datastream);
-                datastream.setObservableProperty(getObservedPropertyService()
-                                                         .createOrfetch(datastream.getObservableProperty()));
+                datastream.setObservableProperty(
+                        getObservedPropertyService().createOrfetch(datastream.getObservableProperty()));
                 datastream.setProcedure(getSensorService().createOrfetch(datastream.getProcedure()));
                 datastream.setThing(getThingService().createOrfetch(datastream.getThing()));
 
@@ -351,18 +372,18 @@ public class DatastreamService
             dataset = dataset.setDatasetType(DatasetType.timeseries);
         }
         switch (observationType) {
-        case OmConstants.OBS_TYPE_MEASUREMENT:
-            return dataset.setValueType(ValueType.quantity);
-        case OmConstants.OBS_TYPE_CATEGORY_OBSERVATION:
-            return dataset.setValueType(ValueType.category);
-        case OmConstants.OBS_TYPE_COUNT_OBSERVATION:
-            return dataset.setValueType(ValueType.count);
-        case OmConstants.OBS_TYPE_TEXT_OBSERVATION:
-            return dataset.setValueType(ValueType.text);
-        case OmConstants.OBS_TYPE_TRUTH_OBSERVATION:
-            return dataset.setValueType(ValueType.bool);
-        default:
-            return dataset;
+            case OmConstants.OBS_TYPE_MEASUREMENT:
+                return dataset.setValueType(ValueType.quantity);
+            case OmConstants.OBS_TYPE_CATEGORY_OBSERVATION:
+                return dataset.setValueType(ValueType.category);
+            case OmConstants.OBS_TYPE_COUNT_OBSERVATION:
+                return dataset.setValueType(ValueType.count);
+            case OmConstants.OBS_TYPE_TEXT_OBSERVATION:
+                return dataset.setValueType(ValueType.text);
+            case OmConstants.OBS_TYPE_TRUTH_OBSERVATION:
+                return dataset.setValueType(ValueType.bool);
+            default:
+                return dataset;
         }
     }
 
@@ -667,6 +688,98 @@ public class DatastreamService
                 }
             }
         };
+    }
+
+    private boolean checkForFirstLastObservation(ExpandItem expandItem) {
+        return expandItem.getQueryOptions().hasTopFilter() && expandItem.getQueryOptions().hasOrderByFilter()
+                && checkPhenomenonTime(expandItem);
+    }
+
+    private boolean checkPhenomenonTime(ExpandItem expandItem) {
+        return expandItem.getQueryOptions().getOrderByFilter().getSortProperties().stream()
+                .filter(p -> p.getValueReference().equals(StaConstants.PROP_PHENOMENON_TIME)).findAny()
+                .isPresent();
+    }
+
+    private SortOrder getSortOrder(ExpandItem expandItem) {
+        for (OrderProperty orderProperty : expandItem.getQueryOptions().getOrderByFilter().getSortProperties()) {
+            if (orderProperty.getValueReference().equals(StaConstants.PROP_PHENOMENON_TIME)) {
+                return orderProperty.getSortOrder();
+            }
+        }
+        return null;
+    }
+
+    private boolean checkForFirstObservation(ExpandItem expandItem) {
+        return checkSortOrder(getSortOrder(expandItem), SortOrder.ASC);
+    }
+
+    private boolean checkForLastObservation(ExpandItem expandItem) {
+        return checkSortOrder(getSortOrder(expandItem), SortOrder.DESC);
+    }
+
+    private boolean checkSortOrder(SortOrder sortOrder, SortOrder check) {
+        return sortOrder != null && sortOrder.equals(check);
+    }
+
+    private ObservationEntity mapDataEntityToObservationEntity(DataEntity<?> dataEntity, ExpandItem expandItem) {
+        ObservationEntity observation = getConcreteObservation(dataEntity);
+        observation.setDataset(dataEntity.getDataset());
+        observation.setDatasetId(dataEntity.getDatasetId());
+        observation.setDescription(dataEntity.getDescription());
+        observation.setId(dataEntity.getId());
+        observation.setIdentifier(dataEntity.getIdentifier());
+        observation.setStaIdentifier(dataEntity.getStaIdentifier());
+        observation.setName(dataEntity.getName());
+        if (dataEntity.hasParameters()) {
+            observation.setParameters(dataEntity.getParameters());
+        }
+        observation.setResultTime(dataEntity.getResultTime());
+        if (dataEntity.isSetGeometryEntity()) {
+            observation.setSamplingGeometry(dataEntity.getGeometryEntity().getGeometry());
+        }
+        observation.setSamplingTimeStart(dataEntity.getSamplingTimeStart());
+        observation.setSamplingTimeStart(dataEntity.getSamplingTimeEnd());
+        observation.setValidTimeStart(dataEntity.getValidTimeStart());
+        observation.setValidTimeEnd(dataEntity.getValidTimeEnd());
+        observation.setVerticalFrom(dataEntity.getVerticalFrom());
+        observation.setVerticalTo(dataEntity.getVerticalTo());
+        if (expandItem.getQueryOptions().hasExpandFilter()
+                && expandItem.getQueryOptions().getExpandFilter().getItems().stream()
+                        .filter(i -> i.getPath().equals(StaConstants.FEATURE_OF_INTEREST)).findAny().isPresent()
+                && dataEntity.getDataset().isSetFeature()) {
+            observation
+                    .setFeature(Hibernate.unproxy(dataEntity.getDataset().getFeature(), AbstractFeatureEntity.class));
+        }
+        return observation;
+    }
+
+    private ObservationEntity getConcreteObservation(DataEntity<?> dataEntity) {
+        if (dataEntity instanceof BooleanDataEntity) {
+            BooleanObservationEntity observation = new BooleanObservationEntity();
+            observation.setValue(((BooleanDataEntity) dataEntity).getValue());
+            return observation;
+        } else if (dataEntity instanceof CategoryDataEntity) {
+            CategoryObservationEntity observation = new CategoryObservationEntity();
+            observation.setValue(((CategoryDataEntity) dataEntity).getValue());
+            return observation;
+        } else if (dataEntity instanceof CountDataEntity) {
+            CountObservationEntity observation = new CountObservationEntity();
+            observation.setValue(((CountDataEntity) dataEntity).getValue());
+            return observation;
+        } else if (dataEntity instanceof QuantityDataEntity) {
+            QuantityObservationEntity observation = new QuantityObservationEntity();
+            observation.setValue(((QuantityDataEntity) dataEntity).getValue());
+            return observation;
+        } else if (dataEntity instanceof TextDataEntity) {
+            TextObservationEntity observation = new TextObservationEntity();
+            observation.setValue(((TextDataEntity) dataEntity).getValue());
+            return observation;
+        } else {
+            ObservationEntity observation = new ObservationEntity();
+            observation.setValue(dataEntity.getValue());
+            return observation;
+        }
     }
 
 }
