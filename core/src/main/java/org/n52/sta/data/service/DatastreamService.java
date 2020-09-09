@@ -176,8 +176,9 @@ public class DatastreamService extends
                 case STAEntityDefinition.OBSERVATIONS:
                     break;
                 default:
-                    throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty
-                                                               + " on Entity of type 'Datastream'");
+                    throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
+                                                                     expandProperty,
+                                                                     StaConstants.DATASTREAM));
                 }
             }
         }
@@ -229,8 +230,9 @@ public class DatastreamService extends
                 entity.setObservations(observations.get().collect(Collectors.toSet()));
                 break;
             default:
-                throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty
-                                                           + " on Entity of type 'Datastream'");
+                throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
+                                                                 expandProperty,
+                                                                 StaConstants.DATASTREAM));
             }
         }
         return entity;

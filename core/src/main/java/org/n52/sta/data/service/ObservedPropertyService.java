@@ -34,7 +34,6 @@ import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
@@ -46,7 +45,6 @@ import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.PhenomenonRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
-import org.n52.sta.serdes.util.ElementWithQueryOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,7 +110,9 @@ public class ObservedPropertyService
                 }
                 String expandProperty = expandItem.getPath();
                 if (ObservedPropertyEntityDefinition.DATASTREAMS.equals(expandProperty)) {
-                    return new EntityGraphRepository.FetchGraph[] {EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS};
+                    return new EntityGraphRepository.FetchGraph[] {
+                            EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS
+                    };
                 }
                 throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
                                                                  expandProperty,

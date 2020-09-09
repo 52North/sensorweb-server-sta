@@ -33,14 +33,10 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.n52.series.db.beans.HibernateRelations;
-import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -62,8 +58,6 @@ public abstract class AbstractSTASerializer<T extends ElementWithQueryOptions<I>
         this.activeExtensions = activeExtensions;
         this.implicitSelect = enableImplicitSelect;
     }
-
-
 
     public void writeSelfLink(JsonGenerator gen, String id) throws IOException {
         String escaped = id.replaceAll(SLASH, ENCODEDSLASH);

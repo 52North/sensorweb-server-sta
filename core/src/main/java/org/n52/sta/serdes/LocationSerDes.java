@@ -102,16 +102,19 @@ public class LocationSerDes {
             if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_NAME)) {
                 gen.writeStringField(STAEntityDefinition.PROP_NAME, location.getName());
             }
-            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
+            if (!value.hasSelectOption()
+                    || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
                 gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, location.getDescription());
             }
-            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ENCODINGTYPE)) {
+            if (!value.hasSelectOption()
+                    || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ENCODINGTYPE)) {
                 // only write out encodingtype if there is a location present
                 if (location.isSetGeometry()) {
                     gen.writeStringField(STAEntityDefinition.PROP_ENCODINGTYPE, ENCODINGTYPE_GEOJSON);
                 }
             }
-            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_LOCATION)) {
+            if (!value.hasSelectOption()
+                    || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_LOCATION)) {
                 gen.writeFieldName(STAEntityDefinition.PROP_LOCATION);
                 gen.writeRawValue(GEO_JSON_WRITER.write(location.getGeometryEntity().getGeometry()));
             }

@@ -172,12 +172,6 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         }
     }
 
-    /**
-     *
-     * @param queryOptions
-     * @param pages
-     * @return
-     */
     protected CollectionWrapper createCollectionWrapperAndExpand(QueryOptions queryOptions, Page<S> pages) {
         if (queryOptions.hasExpandFilter()) {
             Page expanded = pages.map(e -> {
@@ -242,7 +236,9 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
                                                                           QueryOptions queryOptions)
             throws STACRUDException {
         return createCollectionWrapperAndExpand(queryOptions,
-                                                getEntityCollectionByRelatedEntityRaw(relatedId, relatedType, queryOptions));
+                                                getEntityCollectionByRelatedEntityRaw(relatedId,
+                                                                                      relatedType,
+                                                                                      queryOptions));
     }
 
     /**
