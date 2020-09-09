@@ -94,9 +94,8 @@ public abstract class AbstractObservationService<
             EntityQuerySpecifications<I> oQS,
             DataRepository<DataEntity<?>> dataRepository,
             DatastreamRepository datastreamRepository,
-            ParameterRepository parameterRepository,
-            EntityGraphRepository.FetchGraph... defaultFetchGraphs) {
-        super(repository, entityClass, defaultFetchGraphs);
+            ParameterRepository parameterRepository) {
+        super(repository, entityClass);
         this.entityClass = entityClass;
         this.oQS = oQS;
         this.dataRepository = dataRepository;
@@ -158,7 +157,7 @@ public abstract class AbstractObservationService<
                                                 pageableRequest.getSort()),
                 EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
 
-        CollectionWrapper wrapper = getCollectionWrapper(queryOptions, pages);
+        CollectionWrapper wrapper = createCollectionWrapperAndExpand(queryOptions, pages);
         // Create Page manually as we used Database Pagination and are not sure how many Entities there are in
         // the Database
         if (pages.isEmpty()) {
@@ -195,7 +194,7 @@ public abstract class AbstractObservationService<
                 if (queryOptions.hasExpandFilter()) {
                     return pages.map(e -> {
                         try {
-                            return fetchExpandEntities(e, queryOptions.getExpandFilter());
+                            return fetchExpandEntitiesWithFilter(e, queryOptions.getExpandFilter());
                         } catch (STACRUDException | STAInvalidQueryException ex) {
                             throw new RuntimeException(ex);
                         }

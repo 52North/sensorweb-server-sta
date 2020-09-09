@@ -102,8 +102,7 @@ public class FeatureOfInterestService
                                     ObservationRepository observationRepository,
                                     DatastreamRepository datastreamRepository) {
         super(repository,
-              AbstractFeatureEntity.class,
-              EntityGraphRepository.FetchGraph.FETCHGRAPH_FEATURETYPE);
+              AbstractFeatureEntity.class);
         this.formatRepository = formatRepository;
         this.observationRepository = observationRepository;
         this.datastreamRepository = datastreamRepository;
@@ -120,7 +119,7 @@ public class FeatureOfInterestService
             Long foiId = datastreamRepository.findById(id).get().getFeature().getId();
             AbstractFeatureEntity<?> entity = getRepository().findById(foiId).get();
             if (queryOptions.hasExpandFilter()) {
-                return fetchExpandEntities(entity, queryOptions.getExpandFilter());
+                return fetchExpandEntitiesWithFilter(entity, queryOptions.getExpandFilter());
             } else {
                 return entity;
             }
@@ -129,22 +128,29 @@ public class FeatureOfInterestService
         }
     }
 
+    @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption) {
+        return new EntityGraphRepository.FetchGraph[] {EntityGraphRepository.FetchGraph.FETCHGRAPH_FEATURETYPE};
+    }
+
     @Override
-    protected StaFeatureEntity<?> fetchExpandEntities(AbstractFeatureEntity<?> entity, ExpandFilter expandOption)
+    protected StaFeatureEntity<?> fetchExpandEntitiesWithFilter(AbstractFeatureEntity<?> entity,
+                                                                ExpandFilter expandOption)
             throws STACRUDException, STAInvalidQueryException {
         StaFeatureEntity<?> foi = new StaFeatureEntity<>(entity);
         Set<ObservationEntity<?>> observations = new HashSet<>();
         for (ExpandItem expandItem : expandOption.getItems()) {
+            // We have already handled $expand without filter and expand
+            if (!(expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter())) {
+                break;
+            }
             String expandProperty = expandItem.getPath();
-            switch (expandProperty) {
-            case STAEntityDefinition.OBSERVATIONS:
+            if (STAEntityDefinition.OBSERVATIONS.equals(expandProperty)) {
                 Page<ObservationEntity<?>> observation = getObservationService()
                         .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
                                                                STAEntityDefinition.FEATURES_OF_INTEREST,
                                                                expandItem.getQueryOptions());
                 observations.addAll(observation.toSet());
-                break;
-            default:
+            } else {
                 throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
                                                                  expandProperty,
                                                                  StaConstants.FEATURE_OF_INTEREST));

@@ -36,8 +36,8 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.AbstractDatasetEntity;
+import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
-import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.shetland.ogc.sta.model.SensorEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
@@ -58,22 +58,22 @@ public class SensorSerDes {
 
 
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
-    public static class SensorEntityPatch extends SensorEntity implements EntityPatch<SensorEntity> {
+    public static class ProcedureEntityPatch extends ProcedureEntity implements EntityPatch<ProcedureEntity> {
 
         private static final long serialVersionUID = 2966462269307558981L;
-        private final SensorEntity entity;
+        private final ProcedureEntity entity;
 
-        SensorEntityPatch(SensorEntity entity) {
+        ProcedureEntityPatch(ProcedureEntity entity) {
             this.entity = entity;
         }
 
-        public SensorEntity getEntity() {
+        public ProcedureEntity getEntity() {
             return entity;
         }
     }
 
 
-    public static class SensorSerializer extends AbstractSTASerializer<SensorWithQueryOptions, SensorEntity> {
+    public static class SensorSerializer extends AbstractSTASerializer<SensorWithQueryOptions, ProcedureEntity> {
 
         private static final String STA_SENSORML_2 = "http://www.opengis.net/doc/IS/SensorML/2.0";
         private static final String SENSORML_2 = "http://www.opengis.net/sensorml/2.0";
@@ -89,7 +89,7 @@ public class SensorSerDes {
         public void serialize(SensorWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers)
                 throws IOException {
             gen.writeStartObject();
-            SensorEntity sensor = unwrap(value);
+            ProcedureEntity sensor = unwrap(value);
 
             // olingo @iot links
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
@@ -156,18 +156,18 @@ public class SensorSerDes {
     }
 
 
-    public static class SensorDeserializer extends StdDeserializer<SensorEntity> {
+    public static class SensorDeserializer extends StdDeserializer<ProcedureEntity> {
 
         private static final long serialVersionUID = -6513819346703020350L;
         private final boolean variableEncodingType;
 
         public SensorDeserializer(boolean variableEncodingType) {
-            super(SensorEntity.class);
+            super(ProcedureEntity.class);
             this.variableEncodingType = variableEncodingType;
         }
 
         @Override
-        public SensorEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+        public ProcedureEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             if (variableEncodingType) {
                 return p.readValueAs(JSONSensorVariableEncoding.class).toEntity(JSONBase.EntityType.FULL);
             } else {
@@ -177,23 +177,23 @@ public class SensorSerDes {
     }
 
 
-    public static class SensorPatchDeserializer extends StdDeserializer<SensorEntityPatch> {
+    public static class SensorPatchDeserializer extends StdDeserializer<ProcedureEntityPatch> {
 
         private static final long serialVersionUID = -6636765136530111251L;
         private final boolean variableEncodingType;
 
         public SensorPatchDeserializer(boolean variableEncodingType) {
-            super(SensorEntityPatch.class);
+            super(ProcedureEntityPatch.class);
             this.variableEncodingType = variableEncodingType;
         }
 
         @Override
-        public SensorEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+        public ProcedureEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             if (variableEncodingType) {
-                return new SensorEntityPatch(p.readValueAs(JSONSensorVariableEncoding.class)
-                                              .toEntity(JSONBase.EntityType.PATCH));
+                return new ProcedureEntityPatch(p.readValueAs(JSONSensorVariableEncoding.class)
+                                                 .toEntity(JSONBase.EntityType.PATCH));
             } else {
-                return new SensorEntityPatch(p.readValueAs(JSONSensor.class).toEntity(JSONBase.EntityType.PATCH));
+                return new ProcedureEntityPatch(p.readValueAs(JSONSensor.class).toEntity(JSONBase.EntityType.PATCH));
             }
         }
     }

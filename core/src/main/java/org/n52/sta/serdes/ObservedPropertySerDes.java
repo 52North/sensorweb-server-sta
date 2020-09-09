@@ -36,7 +36,6 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.PhenomenonEntity;
-import org.n52.series.db.beans.sta.ObservablePropertyEntity;
 import org.n52.shetland.ogc.sta.model.ObservedPropertyEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
@@ -71,7 +70,7 @@ public class ObservedPropertySerDes {
 
 
     public static class ObservedPropertySerializer
-            extends AbstractSTASerializer<ObservedPropertyWithQueryOptions, ObservablePropertyEntity> {
+            extends AbstractSTASerializer<ObservedPropertyWithQueryOptions, PhenomenonEntity> {
 
         private static final long serialVersionUID = -393434867481235299L;
 
@@ -85,7 +84,7 @@ public class ObservedPropertySerDes {
         public void serialize(ObservedPropertyWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers)
                 throws IOException {
             gen.writeStartObject();
-            ObservablePropertyEntity obsProp = unwrap(value);
+            PhenomenonEntity obsProp = unwrap(value);
 
             // olingo @iot links
             if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {

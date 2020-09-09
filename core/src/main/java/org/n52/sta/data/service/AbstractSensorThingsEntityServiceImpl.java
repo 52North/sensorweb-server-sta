@@ -103,16 +103,13 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     private MutexFactory lock;
 
     private final Class<S> entityClass;
-    private final EntityGraphRepository.FetchGraph[] defaultFetchGraphs;
 
     private T repository;
 
     public AbstractSensorThingsEntityServiceImpl(T repository,
-                                                 Class entityClass,
-                                                 EntityGraphRepository.FetchGraph... defaultFetchGraphs) {
+                                                 Class entityClass) {
         this.entityClass = entityClass;
         this.repository = repository;
-        this.defaultFetchGraphs = defaultFetchGraphs;
     }
 
     /**
@@ -139,9 +136,10 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
 
     @Override public ElementWithQueryOptions getEntity(String id, QueryOptions queryOptions) throws STACRUDException {
         try {
-            S entity = getRepository().findByStaIdentifier(id, defaultFetchGraphs).get();
+            S entity = getRepository().findByStaIdentifier(id, createFetchGraph(queryOptions.getExpandFilter())).get();
             if (queryOptions.hasExpandFilter()) {
-                return this.createWrapper(fetchExpandEntities(entity, queryOptions.getExpandFilter()), queryOptions);
+                return this.createWrapper(fetchExpandEntitiesWithFilter(entity, queryOptions.getExpandFilter()),
+                                          queryOptions);
             } else {
                 return this.createWrapper(entity, queryOptions);
             }
@@ -152,9 +150,9 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
 
     public S getEntityByIdRaw(Long id, QueryOptions queryOptions) throws STACRUDException {
         try {
-            S entity = getRepository().findById(id, defaultFetchGraphs).get();
+            S entity = getRepository().findById(id, createFetchGraph(queryOptions.getExpandFilter())).get();
             if (queryOptions.hasExpandFilter()) {
-                return fetchExpandEntities(entity, queryOptions.getExpandFilter());
+                return fetchExpandEntitiesWithFilter(entity, queryOptions.getExpandFilter());
             } else {
                 return entity;
             }
@@ -167,18 +165,24 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         try {
             Page<S> pages = getRepository().findAll(getFilterPredicate(entityClass, queryOptions),
                                                     createPageableRequest(queryOptions),
-                                                    defaultFetchGraphs);
-            return getCollectionWrapper(queryOptions, pages);
-        } catch (RuntimeException e) {
+                                                    createFetchGraph(queryOptions.getExpandFilter()));
+            return createCollectionWrapperAndExpand(queryOptions, pages);
+        } catch (RuntimeException | STAInvalidQueryException e) {
             throw new STACRUDException(e.getMessage(), e);
         }
     }
 
-    protected CollectionWrapper getCollectionWrapper(QueryOptions queryOptions, Page<S> pages) {
+    /**
+     *
+     * @param queryOptions
+     * @param pages
+     * @return
+     */
+    protected CollectionWrapper createCollectionWrapperAndExpand(QueryOptions queryOptions, Page<S> pages) {
         if (queryOptions.hasExpandFilter()) {
             Page expanded = pages.map(e -> {
                 try {
-                    return fetchExpandEntities(e, queryOptions.getExpandFilter());
+                    return fetchExpandEntitiesWithFilter(e, queryOptions.getExpandFilter());
                 } catch (STACRUDException | STAInvalidQueryException ex) {
                     throw new RuntimeException(ex);
                 }
@@ -218,10 +222,10 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
             Optional<S> elem =
                     getRepository().findOne(byRelatedEntityFilter(relatedId, relatedType, ownId)
                                                     .and(getFilterPredicate(entityClass, queryOptions)),
-                                            defaultFetchGraphs);
+                                            createFetchGraph(queryOptions.getExpandFilter()));
             if (elem.isPresent()) {
                 if (queryOptions.hasExpandFilter()) {
-                    return fetchExpandEntities(elem.get(), queryOptions.getExpandFilter());
+                    return fetchExpandEntitiesWithFilter(elem.get(), queryOptions.getExpandFilter());
                 } else {
                     return elem.get();
                 }
@@ -237,8 +241,8 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
                                                                           String relatedType,
                                                                           QueryOptions queryOptions)
             throws STACRUDException {
-        return getCollectionWrapper(queryOptions,
-                                    getEntityCollectionByRelatedEntityRaw(relatedId, relatedType, queryOptions));
+        return createCollectionWrapperAndExpand(queryOptions,
+                                                getEntityCollectionByRelatedEntityRaw(relatedId, relatedType, queryOptions));
     }
 
     /**
@@ -260,11 +264,11 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
                     .findAll(byRelatedEntityFilter(relatedId, relatedType, null)
                                      .and(getFilterPredicate(entityClass, queryOptions)),
                              createPageableRequest(queryOptions),
-                             defaultFetchGraphs);
+                             createFetchGraph(queryOptions.getExpandFilter()));
             if (queryOptions.hasExpandFilter()) {
                 return pages.map(e -> {
                     try {
-                        return fetchExpandEntities(e, queryOptions.getExpandFilter());
+                        return fetchExpandEntitiesWithFilter(e, queryOptions.getExpandFilter());
                     } catch (STACRUDException | STAInvalidQueryException ex) {
                         throw new RuntimeException(ex);
                     }
@@ -272,7 +276,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
             } else {
                 return pages;
             }
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | STAInvalidQueryException e) {
             throw new STACRUDException(e.getMessage(), e);
         }
     }
@@ -290,7 +294,30 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         return getRepository().count(byRelatedEntityFilter(relatedId, relatedType, ownId)) > 0;
     }
 
-    protected abstract E fetchExpandEntities(S entity, ExpandFilter expandOption)
+    /**
+     * Creates a Fetchgraph for this Entity. Includes relations that need to be fetched by default as well as directly
+     * fetching $expanded Entities that are NOT  filtered via $filter. As they are not filtered individually they
+     * can be fetched at the same time for all entities.
+     *
+     * @param expandOption Specification of the $expand parameter
+     * @return FetchGraph fetching the required
+     * @throws STACRUDException         if an error occurred
+     * @throws STAInvalidQueryException if the query is invalid
+     */
+    protected abstract EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
+            throws STAInvalidQueryException;
+
+    /**
+     * Fetches $expanded Entities that are filtered via $filter. An individual request is needed for each expanded
+     * Item as $filter needs to be evaluated.
+     *
+     * @param entity       Base Entity
+     * @param expandOption Entities to be expanded
+     * @return Base Entity with embedded expanded parameters
+     * @throws STACRUDException         if an error occurred
+     * @throws STAInvalidQueryException if the query is invalid
+     */
+    protected abstract E fetchExpandEntitiesWithFilter(S entity, ExpandFilter expandOption)
             throws STACRUDException, STAInvalidQueryException;
 
     /**

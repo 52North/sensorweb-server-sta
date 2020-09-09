@@ -39,10 +39,10 @@ import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
+import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ObservationEntity;
-import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.sta.data.service.util.CollectionWrapper;
 import org.n52.sta.serdes.CollectionSer;
 import org.n52.sta.serdes.DatastreamSerDes;
@@ -129,7 +129,7 @@ public class JacksonConfig {
                                       new ThingSerDes.ThingDeserializer());
         deserializers.addDeserializer(LocationEntity.class,
                                       new LocationSerDes.LocationDeserializer());
-        deserializers.addDeserializer(SensorEntity.class,
+        deserializers.addDeserializer(ProcedureEntity.class,
                                       new SensorSerDes.SensorDeserializer(variableSensorEncodingTypeEnabled));
         deserializers.addDeserializer(ObservationEntity.class,
                                       new ObservationSerDes.ObservationDeserializer(parameterMapping));
@@ -146,7 +146,7 @@ public class JacksonConfig {
                                       new ThingSerDes.ThingPatchDeserializer());
         deserializers.addDeserializer(LocationSerDes.LocationEntityPatch.class,
                                       new LocationSerDes.LocationPatchDeserializer());
-        deserializers.addDeserializer(SensorSerDes.SensorEntityPatch.class,
+        deserializers.addDeserializer(SensorSerDes.ProcedureEntityPatch.class,
                                       new SensorSerDes.SensorPatchDeserializer(variableSensorEncodingTypeEnabled));
         deserializers.addDeserializer(ObservationSerDes.ObservationEntityPatch.class,
                                       new ObservationSerDes.ObservationPatchDeserializer(parameterMapping));

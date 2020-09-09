@@ -84,9 +84,43 @@ public class ThingService
         return new EntityTypes[] {EntityTypes.Thing, EntityTypes.Things};
     }
 
-    @Override protected PlatformEntity fetchExpandEntities(PlatformEntity entity, ExpandFilter expandOption)
+    @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
+            throws STAInvalidQueryException {
+        Set<EntityGraphRepository.FetchGraph> fetchGraphs = new HashSet<>(6);
+        if (expandOption != null) {
+            for (ExpandItem expandItem : expandOption.getItems()) {
+                // We cannot handle nested $filter or $expand
+                if (expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter()) {
+                    break;
+                }
+                String expandProperty = expandItem.getPath();
+                switch (expandProperty) {
+                case STAEntityDefinition.HISTORICAL_LOCATIONS:
+                    fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATIONS);
+                    break;
+                case STAEntityDefinition.DATASTREAMS:
+                    fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS);
+                    break;
+                case STAEntityDefinition.LOCATIONS:
+                    fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_LOCATIONS);
+                    break;
+                default:
+                    throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
+                                                                     expandProperty,
+                                                                     StaConstants.THING));
+                }
+            }
+        }
+        return fetchGraphs.toArray(new EntityGraphRepository.FetchGraph[0]);
+    }
+
+    @Override protected PlatformEntity fetchExpandEntitiesWithFilter(PlatformEntity entity, ExpandFilter expandOption)
             throws STACRUDException, STAInvalidQueryException {
         for (ExpandItem expandItem : expandOption.getItems()) {
+            // We have already handled $expand without filter and expand
+            if (!(expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter())) {
+                break;
+            }
             String expandProperty = expandItem.getPath();
             switch (expandProperty) {
             case STAEntityDefinition.HISTORICAL_LOCATIONS:
@@ -200,8 +234,8 @@ public class ThingService
             synchronized (getLock(id)) {
                 Optional<PlatformEntity> existing =
                         getRepository().findByStaIdentifier(id,
-                                                            IdentifierRepository.FetchGraph.FETCHGRAPH_LOCATION,
-                                                            IdentifierRepository.FetchGraph.FETCHGRAPH_HIST_LOCATION);
+                                                            IdentifierRepository.FetchGraph.FETCHGRAPH_LOCATIONS,
+                                                            IdentifierRepository.FetchGraph.FETCHGRAPH_HIST_LOCATIONS);
                 if (existing.isPresent()) {
                     PlatformEntity merged = merge(existing.get(), newEntity);
                     if (newEntity.hasLocationEntities()) {
@@ -254,7 +288,7 @@ public class ThingService
                 PlatformEntity thing =
                         getRepository().findByStaIdentifier(identifier,
                                                             EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS,
-                                                            EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATION)
+                                                            EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATIONS)
                                        .get();
                 // delete datastreams
                 for (AbstractDatasetEntity ds : thing.getDatasets()) {

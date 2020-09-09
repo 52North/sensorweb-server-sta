@@ -44,7 +44,6 @@ import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ObservationEntity;
-import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.SpringApplicationContext;
@@ -295,24 +294,13 @@ public class MessageBusRepository<T, I extends Serializable>
     private <S extends T> Map<String, Set<String>> getRelatedCollections(S rawObject) {
         Map<String, Set<String>> collections = new HashMap<>();
         if (rawObject instanceof ProcedureEntity) {
-            if (rawObject instanceof SensorEntity) {
-                SensorEntity entity = (SensorEntity) rawObject;
-                if (entity.hasDatastreams()) {
-                    collections.put(STAEntityDefinition.DATASTREAMS,
-                                    entity.getDatasets()
-                                          .stream()
-                                          .map(AbstractDatasetEntity::getStaIdentifier)
-                                          .collect(Collectors.toSet()));
-                }
-            } else {
-                ProcedureEntity entity = (ProcedureEntity) rawObject;
-                collections.put(STAEntityDefinition.DATASTREAM,
-                                datastreamRepository
-                                        .findAll(dQs.withSensorStaIdentifier(entity.getStaIdentifier()))
-                                        .stream()
-                                        .map(AbstractDatasetEntity::getStaIdentifier)
-                                        .collect(Collectors.toSet())
-                );
+            ProcedureEntity entity = (ProcedureEntity) rawObject;
+            if (entity.hasDatastreams()) {
+                collections.put(STAEntityDefinition.DATASTREAMS,
+                                entity.getDatasets()
+                                      .stream()
+                                      .map(AbstractDatasetEntity::getStaIdentifier)
+                                      .collect(Collectors.toSet()));
             }
         } else if (rawObject instanceof LocationEntity) {
             LocationEntity entity = (LocationEntity) rawObject;

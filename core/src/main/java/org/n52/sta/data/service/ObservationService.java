@@ -83,9 +83,7 @@ public class ObservationService
               oQS,
               dataRepository,
               datastreamRepository,
-              parameterRepository,
-              EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS,
-              EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASET
+              parameterRepository
         );
     }
 
@@ -94,12 +92,21 @@ public class ObservationService
         return new EntityTypes[] {EntityTypes.Observation, EntityTypes.Observations};
     }
 
+    @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption) {
+        return new EntityGraphRepository.FetchGraph[] {
+                EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS
+        };
+    }
+
     @Override
-    protected ObservationEntity<?> fetchExpandEntities(ObservationEntity<?> returned,
-                                                       ExpandFilter expandOption)
+    protected ObservationEntity<?> fetchExpandEntitiesWithFilter(ObservationEntity<?> returned,
+                                                                 ExpandFilter expandOption)
             throws STACRUDException, STAInvalidQueryException {
-        // I returned = new ObservationEntity(entity);
         for (ExpandItem expandItem : expandOption.getItems()) {
+            // We handle all $expands individually as they need to be fetched via staIdentifier and not via id
+            //if (!expandItem.getQueryOptions().hasFilterFilter()) {
+            //    break;
+            //}
             String expandProperty = expandItem.getPath();
             switch (expandProperty) {
             case STAEntityDefinition.DATASTREAM:

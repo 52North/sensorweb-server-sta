@@ -33,8 +33,8 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.joda.time.DateTime;
 import org.n52.series.db.beans.FormatEntity;
+import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
-import org.n52.series.db.beans.sta.SensorEntity;
 import org.springframework.util.Assert;
 
 import java.util.Arrays;
@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("VisibilityModifier")
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
-public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorEntity> implements AbstractJSONEntity {
+public class JSONSensor extends JSONBase.JSONwithIdNameDescription<ProcedureEntity> implements AbstractJSONEntity {
 
     protected static final String INALID_ENCODING_TYPE = "Invalid encodingType supplied. Only SensorML or PDF allowed.";
     protected static final String STA_SENSORML_2 = "http://www.opengis.net/doc/IS/SensorML/2.0";
@@ -60,11 +60,11 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorEntity>
     public JSONDatastream[] Datastreams;
 
     public JSONSensor() {
-        self = new SensorEntity();
+        self = new ProcedureEntity();
     }
 
     @Override
-    public SensorEntity toEntity(JSONBase.EntityType type) {
+    public ProcedureEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
         case FULL:
             Assert.notNull(name, INVALID_INLINE_ENTITY_MISSING + "name");

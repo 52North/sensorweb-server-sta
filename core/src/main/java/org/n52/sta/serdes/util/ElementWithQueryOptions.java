@@ -39,9 +39,7 @@ import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
-import org.n52.series.db.beans.sta.ObservablePropertyEntity;
 import org.n52.series.db.beans.sta.ObservationEntity;
-import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.series.db.beans.sta.StaFeatureEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 
@@ -64,14 +62,9 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
         case "PlatformEntity":
             return new ThingWithQueryOptions((PlatformEntity) unwrapped, queryOptions);
         case "ProcedureEntity":
-            return new SensorWithQueryOptions(new SensorEntity((ProcedureEntity) unwrapped), queryOptions);
-        case "SensorEntity":
-            return new SensorWithQueryOptions((SensorEntity) unwrapped, queryOptions);
+            return new SensorWithQueryOptions((ProcedureEntity) unwrapped, queryOptions);
         case "PhenomenonEntity":
-            return new ObservedPropertyWithQueryOptions(new ObservablePropertyEntity((PhenomenonEntity) unwrapped),
-                                                        queryOptions);
-        case "ObservablePropertyEntity":
-            return new ObservedPropertyWithQueryOptions((ObservablePropertyEntity) unwrapped, queryOptions);
+            return new ObservedPropertyWithQueryOptions((PhenomenonEntity) unwrapped, queryOptions);
         case "LocationEntity":
             return new LocationWithQueryOptions((LocationEntity) unwrapped, queryOptions);
         case "HistoricalLocationEntity":
@@ -105,18 +98,18 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
     }
 
 
-    public static class SensorWithQueryOptions extends ElementWithQueryOptions<SensorEntity> {
+    public static class SensorWithQueryOptions extends ElementWithQueryOptions<ProcedureEntity> {
 
-        SensorWithQueryOptions(SensorEntity thing, QueryOptions queryOptions) {
+        SensorWithQueryOptions(ProcedureEntity thing, QueryOptions queryOptions) {
             this.entity = thing;
             this.queryOptions = queryOptions;
         }
     }
 
 
-    public static class ObservedPropertyWithQueryOptions extends ElementWithQueryOptions<ObservablePropertyEntity> {
+    public static class ObservedPropertyWithQueryOptions extends ElementWithQueryOptions<PhenomenonEntity> {
 
-        ObservedPropertyWithQueryOptions(ObservablePropertyEntity thing, QueryOptions queryOptions) {
+        ObservedPropertyWithQueryOptions(PhenomenonEntity thing, QueryOptions queryOptions) {
             this.entity = thing;
             this.queryOptions = queryOptions;
         }
