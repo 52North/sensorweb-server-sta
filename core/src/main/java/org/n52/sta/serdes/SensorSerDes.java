@@ -89,24 +89,27 @@ public class SensorSerDes {
         public void serialize(SensorWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers)
                 throws IOException {
             gen.writeStartObject();
-            ProcedureEntity sensor = unwrap(value);
+            value.unwrap(implicitSelect);
+            ProcedureEntity sensor = value.getEntity();
 
             // olingo @iot links
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
+            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ID)) {
                 writeId(gen, sensor.getStaIdentifier());
             }
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_SELF_LINK)) {
+            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_SELF_LINK)) {
                 writeSelfLink(gen, sensor.getStaIdentifier());
             }
 
             // actual properties
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_NAME)) {
+            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_NAME)) {
                 gen.writeStringField(STAEntityDefinition.PROP_NAME, sensor.getName());
             }
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_DESCRIPTION)) {
+            if (!value.hasSelectOption() ||
+                    value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
                 gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, sensor.getDescription());
             }
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ENCODINGTYPE)) {
+            if (!value.hasSelectOption() ||
+                    value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ENCODINGTYPE)) {
                 String format = sensor.getFormat().getFormat();
                 if (format.equalsIgnoreCase(SENSORML_2)) {
                     format = STA_SENSORML_2;
@@ -114,7 +117,7 @@ public class SensorSerDes {
                 gen.writeObjectField(STAEntityDefinition.PROP_ENCODINGTYPE, format);
             }
 
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_METADATA)) {
+            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_METADATA)) {
                 String metadata = "metadata";
                 if (sensor.getDescriptionFile() != null && !sensor.getDescriptionFile().isEmpty()) {
                     metadata = sensor.getDescriptionFile();
@@ -130,8 +133,8 @@ public class SensorSerDes {
 
             // navigation properties
             for (String navigationProperty : SensorEntityDefinition.NAVIGATION_PROPERTIES) {
-                if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
-                    if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
+                if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(navigationProperty)) {
+                    if (!value.hasExpandOption() || value.getFieldsToExpand().get(navigationProperty) == null) {
                         writeNavigationProp(gen, navigationProperty, sensor.getStaIdentifier());
                     } else {
                         if (SensorEntityDefinition.DATASTREAMS.equals(navigationProperty)) {
@@ -141,7 +144,7 @@ public class SensorSerDes {
                                 gen.writeFieldName(navigationProperty);
                                 writeNestedCollectionOfType(Collections.unmodifiableSet(sensor.getDatasets()),
                                                             AbstractDatasetEntity.class,
-                                                            fieldsToExpand.get(navigationProperty),
+                                                            value.getFieldsToExpand().get(navigationProperty),
                                                             gen,
                                                             serializers);
                             }

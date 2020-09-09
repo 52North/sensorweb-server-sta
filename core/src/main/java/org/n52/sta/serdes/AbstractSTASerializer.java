@@ -52,48 +52,18 @@ public abstract class AbstractSTASerializer<T extends ElementWithQueryOptions<I>
 
     protected String rootUrl;
     protected String entitySetName;
-
-    protected Set<String> fieldsToSerialize = new HashSet<>();
-    protected Map<String, QueryOptions> fieldsToExpand = new HashMap<>();
+    protected boolean implicitSelect;
     protected final String[] activeExtensions;
-    protected boolean hasSelectOption;
-    protected boolean hasExpandOption;
-    private final boolean enableImplicitSelect;
 
     protected AbstractSTASerializer(Class<T> t,
                                     boolean enableImplicitSelect,
                                     String... activeExtensions) {
         super(t);
-        this.enableImplicitSelect = enableImplicitSelect;
         this.activeExtensions = activeExtensions;
+        this.implicitSelect = enableImplicitSelect;
     }
 
-    protected I unwrap(T wrapped) {
-        I unwrapped = wrapped.getEntity();
-        hasSelectOption = false;
-        hasExpandOption = false;
-        fieldsToSerialize.clear();
-        fieldsToExpand.clear();
-        QueryOptions options = wrapped.getQueryOptions();
 
-        if (options != null) {
-            if (options.hasSelectFilter()) {
-                hasSelectOption = true;
-                fieldsToSerialize.addAll(options.getSelectFilter().getItems());
-            }
-            if (options.hasExpandFilter()) {
-                hasExpandOption = true;
-                for (ExpandItem item : options.getExpandFilter().getItems()) {
-                    fieldsToExpand.put(item.getPath(), item.getQueryOptions());
-                    // Add expanded items to $select replacing implicit selection with explicit selection
-                    if (hasSelectOption && enableImplicitSelect) {
-                        fieldsToSerialize.add(item.getPath());
-                    }
-                }
-            }
-        }
-        return unwrapped;
-    }
 
     public void writeSelfLink(JsonGenerator gen, String id) throws IOException {
         String escaped = id.replaceAll(SLASH, ENCODEDSLASH);

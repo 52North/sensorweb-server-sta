@@ -41,12 +41,22 @@ import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.series.db.beans.sta.StaFeatureEntity;
+import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId> {
 
     protected P entity;
     protected QueryOptions queryOptions;
+    protected Set<String> fieldsToSerialize = new HashSet<>();
+    protected Map<String, QueryOptions> fieldsToExpand = new HashMap<>();
+    protected boolean hasSelectOption;
+    protected boolean hasExpandOption;
 
     public QueryOptions getQueryOptions() {
         return queryOptions;
@@ -54,6 +64,22 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
 
     public P getEntity() {
         return entity;
+    }
+
+    public Set<String> getFieldsToSerialize() {
+        return fieldsToSerialize;
+    }
+
+    public Map<String, QueryOptions> getFieldsToExpand() {
+        return fieldsToExpand;
+    }
+
+    public boolean hasSelectOption() {
+        return hasSelectOption;
+    }
+
+    public boolean hasExpandOption() {
+        return hasExpandOption;
     }
 
     public static ElementWithQueryOptions from(Object entity, QueryOptions queryOptions) {
@@ -85,6 +111,25 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
                 throw new RuntimeException(
                         "Error wrapping object with queryOptions. Could not find Wrapper for class: " +
                                 unwrapped.getClass().getSimpleName());
+            }
+        }
+    }
+
+    public void unwrap(boolean enableImplicitSelect) {
+        if (queryOptions != null) {
+            if (queryOptions.hasSelectFilter()) {
+                hasSelectOption = true;
+                fieldsToSerialize.addAll(queryOptions.getSelectFilter().getItems());
+            }
+            if (queryOptions.hasExpandFilter()) {
+                hasExpandOption = true;
+                for (ExpandItem item : queryOptions.getExpandFilter().getItems()) {
+                    fieldsToExpand.put(item.getPath(), item.getQueryOptions());
+                    // Add expanded items to $select replacing implicit selection with explicit selection
+                    if (hasSelectOption && enableImplicitSelect) {
+                        fieldsToSerialize.add(item.getPath());
+                    }
+                }
             }
         }
     }
