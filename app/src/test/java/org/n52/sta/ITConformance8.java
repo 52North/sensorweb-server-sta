@@ -142,10 +142,8 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
         patchMap.put("description", "{\"description\":\"This is a PATCHED Description\"}");
         patchMap.put("location", "{\"location\":{ \"type\": \"Point\", \"coordinates\": [-114.05, 50] }}}");
 
-        /*
         testCollectionSubscriptionOnNewEntityCreation(type, source);
         deleteCollection(type);
-         */
         testCollectionSubscriptionOnExistingEntityPatch(patchMap, type, source);
         deleteCollection(type);
         testPropertySubscriptionOnEntityPatch(patchMap, type, source);
@@ -543,12 +541,13 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
         JsonNode entity = postEntity(type, source);
 
         for (String ignored : patchMap.keySet()) {
-            JsonNode mqtt = mapper.readTree(listener.next().toString());
-            Iterator<String> fieldNameIt = mqtt.fieldNames();
+            JsonNode response = mapper.readTree(listener.next().toString());
+            Iterator<String> fieldNameIt = response.fieldNames();
             Assertions.assertTrue(fieldNameIt.hasNext());
             String name = fieldNameIt.next();
-            Assertions.assertFalse(fieldNameIt.hasNext());
-            Assertions.assertEquals(entity.get(name).asText(), mqtt.get(name).asText());
+            Assertions.assertFalse(fieldNameIt.hasNext(),
+                                   "expected single field but got response: " + response.toPrettyString());
+            Assertions.assertEquals(entity.get(name).asText(), response.get(name).asText());
         }
 
         for (String key : patchMap.keySet()) {
@@ -590,26 +589,28 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
             patchEntity(type, patchMap.get(patchKey), entity.get(idKey).asText());
             alreadyPatched.add(patchKey);
             for (int i = 0; i < patchMap.keySet().size(); i++) {
-                JsonNode mqtt = mapper.readTree(listener.next().toString());
-                Iterator<String> fieldNameIt = mqtt.fieldNames();
+                MqttMessage mqttMessage = listener.next();
+                JsonNode response = mapper.readTree(mqttMessage.toString());
+                Iterator<String> fieldNameIt = response.fieldNames();
                 Assertions.assertTrue(fieldNameIt.hasNext());
                 String name = fieldNameIt.next();
-                Assertions.assertFalse(fieldNameIt.hasNext());
+                Assertions.assertFalse(fieldNameIt.hasNext(),
+                                       "expected a single field but got response: " + response);
                 if (alreadyPatched.contains(name)) {
                     if (name.equals("result")) {
                         Assertions.assertEquals(Double.valueOf(mapper.readTree(patchMap.get(name)).get(name).asText()),
-                                                Double.valueOf(mqtt.get(name).asText()));
+                                                Double.valueOf(response.get(name).asText()));
                     } else if (name.contains("Time")) {
                         Assertions.assertEquals(new TimeInstant(DateTime.parse(mapper.readTree(patchMap.get(name))
                                                                                      .get(name)
                                                                                      .asText())),
-                                                new TimeInstant(DateTime.parse(mqtt.get(name).asText())));
+                                                new TimeInstant(DateTime.parse(response.get(name).asText())));
                     } else {
                         Assertions.assertEquals(mapper.readTree(patchMap.get(name)).get(name).asText(),
-                                                mqtt.get(name).asText());
+                                                response.get(name).asText());
                     }
                 } else {
-                    Assertions.assertEquals(entity.get(name).asText(), mqtt.get(name).asText());
+                    Assertions.assertEquals(entity.get(name).asText(), response.get(name).asText());
                 }
             }
         }
@@ -629,7 +630,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
         }
 
         public void messageArrived(String topic, MqttMessage message) throws Exception {
-            LOGGER.info("Received: " + new String(message.getPayload()) + "'");
+            LOGGER.info("Received: " + new String(message.getPayload()) + " on topic: " + topic);
 
             synchronized (messages) {
                 messages.add(message);
