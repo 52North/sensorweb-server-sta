@@ -77,16 +77,18 @@ public class ProjectService
 
     @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
             throws STAInvalidQueryException {
-        for (ExpandItem expandItem : expandOption.getItems()) {
-            String expandProperty = expandItem.getPath();
-            if (ProjectEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
-                return new EntityGraphRepository.FetchGraph[] {
-                        EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS
-                };
-            } else {
-                throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                                                                 expandProperty,
-                                                                 StaConstants.PROJECT));
+        if (expandOption != null) {
+            for (ExpandItem expandItem : expandOption.getItems()) {
+                String expandProperty = expandItem.getPath();
+                if (ProjectEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
+                    return new EntityGraphRepository.FetchGraph[] {
+                            EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS
+                    };
+                } else {
+                    throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
+                                                                     expandProperty,
+                                                                     StaConstants.PROJECT));
+                }
             }
         }
         return new EntityGraphRepository.FetchGraph[0];

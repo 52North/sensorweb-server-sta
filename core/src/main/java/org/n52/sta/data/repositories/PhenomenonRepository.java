@@ -31,10 +31,12 @@ package org.n52.sta.data.repositories;
 
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 @DependsOn("DatastreamRepository")
+@Repository
 public interface PhenomenonRepository
         extends IdentifierNameRepository<PhenomenonEntity>, StaIdentifierRepository<PhenomenonEntity> {
 

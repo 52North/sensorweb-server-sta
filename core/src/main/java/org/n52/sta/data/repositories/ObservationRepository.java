@@ -31,12 +31,14 @@ package org.n52.sta.data.repositories;
 
 import org.n52.series.db.beans.sta.ObservationEntity;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
 @Transactional
 @DependsOn("DatastreamRepository")
+@Repository
 public interface ObservationRepository<T extends ObservationEntity<?>>
         extends IdentifierRepository<T, Long>, StaIdentifierRepository<T> {
 

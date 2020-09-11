@@ -32,8 +32,11 @@ package org.n52.sta.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.shetland.ogc.sta.model.extension.CitSciExtensionEntityDefinition;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -46,13 +49,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class RootRequestHandler {
 
-    private final String rootUrl;
-    private final ObjectMapper mapper;
+    private final String rootResponse;
 
     public RootRequestHandler(@Value("${server.rootUrl}") String rootUrl,
-                              ObjectMapper mapper) {
-        this.rootUrl = rootUrl;
-        this.mapper = mapper;
+                              ObjectMapper mapper,
+                              Environment environment) {
+        rootResponse = createRootResponse(rootUrl, mapper, environment.getActiveProfiles());
     }
 
     /**
@@ -64,16 +66,19 @@ public class RootRequestHandler {
             produces = "application/json"
     )
     public String returnRootResponse() {
-        return createRootResponse(this.rootUrl);
+        return rootResponse;
     }
 
-    private String createRootResponse(String uri) {
+    private String createRootResponse(String rootUrl,
+                                      ObjectMapper mapper,
+                                      String[] activeProfiles) {
         ArrayNode arrayNode = mapper.createArrayNode();
-        for (String collection : STAEntityDefinition.ALLCOLLECTIONS) {
-            ObjectNode node = mapper.createObjectNode();
-            node.put("name", collection);
-            node.put("url", uri + collection);
-            arrayNode.add(node);
+
+        addToArray(rootUrl, mapper, arrayNode, STAEntityDefinition.ALLCOLLECTIONS);
+        for (String profile : activeProfiles) {
+            if (profile.equals(StaConstants.CITSCIEXTENSION)) {
+                addToArray(rootUrl, mapper, arrayNode, CitSciExtensionEntityDefinition.ALLCOLLECTIONS);
+            }
         }
 
         ObjectNode node = mapper.createObjectNode();
@@ -81,4 +86,12 @@ public class RootRequestHandler {
         return node.toString();
     }
 
+    private void addToArray(String rootUrl, ObjectMapper mapper, ArrayNode array, String[] endpoints) {
+        for (String collection : endpoints) {
+            ObjectNode node = mapper.createObjectNode();
+            node.put("name", collection);
+            node.put("url", rootUrl + collection);
+            array.add(node);
+        }
+    }
 }

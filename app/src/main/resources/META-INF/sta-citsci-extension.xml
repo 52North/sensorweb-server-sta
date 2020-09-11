@@ -24,11 +24,11 @@
         <mapping-file>/hbm/transactional/core/VerticalMetadataResource.hbm.xml</mapping-file>
 
         <mapping-file>/hbm/transactional/dataset/DataResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/transactional/dataset/DatasetResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/dataset/DatasetResourceCitSci.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/core/TagResource.hbm.xml</mapping-file>
 
         <mapping-file>/hbm/transactional/core/LocationResource.hbm.xml</mapping-file>
-
-        <class>org.n52.series.db.beans.PlatformEntity</class>
+        <mapping-file>/hbm/transactional/core/PlatformResource.hbm.xml</mapping-file>
 
         <!-- Load Classes annoted by @Entity-->
         <class>org.n52.series.db.beans.sta.QuantityObservationEntity</class>
@@ -37,11 +37,11 @@
         <class>org.n52.series.db.beans.sta.CategoryObservationEntity</class>
         <class>org.n52.series.db.beans.sta.BooleanObservationEntity</class>
 
-        <class>org.n52.series.db.beans.sta.extension.ObservationGroup</class>
-        <class>org.n52.series.db.beans.sta.extension.ObservationRelation</class>
-        <class>org.n52.series.db.beans.sta.extension.License</class>
-        <class>org.n52.series.db.beans.sta.extension.Party</class>
-        <class>org.n52.series.db.beans.sta.extension.Project</class>
+        <class>org.n52.series.db.beans.sta.ObservationGroupEntity</class>
+        <class>org.n52.series.db.beans.sta.ObservationRelationEntity</class>
+        <class>org.n52.series.db.beans.sta.LicenseEntity</class>
+        <class>org.n52.series.db.beans.sta.PartyEntity</class>
+        <class>org.n52.series.db.beans.sta.ProjectEntity</class>
 
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>

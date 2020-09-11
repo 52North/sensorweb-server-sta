@@ -20,12 +20,12 @@
         <mapping-file>/hbm/transactional/core/RelatedDatasetResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/RelatedFeatureResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/ResultTemplateResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/transactional/core/TagResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/UnitResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/VerticalMetadataResource.hbm.xml</mapping-file>
 
         <mapping-file>/hbm/transactional/dataset/DataResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/dataset/DatasetResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/core/TagResource.hbm.xml</mapping-file>
 
         <!--
         <mapping-file>/hbm/transactional/sampling/DataResource.hbm.xml</mapping-file>

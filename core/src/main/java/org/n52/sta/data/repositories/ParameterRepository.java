@@ -31,9 +31,8 @@ package org.n52.sta.data.repositories;
 
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Repository;
-
+import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 @Repository

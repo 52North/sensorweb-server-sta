@@ -77,16 +77,18 @@ public class PartyService
 
     @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
             throws STAInvalidQueryException {
-        for (ExpandItem expandItem : expandOption.getItems()) {
-            String expandProperty = expandItem.getPath();
-            if (PartyEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
-                return new EntityGraphRepository.FetchGraph[] {
-                        EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS
-                };
-            } else {
-                throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                                                                 expandProperty,
-                                                                 StaConstants.PARTY));
+        if (expandOption != null) {
+            for (ExpandItem expandItem : expandOption.getItems()) {
+                String expandProperty = expandItem.getPath();
+                if (PartyEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
+                    return new EntityGraphRepository.FetchGraph[] {
+                            EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS
+                    };
+                } else {
+                    throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
+                                                                     expandProperty,
+                                                                     StaConstants.PARTY));
+                }
             }
         }
         return new EntityGraphRepository.FetchGraph[0];
@@ -94,19 +96,21 @@ public class PartyService
 
     @Override protected PartyEntity fetchExpandEntitiesWithFilter(PartyEntity entity, ExpandFilter expandOption)
             throws STACRUDException, STAInvalidQueryException {
-        for (ExpandItem expandItem : expandOption.getItems()) {
-            String expandProperty = expandItem.getPath();
-            if (PartyEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
-                Page<AbstractDatasetEntity> datastreams = getDatastreamService()
-                        .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
-                                                               STAEntityDefinition.PARTIES,
-                                                               expandItem.getQueryOptions());
-                entity.setDatasets(datastreams.get().collect(Collectors.toSet()));
-                break;
-            } else {
-                throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                                                                 expandProperty,
-                                                                 StaConstants.PARTY));
+        if (expandOption != null) {
+            for (ExpandItem expandItem : expandOption.getItems()) {
+                String expandProperty = expandItem.getPath();
+                if (PartyEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
+                    Page<AbstractDatasetEntity> datastreams = getDatastreamService()
+                            .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
+                                                                   STAEntityDefinition.PARTIES,
+                                                                   expandItem.getQueryOptions());
+                    entity.setDatasets(datastreams.get().collect(Collectors.toSet()));
+                    break;
+                } else {
+                    throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
+                                                                     expandProperty,
+                                                                     StaConstants.PARTY));
+                }
             }
         }
         return entity;

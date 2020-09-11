@@ -78,20 +78,22 @@ public class ObservationRelationService
     @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
             throws STAInvalidQueryException {
         Set<EntityGraphRepository.FetchGraph> fetchGraphs = new HashSet<>();
-        for (ExpandItem expandItem : expandOption.getItems()) {
-            String expandProperty = expandItem.getPath();
-            switch (expandProperty) {
-            case STAEntityDefinition.OBSERVATION_GROUP:
-                fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_OBSERVATION_GROUP);
-                break;
-            case STAEntityDefinition.OBSERVATION:
-                fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_OBSERVATION);
+        if (expandOption != null) {
+            for (ExpandItem expandItem : expandOption.getItems()) {
+                String expandProperty = expandItem.getPath();
+                switch (expandProperty) {
+                case STAEntityDefinition.OBSERVATION_GROUP:
+                    fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_OBSERVATION_GROUP);
+                    break;
+                case STAEntityDefinition.OBSERVATION:
+                    fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_OBSERVATION);
 
-                break;
-            default:
-                throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                                                                 expandProperty,
-                                                                 StaConstants.OBSERVATION_RELATION));
+                    break;
+                default:
+                    throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
+                                                                     expandProperty,
+                                                                     StaConstants.OBSERVATION_RELATION));
+                }
             }
         }
         return fetchGraphs.toArray(new EntityGraphRepository.FetchGraph[0]);

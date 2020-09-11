@@ -88,8 +88,8 @@ public class CoreEntityRequestHandler extends EntityRequestHandler implements Co
     )
     public ElementWithQueryOptions<?> readRelatedEntity(@PathVariable String entity,
                                                         @PathVariable String target,
-                                                        HttpServletRequest request) {
-        return readRelatedEntity(entity, target, request);
+                                                        HttpServletRequest request) throws Exception {
+        return super.readRelatedEntity(entity, target, request);
     }
 
     @GetMapping(

@@ -78,16 +78,18 @@ public class ObservationGroupService
 
     @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
             throws STAInvalidQueryException {
-        for (ExpandItem expandItem : expandOption.getItems()) {
-            String expandProperty = expandItem.getPath();
-            if (ObservationGroupEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
-                return new EntityGraphRepository.FetchGraph[] {
-                        EntityGraphRepository.FetchGraph.FETCHGRAPH_OBSERVATION_RELATIONS
-                };
-            } else {
-                throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                                                                 expandProperty,
-                                                                 StaConstants.OBSERVATION_GROUP));
+        if (expandOption != null) {
+            for (ExpandItem expandItem : expandOption.getItems()) {
+                String expandProperty = expandItem.getPath();
+                if (ObservationGroupEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
+                    return new EntityGraphRepository.FetchGraph[] {
+                            EntityGraphRepository.FetchGraph.FETCHGRAPH_OBSERVATION_RELATIONS
+                    };
+                } else {
+                    throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
+                                                                     expandProperty,
+                                                                     StaConstants.OBSERVATION_GROUP));
+                }
             }
         }
         return new EntityGraphRepository.FetchGraph[0];

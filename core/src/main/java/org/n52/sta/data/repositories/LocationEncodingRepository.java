@@ -30,9 +30,11 @@
 package org.n52.sta.data.repositories;
 
 import org.n52.series.db.beans.FormatEntity;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
+@Repository
 public interface LocationEncodingRepository extends EntityGraphRepository<FormatEntity, Long> {
 
 }
