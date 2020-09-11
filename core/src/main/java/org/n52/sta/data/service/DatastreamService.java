@@ -272,14 +272,7 @@ public class DatastreamService extends
 
     @Override
     public String checkPropertyName(String property) {
-        switch (property) {
-        case StaConstants.PROP_PHENOMENON_TIME:
-            return AbstractDatasetEntity.PROPERTY_FIRST_VALUE_AT;
-        case StaConstants.PROP_RESULT_TIME:
-            return AbstractDatasetEntity.RESULT_TIME_START;
-        default:
-            return super.checkPropertyName(property);
-        }
+        return dQS.checkPropertyName(property);
     }
 
     @Override
@@ -319,11 +312,14 @@ public class DatastreamService extends
                 DatasetEntity saved = getRepository().save(dataset);
                 processObservation(saved, entity.getObservations());
             }
+            return getRepository().findByStaIdentifier(entity.getStaIdentifier(),
+                                                       EntityGraphRepository.FetchGraph.FETCHGRAPH_UOM,
+                                                       EntityGraphRepository.FetchGraph.FETCHGRAPH_OM_OBS_TYPE)
+                                  .orElseThrow(() -> new STACRUDException("Datastream requested but still " +
+                                                                                  "processing!"));
+        } else {
+            return entity;
         }
-        return getRepository().findByStaIdentifier(entity.getStaIdentifier(),
-                                                   EntityGraphRepository.FetchGraph.FETCHGRAPH_UOM,
-                                                   EntityGraphRepository.FetchGraph.FETCHGRAPH_OM_OBS_TYPE)
-                              .orElseThrow(() -> new STACRUDException("Datastream requested but still processing!"));
     }
 
     /**
@@ -517,12 +513,12 @@ public class DatastreamService extends
                     getRepository().save(merged);
                     return merged;
                 }
-                throw new STACRUDException("Unable to update. Entity not found.", HTTPStatus.NOT_FOUND);
+                throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }
         } else if (HttpMethod.PUT.equals(method)) {
-            throw new STACRUDException("Http PUT is not yet supported!", HTTPStatus.NOT_IMPLEMENTED);
+            throw new STACRUDException(HTTP_PUT_IS_NOT_YET_SUPPORTED, HTTPStatus.NOT_IMPLEMENTED);
         }
-        throw new STACRUDException("Invalid http method for updating entity!", HTTPStatus.BAD_REQUEST);
+        throw new STACRUDException(INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY, HTTPStatus.BAD_REQUEST);
     }
 
     private void checkUpdate(AbstractDatasetEntity entity) throws STACRUDException {
@@ -585,7 +581,7 @@ public class DatastreamService extends
                 //delete main datastream
                 getRepository().deleteByStaIdentifier(id);
             } else {
-                throw new STACRUDException("Unable to delete. Entity not found.", HTTPStatus.NOT_FOUND);
+                throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }
         }
     }

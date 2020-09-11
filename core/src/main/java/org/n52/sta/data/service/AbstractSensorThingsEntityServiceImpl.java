@@ -31,7 +31,6 @@ package org.n52.sta.data.service;
 
 import org.hibernate.query.criteria.internal.CriteriaBuilderImpl;
 import org.n52.series.db.beans.AbstractDatasetEntity;
-import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.HibernateRelations;
 import org.n52.series.db.beans.HibernateRelations.HasDescription;
 import org.n52.series.db.beans.HibernateRelations.HasName;
@@ -66,6 +65,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.Predicate;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Interface for requesting Sensor Things entities
@@ -374,7 +374,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     protected abstract S updateEntity(String id, S entity, HttpMethod method) throws STACRUDException;
 
     @Transactional(rollbackFor = Exception.class)
-    protected S save(S entity) throws STACRUDException {
+    protected S save(S entity) {
         return getRepository().save(entity);
     }
 
@@ -496,7 +496,9 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
 
     protected abstract S merge(S existing, S toMerge) throws STACRUDException;
 
-    protected void mergeIdentifierNameDescription(DescribableEntity existing, DescribableEntity toMerge) {
+    protected <U extends HibernateRelations.HasIdentifier & HibernateRelations.HasStaIdentifier
+            & HasName & HasDescription>
+    void mergeIdentifierNameDescription(U existing, U toMerge) {
         if (toMerge.isSetIdentifier()) {
             existing.setIdentifier(toMerge.getIdentifier());
         }
@@ -506,7 +508,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         mergeNameDescription(existing, toMerge);
     }
 
-    protected void mergeNameDescription(DescribableEntity existing, DescribableEntity toMerge) {
+    protected <U extends HasName & HasDescription> void mergeNameDescription(U existing, U toMerge) {
         mergeName(existing, toMerge);
         mergeDescription(existing, toMerge);
     }
@@ -533,44 +535,69 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         }
     }
 
-    @SuppressWarnings("unchecked")
+    protected void mergeDatastreams(HibernateRelations.HasAbstractDatasets existing,
+                                    HibernateRelations.HasAbstractDatasets toMerge)
+            throws STACRUDException {
+        if (toMerge.getDatasets() != null) {
+            for (AbstractDatasetEntity datastream : toMerge.getDatasets()) {
+                checkInlineDatastream(datastream);
+            }
+            Set<AbstractDatasetEntity> ex = existing.getDatasets();
+            ex.addAll(toMerge.getDatasets());
+            existing.setDatasets(ex);
+        }
+    }
+
     LocationService getLocationService() {
         return (LocationService) getEntityService(EntityTypes.Location);
     }
 
-    @SuppressWarnings("unchecked")
     HistoricalLocationService getHistoricalLocationService() {
         return (HistoricalLocationService) getEntityService(EntityTypes.HistoricalLocation);
     }
 
-    @SuppressWarnings("unchecked")
     DatastreamService getDatastreamService() {
         return (DatastreamService) getEntityService(EntityTypes.Datastream);
     }
 
-    @SuppressWarnings("unchecked")
     FeatureOfInterestService getFeatureOfInterestService() {
         return (FeatureOfInterestService) getEntityService(EntityTypes.FeatureOfInterest);
     }
 
-    @SuppressWarnings("unchecked")
     ThingService getThingService() {
         return (ThingService) getEntityService(EntityTypes.Thing);
     }
 
-    @SuppressWarnings("unchecked")
     SensorService getSensorService() {
         return (SensorService) getEntityService(EntityTypes.Sensor);
     }
 
-    @SuppressWarnings("unchecked")
     ObservedPropertyService getObservedPropertyService() {
         return (ObservedPropertyService) getEntityService(EntityTypes.ObservedProperty);
     }
 
-    @SuppressWarnings("unchecked")
     ObservationService getObservationService() {
         return (ObservationService) getEntityService(EntityTypes.Observation);
+    }
+
+    ObservationGroupService getObservationGroupService() {
+        return (ObservationGroupService) getEntityService(EntityTypes.ObservationGroup);
+    }
+
+    ObservationRelationService getObservationRelationService() {
+        return (ObservationRelationService) getEntityService(EntityTypes.ObservationRelation);
+    }
+
+    LicenseService getLicenseService() {
+        return (LicenseService) getEntityService(EntityTypes.License);
+    }
+
+    PartyService getPartyService() {
+        return (PartyService) getEntityService(EntityTypes.Party);
+    }
+
+    ProjectService getProjectService() {
+        return (ProjectService) getEntityService(EntityTypes.Project);
     }
 
     public void setServiceRepository(EntityServiceRepository serviceRepository) {

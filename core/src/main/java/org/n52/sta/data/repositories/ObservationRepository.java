@@ -45,5 +45,4 @@ public interface ObservationRepository<T extends ObservationEntity<?>>
     ObservationEntity<T> findFirstByDataset_idOrderBySamplingTimeEndDesc(Long datasetIdentifier);
 
     void deleteAllByDatasetIdIn(Set<Long> datasetId);
-
 }

@@ -255,4 +255,15 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Abs
             }
         };
     }
+
+    public String checkPropertyName(String property) {
+        switch (property) {
+        case "phenomenonTime":
+            return AbstractDatasetEntity.PROPERTY_FIRST_VALUE_AT;
+        case "resultTime":
+            return AbstractDatasetEntity.PROPERTY_RESULT_TIME_START;
+        default:
+            return super.checkPropertyName(property);
+        }
+    }
 }

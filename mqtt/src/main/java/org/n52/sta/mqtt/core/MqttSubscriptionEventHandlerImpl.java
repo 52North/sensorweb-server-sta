@@ -51,6 +51,7 @@ import org.n52.sta.mqtt.core.subscription.MqttPropertySubscription;
 import org.n52.sta.mqtt.core.subscription.MqttSelectSubscription;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
 import org.n52.sta.utils.AbstractSTARequestHandler;
+import org.n52.sta.utils.CoreRequestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -69,7 +70,7 @@ import java.util.regex.Pattern;
  */
 @Component
 public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
-        implements MqttSubscriptionEventHandler {
+        implements MqttSubscriptionEventHandler, CoreRequestUtils {
 
     private static final String BASE_URL = "";
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttSubscriptionEventHandlerImpl.class);

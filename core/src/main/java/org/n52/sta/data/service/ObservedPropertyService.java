@@ -237,11 +237,6 @@ public class ObservedPropertyService
         throw new STACRUDException(INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY, HTTPStatus.BAD_REQUEST);
     }
 
-    @Override
-    protected PhenomenonEntity save(PhenomenonEntity entity) {
-        return getRepository().save(entity);
-    }
-
     private void checkUpdate(PhenomenonEntity entity) throws STACRUDException {
         if (entity.hasDatastreams()) {
             for (AbstractDatasetEntity datastream : entity.getDatasets()) {

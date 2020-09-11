@@ -29,6 +29,8 @@
 
 package org.n52.sta.data.service.util;
 
+import org.n52.series.db.beans.parameter.ParameterEntity;
+import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.shetland.oasis.odata.ODataConstants;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
@@ -53,10 +55,11 @@ import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import java.time.Instant;
 import java.util.Date;
+import java.util.function.BiFunction;
 
 /**
  * Visitor visiting svalbard.odata.Expr and parsing it into javax.expression to be used in database access.
@@ -67,9 +70,10 @@ import java.util.Date;
 public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, STAInvalidQueryException> {
 
     private static final String ERROR_NOT_IMPLEMENTED = "not implemented yet!";
-    private static final String ERROR_NOT_EVALUABLE = "Could not evaluate Methodcall to :";
+    private static final String ERROR_NOT_EVALUABLE = "Could not evaluate Methodcall to: ";
     private static final String ERROR_NOT_SPATIAL = "Entity does not have spatial property!";
 
+    private static final String DOLLAR = "%";
     private static final String SLASH = "/";
 
     private HibernateSpatialCriteriaBuilderImpl builder;
@@ -299,9 +303,9 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
         case ODataConstants.DateAndTimeFunctions.NOW:
             return builder.currentTimestamp();
         case ODataConstants.DateAndTimeFunctions.MINDATETIME:
-            return builder.literal(Date.from(Instant.MIN));
+            return builder.literal(new Date(0L));
         case ODataConstants.DateAndTimeFunctions.MAXDATETIME:
-            return builder.literal(Date.from(Instant.MAX));
+            return builder.literal(new Date(Long.MAX_VALUE));
         default:
             throw new STAInvalidQueryException(ERROR_NOT_EVALUABLE + expr.getName());
         }
@@ -365,19 +369,40 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
         }
     }
 
+    /**
+     * wraps function evaluation to handle function on Observation->value or Observation->parameters->value as the
+     * value is split over multiple columns
+     *
+     * @param firstParam  path to property
+     * @param secondParam value to be checked against
+     * @param fkt         function to be used for check
+     * @return evaluated Predicate
+     */
+    private Predicate evalStringFuncOnMember(Path<String> firstParam,
+                                             String secondParam,
+                                             BiFunction<Expression<String>, String, Predicate> fkt) {
+        return fkt.apply(firstParam, secondParam);
+    }
+
     @SuppressWarnings("unchecked")
     private Expression<?> visitMethodCallBinary(MethodCallExpr expr) throws STAInvalidQueryException {
-        Expression<?> firstParam = expr.getParameters().get(0).accept(this);
-        Expression<?> secondParam = expr.getParameters().get(1).accept(this);
+        Path firstParam = (Path<?>) expr.getParameters().get(0).accept(this);
+        Expression<?> secondParam;
         switch (expr.getName()) {
 
         // String Functions
         case ODataConstants.StringFunctions.ENDSWITH:
+            String rawSecondPar = expr.getParameters().get(1).toString();
+            return evalStringFuncOnMember(firstParam,
+                                          DOLLAR + rawSecondPar.substring(1, rawSecondPar.length() - 1),
+                                          builder::like);
         case ODataConstants.StringFunctions.STARTSWITH:
-            //TODO: Check how we can append/prepend the DOLLAR to the second param
-            // return builder.like((Expression<String>) firstParam, "%" + secondParam);
-            throw new STAInvalidQueryException(ERROR_NOT_IMPLEMENTED);
+            String rawSecondParam = expr.getParameters().get(1).toString();
+            return evalStringFuncOnMember(firstParam,
+                                          rawSecondParam.substring(1, rawSecondParam.length() - 1) + DOLLAR,
+                                          builder::like);
         case ODataConstants.StringFunctions.SUBSTRINGOF:
+            secondParam = expr.getParameters().get(1).accept(this);
             return builder.function(
                     "CONTAINS",
                     Boolean.class,
@@ -385,13 +410,16 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
                     secondParam
             );
         case ODataConstants.StringFunctions.INDEXOF:
-            return builder.locate((Expression<String>) firstParam,
+            secondParam = expr.getParameters().get(1).accept(this);
+            return builder.locate(firstParam,
                                   (Expression<String>) secondParam);
         case ODataConstants.StringFunctions.SUBSTRING:
-            return builder.substring((Expression<String>) firstParam,
+            secondParam = expr.getParameters().get(1).accept(this);
+            return builder.substring(firstParam,
                                      (Expression<Integer>) secondParam);
         case ODataConstants.StringFunctions.CONCAT:
-            return builder.concat((Expression<String>) firstParam,
+            secondParam = expr.getParameters().get(1).accept(this);
+            return builder.concat(firstParam,
                                   (Expression<String>) secondParam);
 
         // Geospatial Functions + Spatial Relationship Functions
@@ -478,7 +506,15 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
      * @throws STAInvalidQueryException if the visit fails
      */
     @Override public Expression<?> visitMember(MemberExpr expr) throws STAInvalidQueryException {
-        return null;
+        // Add special handling for Observation and Parameter as they have stored their "value" attribute distributed
+        // over several different columns
+        if (root.getJavaType().isAssignableFrom(ParameterEntity.class)
+                || root.getJavaType().isAssignableFrom(ObservationEntity.class)) {
+            // root.get()
+            return null;
+        } else {
+            return root.get(expr.getValue());
+        }
     }
 
     /**
@@ -535,7 +571,11 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
      */
     @Override public Expression<Date> visitTime(TimeValueExpr expr) throws STAInvalidQueryException {
         // This is always literal as we handle member Expressions seperately
-        return builder.literal(((TimeInstant) expr.getTime()).getValue().toDate());
+        if (expr.getTime() instanceof String) {
+            return root.get(rootQS.checkPropertyName((String) expr.getTime()));
+        } else {
+            return builder.literal(((TimeInstant) expr.getTime()).getValue().toDate());
+        }
     }
 
     /**

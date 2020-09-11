@@ -83,8 +83,28 @@ public class QuerySpecificationRepository {
         case "ObservedProperties": {
             return new ObservedPropertyQuerySpecifications();
         }
+        case "License":
+        case "Licenses": {
+            return new LicenseQuerySpecifications();
+        }
+        case "Party":
+        case "Parties": {
+            return new PartyQuerySpecifications();
+        }
+        case "Project":
+        case "Projects": {
+            return new ProjectQuerySpecifications();
+        }
+        case "ObservationRelation":
+        case "ObservationRelations": {
+            return new ObservationRelationQuerySpecifications();
+        }
+        case "ObservationGroup":
+        case "ObservationGroups": {
+            return new ObservationGroupQuerySpecifications();
+        }
         default:
-            throw new STAInvalidFilterExpressionException("Unable to find QuerySpecification for type:" + name);
+            throw new STAInvalidFilterExpressionException("Unable to find QuerySpecification for type: " + name);
         }
     }
 

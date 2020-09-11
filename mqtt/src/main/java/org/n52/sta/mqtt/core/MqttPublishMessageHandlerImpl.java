@@ -38,6 +38,7 @@ import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.utils.AbstractSTARequestHandler;
+import org.n52.sta.utils.CoreRequestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,7 +56,8 @@ import java.util.Set;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
-public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler implements MqttPublishMessageHandler {
+public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
+        implements MqttPublishMessageHandler, CoreRequestUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttPublishMessageHandlerImpl.class);
 

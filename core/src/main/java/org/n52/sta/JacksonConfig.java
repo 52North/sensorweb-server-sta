@@ -41,16 +41,27 @@ import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
+import org.n52.series.db.beans.sta.LicenseEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ObservationEntity;
+import org.n52.series.db.beans.sta.ObservationGroupEntity;
+import org.n52.series.db.beans.sta.ObservationRelationEntity;
+import org.n52.series.db.beans.sta.PartyEntity;
+import org.n52.series.db.beans.sta.ProjectEntity;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.data.service.util.CollectionWrapper;
 import org.n52.sta.serdes.CollectionSer;
 import org.n52.sta.serdes.DatastreamSerDes;
 import org.n52.sta.serdes.FeatureOfInterestSerDes;
 import org.n52.sta.serdes.HistoricalLocationSerDes;
+import org.n52.sta.serdes.LicenseSerDes;
 import org.n52.sta.serdes.LocationSerDes;
+import org.n52.sta.serdes.ObservationGroupSerDes;
+import org.n52.sta.serdes.ObservationRelationSerDes;
 import org.n52.sta.serdes.ObservationSerDes;
 import org.n52.sta.serdes.ObservedPropertySerDes;
+import org.n52.sta.serdes.PartySerDes;
+import org.n52.sta.serdes.ProjectSerDes;
 import org.n52.sta.serdes.SensorSerDes;
 import org.n52.sta.serdes.ThingSerDes;
 import org.springframework.beans.factory.annotation.Value;
@@ -77,52 +88,52 @@ public class JacksonConfig {
             @Value("${server.feature.implicitExpand:false}") boolean implicitExpand,
             Environment environment
     ) {
-
         Map<String, String> parameterMapping = new HashMap<>();
         parameterMapping.put("samplingGeometry", samplingGeometryMapping);
         parameterMapping.put("verticalFrom", verticalFromMapping);
         parameterMapping.put("verticalTo", verticalToMapping);
         parameterMapping.put("verticalFromTo", verticalFromToMapping);
 
+        String[] activeProfiles = environment.getActiveProfiles();
         ArrayList<Module> modules = new ArrayList<>();
 
         SimpleModule module = new SimpleModule();
 
-        // Register Serializers/Deserializers for all custom types
+        // Register Serializers/Deserializers for STA Core Entities
         SimpleSerializers serializers = new SimpleSerializers();
         serializers.addSerializer(new CollectionSer(CollectionWrapper.class));
         serializers.addSerializer(
                 new ThingSerDes.ThingSerializer(rootUrl,
                                                 implicitExpand,
-                                                environment.getActiveProfiles()));
+                                                activeProfiles));
         serializers.addSerializer(
                 new LocationSerDes.LocationSerializer(rootUrl,
                                                       implicitExpand,
-                                                      environment.getActiveProfiles()));
+                                                      activeProfiles));
         serializers.addSerializer(
                 new SensorSerDes.SensorSerializer(rootUrl,
                                                   implicitExpand,
-                                                  environment.getActiveProfiles()));
+                                                  activeProfiles));
         serializers.addSerializer(
                 new ObservationSerDes.ObservationSerializer(rootUrl,
                                                             implicitExpand,
-                                                            environment.getActiveProfiles()));
+                                                            activeProfiles));
         serializers.addSerializer(
                 new ObservedPropertySerDes.ObservedPropertySerializer(rootUrl,
                                                                       implicitExpand,
-                                                                      environment.getActiveProfiles()));
+                                                                      activeProfiles));
         serializers.addSerializer(
                 new FeatureOfInterestSerDes.FeatureOfInterestSerializer(rootUrl,
                                                                         implicitExpand,
-                                                                        environment.getActiveProfiles()));
+                                                                        activeProfiles));
         serializers.addSerializer(
                 new HistoricalLocationSerDes.HistoricalLocationSerializer(rootUrl,
                                                                           implicitExpand,
-                                                                          environment.getActiveProfiles()));
+                                                                          activeProfiles));
         serializers.addSerializer(
                 new DatastreamSerDes.DatastreamSerializer(rootUrl,
                                                           implicitExpand,
-                                                          environment.getActiveProfiles()));
+                                                          activeProfiles));
 
         SimpleDeserializers deserializers = new SimpleDeserializers();
         deserializers.addDeserializer(PlatformEntity.class,
@@ -158,6 +169,61 @@ public class JacksonConfig {
                                       new HistoricalLocationSerDes.HistoricalLocationPatchDeserializer());
         deserializers.addDeserializer(DatastreamSerDes.DatastreamEntityPatch.class,
                                       new DatastreamSerDes.DatastreamPatchDeserializer());
+
+        // Add Seralizers/Deserializers for Extensions
+        for (String activeProfile : activeProfiles) {
+            switch (activeProfile) {
+            case StaConstants.CITSCIEXTENSION:
+                serializers.addSerializer(
+                        new ObservationGroupSerDes.ObservationGroupSerializer(rootUrl,
+                                                                              implicitExpand,
+                                                                              activeProfiles));
+                serializers.addSerializer(
+                        new ObservationRelationSerDes.ObservationRelationSerializer(rootUrl,
+                                                                                    implicitExpand,
+                                                                                    activeProfiles));
+                serializers.addSerializer(
+                        new LicenseSerDes.LicenseSerializer(rootUrl,
+                                                            implicitExpand,
+                                                            activeProfiles));
+                serializers.addSerializer(
+                        new PartySerDes.PartySerializer(rootUrl,
+                                                        implicitExpand,
+                                                        activeProfiles));
+                serializers.addSerializer(
+                        new ProjectSerDes.ProjectSerializer(rootUrl,
+                                                            implicitExpand,
+                                                            activeProfiles));
+
+                deserializers.addDeserializer(ObservationGroupEntity.class,
+                                              new ObservationGroupSerDes.ObservationGroupDeserializer());
+                deserializers.addDeserializer(ObservationRelationEntity.class,
+                                              new ObservationRelationSerDes.ObservationRelationDeserializer());
+                deserializers.addDeserializer(LicenseEntity.class,
+                                              new LicenseSerDes.LicenseDeserializer());
+                deserializers.addDeserializer(PartyEntity.class,
+                                              new PartySerDes.PartyDeserializer());
+                deserializers.addDeserializer(ProjectEntity.class,
+                                              new ProjectSerDes.ProjectDeserializer());
+                deserializers.addDeserializer(ObservationGroupSerDes.ObservationGroupPatch.class,
+                                              new ObservationGroupSerDes.ObservationGroupPatchDeserializer());
+                deserializers.addDeserializer(ObservationRelationSerDes.ObservationRelationPatch.class,
+                                              new ObservationRelationSerDes.ObservationRelationPatchDeserializer());
+                deserializers.addDeserializer(LicenseSerDes.LicensePatch.class,
+                                              new LicenseSerDes.LicensePatchDeserializer());
+                deserializers.addDeserializer(PartySerDes.PartyPatch.class,
+                                              new PartySerDes.PartyPatchDeserializer());
+                deserializers.addDeserializer(ProjectSerDes.ProjectPatch.class,
+                                              new ProjectSerDes.ProjectPatchDeserializer());
+                break;
+            case StaConstants.VANILLA:
+                break;
+            case StaConstants.MULTIDATASTREAM:
+                throw new RuntimeException("MultiDatastreamExtension is not implemented yet!");
+            default:
+                throw new RuntimeException(String.format("Invalid Profile supplied: %s", activeProfile));
+            }
+        }
 
         module.setSerializers(serializers);
         module.setDeserializers(deserializers);

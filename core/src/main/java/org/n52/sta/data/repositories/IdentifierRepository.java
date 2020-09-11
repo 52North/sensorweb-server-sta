@@ -65,25 +65,4 @@ public interface IdentifierRepository<T, I> extends EntityGraphRepository<T, I> 
      * @param identifier Identifier of the Entity
      */
     void deleteByIdentifier(String identifier);
-
-    /**
-     * Gets content of columnName of entity that is specified by spec. Used for fetching only identifier instead of
-     * whole Entity
-     *
-     * @param spec       Specification of Entity
-     * @param columnName Name of Column
-     * @return Content of the column with columnName if spec matches. Optional.empty() otherwise
-     */
-    Optional<String> getColumn(Specification<T> spec, String columnName);
-
-    /**
-     * Gets content of columnName of entity that is specified by spec. Used for fetching only identifier instead of
-     * whole Entity
-     *
-     * @param spec       Specification of Entity
-     * @param pageable   Pagination Specification
-     * @param columnName Name of Column
-     * @return Content of the column with columnName if spec matches. Optional.empty() otherwise
-     */
-    List<String> getColumnList(Specification<T> spec, Pageable pageable, String columnName);
 }

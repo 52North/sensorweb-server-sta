@@ -53,12 +53,11 @@ import java.util.HashSet;
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@RestController
-public class STAEntityRequestHandler extends AbstractSTARequestHandler {
+public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
 
-    public STAEntityRequestHandler(@Value("${server.rootUrl}") String rootUrl,
-                                   @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
-                                   EntityServiceRepository serviceRepository) {
+    public EntityRequestHandler(String rootUrl,
+                                boolean shouldEscapeId,
+                                EntityServiceRepository serviceRepository) {
         super(rootUrl, shouldEscapeId, serviceRepository);
     }
 
@@ -70,12 +69,8 @@ public class STAEntityRequestHandler extends AbstractSTARequestHandler {
      * @param id      id of entity. Automatically set by Spring via @PathVariable
      * @param request full request
      */
-    @GetMapping(
-            value = MAPPING_PREFIX + ENTITY_IDENTIFIED_DIRECTLY,
-            produces = "application/json"
-    )
-    public ElementWithQueryOptions<?> readEntityDirect(@PathVariable String entity,
-                                                       @PathVariable String id,
+    public ElementWithQueryOptions<?> readEntityDirect(String entity,
+                                                       String id,
                                                        HttpServletRequest request) throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         validateResource(lookupPath, serviceRepository);
@@ -94,12 +89,8 @@ public class STAEntityRequestHandler extends AbstractSTARequestHandler {
      * @param id      id of entity. Automatically set by Spring via @PathVariable
      * @param request full request
      */
-    @GetMapping(
-            value = MAPPING_PREFIX + ENTITY_IDENTIFIED_DIRECTLY + SLASHREF,
-            produces = "application/json"
-    )
-    public ElementWithQueryOptions<?> readEntityRefDirect(@PathVariable String entity,
-                                                          @PathVariable String id,
+    public ElementWithQueryOptions<?> readEntityRefDirect(String entity,
+                                                          String id,
                                                           HttpServletRequest request) throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         validateResource(lookupPath.substring(0, lookupPath.length() - 5), serviceRepository);
@@ -120,16 +111,8 @@ public class STAEntityRequestHandler extends AbstractSTARequestHandler {
      * @param request full request
      * @return JSON String representing Entity
      */
-    @GetMapping(
-            value = {
-                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
-                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE,
-                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE
-            },
-            produces = "application/json"
-    )
-    public ElementWithQueryOptions<?> readRelatedEntity(@PathVariable String entity,
-                                                        @PathVariable String target,
+    public ElementWithQueryOptions<?> readRelatedEntity(String entity,
+                                                        String target,
                                                         HttpServletRequest request)
             throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
@@ -156,16 +139,8 @@ public class STAEntityRequestHandler extends AbstractSTARequestHandler {
      * @param request full request
      * @return JSON String representing Entity
      */
-    @GetMapping(
-            value = {
-                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE + SLASHREF,
-                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE + SLASHREF,
-                    MAPPING_PREFIX + ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE + SLASHREF
-            },
-            produces = "application/json"
-    )
-    public ElementWithQueryOptions<?> readRelatedEntityRef(@PathVariable String entity,
-                                                           @PathVariable String target,
+    public ElementWithQueryOptions<?> readRelatedEntityRef(String entity,
+                                                           String target,
                                                            HttpServletRequest request)
             throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);

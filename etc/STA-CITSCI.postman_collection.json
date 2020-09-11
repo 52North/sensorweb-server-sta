@@ -1,0 +1,2523 @@
+{
+  "info": {
+    "_postman_id": "7f543e2c-5cee-4704-bd55-bdd383869177",
+    "name": "STA CitizenScienceExtension",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "POST",
+      "item": [
+        {
+          "name": "CSObservation with nested Group",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"@iot.id\": \"testCSObservation\",\n    \"result\": \"52\",\n    \"phenomenonTime\": \"2099-03-11T17:55:09Z\",\n    \"FeatureOfInterest\": {\n        \"@iot.id\": \"foi\"\n    },\n    \"Datastream\": {\n        \"@iot.id\": \"testDatastream\"\n    },\n    \"ObservationRelations\": [\n        {\n            \"@iot.id\": \"testRelation\",\n            \"type\": \"root\",\n            \"Group\": {\n                \"@iot.id\": \"testGroup\",\n                \"name\": \"Test Group 1\",\n                \"description\": \"Test Group 1 description\"\n            }\n        }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:8081/sta/CSObservations",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "CSObservations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "FeatureOfInterest",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"@iot.id\": \"foi\",\n    \"name\": \"ITConformance27\",\n    \"description\": \"ITConfo2rmance7 FOI\",\n    \"encodingType\": \"application/vnd.geo+json\",\n    \"feature\": {\n    \t\"type\": \"Feature\",\n      \"geometry\": {\n        \"type\": \"LineString\",\n        \"coordinates\": [\n          [0, 0.0], [52, 52]\n        ]\n      }\n    }\n}"
+            },
+            "url": {
+              "raw": "localhost:8081/sta/FeaturesOfInterest",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "FeaturesOfInterest"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Full Test Harness",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"@iot.id\": \"DemoThing\",\n    \"description\": \"This is the Lobby of the 52N HQ\",\n    \"name\": \"52N HQ Lobby\",\n    \"Locations\": [\n        {\n            \"@iot.id\": \"DemoLocation\",\n            \"name\": \"Location of 52N HQ\",\n            \"description\": \"Somewhere in the Loddenheide\",\n            \"encodingType\": \"application/vnd.geo+json\",\n            \"location\": {\n                \"type\": \"Feature\",\n                \"geometry\": {\n                    \"type\": \"Point\",\n                    \"coordinates\": [\n                        52,\n                        7\n                    ]\n                }\n            }\n        }\n    ],\n    \"CSDatastreams\": [\n        {\n            \"@iot.id\": \"DemoCSDatastream\",\n            \"name\": \"Air Temperature\",\n            \"description\": \"This Datastreams measures Air Temperature\",\n            \"unitOfMeasurement\": {\n                \"name\": \"degree Celsius\",\n                \"symbol\": \"°C\",\n                \"definition\": \"http://unitsofmeasure.org/ucum.html#para-30\"\n            },\n            \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n            \"phenomenonTime\": \"2009-01-11T16:22:25.00Z/2011-08-21T08:32:10.00Z\",\n            \"ObservedProperty\": {\n                \"@iot.id\": \"DemoAirTemp\",\n                \"name\": \"Air Temperature\",\n                \"definition\": \"http://sweet.jpl.nasa.gov/ontology/property.owl#AirTemperature\",\n                \"description\": \"The air temperature is the temperature of the air.\"\n            },\n            \"Sensor\": {\n                \"@iot.id\": \"DemoDS18B2022\",\n                \"name\": \"sensor 1\",\n                \"description\": \"sensor 1\",\n                \"encodingType\": \"application/pdf\",\n                \"metadata\": \"http://datasheets.maxim-ic.com/en/ds/DS18B20.pdf\"\n            },\n            \"License\": {\n                \"@iot.id\": \"DemoMIT\",\n                \"name\": \"Demo MIT License\",\n                \"definition\": \"https://opensource.org/licenses/MIT\"\n            },\n            \"Project\": {\n                \"@iot.id\": \"DemoProject\",\n                \"name\": \"Demo Project.\",\n                \"description\": \"This is a demo project\",\n                \"runtime\": \"2020-06-25T03:42:02-02:00\"\n            },\n            \"Party\": {\n                \"@iot.id\": \"DemoParty\",\n                \"nickName\": \"Demo Party nickName\",\n                \"role\": \"individual\"\n            },\n            \"CSObservations\": [\n                {\n                    \"@iot.id\": \"DemoCSObservation\",\n                    \"result\": \"52\",\n                    \"phenomenonTime\": \"2099-03-11T17:55:09Z\",\n                    \"FeatureOfInterest\": {\n                        \"@iot.id\": \"DemoFOI\",\n                        \"name\": \"DemoFeatureOfInterest\",\n                        \"description\": \"DemoFeatureOfInterest\",\n                        \"encodingType\": \"application/vnd.geo+json\",\n                        \"feature\": {\n                            \"type\": \"Feature\",\n                            \"geometry\": {\n                                \"type\": \"LineString\",\n                                \"coordinates\": [\n                                    [\n                                        0,\n                                        0.0\n                                    ],\n                                    [\n                                        52,\n                                        52\n                                    ]\n                                ]\n                            }\n                        }\n                    },\n                    \"ObservationRelations\": [\n                        {\n                            \"@iot.id\": \"DemoRelation\",\n                            \"type\": \"root\",\n                            \"Group\": {\n                                \"@iot.id\": \"DemoGroup\",\n                                \"name\": \"Demo Group 1\",\n                                \"description\": \"Demo Group 1 description\"\n                            }\n                        }\n                    ]\n                }\n            ]\n        }\n    ]\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8081/sta/Things",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "Things"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Full Test Harness with Linking via @iot.id",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"@iot.id\": \"DemoThing2\",\n    \"description\": \"This is the Lobby of the 52N HQ\",\n    \"name\": \"52N HQ Lobby\",\n    \"Locations\": [\n        {\n            \"@iot.id\": \"DemoLocation2\",\n            \"name\": \"Location of 52N HQ\",\n            \"description\": \"Somewhere in the Loddenheide\",\n            \"encodingType\": \"application/vnd.geo+json\",\n            \"location\": {\n                \"type\": \"Feature\",\n                \"geometry\": {\n                    \"type\": \"Point\",\n                    \"coordinates\": [\n                        52,\n                        7\n                    ]\n                }\n            }\n        }\n    ],\n    \"CSDatastreams\": [\n        {\n            \"@iot.id\": \"DemoCSDatastream2\",\n            \"name\": \"Air Temperature\",\n            \"description\": \"This Datastreams measures Air Temperature\",\n            \"unitOfMeasurement\": {\n                \"name\": \"degree Celsius\",\n                \"symbol\": \"°C\",\n                \"definition\": \"http://unitsofmeasure.org/ucum.html#para-30\"\n            },\n            \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n            \"phenomenonTime\": \"2009-01-11T16:22:25.00Z/2011-08-21T08:32:10.00Z\",\n            \"ObservedProperty\": {\n                \"@iot.id\": \"DemoAirTemp\"\n            },\n            \"Sensor\": {\n                \"@iot.id\": \"DemoDS18B2022\"\n            },\n            \"License\": {\n                \"@iot.id\": \"DemoMIT\"\n            },\n            \"Project\": {\n                \"@iot.id\": \"DemoProject\"\n            },\n            \"Party\": {\n                \"@iot.id\": \"DemoParty\"\n            }\n        }\n    ]\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8081/sta/Things",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "Things"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "License",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"@iot.id\": \"DemoMIT\",\n    \"name\": \"MIT License\",\n    \"definition\": \"https://opensource.org/licenses/MIT\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/sta/Licenses",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "Licenses"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Project",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"@iot.id\": \"DemoProject\",\n    \"name\": \"Demo Project.\",\n    \"description\": \"This is a demo project\",\n    \"runtime\": \"2020-06-25T03:42:02-02:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/sta/Projects",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "Projects"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Parties",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"@iot.id\": \"DemoParty\",\n    \"nickName\": \"Demo Party nickName\",\n    \"role\": \"individual\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/sta/Parties",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "Parties"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "protocolProfileBehavior": {}
+    },
+    {
+      "name": "PATCH",
+      "item": [
+        {
+          "name": "CSObservation",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"result\": \"152\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:8081/sta/CSObservations(testCSObservation)",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "CSObservations(testCSObservation)"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "CSDatastream",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"PATCHed name\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/sta/CSDatastreams(DemoCSDatastream)",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "CSDatastreams(DemoCSDatastream)"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "License",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"PATCHed MIT License\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/sta/Licenses(DemoMIT)",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "Licenses(DemoMIT)"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Project",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"PATCHed name\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/sta/Projects(DemoProject)",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "Projects(DemoProject)"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Party",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nickName\": \"PATCHed\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/sta/Parties(DemoParty)",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "Parties(DemoParty)"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ObservationRelation",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"PATCHed name\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/sta/ObservationRelations(DemoRelation)",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "ObservationRelations(DemoRelation)"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ObservationGroup",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"PATCHed name\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/sta/ObservationGroups(DemoGroup)",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "ObservationGroups(DemoGroup)"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "id": "6d4cd33c-e51e-49ea-b835-7848619fe3dd",
+            "type": "text/javascript",
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "id": "5c0664e8-b10b-4ee9-8682-a4e1c4064251",
+            "type": "text/javascript",
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ],
+      "protocolProfileBehavior": {}
+    },
+    {
+      "name": "DELETE",
+      "item": [
+        {
+          "name": "CSObservation",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"result\": \"152\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:8081/sta/CSObservations(testCSObservation)",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "CSObservations(testCSObservation)"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "CSDatastream",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/sta/CSDatastreams(DemoCSDatastream)",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "CSDatastreams(DemoCSDatastream)"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "License",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"PATCHed MIT License\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/sta/Licenses(DemoMIT)",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "Licenses(DemoMIT)"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Project",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"PATCHed name\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/sta/Projects(DemoProject)",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "Projects(DemoProject)"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Party",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nickName\": \"PATCHed\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/sta/Parties(DemoParty)",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "Parties(DemoParty)"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ObservationRelation",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"PATCHed name\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/sta/ObservationRelations(DemoRelation)",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "ObservationRelations(DemoRelation)"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ObservationGroup",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"PATCHed name\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8081/sta/ObservationGroups(DemoGroup)",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "ObservationGroups(DemoGroup)"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "id": "ca0172a3-0daa-410c-ab78-73fadd26d1a2",
+            "type": "text/javascript",
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "id": "317b168f-d88f-4f3e-bcef-57cd32987752",
+            "type": "text/javascript",
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ],
+      "protocolProfileBehavior": {}
+    },
+    {
+      "name": "GET Root Collections",
+      "item": [
+        {
+          "name": "CSObservations Collection",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/sta/CSObservations",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "CSObservations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "CSDatastreams Collection",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/sta/CSDatastreams",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "CSDatastreams"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Parties Collection",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/sta/Parties",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "Parties"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Licenses Collection",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/sta/Licenses",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "Licenses"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Projects Collection",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/sta/Projects",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "Projects"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ObservationGroups Collection",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/sta/ObservationGroups",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "ObservationGroups"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ObservationRelations Collection",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/sta/ObservationRelations",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "ObservationRelations"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "protocolProfileBehavior": {}
+    },
+    {
+      "name": "GET Collections with $filter",
+      "item": [
+        {
+          "name": "empty response",
+          "item": [
+            {
+              "name": "CSObservations $filter CSDatastream",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/CSObservations?$filter=CSDatastream/id eq 'invalid'",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "CSObservations"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "CSDatastream/id eq 'invalid'"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "CSObservations $filter FOI",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/CSObservations?$filter=FeatureOfInterest/id eq 'invalid'",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "CSObservations"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "FeatureOfInterest/id eq 'invalid'"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "CSObservations $filter ObservationRelation",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/CSObservations?$filter=ObservationRelations/id eq 'invalid'",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "CSObservations"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "ObservationRelations/id eq 'invalid'"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "CSDatastreams $filter License",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/CSDatastreams?$filter=License/id eq 'invalid'",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "CSDatastreams"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "License/id eq 'invalid'"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "CSDatastreams $filter Party",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/CSDatastreams?$filter=Party/id eq 'invalid'",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "CSDatastreams"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "Party/id eq 'invalid'"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "CSDatastreams $filter Project",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/CSDatastreams?$filter=Project/id eq 'invalid'",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "CSDatastreams"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "Project/id eq 'invalid'"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "CSDatastreams $filter Sensor",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/CSDatastreams?$filter=Sensor/id eq 'invalid'",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "CSDatastreams"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "Sensor/id eq 'invalid'"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "CSDatastreams $filter Thing",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/CSDatastreams?$filter=Thing/id eq 'invalid'",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "CSDatastreams"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "Thing/id eq 'invalid'"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "CSDatastreams $filter ObservedProperty",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/CSDatastreams?$filter=ObservedProperty/id eq 'invalid'",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "CSDatastreams"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "ObservedProperty/id eq 'invalid'"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Parties $filter CSDatastreams",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/Parties?$filter=CSDatastreams/id eq 'invalid'",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "Parties"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "CSDatastreams/id eq 'invalid'"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Licenses $filter CSDatastreams",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/Licenses?$filter=CSDatastreams/id eq 'invalid'",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "Licenses"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "CSDatastreams/id eq 'invalid'"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Projects $filter CSDatastreams",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "id": "3acb5c90-761e-40d6-876d-61f57cc88dc4",
+                    "exec": [
+                      "pm.test(\"Your test name\", function () {",
+                      "    var jsonData = pm.response.json();",
+                      "    pm.expect(jsonData[\"@iot.count\"]).to.eql(0);",
+                      "    pm.expect(jsonData[\"value\"]).to.eql([]);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/Projects?$filter=CSDatastreams/id eq 'invalid'",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "Projects"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "CSDatastreams/id eq 'invalid'"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Things $filter CSDatastreams",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "id": "56495981-2a0c-461d-b4ae-6af40efa4ad4",
+                    "exec": [
+                      "pm.test(\"Your test name\", function () {",
+                      "    var jsonData = pm.response.json();",
+                      "    pm.expect(jsonData[\"@iot.count\"]).to.eql(0);",
+                      "    pm.expect(jsonData[\"value\"]).to.eql([]);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/Things?$filter=CSDatastreams/id eq 'invalid'",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "Things"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "CSDatastreams/id eq 'invalid'"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Sensors $filter CSDatastreams",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "id": "dd1151f9-d91a-42a4-a07f-a40345f7528a",
+                    "exec": [
+                      "pm.test(\"Your test name\", function () {",
+                      "    var jsonData = pm.response.json();",
+                      "    pm.expect(jsonData[\"@iot.count\"]).to.eql(0);",
+                      "    pm.expect(jsonData[\"value\"]).to.eql([]);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/Sensors?$filter=CSDatastreams/id eq 'invalid'",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "Sensors"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "CSDatastreams/id eq 'invalid'"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "ObservedProperties $filter CSDatastreams",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "id": "c8d4393d-8c88-459f-aefc-9ed9ce7fae37",
+                    "exec": [
+                      "pm.test(\"Your test name\", function () {",
+                      "    var jsonData = pm.response.json();",
+                      "    pm.expect(jsonData[\"@iot.count\"]).to.eql(0);",
+                      "    pm.expect(jsonData[\"value\"]).to.eql([]);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/ObservedProperties?$filter=CSDatastreams/id eq 'invalid'",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "ObservedProperties"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "CSDatastreams/id eq 'invalid'"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "ObservationGroups $filter ObservationRelation",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/ObservationGroups?$filter=ObservationRelations/id eq 'invalid'",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "ObservationGroups"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "ObservationRelations/id eq 'invalid'"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "ObservationRelations $filter ObservationGroups",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/ObservationRelations?$filter=ObservationGroup/id eq 'invalid'",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "ObservationRelations"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "ObservationGroup/id eq 'invalid'"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "ObservationRelations $filter CSObservation",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/ObservationRelations?$filter=CSObservation/id eq 'invalid'",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "ObservationRelations"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "CSObservation/id eq 'invalid'"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            }
+          ],
+          "protocolProfileBehavior": {},
+          "_postman_isSubFolder": true
+        },
+        {
+          "name": "expanded response",
+          "item": [
+            {
+              "name": "CSObservations $filter CSDatastream",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/CSObservations?$filter=CSDatastream/id eq 'DemoCSDatastream'&$expand=CSDatastream",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "CSObservations"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "CSDatastream/id eq 'DemoCSDatastream'"
+                    },
+                    {
+                      "key": "$expand",
+                      "value": "CSDatastream"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "CSObservations $filter FOI",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/CSObservations?$filter=FeatureOfInterest/id eq 'DemoFOI'&$expand=FeatureOfInterest",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "CSObservations"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "FeatureOfInterest/id eq 'DemoFOI'"
+                    },
+                    {
+                      "key": "$expand",
+                      "value": "FeatureOfInterest"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "CSObservations $filter ObservationRelation",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/CSObservations?$filter=ObservationRelations/id eq 'DemoRelation'&$expand=ObservationRelations",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "CSObservations"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "ObservationRelations/id eq 'DemoRelation'"
+                    },
+                    {
+                      "key": "$expand",
+                      "value": "ObservationRelations"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "CSDatastreams $filter License",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/CSDatastreams?$filter=License/id eq 'DemoMIT'&$expand=License",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "CSDatastreams"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "License/id eq 'DemoMIT'"
+                    },
+                    {
+                      "key": "$expand",
+                      "value": "License"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "CSDatastreams $filter Party",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/CSDatastreams?$filter=Party/id eq 'DemoParty'&$expand=Party",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "CSDatastreams"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "Party/id eq 'DemoParty'"
+                    },
+                    {
+                      "key": "$expand",
+                      "value": "Party"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "CSDatastreams $filter Project",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/CSDatastreams?$filter=Project/id eq 'DemoProject'&$expand=Project",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "CSDatastreams"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "Project/id eq 'DemoProject'"
+                    },
+                    {
+                      "key": "$expand",
+                      "value": "Project"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "CSDatastreams $filter Sensor",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/CSDatastreams?$filter=Sensor/id eq 'DemoDS18B2022'&$expand=Sensor",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "CSDatastreams"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "Sensor/id eq 'DemoDS18B2022'"
+                    },
+                    {
+                      "key": "$expand",
+                      "value": "Sensor"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "CSDatastreams $filter Thing",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/CSDatastreams?$filter=Thing/id eq 'DemoThing'&$expand=Thing",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "CSDatastreams"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "Thing/id eq 'DemoThing'"
+                    },
+                    {
+                      "key": "$expand",
+                      "value": "Thing"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "CSDatastreams $filter ObservedProperty",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/CSDatastreams?$filter=ObservedProperty/id eq 'DemoAirTemp'&$expand=ObservedProperty",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "CSDatastreams"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "ObservedProperty/id eq 'DemoAirTemp'"
+                    },
+                    {
+                      "key": "$expand",
+                      "value": "ObservedProperty"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Parties $filter CSDatastreams",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/Parties?$filter=CSDatastreams/id eq 'DemoCSDatastream'&$expand=CSDatastreams",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "Parties"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "CSDatastreams/id eq 'DemoCSDatastream'"
+                    },
+                    {
+                      "key": "$expand",
+                      "value": "CSDatastreams"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Licenses $filter CSDatastreams",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/Licenses?$filter=CSDatastreams/id eq 'DemoCSDatastream'&$expand=CSDatastreams",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "Licenses"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "CSDatastreams/id eq 'DemoCSDatastream'"
+                    },
+                    {
+                      "key": "$expand",
+                      "value": "CSDatastreams"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Projects $filter CSDatastreams",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "id": "564cd40d-a31f-430d-8b9a-5d9edc6f9642",
+                    "exec": [
+                      "pm.test(\"Your test name\", function () {",
+                      "    var jsonData = pm.response.json();",
+                      "    pm.expect(jsonData[\"@iot.count\"]).to.eql(0);",
+                      "    pm.expect(jsonData[\"value\"]).to.eql([]);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/Projects?$filter=CSDatastreams/id eq 'DemoCSDatastream'&$expand=CSDatastreams",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "Projects"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "CSDatastreams/id eq 'DemoCSDatastream'"
+                    },
+                    {
+                      "key": "$expand",
+                      "value": "CSDatastreams"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "ObservationGroups $filter ObservationRelation",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/ObservationGroups?$filter=ObservationRelations/id eq 'DemoRelation'&$expand=ObservationRelations",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "ObservationGroups"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "ObservationRelations/id eq 'DemoRelation'"
+                    },
+                    {
+                      "key": "$expand",
+                      "value": "ObservationRelations"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "ObservationRelations $filter ObservationGroups",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/ObservationRelations?$filter=ObservationGroup/id eq 'DemoGroup'&$expand=ObservationGroup",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "ObservationRelations"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "ObservationGroup/id eq 'DemoGroup'"
+                    },
+                    {
+                      "key": "$expand",
+                      "value": "ObservationGroup"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "ObservationRelations $filter CSObservation",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/ObservationRelations?$filter=CSObservation/id eq 'DemoCSObservation'&$expand=CSObservation",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "ObservationRelations"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "CSObservation/id eq 'DemoCSObservation'"
+                    },
+                    {
+                      "key": "$expand",
+                      "value": "CSObservation"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "ObservedProperties $filter CSDatastreams",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "id": "cdb926bd-a9b9-4925-98e8-3800ad07706a",
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/ObservedProperties?$filter=CSDatastreams/id eq 'DemoCSDatastream'&$expand=CSDatastreams",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "ObservedProperties"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "CSDatastreams/id eq 'DemoCSDatastream'"
+                    },
+                    {
+                      "key": "$expand",
+                      "value": "CSDatastreams"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Sensors $filter CSDatastreams",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "id": "f06e6172-2488-4c5d-8004-c858c5f9d020",
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/Sensors?$filter=CSDatastreams/id eq 'DemoCSDatastream'&$expand=CSDatastreams",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "Sensors"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "CSDatastreams/id eq 'DemoCSDatastream'"
+                    },
+                    {
+                      "key": "$expand",
+                      "value": "CSDatastreams"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Things $filter CSDatastreams",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "id": "f96b0df7-d9b1-4319-8890-26348c1a9222",
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/Things?$filter=CSDatastreams/id eq 'DemoCSDatastream'&$expand=CSDatastreams",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "Things"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "CSDatastreams/id eq 'DemoCSDatastream'"
+                    },
+                    {
+                      "key": "$expand",
+                      "value": "CSDatastreams"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "FOI $filter CSObservations",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "id": "6966b311-647f-4563-99ab-269bba420a53",
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8081/sta/FeaturesOfInterest?$filter=CSObservations/id eq 'DemoCSObservation'&$expand=CSObservations",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8081",
+                  "path": [
+                    "sta",
+                    "FeaturesOfInterest"
+                  ],
+                  "query": [
+                    {
+                      "key": "$filter",
+                      "value": "CSObservations/id eq 'DemoCSObservation'"
+                    },
+                    {
+                      "key": "$expand",
+                      "value": "CSObservations"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            }
+          ],
+          "protocolProfileBehavior": {},
+          "_postman_isSubFolder": true
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "id": "05c4318a-313d-40a2-a74d-fb3848420151",
+            "type": "text/javascript",
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "id": "03d0c0ba-5061-4a02-875e-864ba54f133c",
+            "type": "text/javascript",
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ],
+      "protocolProfileBehavior": {}
+    },
+    {
+      "name": "GET Root Collections with $expand",
+      "item": [
+        {
+          "name": "CSObservations Collection $expand",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/sta/CSObservations?$expand=ObservationRelations,CSDatastream,FeatureOfInterest",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "CSObservations"
+              ],
+              "query": [
+                {
+                  "key": "$expand",
+                  "value": "ObservationRelations,CSDatastream,FeatureOfInterest"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "CSDatastreams Collection $expand",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/sta/CSDatastreams?$expand=Sensor,Thing,ObservedProperty,License,CSObservations,Party,Project",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "CSDatastreams"
+              ],
+              "query": [
+                {
+                  "key": "$expand",
+                  "value": "Sensor,Thing,ObservedProperty,License,CSObservations,Party,Project"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Parties Collection $expand",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/sta/Parties?$expand=CSDatastreams",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "Parties"
+              ],
+              "query": [
+                {
+                  "key": "$expand",
+                  "value": "CSDatastreams"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Licenses Collection $expand",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/sta/Licenses?$expand=CSDatastreams",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "Licenses"
+              ],
+              "query": [
+                {
+                  "key": "$expand",
+                  "value": "CSDatastreams"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Projects Collection $expand",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/sta/Projects?$expand=CSDatastreams",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "Projects"
+              ],
+              "query": [
+                {
+                  "key": "$expand",
+                  "value": "CSDatastreams"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Thing Collection $expand",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/sta/Things?$expand=CSDatastreams",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "Things"
+              ],
+              "query": [
+                {
+                  "key": "$expand",
+                  "value": "CSDatastreams"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Sensor Collection $expand",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/sta/Sensors?$expand=CSDatastreams",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "Sensors"
+              ],
+              "query": [
+                {
+                  "key": "$expand",
+                  "value": "CSDatastreams"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ObservedProperty Collection $expand",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/sta/ObservedProperties?$expand=CSDatastreams",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "ObservedProperties"
+              ],
+              "query": [
+                {
+                  "key": "$expand",
+                  "value": "CSDatastreams"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ObservationGroups Collection $expand",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/sta/ObservationGroups?$expand=ObservationRelations",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "ObservationGroups"
+              ],
+              "query": [
+                {
+                  "key": "$expand",
+                  "value": "ObservationRelations"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ObservationRelations Collection $expand",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/sta/ObservationRelations?$expand=CSObservation,ObservationGroup",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "ObservationRelations"
+              ],
+              "query": [
+                {
+                  "key": "$expand",
+                  "value": "CSObservation,ObservationGroup"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "protocolProfileBehavior": {}
+    },
+    {
+      "name": "GET Related Collections",
+      "item": [
+        {
+          "name": "ObservationRelations via  CSObservation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/sta/CSObservations(testCSObservation)/ObservationRelations",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "CSObservations(testCSObservation)",
+                "ObservationRelations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "CSDatastreams via Licenses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/sta/Licenses(MIT)/CSDatastreams",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "Licenses(MIT)",
+                "CSDatastreams"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "CSDatastreams via Parties",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/sta/Parties(DemoParty)/CSDatastreams",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "Parties(DemoParty)",
+                "CSDatastreams"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "CSDatastreams via Projects",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/sta/Projects(DemoProject)/CSDatastreams",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "Projects(DemoProject)",
+                "CSDatastreams"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "CSDatastreams via CSObservations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/sta/CSObservations(DemoCSObservation)/CSDatastream",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "CSObservations(DemoCSObservation)",
+                "CSDatastream"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ObservationRelations via ObservationGroup",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/sta/ObservationGroups(testGroup)/ObservationRelations",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "ObservationGroups(testGroup)",
+                "ObservationRelations"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "protocolProfileBehavior": {}
+    },
+    {
+      "name": "GET Related Entities",
+      "item": [
+        {
+          "name": "CSObservation via  ObservationRelation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/sta/ObservationRelations(testRelation)/CSObservation",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "ObservationRelations(testRelation)",
+                "CSObservation"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ObservationGroup via  ObservationRelation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/sta/ObservationRelations(testRelation)/ObservationGroup",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "ObservationRelations(testRelation)",
+                "ObservationGroup"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "protocolProfileBehavior": {}
+    },
+    {
+      "name": "GET Entities",
+      "item": [
+        {
+          "name": "GET Project",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/sta/Projects(DemoProject)",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "Projects(DemoProject)"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET License",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/sta/Licenses(MIT)",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8081",
+              "path": [
+                "sta",
+                "Licenses(MIT)"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "protocolProfileBehavior": {}
+    }
+  ],
+  "protocolProfileBehavior": {}
+}

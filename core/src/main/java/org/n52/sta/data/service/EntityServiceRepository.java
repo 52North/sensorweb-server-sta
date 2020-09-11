@@ -63,14 +63,17 @@ public class EntityServiceRepository {
 
     @Autowired private FeatureOfInterestService featureOfInterestService;
 
-    @Autowired private STAEventHandler mqttSubscriptionEventHandler;
+    @Autowired(required = false) private ObservationGroupService obsGroupService;
 
-    /*
-    public void addEntityService(AbstractSensorThingsEntityServiceImpl<?, ?, ?> entityService) {
-        for (EntityTypes entityType : entityService.getTypes()) {
-            entityServices.put(entityType, entityService);
-        }
-    }*/
+    @Autowired(required = false) private ObservationRelationService obsRelationService;
+
+    @Autowired(required = false) private LicenseService licenseService;
+
+    @Autowired(required = false) private PartyService partyService;
+
+    @Autowired(required = false) private ProjectService projectService;
+
+    @Autowired private STAEventHandler mqttSubscriptionEventHandler;
 
     @PostConstruct
     public void postConstruct() {
@@ -107,6 +110,29 @@ public class EntityServiceRepository {
         entityServices.put(EntityTypes.FeaturesOfInterest, featureOfInterestService);
 
         this.mqttSubscriptionEventHandler.setServiceRepository(this);
+
+        if (obsGroupService != null) {
+            this.obsGroupService.setServiceRepository(this);
+            entityServices.put(EntityTypes.ObservationGroup, obsGroupService);
+            entityServices.put(EntityTypes.ObservationGroups, obsGroupService);
+
+            this.obsRelationService.setServiceRepository(this);
+            entityServices.put(EntityTypes.ObservationRelation, obsRelationService);
+            entityServices.put(EntityTypes.ObservationRelations, obsRelationService);
+
+            this.licenseService.setServiceRepository(this);
+            entityServices.put(EntityTypes.License, licenseService);
+            entityServices.put(EntityTypes.Licenses, licenseService);
+
+            this.partyService.setServiceRepository(this);
+            entityServices.put(EntityTypes.Party, partyService);
+            entityServices.put(EntityTypes.Parties, partyService);
+
+            this.projectService.setServiceRepository(this);
+            entityServices.put(EntityTypes.Project, projectService);
+            entityServices.put(EntityTypes.Projects, projectService);
+
+        }
     }
 
     /**
@@ -132,7 +158,8 @@ public class EntityServiceRepository {
     public enum EntityTypes {
         Thing, Location, HistoricalLocation, Sensor, Datastream, Observation, ObservedProperty, FeatureOfInterest,
         Things, Locations, HistoricalLocations, Sensors, Datastreams, Observations, ObservedProperties,
-        FeaturesOfInterest
+        FeaturesOfInterest, ObservationGroup, ObservationGroups, ObservationRelation, ObservationRelations,
+        License, Licenses, Party, Parties, Project, Projects
     }
 
 }

@@ -267,11 +267,6 @@ public class SensorService
         throw new STACRUDException(INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY, HTTPStatus.BAD_REQUEST);
     }
 
-    @Override
-    protected ProcedureEntity save(ProcedureEntity entity) {
-        return getRepository().save(entity);
-    }
-
     private void checkUpdate(ProcedureEntity entity) throws STACRUDException {
         if (entity instanceof ProcedureEntity) {
             ProcedureEntity sensor = (ProcedureEntity) entity;

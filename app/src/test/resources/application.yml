@@ -40,7 +40,7 @@ server:
 # Database Configuration
 database:
   jpa:
-    persistence-location: classpath:META-INF/sensorthings-persistence.xml
+    persistence-location: classpath:META-INF/sta-vanilla.xml
 spring:
   main:
     show-banner: false
