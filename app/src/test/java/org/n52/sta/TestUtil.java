@@ -59,7 +59,12 @@ public interface TestUtil {
         SENSOR("Sensors"),
         FEATURE_OF_INTEREST("FeaturesOfInterest"),
         OBSERVATION("Observations"),
-        OBSERVED_PROPERTY("ObservedProperties");
+        OBSERVED_PROPERTY("ObservedProperties"),
+        OBSERVATIONRELATION("ObservationRelations"),
+        OBSERVATIONGROUP("ObservationGroups"),
+        LICENSE("Licenses"),
+        PROJECT("Projects"),
+        PARTY("Parties");
 
         String val;
 
@@ -74,6 +79,10 @@ public interface TestUtil {
                 }
             }
             return null;
+        }
+
+        public String getVal() {
+            return val;
         }
     }
 
@@ -100,6 +109,17 @@ public interface TestUtil {
     String FEATURESOFINTEREST = "FeaturesOfInterest";
     String OBSERVEDPROPERTY = "ObservedProperty";
     String OBSERVEDPROPERTIES = "ObservedProperties";
+
+    String OBSERVATIONRELATIONS = "ObservationRelations";
+    String OBSERVATIONRELATION = "ObservationRelation";
+    String OBSERVATIONGROUPS = "ObservationGroups";
+    String OBSERVATIONGROUP = "ObservationGroup'";
+    String LICENSES = "Licenses";
+    String LICENSE = "License";
+    String PROJECTS = "Projects";
+    String PROJECT = "Project";
+    String PARTIES = "Parties";
+    String PARTY = "Party";
 
     GeometryFactory factory =
             new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
@@ -145,6 +165,33 @@ public interface TestUtil {
         put(EntityType.FEATURE_OF_INTEREST.toString() + EntityType.OBSERVATION.toString(),
             "FeaturesOfInterest(%s)/Observations");
 
+        // CitSciExtension
+        put(EntityType.DATASTREAM.toString() + EntityType.LICENSE.toString(),
+            "Datastreams(%s)/License");
+        put(EntityType.DATASTREAM.toString() + EntityType.PARTY.toString(),
+            "Datastreams(%s)/Party");
+        put(EntityType.DATASTREAM.toString() + EntityType.PROJECT.toString(),
+            "Datastreams(%s)/Project");
+
+        put(EntityType.LICENSE.toString() + EntityType.DATASTREAM.toString(),
+            "License(%s)/Datastreams");
+
+        put(EntityType.PARTY.toString() + EntityType.DATASTREAM.toString(),
+            "Party(%s)/Datastreams");
+
+        put(EntityType.PROJECT.toString() + EntityType.DATASTREAM.toString(),
+            "Project(%s)/Datastreams");
+
+        put(EntityType.OBSERVATION.toString() + EntityType.OBSERVATIONRELATION.toString(),
+            "Observations(%s)/ObservationRelations");
+
+        put(EntityType.OBSERVATIONRELATION.toString() + EntityType.OBSERVATION.toString(),
+            "ObservationRelations(%s)/Observation");
+        put(EntityType.OBSERVATIONRELATION.toString() + EntityType.OBSERVATIONGROUP.toString(),
+            "ObservationRelations(%s)/ObservationGroup");
+
+        put(EntityType.OBSERVATIONGROUP.toString() + EntityType.OBSERVATIONRELATION.toString(),
+            "ObservationGroups(%s)/ObservationRelations");
     }};
 
     default Set<String> getRelatedEntityEndpointKeys(EntityType source) {

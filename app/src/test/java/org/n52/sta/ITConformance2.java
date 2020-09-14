@@ -98,14 +98,14 @@ public class ITConformance2 extends ConformanceTests implements TestUtil {
      * $expand
      * $select
      */
-    @Test
+    /*@Test
     public void testQueryOptionOrder() {
 
-    }
+    }*/
 
     @Test
     public void testSelect() throws Exception {
-        for (String collectionName : STAEntityDefinition.ALLCOLLECTIONS) {
+        for (String collectionName : STAEntityDefinition.CORECOLLECTIONS) {
             STAEntityDefinition definition = STAEntityDefinition.definitions.get(collectionName);
             String prefix = "$select=";
             String filter;

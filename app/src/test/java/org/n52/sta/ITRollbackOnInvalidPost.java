@@ -34,6 +34,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.util.Arrays;
+
 /**
  * Implements Conformance Tests according to Section A.1 in OGC SensorThings API Part 1: Sensing (15-078r6)
  * Adapted from the official Test Suite <a href="https://github.com/opengeospatial/ets-sta10/">ets-sta10</a>
@@ -133,18 +135,18 @@ public class ITRollbackOnInvalidPost extends ConformanceTests {
     @Test
     public void checkNoEntityCreatedOnInvalidThingPost() throws Exception {
         postInvalidEntity(EntityType.THING, invalidSensor);
-        checkNotExisting(endpoints.keySet());
+        checkNotExisting(Arrays.asList(EntityType.values()));
 
         postInvalidEntity(EntityType.THING, invalidObsProp);
-        checkNotExisting(endpoints.keySet());
+        checkNotExisting(Arrays.asList(EntityType.values()));
 
         postInvalidEntity(EntityType.THING, invalidObs);
-        checkNotExisting(endpoints.keySet());
+        checkNotExisting(Arrays.asList(EntityType.values()));
 
         postInvalidEntity(EntityType.THING, invalidDatastream);
-        checkNotExisting(endpoints.keySet());
+        checkNotExisting(Arrays.asList(EntityType.values()));
 
         postInvalidEntity(EntityType.THING, invalidLocation);
-        checkNotExisting(endpoints.keySet());
+        checkNotExisting(Arrays.asList(EntityType.values()));
     }
 }

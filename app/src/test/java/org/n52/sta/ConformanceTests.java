@@ -48,11 +48,8 @@ import org.testcontainers.junit.jupiter.Container;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -68,24 +65,13 @@ abstract class ConformanceTests implements TestUtil {
 
     protected final String rootUrl;
     protected final ObjectMapper mapper = new ObjectMapper();
-    protected final HashMap<EntityType, String> endpoints;
 
     ConformanceTests(String rootUrl) {
         this.rootUrl = rootUrl;
-        HashMap<EntityType, String> map = new HashMap<>();
-        map.put(EntityType.THING, "Things");
-        map.put(EntityType.LOCATION, "Locations");
-        map.put(EntityType.HISTORICAL_LOCATION, "HistoricalLocations");
-        map.put(EntityType.DATASTREAM, "Datastreams");
-        map.put(EntityType.SENSOR, "Sensors");
-        map.put(EntityType.FEATURE_OF_INTEREST, "FeaturesOfInterest");
-        map.put(EntityType.OBSERVATION, "Observations");
-        map.put(EntityType.OBSERVED_PROPERTY, "ObservedProperties");
-        this.endpoints = map;
     }
 
     JsonNode postEntity(EntityType type, String body) throws IOException {
-        HttpPost request = new HttpPost(rootUrl + endpoints.get(type));
+        HttpPost request = new HttpPost(rootUrl + type.getVal());
         request.setEntity(new StringEntity(body));
         request.setHeader("Content-Type", "application/json");
 
@@ -115,7 +101,7 @@ abstract class ConformanceTests implements TestUtil {
     }
 
     protected JsonNode postInvalidEntity(EntityType type, String body) throws IOException {
-        HttpPost request = new HttpPost(rootUrl + endpoints.get(type));
+        HttpPost request = new HttpPost(rootUrl + type.getVal());
         request.setEntity(new StringEntity(body));
         request.setHeader("Content-Type", "application/json");
 
@@ -127,7 +113,7 @@ abstract class ConformanceTests implements TestUtil {
         HttpResponse response = HttpClientBuilder.create().build().execute(request);
         Assertions.assertTrue(
                 response.getStatusLine().getStatusCode() == 400 || response.getStatusLine().getStatusCode() == 409,
-                "Entity " + rootUrl + endpoints.get(type) + " should not have been created but response Code  is: " +
+                "Entity " + rootUrl + type.getVal() + " should not have been created but response Code  is: " +
                         response.getStatusLine().getStatusCode()
         );
 
@@ -141,7 +127,7 @@ abstract class ConformanceTests implements TestUtil {
 
     protected JsonNode patchEntity(EntityType type, String body, String id) throws IOException {
         HttpPatch request = new HttpPatch(rootUrl
-                                                  + endpoints.get(type)
+                                                  + type.getVal()
                                                   + "("
                                                   + id
                                                   + ")");
@@ -184,7 +170,7 @@ abstract class ConformanceTests implements TestUtil {
      */
     protected void patchInvalidEntity(EntityType type, String body, String id) throws IOException {
         HttpPatch request = new HttpPatch(rootUrl
-                                                  + endpoints.get(type)
+                                                  + type.getVal()
                                                   + "("
                                                   + id
                                                   + ")");
@@ -220,7 +206,7 @@ abstract class ConformanceTests implements TestUtil {
      */
     protected void deleteNonexistentEntity(EntityType type) throws IOException {
         HttpDelete request = new HttpDelete(rootUrl
-                                                    + endpoints.get(type)
+                                                    + type.getVal()
                                                     + "("
                                                     + "aaaaaa"
                                                     + ")");
@@ -255,7 +241,7 @@ abstract class ConformanceTests implements TestUtil {
 
     protected void deleteEntity(EntityType type, String id, boolean canError) throws IOException {
         HttpDelete request = new HttpDelete(rootUrl
-                                                    + endpoints.get(type)
+                                                    + type.getVal()
                                                     + "("
                                                     + id
                                                     + ")");
@@ -284,15 +270,15 @@ abstract class ConformanceTests implements TestUtil {
 
     protected JsonNode getEntity(EntityType type, String id, String queryOption) throws IOException {
         String query = UriUtils.encode(queryOption, Charset.defaultCharset());
-        return getEntity(endpoints.get(type) + "(" + id + ")" + "?" + query);
+        return getEntity(type.getVal() + "(" + id + ")" + "?" + query);
     }
 
     protected JsonNode getEntityProperty(EntityType type, String id, String property) throws IOException {
-        return getEntity(endpoints.get(type) + "(" + id + ")" + "/" + property);
+        return getEntity(type.getVal() + "(" + id + ")" + "/" + property);
     }
 
     protected JsonNode getEntity(EntityType type, String id) throws IOException {
-        return getEntity(endpoints.get(type) + "(" + id + ")");
+        return getEntity(type.getVal() + "(" + id + ")");
     }
 
     protected JsonNode getEntity(String path) throws IOException {
@@ -312,7 +298,7 @@ abstract class ConformanceTests implements TestUtil {
     }
 
     protected String getEntityValue(EntityType type, String id, String property) throws IOException {
-        String url = endpoints.get(type) + "(" + id + ")" + "/" + property + "/$value";
+        String url = type.getVal() + "(" + id + ")" + "/" + property + "/$value";
         HttpGet request = new HttpGet(rootUrl + url);
         HttpResponse response = HttpClientBuilder.create().build().execute(request);
 
@@ -344,7 +330,7 @@ abstract class ConformanceTests implements TestUtil {
     }
 
     protected void getNonExistentEntity(EntityType type) throws IOException {
-        HttpGet request = new HttpGet(rootUrl + endpoints.get(type) + "(aaaaaa)");
+        HttpGet request = new HttpGet(rootUrl + type.getVal() + "(aaaaaa)");
         HttpResponse response = HttpClientBuilder.create().build().execute(request);
 
         // Check Response MIME Type
@@ -354,13 +340,13 @@ abstract class ConformanceTests implements TestUtil {
         Assertions.assertEquals(404,
                                 response.getStatusLine().getStatusCode(),
                                 "ERROR: Did not receive 404 NOT FOUND for path: "
-                                        + endpoints.get(type)
+                                        + type.getVal()
                                         + "(aaaaaa)"
                                         + " Instead received Status Code: " + response.getStatusLine().getStatusCode());
     }
 
     protected JsonNode getCollection(EntityType type, String filters) throws IOException {
-        return getCollection(rootUrl + endpoints.get(type), filters);
+        return getCollection(rootUrl + type.getVal(), filters);
     }
 
     protected JsonNode getCollection(String url, String filters) throws IOException {
@@ -423,9 +409,9 @@ abstract class ConformanceTests implements TestUtil {
      *
      * @param entityTypes List of entity types
      */
-    protected void checkNotExisting(Set<EntityType> entityTypes) throws Exception {
+    protected void checkNotExisting(Iterable<EntityType> entityTypes) throws Exception {
         for (EntityType entityType : entityTypes) {
-            JsonNode response = getEntity(endpoints.get(entityType));
+            JsonNode response = getEntity(entityType.getVal());
             Assertions.assertTrue(
                     response.get("value").isEmpty(),
                     "Entity with type: " + entityType.name() + " is created although it shouldn't"
@@ -435,7 +421,7 @@ abstract class ConformanceTests implements TestUtil {
 
     protected void checkExisting(Set<EntityType> entityTypes) throws Exception {
         for (EntityType entityType : entityTypes) {
-            JsonNode response = getEntity(endpoints.get(entityType));
+            JsonNode response = getEntity(entityType.getVal());
             Assertions.assertTrue(
                     !response.get("value").isEmpty(),
                     "No Entity with type: " + entityType.name() + " is present"
