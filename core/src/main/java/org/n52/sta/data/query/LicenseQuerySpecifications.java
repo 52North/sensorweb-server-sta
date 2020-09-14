@@ -51,7 +51,7 @@ public class LicenseQuerySpecifications extends EntityQuerySpecifications<Licens
         return (root, query, builder) -> {
             final Join<LicenseEntity, AbstractDatasetEntity> join =
                     root.join(LicenseEntity.PROPERTY_DATASETS, JoinType.INNER);
-            return builder.equal(join.get(LicenseEntity.STA_IDENTIFIER), identifier);
+            return builder.equal(join.get(AbstractDatasetEntity.STA_IDENTIFIER), identifier);
         };
     }
 

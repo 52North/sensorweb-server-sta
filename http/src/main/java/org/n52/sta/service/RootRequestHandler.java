@@ -34,7 +34,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.shetland.ogc.sta.model.extension.CitSciExtensionEntityDefinition;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -74,10 +73,10 @@ public class RootRequestHandler {
                                       String[] activeProfiles) {
         ArrayNode arrayNode = mapper.createArrayNode();
 
-        addToArray(rootUrl, mapper, arrayNode, STAEntityDefinition.ALLCOLLECTIONS);
+        addToArray(rootUrl, mapper, arrayNode, STAEntityDefinition.CORECOLLECTIONS);
         for (String profile : activeProfiles) {
             if (profile.equals(StaConstants.CITSCIEXTENSION)) {
-                addToArray(rootUrl, mapper, arrayNode, CitSciExtensionEntityDefinition.ALLCOLLECTIONS);
+                addToArray(rootUrl, mapper, arrayNode, STAEntityDefinition.CITSCICOLLECTIONS);
             }
         }
 

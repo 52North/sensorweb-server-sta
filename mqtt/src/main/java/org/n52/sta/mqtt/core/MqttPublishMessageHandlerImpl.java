@@ -96,7 +96,7 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
     private boolean validateTopics(Set<String> topics) {
         boolean valid = true;
         for (String topic : topics) {
-            valid = Arrays.asList(STAEntityDefinition.ALLCOLLECTIONS).contains(topic);
+            valid = Arrays.asList(STAEntityDefinition.CORECOLLECTIONS).contains(topic);
         }
         return valid;
     }

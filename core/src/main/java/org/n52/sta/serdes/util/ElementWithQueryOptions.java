@@ -114,15 +114,15 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
         case "AbstractDatasetEntity":
         case "DatasetAggregationEntity":
             return new DatastreamWithQueryOptions((AbstractDatasetEntity) unwrapped, queryOptions);
-        case "ObservationGroup":
+        case "ObservationGroupEntity":
             return new ObservationGroupWithQueryOptions((ObservationGroupEntity) unwrapped, queryOptions);
-        case "ObservationRelation":
+        case "ObservationRelationEntity":
             return new ObservationRelationWithQueryOptions((ObservationRelationEntity) unwrapped, queryOptions);
-        case "License":
+        case "LicenseEntity":
             return new LicenseWithQueryOptions((LicenseEntity) unwrapped, queryOptions);
-        case "Party":
+        case "PartyEntity":
             return new PartyWithQueryOptions((PartyEntity) unwrapped, queryOptions);
-        case "Project":
+        case "ProjectEntity":
             return new ProjectWithQueryOptions((ProjectEntity) unwrapped, queryOptions);
         default:
             if (unwrapped instanceof ObservationEntity) {

@@ -35,8 +35,6 @@ import org.n52.series.db.beans.sta.ObservationRelationEntity;
 import org.n52.series.db.beans.sta.PartyEntity;
 import org.n52.series.db.beans.sta.ProjectEntity;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
-import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.shetland.ogc.sta.model.extension.CitSciExtensionEntityDefinition;
 import org.n52.sta.serdes.LicenseSerDes;
 import org.n52.sta.serdes.ObservationGroupSerDes;
 import org.n52.sta.serdes.ObservationRelationSerDes;
@@ -58,7 +56,8 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
                     + OR + LICENSES;
 
     String BASE_COLLECTION_REGEX_NAMED_GROUPS =
-            WANTED_NAME_GROUP_START + BASE_COLLECTION_REGEX + WANTED_NAME_GROUP_END;
+            WANTED_NAME_GROUP_START + BASE_COLLECTION_REGEX + OR + DATASTREAMS + OR + OBSERVATIONS +
+                    WANTED_NAME_GROUP_END;
 
     String IDENTIFIED_BY_OBSERVATION_REGEX =
             OBSERVATIONS + IDENTIFIER_REGEX + SLASH
@@ -89,6 +88,11 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
             OBSERVATION_RELATIONS + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN + OBSERVATION + OR +
                     OBSERVATION_GROUP +
                     ROUND_BRACKET_CLOSE;
+
+    String IDENTIFIED_BY_DATASTREAM_REGEX =
+            DATASTREAMS + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN
+                    + PROJECT + OR + PARTY + OR + LICENSE
+                    + ROUND_BRACKET_CLOSE;
 
     // /Observations(52)/ObservationRelations
     String COLLECTION_IDENTIFIED_BY_OBSERVATION =
@@ -224,11 +228,13 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
             BASE_COLLECTION_REGEX_NAMED_GROUPS + WANTED_ID_GROUP_START + IDENTIFIER_REGEX + WANTED_ID_GROUP_END +
                     DOLLAR);
     Pattern EP_IDENT_BY_OBSERVATIONRELATION = Pattern.compile(ENTITY_IDENTIFIED_BY_OBSERVATIONRELATION + DOLLAR);
+    Pattern EP_IDENT_BY_DATASTREAM = Pattern.compile(ENTITY_IDENTIFIED_BY_DATASTREAM + DOLLAR);
 
     Pattern[] NAMED_ENTITY_PATTERNS =
             new Pattern[] {
                     EP_BASE,
-                    EP_IDENT_BY_OBSERVATIONRELATION
+                    EP_IDENT_BY_OBSERVATIONRELATION,
+                    EP_IDENT_BY_DATASTREAM
             };
 
     // OGC-15-078r6 14.2.4
@@ -247,6 +253,8 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
     Pattern BY_LICENSE_PATTERN = Pattern.compile(IDENTIFIED_BY_LICENSE_REGEX);
     Pattern BY_PARTY_PATTERN = Pattern.compile(IDENTIFIED_BY_PARTY_REGEX);
     Pattern BY_PROJECT_PATTERN = Pattern.compile(IDENTIFIED_BY_PROJECT_REGEX);
+    Pattern BY_DATASTREAM_PATTERN = Pattern.compile(IDENTIFIED_BY_DATASTREAM_REGEX);
+    Pattern BY_OBSERVATION_PATTERN = Pattern.compile(IDENTIFIED_BY_OBSERVATION_REGEX);
 
     default Class collectionNameToClass(String collectionName) throws STAInvalidUrlException {
         switch (collectionName) {
@@ -309,6 +317,8 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
                                 || BY_LICENSE_PATTERN.matcher(resource).matches()
                                 || BY_PARTY_PATTERN.matcher(resource).matches()
                                 || BY_PROJECT_PATTERN.matcher(resource).matches()
+                                || BY_DATASTREAM_PATTERN.matcher(resource).matches()
+                                || BY_OBSERVATION_PATTERN.matcher(resource).matches()
                                 || BY_OBSERVATION_RELATION_PATTERN.matcher(resource).matches())) {
                             return new STAInvalidUrlException(URL_INVALID
                                                                       + uriResources[i - 1]

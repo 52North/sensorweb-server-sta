@@ -53,7 +53,7 @@ import javax.servlet.http.HttpServletRequest;
  */
 @RestController
 @Profile(StaConstants.CITSCIEXTENSION)
-public class CitSciEntityRequestHandler extends EntityRequestHandler implements CitSciExtensionRequestUtils{
+public class CitSciEntityRequestHandler extends EntityRequestHandler implements CitSciExtensionRequestUtils {
 
     public CitSciEntityRequestHandler(@Value("${server.rootUrl}") String rootUrl,
                                       @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
@@ -81,10 +81,10 @@ public class CitSciEntityRequestHandler extends EntityRequestHandler implements 
         return super.readEntityRefDirect(entity, id, request);
     }
 
-    // There are no singular References so no getting via reference is possible!
     @GetMapping(
             value = {
-                    MAPPING_PREFIX + CitSciExtensionRequestUtils.ENTITY_IDENTIFIED_BY_OBSERVATIONRELATION_PATH_VARIABLE
+                    MAPPING_PREFIX + CitSciExtensionRequestUtils.ENTITY_IDENTIFIED_BY_OBSERVATIONRELATION_PATH_VARIABLE,
+                    MAPPING_PREFIX + CitSciExtensionRequestUtils.ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE
             },
             produces = "application/json"
     )
@@ -99,6 +99,9 @@ public class CitSciEntityRequestHandler extends EntityRequestHandler implements 
             value = {
                     MAPPING_PREFIX
                             + CitSciExtensionRequestUtils.ENTITY_IDENTIFIED_BY_OBSERVATIONRELATION_PATH_VARIABLE
+                            + SLASHREF,
+                    MAPPING_PREFIX
+                            + CitSciExtensionRequestUtils.ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE
                             + SLASHREF
             },
             produces = "application/json"

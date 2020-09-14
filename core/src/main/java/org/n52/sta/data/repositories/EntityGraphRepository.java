@@ -151,7 +151,12 @@ public interface EntityGraphRepository<T, I> extends JpaSpecificationExecutor<T>
         FETCHGRAPH_PROCEDUREHISTORY("procedureHistory"),
         FETCHGRAPH_OBSERVATION_RELATIONS("entities"),
         FETCHGRAPH_OBSERVATION("observation"),
-        FETCHGRAPH_OBSERVATION_GROUP("group");
+        FETCHGRAPH_OBSERVATION_GROUP("group"),
+
+        // STA CitSci Extension
+        FETCHGRAPH_LICENSE("license"),
+        FETCHGRAPH_PARTY("party"),
+        FETCHGRAPH_PROJECT("project");
 
         private String val;
 

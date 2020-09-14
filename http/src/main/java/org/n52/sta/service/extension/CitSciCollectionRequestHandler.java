@@ -94,7 +94,9 @@ public class CitSciCollectionRequestHandler extends CollectionRequestHandler imp
                     MAPPING_PREFIX +
                             CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_LICENSE_PATH_VARIABLE,
                     MAPPING_PREFIX +
-                            CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_PARTY_PATH_VARIABLE
+                            CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_PARTY_PATH_VARIABLE,
+                    MAPPING_PREFIX +
+                            CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE
             },
             produces = "application/json"
     )
@@ -119,7 +121,10 @@ public class CitSciCollectionRequestHandler extends CollectionRequestHandler imp
                             + SLASHREF,
                     MAPPING_PREFIX
                             + CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_PARTY_PATH_VARIABLE
-                            + SLASHREF
+                            + SLASHREF,
+                    MAPPING_PREFIX +
+                            CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE
+                            + SLASHREF,
             },
             produces = "application/json"
     )

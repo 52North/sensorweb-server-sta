@@ -35,6 +35,7 @@ import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.sta.ObservationEntity;
+import org.n52.series.db.beans.sta.ObservationRelationEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
@@ -42,6 +43,7 @@ import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
@@ -96,6 +98,14 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Ob
 
             return builder.or(builder.in(root.get(ObservationEntity.PROPERTY_DATASET_ID)).value(subquery),
                               builder.in(root.get(ObservationEntity.PROPERTY_DATASET_ID)).value(sq));
+        };
+    }
+
+    public static Specification<ObservationEntity<?>> withRelationStaIdentifier(final String relationIdentifier) {
+        return (root, query, builder) -> {
+            final Join<ObservationEntity, ObservationRelationEntity> join =
+                    root.join("relations", JoinType.INNER);
+            return builder.equal(join.get(ObservationRelationEntity.STA_IDENTIFIER), relationIdentifier);
         };
     }
 

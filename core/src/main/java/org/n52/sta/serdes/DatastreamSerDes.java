@@ -218,6 +218,39 @@ public class DatastreamSerDes {
                                                   serializers);
                             }
                             break;
+                        case STAEntityDefinition.LICENSE:
+                            if (datastream.getLicense() == null) {
+                                writeNavigationProp(gen, navigationProperty, datastream.getStaIdentifier());
+                            } else {
+                                gen.writeFieldName(navigationProperty);
+                                writeNestedEntity(datastream.getLicense(),
+                                                  value.getFieldsToExpand().get(navigationProperty),
+                                                  gen,
+                                                  serializers);
+                            }
+                            break;
+                        case STAEntityDefinition.PARTY:
+                            if (datastream.getParty() == null) {
+                                writeNavigationProp(gen, navigationProperty, datastream.getStaIdentifier());
+                            } else {
+                                gen.writeFieldName(navigationProperty);
+                                writeNestedEntity(datastream.getParty(),
+                                                  value.getFieldsToExpand().get(navigationProperty),
+                                                  gen,
+                                                  serializers);
+                            }
+                            break;
+                        case STAEntityDefinition.PROJECT:
+                            if (datastream.getProject() == null) {
+                                writeNavigationProp(gen, navigationProperty, datastream.getStaIdentifier());
+                            } else {
+                                gen.writeFieldName(navigationProperty);
+                                writeNestedEntity(datastream.getProject(),
+                                                  value.getFieldsToExpand().get(navigationProperty),
+                                                  gen,
+                                                  serializers);
+                            }
+                            break;
                         default:
                             throw new IllegalStateException("Unexpected value: " + navigationProperty);
                         }

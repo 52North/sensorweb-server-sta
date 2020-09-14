@@ -188,6 +188,17 @@ public class ObservationSerDes {
                                                   serializers);
                             }
                             break;
+                        case ObservationEntityDefinition.OBSERVATION_RELATIONS:
+                            if (observation.getRelations() == null) {
+                                writeNavigationProp(gen, navigationProperty, observation.getStaIdentifier());
+                            } else {
+                                gen.writeFieldName(navigationProperty);
+                                writeNestedCollection(observation.getRelations(),
+                                                      value.getFieldsToExpand().get(navigationProperty),
+                                                      gen,
+                                                      serializers);
+                            }
+                            break;
                         default:
                             throw new IllegalStateException("Unexpected value: " + navigationProperty);
                         }

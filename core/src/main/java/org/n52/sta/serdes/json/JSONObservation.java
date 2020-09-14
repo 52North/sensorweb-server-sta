@@ -30,6 +30,7 @@
 package org.n52.sta.serdes.json;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -41,15 +42,18 @@ import org.locationtech.jts.io.geojson.GeoJsonReader;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.parameter.ParameterJsonEntity;
 import org.n52.series.db.beans.sta.ObservationEntity;
+import org.n52.series.db.beans.sta.ObservationRelationEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.springframework.util.Assert;
 
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 @SuppressWarnings("VisibilityModifier")
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
@@ -67,6 +71,9 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
     public JSONFeatureOfInterest FeatureOfInterest;
     @JsonManagedReference
     public JSONDatastream Datastream;
+    @JsonManagedReference
+    @JsonProperty(StaConstants.OBSERVATION_RELATIONS)
+    public JSONObservationRelation[] relations;
 
     private final String NAME = "name";
     private final String VALUE = "value";
@@ -105,12 +112,17 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
     protected void parseReferencedFrom() {
         if (referencedFromType != null) {
             switch (referencedFromType) {
-            case "Datastreams":
+            case StaConstants.DATASTREAMS:
                 Assert.isNull(Datastream, INVALID_DUPLICATE_REFERENCE);
                 this.Datastream = new JSONDatastream();
                 this.Datastream.identifier = referencedFromID;
                 return;
-            case "FeaturesOfInterest":
+            case StaConstants.FEATURES_OF_INTEREST:
+                Assert.isNull(FeatureOfInterest, INVALID_DUPLICATE_REFERENCE);
+                this.FeatureOfInterest = new JSONFeatureOfInterest();
+                this.FeatureOfInterest.identifier = referencedFromID;
+                return;
+            case StaConstants.OBSERVATION_RELATIONS:
                 Assert.isNull(FeatureOfInterest, INVALID_DUPLICATE_REFERENCE);
                 this.FeatureOfInterest = new JSONFeatureOfInterest();
                 this.FeatureOfInterest.identifier = referencedFromID;
@@ -168,6 +180,15 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
         // Link to FOI
         if (FeatureOfInterest != null) {
             self.setFeature(FeatureOfInterest.toEntity(JSONBase.EntityType.REFERENCE));
+        }
+
+        // Link to Relations
+        if (relations != null) {
+            Set<ObservationRelationEntity> rel = new HashSet<>();
+            for (JSONObservationRelation relation : relations) {
+                rel.add(relation.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+            }
+            self.setRelations(rel);
         }
 
         return self;
@@ -234,6 +255,15 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
                     FeatureOfInterest.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
         } else if (backReference instanceof JSONFeatureOfInterest) {
             self.setFeature(((JSONFeatureOfInterest) backReference).getEntity());
+        }
+
+        // Link to Relations
+        if (relations != null) {
+            Set<ObservationRelationEntity> rel = new HashSet<>();
+            for (JSONObservationRelation relation : relations) {
+                rel.add(relation.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+            }
+            self.setRelations(rel);
         }
 
         return self;

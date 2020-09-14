@@ -30,6 +30,7 @@
 package org.n52.sta.serdes.json;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -42,6 +43,7 @@ import org.n52.series.db.beans.UnitEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.springframework.util.Assert;
 
 import java.util.Arrays;
@@ -70,6 +72,18 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Abstr
     @JsonManagedReference
     public JSONObservation[] Observations;
 
+    @JsonManagedReference
+    @JsonProperty(StaConstants.LICENSE)
+    public JSONLicense license;
+
+    @JsonManagedReference
+    @JsonProperty(StaConstants.PARTY)
+    public JSONParty party;
+
+    @JsonManagedReference
+    @JsonProperty(StaConstants.PROJECT)
+    public JSONProject project;
+
     private final GeometryFactory factory =
             new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
 
@@ -96,20 +110,35 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Abstr
     @Override protected void parseReferencedFrom() {
         if (referencedFromType != null) {
             switch (referencedFromType) {
-            case "Sensors":
+            case StaConstants.SENSORS:
                 Assert.isNull(Sensor, INVALID_DUPLICATE_REFERENCE);
                 this.Sensor = new JSONSensor();
                 this.Sensor.identifier = referencedFromID;
                 return;
-            case "ObservedProperties":
+            case StaConstants.OBSERVED_PROPERTIES:
                 Assert.isNull(ObservedProperty, INVALID_DUPLICATE_REFERENCE);
                 this.ObservedProperty = new JSONObservedProperty();
                 this.ObservedProperty.identifier = referencedFromID;
                 return;
-            case "Things":
+            case StaConstants.THINGS:
                 Assert.isNull(Thing, INVALID_DUPLICATE_REFERENCE);
                 this.Thing = new JSONThing();
                 this.Thing.identifier = referencedFromID;
+                return;
+            case StaConstants.LICENSES:
+                Assert.isNull(license, INVALID_DUPLICATE_REFERENCE);
+                this.license = new JSONLicense();
+                this.license.identifier = referencedFromID;
+                return;
+            case StaConstants.PARTIES:
+                Assert.isNull(party, INVALID_DUPLICATE_REFERENCE);
+                this.party = new JSONParty();
+                this.party.identifier = referencedFromID;
+                return;
+            case StaConstants.PROJECTS:
+                Assert.isNull(project, INVALID_DUPLICATE_REFERENCE);
+                this.project = new JSONProject();
+                this.project.identifier = referencedFromID;
                 return;
             default:
                 throw new IllegalArgumentException(INVALID_BACKREFERENCE);
@@ -233,6 +262,18 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Abstr
                                        .collect(Collectors.toSet()));
         }
 
+        if (license != null) {
+            self.setLicense(license.toEntity(JSONBase.EntityType.REFERENCE));
+        }
+
+        if (party != null) {
+            self.setParty(party.toEntity(JSONBase.EntityType.REFERENCE));
+        }
+
+        if (project != null) {
+            self.setProject(project.toEntity(JSONBase.EntityType.REFERENCE));
+        }
+
         return self;
     }
 
@@ -303,6 +344,30 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Abstr
                                        .collect(Collectors.toSet()));
         } else if (backReference instanceof JSONObservation) {
             self.setObservations(Collections.singleton(((JSONObservation) backReference).self));
+        }
+
+        if (license != null) {
+            self.setLicense(license.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+        } else if (backReference instanceof JSONLicense) {
+            self.setLicense(((JSONLicense) backReference).getEntity());
+        } else {
+            Assert.notNull(null, INVALID_INLINE_ENTITY_MISSING + "License");
+        }
+
+        if (party != null) {
+            self.setParty(party.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+        } else if (backReference instanceof JSONParty) {
+            self.setParty(((JSONParty) backReference).getEntity());
+        } else {
+            Assert.notNull(null, INVALID_INLINE_ENTITY_MISSING + "Party");
+        }
+
+        if (project != null) {
+            self.setProject(project.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+        } else if (backReference instanceof JSONProject) {
+            self.setProject(((JSONProject) backReference).getEntity());
+        } else {
+            Assert.notNull(null, INVALID_INLINE_ENTITY_MISSING + "Project");
         }
         return self;
     }

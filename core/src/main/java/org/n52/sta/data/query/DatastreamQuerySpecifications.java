@@ -37,7 +37,10 @@ import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
+import org.n52.series.db.beans.sta.LicenseEntity;
 import org.n52.series.db.beans.sta.ObservationEntity;
+import org.n52.series.db.beans.sta.PartyEntity;
+import org.n52.series.db.beans.sta.ProjectEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
@@ -149,6 +152,30 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Abs
             // Either id matches or aggregation id matches
             return builder.or(builder.equal(root.get(AbstractDatasetEntity.PROPERTY_ID), sq),
                               builder.equal(root.get(AbstractDatasetEntity.PROPERTY_ID), subquery));
+        };
+    }
+
+    public Specification<AbstractDatasetEntity> withPartyStaIdentifier(final String identifier) {
+        return (root, query, builder) -> {
+            final Join<AbstractDatasetEntity, PartyEntity> join =
+                    root.join(AbstractDatasetEntity.PROPERTY_PARTY, JoinType.INNER);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), identifier);
+        };
+    }
+
+    public Specification<AbstractDatasetEntity> withProjectStaIdentifier(final String identifier) {
+        return (root, query, builder) -> {
+            final Join<AbstractDatasetEntity, ProjectEntity> join =
+                    root.join(AbstractDatasetEntity.PROPERTY_PROJECT, JoinType.INNER);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), identifier);
+        };
+    }
+
+    public Specification<AbstractDatasetEntity> withLicenseStaIdentifier(final String identifier) {
+        return (root, query, builder) -> {
+            final Join<AbstractDatasetEntity, LicenseEntity> join =
+                    root.join(AbstractDatasetEntity.PROPERTY_LICENSE, JoinType.INNER);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), identifier);
         };
     }
 

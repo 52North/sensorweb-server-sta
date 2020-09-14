@@ -175,6 +175,15 @@ public class DatastreamService extends
                     break;
                 case STAEntityDefinition.OBSERVATIONS:
                     break;
+                case STAEntityDefinition.LICENSE:
+                    fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_LICENSE);
+                    break;
+                case STAEntityDefinition.PARTY:
+                    fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_PARTY);
+                    break;
+                case STAEntityDefinition.PROJECT:
+                    fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_PROJECT);
+                    break;
                 default:
                     throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
                                                                      expandProperty,
@@ -229,6 +238,18 @@ public class DatastreamService extends
                                                                expandItem.getQueryOptions());
                 entity.setObservations(observations.get().collect(Collectors.toSet()));
                 break;
+            case STAEntityDefinition.LICENSE:
+                entity.setLicense(getLicenseService().getEntityByIdRaw(entity.getLicense().getId(),
+                                                                       expandItem.getQueryOptions()));
+                break;
+            case STAEntityDefinition.PARTY:
+                entity.setParty(getPartyService().getEntityByIdRaw(entity.getParty().getId(),
+                                                                   expandItem.getQueryOptions()));
+                break;
+            case STAEntityDefinition.PROJECT:
+                entity.setProject(getProjectService().getEntityByIdRaw(entity.getProject().getId(),
+                                                                       expandItem.getQueryOptions()));
+                break;
             default:
                 throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
                                                                  expandProperty,
@@ -260,6 +281,15 @@ public class DatastreamService extends
             filter = dQS.withObservationStaIdentifier(relatedId);
             break;
         }
+        case STAEntityDefinition.LICENSES:
+            filter = dQS.withLicenseStaIdentifier(relatedId);
+            break;
+        case STAEntityDefinition.PROJECTS:
+            filter = dQS.withProjectStaIdentifier(relatedId);
+            break;
+        case STAEntityDefinition.PARTIES:
+            filter = dQS.withPartyStaIdentifier(relatedId);
+            break;
         default:
             throw new IllegalStateException("Trying to filter by unrelated type: " + relatedType + "not found!");
         }
@@ -307,6 +337,10 @@ public class DatastreamService extends
                         getObservedPropertyService().createOrfetch(datastream.getObservableProperty()));
                 datastream.setProcedure(getSensorService().createOrfetch(datastream.getProcedure()));
                 datastream.setThing(getThingService().createOrfetch(datastream.getThing()));
+
+                datastream.setLicense(getLicenseService().createOrUpdate(datastream.getLicense()));
+                datastream.setParty(getPartyService().createOrUpdate(datastream.getParty()));
+                datastream.setProject(getProjectService().createOrUpdate(datastream.getProject()));
 
                 DatasetEntity dataset = createDataset(datastream, null, datastream.getStaIdentifier());
                 DatasetEntity saved = getRepository().save(dataset);
@@ -383,6 +417,9 @@ public class DatastreamService extends
         dataset.setFeature(feature);
         dataset.setOffering(offering);
         dataset.setPlatform(datastream.getThing());
+        dataset.setParty(datastream.getParty());
+        dataset.setProject(datastream.getProject());
+        dataset.setLicense(datastream.getLicense());
         dataset.setUnit(datastream.getUnit());
         dataset.setOMObservationType(datastream.getOMObservationType());
         if (datastream.getId() != null) {
@@ -633,7 +670,7 @@ public class DatastreamService extends
         datastream.setOMObservationType(format);
     }
 
-    private void createOrfetchObservationType(AbstractDatasetEntity existing, AbstractDatasetEntity toMerge)
+    private void checkObservationType(AbstractDatasetEntity existing, AbstractDatasetEntity toMerge)
             throws STACRUDException {
         if (toMerge.isSetOMObservationType() && !toMerge.getOMObservationType()
                                                         .getFormat()
@@ -664,7 +701,7 @@ public class DatastreamService extends
             throws STACRUDException {
         mergeName(existing, toMerge);
         mergeDescription(existing, toMerge);
-        createOrfetchObservationType(existing, toMerge);
+        checkObservationType(existing, toMerge);
         // observedArea
         if (toMerge.isSetGeometry()) {
             existing.setGeometryEntity(toMerge.getGeometryEntity());
