@@ -115,7 +115,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
      *
      * @param key name of the lock
      * @return Object used for holding the lock
-     * @throws STACRUDException if the key is invalid
+     * @throws org.n52.shetland.ogc.sta.exception.STACRUDException if the key is invalid
      */
     protected Object getLock(String key) throws STACRUDException {
         if (key == null) {
@@ -310,7 +310,6 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
      *
      * @param expandOption Specification of the $expand parameter
      * @return FetchGraph fetching the required
-     * @throws STACRUDException         if an error occurred
      * @throws STAInvalidQueryException if the query is invalid
      */
     protected abstract EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
