@@ -56,8 +56,9 @@ public class ObservationGroupQuerySpecifications extends EntityQuerySpecificatio
         };
     }
 
-    @Override protected Specification<ObservationGroupEntity> handleRelatedPropertyFilter(String propertyName,
-                                                                                          Specification<?> propertyValue) {
+    @Override protected Specification<ObservationGroupEntity> handleRelatedPropertyFilter(
+            String propertyName,
+            Specification<?> propertyValue) {
         return (root, query, builder) -> {
             if (StaConstants.OBSERVATION_RELATIONS.equals(propertyName)) {
                 Subquery<ObservationGroupEntity> sq = query.subquery(ObservationGroupEntity.class);

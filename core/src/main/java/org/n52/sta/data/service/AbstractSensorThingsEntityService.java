@@ -32,7 +32,6 @@ package org.n52.sta.data.service;
 import org.n52.series.db.beans.HibernateRelations;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
-import org.n52.sta.data.repositories.IdentifierRepository;
 import org.n52.sta.data.service.util.CollectionWrapper;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
 import org.springframework.data.jpa.repository.JpaRepository;

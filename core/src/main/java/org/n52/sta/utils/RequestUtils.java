@@ -49,8 +49,6 @@ import org.n52.sta.serdes.SensorSerDes;
 import org.n52.sta.serdes.ThingSerDes;
 import org.n52.svalbard.odata.core.QueryOptionsFactory;
 
-import java.util.regex.Pattern;
-
 public interface RequestUtils extends StaConstants {
 
     QueryOptionsFactory QUERY_OPTIONS_FACTORY = new QueryOptionsFactory();

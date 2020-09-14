@@ -41,15 +41,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static org.n52.sta.utils.CoreRequestUtils.BASE_COLLECTION_REGEX;
-import static org.n52.sta.utils.CoreRequestUtils.COLLECTION_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE;
-import static org.n52.sta.utils.CoreRequestUtils.COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH_VARIABLE;
-import static org.n52.sta.utils.CoreRequestUtils.COLLECTION_IDENTIFIED_BY_HIST_LOCATION_PATH_VARIABLE;
-import static org.n52.sta.utils.CoreRequestUtils.COLLECTION_IDENTIFIED_BY_LOCATION_PATH_VARIABLE;
-import static org.n52.sta.utils.CoreRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH_VARIABLE;
-import static org.n52.sta.utils.CoreRequestUtils.COLLECTION_IDENTIFIED_BY_SENSOR_PATH_VARIABLE;
-import static org.n52.sta.utils.CoreRequestUtils.COLLECTION_IDENTIFIED_BY_THING_PATH_VARIABLE;
-
 /**
  * Handles all requests to Entity Collections and Entity Collections association Links
  * e.g. /Things

@@ -47,33 +47,47 @@ public class EntityServiceRepository {
 
     private Map<EntityTypes, AbstractSensorThingsEntityService<?, ?, ?>> entityServices = new LinkedHashMap<>();
 
-    @Autowired private ThingService thingService;
+    @Autowired
+    private ThingService thingService;
 
-    @Autowired private LocationService locationService;
+    @Autowired
+    private LocationService locationService;
 
-    @Autowired private HistoricalLocationService historicalLocationService;
+    @Autowired
+    private HistoricalLocationService historicalLocationService;
 
-    @Autowired private SensorService sensorService;
+    @Autowired
+    private SensorService sensorService;
 
-    @Autowired private DatastreamService datastreamService;
+    @Autowired
+    private DatastreamService datastreamService;
 
-    @Autowired private ObservationService observationService;
+    @Autowired
+    private ObservationService observationService;
 
-    @Autowired private ObservedPropertyService observedPropertyService;
+    @Autowired
+    private ObservedPropertyService observedPropertyService;
 
-    @Autowired private FeatureOfInterestService featureOfInterestService;
+    @Autowired
+    private FeatureOfInterestService featureOfInterestService;
 
-    @Autowired(required = false) private ObservationGroupService obsGroupService;
+    @Autowired(required = false)
+    private ObservationGroupService obsGroupService;
 
-    @Autowired(required = false) private ObservationRelationService obsRelationService;
+    @Autowired(required = false)
+    private ObservationRelationService obsRelationService;
 
-    @Autowired(required = false) private LicenseService licenseService;
+    @Autowired(required = false)
+    private LicenseService licenseService;
 
-    @Autowired(required = false) private PartyService partyService;
+    @Autowired(required = false)
+    private PartyService partyService;
 
-    @Autowired(required = false) private ProjectService projectService;
+    @Autowired(required = false)
+    private ProjectService projectService;
 
-    @Autowired private STAEventHandler mqttSubscriptionEventHandler;
+    @Autowired
+    private STAEventHandler mqttSubscriptionEventHandler;
 
     @PostConstruct
     public void postConstruct() {

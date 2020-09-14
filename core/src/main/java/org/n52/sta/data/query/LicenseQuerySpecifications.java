@@ -73,10 +73,11 @@ public class LicenseQuerySpecifications extends EntityQuerySpecifications<Licens
         };
     }
 
-    @Override protected Specification<LicenseEntity> handleDirectPropertyFilter(String propertyName,
-                                                                                Expression<?> propertyValue,
-                                                                                FilterConstants.ComparisonOperator operator,
-                                                                                boolean switched) {
+    @Override protected Specification<LicenseEntity> handleDirectPropertyFilter(
+            String propertyName,
+            Expression<?> propertyValue,
+            FilterConstants.ComparisonOperator operator,
+            boolean switched) {
         return (Specification<LicenseEntity>) (root, query, builder) -> {
             try {
                 switch (propertyName) {

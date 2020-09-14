@@ -75,10 +75,11 @@ public class ProjectQuerySpecifications extends EntityQuerySpecifications<Projec
         };
     }
 
-    @Override protected Specification<ProjectEntity> handleDirectPropertyFilter(String propertyName,
-                                                                                Expression<?> propertyValue,
-                                                                                FilterConstants.ComparisonOperator operator,
-                                                                                boolean switched) {
+    @Override protected Specification<ProjectEntity> handleDirectPropertyFilter(
+            String propertyName,
+            Expression<?> propertyValue,
+            FilterConstants.ComparisonOperator operator,
+            boolean switched) {
         return (Specification<ProjectEntity>) (root, query, builder) -> {
             try {
                 switch (propertyName) {
