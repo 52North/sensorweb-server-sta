@@ -336,6 +336,8 @@
                 </executions>
                 <configuration>
                     <failOnNoGitDirectory>false</failOnNoGitDirectory>
+                    <!-- This is needed to be able to include the STA Git as a submodule -->
+                    <failOnUnableToExtractRepoInfo>false</failOnUnableToExtractRepoInfo>
                     <generateGitPropertiesFile>true</generateGitPropertiesFile>
                     <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties
                     </generateGitPropertiesFilename>
