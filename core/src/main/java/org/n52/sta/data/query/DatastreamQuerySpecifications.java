@@ -274,6 +274,33 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Abs
                                                                                             builder));
                     return builder.in(root.get(DatasetEntity.PROPERTY_ID)).value(sq);
                 }
+                case StaConstants.LICENSE: {
+                    Subquery<AbstractDatasetEntity> sq = query.subquery(AbstractDatasetEntity.class);
+                    Root<LicenseEntity> license = sq.from(LicenseEntity.class);
+                    sq.select(license.get(DescribableEntity.PROPERTY_ID))
+                      .where(((Specification<LicenseEntity>) propertyValue).toPredicate(license,
+                                                                                        query,
+                                                                                        builder));
+                    return builder.in(root.get(AbstractDatasetEntity.PROPERTY_LICENSE)).value(sq);
+                }
+                case StaConstants.PARTY: {
+                    Subquery<AbstractDatasetEntity> sq = query.subquery(AbstractDatasetEntity.class);
+                    Root<PartyEntity> party = sq.from(PartyEntity.class);
+                    sq.select(party.get(DescribableEntity.PROPERTY_ID))
+                      .where(((Specification<PartyEntity>) propertyValue).toPredicate(party,
+                                                                                      query,
+                                                                                      builder));
+                    return builder.in(root.get(AbstractDatasetEntity.PROPERTY_PARTY)).value(sq);
+                }
+                case StaConstants.PROJECT: {
+                    Subquery<AbstractDatasetEntity> sq = query.subquery(AbstractDatasetEntity.class);
+                    Root<ProjectEntity> project = sq.from(ProjectEntity.class);
+                    sq.select(project.get(DescribableEntity.PROPERTY_ID))
+                      .where(((Specification<ProjectEntity>) propertyValue).toPredicate(project,
+                                                                                        query,
+                                                                                        builder));
+                    return builder.in(root.get(AbstractDatasetEntity.PROPERTY_PROJECT)).value(sq);
+                }
                 default:
                     throw new STAInvalidFilterExpressionException(COULD_NOT_FIND_RELATED_PROPERTY + propertyName);
                 }

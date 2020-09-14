@@ -66,7 +66,7 @@ public class ObservationGroupQuerySpecifications extends EntityQuerySpecificatio
                   .where(((Specification<ObservationRelationEntity>) propertyValue).toPredicate(obsRelation,
                                                                                                 query,
                                                                                                 builder));
-                return builder.in(root.get(ObservationGroupEntity.PROP_ENTITIES)).value(sq);
+                return builder.in(root.get(ObservationGroupEntity.ID)).value(sq);
             } else {
                 throw new RuntimeException("Could not find related property: " + propertyName);
             }

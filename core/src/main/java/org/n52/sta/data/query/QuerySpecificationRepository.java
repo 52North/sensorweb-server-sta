@@ -84,22 +84,27 @@ public class QuerySpecificationRepository {
             return new ObservedPropertyQuerySpecifications();
         }
         case "License":
+        case "LicenseEntity":
         case "Licenses": {
             return new LicenseQuerySpecifications();
         }
         case "Party":
+        case "PartyEntity":
         case "Parties": {
             return new PartyQuerySpecifications();
         }
         case "Project":
+        case "ProjectEntity":
         case "Projects": {
             return new ProjectQuerySpecifications();
         }
         case "ObservationRelation":
+        case "ObservationRelationEntity":
         case "ObservationRelations": {
             return new ObservationRelationQuerySpecifications();
         }
         case "ObservationGroup":
+        case "ObservationGroupEntity":
         case "ObservationGroups": {
             return new ObservationGroupQuerySpecifications();
         }

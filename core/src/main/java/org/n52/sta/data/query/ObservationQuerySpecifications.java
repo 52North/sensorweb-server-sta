@@ -146,6 +146,15 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Ob
                                                                                           query,
                                                                                           builder));
                     return builder.in(join.get(DescribableEntity.PROPERTY_ID)).value(sq);
+                } else if (StaConstants.OBSERVATION_RELATIONS.equals(propertyName)) {
+                    Subquery<ObservationEntity> sq = query.subquery(ObservationEntity.class);
+                    Root<ObservationRelationEntity> obsRelation = sq.from(ObservationRelationEntity.class);
+                    sq.select(obsRelation.get(ObservationRelationEntity.PROPERTY_OBSERVATION)).where(
+                            ((Specification<ObservationRelationEntity>) propertyValue).toPredicate(obsRelation,
+                                                                                                   query,
+                                                                                                   builder));
+                    return builder.in(root.get(ObservationEntity.ID)).value(sq);
+
                 } else {
                     throw new STAInvalidFilterExpressionException("Could not find related property: " + propertyName);
                 }
