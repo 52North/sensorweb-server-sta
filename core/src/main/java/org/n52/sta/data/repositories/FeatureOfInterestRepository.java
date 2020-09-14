@@ -36,6 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Repository
 public interface FeatureOfInterestRepository extends IdentifierNameRepository<AbstractFeatureEntity<?>>,
-        StaIdentifierRepository<AbstractFeatureEntity<?>> {
+                                                     StaIdentifierRepository<AbstractFeatureEntity<?>> {
 
 }

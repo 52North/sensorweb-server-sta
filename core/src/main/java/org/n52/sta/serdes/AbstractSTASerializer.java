@@ -41,15 +41,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public abstract class AbstractSTASerializer<T extends ElementWithQueryOptions<I>, I extends HibernateRelations.HasId>
-        extends StdSerializer<T> {
+    extends StdSerializer<T> {
 
     private static final String ENCODEDSLASH = "%2F";
     private static final String SLASH = "/";
-
+    protected final String[] activeExtensions;
     protected String rootUrl;
     protected String entitySetName;
     protected boolean implicitSelect;
-    protected final String[] activeExtensions;
 
     protected AbstractSTASerializer(Class<T> t,
                                     boolean enableImplicitSelect,
@@ -86,10 +85,10 @@ public abstract class AbstractSTASerializer<T extends ElementWithQueryOptions<I>
                                          JsonGenerator gen,
                                          SerializerProvider serializers) throws IOException {
         serializers.defaultSerializeValue(
-                expandedElements
-                        .stream()
-                        .map(d -> ElementWithQueryOptions.from(d, queryOptions))
-                        .collect(Collectors.toSet()), gen);
+            expandedElements
+                .stream()
+                .map(d -> ElementWithQueryOptions.from(d, queryOptions))
+                .collect(Collectors.toSet()), gen);
     }
 
     protected void writeNestedCollectionOfType(Set<?> expandedElements,
@@ -98,10 +97,10 @@ public abstract class AbstractSTASerializer<T extends ElementWithQueryOptions<I>
                                                JsonGenerator gen,
                                                SerializerProvider serializers) throws IOException {
         serializers.defaultSerializeValue(
-                expandedElements
-                        .stream()
-                        .filter(type::isInstance)
-                        .map(d -> ElementWithQueryOptions.from(d, queryOptions))
-                        .collect(Collectors.toSet()), gen);
+            expandedElements
+                .stream()
+                .filter(type::isInstance)
+                .map(d -> ElementWithQueryOptions.from(d, queryOptions))
+                .collect(Collectors.toSet()), gen);
     }
 }

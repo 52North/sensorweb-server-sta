@@ -87,7 +87,7 @@ public class SensorSerDes {
 
         @Override
         public void serialize(SensorWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers)
-                throws IOException {
+            throws IOException {
             gen.writeStartObject();
             value.unwrap(implicitSelect);
             ProcedureEntity sensor = value.getEntity();
@@ -105,11 +105,11 @@ public class SensorSerDes {
                 gen.writeStringField(STAEntityDefinition.PROP_NAME, sensor.getName());
             }
             if (!value.hasSelectOption() ||
-                    value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
+                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
                 gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, sensor.getDescription());
             }
             if (!value.hasSelectOption() ||
-                    value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ENCODINGTYPE)) {
+                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ENCODINGTYPE)) {
                 String format = sensor.getFormat().getFormat();
                 if (format.equalsIgnoreCase(SENSORML_2)) {
                     format = STA_SENSORML_2;
@@ -123,7 +123,7 @@ public class SensorSerDes {
                     metadata = sensor.getDescriptionFile();
                 } else if (sensor.hasProcedureHistory()) {
                     Optional<ProcedureHistoryEntity> history =
-                            sensor.getProcedureHistory().stream().filter(h -> h.getEndTime() == null).findFirst();
+                        sensor.getProcedureHistory().stream().filter(h -> h.getEndTime() == null).findFirst();
                     if (history.isPresent()) {
                         metadata = history.get().getXml();
                     }
@@ -194,7 +194,7 @@ public class SensorSerDes {
         public ProcedureEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             if (variableEncodingType) {
                 return new ProcedureEntityPatch(p.readValueAs(JSONSensorVariableEncoding.class)
-                                                 .toEntity(JSONBase.EntityType.PATCH));
+                                                    .toEntity(JSONBase.EntityType.PATCH));
             } else {
                 return new ProcedureEntityPatch(p.readValueAs(JSONSensor.class).toEntity(JSONBase.EntityType.PATCH));
             }

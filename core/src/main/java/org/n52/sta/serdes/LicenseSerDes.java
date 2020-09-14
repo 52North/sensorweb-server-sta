@@ -68,7 +68,7 @@ public class LicenseSerDes {
 
 
     public static class LicenseSerializer
-            extends AbstractSTASerializer<LicenseWithQueryOptions, LicenseEntity> {
+        extends AbstractSTASerializer<LicenseWithQueryOptions, LicenseEntity> {
 
         private static final long serialVersionUID = -1618289129123682794L;
 
@@ -82,7 +82,7 @@ public class LicenseSerDes {
         public void serialize(LicenseWithQueryOptions value,
                               JsonGenerator gen,
                               SerializerProvider serializers)
-                throws IOException {
+            throws IOException {
             gen.writeStartObject();
             value.unwrap(implicitSelect);
             LicenseEntity license = value.getEntity();
@@ -99,7 +99,7 @@ public class LicenseSerDes {
                 gen.writeStringField(STAEntityDefinition.PROP_NAME, license.getName());
             }
             if (!value.hasSelectOption() ||
-                    value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DEFINITION)) {
+                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DEFINITION)) {
                 gen.writeStringField(STAEntityDefinition.PROP_DEFINITION, license.getDefinition());
             }
             if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_LOGO)) {
@@ -108,7 +108,7 @@ public class LicenseSerDes {
 
             if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.DATASTREAMS)) {
                 if (!value.hasExpandOption() ||
-                        value.getFieldsToExpand().get(STAEntityDefinition.DATASTREAMS) == null) {
+                    value.getFieldsToExpand().get(STAEntityDefinition.DATASTREAMS) == null) {
                     writeNavigationProp(gen, STAEntityDefinition.DATASTREAMS, license.getStaIdentifier());
                 } else {
                     gen.writeFieldName(STAEntityDefinition.DATASTREAMS);
@@ -140,7 +140,7 @@ public class LicenseSerDes {
 
 
     public static class LicensePatchDeserializer
-            extends StdDeserializer<LicenseSerDes.LicensePatch> {
+        extends StdDeserializer<LicenseSerDes.LicensePatch> {
 
         private static final long serialVersionUID = -6355786322787893665L;
 
@@ -150,9 +150,9 @@ public class LicenseSerDes {
 
         @Override
         public LicenseSerDes.LicensePatch deserialize(JsonParser p, DeserializationContext ctxt)
-                throws IOException {
+            throws IOException {
             return new LicenseSerDes.LicensePatch(p.readValueAs(JSONLicense.class)
-                                                   .toEntity(JSONBase.EntityType.PATCH));
+                                                      .toEntity(JSONBase.EntityType.PATCH));
         }
     }
 }

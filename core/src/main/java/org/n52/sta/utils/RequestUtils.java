@@ -116,83 +116,83 @@ public interface RequestUtils extends StaConstants {
 
     // Used to mark start and end of named capturing groups
     String SOURCE_NAME_GROUP_START =
-            ROUND_BRACKET_OPEN + QUESTIONMARK + LESS_THAN + GROUPNAME_SOURCE_NAME + GREATER_THAN;
+        ROUND_BRACKET_OPEN + QUESTIONMARK + LESS_THAN + GROUPNAME_SOURCE_NAME + GREATER_THAN;
     String SOURCE_NAME_GROUP_END = ROUND_BRACKET_CLOSE;
     String SOURCE_ID_GROUP_START =
-            ROUND_BRACKET_OPEN + QUESTIONMARK + LESS_THAN + GROUPNAME_SOURCE_IDENTIFIER + GREATER_THAN;
+        ROUND_BRACKET_OPEN + QUESTIONMARK + LESS_THAN + GROUPNAME_SOURCE_IDENTIFIER + GREATER_THAN;
     String SOURCE_ID_GROUP_END = ROUND_BRACKET_CLOSE;
     String WANTED_NAME_GROUP_START =
-            ROUND_BRACKET_OPEN + QUESTIONMARK + LESS_THAN + GROUPNAME_WANTED_NAME + GREATER_THAN;
+        ROUND_BRACKET_OPEN + QUESTIONMARK + LESS_THAN + GROUPNAME_WANTED_NAME + GREATER_THAN;
     String WANTED_NAME_GROUP_END = ROUND_BRACKET_CLOSE;
     String WANTED_ID_GROUP_START =
-            ROUND_BRACKET_OPEN + QUESTIONMARK + LESS_THAN + GROUPNAME_WANTED_IDENTIFIER + GREATER_THAN;
+        ROUND_BRACKET_OPEN + QUESTIONMARK + LESS_THAN + GROUPNAME_WANTED_IDENTIFIER + GREATER_THAN;
     String WANTED_ID_GROUP_END = ROUND_BRACKET_CLOSE;
     String SELECT_GROUP_START =
-            ROUND_BRACKET_OPEN + QUESTIONMARK + LESS_THAN + GROUPNAME_SELECT + GREATER_THAN;
+        ROUND_BRACKET_OPEN + QUESTIONMARK + LESS_THAN + GROUPNAME_SELECT + GREATER_THAN;
     String SELECT_GROUP_END = ROUND_BRACKET_CLOSE;
     String PROPERTY_GROUP_START =
-            ROUND_BRACKET_OPEN + QUESTIONMARK + LESS_THAN + GROUPNAME_PROPERTY + GREATER_THAN;
+        ROUND_BRACKET_OPEN + QUESTIONMARK + LESS_THAN + GROUPNAME_PROPERTY + GREATER_THAN;
     String PROPERTY_GROUP_END = ROUND_BRACKET_CLOSE;
     String SELECT_REGEX_NAMED_GROUPS =
-            BACKSLASH + QUESTIONMARK + BACKSLASH + DOLLAR + "select=" +
-                    SELECT_GROUP_START + SQUARE_BRACKET_OPEN + BACKSLASH + "w" + BACKSLASH + "," +
-                    SQUARE_BRACKET_CLOSE + PLUS + SELECT_GROUP_END;
+        BACKSLASH + QUESTIONMARK + BACKSLASH + DOLLAR + "select=" +
+            SELECT_GROUP_START + SQUARE_BRACKET_OPEN + BACKSLASH + "w" + BACKSLASH + "," +
+            SQUARE_BRACKET_CLOSE + PLUS + SELECT_GROUP_END;
 
     String PROPERTY_REGEX_NAMED_GROUPS =
-            SLASH + PROPERTY_GROUP_START + SQUARE_BRACKET_OPEN + "A-z," + SQUARE_BRACKET_CLOSE + PLUS +
-                    PROPERTY_GROUP_END;
+        SLASH + PROPERTY_GROUP_START + SQUARE_BRACKET_OPEN + "A-z," + SQUARE_BRACKET_CLOSE + PLUS +
+            PROPERTY_GROUP_END;
 
     default Class collectionNameToClass(String collectionName) throws STAInvalidUrlException {
         switch (collectionName) {
-        case THINGS:
-            return PlatformEntity.class;
-        case LOCATIONS:
-            return LocationEntity.class;
-        case DATASTREAMS:
-            return AbstractDatasetEntity.class;
-        case HISTORICAL_LOCATIONS:
-            return HistoricalLocationEntity.class;
-        case SENSORS:
-            return ProcedureEntity.class;
-        case OBSERVATIONS:
-            return ObservationEntity.class;
-        case OBSERVED_PROPERTIES:
-            return PhenomenonEntity.class;
-        case FEATURES_OF_INTEREST:
-            return AbstractFeatureEntity.class;
-        default:
-            throw new STAInvalidUrlException("Could not resolve CollectionName to Entity class!");
+            case THINGS:
+                return PlatformEntity.class;
+            case LOCATIONS:
+                return LocationEntity.class;
+            case DATASTREAMS:
+                return AbstractDatasetEntity.class;
+            case HISTORICAL_LOCATIONS:
+                return HistoricalLocationEntity.class;
+            case SENSORS:
+                return ProcedureEntity.class;
+            case OBSERVATIONS:
+                return ObservationEntity.class;
+            case OBSERVED_PROPERTIES:
+                return PhenomenonEntity.class;
+            case FEATURES_OF_INTEREST:
+                return AbstractFeatureEntity.class;
+            default:
+                throw new STAInvalidUrlException("Could not resolve CollectionName to Entity class!");
         }
     }
 
     default Class collectionNameToPatchClass(String collectionName) throws STAInvalidUrlException {
         switch (collectionName) {
-        case THINGS:
-        case THING:
-            return ThingSerDes.PlatformEntityPatch.class;
-        case LOCATIONS:
-        case LOCATION:
-            return LocationSerDes.LocationEntityPatch.class;
-        case DATASTREAMS:
-        case DATASTREAM:
-            return DatastreamSerDes.DatastreamEntityPatch.class;
-        case HISTORICAL_LOCATIONS:
-        case HISTORICAL_LOCATION:
-            return HistoricalLocationSerDes.HistoricalLocationEntityPatch.class;
-        case SENSORS:
-        case SENSOR:
-            return SensorSerDes.ProcedureEntityPatch.class;
-        case OBSERVATIONS:
-        case OBSERVATION:
-            return ObservationSerDes.ObservationEntityPatch.class;
-        case OBSERVED_PROPERTIES:
-        case OBSERVED_PROPERTY:
-            return ObservedPropertySerDes.PhenomenonEntityPatch.class;
-        case FEATURES_OF_INTEREST:
-        case FEATURE_OF_INTEREST:
-            return FeatureOfInterestSerDes.AbstractFeatureEntityPatch.class;
-        default:
-            throw new STAInvalidUrlException("Could not resolve CollectionName to PatchEntity class!");
+            case THINGS:
+            case THING:
+                return ThingSerDes.PlatformEntityPatch.class;
+            case LOCATIONS:
+            case LOCATION:
+                return LocationSerDes.LocationEntityPatch.class;
+            case DATASTREAMS:
+            case DATASTREAM:
+                return DatastreamSerDes.DatastreamEntityPatch.class;
+            case HISTORICAL_LOCATIONS:
+            case HISTORICAL_LOCATION:
+                return HistoricalLocationSerDes.HistoricalLocationEntityPatch.class;
+            case SENSORS:
+            case SENSOR:
+                return SensorSerDes.ProcedureEntityPatch.class;
+            case OBSERVATIONS:
+            case OBSERVATION:
+                return ObservationSerDes.ObservationEntityPatch.class;
+            case OBSERVED_PROPERTIES:
+            case OBSERVED_PROPERTY:
+                return ObservedPropertySerDes.PhenomenonEntityPatch.class;
+            case FEATURES_OF_INTEREST:
+            case FEATURE_OF_INTEREST:
+                return FeatureOfInterestSerDes.AbstractFeatureEntityPatch.class;
+            default:
+                throw new STAInvalidUrlException("Could not resolve CollectionName to PatchEntity class!");
         }
     }
 

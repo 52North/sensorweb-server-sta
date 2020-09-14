@@ -64,12 +64,12 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
      */
     public CollectionWrapper readCollectionDirect(@PathVariable String collectionName,
                                                   HttpServletRequest request)
-            throws STACRUDException {
+        throws STACRUDException {
         QueryOptions options = decodeQueryString(request);
         return serviceRepository
-                .getEntityService(collectionName)
-                .getEntityCollection(options)
-                .setRequestURL(rootUrl + collectionName);
+            .getEntityService(collectionName)
+            .getEntityCollection(options)
+            .setRequestURL(rootUrl + collectionName);
     }
 
     /**
@@ -82,7 +82,7 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
      */
     public CollectionWrapper readCollectionRefDirect(@PathVariable String collectionName,
                                                      HttpServletRequest request)
-            throws STACRUDException {
+        throws STACRUDException {
         HashSet<FilterClause> filters = new HashSet<>();
         String queryString = request.getQueryString();
         if (queryString != null) {
@@ -96,9 +96,9 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
         // Overwrite select filter with filter only returning id
         filters.add(new SelectFilter(ID));
         return serviceRepository
-                .getEntityService(collectionName)
-                .getEntityCollection(QUERY_OPTIONS_FACTORY.createQueryOptions(filters))
-                .setRequestURL(rootUrl + collectionName);
+            .getEntityService(collectionName)
+            .getEntityCollection(QUERY_OPTIONS_FACTORY.createQueryOptions(filters))
+            .setRequestURL(rootUrl + collectionName);
     }
 
     /**
@@ -113,7 +113,7 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
     public CollectionWrapper readCollectionRelated(@PathVariable String entity,
                                                    @PathVariable String target,
                                                    HttpServletRequest request)
-            throws Exception {
+        throws Exception {
         validateResource((String) request.getAttribute(HandlerMapping.LOOKUP_PATH), serviceRepository);
 
         String[] split = splitId(entity);
@@ -122,10 +122,10 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
 
         QueryOptions options = decodeQueryString(request);
         return serviceRepository.getEntityService(target)
-                                .getEntityCollectionByRelatedEntity(sourceId,
-                                                                    sourceType,
-                                                                    options)
-                                .setRequestURL(rootUrl + entity + "/" + target);
+            .getEntityCollectionByRelatedEntity(sourceId,
+                                                sourceType,
+                                                options)
+            .setRequestURL(rootUrl + entity + "/" + target);
     }
 
     /**
@@ -140,7 +140,7 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
     public CollectionWrapper readCollectionRelatedRef(@PathVariable String entity,
                                                       @PathVariable String target,
                                                       HttpServletRequest request)
-            throws Exception {
+        throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         validateResource(lookupPath.substring(0, lookupPath.length() - 5), serviceRepository);
 
@@ -161,9 +161,9 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
         // Overwrite select filter with filter only returning id
         filters.add(new SelectFilter(ID));
         return serviceRepository.getEntityService(target)
-                                .getEntityCollectionByRelatedEntity(sourceId,
-                                                                    sourceType,
-                                                                    QUERY_OPTIONS_FACTORY.createQueryOptions(filters))
-                                .setRequestURL(rootUrl + entity + "/" + target);
+            .getEntityCollectionByRelatedEntity(sourceId,
+                                                sourceType,
+                                                QUERY_OPTIONS_FACTORY.createQueryOptions(filters))
+            .setRequestURL(rootUrl + entity + "/" + target);
     }
 }

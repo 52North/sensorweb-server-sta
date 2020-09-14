@@ -48,26 +48,13 @@ import javax.persistence.criteria.Subquery;
  */
 public class SensorQuerySpecifications extends EntityQuerySpecifications<ProcedureEntity> {
 
-    @Override
-    public String checkPropertyName(String property) {
-        switch (property) {
-        case StaConstants.PROP_ENCODINGTYPE:
-            return ProcedureEntity.PROPERTY_PROCEDURE_DESCRIPTION_FORMAT;
-        case StaConstants.PROP_METADATA:
-            // TODO: Add sorting by HistoricalLocation that replaces Description if it is not present
-            return "descriptionFile";
-        default:
-            return super.checkPropertyName(property);
-        }
-    }
-
     public Specification<ProcedureEntity> withDatastreamStaIdentifier(final String datastreamIdentifier) {
         return (root, query, builder) -> {
             Subquery<ProcedureEntity> sq = query.subquery(ProcedureEntity.class);
             Root<AbstractDatasetEntity> datastream = sq.from(AbstractDatasetEntity.class);
             Join<AbstractDatasetEntity, ProcedureEntity> join = datastream.join(AbstractDatasetEntity.PROCEDURE);
             sq.select(join)
-              .where(builder.equal(datastream.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), datastreamIdentifier));
+                .where(builder.equal(datastream.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), datastreamIdentifier));
             return builder.in(root).value(sq);
         };
     }
@@ -79,9 +66,9 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications<Procedu
                 Subquery<ProcedureEntity> sq = query.subquery(ProcedureEntity.class);
                 Root<AbstractDatasetEntity> datastream = sq.from(AbstractDatasetEntity.class);
                 sq.select(datastream.get(AbstractDatasetEntity.PROCEDURE))
-                  .where(((Specification<AbstractDatasetEntity>) propertyValue).toPredicate(datastream,
-                                                                                            query,
-                                                                                            builder));
+                    .where(((Specification<AbstractDatasetEntity>) propertyValue).toPredicate(datastream,
+                                                                                              query,
+                                                                                              builder));
                 return builder.in(root.get(DescribableEntity.PROPERTY_ID)).value(sq);
             } else {
                 throw new RuntimeException("Could not find related property: " + propertyName);
@@ -90,52 +77,65 @@ public class SensorQuerySpecifications extends EntityQuerySpecifications<Procedu
     }
 
     @Override protected Specification<ProcedureEntity> handleDirectPropertyFilter(
-            String propertyName,
-            Expression<?> propertyValue,
-            FilterConstants.ComparisonOperator operator,
-            boolean switched) {
+        String propertyName,
+        Expression<?> propertyValue,
+        FilterConstants.ComparisonOperator operator,
+        boolean switched) {
         return (Specification<ProcedureEntity>) (root, query, builder) -> {
             try {
                 switch (propertyName) {
-                case StaConstants.PROP_ID:
-                    return handleDirectStringPropertyFilter(root.get(ProcedureEntity.STA_IDENTIFIER),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            false);
-                case StaConstants.PROP_NAME:
-                    return handleDirectStringPropertyFilter(root.get(ProcedureEntity.NAME),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            switched);
-                case StaConstants.PROP_DESCRIPTION:
-                    return handleDirectStringPropertyFilter(root.get(ProcedureEntity.DESCRIPTION),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            switched);
-                case "format":
-                case StaConstants.PROP_ENCODINGTYPE:
-                    Join<ProcedureEntity, FormatEntity> join =
+                    case StaConstants.PROP_ID:
+                        return handleDirectStringPropertyFilter(root.get(ProcedureEntity.STA_IDENTIFIER),
+                                                                propertyValue,
+                                                                operator,
+                                                                builder,
+                                                                false);
+                    case StaConstants.PROP_NAME:
+                        return handleDirectStringPropertyFilter(root.get(ProcedureEntity.NAME),
+                                                                propertyValue,
+                                                                operator,
+                                                                builder,
+                                                                switched);
+                    case StaConstants.PROP_DESCRIPTION:
+                        return handleDirectStringPropertyFilter(root.get(ProcedureEntity.DESCRIPTION),
+                                                                propertyValue,
+                                                                operator,
+                                                                builder,
+                                                                switched);
+                    case "format":
+                    case StaConstants.PROP_ENCODINGTYPE:
+                        Join<ProcedureEntity, FormatEntity> join =
                             root.join(ProcedureEntity.PROPERTY_PROCEDURE_DESCRIPTION_FORMAT);
-                    return handleDirectStringPropertyFilter(join.get(FormatEntity.FORMAT),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            switched);
-                case StaConstants.PROP_METADATA:
-                    return handleDirectStringPropertyFilter(root.get(ProcedureEntity.PROPERTY_DESCRIPTION_FILE),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            switched);
-                default:
-                    throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP, propertyName));
+                        return handleDirectStringPropertyFilter(join.get(FormatEntity.FORMAT),
+                                                                propertyValue,
+                                                                operator,
+                                                                builder,
+                                                                switched);
+                    case StaConstants.PROP_METADATA:
+                        return handleDirectStringPropertyFilter(root.get(ProcedureEntity.PROPERTY_DESCRIPTION_FILE),
+                                                                propertyValue,
+                                                                operator,
+                                                                builder,
+                                                                switched);
+                    default:
+                        throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP, propertyName));
                 }
             } catch (STAInvalidFilterExpressionException e) {
                 throw new RuntimeException(e);
             }
         };
+    }
+
+    @Override
+    public String checkPropertyName(String property) {
+        switch (property) {
+            case StaConstants.PROP_ENCODINGTYPE:
+                return ProcedureEntity.PROPERTY_PROCEDURE_DESCRIPTION_FORMAT;
+            case StaConstants.PROP_METADATA:
+                // TODO: Add sorting by HistoricalLocation that replaces Description if it is not present
+                return "descriptionFile";
+            default:
+                return super.checkPropertyName(property);
+        }
     }
 }

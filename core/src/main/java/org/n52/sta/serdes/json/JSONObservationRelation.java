@@ -40,7 +40,7 @@ import org.springframework.util.Assert;
 @SuppressWarnings("VisibilityModifier")
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
 public class JSONObservationRelation extends JSONBase.JSONwithId<ObservationRelationEntity>
-        implements AbstractJSONEntity {
+    implements AbstractJSONEntity {
 
     public String type;
 
@@ -56,23 +56,23 @@ public class JSONObservationRelation extends JSONBase.JSONwithId<ObservationRela
 
     @Override public ObservationRelationEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
-        case FULL:
-            parseReferencedFrom();
-            Assert.notNull(type, INVALID_INLINE_ENTITY_MISSING + "type");
+            case FULL:
+                parseReferencedFrom();
+                Assert.notNull(type, INVALID_INLINE_ENTITY_MISSING + "type");
 
-            return createPostEntity();
-        case PATCH:
-            parseReferencedFrom();
-            return createPatchEntity();
+                return createPostEntity();
+            case PATCH:
+                parseReferencedFrom();
+                return createPatchEntity();
 
-        case REFERENCE:
-            Assert.isNull(Group, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(Observation, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(type, INVALID_REFERENCED_ENTITY);
-            self.setStaIdentifier(identifier);
-            return self;
-        default:
-            return null;
+            case REFERENCE:
+                Assert.isNull(Group, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(Observation, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(type, INVALID_REFERENCED_ENTITY);
+                self.setStaIdentifier(identifier);
+                return self;
+            default:
+                return null;
         }
     }
 

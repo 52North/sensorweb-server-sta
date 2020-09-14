@@ -74,9 +74,49 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(ITConformance8.class);
 
     private static IMqttClient mqttClient;
+    private String demoThing = "{"
+        + "\"name\":\"Test Thing\","
+        + "\"description\":\"This is a Test Thing\""
+        + "}";
+    private String demoLocation = "{\n"
+        + "  \"name\": \"bow river\",\n"
+        + "  \"description\": \"bow river\",\n"
+        + "  \"encodingType\": \"application/vnd.geo+json\",\n"
+        + "  \"location\": { \"type\": \"Point\", \"coordinates\": [-114.05, 51.05] }\n"
+        + "}";
+    private String demoSensor = "{\n"
+        + "  \"name\": \"Fuguro Barometer\",\n"
+        + "  \"description\": \"Fuguro Barometer\",\n"
+        + "  \"encodingType\": \"application/pdf\",\n"
+        + "  \"metadata\": \"Barometer\"\n"
+        + "}";
+    private String demoObsProp = "{\n"
+        + "  \"name\": \"DewPoint Temperature\",\n"
+        + "  \"definition\": \"http://dbpedia.org/page/Dew_point" + System.currentTimeMillis() + "\",\n"
+        + "  \"description\": \"The dewpoint temperature \"\n"
+        + "}";
+    private String demoFOI = "{\n"
+        + "  \"name\": \"A weather station.\",\n"
+        + "  \"description\": \"A weather station.\",\n"
+        + "  \"encodingType\": \"application/vnd.geo+json\",\n"
+        + "  \"feature\": {\n"
+        + "    \"type\": \"Point\",\n"
+        + "    \"coordinates\": [\n"
+        + "      10,\n"
+        + "      10\n"
+        + "    ]\n"
+        + "  }\n"
+        + "}";
 
     public ITConformance8(@Value("${server.rootUrl}") String rootUrl) {
         super(rootUrl);
+    }
+
+    @AfterAll static void disconnectClient() throws MqttException {
+        if (mqttClient.isConnected()) {
+            mqttClient.disconnect();
+            mqttClient.close();
+        }
     }
 
     private void connectClient() throws MqttException {
@@ -85,13 +125,6 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
         options.setCleanSession(true);
         client.connect(options);
         mqttClient = client;
-    }
-
-    @AfterAll static void disconnectClient() throws MqttException {
-        if (mqttClient.isConnected()) {
-            mqttClient.disconnect();
-            mqttClient.close();
-        }
     }
 
     void init() throws MqttException {
@@ -264,18 +297,18 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
         /* Datastream */
         EntityType type = EntityType.DATASTREAM;
         String source = "{\n"
-                + "  \"unitOfMeasurement\": {\n"
-                + "    \"name\": \"Celsius\",\n"
-                + "    \"symbol\": \"degC\",\n"
-                + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
-                + "  },\n"
-                + "  \"name\": \"test datastream.\",\n"
-                + "  \"description\": \"test datastream.\",\n"
-                + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                + "  \"Thing\": { \"@iot.id\": " + escape(thingId) + " },\n"
-                + "  \"ObservedProperty\":{ \"@iot.id\":" + escape(obsPropId) + "},\n"
-                + "  \"Sensor\": { \"@iot.id\": " + escape(sensorId) + " }\n"
-                + "}";
+            + "  \"unitOfMeasurement\": {\n"
+            + "    \"name\": \"Celsius\",\n"
+            + "    \"symbol\": \"degC\",\n"
+            + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
+            + "  },\n"
+            + "  \"name\": \"test datastream.\",\n"
+            + "  \"description\": \"test datastream.\",\n"
+            + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
+            + "  \"Thing\": { \"@iot.id\": " + escape(thingId) + " },\n"
+            + "  \"ObservedProperty\":{ \"@iot.id\":" + escape(obsPropId) + "},\n"
+            + "  \"Sensor\": { \"@iot.id\": " + escape(sensorId) + " }\n"
+            + "}";
 
         Map<String, String> patchMap = new HashMap<>();
         patchMap.put("name", "{\"name\":\"This is a PATCHED Name\"}");
@@ -319,30 +352,30 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
 
         /* Datastream */
         String datastream = "{\n"
-                + "  \"unitOfMeasurement\": {\n"
-                + "    \"name\": \"Celsius\",\n"
-                + "    \"symbol\": \"degC\",\n"
-                + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
-                + "  },\n"
-                + "  \"name\": \"test datastream.\",\n"
-                + "  \"description\": \"test datastream.\",\n"
-                + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                + "  \"Thing\": { \"@iot.id\": " + escape(thingId) + " },\n"
-                + "  \"ObservedProperty\":{ \"@iot.id\":" + escape(obsPropId) + "},\n"
-                + "  \"Sensor\": { \"@iot.id\": " + escape(sensorId) + " }\n"
-                + "}";
+            + "  \"unitOfMeasurement\": {\n"
+            + "    \"name\": \"Celsius\",\n"
+            + "    \"symbol\": \"degC\",\n"
+            + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
+            + "  },\n"
+            + "  \"name\": \"test datastream.\",\n"
+            + "  \"description\": \"test datastream.\",\n"
+            + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
+            + "  \"Thing\": { \"@iot.id\": " + escape(thingId) + " },\n"
+            + "  \"ObservedProperty\":{ \"@iot.id\":" + escape(obsPropId) + "},\n"
+            + "  \"Sensor\": { \"@iot.id\": " + escape(sensorId) + " }\n"
+            + "}";
         entity = postEntity(EntityType.DATASTREAM, datastream);
         String datastreamId = entity.get(idKey).asText();
 
         /* Observation */
         EntityType type = EntityType.OBSERVATION;
         String source = "{\n"
-                + "  \"phenomenonTime\": \"2015-03-01T00:40:00.000Z\",\n"
-                + "  \"validTime\": \"2015-03-01T00:40:00.000Z\",\n"
-                + "  \"result\": 8,\n"
-                + "  \"Datastream\":{\"@iot.id\": " + escape(datastreamId) + "},\n"
-                + "  \"FeatureOfInterest\": {\"@iot.id\": " + escape(foiId) + "}  \n"
-                + "}";
+            + "  \"phenomenonTime\": \"2015-03-01T00:40:00.000Z\",\n"
+            + "  \"validTime\": \"2015-03-01T00:40:00.000Z\",\n"
+            + "  \"result\": 8,\n"
+            + "  \"Datastream\":{\"@iot.id\": " + escape(datastreamId) + "},\n"
+            + "  \"FeatureOfInterest\": {\"@iot.id\": " + escape(foiId) + "}  \n"
+            + "}";
 
         Map<String, String> patchMap = new HashMap<>();
         patchMap.put("result", "{\"result\":\"52.0\"}");
@@ -368,44 +401,6 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
         }
     }
 
-    private String demoThing = "{"
-            + "\"name\":\"Test Thing\","
-            + "\"description\":\"This is a Test Thing\""
-            + "}";
-
-    private String demoLocation = "{\n"
-            + "  \"name\": \"bow river\",\n"
-            + "  \"description\": \"bow river\",\n"
-            + "  \"encodingType\": \"application/vnd.geo+json\",\n"
-            + "  \"location\": { \"type\": \"Point\", \"coordinates\": [-114.05, 51.05] }\n"
-            + "}";
-
-    private String demoSensor = "{\n"
-            + "  \"name\": \"Fuguro Barometer\",\n"
-            + "  \"description\": \"Fuguro Barometer\",\n"
-            + "  \"encodingType\": \"application/pdf\",\n"
-            + "  \"metadata\": \"Barometer\"\n"
-            + "}";
-
-    private String demoObsProp = "{\n"
-            + "  \"name\": \"DewPoint Temperature\",\n"
-            + "  \"definition\": \"http://dbpedia.org/page/Dew_point" + System.currentTimeMillis() + "\",\n"
-            + "  \"description\": \"The dewpoint temperature \"\n"
-            + "}";
-
-    private String demoFOI = "{\n"
-            + "  \"name\": \"A weather station.\",\n"
-            + "  \"description\": \"A weather station.\",\n"
-            + "  \"encodingType\": \"application/vnd.geo+json\",\n"
-            + "  \"feature\": {\n"
-            + "    \"type\": \"Point\",\n"
-            + "    \"coordinates\": [\n"
-            + "      10,\n"
-            + "      10\n"
-            + "    ]\n"
-            + "  }\n"
-            + "}";
-
     /**
      * Subscribe to an entity set with MQTT Subscribe.
      * Then create a new entity of the subscribed entity set.
@@ -417,7 +412,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
      * @throws Exception     if an error occurred
      */
     private void testCollectionSubscriptionOnNewEntityCreation(EntityType type, String source)
-            throws MqttException, Exception {
+        throws MqttException, Exception {
         MessageListener listener = new MessageListener();
         mqttClient.setCallback(listener);
         mqttClient.subscribe(type.getVal());
@@ -486,7 +481,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
     private void testPropertySubscriptionOnEntityPatch(Map<String, String> patchMap,
                                                        EntityType type,
                                                        String source)
-            throws MqttException, Exception {
+        throws MqttException, Exception {
         MessageListener listener = new MessageListener();
         JsonNode entity = postEntity(type, source);
         mqttClient.setCallback(listener);
@@ -524,7 +519,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
      * @throws Exception     if an error occurred
      */
     private void testSelectSubscriptionOnNewEntityCreation(Map<String, String> patchMap, EntityType type, String source)
-            throws Exception, MqttException {
+        throws Exception, MqttException {
         MessageListener listener = new MessageListener();
         mqttClient.setCallback(listener);
 
@@ -568,7 +563,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
      * @throws Exception     if an error occurred
      */
     private void testSelectSubscriptionOnEntityPatch(Map<String, String> patchMap, EntityType type, String source)
-            throws MqttException, Exception {
+        throws MqttException, Exception {
         MessageListener listener = new MessageListener();
         mqttClient.setCallback(listener);
         JsonNode entity = postEntity(type, source);
@@ -602,8 +597,8 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
                                                 Double.valueOf(response.get(name).asText()));
                     } else if (name.contains("Time")) {
                         Assertions.assertEquals(new TimeInstant(DateTime.parse(mapper.readTree(patchMap.get(name))
-                                                                                     .get(name)
-                                                                                     .asText())),
+                                                                                   .get(name)
+                                                                                   .asText())),
                                                 new TimeInstant(DateTime.parse(response.get(name).asText())));
                     } else {
                         Assertions.assertEquals(mapper.readTree(patchMap.get(name)).get(name).asText(),
@@ -629,15 +624,6 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
             messages = new ArrayList<>();
         }
 
-        public void messageArrived(String topic, MqttMessage message) throws Exception {
-            LOGGER.info("Received: " + new String(message.getPayload()) + " on topic: " + topic);
-
-            synchronized (messages) {
-                messages.add(message);
-                messages.notifyAll();
-            }
-        }
-
         MqttMessage next() {
             synchronized (messages) {
                 if (messages.size() == 0) {
@@ -656,6 +642,15 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
 
         public void connectionLost(Throwable cause) {
             LOGGER.error(cause.getMessage());
+        }
+
+        public void messageArrived(String topic, MqttMessage message) throws Exception {
+            LOGGER.info("Received: " + new String(message.getPayload()) + " on topic: " + topic);
+
+            synchronized (messages) {
+                messages.add(message);
+                messages.notifyAll();
+            }
         }
 
         public void deliveryComplete(IMqttDeliveryToken token) {

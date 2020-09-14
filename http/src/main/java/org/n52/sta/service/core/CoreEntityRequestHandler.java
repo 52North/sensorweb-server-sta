@@ -59,8 +59,8 @@ public class CoreEntityRequestHandler extends EntityRequestHandler implements Co
     }
 
     @GetMapping(
-            value = MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_DIRECTLY,
-            produces = "application/json"
+        value = MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_DIRECTLY,
+        produces = "application/json"
     )
     public ElementWithQueryOptions<?> readEntityDirect(@PathVariable String entity,
                                                        @PathVariable String id,
@@ -69,8 +69,8 @@ public class CoreEntityRequestHandler extends EntityRequestHandler implements Co
     }
 
     @GetMapping(
-            value = MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_DIRECTLY + SLASHREF,
-            produces = "application/json"
+        value = MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_DIRECTLY + SLASHREF,
+        produces = "application/json"
     )
     public ElementWithQueryOptions<?> readEntityRefDirect(@PathVariable String entity,
                                                           @PathVariable String id,
@@ -79,12 +79,12 @@ public class CoreEntityRequestHandler extends EntityRequestHandler implements Co
     }
 
     @GetMapping(
-            value = {
-                    MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
-                    MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE,
-                    MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE
-            },
-            produces = "application/json"
+        value = {
+            MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
+            MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE,
+            MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE
+        },
+        produces = "application/json"
     )
     public ElementWithQueryOptions<?> readRelatedEntity(@PathVariable String entity,
                                                         @PathVariable String target,
@@ -93,17 +93,17 @@ public class CoreEntityRequestHandler extends EntityRequestHandler implements Co
     }
 
     @GetMapping(
-            value = {
-                    MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE + SLASHREF,
-                    MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE + SLASHREF,
-                    MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE + SLASHREF
-            },
-            produces = "application/json"
+        value = {
+            MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE + SLASHREF,
+            MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE + SLASHREF,
+            MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE + SLASHREF
+        },
+        produces = "application/json"
     )
     public ElementWithQueryOptions<?> readRelatedEntityRef(@PathVariable String entity,
                                                            @PathVariable String target,
                                                            HttpServletRequest request)
-            throws Exception {
+        throws Exception {
         return super.readRelatedEntityRef(entity, target, request);
     }
 }

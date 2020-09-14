@@ -43,7 +43,7 @@ public class VersionInfoConfig {
     @Bean
     public static PropertySourcesPlaceholderConfigurer placeholderConfigurer() {
         PropertySourcesPlaceholderConfigurer propsConfig
-                = new PropertySourcesPlaceholderConfigurer();
+            = new PropertySourcesPlaceholderConfigurer();
         propsConfig.setLocation(new ClassPathResource("git.properties"));
         propsConfig.setIgnoreResourceNotFound(true);
         propsConfig.setIgnoreUnresolvablePlaceholders(true);

@@ -38,7 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DependsOn("DatastreamRepository")
 @Repository
 public interface ProcedureRepository extends IdentifierNameRepository<ProcedureEntity>,
-        StaIdentifierRepository<ProcedureEntity> {
+                                             StaIdentifierRepository<ProcedureEntity> {
 
     <S extends ProcedureEntity> S intermediateSave(S entity);
 }

@@ -62,8 +62,8 @@ import java.util.UUID;
 @Transactional
 @Profile(StaConstants.CITSCIEXTENSION)
 public class ObservationRelationService
-        extends AbstractSensorThingsEntityServiceImpl<ObservationRelationRepository, ObservationRelationEntity,
-        ObservationRelationEntity> {
+    extends AbstractSensorThingsEntityServiceImpl<ObservationRelationRepository, ObservationRelationEntity,
+    ObservationRelationEntity> {
 
     private static final ObservationRelationQuerySpecifications orQS = new ObservationRelationQuerySpecifications();
 
@@ -76,23 +76,23 @@ public class ObservationRelationService
     }
 
     @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
-            throws STAInvalidQueryException {
+        throws STAInvalidQueryException {
         Set<EntityGraphRepository.FetchGraph> fetchGraphs = new HashSet<>();
         if (expandOption != null) {
             for (ExpandItem expandItem : expandOption.getItems()) {
                 String expandProperty = expandItem.getPath();
                 switch (expandProperty) {
-                case STAEntityDefinition.OBSERVATION_GROUP:
-                    fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_OBSERVATION_GROUP);
-                    break;
-                case STAEntityDefinition.OBSERVATION:
-                    fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_OBSERVATION);
+                    case STAEntityDefinition.OBSERVATION_GROUP:
+                        fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_OBSERVATION_GROUP);
+                        break;
+                    case STAEntityDefinition.OBSERVATION:
+                        fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_OBSERVATION);
 
-                    break;
-                default:
-                    throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                                                                     expandProperty,
-                                                                     StaConstants.OBSERVATION_RELATION));
+                        break;
+                    default:
+                        throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
+                                                                         expandProperty,
+                                                                         StaConstants.OBSERVATION_RELATION));
                 }
             }
         }
@@ -101,23 +101,23 @@ public class ObservationRelationService
 
     @Override protected ObservationRelationEntity fetchExpandEntitiesWithFilter(ObservationRelationEntity entity,
                                                                                 ExpandFilter expandOption)
-            throws STACRUDException, STAInvalidQueryException {
+        throws STACRUDException, STAInvalidQueryException {
         for (ExpandItem expandItem : expandOption.getItems()) {
             String expandProperty = expandItem.getPath();
             switch (expandProperty) {
-            case STAEntityDefinition.OBSERVATION_GROUP:
-                entity.setGroup(getObservationGroupService()
+                case STAEntityDefinition.OBSERVATION_GROUP:
+                    entity.setGroup(getObservationGroupService()
                                         .getEntityByIdRaw(entity.getGroup().getId(), expandItem.getQueryOptions()));
-                break;
-            case STAEntityDefinition.OBSERVATION:
-                entity.setObservation(getObservationService()
+                    break;
+                case STAEntityDefinition.OBSERVATION:
+                    entity.setObservation(getObservationService()
                                               .getEntityByIdRaw(entity.getObservation().getId(),
                                                                 expandItem.getQueryOptions()));
-                break;
-            default:
-                throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                                                                 expandProperty,
-                                                                 StaConstants.OBSERVATION_RELATION));
+                    break;
+                default:
+                    throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
+                                                                     expandProperty,
+                                                                     StaConstants.OBSERVATION_RELATION));
             }
         }
         return entity;
@@ -128,15 +128,15 @@ public class ObservationRelationService
                                                                                        String ownId) {
         Specification<ObservationRelationEntity> filter;
         switch (relatedType) {
-        case STAEntityDefinition.OBSERVATION_GROUPS:
-            filter = orQS.withGroupStaIdentifier(relatedId);
-            break;
-        case STAEntityDefinition.OBSERVATIONS:
-            filter = orQS.withObservationStaIdentifier(relatedId);
-            break;
-        default:
-            throw new IllegalStateException(String.format(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE,
-                                                                        relatedType)));
+            case STAEntityDefinition.OBSERVATION_GROUPS:
+                filter = orQS.withGroupStaIdentifier(relatedId);
+                break;
+            case STAEntityDefinition.OBSERVATIONS:
+                filter = orQS.withObservationStaIdentifier(relatedId);
+                break;
+            default:
+                throw new IllegalStateException(String.format(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE,
+                                                                            relatedType)));
         }
 
         if (ownId != null) {
@@ -149,7 +149,7 @@ public class ObservationRelationService
         ObservationRelationEntity obsRel = entity;
         if (obsRel.getStaIdentifier() != null && obsRel.getType() == null) {
             Optional<ObservationRelationEntity> optionalEntity =
-                    getRepository().findByStaIdentifier(obsRel.getStaIdentifier());
+                getRepository().findByStaIdentifier(obsRel.getStaIdentifier());
             if (optionalEntity.isPresent()) {
                 return optionalEntity.get();
             } else {
@@ -177,7 +177,7 @@ public class ObservationRelationService
 
     @Override
     protected ObservationRelationEntity updateEntity(String id, ObservationRelationEntity entity, HttpMethod method)
-            throws STACRUDException {
+        throws STACRUDException {
         if (HttpMethod.PATCH.equals(method)) {
             synchronized (getLock(id)) {
                 Optional<ObservationRelationEntity> existing = getRepository().findByStaIdentifier(id);
@@ -195,7 +195,7 @@ public class ObservationRelationService
     }
 
     @Override public ObservationRelationEntity createOrUpdate(ObservationRelationEntity entity)
-            throws STACRUDException {
+        throws STACRUDException {
         if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
             return updateEntity(entity.getStaIdentifier(), entity, HttpMethod.PATCH);
         }
@@ -215,10 +215,6 @@ public class ObservationRelationService
             existing.setType(toMerge.getType());
         }
         return existing;
-    }
-
-    @Override protected void delete(ObservationRelationEntity entity) throws STACRUDException {
-        delete(entity.getStaIdentifier());
     }
 
     @Override public void delete(String id) throws STACRUDException {

@@ -65,11 +65,11 @@ public class CitSciPropertyRequestHandler extends PropertyRequestHandler impleme
     }
 
     @GetMapping(
-            value = RequestUtils.MAPPING_PREFIX
-                    + CitSciExtensionRequestUtils.ENTITY_IDENTIFIED_DIRECTLY
-                    + RequestUtils.SLASH
-                    + RequestUtils.PATH_PROPERTY,
-            produces = "application/json"
+        value = RequestUtils.MAPPING_PREFIX
+            + CitSciExtensionRequestUtils.ENTITY_IDENTIFIED_DIRECTLY
+            + RequestUtils.SLASH
+            + RequestUtils.PATH_PROPERTY,
+        produces = "application/json"
     )
     public ElementWithQueryOptions<?> readEntityPropertyDirect(@PathVariable String entity,
                                                                @PathVariable String id,
@@ -95,12 +95,12 @@ public class CitSciPropertyRequestHandler extends PropertyRequestHandler impleme
     */
 
     @GetMapping(
-            value = RequestUtils.MAPPING_PREFIX
-                    + CitSciExtensionRequestUtils.ENTITY_IDENTIFIED_DIRECTLY
-                    + RequestUtils.SLASH
-                    + RequestUtils.PATH_PROPERTY
-                    + RequestUtils.SLASHVALUE,
-            produces = "text/plain"
+        value = RequestUtils.MAPPING_PREFIX
+            + CitSciExtensionRequestUtils.ENTITY_IDENTIFIED_DIRECTLY
+            + RequestUtils.SLASH
+            + RequestUtils.PATH_PROPERTY
+            + RequestUtils.SLASHVALUE,
+        produces = "text/plain"
     )
     public String readEntityPropertyValueDirect(@PathVariable String entity,
                                                 @PathVariable String id,

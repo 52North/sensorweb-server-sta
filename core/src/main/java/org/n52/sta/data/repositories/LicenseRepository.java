@@ -42,4 +42,5 @@ import org.springframework.transaction.annotation.Transactional;
 @Profile(StaConstants.CITSCIEXTENSION)
 @Transactional
 public interface LicenseRepository extends StaIdentifierRepository<LicenseEntity> {
+
 }

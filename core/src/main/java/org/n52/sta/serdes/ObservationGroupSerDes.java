@@ -52,7 +52,7 @@ public class ObservationGroupSerDes {
 
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     public static class ObservationGroupPatch extends ObservationGroupEntity
-            implements EntityPatch<ObservationGroupEntity> {
+        implements EntityPatch<ObservationGroupEntity> {
 
         private static final long serialVersionUID = -2233037380407692718L;
         private final ObservationGroupEntity entity;
@@ -68,7 +68,7 @@ public class ObservationGroupSerDes {
 
 
     public static class ObservationGroupSerializer
-            extends AbstractSTASerializer<ObservationGroupWithQueryOptions, ObservationGroupEntity> {
+        extends AbstractSTASerializer<ObservationGroupWithQueryOptions, ObservationGroupEntity> {
 
         private static final long serialVersionUID = -1618289129123682794L;
 
@@ -80,7 +80,7 @@ public class ObservationGroupSerDes {
 
         @Override
         public void serialize(ObservationGroupWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers)
-                throws IOException {
+            throws IOException {
             gen.writeStartObject();
             value.unwrap(implicitSelect);
             ObservationGroupEntity obsGroup = value.getEntity();
@@ -98,14 +98,14 @@ public class ObservationGroupSerDes {
             }
 
             if (!value.hasSelectOption() ||
-                    value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
+                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
                 gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, obsGroup.getDescription());
             }
 
             if (!value.hasSelectOption()
-                    || value.getFieldsToSerialize().contains(STAEntityDefinition.OBSERVATION_RELATIONS)) {
+                || value.getFieldsToSerialize().contains(STAEntityDefinition.OBSERVATION_RELATIONS)) {
                 if (!value.hasExpandOption()
-                        || value.getFieldsToExpand().get(STAEntityDefinition.OBSERVATION_RELATIONS) == null) {
+                    || value.getFieldsToExpand().get(STAEntityDefinition.OBSERVATION_RELATIONS) == null) {
                     writeNavigationProp(gen,
                                         STAEntityDefinition.OBSERVATION_RELATIONS,
                                         obsGroup.getStaIdentifier());
@@ -139,7 +139,7 @@ public class ObservationGroupSerDes {
 
 
     public static class ObservationGroupPatchDeserializer
-            extends StdDeserializer<ObservationGroupSerDes.ObservationGroupPatch> {
+        extends StdDeserializer<ObservationGroupSerDes.ObservationGroupPatch> {
 
         private static final long serialVersionUID = -6355786322787893665L;
 
@@ -149,9 +149,9 @@ public class ObservationGroupSerDes {
 
         @Override
         public ObservationGroupSerDes.ObservationGroupPatch deserialize(JsonParser p, DeserializationContext ctxt)
-                throws IOException {
+            throws IOException {
             return new ObservationGroupSerDes.ObservationGroupPatch(p.readValueAs(JSONObservationGroup.class)
-                                                                     .toEntity(JSONBase.EntityType.PATCH));
+                                                                        .toEntity(JSONBase.EntityType.PATCH));
         }
     }
 }

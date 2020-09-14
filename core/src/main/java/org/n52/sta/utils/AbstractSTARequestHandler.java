@@ -74,7 +74,7 @@ public abstract class AbstractSTARequestHandler implements RequestUtils {
      */
     protected void validateResource(StringBuffer requestURI,
                                     EntityServiceRepository serviceRepository)
-            throws Exception {
+        throws Exception {
         validateResource(requestURI.toString(), serviceRepository);
     }
 
@@ -87,7 +87,7 @@ public abstract class AbstractSTARequestHandler implements RequestUtils {
      */
     protected void validateResource(String requestURI,
                                     EntityServiceRepository serviceRepository)
-            throws Exception {
+        throws Exception {
         String[] uriResources;
         if (requestURI.startsWith("/")) {
             uriResources = requestURI.substring(1).split(SLASH);
@@ -117,7 +117,7 @@ public abstract class AbstractSTARequestHandler implements RequestUtils {
         STAEntityDefinition definition = STAEntityDefinition.definitions.get(entity);
 
         if (!definition.getEntityPropsMandatory().contains(property) &&
-                !definition.getEntityPropsOptional().contains(property)) {
+            !definition.getEntityPropsOptional().contains(property)) {
             throw new STAInvalidUrlException("Entity: " + entity + " does not have property: " + property);
         }
     }
@@ -156,7 +156,7 @@ public abstract class AbstractSTARequestHandler implements RequestUtils {
                 // e.g. /Datastreams(1)/Thing/
                 // Getting id directly as it is needed for next iteration
                 targetId = serviceRepository.getEntityService(targetType)
-                                            .getEntityIdByRelatedEntity(sourceId, sourceType);
+                    .getEntityIdByRelatedEntity(sourceId, sourceType);
                 if (targetId == null) {
                     return createInvalidUrlExceptionNoEntityAssociated(uriResources[i], uriResources[i - 1]);
                 }
@@ -166,7 +166,7 @@ public abstract class AbstractSTARequestHandler implements RequestUtils {
                 // Only checking exists as Id is already known
                 targetId = targetEntity[1];
                 if (!serviceRepository.getEntityService(targetType)
-                                      .existsEntityByRelatedEntity(sourceId, sourceType, targetId)) {
+                    .existsEntityByRelatedEntity(sourceId, sourceType, targetId)) {
                     return createInvalidUrlExceptionNoEntityAssociated(uriResources[i], uriResources[i - 1]);
                 }
             }

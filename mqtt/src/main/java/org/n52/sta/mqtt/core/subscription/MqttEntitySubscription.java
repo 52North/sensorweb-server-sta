@@ -87,6 +87,18 @@ public class MqttEntitySubscription extends AbstractMqttSubscription {
     }
 
     @Override
+    public String toString() {
+        String base = super.toString();
+        return new StringBuilder()
+            .append(base)
+            .deleteCharAt(base.length() - 1)
+            .append(",wantedIdentifier=")
+            .append(wantedIdentifier)
+            .append("]")
+            .toString();
+    }
+
+    @Override
     public boolean matches(HibernateRelations.HasStaIdentifier entity,
                            String realEntityType,
                            Map<String, Set<String>> collections,
@@ -117,17 +129,5 @@ public class MqttEntitySubscription extends AbstractMqttSubscription {
             }
         }
         return false;
-    }
-
-    @Override
-    public String toString() {
-        String base = super.toString();
-        return new StringBuilder()
-                .append(base)
-                .deleteCharAt(base.length() - 1)
-                .append(",wantedIdentifier=")
-                .append(wantedIdentifier)
-                .append("]")
-                .toString();
     }
 }

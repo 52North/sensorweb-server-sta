@@ -77,10 +77,10 @@ public abstract class CudRequestHandler<T extends IdEntity> extends AbstractSTAR
     @SuppressWarnings("unchecked")
     public ElementWithQueryOptions<?> handlePostDirect(String collectionName,
                                                        String body)
-            throws IOException, STACRUDException, STAInvalidUrlException {
+        throws IOException, STACRUDException, STAInvalidUrlException {
         Class<T> clazz = collectionNameToClass(collectionName);
         return ((AbstractSensorThingsEntityService<?, T, ? extends T>)
-                serviceRepository.getEntityService(collectionName)).create(mapper.readValue(body, clazz));
+            serviceRepository.getEntityService(collectionName)).create(mapper.readValue(body, clazz));
     }
 
     /**
@@ -97,7 +97,7 @@ public abstract class CudRequestHandler<T extends IdEntity> extends AbstractSTAR
                                                         String target,
                                                         String body,
                                                         HttpServletRequest request)
-            throws Exception {
+        throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         validateResource(lookupPath, serviceRepository);
 
@@ -111,7 +111,7 @@ public abstract class CudRequestHandler<T extends IdEntity> extends AbstractSTAR
 
         Class<T> clazz = collectionNameToClass(target);
         return ((AbstractSensorThingsEntityService<?, T, ? extends T>)
-                serviceRepository.getEntityService(target)).create(mapper.readValue(jsonBody.toString(), clazz));
+            serviceRepository.getEntityService(target)).create(mapper.readValue(jsonBody.toString(), clazz));
     }
 
     /**
@@ -127,7 +127,7 @@ public abstract class CudRequestHandler<T extends IdEntity> extends AbstractSTAR
                                                         @PathVariable String id,
                                                         @RequestBody String body,
                                                         HttpServletRequest request)
-            throws Exception {
+        throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         validateResource(lookupPath, serviceRepository);
 
@@ -136,10 +136,10 @@ public abstract class CudRequestHandler<T extends IdEntity> extends AbstractSTAR
         String strippedId = unescapeIdIfWanted(id.substring(1, id.length() - 1));
         jsonBody.put(StaConstants.AT_IOT_ID, strippedId);
         return ((AbstractSensorThingsEntityService<?, T, ? extends T>)
-                serviceRepository.getEntityService(collectionName)).update(strippedId,
-                                                                           (T) ((mapper.readValue(jsonBody.toString(),
-                                                                                                  clazz))).getEntity(),
-                                                                           HttpMethod.PATCH);
+            serviceRepository.getEntityService(collectionName)).update(strippedId,
+                                                                       (T) ((mapper.readValue(jsonBody.toString(),
+                                                                                              clazz))).getEntity(),
+                                                                       HttpMethod.PATCH);
     }
 
     /**
@@ -155,7 +155,7 @@ public abstract class CudRequestHandler<T extends IdEntity> extends AbstractSTAR
                                                          String target,
                                                          String body,
                                                          HttpServletRequest request)
-            throws Exception {
+        throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         validateResource(lookupPath, serviceRepository);
 
@@ -163,7 +163,7 @@ public abstract class CudRequestHandler<T extends IdEntity> extends AbstractSTAR
         String sourceType = split[0];
         String sourceId = split[1];
         AbstractSensorThingsEntityService<?, T, ? extends T> entityService =
-                (AbstractSensorThingsEntityService<?, T, ? extends T>) serviceRepository.getEntityService(target);
+            (AbstractSensorThingsEntityService<?, T, ? extends T>) serviceRepository.getEntityService(target);
 
         // Get Id from datastore
         String entityId = entityService.getEntityIdByRelatedEntity(sourceId, sourceType);
@@ -193,11 +193,11 @@ public abstract class CudRequestHandler<T extends IdEntity> extends AbstractSTAR
     public Object handleDelete(String collectionName,
                                String id,
                                HttpServletRequest request)
-            throws Exception {
+        throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         validateResource(lookupPath, serviceRepository);
         serviceRepository.getEntityService(collectionName).delete(
-                unescapeIdIfWanted(id.substring(1, id.length() - 1)));
+            unescapeIdIfWanted(id.substring(1, id.length() - 1)));
         return null;
     }
 
@@ -214,7 +214,7 @@ public abstract class CudRequestHandler<T extends IdEntity> extends AbstractSTAR
                                       String target,
                                       String body,
                                       HttpServletRequest request)
-            throws Exception {
+        throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         validateResource(lookupPath, serviceRepository);
 
@@ -222,7 +222,7 @@ public abstract class CudRequestHandler<T extends IdEntity> extends AbstractSTAR
         String sourceType = split[0];
         String sourceId = split[1];
         AbstractSensorThingsEntityService<?, T, ? extends T> entityService =
-                (AbstractSensorThingsEntityService<?, T, ? extends T>) serviceRepository.getEntityService(target);
+            (AbstractSensorThingsEntityService<?, T, ? extends T>) serviceRepository.getEntityService(target);
 
         // Get Id from datastore
         String entityId = entityService.getEntityIdByRelatedEntity(sourceId, sourceType);

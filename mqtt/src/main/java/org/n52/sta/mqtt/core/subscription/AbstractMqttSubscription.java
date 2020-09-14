@@ -42,11 +42,8 @@ import java.util.Set;
 public abstract class AbstractMqttSubscription {
 
     protected String sourceEntityType;
-
     protected String sourceId;
-
     protected String wantedEntityType;
-
     private final String topic;
 
     public AbstractMqttSubscription(String topic) {
@@ -89,7 +86,27 @@ public abstract class AbstractMqttSubscription {
     @Override
     public boolean equals(Object other) {
         return other instanceof AbstractMqttSubscription
-                && ((AbstractMqttSubscription) other).getTopic().equals(this.topic);
+            && ((AbstractMqttSubscription) other).getTopic().equals(this.topic);
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder()
+            .append(this.getClass().getSimpleName())
+            .append("[")
+            .append("topic=")
+            .append(topic)
+            .append(",")
+            .append("sourceEntityType=")
+            .append(sourceEntityType)
+            .append(",")
+            .append("sourceId=")
+            .append(sourceId)
+            .append(",")
+            .append("wantedEntityType=")
+            .append(wantedEntityType)
+            .append("]")
+            .toString();
     }
 
     /**
@@ -112,24 +129,4 @@ public abstract class AbstractMqttSubscription {
                                        String realEntityType,
                                        Map<String, Set<String>> collections,
                                        Set<String> differenceMap);
-
-    @Override
-    public String toString() {
-        return new StringBuilder()
-                .append(this.getClass().getSimpleName())
-                .append("[")
-                .append("topic=")
-                .append(topic)
-                .append(",")
-                .append("sourceEntityType=")
-                .append(sourceEntityType)
-                .append(",")
-                .append("sourceId=")
-                .append(sourceId)
-                .append(",")
-                .append("wantedEntityType=")
-                .append(wantedEntityType)
-                .append("]")
-                .toString();
-    }
 }

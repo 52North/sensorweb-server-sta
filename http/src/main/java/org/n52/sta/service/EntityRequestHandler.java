@@ -74,7 +74,7 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
         String entityId = unescapeIdIfWanted(id.substring(1, id.length() - 1));
         QueryOptions options = decodeQueryString(request);
         return serviceRepository.getEntityService(entity)
-                                .getEntity(entityId, options);
+            .getEntity(entityId, options);
     }
 
     /**
@@ -96,7 +96,7 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
         // Overwrite select filter with filter only returning id
         filters.add(new SelectFilter(ID));
         return serviceRepository.getEntityService(entity)
-                                .getEntity(entityId, QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
+            .getEntity(entityId, QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
     }
 
     /**
@@ -110,7 +110,7 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
     public ElementWithQueryOptions<?> readRelatedEntity(String entity,
                                                         String target,
                                                         HttpServletRequest request)
-            throws Exception {
+        throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         validateResource(lookupPath, serviceRepository);
 
@@ -120,10 +120,10 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
 
         QueryOptions options = decodeQueryString(request);
         return serviceRepository.getEntityService(target)
-                                .getEntityByRelatedEntity(sourceId,
-                                                          sourceType,
-                                                          null,
-                                                          options);
+            .getEntityByRelatedEntity(sourceId,
+                                      sourceType,
+                                      null,
+                                      options);
     }
 
     /**
@@ -138,7 +138,7 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
     public ElementWithQueryOptions<?> readRelatedEntityRef(String entity,
                                                            String target,
                                                            HttpServletRequest request)
-            throws Exception {
+        throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         validateResource(lookupPath.substring(0, lookupPath.length() - 5), serviceRepository);
 
@@ -150,9 +150,9 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
         // Overwrite select filter with filter only returning id
         filters.add(new SelectFilter(ID));
         return serviceRepository.getEntityService(target)
-                                .getEntityByRelatedEntity(sourceId,
-                                                          sourceType,
-                                                          null,
-                                                          QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
+            .getEntityByRelatedEntity(sourceId,
+                                      sourceType,
+                                      null,
+                                      QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
     }
 }

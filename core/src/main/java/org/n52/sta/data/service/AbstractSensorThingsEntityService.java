@@ -42,8 +42,9 @@ import org.springframework.transaction.annotation.Transactional;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 public interface AbstractSensorThingsEntityService<T,
-        S extends HibernateRelations.HasId,
-        E extends S> {
+    S extends HibernateRelations.HasId,
+    E extends S> {
+
     /**
      * Checks if an Entity with given id exists
      *

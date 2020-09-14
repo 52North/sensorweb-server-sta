@@ -69,8 +69,10 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
 
     @JsonManagedReference
     public JSONFeatureOfInterest FeatureOfInterest;
+
     @JsonManagedReference
     public JSONDatastream Datastream;
+
     @JsonManagedReference
     @JsonProperty(StaConstants.OBSERVATION_RELATIONS)
     public JSONObservationRelation[] relations;
@@ -83,53 +85,53 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
     }
 
     @Override
-    public ObservationEntity toEntity(JSONBase.EntityType type) {
-        switch (type) {
-        case FULL:
-            parseReferencedFrom();
-            Assert.notNull(result, INVALID_INLINE_ENTITY_MISSING + "result");
-            return createPostEntity();
-        case PATCH:
-            parseReferencedFrom();
-            return createPatchEntity();
-        case REFERENCE:
-            Assert.isNull(phenomenonTime, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(resultTime, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(result, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(resultTime, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(resultQuality, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(parameters, INVALID_REFERENCED_ENTITY);
-
-            self.setIdentifier(identifier);
-            self.setStaIdentifier(identifier);
-            return self;
-        default:
-            return null;
+    protected void parseReferencedFrom() {
+        if (referencedFromType != null) {
+            switch (referencedFromType) {
+                case StaConstants.DATASTREAMS:
+                    Assert.isNull(Datastream, INVALID_DUPLICATE_REFERENCE);
+                    this.Datastream = new JSONDatastream();
+                    this.Datastream.identifier = referencedFromID;
+                    return;
+                case StaConstants.FEATURES_OF_INTEREST:
+                    Assert.isNull(FeatureOfInterest, INVALID_DUPLICATE_REFERENCE);
+                    this.FeatureOfInterest = new JSONFeatureOfInterest();
+                    this.FeatureOfInterest.identifier = referencedFromID;
+                    return;
+                case StaConstants.OBSERVATION_RELATIONS:
+                    Assert.isNull(relations, INVALID_DUPLICATE_REFERENCE);
+                    this.relations = new JSONObservationRelation[] {new JSONObservationRelation()};
+                    this.relations[0].identifier = referencedFromID;
+                    return;
+                default:
+                    throw new IllegalArgumentException(INVALID_BACKREFERENCE);
+            }
         }
     }
 
     @Override
-    protected void parseReferencedFrom() {
-        if (referencedFromType != null) {
-            switch (referencedFromType) {
-            case StaConstants.DATASTREAMS:
-                Assert.isNull(Datastream, INVALID_DUPLICATE_REFERENCE);
-                this.Datastream = new JSONDatastream();
-                this.Datastream.identifier = referencedFromID;
-                return;
-            case StaConstants.FEATURES_OF_INTEREST:
-                Assert.isNull(FeatureOfInterest, INVALID_DUPLICATE_REFERENCE);
-                this.FeatureOfInterest = new JSONFeatureOfInterest();
-                this.FeatureOfInterest.identifier = referencedFromID;
-                return;
-            case StaConstants.OBSERVATION_RELATIONS:
-                Assert.isNull(FeatureOfInterest, INVALID_DUPLICATE_REFERENCE);
-                this.FeatureOfInterest = new JSONFeatureOfInterest();
-                this.FeatureOfInterest.identifier = referencedFromID;
-                return;
+    public ObservationEntity toEntity(JSONBase.EntityType type) {
+        switch (type) {
+            case FULL:
+                parseReferencedFrom();
+                Assert.notNull(result, INVALID_INLINE_ENTITY_MISSING + "result");
+                return createPostEntity();
+            case PATCH:
+                parseReferencedFrom();
+                return createPatchEntity();
+            case REFERENCE:
+                Assert.isNull(phenomenonTime, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(resultTime, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(result, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(resultTime, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(resultQuality, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(parameters, INVALID_REFERENCED_ENTITY);
+
+                self.setIdentifier(identifier);
+                self.setStaIdentifier(identifier);
+                return self;
             default:
-                throw new IllegalArgumentException(INVALID_BACKREFERENCE);
-            }
+                return null;
         }
     }
 
@@ -242,7 +244,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
         // Link to Datastream
         if (Datastream != null) {
             self.setDataset(
-                    Datastream.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+                Datastream.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
         } else if (backReference instanceof JSONDatastream) {
             self.setDataset(((JSONDatastream) backReference).getEntity());
         } else {
@@ -252,7 +254,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
         // Link to FOI
         if (FeatureOfInterest != null) {
             self.setFeature(
-                    FeatureOfInterest.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+                FeatureOfInterest.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
         } else if (backReference instanceof JSONFeatureOfInterest) {
             self.setFeature(((JSONFeatureOfInterest) backReference).getEntity());
         }
@@ -299,32 +301,32 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
                     if (paramName.equals(mapping.getValue())) {
                         JsonNode jsonNode = param.get(VALUE);
                         switch (mapping.getKey()) {
-                        case "samplingGeometry":
-                            // Add as samplingGeometry to enable interoperability with SOS
-                            GeometryFactory factory =
+                            case "samplingGeometry":
+                                // Add as samplingGeometry to enable interoperability with SOS
+                                GeometryFactory factory =
                                     new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
-                            GeoJsonReader reader = new GeoJsonReader(factory);
-                            try {
-                                self.setSamplingGeometry(reader.read(jsonNode.toString()));
-                            } catch (ParseException e) {
-                                Assert.notNull(null, "Could not parse" + e.getMessage());
-                            }
-                            break;
-                        case "verticalFrom":
-                            // Add as verticalTo to enable interoperability with SOS
-                            self.setVerticalTo(BigDecimal.valueOf(jsonNode.asDouble()));
-                            break;
-                        case "verticalTo":
-                            // Add as verticalTo to enable interoperability with SOS
-                            self.setVerticalFrom(BigDecimal.valueOf(jsonNode.asDouble()));
-                            break;
-                        case "verticalFromTo":
-                            // Add as verticalTo to enable interoperability with SOS
-                            self.setVerticalTo(BigDecimal.valueOf(jsonNode.asDouble()));
-                            self.setVerticalFrom(BigDecimal.valueOf(jsonNode.asDouble()));
-                            break;
-                        default:
-                            throw new RuntimeException("Unable to parse Parameters!");
+                                GeoJsonReader reader = new GeoJsonReader(factory);
+                                try {
+                                    self.setSamplingGeometry(reader.read(jsonNode.toString()));
+                                } catch (ParseException e) {
+                                    Assert.notNull(null, "Could not parse" + e.getMessage());
+                                }
+                                break;
+                            case "verticalFrom":
+                                // Add as verticalTo to enable interoperability with SOS
+                                self.setVerticalTo(BigDecimal.valueOf(jsonNode.asDouble()));
+                                break;
+                            case "verticalTo":
+                                // Add as verticalTo to enable interoperability with SOS
+                                self.setVerticalFrom(BigDecimal.valueOf(jsonNode.asDouble()));
+                                break;
+                            case "verticalFromTo":
+                                // Add as verticalTo to enable interoperability with SOS
+                                self.setVerticalTo(BigDecimal.valueOf(jsonNode.asDouble()));
+                                self.setVerticalFrom(BigDecimal.valueOf(jsonNode.asDouble()));
+                                break;
+                            default:
+                                throw new RuntimeException("Unable to parse Parameters!");
                         }
                     }
                 }

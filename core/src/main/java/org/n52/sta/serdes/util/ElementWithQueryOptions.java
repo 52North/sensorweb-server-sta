@@ -68,6 +68,49 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
         this.queryOptions = queryOptions;
     }
 
+    public static ElementWithQueryOptions from(Object entity, QueryOptions queryOptions) {
+        Object unwrapped = (entity instanceof HibernateProxy) ? Hibernate.unproxy(entity) : entity;
+        switch (unwrapped.getClass().getSimpleName()) {
+            case "PlatformEntity":
+                return new ThingWithQueryOptions((PlatformEntity) unwrapped, queryOptions);
+            case "ProcedureEntity":
+                return new SensorWithQueryOptions((ProcedureEntity) unwrapped, queryOptions);
+            case "PhenomenonEntity":
+                return new ObservedPropertyWithQueryOptions((PhenomenonEntity) unwrapped, queryOptions);
+            case "LocationEntity":
+                return new LocationWithQueryOptions((LocationEntity) unwrapped, queryOptions);
+            case "HistoricalLocationEntity":
+                return new HistoricalLocationWithQueryOptions((HistoricalLocationEntity) unwrapped, queryOptions);
+            case "StaFeatureEntity":
+                return new FeatureOfInterestWithQueryOptions((StaFeatureEntity<?>) unwrapped, queryOptions);
+            case "FeatureEntity":
+                return new FeatureOfInterestWithQueryOptions(
+                    new StaFeatureEntity<>((FeatureEntity) unwrapped), queryOptions);
+            case "DatasetEntity":
+            case "AbstractDatasetEntity":
+            case "DatasetAggregationEntity":
+                return new DatastreamWithQueryOptions((AbstractDatasetEntity) unwrapped, queryOptions);
+            case "ObservationGroupEntity":
+                return new ObservationGroupWithQueryOptions((ObservationGroupEntity) unwrapped, queryOptions);
+            case "ObservationRelationEntity":
+                return new ObservationRelationWithQueryOptions((ObservationRelationEntity) unwrapped, queryOptions);
+            case "LicenseEntity":
+                return new LicenseWithQueryOptions((LicenseEntity) unwrapped, queryOptions);
+            case "PartyEntity":
+                return new PartyWithQueryOptions((PartyEntity) unwrapped, queryOptions);
+            case "ProjectEntity":
+                return new ProjectWithQueryOptions((ProjectEntity) unwrapped, queryOptions);
+            default:
+                if (unwrapped instanceof ObservationEntity) {
+                    return new ObservationWithQueryOptions((ObservationEntity<?>) unwrapped, queryOptions);
+                } else {
+                    throw new RuntimeException(
+                        "Error wrapping object with queryOptions. Could not find Wrapper for class: " +
+                            unwrapped.getClass().getSimpleName());
+                }
+        }
+    }
+
     public QueryOptions getQueryOptions() {
         return queryOptions;
     }
@@ -90,49 +133,6 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
 
     public boolean hasExpandOption() {
         return hasExpandOption;
-    }
-
-    public static ElementWithQueryOptions from(Object entity, QueryOptions queryOptions) {
-        Object unwrapped = (entity instanceof HibernateProxy) ? Hibernate.unproxy(entity) : entity;
-        switch (unwrapped.getClass().getSimpleName()) {
-        case "PlatformEntity":
-            return new ThingWithQueryOptions((PlatformEntity) unwrapped, queryOptions);
-        case "ProcedureEntity":
-            return new SensorWithQueryOptions((ProcedureEntity) unwrapped, queryOptions);
-        case "PhenomenonEntity":
-            return new ObservedPropertyWithQueryOptions((PhenomenonEntity) unwrapped, queryOptions);
-        case "LocationEntity":
-            return new LocationWithQueryOptions((LocationEntity) unwrapped, queryOptions);
-        case "HistoricalLocationEntity":
-            return new HistoricalLocationWithQueryOptions((HistoricalLocationEntity) unwrapped, queryOptions);
-        case "StaFeatureEntity":
-            return new FeatureOfInterestWithQueryOptions((StaFeatureEntity<?>) unwrapped, queryOptions);
-        case "FeatureEntity":
-            return new FeatureOfInterestWithQueryOptions(
-                    new StaFeatureEntity<>((FeatureEntity) unwrapped), queryOptions);
-        case "DatasetEntity":
-        case "AbstractDatasetEntity":
-        case "DatasetAggregationEntity":
-            return new DatastreamWithQueryOptions((AbstractDatasetEntity) unwrapped, queryOptions);
-        case "ObservationGroupEntity":
-            return new ObservationGroupWithQueryOptions((ObservationGroupEntity) unwrapped, queryOptions);
-        case "ObservationRelationEntity":
-            return new ObservationRelationWithQueryOptions((ObservationRelationEntity) unwrapped, queryOptions);
-        case "LicenseEntity":
-            return new LicenseWithQueryOptions((LicenseEntity) unwrapped, queryOptions);
-        case "PartyEntity":
-            return new PartyWithQueryOptions((PartyEntity) unwrapped, queryOptions);
-        case "ProjectEntity":
-            return new ProjectWithQueryOptions((ProjectEntity) unwrapped, queryOptions);
-        default:
-            if (unwrapped instanceof ObservationEntity) {
-                return new ObservationWithQueryOptions((ObservationEntity<?>) unwrapped, queryOptions);
-            } else {
-                throw new RuntimeException(
-                        "Error wrapping object with queryOptions. Could not find Wrapper for class: " +
-                                unwrapped.getClass().getSimpleName());
-            }
-        }
     }
 
     public void unwrap(boolean enableImplicitSelect) {
@@ -196,7 +196,7 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
 
 
     public static class HistoricalLocationWithQueryOptions
-            extends ElementWithQueryOptions<HistoricalLocationEntity> {
+        extends ElementWithQueryOptions<HistoricalLocationEntity> {
 
         HistoricalLocationWithQueryOptions(HistoricalLocationEntity entity,
                                            QueryOptions queryOptions) {
@@ -239,6 +239,7 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
 
 
     public static class LicenseWithQueryOptions extends ElementWithQueryOptions<LicenseEntity> {
+
         LicenseWithQueryOptions(LicenseEntity entity, QueryOptions queryOptions) {
             super(entity, queryOptions);
         }
@@ -254,6 +255,7 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
 
 
     public static class ProjectWithQueryOptions extends ElementWithQueryOptions<ProjectEntity> {
+
         ProjectWithQueryOptions(ProjectEntity entity, QueryOptions queryOptions) {
             super(entity, queryOptions);
         }

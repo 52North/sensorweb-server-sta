@@ -66,87 +66,87 @@ public class CoreCudRequestHandler<T extends IdEntity> extends CudRequestHandler
     }
 
     @PostMapping(
-            consumes = "application/json",
-            value = "/{collectionName:" + CoreRequestUtils.BASE_COLLECTION_REGEX + "$}",
-            produces = "application/json")
+        consumes = "application/json",
+        value = "/{collectionName:" + CoreRequestUtils.BASE_COLLECTION_REGEX + "$}",
+        produces = "application/json")
     public ElementWithQueryOptions<?> handlePostDirect(@PathVariable String collectionName,
                                                        @RequestBody String body)
-            throws IOException, STACRUDException, STAInvalidUrlException {
+        throws IOException, STACRUDException, STAInvalidUrlException {
         return super.handlePostDirect(collectionName, body);
     }
 
     @PostMapping(
-            value = {
-                    MAPPING_PREFIX + CoreRequestUtils.COLLECTION_IDENTIFIED_BY_THING_PATH_VARIABLE,
-                    MAPPING_PREFIX + CoreRequestUtils.COLLECTION_IDENTIFIED_BY_LOCATION_PATH_VARIABLE,
-                    MAPPING_PREFIX + CoreRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH_VARIABLE,
-                    MAPPING_PREFIX + CoreRequestUtils.COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH_VARIABLE,
-                    MAPPING_PREFIX + CoreRequestUtils.COLLECTION_IDENTIFIED_BY_SENSOR_PATH_VARIABLE,
-                    MAPPING_PREFIX + CoreRequestUtils.COLLECTION_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
-                    MAPPING_PREFIX + CoreRequestUtils.COLLECTION_IDENTIFIED_BY_HIST_LOCATION_PATH_VARIABLE
-            },
-            produces = "application/json"
+        value = {
+            MAPPING_PREFIX + CoreRequestUtils.COLLECTION_IDENTIFIED_BY_THING_PATH_VARIABLE,
+            MAPPING_PREFIX + CoreRequestUtils.COLLECTION_IDENTIFIED_BY_LOCATION_PATH_VARIABLE,
+            MAPPING_PREFIX + CoreRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH_VARIABLE,
+            MAPPING_PREFIX + CoreRequestUtils.COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH_VARIABLE,
+            MAPPING_PREFIX + CoreRequestUtils.COLLECTION_IDENTIFIED_BY_SENSOR_PATH_VARIABLE,
+            MAPPING_PREFIX + CoreRequestUtils.COLLECTION_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
+            MAPPING_PREFIX + CoreRequestUtils.COLLECTION_IDENTIFIED_BY_HIST_LOCATION_PATH_VARIABLE
+        },
+        produces = "application/json"
     )
     public ElementWithQueryOptions<?> handlePostRelated(@PathVariable String entity,
                                                         @PathVariable String target,
                                                         @RequestBody String body,
                                                         HttpServletRequest request)
-            throws Exception {
+        throws Exception {
         return super.handlePostRelated(entity, target, body, request);
     }
 
     @PatchMapping(
-            value = "**/{collectionName:" + CoreRequestUtils.BASE_COLLECTION_REGEX + "}{id:" + IDENTIFIER_REGEX + "$}",
-            produces = "application/json"
+        value = "**/{collectionName:" + CoreRequestUtils.BASE_COLLECTION_REGEX + "}{id:" + IDENTIFIER_REGEX + "$}",
+        produces = "application/json"
     )
     public ElementWithQueryOptions<?> handleDirectPatch(@PathVariable String collectionName,
                                                         @PathVariable String id,
                                                         @RequestBody String body,
                                                         HttpServletRequest request)
-            throws Exception {
+        throws Exception {
         return super.handleDirectPatch(collectionName, id, body, request);
     }
 
     @PatchMapping(
-            value = {
-                    MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
-                    MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE,
-                    MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE
-            },
-            produces = "application/json"
+        value = {
+            MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
+            MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE,
+            MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE
+        },
+        produces = "application/json"
     )
     public ElementWithQueryOptions<?> handleRelatedPatch(@PathVariable String entity,
                                                          @PathVariable String target,
                                                          @RequestBody String body,
                                                          HttpServletRequest request)
-            throws Exception {
+        throws Exception {
         return super.handleRelatedPatch(entity, target, body, request);
     }
 
     @DeleteMapping(
-            value = "**/{collectionName:" + CoreRequestUtils.BASE_COLLECTION_REGEX + "}{id:" + IDENTIFIER_REGEX + "$}",
-            produces = "application/json"
+        value = "**/{collectionName:" + CoreRequestUtils.BASE_COLLECTION_REGEX + "}{id:" + IDENTIFIER_REGEX + "$}",
+        produces = "application/json"
     )
     public Object handleDelete(@PathVariable String collectionName,
                                @PathVariable String id,
                                HttpServletRequest request)
-            throws Exception {
+        throws Exception {
         return super.handleDelete(collectionName, id, request);
     }
 
     @DeleteMapping(
-            value = {
-                    MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
-                    MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE,
-                    MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE
-            },
-            produces = "application/json"
+        value = {
+            MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
+            MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE,
+            MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE
+        },
+        produces = "application/json"
     )
     public Object handleRelatedDelete(@PathVariable String entity,
                                       @PathVariable String target,
                                       @RequestBody String body,
                                       HttpServletRequest request)
-            throws Exception {
+        throws Exception {
         return super.handleRelatedDelete(entity, target, body, request);
     }
 }

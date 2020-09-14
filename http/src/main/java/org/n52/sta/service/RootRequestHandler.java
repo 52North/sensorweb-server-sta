@@ -61,8 +61,8 @@ public class RootRequestHandler {
      * e.g. /
      */
     @GetMapping(
-            value = "/",
-            produces = "application/json"
+        value = "/",
+        produces = "application/json"
     )
     public String returnRootResponse() {
         return rootResponse;

@@ -77,8 +77,8 @@ public class VersionRequestHandler {
      * e.g. /version
      */
     @GetMapping(
-            value = "/version",
-            produces = "application/json"
+        value = "/version",
+        produces = "application/json"
     )
     public Map<String, String> getCommitId() {
         Map<String, String> result = new HashMap<>();

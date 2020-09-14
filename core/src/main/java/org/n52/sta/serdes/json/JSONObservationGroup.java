@@ -46,7 +46,7 @@ import java.util.Set;
 @SuppressWarnings("VisibilityModifier")
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
 public class JSONObservationGroup extends JSONBase.JSONwithIdNameDescription<ObservationGroupEntity>
-        implements AbstractJSONEntity {
+    implements AbstractJSONEntity {
 
     @JsonManagedReference
     @JsonProperty(StaConstants.OBSERVATION_RELATIONS)
@@ -58,24 +58,24 @@ public class JSONObservationGroup extends JSONBase.JSONwithIdNameDescription<Obs
 
     @Override public ObservationGroupEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
-        case FULL:
-            parseReferencedFrom();
-            Assert.notNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
-            Assert.notNull(description, INVALID_INLINE_ENTITY_MISSING + "description");
+            case FULL:
+                parseReferencedFrom();
+                Assert.notNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
+                Assert.notNull(description, INVALID_INLINE_ENTITY_MISSING + "description");
 
-            return createEntity();
-        case PATCH:
-            parseReferencedFrom();
-            return createEntity();
+                return createEntity();
+            case PATCH:
+                parseReferencedFrom();
+                return createEntity();
 
-        case REFERENCE:
-            Assert.isNull(name, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(description, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(relations, INVALID_REFERENCED_ENTITY);
-            self.setStaIdentifier(identifier);
-            return self;
-        default:
-            return null;
+            case REFERENCE:
+                Assert.isNull(name, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(description, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(relations, INVALID_REFERENCED_ENTITY);
+                self.setStaIdentifier(identifier);
+                return self;
+            default:
+                return null;
         }
     }
 

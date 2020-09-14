@@ -41,13 +41,12 @@ import javax.persistence.criteria.Predicate;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 public class HibernateSpatialCriteriaBuilderImpl extends CriteriaBuilderImpl
-        implements HibernateSpatialCriteriaBuilder {
+    implements HibernateSpatialCriteriaBuilder {
 
     private static final String GEOMETRY = "geometry";
     private static final String GEOGRAPHY = "geography";
     private static final String ST_LENGTH = "ST_LENGTH";
     private static final String ST_DISTANCE = "ST_DISTANCE";
-
 
     public HibernateSpatialCriteriaBuilderImpl(CriteriaBuilderImpl hibernateCriteriaBuilder) {
         super(hibernateCriteriaBuilder.getEntityManagerFactory());
@@ -82,87 +81,87 @@ public class HibernateSpatialCriteriaBuilderImpl extends CriteriaBuilderImpl
         return defaultSTMethodCallGeometry("ST_CONTAINS", x, wktWithType);
     }
 
-    @Override public Expression<Float> st_length(String wkt) {
-        return this.function(
-                ST_LENGTH,
-                Float.class,
-                geographyfromWKT(extractWKT(wkt))
-        );
-    }
-
-    @Override public Expression<Float> st_length(Expression<Geometry> x) {
-        return this.function(
-                ST_LENGTH,
-                Float.class,
-                this.function(GEOGRAPHY, Geometry.class, x)
-        );
-    }
-
-    @Override public Expression<Float> st_distance(Expression<Geometry> x, String wkt) {
-        return this.function(
-                ST_DISTANCE,
-                Float.class,
-                this.function(GEOGRAPHY, Geometry.class, x),
-                geographyfromWKT(extractWKT(wkt))
-        );
-    }
-
-    @Override public Expression<Float> st_distance(String x, String wkt) {
-        return this.function(
-                ST_DISTANCE,
-                Float.class,
-                geographyfromWKT(extractWKT(x)),
-                geographyfromWKT(extractWKT(wkt))
-        );
-    }
-
     @Override public Predicate st_intersects(Expression<String> x, String wktWithType) {
         return this.isTrue(
-                this.function(
-                        "ST_Intersects",
-                        Boolean.class,
-                        this.function(GEOGRAPHY, Geometry.class, x),
-                        geographyfromWKT(extractWKT(wktWithType))
-                )
+            this.function(
+                "ST_Intersects",
+                Boolean.class,
+                this.function(GEOGRAPHY, Geometry.class, x),
+                geographyfromWKT(extractWKT(wktWithType))
+            )
         );
     }
 
     @Override public Predicate st_relate(Expression<Geometry> x, String wktWithType, String mask) {
         return this.isTrue(
-                this.function(
-                        "ST_RELATE",
-                        Boolean.class,
-                        this.function(GEOMETRY, Geometry.class, x),
-                        geometryfromWKT(extractWKT(wktWithType)),
-                        this.literal(mask)
-                )
+            this.function(
+                "ST_RELATE",
+                Boolean.class,
+                this.function(GEOMETRY, Geometry.class, x),
+                geometryfromWKT(extractWKT(wktWithType)),
+                this.literal(mask)
+            )
+        );
+    }
+
+    @Override public Expression<Float> st_length(Expression<Geometry> x) {
+        return this.function(
+            ST_LENGTH,
+            Float.class,
+            this.function(GEOGRAPHY, Geometry.class, x)
+        );
+    }
+
+    @Override public Expression<Float> st_length(String wkt) {
+        return this.function(
+            ST_LENGTH,
+            Float.class,
+            geographyfromWKT(extractWKT(wkt))
+        );
+    }
+
+    @Override public Expression<Float> st_distance(Expression<Geometry> x, String wkt) {
+        return this.function(
+            ST_DISTANCE,
+            Float.class,
+            this.function(GEOGRAPHY, Geometry.class, x),
+            geographyfromWKT(extractWKT(wkt))
+        );
+    }
+
+    @Override public Expression<Float> st_distance(String x, String wkt) {
+        return this.function(
+            ST_DISTANCE,
+            Float.class,
+            geographyfromWKT(extractWKT(x)),
+            geographyfromWKT(extractWKT(wkt))
         );
     }
 
     private Predicate defaultSTMethodCallGeometry(String methodName, Expression<Geometry> x, String wktWithType) {
         return this.isTrue(
-                this.function(
-                        methodName,
-                        Boolean.class,
-                        this.function(GEOMETRY, Geometry.class, x),
-                        geometryfromWKT(extractWKT(wktWithType))
-                )
+            this.function(
+                methodName,
+                Boolean.class,
+                this.function(GEOMETRY, Geometry.class, x),
+                geometryfromWKT(extractWKT(wktWithType))
+            )
         );
     }
 
     private Expression<Geometry> geometryfromWKT(String wkt) {
         return this.function(
-                "ST_GeomFromText",
-                Geometry.class,
-                this.literal("SRID=4326;" + wkt)
+            "ST_GeomFromText",
+            Geometry.class,
+            this.literal("SRID=4326;" + wkt)
         );
     }
 
     private Expression<Geometry> geographyfromWKT(String wkt) {
         return this.function(
-                "ST_GeographyFromText",
-                Geometry.class,
-                this.literal(wkt)
+            "ST_GeographyFromText",
+            Geometry.class,
+            this.literal(wkt)
         );
     }
 

@@ -51,22 +51,22 @@ public class ObservationGroupQuerySpecifications extends EntityQuerySpecificatio
     public Specification<ObservationGroupEntity> withRelationStaIdentifier(final String relationIdentifier) {
         return (root, query, builder) -> {
             final Join<ObservationGroupEntity, ObservationRelationEntity> join =
-                    root.join(ObservationGroupEntity.PROP_ENTITIES, JoinType.INNER);
+                root.join(ObservationGroupEntity.PROP_ENTITIES, JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), relationIdentifier);
         };
     }
 
     @Override protected Specification<ObservationGroupEntity> handleRelatedPropertyFilter(
-            String propertyName,
-            Specification<?> propertyValue) {
+        String propertyName,
+        Specification<?> propertyValue) {
         return (root, query, builder) -> {
             if (StaConstants.OBSERVATION_RELATIONS.equals(propertyName)) {
                 Subquery<ObservationGroupEntity> sq = query.subquery(ObservationGroupEntity.class);
                 Root<ObservationRelationEntity> obsRelation = sq.from(ObservationRelationEntity.class);
                 sq.select(obsRelation.get(ObservationRelationEntity.PROPERTY_GROUP))
-                  .where(((Specification<ObservationRelationEntity>) propertyValue).toPredicate(obsRelation,
-                                                                                                query,
-                                                                                                builder));
+                    .where(((Specification<ObservationRelationEntity>) propertyValue).toPredicate(obsRelation,
+                                                                                                  query,
+                                                                                                  builder));
                 return builder.in(root.get(ObservationGroupEntity.ID)).value(sq);
             } else {
                 throw new RuntimeException("Could not find related property: " + propertyName);
@@ -75,33 +75,33 @@ public class ObservationGroupQuerySpecifications extends EntityQuerySpecificatio
     }
 
     @Override protected Specification<ObservationGroupEntity> handleDirectPropertyFilter(
-            String propertyName,
-            Expression<?> propertyValue,
-            FilterConstants.ComparisonOperator operator,
-            boolean switched) {
+        String propertyName,
+        Expression<?> propertyValue,
+        FilterConstants.ComparisonOperator operator,
+        boolean switched) {
         return (Specification<ObservationGroupEntity>) (root, query, builder) -> {
             try {
                 switch (propertyName) {
-                case StaConstants.PROP_ID:
-                    return handleDirectStringPropertyFilter(root.get(ObservationGroupEntity.STA_IDENTIFIER),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            false);
-                case StaConstants.PROP_NAME:
-                    return handleDirectStringPropertyFilter(root.get(ObservationGroupEntity.NAME),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            switched);
-                case StaConstants.PROP_DESCRIPTION:
-                    return handleDirectStringPropertyFilter(root.get(ObservationGroupEntity.DESCRIPTION),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            switched);
-                default:
-                    throw new RuntimeException("Error getting filter for Property: \"" + propertyName
+                    case StaConstants.PROP_ID:
+                        return handleDirectStringPropertyFilter(root.get(ObservationGroupEntity.STA_IDENTIFIER),
+                                                                propertyValue,
+                                                                operator,
+                                                                builder,
+                                                                false);
+                    case StaConstants.PROP_NAME:
+                        return handleDirectStringPropertyFilter(root.get(ObservationGroupEntity.NAME),
+                                                                propertyValue,
+                                                                operator,
+                                                                builder,
+                                                                switched);
+                    case StaConstants.PROP_DESCRIPTION:
+                        return handleDirectStringPropertyFilter(root.get(ObservationGroupEntity.DESCRIPTION),
+                                                                propertyValue,
+                                                                operator,
+                                                                builder,
+                                                                switched);
+                    default:
+                        throw new RuntimeException("Error getting filter for Property: \"" + propertyName
                                                        + "\". No such property in Entity.");
 
                 }

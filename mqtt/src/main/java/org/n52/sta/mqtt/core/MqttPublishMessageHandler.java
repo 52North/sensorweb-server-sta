@@ -37,5 +37,6 @@ import org.n52.sta.utils.RequestUtils;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 public interface MqttPublishMessageHandler extends RequestUtils {
+
     <T extends IdEntity> void processPublishMessage(InterceptPublishMessage msg);
 }

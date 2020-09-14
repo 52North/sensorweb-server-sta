@@ -38,6 +38,6 @@ import org.springframework.transaction.annotation.Transactional;
 @DependsOn("DatastreamRepository")
 @Repository
 public interface DataRepository<T extends DataEntity<?>>
-        extends IdentifierRepository<T, Long> {
+    extends IdentifierRepository<T, Long> {
 
 }

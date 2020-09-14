@@ -40,4 +40,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 @Profile(StaConstants.CITSCIEXTENSION)
 public interface ObservationGroupRepository extends NameRepository<ObservationGroupEntity> {
+
 }

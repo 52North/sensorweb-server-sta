@@ -61,8 +61,8 @@ public class CorePropertyRequestHandler extends PropertyRequestHandler implement
     }
 
     @GetMapping(
-            value = MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_DIRECTLY + SLASH + PATH_PROPERTY,
-            produces = "application/json"
+        value = MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_DIRECTLY + SLASH + PATH_PROPERTY,
+        produces = "application/json"
     )
     public ElementWithQueryOptions<?> readEntityPropertyDirect(@PathVariable String entity,
                                                                @PathVariable String id,
@@ -72,27 +72,27 @@ public class CorePropertyRequestHandler extends PropertyRequestHandler implement
     }
 
     @GetMapping(
-            value = {
-                    MAPPING_PREFIX + CoreRequestUtils.ENTITY_PROPERTY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
-                    MAPPING_PREFIX + CoreRequestUtils.ENTITY_PROPERTY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE,
-                    MAPPING_PREFIX + CoreRequestUtils.ENTITY_PROPERTY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE
-            },
-            produces = "application/json"
+        value = {
+            MAPPING_PREFIX + CoreRequestUtils.ENTITY_PROPERTY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
+            MAPPING_PREFIX + CoreRequestUtils.ENTITY_PROPERTY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE,
+            MAPPING_PREFIX + CoreRequestUtils.ENTITY_PROPERTY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE
+        },
+        produces = "application/json"
     )
     public ElementWithQueryOptions<?> readRelatedEntityProperty(@PathVariable String entity,
                                                                 @PathVariable String target,
                                                                 @PathVariable String property,
                                                                 HttpServletRequest request)
-            throws Exception {
+        throws Exception {
         return super.readRelatedEntityProperty(entity, target, property, request);
     }
 
     @GetMapping(
-            value = MAPPING_PREFIX
-                    + CoreRequestUtils.ENTITY_IDENTIFIED_DIRECTLY + SLASH
-                    + PATH_PROPERTY
-                    + SLASHVALUE,
-            produces = "text/plain"
+        value = MAPPING_PREFIX
+            + CoreRequestUtils.ENTITY_IDENTIFIED_DIRECTLY + SLASH
+            + PATH_PROPERTY
+            + SLASHVALUE,
+        produces = "text/plain"
     )
     public String readEntityPropertyValueDirect(@PathVariable String entity,
                                                 @PathVariable String id,
@@ -102,18 +102,18 @@ public class CorePropertyRequestHandler extends PropertyRequestHandler implement
     }
 
     @GetMapping(
-            value = {
-                    MAPPING_PREFIX
-                            + CoreRequestUtils.ENTITY_PROPERTY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE
-                            + SLASHVALUE,
-                    MAPPING_PREFIX
-                            + CoreRequestUtils.ENTITY_PROPERTY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE
-                            + SLASHVALUE,
-                    MAPPING_PREFIX
-                            + CoreRequestUtils.ENTITY_PROPERTY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE
-                            + SLASHVALUE
-            },
-            produces = "text/plain"
+        value = {
+            MAPPING_PREFIX
+                + CoreRequestUtils.ENTITY_PROPERTY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE
+                + SLASHVALUE,
+            MAPPING_PREFIX
+                + CoreRequestUtils.ENTITY_PROPERTY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE
+                + SLASHVALUE,
+            MAPPING_PREFIX
+                + CoreRequestUtils.ENTITY_PROPERTY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE
+                + SLASHVALUE
+        },
+        produces = "text/plain"
     )
     public String readRelatedEntityPropertyValue(@PathVariable String entity,
                                                  @PathVariable String target,

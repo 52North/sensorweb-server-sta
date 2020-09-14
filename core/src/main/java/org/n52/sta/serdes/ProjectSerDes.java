@@ -87,7 +87,7 @@ public class ProjectSerDes {
         public void serialize(ProjectWithQueryOptions value,
                               JsonGenerator gen,
                               SerializerProvider serializers)
-                throws IOException {
+            throws IOException {
             gen.writeStartObject();
             value.unwrap(implicitSelect);
             ProjectEntity project = value.getEntity();
@@ -104,7 +104,7 @@ public class ProjectSerDes {
                 gen.writeStringField(STAEntityDefinition.PROP_NAME, project.getName());
             }
             if (!value.hasSelectOption() ||
-                    value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
+                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
                 gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, project.getDescription());
             }
 
@@ -115,7 +115,7 @@ public class ProjectSerDes {
 
             if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.DATASTREAMS)) {
                 if (!value.hasExpandOption() ||
-                        value.getFieldsToExpand().get(STAEntityDefinition.DATASTREAMS) == null) {
+                    value.getFieldsToExpand().get(STAEntityDefinition.DATASTREAMS) == null) {
                     writeNavigationProp(gen, STAEntityDefinition.DATASTREAMS, project.getStaIdentifier());
                 } else {
                     gen.writeFieldName(STAEntityDefinition.DATASTREAMS);
@@ -156,7 +156,7 @@ public class ProjectSerDes {
 
 
     public static class ProjectPatchDeserializer
-            extends StdDeserializer<ProjectSerDes.ProjectPatch> {
+        extends StdDeserializer<ProjectSerDes.ProjectPatch> {
 
         private static final long serialVersionUID = -6355786322787893665L;
 
@@ -166,9 +166,9 @@ public class ProjectSerDes {
 
         @Override
         public ProjectSerDes.ProjectPatch deserialize(JsonParser p, DeserializationContext ctxt)
-                throws IOException {
+            throws IOException {
             return new ProjectSerDes.ProjectPatch(p.readValueAs(JSONProject.class)
-                                                   .toEntity(JSONBase.EntityType.PATCH));
+                                                      .toEntity(JSONBase.EntityType.PATCH));
         }
     }
 }

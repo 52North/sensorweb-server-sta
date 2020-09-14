@@ -38,7 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DependsOn("DatastreamRepository")
 @Repository
 public interface PhenomenonRepository
-        extends IdentifierNameRepository<PhenomenonEntity>, StaIdentifierRepository<PhenomenonEntity> {
+    extends IdentifierNameRepository<PhenomenonEntity>, StaIdentifierRepository<PhenomenonEntity> {
 
 }
 

@@ -60,23 +60,23 @@ public class JSONParty extends JSONBase.JSONwithId<PartyEntity> implements Abstr
 
     @Override public PartyEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
-        case FULL:
-            parseReferencedFrom();
-            Assert.notNull(nickName, INVALID_INLINE_ENTITY_MISSING + "nickName");
-            Assert.notNull(role, INVALID_INLINE_ENTITY_MISSING + "role");
+            case FULL:
+                parseReferencedFrom();
+                Assert.notNull(nickName, INVALID_INLINE_ENTITY_MISSING + "nickName");
+                Assert.notNull(role, INVALID_INLINE_ENTITY_MISSING + "role");
 
-            return createEntity();
-        case PATCH:
-            parseReferencedFrom();
-            return createEntity();
+                return createEntity();
+            case PATCH:
+                parseReferencedFrom();
+                return createEntity();
 
-        case REFERENCE:
-            Assert.isNull(nickName, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(role, INVALID_REFERENCED_ENTITY);
-            self.setStaIdentifier(identifier);
-            return self;
-        default:
-            return null;
+            case REFERENCE:
+                Assert.isNull(nickName, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(role, INVALID_REFERENCED_ENTITY);
+                self.setStaIdentifier(identifier);
+                return self;
+            default:
+                return null;
         }
     }
 

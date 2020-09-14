@@ -92,7 +92,7 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
         // Add select filter with filter only returning property
         filters.add(new SelectFilter(property));
         return serviceRepository.getEntityService(entity)
-                                .getEntity(entityId, QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
+            .getEntity(entityId, QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
     }
 
     /**
@@ -109,7 +109,7 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
                                                                 String target,
                                                                 String property,
                                                                 HttpServletRequest request)
-            throws Exception {
+        throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         return readRelatedEntityProperty(entity, target, property, lookupPath);
     }
@@ -131,10 +131,10 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
         filters.add(new SelectFilter(property));
 
         return serviceRepository.getEntityService(target)
-                                .getEntityByRelatedEntity(sourceId,
-                                                          sourceType,
-                                                          null,
-                                                          QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
+            .getEntityByRelatedEntity(sourceId,
+                                      sourceType,
+                                      null,
+                                      QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
     }
 
     /**
@@ -152,7 +152,7 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
                                                 HttpServletRequest request) throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         ElementWithQueryOptions<?> elementWithQueryOptions =
-                this.readEntityPropertyDirect(entity, id, property, lookupPath.substring(0, lookupPath.length() - 7));
+            this.readEntityPropertyDirect(entity, id, property, lookupPath.substring(0, lookupPath.length() - 7));
         return mapper.valueToTree(elementWithQueryOptions).fields().next().getValue().toString();
     }
 
@@ -172,10 +172,10 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
                                                  HttpServletRequest request) throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         ElementWithQueryOptions<?> elementWithQueryOptions =
-                this.readRelatedEntityProperty(entity,
-                                               target,
-                                               property,
-                                               lookupPath.substring(0, lookupPath.length() - 7));
+            this.readRelatedEntityProperty(entity,
+                                           target,
+                                           property,
+                                           lookupPath.substring(0, lookupPath.length() - 7));
         return mapper.valueToTree(elementWithQueryOptions).fields().next().getValue().toString();
     }
 }

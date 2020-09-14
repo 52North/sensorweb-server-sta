@@ -41,7 +41,7 @@ import java.util.Set;
 @Transactional
 @Repository
 public interface DatastreamRepository
-        extends NameRepository<AbstractDatasetEntity>, StaIdentifierRepository<AbstractDatasetEntity> {
+    extends NameRepository<AbstractDatasetEntity>, StaIdentifierRepository<AbstractDatasetEntity> {
 
     <S extends AbstractDatasetEntity> S intermediateSave(S entity);
 

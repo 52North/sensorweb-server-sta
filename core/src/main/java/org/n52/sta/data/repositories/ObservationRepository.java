@@ -40,7 +40,7 @@ import java.util.Set;
 @DependsOn("DatastreamRepository")
 @Repository
 public interface ObservationRepository<T extends ObservationEntity<?>>
-        extends IdentifierRepository<T, Long>, StaIdentifierRepository<T> {
+    extends IdentifierRepository<T, Long>, StaIdentifierRepository<T> {
 
     ObservationEntity<T> findFirstByDataset_idOrderBySamplingTimeStartAsc(Long datasetIdentifier);
 

@@ -57,7 +57,7 @@ import java.util.Set;
  */
 @Component
 public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
-        implements MqttPublishMessageHandler, CoreRequestUtils {
+    implements MqttPublishMessageHandler, CoreRequestUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttPublishMessageHandlerImpl.class);
 
@@ -67,12 +67,12 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
     private final boolean readOnly;
 
     public MqttPublishMessageHandlerImpl(
-            @Value("${server.feature.mqttPublishTopics:Observations}") List<String> publishTopics,
-            @Value("${server.feature.mqttReadOnly}") boolean readOnly,
-            @Value("${server.rootUrl}") String rootUrl,
-            @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
-            EntityServiceRepository serviceRepository,
-            ObjectMapper mapper) {
+        @Value("${server.feature.mqttPublishTopics:Observations}") List<String> publishTopics,
+        @Value("${server.feature.mqttReadOnly}") boolean readOnly,
+        @Value("${server.rootUrl}") String rootUrl,
+        @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
+        EntityServiceRepository serviceRepository,
+        ObjectMapper mapper) {
         super(rootUrl, shouldEscapeId, serviceRepository);
         this.mapper = mapper;
         this.readOnly = readOnly;
@@ -132,7 +132,7 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
                     String sourceType = reference[0];
                     String sourceId = reference[1].replace(")", "");
                     ObjectNode jsonBody =
-                            (ObjectNode) mapper.readTree(msg.getPayload().toString(Charset.defaultCharset()));
+                        (ObjectNode) mapper.readTree(msg.getPayload().toString(Charset.defaultCharset()));
                     jsonBody.put(REFERENCED_FROM_TYPE, sourceType);
                     jsonBody.put(REFERENCED_FROM_ID, sourceId);
                     payload = jsonBody.toString();
@@ -142,7 +142,7 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
 
                 Class<T> clazz = collectionNameToClass(collection);
                 ((AbstractSensorThingsEntityService<?, T, ? extends T>) serviceRepository.getEntityService(collection))
-                        .create(mapper.readValue(payload, clazz));
+                    .create(mapper.readValue(payload, clazz));
             } else {
                 throw new STAInvalidUrlException("Topic does not reference a Collection allowed for POSTing via mqtt");
             }

@@ -81,9 +81,9 @@ public class ErrorHandler {
 
         LOGGER.debug(msg, exception);
         return new ResponseEntity<>(
-                createErrorMessage(exception.getClass().getName(), msg),
-                headers,
-                HttpStatus.INTERNAL_SERVER_ERROR);
+            createErrorMessage(exception.getClass().getName(), msg),
+            headers,
+            HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(value = STACRUDException.class)

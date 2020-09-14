@@ -63,8 +63,8 @@ import java.util.stream.Collectors;
 @Transactional
 @Profile(StaConstants.CITSCIEXTENSION)
 public class ObservationGroupService
-        extends AbstractSensorThingsEntityServiceImpl<ObservationGroupRepository, ObservationGroupEntity,
-        ObservationGroupEntity> {
+    extends AbstractSensorThingsEntityServiceImpl<ObservationGroupRepository, ObservationGroupEntity,
+    ObservationGroupEntity> {
 
     private static final ObservationGroupQuerySpecifications ogQS = new ObservationGroupQuerySpecifications();
 
@@ -77,13 +77,13 @@ public class ObservationGroupService
     }
 
     @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
-            throws STAInvalidQueryException {
+        throws STAInvalidQueryException {
         if (expandOption != null) {
             for (ExpandItem expandItem : expandOption.getItems()) {
                 String expandProperty = expandItem.getPath();
                 if (ObservationGroupEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
                     return new EntityGraphRepository.FetchGraph[] {
-                            EntityGraphRepository.FetchGraph.FETCHGRAPH_OBSERVATION_RELATIONS
+                        EntityGraphRepository.FetchGraph.FETCHGRAPH_OBSERVATION_RELATIONS,
                     };
                 } else {
                     throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
@@ -97,14 +97,14 @@ public class ObservationGroupService
 
     @Override protected ObservationGroupEntity fetchExpandEntitiesWithFilter(ObservationGroupEntity entity,
                                                                              ExpandFilter expandOption)
-            throws STACRUDException, STAInvalidQueryException {
+        throws STACRUDException, STAInvalidQueryException {
         for (ExpandItem expandItem : expandOption.getItems()) {
             String expandProperty = expandItem.getPath();
             if (ObservationGroupEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
                 Page<ObservationRelationEntity> obsRelations = getObservationRelationService()
-                        .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
-                                                               STAEntityDefinition.OBSERVATION_GROUPS,
-                                                               expandItem.getQueryOptions());
+                    .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
+                                                           STAEntityDefinition.OBSERVATION_GROUPS,
+                                                           expandItem.getQueryOptions());
                 entity.setEntities(obsRelations.get().collect(Collectors.toSet()));
                 break;
             } else {
@@ -121,11 +121,11 @@ public class ObservationGroupService
                                                                                     String ownId) {
         Specification<ObservationGroupEntity> filter;
         switch (relatedType) {
-        case STAEntityDefinition.OBSERVATION_RELATIONS:
-            filter = ogQS.withRelationStaIdentifier(relatedId);
-            break;
-        default:
-            throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
+            case STAEntityDefinition.OBSERVATION_RELATIONS:
+                filter = ogQS.withRelationStaIdentifier(relatedId);
+                break;
+            default:
+                throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
         }
 
         if (ownId != null) {
@@ -139,7 +139,7 @@ public class ObservationGroupService
         if (!obsGroup.isProcessed()) {
             if (obsGroup.getStaIdentifier() != null && !obsGroup.isSetName()) {
                 Optional<ObservationGroupEntity> optionalEntity =
-                        getRepository().findByStaIdentifier(obsGroup.getStaIdentifier());
+                    getRepository().findByStaIdentifier(obsGroup.getStaIdentifier());
                 if (optionalEntity.isPresent()) {
                     return optionalEntity.get();
                 } else {
@@ -165,7 +165,7 @@ public class ObservationGroupService
     }
 
     @Override protected ObservationGroupEntity updateEntity(String id, ObservationGroupEntity entity, HttpMethod method)
-            throws STACRUDException {
+        throws STACRUDException {
         if (HttpMethod.PATCH.equals(method)) {
             synchronized (getLock(id)) {
                 Optional<ObservationGroupEntity> existing = getRepository().findByStaIdentifier(id);
@@ -200,10 +200,6 @@ public class ObservationGroupService
         mergeDescription(existing, toMerge);
         mergeObservationRelations(existing, toMerge);
         return existing;
-    }
-
-    @Override protected void delete(ObservationGroupEntity entity) throws STACRUDException {
-        getRepository().save(entity);
     }
 
     @Override public void delete(String id) throws STACRUDException {

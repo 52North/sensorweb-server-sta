@@ -46,7 +46,7 @@ import java.util.Set;
 @SuppressWarnings("VisibilityModifier")
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
 public class JSONLicense extends JSONBase.JSONwithId<LicenseEntity>
-        implements AbstractJSONEntity {
+    implements AbstractJSONEntity {
 
     public String name;
     public String definition;
@@ -62,23 +62,23 @@ public class JSONLicense extends JSONBase.JSONwithId<LicenseEntity>
 
     @Override public LicenseEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
-        case FULL:
-            parseReferencedFrom();
-            Assert.notNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
-            Assert.notNull(definition, INVALID_INLINE_ENTITY_MISSING + "definition");
+            case FULL:
+                parseReferencedFrom();
+                Assert.notNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
+                Assert.notNull(definition, INVALID_INLINE_ENTITY_MISSING + "definition");
 
-            return createEntity();
-        case PATCH:
-            parseReferencedFrom();
-            return createEntity();
-        case REFERENCE:
-            Assert.isNull(name, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(definition, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(logo, INVALID_REFERENCED_ENTITY);
-            self.setStaIdentifier(identifier);
-            return self;
-        default:
-            return null;
+                return createEntity();
+            case PATCH:
+                parseReferencedFrom();
+                return createEntity();
+            case REFERENCE:
+                Assert.isNull(name, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(definition, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(logo, INVALID_REFERENCED_ENTITY);
+                self.setStaIdentifier(identifier);
+                return self;
+            default:
+                return null;
         }
     }
 

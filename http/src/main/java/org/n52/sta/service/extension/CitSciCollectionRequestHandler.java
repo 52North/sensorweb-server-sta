@@ -65,8 +65,8 @@ public class CitSciCollectionRequestHandler extends CollectionRequestHandler imp
 
     @Override
     @GetMapping(
-            value = "/{collectionName:" + CitSciExtensionRequestUtils.BASE_COLLECTION_REGEX + "}",
-            produces = "application/json"
+        value = "/{collectionName:" + CitSciExtensionRequestUtils.BASE_COLLECTION_REGEX + "}",
+        produces = "application/json"
     )
     public CollectionWrapper readCollectionDirect(@PathVariable String collectionName,
                                                   HttpServletRequest request) throws STACRUDException {
@@ -75,63 +75,63 @@ public class CitSciCollectionRequestHandler extends CollectionRequestHandler imp
 
     @Override
     @GetMapping(
-            value = "/{collectionName:" + CitSciExtensionRequestUtils.BASE_COLLECTION_REGEX + "}" + SLASHREF,
-            produces = "application/json"
+        value = "/{collectionName:" + CitSciExtensionRequestUtils.BASE_COLLECTION_REGEX + "}" + SLASHREF,
+        produces = "application/json"
     )
     public CollectionWrapper readCollectionRefDirect(@PathVariable String collectionName,
                                                      HttpServletRequest request)
-            throws STACRUDException {
+        throws STACRUDException {
         return super.readCollectionRefDirect(collectionName, request);
     }
 
     @Override
     @GetMapping(
-            value = {
-                    MAPPING_PREFIX +
-                            CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVATION_GROUP_PATH_VARIABLE,
-                    MAPPING_PREFIX +
-                            CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_PROJECT_PATH_VARIABLE,
-                    MAPPING_PREFIX +
-                            CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_LICENSE_PATH_VARIABLE,
-                    MAPPING_PREFIX +
-                            CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_PARTY_PATH_VARIABLE,
-                    MAPPING_PREFIX +
-                            CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE
-            },
-            produces = "application/json"
+        value = {
+            MAPPING_PREFIX +
+                CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVATION_GROUP_PATH_VARIABLE,
+            MAPPING_PREFIX +
+                CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_PROJECT_PATH_VARIABLE,
+            MAPPING_PREFIX +
+                CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_LICENSE_PATH_VARIABLE,
+            MAPPING_PREFIX +
+                CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_PARTY_PATH_VARIABLE,
+            MAPPING_PREFIX +
+                CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE
+        },
+        produces = "application/json"
     )
     public CollectionWrapper readCollectionRelated(@PathVariable String entity,
                                                    @PathVariable String target,
                                                    HttpServletRequest request)
-            throws Exception {
+        throws Exception {
         return super.readCollectionRelated(entity, target, request);
     }
 
     @Override
     @GetMapping(
-            value = {
-                    MAPPING_PREFIX
-                            + CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVATION_GROUP_PATH_VARIABLE
-                            + SLASHREF,
-                    MAPPING_PREFIX
-                            + CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_PROJECT_PATH_VARIABLE
-                            + SLASHREF,
-                    MAPPING_PREFIX
-                            + CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_LICENSE_PATH_VARIABLE
-                            + SLASHREF,
-                    MAPPING_PREFIX
-                            + CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_PARTY_PATH_VARIABLE
-                            + SLASHREF,
-                    MAPPING_PREFIX +
-                            CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE
-                            + SLASHREF,
-            },
-            produces = "application/json"
+        value = {
+            MAPPING_PREFIX
+                + CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVATION_GROUP_PATH_VARIABLE
+                + SLASHREF,
+            MAPPING_PREFIX
+                + CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_PROJECT_PATH_VARIABLE
+                + SLASHREF,
+            MAPPING_PREFIX
+                + CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_LICENSE_PATH_VARIABLE
+                + SLASHREF,
+            MAPPING_PREFIX
+                + CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_PARTY_PATH_VARIABLE
+                + SLASHREF,
+            MAPPING_PREFIX +
+                CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE
+                + SLASHREF,
+        },
+        produces = "application/json"
     )
     public CollectionWrapper readCollectionRelatedRef(@PathVariable String entity,
                                                       @PathVariable String target,
                                                       HttpServletRequest request)
-            throws Exception {
+        throws Exception {
         return super.readCollectionRelatedRef(entity, target, request);
     }
 }

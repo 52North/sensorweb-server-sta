@@ -52,7 +52,7 @@ public class ObservationRelationSerDes {
 
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     public static class ObservationRelationPatch extends ObservationRelationEntity
-            implements EntityPatch<ObservationRelationEntity> {
+        implements EntityPatch<ObservationRelationEntity> {
 
         private static final long serialVersionUID = -2233037380407692718L;
         private final ObservationRelationEntity entity;
@@ -68,7 +68,7 @@ public class ObservationRelationSerDes {
 
 
     public static class ObservationRelationSerializer
-            extends AbstractSTASerializer<ObservationRelationWithQueryOptions, ObservationRelationEntity> {
+        extends AbstractSTASerializer<ObservationRelationWithQueryOptions, ObservationRelationEntity> {
 
         private static final long serialVersionUID = -1618289129123682794L;
 
@@ -82,7 +82,7 @@ public class ObservationRelationSerDes {
         public void serialize(ObservationRelationWithQueryOptions value,
                               JsonGenerator gen,
                               SerializerProvider serializers)
-                throws IOException {
+            throws IOException {
             gen.writeStartObject();
             value.unwrap(implicitSelect);
             ObservationRelationEntity obsRelation = value.getEntity();
@@ -101,7 +101,7 @@ public class ObservationRelationSerDes {
 
             if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.OBSERVATION)) {
                 if (!value.hasExpandOption() ||
-                        value.getFieldsToExpand().get(STAEntityDefinition.OBSERVATION) == null) {
+                    value.getFieldsToExpand().get(STAEntityDefinition.OBSERVATION) == null) {
                     writeNavigationProp(gen, STAEntityDefinition.OBSERVATION, obsRelation.getStaIdentifier());
                 } else {
                     gen.writeFieldName(STAEntityDefinition.OBSERVATION);
@@ -113,9 +113,9 @@ public class ObservationRelationSerDes {
             }
 
             if (!value.hasSelectOption() ||
-                    value.getFieldsToSerialize().contains(STAEntityDefinition.OBSERVATION_GROUP)) {
+                value.getFieldsToSerialize().contains(STAEntityDefinition.OBSERVATION_GROUP)) {
                 if (!value.hasExpandOption()
-                        || value.getFieldsToExpand().get(STAEntityDefinition.OBSERVATION_GROUP) == null) {
+                    || value.getFieldsToExpand().get(STAEntityDefinition.OBSERVATION_GROUP) == null) {
                     writeNavigationProp(gen, STAEntityDefinition.OBSERVATION_GROUP, obsRelation.getStaIdentifier());
                 } else {
                     gen.writeFieldName(STAEntityDefinition.OBSERVATION_GROUP);
@@ -147,7 +147,7 @@ public class ObservationRelationSerDes {
 
 
     public static class ObservationRelationPatchDeserializer
-            extends StdDeserializer<ObservationRelationSerDes.ObservationRelationPatch> {
+        extends StdDeserializer<ObservationRelationSerDes.ObservationRelationPatch> {
 
         private static final long serialVersionUID = -6355786322787893665L;
 
@@ -157,9 +157,9 @@ public class ObservationRelationSerDes {
 
         @Override
         public ObservationRelationSerDes.ObservationRelationPatch deserialize(JsonParser p, DeserializationContext ctxt)
-                throws IOException {
+            throws IOException {
             return new ObservationRelationSerDes.ObservationRelationPatch(p.readValueAs(JSONObservationRelation.class)
-                                                                           .toEntity(JSONBase.EntityType.PATCH));
+                                                                              .toEntity(JSONBase.EntityType.PATCH));
         }
     }
 }

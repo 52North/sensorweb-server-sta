@@ -53,16 +53,15 @@ import java.util.stream.Collectors;
 @SuppressWarnings("VisibilityModifier")
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
 public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<AbstractDatasetEntity>
-        implements AbstractJSONEntity {
-    private static final String COULD_NOT_PARSE_OBS_AREA = "Could not parse observedArea to GeoJSON. Error was: ";
+    implements AbstractJSONEntity {
 
+    private static final String COULD_NOT_PARSE_OBS_AREA = "Could not parse observedArea to GeoJSON. Error was: ";
     // JSON Properties. Matched by Annotation or variable name
     public String observationType;
     public JSONUnitOfMeasurement unitOfMeasurement;
     public JsonNode observedArea;
     public String phenomenonTime;
     public String resultTime;
-
     @JsonManagedReference
     public JSONSensor Sensor;
     @JsonManagedReference
@@ -71,34 +70,28 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Abstr
     public JSONObservedProperty ObservedProperty;
     @JsonManagedReference
     public JSONObservation[] Observations;
-
     @JsonManagedReference
     @JsonProperty(StaConstants.LICENSE)
     public JSONLicense license;
-
     @JsonManagedReference
     @JsonProperty(StaConstants.PARTY)
     public JSONParty party;
-
     @JsonManagedReference
     @JsonProperty(StaConstants.PROJECT)
     public JSONProject project;
-
     private final GeometryFactory factory =
-            new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
-
+        new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
     private final String OM_CategoryObservation =
-            "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CategoryObservation";
+        "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CategoryObservation";
     private final String OM_CountObservation =
-            "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation";
+        "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation";
     private final String OM_Measurement =
-            "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement";
+        "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement";
     private final String OM_Observation =
-            "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation";
+        "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation";
     private final String OM_TruthObservation =
-            "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_TruthObservation";
+        "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_TruthObservation";
     private final String obsType = "observationType";
-
     private final String uomName = "unitOfMeasurement->name";
     private final String uomSymbol = "unitOfMeasurement->symbol";
     private final String uomDef = "unitOfMeasurement->definition";
@@ -110,38 +103,38 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Abstr
     @Override protected void parseReferencedFrom() {
         if (referencedFromType != null) {
             switch (referencedFromType) {
-            case StaConstants.SENSORS:
-                Assert.isNull(Sensor, INVALID_DUPLICATE_REFERENCE);
-                this.Sensor = new JSONSensor();
-                this.Sensor.identifier = referencedFromID;
-                return;
-            case StaConstants.OBSERVED_PROPERTIES:
-                Assert.isNull(ObservedProperty, INVALID_DUPLICATE_REFERENCE);
-                this.ObservedProperty = new JSONObservedProperty();
-                this.ObservedProperty.identifier = referencedFromID;
-                return;
-            case StaConstants.THINGS:
-                Assert.isNull(Thing, INVALID_DUPLICATE_REFERENCE);
-                this.Thing = new JSONThing();
-                this.Thing.identifier = referencedFromID;
-                return;
-            case StaConstants.LICENSES:
-                Assert.isNull(license, INVALID_DUPLICATE_REFERENCE);
-                this.license = new JSONLicense();
-                this.license.identifier = referencedFromID;
-                return;
-            case StaConstants.PARTIES:
-                Assert.isNull(party, INVALID_DUPLICATE_REFERENCE);
-                this.party = new JSONParty();
-                this.party.identifier = referencedFromID;
-                return;
-            case StaConstants.PROJECTS:
-                Assert.isNull(project, INVALID_DUPLICATE_REFERENCE);
-                this.project = new JSONProject();
-                this.project.identifier = referencedFromID;
-                return;
-            default:
-                throw new IllegalArgumentException(INVALID_BACKREFERENCE);
+                case StaConstants.SENSORS:
+                    Assert.isNull(Sensor, INVALID_DUPLICATE_REFERENCE);
+                    this.Sensor = new JSONSensor();
+                    this.Sensor.identifier = referencedFromID;
+                    return;
+                case StaConstants.OBSERVED_PROPERTIES:
+                    Assert.isNull(ObservedProperty, INVALID_DUPLICATE_REFERENCE);
+                    this.ObservedProperty = new JSONObservedProperty();
+                    this.ObservedProperty.identifier = referencedFromID;
+                    return;
+                case StaConstants.THINGS:
+                    Assert.isNull(Thing, INVALID_DUPLICATE_REFERENCE);
+                    this.Thing = new JSONThing();
+                    this.Thing.identifier = referencedFromID;
+                    return;
+                case StaConstants.LICENSES:
+                    Assert.isNull(license, INVALID_DUPLICATE_REFERENCE);
+                    this.license = new JSONLicense();
+                    this.license.identifier = referencedFromID;
+                    return;
+                case StaConstants.PARTIES:
+                    Assert.isNull(party, INVALID_DUPLICATE_REFERENCE);
+                    this.party = new JSONParty();
+                    this.party.identifier = referencedFromID;
+                    return;
+                case StaConstants.PROJECTS:
+                    Assert.isNull(project, INVALID_DUPLICATE_REFERENCE);
+                    this.project = new JSONProject();
+                    this.project.identifier = referencedFromID;
+                    return;
+                default:
+                    throw new IllegalArgumentException(INVALID_BACKREFERENCE);
             }
         }
     }
@@ -149,52 +142,52 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Abstr
     @Override
     public AbstractDatasetEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
-        case FULL:
-            parseReferencedFrom();
-            Assert.notNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
-            Assert.notNull(description, INVALID_INLINE_ENTITY_MISSING + "description");
-            Assert.notNull(observationType, INVALID_INLINE_ENTITY_MISSING + obsType);
-            Assert.state(observationType.equals(OM_Measurement)
+            case FULL:
+                parseReferencedFrom();
+                Assert.notNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
+                Assert.notNull(description, INVALID_INLINE_ENTITY_MISSING + "description");
+                Assert.notNull(observationType, INVALID_INLINE_ENTITY_MISSING + obsType);
+                Assert.state(observationType.equals(OM_Measurement)
                                  || observationType.equals(OM_CountObservation)
                                  || observationType.equals(OM_CategoryObservation)
                                  || observationType.equals(OM_Observation)
                                  || observationType.equals(OM_TruthObservation),
-                         INVALID_INLINE_ENTITY_INVALID_VALUE + obsType);
-            Assert.notNull(unitOfMeasurement, INVALID_INLINE_ENTITY_MISSING + "unitOfMeasurement");
-            // Check if we have special null-unit
-            if (unitOfMeasurement.name != null) {
-                Assert.notNull(unitOfMeasurement.name, INVALID_INLINE_ENTITY_MISSING + uomName);
-                Assert.notNull(unitOfMeasurement.symbol, INVALID_INLINE_ENTITY_MISSING + uomSymbol);
-                Assert.notNull(unitOfMeasurement.definition, INVALID_INLINE_ENTITY_MISSING + uomDef);
-            } else {
-                Assert.isNull(unitOfMeasurement.name, INVALID_INLINE_ENTITY_MISSING + uomName);
-                Assert.isNull(unitOfMeasurement.symbol, INVALID_INLINE_ENTITY_MISSING + uomSymbol);
-                Assert.isNull(unitOfMeasurement.definition, INVALID_INLINE_ENTITY_MISSING + uomDef);
-            }
-            return createPostEntity();
-        case PATCH:
-            parseReferencedFrom();
-            return createPatchEntity();
+                             INVALID_INLINE_ENTITY_INVALID_VALUE + obsType);
+                Assert.notNull(unitOfMeasurement, INVALID_INLINE_ENTITY_MISSING + "unitOfMeasurement");
+                // Check if we have special null-unit
+                if (unitOfMeasurement.name != null) {
+                    Assert.notNull(unitOfMeasurement.name, INVALID_INLINE_ENTITY_MISSING + uomName);
+                    Assert.notNull(unitOfMeasurement.symbol, INVALID_INLINE_ENTITY_MISSING + uomSymbol);
+                    Assert.notNull(unitOfMeasurement.definition, INVALID_INLINE_ENTITY_MISSING + uomDef);
+                } else {
+                    Assert.isNull(unitOfMeasurement.name, INVALID_INLINE_ENTITY_MISSING + uomName);
+                    Assert.isNull(unitOfMeasurement.symbol, INVALID_INLINE_ENTITY_MISSING + uomSymbol);
+                    Assert.isNull(unitOfMeasurement.definition, INVALID_INLINE_ENTITY_MISSING + uomDef);
+                }
+                return createPostEntity();
+            case PATCH:
+                parseReferencedFrom();
+                return createPatchEntity();
 
-        case REFERENCE:
-            Assert.isNull(name, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(description, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(observationType, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(unitOfMeasurement, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(observedArea, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(phenomenonTime, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(resultTime, INVALID_REFERENCED_ENTITY);
+            case REFERENCE:
+                Assert.isNull(name, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(description, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(observationType, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(unitOfMeasurement, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(observedArea, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(phenomenonTime, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(resultTime, INVALID_REFERENCED_ENTITY);
 
-            Assert.isNull(Sensor, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(ObservedProperty, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(Thing, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(Observations, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(Sensor, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(ObservedProperty, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(Thing, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(Observations, INVALID_REFERENCED_ENTITY);
 
-            self.setIdentifier(identifier);
-            self.setStaIdentifier(identifier);
-            return self;
-        default:
-            return null;
+                self.setIdentifier(identifier);
+                self.setStaIdentifier(identifier);
+                return self;
+            default:
+                return null;
         }
     }
 
@@ -258,8 +251,8 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Abstr
 
         if (Observations != null) {
             self.setObservations(Arrays.stream(Observations)
-                                       .map(obs -> obs.toEntity(JSONBase.EntityType.REFERENCE))
-                                       .collect(Collectors.toSet()));
+                                     .map(obs -> obs.toEntity(JSONBase.EntityType.REFERENCE))
+                                     .collect(Collectors.toSet()));
         }
 
         if (license != null) {
@@ -330,7 +323,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Abstr
 
         if (ObservedProperty != null) {
             self.setObservableProperty(
-                    ObservedProperty.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+                ObservedProperty.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
         } else if (backReference instanceof JSONObservedProperty) {
             self.setObservableProperty(((JSONObservedProperty) backReference).getEntity());
         } else {
@@ -339,9 +332,9 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Abstr
 
         if (Observations != null) {
             self.setObservations(Arrays.stream(Observations)
-                                       .map(entity -> entity.toEntity(JSONBase.EntityType.FULL,
-                                                                      JSONBase.EntityType.REFERENCE))
-                                       .collect(Collectors.toSet()));
+                                     .map(entity -> entity.toEntity(JSONBase.EntityType.FULL,
+                                                                    JSONBase.EntityType.REFERENCE))
+                                     .collect(Collectors.toSet()));
         } else if (backReference instanceof JSONObservation) {
             self.setObservations(Collections.singleton(((JSONObservation) backReference).self));
         }
@@ -373,6 +366,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Abstr
     }
 
     static class JSONUnitOfMeasurement {
+
         public String symbol;
 
         public String name;

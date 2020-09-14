@@ -47,86 +47,86 @@ import java.util.Arrays;
 public class ITRollbackOnInvalidPost extends ConformanceTests {
 
     private final String invalidSensor = "{\"description\":\"This is the Lobby of the 52N HQ\",\"name\":\"52N HQ " +
-            "Lobby\",\"Locations\":[{\"name\":\"Location of 52N HQ\",\"description\":\"Somewhere in the " +
-            "Loddenheide\",\"encodingType\":\"application/vnd.geo+json\",\"location\":{\"type\":\"Feature\"," +
-            "\"geometry\":{\"type\":\"Point\",\"coordinates\":[52,7]}}}],\"Datastreams\":[{\"name\":\"Air " +
-            "Temperature\",\"description\":\"This Datastreams measures Air Temperature\"," +
-            "\"unitOfMeasurement\":{\"name\":\"degree Celsius\",\"symbol\":\"°C\"," +
-            "\"definition\":\"http://unitsofmeasure.org/ucum.html#para-30\"},\"observationType\":\"http://www.opengis" +
-            ".net/def/observationType/OGC-OM/2.0/OM_Measurement\",\"observedArea\":{\"type\":\"Polygon\"," +
-            "\"coordinates\":[[[100,0]]]},\"Observations\":[{\"result\":\"28\"," +
-            "\"phenomenonTime\":\"2019-03-10T17:46:09Z\"},{\"result\":\"31\"," +
-            "\"phenomenonTime\":\"2019-03-10T17:50:00Z\"}],\"phenomenonTime\":\"2009-01-11T16:22:25" +
-            ".00Z/2011-08-21T08:32:10.00Z\",\"ObservedProperty\":{\"@iot.id\":\"AirTemp\",\"name\":\"Air " +
-            "Temperature\",\"definition\":\"http://sweet.jpl.nasa.gov/ontology/property.owl#AirTemperature\"," +
-            "\"description\":\"The air temperature is the temperature of the air.\"},\"Sensor\":{\"@iot" +
-            ".id\":\"DS18B2022\",\"encodingType\":\"application/pdf\",\"metadata\":\"http://datasheets.maxim-ic" +
-            ".com/en/ds/DS18B20.pdf\"}}]}";
+        "Lobby\",\"Locations\":[{\"name\":\"Location of 52N HQ\",\"description\":\"Somewhere in the " +
+        "Loddenheide\",\"encodingType\":\"application/vnd.geo+json\",\"location\":{\"type\":\"Feature\"," +
+        "\"geometry\":{\"type\":\"Point\",\"coordinates\":[52,7]}}}],\"Datastreams\":[{\"name\":\"Air " +
+        "Temperature\",\"description\":\"This Datastreams measures Air Temperature\"," +
+        "\"unitOfMeasurement\":{\"name\":\"degree Celsius\",\"symbol\":\"°C\"," +
+        "\"definition\":\"http://unitsofmeasure.org/ucum.html#para-30\"},\"observationType\":\"http://www.opengis" +
+        ".net/def/observationType/OGC-OM/2.0/OM_Measurement\",\"observedArea\":{\"type\":\"Polygon\"," +
+        "\"coordinates\":[[[100,0]]]},\"Observations\":[{\"result\":\"28\"," +
+        "\"phenomenonTime\":\"2019-03-10T17:46:09Z\"},{\"result\":\"31\"," +
+        "\"phenomenonTime\":\"2019-03-10T17:50:00Z\"}],\"phenomenonTime\":\"2009-01-11T16:22:25" +
+        ".00Z/2011-08-21T08:32:10.00Z\",\"ObservedProperty\":{\"@iot.id\":\"AirTemp\",\"name\":\"Air " +
+        "Temperature\",\"definition\":\"http://sweet.jpl.nasa.gov/ontology/property.owl#AirTemperature\"," +
+        "\"description\":\"The air temperature is the temperature of the air.\"},\"Sensor\":{\"@iot" +
+        ".id\":\"DS18B2022\",\"encodingType\":\"application/pdf\",\"metadata\":\"http://datasheets.maxim-ic" +
+        ".com/en/ds/DS18B20.pdf\"}}]}";
 
     private final String invalidObsProp = "{\"description\":\"This is the Lobby of the 52N HQ\",\"name\":\"52N HQ " +
-            "Lobby\",\"Locations\":[{\"name\":\"Location of 52N HQ\",\"description\":\"Somewhere in the " +
-            "Loddenheide\",\"encodingType\":\"application/vnd.geo+json\",\"location\":{\"type\":\"Feature\"," +
-            "\"geometry\":{\"type\":\"Point\",\"coordinates\":[52,7]}}}],\"Datastreams\":[{\"name\":\"Air " +
-            "Temperature\",\"description\":\"This Datastreams measures Air Temperature\"," +
-            "\"unitOfMeasurement\":{\"name\":\"degree Celsius\",\"symbol\":\"°C\"," +
-            "\"definition\":\"http://unitsofmeasure.org/ucum.html#para-30\"},\"observationType\":\"http://www.opengis" +
-            ".net/def/observationType/OGC-OM/2.0/OM_Measurement\",\"observedArea\":{\"type\":\"Polygon\"," +
-            "\"coordinates\":[[[100,0]]]},\"Observations\":[{\"result\":\"28\"," +
-            "\"phenomenonTime\":\"2019-03-10T17:46:09Z\"},{\"result\":\"31\"," +
-            "\"phenomenonTime\":\"2019-03-10T17:50:00Z\"}],\"phenomenonTime\":\"2009-01-11T16:22:25" +
-            ".00Z/2011-08-21T08:32:10.00Z\",\"ObservedProperty\":{\"@iot.id\":\"AirTemp\",\"name\":\"Air " +
-            "Temperature\",\"description\":\"The air temperature is the temperature of the air.\"},\"Sensor\":{\"@iot" +
-            ".id\":\"DS18B2022\",\"name\":\"sensor 1\",\"description\":\"sensor 1\"," +
-            "\"encodingType\":\"application/pdf\",\"metadata\":\"http://datasheets.maxim-ic.com/en/ds/DS18B20" +
-            ".pdf\"}}]}";
+        "Lobby\",\"Locations\":[{\"name\":\"Location of 52N HQ\",\"description\":\"Somewhere in the " +
+        "Loddenheide\",\"encodingType\":\"application/vnd.geo+json\",\"location\":{\"type\":\"Feature\"," +
+        "\"geometry\":{\"type\":\"Point\",\"coordinates\":[52,7]}}}],\"Datastreams\":[{\"name\":\"Air " +
+        "Temperature\",\"description\":\"This Datastreams measures Air Temperature\"," +
+        "\"unitOfMeasurement\":{\"name\":\"degree Celsius\",\"symbol\":\"°C\"," +
+        "\"definition\":\"http://unitsofmeasure.org/ucum.html#para-30\"},\"observationType\":\"http://www.opengis" +
+        ".net/def/observationType/OGC-OM/2.0/OM_Measurement\",\"observedArea\":{\"type\":\"Polygon\"," +
+        "\"coordinates\":[[[100,0]]]},\"Observations\":[{\"result\":\"28\"," +
+        "\"phenomenonTime\":\"2019-03-10T17:46:09Z\"},{\"result\":\"31\"," +
+        "\"phenomenonTime\":\"2019-03-10T17:50:00Z\"}],\"phenomenonTime\":\"2009-01-11T16:22:25" +
+        ".00Z/2011-08-21T08:32:10.00Z\",\"ObservedProperty\":{\"@iot.id\":\"AirTemp\",\"name\":\"Air " +
+        "Temperature\",\"description\":\"The air temperature is the temperature of the air.\"},\"Sensor\":{\"@iot" +
+        ".id\":\"DS18B2022\",\"name\":\"sensor 1\",\"description\":\"sensor 1\"," +
+        "\"encodingType\":\"application/pdf\",\"metadata\":\"http://datasheets.maxim-ic.com/en/ds/DS18B20" +
+        ".pdf\"}}]}";
 
     private final String invalidObs = "{\"description\":\"This is the Lobby of the 52N HQ\",\"name\":\"52N HQ " +
-            "Lobby\",\"Locations\":[{\"name\":\"Location of 52N HQ\",\"description\":\"Somewhere in the " +
-            "Loddenheide\",\"encodingType\":\"application/vnd.geo+json\",\"location\":{\"type\":\"Feature\"," +
-            "\"geometry\":{\"type\":\"Point\",\"coordinates\":[52,7]}}}],\"Datastreams\":[{\"name\":\"Air " +
-            "Temperature\",\"description\":\"This Datastreams measures Air Temperature\"," +
-            "\"unitOfMeasurement\":{\"name\":\"degree Celsius\",\"symbol\":\"°C\"," +
-            "\"definition\":\"http://unitsofmeasure.org/ucum.html#para-30\"},\"observationType\":\"http://www.opengis" +
-            ".net/def/observationType/OGC-OM/2.0/OM_Measurement\",\"observedArea\":{\"type\":\"Polygon\"," +
-            "\"coordinates\":[[[100,0]]]},\"Observations\":[{},{\"result\":\"31\"," +
-            "\"phenomenonTime\":\"2019-03-10T17:50:00Z\"}],\"phenomenonTime\":\"2009-01-11T16:22:25" +
-            ".00Z/2011-08-21T08:32:10.00Z\",\"ObservedProperty\":{\"@iot.id\":\"AirTemp\",\"name\":\"Air " +
-            "Temperature\",\"definition\":\"http://sweet.jpl.nasa.gov/ontology/property.owl#AirTemperature\"," +
-            "\"description\":\"The air temperature is the temperature of the air.\"},\"Sensor\":{\"@iot" +
-            ".id\":\"DS18B2022\",\"name\":\"sensor 1\",\"description\":\"sensor 1\"," +
-            "\"encodingType\":\"application/pdf\",\"metadata\":\"http://datasheets.maxim-ic.com/en/ds/DS18B20" +
-            ".pdf\"}}]}";
+        "Lobby\",\"Locations\":[{\"name\":\"Location of 52N HQ\",\"description\":\"Somewhere in the " +
+        "Loddenheide\",\"encodingType\":\"application/vnd.geo+json\",\"location\":{\"type\":\"Feature\"," +
+        "\"geometry\":{\"type\":\"Point\",\"coordinates\":[52,7]}}}],\"Datastreams\":[{\"name\":\"Air " +
+        "Temperature\",\"description\":\"This Datastreams measures Air Temperature\"," +
+        "\"unitOfMeasurement\":{\"name\":\"degree Celsius\",\"symbol\":\"°C\"," +
+        "\"definition\":\"http://unitsofmeasure.org/ucum.html#para-30\"},\"observationType\":\"http://www.opengis" +
+        ".net/def/observationType/OGC-OM/2.0/OM_Measurement\",\"observedArea\":{\"type\":\"Polygon\"," +
+        "\"coordinates\":[[[100,0]]]},\"Observations\":[{},{\"result\":\"31\"," +
+        "\"phenomenonTime\":\"2019-03-10T17:50:00Z\"}],\"phenomenonTime\":\"2009-01-11T16:22:25" +
+        ".00Z/2011-08-21T08:32:10.00Z\",\"ObservedProperty\":{\"@iot.id\":\"AirTemp\",\"name\":\"Air " +
+        "Temperature\",\"definition\":\"http://sweet.jpl.nasa.gov/ontology/property.owl#AirTemperature\"," +
+        "\"description\":\"The air temperature is the temperature of the air.\"},\"Sensor\":{\"@iot" +
+        ".id\":\"DS18B2022\",\"name\":\"sensor 1\",\"description\":\"sensor 1\"," +
+        "\"encodingType\":\"application/pdf\",\"metadata\":\"http://datasheets.maxim-ic.com/en/ds/DS18B20" +
+        ".pdf\"}}]}";
 
     private final String invalidDatastream = "{\"description\":\"This is the Lobby of the 52N HQ\",\"name\":\"52N HQ " +
-            "Lobby\",\"Locations\":[{\"name\":\"Location of 52N HQ\",\"description\":\"Somewhere in the " +
-            "Loddenheide\",\"encodingType\":\"application/vnd.geo+json\",\"location\":{\"type\":\"Feature\"," +
-            "\"geometry\":{\"type\":\"Point\",\"coordinates\":[52,7]}}}],\"Datastreams\":[{\"name\":\"Air " +
-            "Temperature\",\"description\":\"This Datastreams measures Air Temperature\"," +
-            "\"observationType\":\"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\"," +
-            "\"observedArea\":{\"type\":\"Polygon\",\"coordinates\":[[[100,0]]]}," +
-            "\"Observations\":[{\"result\":\"31\",\"phenomenonTime\":\"2019-03-10T17:50:00Z\"}]," +
-            "\"phenomenonTime\":\"2009-01-11T16:22:25.00Z/2011-08-21T08:32:10.00Z\",\"ObservedProperty\":{\"@iot" +
-            ".id\":\"AirTemp\",\"name\":\"Air Temperature\",\"definition\":\"http://sweet.jpl.nasa" +
-            ".gov/ontology/property.owl#AirTemperature\",\"description\":\"The air temperature is the temperature of " +
-            "the air.\"},\"Sensor\":{\"@iot.id\":\"DS18B2022\",\"name\":\"sensor 1\",\"description\":\"sensor 1\"," +
-            "\"encodingType\":\"application/pdf\",\"metadata\":\"http://datasheets.maxim-ic.com/en/ds/DS18B20" +
-            ".pdf\"}}]}";
+        "Lobby\",\"Locations\":[{\"name\":\"Location of 52N HQ\",\"description\":\"Somewhere in the " +
+        "Loddenheide\",\"encodingType\":\"application/vnd.geo+json\",\"location\":{\"type\":\"Feature\"," +
+        "\"geometry\":{\"type\":\"Point\",\"coordinates\":[52,7]}}}],\"Datastreams\":[{\"name\":\"Air " +
+        "Temperature\",\"description\":\"This Datastreams measures Air Temperature\"," +
+        "\"observationType\":\"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\"," +
+        "\"observedArea\":{\"type\":\"Polygon\",\"coordinates\":[[[100,0]]]}," +
+        "\"Observations\":[{\"result\":\"31\",\"phenomenonTime\":\"2019-03-10T17:50:00Z\"}]," +
+        "\"phenomenonTime\":\"2009-01-11T16:22:25.00Z/2011-08-21T08:32:10.00Z\",\"ObservedProperty\":{\"@iot" +
+        ".id\":\"AirTemp\",\"name\":\"Air Temperature\",\"definition\":\"http://sweet.jpl.nasa" +
+        ".gov/ontology/property.owl#AirTemperature\",\"description\":\"The air temperature is the temperature of " +
+        "the air.\"},\"Sensor\":{\"@iot.id\":\"DS18B2022\",\"name\":\"sensor 1\",\"description\":\"sensor 1\"," +
+        "\"encodingType\":\"application/pdf\",\"metadata\":\"http://datasheets.maxim-ic.com/en/ds/DS18B20" +
+        ".pdf\"}}]}";
 
     private final String invalidLocation = "{\"description\":\"This is the Lobby of the 52N HQ\",\"name\":\"52N HQ " +
-            "Lobby\",\"Locations\":[{\"name\":\"Location of 52N HQ\",\"description\":\"Somewhere in the " +
-            "Loddenheide\",\"location\":{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[52," +
-            "7]}}}],\"Datastreams\":[{\"name\":\"Air Temperature\",\"description\":\"This Datastreams measures Air " +
-            "Temperature\",\"unitOfMeasurement\":{\"name\":\"degree Celsius\",\"symbol\":\"°C\"," +
-            "\"definition\":\"http://unitsofmeasure.org/ucum.html#para-30\"},\"observationType\":\"http://www.opengis" +
-            ".net/def/observationType/OGC-OM/2.0/OM_Measurement\",\"observedArea\":{\"type\":\"Polygon\"," +
-            "\"coordinates\":[[[100,0]]]},\"Observations\":[{\"result\":\"31\"," +
-            "\"phenomenonTime\":\"2019-03-10T17:50:00Z\"}],\"phenomenonTime\":\"2009-01-11T16:22:25" +
-            ".00Z/2011-08-21T08:32:10.00Z\",\"ObservedProperty\":{\"@iot.id\":\"AirTemp\",\"name\":\"Air " +
-            "Temperature\",\"definition\":\"http://sweet.jpl.nasa.gov/ontology/property.owl#AirTemperature\"," +
-            "\"description\":\"The air temperature is the temperature of the air.\"},\"Sensor\":{\"@iot" +
-            ".id\":\"DS18B2022\",\"name\":\"sensor 1\",\"description\":\"sensor 1\"," +
-            "\"encodingType\":\"application/pdf\",\"metadata\":\"http://datasheets.maxim-ic.com/en/ds/DS18B20" +
-            ".pdf\"}}]}";
+        "Lobby\",\"Locations\":[{\"name\":\"Location of 52N HQ\",\"description\":\"Somewhere in the " +
+        "Loddenheide\",\"location\":{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[52," +
+        "7]}}}],\"Datastreams\":[{\"name\":\"Air Temperature\",\"description\":\"This Datastreams measures Air " +
+        "Temperature\",\"unitOfMeasurement\":{\"name\":\"degree Celsius\",\"symbol\":\"°C\"," +
+        "\"definition\":\"http://unitsofmeasure.org/ucum.html#para-30\"},\"observationType\":\"http://www.opengis" +
+        ".net/def/observationType/OGC-OM/2.0/OM_Measurement\",\"observedArea\":{\"type\":\"Polygon\"," +
+        "\"coordinates\":[[[100,0]]]},\"Observations\":[{\"result\":\"31\"," +
+        "\"phenomenonTime\":\"2019-03-10T17:50:00Z\"}],\"phenomenonTime\":\"2009-01-11T16:22:25" +
+        ".00Z/2011-08-21T08:32:10.00Z\",\"ObservedProperty\":{\"@iot.id\":\"AirTemp\",\"name\":\"Air " +
+        "Temperature\",\"definition\":\"http://sweet.jpl.nasa.gov/ontology/property.owl#AirTemperature\"," +
+        "\"description\":\"The air temperature is the temperature of the air.\"},\"Sensor\":{\"@iot" +
+        ".id\":\"DS18B2022\",\"name\":\"sensor 1\",\"description\":\"sensor 1\"," +
+        "\"encodingType\":\"application/pdf\",\"metadata\":\"http://datasheets.maxim-ic.com/en/ds/DS18B20" +
+        ".pdf\"}}]}";
 
     ITRollbackOnInvalidPost(@Value("${server.rootUrl}") String rootUrl) {
         super(rootUrl);

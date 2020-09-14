@@ -50,7 +50,7 @@ public class PartyQuerySpecifications extends EntityQuerySpecifications<PartyEnt
     public Specification<PartyEntity> withDatastreamStaIdentifier(final String identifier) {
         return (root, query, builder) -> {
             final Join<PartyEntity, AbstractDatasetEntity> join =
-                    root.join(PartyEntity.PROPERTY_DATASTREAMS, JoinType.INNER);
+                root.join(PartyEntity.PROPERTY_DATASTREAMS, JoinType.INNER);
             return builder.equal(join.get(PartyEntity.STA_IDENTIFIER), identifier);
         };
     }
@@ -63,9 +63,9 @@ public class PartyQuerySpecifications extends EntityQuerySpecifications<PartyEnt
                 Subquery<PartyEntity> sq = query.subquery(PartyEntity.class);
                 Root<AbstractDatasetEntity> datastream = sq.from(AbstractDatasetEntity.class);
                 sq.select(datastream.get(AbstractDatasetEntity.PROPERTY_PARTY))
-                  .where(((Specification<AbstractDatasetEntity>) propertyValue).toPredicate(datastream,
-                                                                                            query,
-                                                                                            builder));
+                    .where(((Specification<AbstractDatasetEntity>) propertyValue).toPredicate(datastream,
+                                                                                              query,
+                                                                                              builder));
                 return builder.in(root.get(PartyEntity.ID)).value(sq);
             } else {
                 throw new RuntimeException("Could not find related property: " + propertyName);
@@ -74,33 +74,33 @@ public class PartyQuerySpecifications extends EntityQuerySpecifications<PartyEnt
     }
 
     @Override protected Specification<PartyEntity> handleDirectPropertyFilter(
-            String propertyName,
-            Expression<?> propertyValue,
-            FilterConstants.ComparisonOperator operator,
-            boolean switched) {
+        String propertyName,
+        Expression<?> propertyValue,
+        FilterConstants.ComparisonOperator operator,
+        boolean switched) {
         return (Specification<PartyEntity>) (root, query, builder) -> {
             try {
                 switch (propertyName) {
-                case StaConstants.PROP_ID:
-                    return handleDirectStringPropertyFilter(root.get(PartyEntity.STA_IDENTIFIER),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            false);
-                case StaConstants.PROP_NICKNAME:
-                    return handleDirectStringPropertyFilter(root.get(PartyEntity.PROPERTY_NICKNAME),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            switched);
-                case StaConstants.PROP_ROLE:
-                    return handleDirectStringPropertyFilter(root.get(PartyEntity.PROPERTY_ROLE),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            switched);
-                default:
-                    throw new RuntimeException("Error getting filter for Property: \"" + propertyName
+                    case StaConstants.PROP_ID:
+                        return handleDirectStringPropertyFilter(root.get(PartyEntity.STA_IDENTIFIER),
+                                                                propertyValue,
+                                                                operator,
+                                                                builder,
+                                                                false);
+                    case StaConstants.PROP_NICKNAME:
+                        return handleDirectStringPropertyFilter(root.get(PartyEntity.PROPERTY_NICKNAME),
+                                                                propertyValue,
+                                                                operator,
+                                                                builder,
+                                                                switched);
+                    case StaConstants.PROP_ROLE:
+                        return handleDirectStringPropertyFilter(root.get(PartyEntity.PROPERTY_ROLE),
+                                                                propertyValue,
+                                                                operator,
+                                                                builder,
+                                                                switched);
+                    default:
+                        throw new RuntimeException("Error getting filter for Property: \"" + propertyName
                                                        + "\". No such property in Entity.");
 
                 }

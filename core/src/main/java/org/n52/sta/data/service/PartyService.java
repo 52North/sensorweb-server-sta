@@ -63,7 +63,7 @@ import java.util.stream.Collectors;
 @Transactional
 @Profile(StaConstants.CITSCIEXTENSION)
 public class PartyService
-        extends AbstractSensorThingsEntityServiceImpl<PartyRepository, PartyEntity, PartyEntity> {
+    extends AbstractSensorThingsEntityServiceImpl<PartyRepository, PartyEntity, PartyEntity> {
 
     private static final PartyQuerySpecifications pQS = new PartyQuerySpecifications();
 
@@ -76,14 +76,13 @@ public class PartyService
     }
 
     @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
-            throws STAInvalidQueryException {
+        throws STAInvalidQueryException {
         if (expandOption != null) {
             for (ExpandItem expandItem : expandOption.getItems()) {
                 String expandProperty = expandItem.getPath();
                 if (PartyEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
-                    return new EntityGraphRepository.FetchGraph[] {
-                            EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS
-                    };
+                    return new EntityGraphRepository.FetchGraph[]
+                        {EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS};
                 } else {
                     throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
                                                                      expandProperty,
@@ -95,15 +94,15 @@ public class PartyService
     }
 
     @Override protected PartyEntity fetchExpandEntitiesWithFilter(PartyEntity entity, ExpandFilter expandOption)
-            throws STACRUDException, STAInvalidQueryException {
+        throws STACRUDException, STAInvalidQueryException {
         if (expandOption != null) {
             for (ExpandItem expandItem : expandOption.getItems()) {
                 String expandProperty = expandItem.getPath();
                 if (PartyEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
                     Page<AbstractDatasetEntity> datastreams = getDatastreamService()
-                            .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
-                                                                   STAEntityDefinition.PARTIES,
-                                                                   expandItem.getQueryOptions());
+                        .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
+                                                               STAEntityDefinition.PARTIES,
+                                                               expandItem.getQueryOptions());
                     entity.setDatasets(datastreams.get().collect(Collectors.toSet()));
                     break;
                 } else {
@@ -121,11 +120,11 @@ public class PartyService
                                                                          String ownId) {
         Specification<PartyEntity> filter;
         switch (relatedType) {
-        case STAEntityDefinition.DATASTREAMS:
-            filter = pQS.withDatastreamStaIdentifier(relatedId);
-            break;
-        default:
-            throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
+            case STAEntityDefinition.DATASTREAMS:
+                filter = pQS.withDatastreamStaIdentifier(relatedId);
+                break;
+            default:
+                throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
         }
 
         if (ownId != null) {
@@ -139,7 +138,7 @@ public class PartyService
         //if (!party.isProcessed()) {
         if (party.getStaIdentifier() != null && party.getRole() == null) {
             Optional<PartyEntity> optionalEntity =
-                    getRepository().findByStaIdentifier(party.getStaIdentifier());
+                getRepository().findByStaIdentifier(party.getStaIdentifier());
             if (optionalEntity.isPresent()) {
                 return optionalEntity.get();
             } else {
@@ -167,7 +166,7 @@ public class PartyService
     }
 
     @Override protected PartyEntity updateEntity(String id, PartyEntity entity, HttpMethod method)
-            throws STACRUDException {
+        throws STACRUDException {
         if (HttpMethod.PATCH.equals(method)) {
             synchronized (getLock(id)) {
                 Optional<PartyEntity> existing = getRepository().findByStaIdentifier(id);
@@ -195,7 +194,7 @@ public class PartyService
     }
 
     @Override protected PartyEntity merge(PartyEntity existing, PartyEntity toMerge)
-            throws STACRUDException {
+        throws STACRUDException {
 
         if (toMerge.getStaIdentifier() != null) {
             existing.setStaIdentifier(toMerge.getStaIdentifier());
@@ -208,10 +207,6 @@ public class PartyService
         }
         mergeDatastreams(existing, toMerge);
         return existing;
-    }
-
-    @Override protected void delete(PartyEntity entity) throws STACRUDException {
-        delete(entity.getStaIdentifier());
     }
 
     @Override public void delete(String id) throws STACRUDException {

@@ -68,19 +68,19 @@ public class MqttSelectSubscription extends MqttEntityCollectionSubscription {
         LOGGER.debug(this.toString());
     }
 
-    public QueryOptions getQueryOptions() {
-        return queryOptions;
-    }
-
     @Override
     public String toString() {
         String base = super.toString();
         return new StringBuilder()
-                .append(base)
-                .deleteCharAt(base.length() - 1)
-                .append(",selectOption=")
-                .append(selectOption)
-                .append("]")
-                .toString();
+            .append(base)
+            .deleteCharAt(base.length() - 1)
+            .append(",selectOption=")
+            .append(selectOption)
+            .append("]")
+            .toString();
+    }
+
+    public QueryOptions getQueryOptions() {
+        return queryOptions;
     }
 }

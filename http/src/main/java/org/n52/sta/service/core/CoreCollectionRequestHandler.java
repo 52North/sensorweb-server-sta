@@ -60,8 +60,8 @@ public class CoreCollectionRequestHandler extends CollectionRequestHandler imple
     }
 
     @GetMapping(
-            value = "/{collectionName:" + BASE_COLLECTION_REGEX + "}",
-            produces = "application/json"
+        value = "/{collectionName:" + BASE_COLLECTION_REGEX + "}",
+        produces = "application/json"
     )
     public CollectionWrapper readCollectionDirect(@PathVariable String collectionName,
                                                   HttpServletRequest request) throws STACRUDException {
@@ -69,8 +69,8 @@ public class CoreCollectionRequestHandler extends CollectionRequestHandler imple
     }
 
     @GetMapping(
-            value = "/{collectionName:" + BASE_COLLECTION_REGEX + "}" + SLASHREF,
-            produces = "application/json"
+        value = "/{collectionName:" + BASE_COLLECTION_REGEX + "}" + SLASHREF,
+        produces = "application/json"
     )
     public CollectionWrapper readCollectionRefDirect(@PathVariable String collectionName,
                                                      HttpServletRequest request) throws STACRUDException {
@@ -78,16 +78,16 @@ public class CoreCollectionRequestHandler extends CollectionRequestHandler imple
     }
 
     @GetMapping(
-            value = {
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_THING_PATH_VARIABLE,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_LOCATION_PATH_VARIABLE,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH_VARIABLE,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH_VARIABLE,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_SENSOR_PATH_VARIABLE,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_HIST_LOCATION_PATH_VARIABLE
-            },
-            produces = "application/json"
+        value = {
+            MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_THING_PATH_VARIABLE,
+            MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_LOCATION_PATH_VARIABLE,
+            MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH_VARIABLE,
+            MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH_VARIABLE,
+            MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_SENSOR_PATH_VARIABLE,
+            MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
+            MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_HIST_LOCATION_PATH_VARIABLE
+        },
+        produces = "application/json"
     )
     public CollectionWrapper readCollectionRelated(@PathVariable String entity,
                                                    @PathVariable String target,
@@ -96,16 +96,16 @@ public class CoreCollectionRequestHandler extends CollectionRequestHandler imple
     }
 
     @GetMapping(
-            value = {
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_THING_PATH_VARIABLE + SLASHREF,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_LOCATION_PATH_VARIABLE + SLASHREF,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH_VARIABLE + SLASHREF,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH_VARIABLE + SLASHREF,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_SENSOR_PATH_VARIABLE + SLASHREF,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE + SLASHREF,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_HIST_LOCATION_PATH_VARIABLE + SLASHREF
-            },
-            produces = "application/json"
+        value = {
+            MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_THING_PATH_VARIABLE + SLASHREF,
+            MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_LOCATION_PATH_VARIABLE + SLASHREF,
+            MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH_VARIABLE + SLASHREF,
+            MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH_VARIABLE + SLASHREF,
+            MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_SENSOR_PATH_VARIABLE + SLASHREF,
+            MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE + SLASHREF,
+            MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_HIST_LOCATION_PATH_VARIABLE + SLASHREF
+        },
+        produces = "application/json"
     )
     public CollectionWrapper readCollectionRelatedRef(@PathVariable String entity,
                                                       @PathVariable String target,

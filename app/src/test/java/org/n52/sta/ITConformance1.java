@@ -79,26 +79,26 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
         // Create required test harness
         // Requires POST with deep insert to work.
         postEntity(EntityType.THING, "{ \"description\": \"thing 1\", \"name\": \"thing name 1\", \"properties\": { " +
-                "\"reference\": \"first\" }, \"Locations\": [ { \"description\": \"location 1\", \"name\": \"location" +
-                " name 1\", \"location\": { \"type\": \"Point\", \"coordinates\": [ -117.05, 51.05 ] }, " +
-                "\"encodingType\": \"application/vnd.geo+json\" } ], \"Datastreams\": [ { \"unitOfMeasurement\": { " +
-                "\"name\": \"Lumen\", \"symbol\": \"lm\", \"definition\": \"http://www.qudt.org/qudt/owl/1.0" +
-                ".0/unit/Instances.html/Lumen\" }, \"description\": \"datastream 1\", \"name\": \"datastream name " +
-                "1\", \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\", " +
-                "\"ObservedProperty\": { \"name\": \"Luminous Flux\", \"definition\": \"http://www.qudt" +
-                ".org/qudt/owl/1.0.0/quantity/Instances.html/LuminousFlux\", \"description\": \"observedProperty 1\" " +
-                "}, \"Sensor\": { \"description\": \"sensor 1\", \"name\": \"sensor name 1\", \"encodingType\": " +
-                "\"application/pdf\", \"metadata\": \"Light flux sensor\" }, \"Observations\":[ { \"phenomenonTime\":" +
-                " \"2015-03-03T00:00:00Z\", \"result\": 3 }, { \"phenomenonTime\": \"2015-03-04T00:00:00Z\", " +
-                "\"result\": 4 } ] }, { \"unitOfMeasurement\": { \"name\": \"Centigrade\", \"symbol\": \"C\", " +
-                "\"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\" }, \"description\":" +
-                " \"datastream 2\", \"name\": \"datastream name 2\", \"observationType\": \"http://www.opengis" +
-                ".net/def/observationType/OGC-OM/2.0/OM_Measurement\", \"ObservedProperty\": { \"name\": " +
-                "\"Tempretaure\", \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances" +
-                ".html/Tempreture\", \"description\": \"observedProperty 2\" }, \"Sensor\": { \"description\": " +
-                "\"sensor 2\", \"name\": \"sensor name 2\", \"encodingType\": \"application/pdf\", \"metadata\": " +
-                "\"Tempreture sensor\" }, \"Observations\":[ { \"phenomenonTime\": \"2015-03-05T00:00:00Z\", " +
-                "\"result\": 5 }, { \"phenomenonTime\": \"2015-03-06T00:00:00Z\", \"result\": 6 } ] } ] }");
+            "\"reference\": \"first\" }, \"Locations\": [ { \"description\": \"location 1\", \"name\": \"location" +
+            " name 1\", \"location\": { \"type\": \"Point\", \"coordinates\": [ -117.05, 51.05 ] }, " +
+            "\"encodingType\": \"application/vnd.geo+json\" } ], \"Datastreams\": [ { \"unitOfMeasurement\": { " +
+            "\"name\": \"Lumen\", \"symbol\": \"lm\", \"definition\": \"http://www.qudt.org/qudt/owl/1.0" +
+            ".0/unit/Instances.html/Lumen\" }, \"description\": \"datastream 1\", \"name\": \"datastream name " +
+            "1\", \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\", " +
+            "\"ObservedProperty\": { \"name\": \"Luminous Flux\", \"definition\": \"http://www.qudt" +
+            ".org/qudt/owl/1.0.0/quantity/Instances.html/LuminousFlux\", \"description\": \"observedProperty 1\" " +
+            "}, \"Sensor\": { \"description\": \"sensor 1\", \"name\": \"sensor name 1\", \"encodingType\": " +
+            "\"application/pdf\", \"metadata\": \"Light flux sensor\" }, \"Observations\":[ { \"phenomenonTime\":" +
+            " \"2015-03-03T00:00:00Z\", \"result\": 3 }, { \"phenomenonTime\": \"2015-03-04T00:00:00Z\", " +
+            "\"result\": 4 } ] }, { \"unitOfMeasurement\": { \"name\": \"Centigrade\", \"symbol\": \"C\", " +
+            "\"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\" }, \"description\":" +
+            " \"datastream 2\", \"name\": \"datastream name 2\", \"observationType\": \"http://www.opengis" +
+            ".net/def/observationType/OGC-OM/2.0/OM_Measurement\", \"ObservedProperty\": { \"name\": " +
+            "\"Tempretaure\", \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances" +
+            ".html/Tempreture\", \"description\": \"observedProperty 2\" }, \"Sensor\": { \"description\": " +
+            "\"sensor 2\", \"name\": \"sensor name 2\", \"encodingType\": \"application/pdf\", \"metadata\": " +
+            "\"Tempreture sensor\" }, \"Observations\":[ { \"phenomenonTime\": \"2015-03-05T00:00:00Z\", " +
+            "\"result\": 5 }, { \"phenomenonTime\": \"2015-03-06T00:00:00Z\", \"result\": 6 } ] } ] }");
     }
 
     public ITConformance1(@Value("${server.rootUrl}") String rootUrl, boolean defaultPost) throws Exception {
@@ -239,14 +239,14 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
 
             if (EntityType.getByVal(name) == null) {
                 Assertions.fail(
-                        "There is a component in Service Root URI response that is not in SensorThings API : " + name);
+                    "There is a component in Service Root URI response that is not in SensorThings API : " + name);
             } else {
                 Assertions.assertEquals(rootUrl + name,
                                         nameUrl,
                                         String.format(
-                                                "The URL for %s in Service Root URI is not compliant to SensorThings " +
-                                                        "API.",
-                                                rootUrl + name)
+                                            "The URL for %s in Service Root URI is not compliant to SensorThings " +
+                                                "API.",
+                                            rootUrl + name)
                 );
                 addedLinks.put(name, true);
             }
@@ -263,7 +263,7 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
      * @param entityType Entity type from EntityType enum list
      */
     void readPropertyOfEntityWithEntityType(EntityType entityType, STAEntityDefinition definition)
-            throws Exception {
+        throws Exception {
         JsonNode collection = getCollection(entityType);
         Assertions.assertNotNull(collection.get(value),
                                  "Could not get collection for EntityType: " + entityType.name());
@@ -292,7 +292,7 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
         Assertions.assertEquals(1,
                                 entity.size(),
                                 "The response for getting property " + property + " of Entity " + entityType +
-                                        " returns more properties!");
+                                    " returns more properties!");
     }
 
     /**
@@ -471,7 +471,7 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
 
         Assertions.assertTrue(entity.has(StaConstants.AT_IOT_SELFLINK),
                               "The entity does not have mandatory control information :" +
-                                      StaConstants.AT_IOT_SELFLINK);
+                                  StaConstants.AT_IOT_SELFLINK);
     }
 
     /**

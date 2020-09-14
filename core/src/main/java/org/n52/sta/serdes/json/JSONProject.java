@@ -62,25 +62,25 @@ public class JSONProject extends JSONBase.JSONwithIdNameDescriptionTime<ProjectE
 
     @Override public ProjectEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
-        case FULL:
-            parseReferencedFrom();
-            Assert.notNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
-            Assert.notNull(description, INVALID_INLINE_ENTITY_MISSING + "description");
-            Assert.notNull(runtime, INVALID_INLINE_ENTITY_MISSING + "runtime");
+            case FULL:
+                parseReferencedFrom();
+                Assert.notNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
+                Assert.notNull(description, INVALID_INLINE_ENTITY_MISSING + "description");
+                Assert.notNull(runtime, INVALID_INLINE_ENTITY_MISSING + "runtime");
 
-            return createEntity();
-        case PATCH:
-            parseReferencedFrom();
-            return createEntity();
+                return createEntity();
+            case PATCH:
+                parseReferencedFrom();
+                return createEntity();
 
-        case REFERENCE:
-            Assert.isNull(runtime, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(name, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(description, INVALID_REFERENCED_ENTITY);
-            self.setStaIdentifier(identifier);
-            return self;
-        default:
-            return null;
+            case REFERENCE:
+                Assert.isNull(runtime, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(name, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(description, INVALID_REFERENCED_ENTITY);
+                self.setStaIdentifier(identifier);
+                return self;
+            default:
+                return null;
         }
     }
 

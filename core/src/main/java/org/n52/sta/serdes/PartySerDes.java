@@ -68,7 +68,7 @@ public class PartySerDes {
 
 
     public static class PartySerializer
-            extends AbstractSTASerializer<PartyWithQueryOptions, PartyEntity> {
+        extends AbstractSTASerializer<PartyWithQueryOptions, PartyEntity> {
 
         private static final long serialVersionUID = -1618289129123682794L;
 
@@ -82,7 +82,7 @@ public class PartySerDes {
         public void serialize(PartyWithQueryOptions value,
                               JsonGenerator gen,
                               SerializerProvider serializers)
-                throws IOException {
+            throws IOException {
             gen.writeStartObject();
             value.unwrap(implicitSelect);
             PartyEntity party = value.getEntity();
@@ -104,7 +104,7 @@ public class PartySerDes {
 
             if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.DATASTREAMS)) {
                 if (!value.hasExpandOption() ||
-                        value.getFieldsToExpand().get(STAEntityDefinition.DATASTREAMS) == null) {
+                    value.getFieldsToExpand().get(STAEntityDefinition.DATASTREAMS) == null) {
                     writeNavigationProp(gen, STAEntityDefinition.DATASTREAMS, party.getStaIdentifier());
                 } else {
                     gen.writeFieldName(STAEntityDefinition.DATASTREAMS);
@@ -136,7 +136,7 @@ public class PartySerDes {
 
 
     public static class PartyPatchDeserializer
-            extends StdDeserializer<PartySerDes.PartyPatch> {
+        extends StdDeserializer<PartySerDes.PartyPatch> {
 
         private static final long serialVersionUID = -6355786322787893665L;
 
@@ -146,9 +146,9 @@ public class PartySerDes {
 
         @Override
         public PartySerDes.PartyPatch deserialize(JsonParser p, DeserializationContext ctxt)
-                throws IOException {
+            throws IOException {
             return new PartySerDes.PartyPatch(p.readValueAs(JSONParty.class)
-                                               .toEntity(JSONBase.EntityType.PATCH));
+                                                  .toEntity(JSONBase.EntityType.PATCH));
         }
     }
 }

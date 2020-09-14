@@ -70,24 +70,22 @@ import java.util.regex.Pattern;
  */
 @Component
 public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
-        implements MqttSubscriptionEventHandler, CoreRequestUtils {
+    implements MqttSubscriptionEventHandler, CoreRequestUtils {
 
     private static final String BASE_URL = "";
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttSubscriptionEventHandlerImpl.class);
     private final MqttFixedHeader mqttFixedHeader = new MqttFixedHeader(
-            MqttMessageType.PUBLISH,
-            false,
-            MqttQoS.AT_LEAST_ONCE,
-            false,
-            0);
+        MqttMessageType.PUBLISH,
+        false,
+        MqttQoS.AT_LEAST_ONCE,
+        false,
+        0);
 
     private final MqttUtil config;
+    private final ObjectMapper mapper;
     private EntityServiceRepository serviceRepository;
     private Server mqttBroker;
     private Map<AbstractMqttSubscription, HashSet<String>> subscriptions = new HashMap<>();
-
-    private final ObjectMapper mapper;
-
     /*
      * List of all Entity Types that are currently subscribed to. Used for fail-fast.
      */
@@ -100,16 +98,6 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
         super(rootUrl, shouldEscapeId, null);
         this.config = config;
         this.mapper = mapper;
-    }
-
-    @Override
-    public Set<String> getWatchedEntityTypes() {
-        return watchedEntityTypes;
-    }
-
-    @Override
-    public void setServiceRepository(EntityServiceRepository serviceRepository) {
-        this.serviceRepository = serviceRepository;
     }
 
     @Override
@@ -138,7 +126,7 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
                         out = serializedCache.get(subscrip.getQueryOptions());
                     } else {
                         ElementWithQueryOptions wrapped =
-                                ElementWithQueryOptions.from(rawObject, subscrip.getQueryOptions());
+                            ElementWithQueryOptions.from(rawObject, subscrip.getQueryOptions());
                         out = Unpooled.wrappedBuffer(mapper.writeValueAsBytes(wrapped));
                         serializedCache.put(subscrip.getQueryOptions(), out);
                     }
@@ -154,6 +142,16 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
         } catch (JsonProcessingException ex) {
             ex.printStackTrace();
         }
+    }
+
+    @Override
+    public Set<String> getWatchedEntityTypes() {
+        return watchedEntityTypes;
+    }
+
+    @Override
+    public void setServiceRepository(EntityServiceRepository serviceRepository) {
+        this.serviceRepository = serviceRepository;
     }
 
     public void addSubscription(AbstractMqttSubscription subscription, String clientId) {
@@ -186,6 +184,10 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
 
     @Override public void processUnsubscribeMessage(InterceptUnsubscribeMessage msg) throws MqttHandlerException {
         removeSubscription(createMqttSubscription(msg.getTopicFilter()), msg.getClientID());
+    }
+
+    @Override public void setMqttBroker(Server mqttBroker) {
+        this.mqttBroker = mqttBroker;
     }
 
     private AbstractMqttSubscription createMqttSubscription(String rawTopic) throws MqttHandlerException {
@@ -244,9 +246,5 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
         } catch (Exception ex) {
             throw new MqttHandlerException("Error while parsing MQTT topic.", ex);
         }
-    }
-
-    @Override public void setMqttBroker(Server mqttBroker) {
-        this.mqttBroker = mqttBroker;
     }
 }

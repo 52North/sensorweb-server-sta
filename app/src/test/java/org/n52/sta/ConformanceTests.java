@@ -60,9 +60,7 @@ abstract class ConformanceTests implements TestUtil {
 
     @Container
     public static STAPostgresContainer POSTGIS_DB = STAPostgresContainer.instance();
-
     private static final Logger logger = LoggerFactory.getLogger(ConformanceTests.class);
-
     protected final String rootUrl;
     protected final ObjectMapper mapper = new ObjectMapper();
 
@@ -85,9 +83,9 @@ abstract class ConformanceTests implements TestUtil {
         // Check Response MIME Type
         String mimeType = ContentType.getOrDefault(response.getEntity()).getMimeType();
         Assertions.assertEquals(
-                jsonMimeType,
-                mimeType,
-                "Response has invalid MIME Type"
+            jsonMimeType,
+            mimeType,
+            "Response has invalid MIME Type"
         );
 
         JsonNode result = mapper.readTree(response.getEntity().getContent());
@@ -112,9 +110,9 @@ abstract class ConformanceTests implements TestUtil {
 
         HttpResponse response = HttpClientBuilder.create().build().execute(request);
         Assertions.assertTrue(
-                response.getStatusLine().getStatusCode() == 400 || response.getStatusLine().getStatusCode() == 409,
-                "Entity " + rootUrl + type.getVal() + " should not have been created but response Code  is: " +
-                        response.getStatusLine().getStatusCode()
+            response.getStatusLine().getStatusCode() == 400 || response.getStatusLine().getStatusCode() == 409,
+            "Entity " + rootUrl + type.getVal() + " should not have been created but response Code  is: " +
+                response.getStatusLine().getStatusCode()
         );
 
         JsonNode result = mapper.readTree(response.getEntity().getContent());
@@ -127,10 +125,10 @@ abstract class ConformanceTests implements TestUtil {
 
     protected JsonNode patchEntity(EntityType type, String body, String id) throws IOException {
         HttpPatch request = new HttpPatch(rootUrl
-                                                  + type.getVal()
-                                                  + "("
-                                                  + id
-                                                  + ")");
+                                              + type.getVal()
+                                              + "("
+                                              + id
+                                              + ")");
         request.setHeader("Content-Type", "application/json");
         request.setEntity(new StringEntity(body));
 
@@ -152,9 +150,9 @@ abstract class ConformanceTests implements TestUtil {
         }
         int statusCode = response.getStatusLine().getStatusCode();
         Assertions.assertEquals(
-                200,
-                statusCode,
-                "Error: PATCH does not work properly for " + request.getURI()
+            200,
+            statusCode,
+            "Error: PATCH does not work properly for " + request.getURI()
         );
         return result;
     }
@@ -170,10 +168,10 @@ abstract class ConformanceTests implements TestUtil {
      */
     protected void patchInvalidEntity(EntityType type, String body, String id) throws IOException {
         HttpPatch request = new HttpPatch(rootUrl
-                                                  + type.getVal()
-                                                  + "("
-                                                  + id
-                                                  + ")");
+                                              + type.getVal()
+                                              + "("
+                                              + id
+                                              + ")");
         request.setHeader("Content-Type", "application/json");
         request.setEntity(new StringEntity(body));
 
@@ -191,9 +189,9 @@ abstract class ConformanceTests implements TestUtil {
             System.out.println("Statuscode:" + statusCode);
         }
         Assertions.assertEquals(
-                400,
-                statusCode,
-                "Error: Patching related entities inline must be illegal for " + request.getURI()
+            400,
+            statusCode,
+            "Error: Patching related entities inline must be illegal for " + request.getURI()
         );
     }
 
@@ -206,10 +204,10 @@ abstract class ConformanceTests implements TestUtil {
      */
     protected void deleteNonexistentEntity(EntityType type) throws IOException {
         HttpDelete request = new HttpDelete(rootUrl
-                                                    + type.getVal()
-                                                    + "("
-                                                    + "aaaaaa"
-                                                    + ")");
+                                                + type.getVal()
+                                                + "("
+                                                + "aaaaaa"
+                                                + ")");
         request.setHeader("Content-Type", "application/json");
 
         HttpResponse response = HttpClientBuilder.create().build().execute(request);
@@ -225,9 +223,9 @@ abstract class ConformanceTests implements TestUtil {
             System.out.println("Statuscode:" + statusCode);
         }
         Assertions.assertEquals(
-                404,
-                statusCode,
-                "DELETE does not work properly for nonexistent " + request.getURI()
+            404,
+            statusCode,
+            "DELETE does not work properly for nonexistent " + request.getURI()
         );
     }
 
@@ -241,10 +239,10 @@ abstract class ConformanceTests implements TestUtil {
 
     protected void deleteEntity(EntityType type, String id, boolean canError) throws IOException {
         HttpDelete request = new HttpDelete(rootUrl
-                                                    + type.getVal()
-                                                    + "("
-                                                    + id
-                                                    + ")");
+                                                + type.getVal()
+                                                + "("
+                                                + id
+                                                + ")");
         request.setHeader("Content-Type", "application/json");
 
         HttpResponse response = HttpClientBuilder.create().build().execute(request);
@@ -261,9 +259,9 @@ abstract class ConformanceTests implements TestUtil {
         }
         if (!canError) {
             Assertions.assertEquals(
-                    200,
-                    statusCode,
-                    "DELETE does not work properly for nonexistent " + request.getURI()
+                200,
+                statusCode,
+                "DELETE does not work properly for nonexistent " + request.getURI()
             );
         }
     }
@@ -293,7 +291,7 @@ abstract class ConformanceTests implements TestUtil {
         Assertions.assertEquals(200,
                                 response.getStatusLine().getStatusCode(),
                                 "ERROR: Did not receive 200 OK for path: " + path
-                                        + " Instead received Status Code: " + response.getStatusLine().getStatusCode());
+                                    + " Instead received Status Code: " + response.getStatusLine().getStatusCode());
         return mapper.readTree(response.getEntity().getContent());
     }
 
@@ -309,9 +307,9 @@ abstract class ConformanceTests implements TestUtil {
         Assertions.assertEquals(200,
                                 response.getStatusLine().getStatusCode(),
                                 "ERROR: Did not receive 200 OK for path: " + url
-                                        + " Instead received Status Code: " + response.getStatusLine().getStatusCode());
+                                    + " Instead received Status Code: " + response.getStatusLine().getStatusCode());
         return new BufferedReader(new InputStreamReader(response.getEntity().getContent()))
-                .lines().collect(Collectors.joining(""));
+            .lines().collect(Collectors.joining(""));
     }
 
     protected JsonNode getRootResponse() throws IOException {
@@ -325,7 +323,7 @@ abstract class ConformanceTests implements TestUtil {
         Assertions.assertEquals(200,
                                 response.getStatusLine().getStatusCode(),
                                 "ERROR: Did not receive 200 OK for path: " + rootUrl
-                                        + " Instead received Status Code: " + response.getStatusLine().getStatusCode());
+                                    + " Instead received Status Code: " + response.getStatusLine().getStatusCode());
         return mapper.readTree(response.getEntity().getContent());
     }
 
@@ -340,9 +338,9 @@ abstract class ConformanceTests implements TestUtil {
         Assertions.assertEquals(404,
                                 response.getStatusLine().getStatusCode(),
                                 "ERROR: Did not receive 404 NOT FOUND for path: "
-                                        + type.getVal()
-                                        + "(aaaaaa)"
-                                        + " Instead received Status Code: " + response.getStatusLine().getStatusCode());
+                                    + type.getVal()
+                                    + "(aaaaaa)"
+                                    + " Instead received Status Code: " + response.getStatusLine().getStatusCode());
     }
 
     protected JsonNode getCollection(EntityType type, String filters) throws IOException {
@@ -362,7 +360,7 @@ abstract class ConformanceTests implements TestUtil {
         Assertions.assertEquals(200,
                                 response.getStatusLine().getStatusCode(),
                                 "ERROR: Did not receive 200 OK for path: " + url
-                                        + " Instead received Status Code: " + response.getStatusLine().getStatusCode());
+                                    + " Instead received Status Code: " + response.getStatusLine().getStatusCode());
         return mapper.readTree(response.getEntity().getContent());
     }
 
@@ -393,14 +391,14 @@ abstract class ConformanceTests implements TestUtil {
             }
             Assertions.assertTrue(response.has(property),
                                   "Entity: "
-                                          + response.toPrettyString()
-                                          + "does not have mandatory property:"
-                                          + property);
+                                      + response.toPrettyString()
+                                      + "does not have mandatory property:"
+                                      + property);
             Assertions.assertNotNull(response.get(property),
                                      "Entity: "
-                                             + response.toPrettyString()
-                                             + "does not have mandatory property:"
-                                             + property);
+                                         + response.toPrettyString()
+                                         + "does not have mandatory property:"
+                                         + property);
         }
     }
 
@@ -413,8 +411,8 @@ abstract class ConformanceTests implements TestUtil {
         for (EntityType entityType : entityTypes) {
             JsonNode response = getEntity(entityType.getVal());
             Assertions.assertTrue(
-                    response.get("value").isEmpty(),
-                    "Entity with type: " + entityType.name() + " is created although it shouldn't"
+                response.get("value").isEmpty(),
+                "Entity with type: " + entityType.name() + " is created although it shouldn't"
             );
         }
     }
@@ -423,8 +421,8 @@ abstract class ConformanceTests implements TestUtil {
         for (EntityType entityType : entityTypes) {
             JsonNode response = getEntity(entityType.getVal());
             Assertions.assertTrue(
-                    !response.get("value").isEmpty(),
-                    "No Entity with type: " + entityType.name() + " is present"
+                !response.get("value").isEmpty(),
+                "No Entity with type: " + entityType.name() + " is present"
             );
         }
     }

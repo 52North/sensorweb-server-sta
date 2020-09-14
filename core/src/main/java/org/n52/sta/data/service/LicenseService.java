@@ -63,7 +63,7 @@ import java.util.stream.Collectors;
 @Transactional
 @Profile(StaConstants.CITSCIEXTENSION)
 public class LicenseService
-        extends AbstractSensorThingsEntityServiceImpl<LicenseRepository, LicenseEntity, LicenseEntity> {
+    extends AbstractSensorThingsEntityServiceImpl<LicenseRepository, LicenseEntity, LicenseEntity> {
 
     private static final LicenseQuerySpecifications lQS = new LicenseQuerySpecifications();
 
@@ -76,13 +76,13 @@ public class LicenseService
     }
 
     @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
-            throws STAInvalidQueryException {
+        throws STAInvalidQueryException {
         if (expandOption != null) {
             for (ExpandItem expandItem : expandOption.getItems()) {
                 String expandProperty = expandItem.getPath();
                 if (LicenseEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
                     return new EntityGraphRepository.FetchGraph[] {
-                            EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS
+                        EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS,
                     };
                 } else {
                     throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
@@ -95,14 +95,14 @@ public class LicenseService
     }
 
     @Override protected LicenseEntity fetchExpandEntitiesWithFilter(LicenseEntity entity, ExpandFilter expandOption)
-            throws STACRUDException, STAInvalidQueryException {
+        throws STACRUDException, STAInvalidQueryException {
         for (ExpandItem expandItem : expandOption.getItems()) {
             String expandProperty = expandItem.getPath();
             if (LicenseEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
                 Page<AbstractDatasetEntity> datastreams = getDatastreamService()
-                        .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
-                                                               STAEntityDefinition.LICENSES,
-                                                               expandItem.getQueryOptions());
+                    .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
+                                                           STAEntityDefinition.LICENSES,
+                                                           expandItem.getQueryOptions());
                 entity.setDatasets(datastreams.get().collect(Collectors.toSet()));
                 return entity;
             } else {
@@ -119,11 +119,11 @@ public class LicenseService
                                                                            String ownId) {
         Specification<LicenseEntity> filter;
         switch (relatedType) {
-        case STAEntityDefinition.DATASTREAMS:
-            filter = lQS.withDatastreamStaIdentifier(relatedId);
-            break;
-        default:
-            throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
+            case STAEntityDefinition.DATASTREAMS:
+                filter = lQS.withDatastreamStaIdentifier(relatedId);
+                break;
+            default:
+                throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
         }
 
         if (ownId != null) {
@@ -137,7 +137,7 @@ public class LicenseService
         //if (!license.isProcessed()) {
         if (license.getStaIdentifier() != null && !license.isSetName()) {
             Optional<LicenseEntity> optionalEntity =
-                    getRepository().findByStaIdentifier(license.getStaIdentifier());
+                getRepository().findByStaIdentifier(license.getStaIdentifier());
             if (optionalEntity.isPresent()) {
                 return optionalEntity.get();
             } else {
@@ -165,7 +165,7 @@ public class LicenseService
     }
 
     @Override protected LicenseEntity updateEntity(String id, LicenseEntity entity, HttpMethod method)
-            throws STACRUDException {
+        throws STACRUDException {
         if (HttpMethod.PATCH.equals(method)) {
             synchronized (getLock(id)) {
                 Optional<LicenseEntity> existing = getRepository().findByStaIdentifier(id);
@@ -193,7 +193,7 @@ public class LicenseService
     }
 
     @Override protected LicenseEntity merge(LicenseEntity existing, LicenseEntity toMerge)
-            throws STACRUDException {
+        throws STACRUDException {
 
         if (toMerge.getStaIdentifier() != null) {
             existing.setStaIdentifier(toMerge.getStaIdentifier());
@@ -210,10 +210,6 @@ public class LicenseService
 
         mergeDatastreams(existing, toMerge);
         return existing;
-    }
-
-    @Override protected void delete(LicenseEntity entity) throws STACRUDException {
-        delete(entity.getStaIdentifier());
     }
 
     @Override public void delete(String id) throws STACRUDException {

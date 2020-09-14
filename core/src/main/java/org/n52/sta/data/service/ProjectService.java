@@ -63,7 +63,7 @@ import java.util.stream.Collectors;
 @Transactional
 @Profile(StaConstants.CITSCIEXTENSION)
 public class ProjectService
-        extends AbstractSensorThingsEntityServiceImpl<ProjectRepository, ProjectEntity, ProjectEntity> {
+    extends AbstractSensorThingsEntityServiceImpl<ProjectRepository, ProjectEntity, ProjectEntity> {
 
     private static final ProjectQuerySpecifications pQS = new ProjectQuerySpecifications();
 
@@ -76,13 +76,13 @@ public class ProjectService
     }
 
     @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
-            throws STAInvalidQueryException {
+        throws STAInvalidQueryException {
         if (expandOption != null) {
             for (ExpandItem expandItem : expandOption.getItems()) {
                 String expandProperty = expandItem.getPath();
                 if (ProjectEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
                     return new EntityGraphRepository.FetchGraph[] {
-                            EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS
+                        EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS,
                     };
                 } else {
                     throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
@@ -95,14 +95,14 @@ public class ProjectService
     }
 
     @Override protected ProjectEntity fetchExpandEntitiesWithFilter(ProjectEntity entity, ExpandFilter expandOption)
-            throws STACRUDException, STAInvalidQueryException {
+        throws STACRUDException, STAInvalidQueryException {
         for (ExpandItem expandItem : expandOption.getItems()) {
             String expandProperty = expandItem.getPath();
             if (ProjectEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
                 Page<AbstractDatasetEntity> datastreams = getDatastreamService()
-                        .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
-                                                               STAEntityDefinition.PROJECTS,
-                                                               expandItem.getQueryOptions());
+                    .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
+                                                           STAEntityDefinition.PROJECTS,
+                                                           expandItem.getQueryOptions());
                 entity.setDatasets(datastreams.get().collect(Collectors.toSet()));
                 return entity;
             } else {
@@ -119,11 +119,11 @@ public class ProjectService
                                                                            String ownId) {
         Specification<ProjectEntity> filter;
         switch (relatedType) {
-        case STAEntityDefinition.DATASTREAMS:
-            filter = pQS.withDatastreamStaIdentifier(relatedId);
-            break;
-        default:
-            throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
+            case STAEntityDefinition.DATASTREAMS:
+                filter = pQS.withDatastreamStaIdentifier(relatedId);
+                break;
+            default:
+                throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
         }
 
         if (ownId != null) {
@@ -137,7 +137,7 @@ public class ProjectService
         //if (!project.isProcessed()) {
         if (project.getStaIdentifier() != null && !project.isSetName()) {
             Optional<ProjectEntity> optionalEntity =
-                    getRepository().findByStaIdentifier(project.getStaIdentifier());
+                getRepository().findByStaIdentifier(project.getStaIdentifier());
             if (optionalEntity.isPresent()) {
                 return optionalEntity.get();
             } else {
@@ -165,7 +165,7 @@ public class ProjectService
     }
 
     @Override protected ProjectEntity updateEntity(String id, ProjectEntity entity, HttpMethod method)
-            throws STACRUDException {
+        throws STACRUDException {
         if (HttpMethod.PATCH.equals(method)) {
             synchronized (getLock(id)) {
                 Optional<ProjectEntity> existing = getRepository().findByStaIdentifier(id);
@@ -193,7 +193,7 @@ public class ProjectService
     }
 
     @Override protected ProjectEntity merge(ProjectEntity existing, ProjectEntity toMerge)
-            throws STACRUDException {
+        throws STACRUDException {
 
         if (toMerge.getStaIdentifier() != null) {
             existing.setStaIdentifier(toMerge.getStaIdentifier());
@@ -216,10 +216,6 @@ public class ProjectService
 
         mergeDatastreams(existing, toMerge);
         return existing;
-    }
-
-    @Override protected void delete(ProjectEntity entity) throws STACRUDException {
-        delete(entity.getStaIdentifier());
     }
 
     @Override public void delete(String id) throws STACRUDException {

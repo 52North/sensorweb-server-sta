@@ -70,7 +70,7 @@ import java.util.stream.Collectors;
 @DependsOn({"springApplicationContext"})
 @Transactional
 public class ThingService
-        extends AbstractSensorThingsEntityServiceImpl<ThingRepository, PlatformEntity, PlatformEntity> {
+    extends AbstractSensorThingsEntityServiceImpl<ThingRepository, PlatformEntity, PlatformEntity> {
 
     protected static final ThingQuerySpecifications tQS = new ThingQuerySpecifications();
     private static final Logger logger = LoggerFactory.getLogger(ThingService.class);
@@ -85,7 +85,7 @@ public class ThingService
     }
 
     @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
-            throws STAInvalidQueryException {
+        throws STAInvalidQueryException {
         Set<EntityGraphRepository.FetchGraph> fetchGraphs = new HashSet<>(6);
         if (expandOption != null) {
             for (ExpandItem expandItem : expandOption.getItems()) {
@@ -95,19 +95,19 @@ public class ThingService
                 }
                 String expandProperty = expandItem.getPath();
                 switch (expandProperty) {
-                case STAEntityDefinition.HISTORICAL_LOCATIONS:
-                    fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATIONS);
-                    break;
-                case STAEntityDefinition.DATASTREAMS:
-                    fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS);
-                    break;
-                case STAEntityDefinition.LOCATIONS:
-                    fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_LOCATIONS);
-                    break;
-                default:
-                    throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                                                                     expandProperty,
-                                                                     StaConstants.THING));
+                    case STAEntityDefinition.HISTORICAL_LOCATIONS:
+                        fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATIONS);
+                        break;
+                    case STAEntityDefinition.DATASTREAMS:
+                        fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS);
+                        break;
+                    case STAEntityDefinition.LOCATIONS:
+                        fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_LOCATIONS);
+                        break;
+                    default:
+                        throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
+                                                                         expandProperty,
+                                                                         StaConstants.THING));
                 }
             }
         }
@@ -115,7 +115,7 @@ public class ThingService
     }
 
     @Override protected PlatformEntity fetchExpandEntitiesWithFilter(PlatformEntity entity, ExpandFilter expandOption)
-            throws STACRUDException, STAInvalidQueryException {
+        throws STACRUDException, STAInvalidQueryException {
         for (ExpandItem expandItem : expandOption.getItems()) {
             // We have already handled $expand without filter and expand
             if (!(expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter())) {
@@ -123,31 +123,31 @@ public class ThingService
             }
             String expandProperty = expandItem.getPath();
             switch (expandProperty) {
-            case STAEntityDefinition.HISTORICAL_LOCATIONS:
-                Page<HistoricalLocationEntity> hLocs = getHistoricalLocationService()
+                case STAEntityDefinition.HISTORICAL_LOCATIONS:
+                    Page<HistoricalLocationEntity> hLocs = getHistoricalLocationService()
                         .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
                                                                STAEntityDefinition.THINGS,
                                                                expandItem.getQueryOptions());
-                entity.setHistoricalLocations(hLocs.get().collect(Collectors.toSet()));
-                break;
-            case STAEntityDefinition.DATASTREAMS:
-                Page<AbstractDatasetEntity> datastreams = getDatastreamService()
+                    entity.setHistoricalLocations(hLocs.get().collect(Collectors.toSet()));
+                    break;
+                case STAEntityDefinition.DATASTREAMS:
+                    Page<AbstractDatasetEntity> datastreams = getDatastreamService()
                         .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
                                                                STAEntityDefinition.THINGS,
                                                                expandItem.getQueryOptions());
-                entity.setDatasets(datastreams.get().collect(Collectors.toSet()));
-                break;
-            case STAEntityDefinition.LOCATIONS:
-                Page<LocationEntity> locations = getLocationService()
+                    entity.setDatasets(datastreams.get().collect(Collectors.toSet()));
+                    break;
+                case STAEntityDefinition.LOCATIONS:
+                    Page<LocationEntity> locations = getLocationService()
                         .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
                                                                STAEntityDefinition.THINGS,
                                                                expandItem.getQueryOptions());
-                entity.setLocations(locations.get().collect(Collectors.toSet()));
-                break;
-            default:
-                throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                                                                 expandProperty,
-                                                                 StaConstants.THING));
+                    entity.setLocations(locations.get().collect(Collectors.toSet()));
+                    break;
+                default:
+                    throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
+                                                                     expandProperty,
+                                                                     StaConstants.THING));
             }
         }
         return entity;
@@ -159,20 +159,20 @@ public class ThingService
                                                                   String ownId) {
         Specification<PlatformEntity> filter;
         switch (relatedType) {
-        case STAEntityDefinition.HISTORICAL_LOCATIONS: {
-            filter = tQS.withHistoricalLocationStaIdentifier(relatedId);
-            break;
-        }
-        case STAEntityDefinition.DATASTREAMS: {
-            filter = tQS.withDatastreamStaIdentifier(relatedId);
-            break;
-        }
-        case STAEntityDefinition.LOCATIONS: {
-            filter = tQS.withLocationStaIdentifier(relatedId);
-            break;
-        }
-        default:
-            throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
+            case STAEntityDefinition.HISTORICAL_LOCATIONS: {
+                filter = tQS.withHistoricalLocationStaIdentifier(relatedId);
+                break;
+            }
+            case STAEntityDefinition.DATASTREAMS: {
+                filter = tQS.withDatastreamStaIdentifier(relatedId);
+                break;
+            }
+            case STAEntityDefinition.LOCATIONS: {
+                filter = tQS.withLocationStaIdentifier(relatedId);
+                break;
+            }
+            default:
+                throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
         }
 
         if (ownId != null) {
@@ -187,7 +187,7 @@ public class ThingService
         if (!thing.isProcessed()) {
             if (thing.getStaIdentifier() != null && !thing.isSetName()) {
                 Optional<PlatformEntity> optionalEntity =
-                        getRepository().findByStaIdentifier(thing.getStaIdentifier());
+                    getRepository().findByStaIdentifier(thing.getStaIdentifier());
                 if (optionalEntity.isPresent()) {
                     return optionalEntity.get();
                 } else {
@@ -215,7 +215,7 @@ public class ThingService
                     thing = getRepository().intermediateSave(thing);
                     processDatastreams(thing);
                     boolean hasUnpersistedHLocs = thing.hasHistoricalLocations() &&
-                            thing.getHistoricalLocations().stream().anyMatch(p -> p.getId() == null);
+                        thing.getHistoricalLocations().stream().anyMatch(p -> p.getId() == null);
                     if (locationChanged || hasUnpersistedHLocs) {
                         generateHistoricalLocation(thing);
                     }
@@ -233,9 +233,9 @@ public class ThingService
         if (HttpMethod.PATCH.equals(method)) {
             synchronized (getLock(id)) {
                 Optional<PlatformEntity> existing =
-                        getRepository().findByStaIdentifier(id,
-                                                            IdentifierRepository.FetchGraph.FETCHGRAPH_LOCATIONS,
-                                                            IdentifierRepository.FetchGraph.FETCHGRAPH_HIST_LOCATIONS);
+                    getRepository().findByStaIdentifier(id,
+                                                        IdentifierRepository.FetchGraph.FETCHGRAPH_LOCATIONS,
+                                                        IdentifierRepository.FetchGraph.FETCHGRAPH_HIST_LOCATIONS);
                 if (existing.isPresent()) {
                     PlatformEntity merged = merge(existing.get(), newEntity);
                     if (newEntity.hasLocationEntities()) {
@@ -257,60 +257,6 @@ public class ThingService
     }
 
     @Override
-    protected PlatformEntity merge(PlatformEntity existing, PlatformEntity toMerge) {
-        mergeName(existing, toMerge);
-        mergeDescription(existing, toMerge);
-        if (toMerge.hasProperties()) {
-            existing.setProperties(toMerge.getProperties());
-        }
-        return existing;
-    }
-
-    /*
-    private void checkUpdate(PlatformEntity thing) throws STACRUDException {
-        if (thing.hasLocationEntities()) {
-            for (LocationEntity location : thing.getLocations()) {
-                checkInlineLocation(location);
-            }
-        }
-        if (thing.hasDatastreams()) {
-            for (DatastreamEntity datastream : thing.getDatastreams()) {
-                checkInlineDatastream(datastream);
-            }
-        }
-    }
-    */
-
-    @Override
-    public void delete(String identifier) throws STACRUDException {
-        synchronized (getLock(identifier)) {
-            if (getRepository().existsByStaIdentifier(identifier)) {
-                PlatformEntity thing =
-                        getRepository().findByStaIdentifier(identifier,
-                                                            EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS,
-                                                            EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATIONS)
-                                       .get();
-                // delete datastreams
-                for (AbstractDatasetEntity ds : thing.getDatasets()) {
-                    getDatastreamService().delete(ds);
-                }
-                // delete historicalLocation
-                for (HistoricalLocationEntity hloc : thing.getHistoricalLocations()) {
-                    getHistoricalLocationService().delete(hloc);
-                }
-                getRepository().deleteByStaIdentifier(identifier);
-            } else {
-                throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
-            }
-        }
-    }
-
-    @Override
-    public void delete(PlatformEntity entity) throws STACRUDException {
-        delete(entity.getStaIdentifier());
-    }
-
-    @Override
     public PlatformEntity createOrUpdate(PlatformEntity entity) throws STACRUDException {
         if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
             return updateEntity(entity.getStaIdentifier(), entity, HttpMethod.PATCH);
@@ -320,6 +266,40 @@ public class ThingService
 
     @Override public String checkPropertyName(String property) {
         return tQS.checkPropertyName(property);
+    }
+
+    @Override
+    protected PlatformEntity merge(PlatformEntity existing, PlatformEntity toMerge) {
+        mergeName(existing, toMerge);
+        mergeDescription(existing, toMerge);
+        if (toMerge.hasProperties()) {
+            existing.setProperties(toMerge.getProperties());
+        }
+        return existing;
+    }
+
+    @Override
+    public void delete(String identifier) throws STACRUDException {
+        synchronized (getLock(identifier)) {
+            if (getRepository().existsByStaIdentifier(identifier)) {
+                PlatformEntity thing =
+                    getRepository().findByStaIdentifier(identifier,
+                                                        EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS,
+                                                        EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATIONS)
+                        .get();
+                // delete datastreams
+                for (AbstractDatasetEntity ds : thing.getDatasets()) {
+                    getDatastreamService().delete(ds.getStaIdentifier());
+                }
+                // delete historicalLocation
+                for (HistoricalLocationEntity hloc : thing.getHistoricalLocations()) {
+                    getHistoricalLocationService().delete(hloc.getStaIdentifier());
+                }
+                getRepository().deleteByStaIdentifier(identifier);
+            } else {
+                throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
+            }
+        }
     }
 
     protected void processDatastreams(PlatformEntity thing) throws STACRUDException {
@@ -334,7 +314,7 @@ public class ThingService
     }
 
     private boolean processLocations(PlatformEntity thing, Set<LocationEntity> oldLocations) throws
-            STACRUDException {
+        STACRUDException {
         boolean didPersist = false;
         if (oldLocations != null) {
             Set<LocationEntity> locations = new HashSet<>();
@@ -371,15 +351,15 @@ public class ThingService
         // Create new HistoricalLocation based on current location
         if (thing.hasLocationEntities()) {
             Set<HistoricalLocationEntity> historicalLocations = thing.hasHistoricalLocations()
-                    ? new LinkedHashSet<>(thing.getHistoricalLocations())
-                    : new LinkedHashSet<>();
+                ? new LinkedHashSet<>(thing.getHistoricalLocations())
+                : new LinkedHashSet<>();
             HistoricalLocationEntity historicalLocation = new HistoricalLocationEntity();
             historicalLocation.setIdentifier(UUID.randomUUID().toString());
             historicalLocation.setThing(thing);
             historicalLocation.setTime(DateTime.now().toDate());
             historicalLocation.setProcessed(true);
             HistoricalLocationEntity createdHistoricalLocation =
-                    getHistoricalLocationService().createOrUpdate(historicalLocation);
+                getHistoricalLocationService().createOrUpdate(historicalLocation);
             if (createdHistoricalLocation != null) {
                 historicalLocations.add(createdHistoricalLocation);
             }

@@ -49,152 +49,152 @@ import java.util.regex.Pattern;
 public interface CitSciExtensionRequestUtils extends RequestUtils {
 
     String BASE_COLLECTION_REGEX =
-            OBSERVATION_GROUPS
-                    + OR + OBSERVATION_RELATIONS
-                    + OR + PARTIES
-                    + OR + PROJECTS
-                    + OR + LICENSES;
+        OBSERVATION_GROUPS
+            + OR + OBSERVATION_RELATIONS
+            + OR + PARTIES
+            + OR + PROJECTS
+            + OR + LICENSES;
 
     String BASE_COLLECTION_REGEX_NAMED_GROUPS =
-            WANTED_NAME_GROUP_START + BASE_COLLECTION_REGEX + OR + DATASTREAMS + OR + OBSERVATIONS +
-                    WANTED_NAME_GROUP_END;
+        WANTED_NAME_GROUP_START + BASE_COLLECTION_REGEX + OR + DATASTREAMS + OR + OBSERVATIONS +
+            WANTED_NAME_GROUP_END;
 
     String IDENTIFIED_BY_OBSERVATION_REGEX =
-            OBSERVATIONS + IDENTIFIER_REGEX + SLASH
-                    + ROUND_BRACKET_OPEN
-                    + OBSERVATION_RELATIONS
-                    + ROUND_BRACKET_CLOSE;
+        OBSERVATIONS + IDENTIFIER_REGEX + SLASH
+            + ROUND_BRACKET_OPEN
+            + OBSERVATION_RELATIONS
+            + ROUND_BRACKET_CLOSE;
 
     String IDENTIFIED_BY_LICENSE_REGEX =
-            LICENSES + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN
-                    + DATASTREAMS
-                    + ROUND_BRACKET_CLOSE;
+        LICENSES + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN
+            + DATASTREAMS
+            + ROUND_BRACKET_CLOSE;
 
     String IDENTIFIED_BY_PARTY_REGEX =
-            PARTIES + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN
-                    + DATASTREAMS
-                    + ROUND_BRACKET_CLOSE;
+        PARTIES + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN
+            + DATASTREAMS
+            + ROUND_BRACKET_CLOSE;
 
     String IDENTIFIED_BY_PROJECT_REGEX =
-            PROJECTS + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN
-                    + DATASTREAMS
-                    + ROUND_BRACKET_CLOSE;
+        PROJECTS + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN
+            + DATASTREAMS
+            + ROUND_BRACKET_CLOSE;
 
     String IDENTIFIED_BY_OBSERVATION_GROUP_REGEX =
-            OBSERVATION_GROUPS + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN + OBSERVATION_RELATIONS +
-                    ROUND_BRACKET_CLOSE;
+        OBSERVATION_GROUPS + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN + OBSERVATION_RELATIONS +
+            ROUND_BRACKET_CLOSE;
 
     String IDENTIFIED_BY_OBSERVATION_RELATION_REGEX =
-            OBSERVATION_RELATIONS + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN + OBSERVATION + OR +
-                    OBSERVATION_GROUP +
-                    ROUND_BRACKET_CLOSE;
+        OBSERVATION_RELATIONS + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN + OBSERVATION + OR +
+            OBSERVATION_GROUP +
+            ROUND_BRACKET_CLOSE;
 
     String IDENTIFIED_BY_DATASTREAM_REGEX =
-            DATASTREAMS + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN
-                    + PROJECT + OR + PARTY + OR + LICENSE
-                    + ROUND_BRACKET_CLOSE;
+        DATASTREAMS + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN
+            + PROJECT + OR + PARTY + OR + LICENSE
+            + ROUND_BRACKET_CLOSE;
 
     // /Observations(52)/ObservationRelations
     String COLLECTION_IDENTIFIED_BY_OBSERVATION =
-            SOURCE_NAME_GROUP_START + OBSERVATIONS + SOURCE_NAME_GROUP_END
-                    + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
-                    + SLASH
-                    + WANTED_NAME_GROUP_START + OBSERVATION_RELATIONS + WANTED_NAME_GROUP_END;
+        SOURCE_NAME_GROUP_START + OBSERVATIONS + SOURCE_NAME_GROUP_END
+            + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
+            + SLASH
+            + WANTED_NAME_GROUP_START + OBSERVATION_RELATIONS + WANTED_NAME_GROUP_END;
 
     String COLLECTION_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE =
-            PATH_ENTITY + OBSERVATIONS + IDENTIFIER_REGEX + CURLY_BRACKET_CLOSE + PATH_TARGET +
-                    OBSERVATION_RELATIONS +
-                    CURLY_BRACKET_CLOSE;
+        PATH_ENTITY + OBSERVATIONS + IDENTIFIER_REGEX + CURLY_BRACKET_CLOSE + PATH_TARGET +
+            OBSERVATION_RELATIONS +
+            CURLY_BRACKET_CLOSE;
 
     // /ObservationGroups(52)/ObservationRelations
     String COLLECTION_IDENTIFIED_BY_OBSERVATION_GROUP =
-            SOURCE_NAME_GROUP_START + OBSERVATION_GROUPS + SOURCE_NAME_GROUP_END
-                    + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
-                    + SLASH
-                    + WANTED_NAME_GROUP_START + OBSERVATION_RELATIONS + WANTED_NAME_GROUP_END;
+        SOURCE_NAME_GROUP_START + OBSERVATION_GROUPS + SOURCE_NAME_GROUP_END
+            + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
+            + SLASH
+            + WANTED_NAME_GROUP_START + OBSERVATION_RELATIONS + WANTED_NAME_GROUP_END;
 
     String COLLECTION_IDENTIFIED_BY_OBSERVATION_GROUP_PATH_VARIABLE =
-            PATH_ENTITY + OBSERVATION_GROUPS + IDENTIFIER_REGEX + CURLY_BRACKET_CLOSE + PATH_TARGET +
-                    OBSERVATION_RELATIONS +
-                    CURLY_BRACKET_CLOSE;
+        PATH_ENTITY + OBSERVATION_GROUPS + IDENTIFIER_REGEX + CURLY_BRACKET_CLOSE + PATH_TARGET +
+            OBSERVATION_RELATIONS +
+            CURLY_BRACKET_CLOSE;
 
     // /Parties(52)/CSDatastreams
     String COLLECTION_IDENTIFIED_BY_PARTY =
-            SOURCE_NAME_GROUP_START + PARTIES + SOURCE_NAME_GROUP_END
-                    + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
-                    + SLASH
-                    + WANTED_NAME_GROUP_START + DATASTREAMS + WANTED_NAME_GROUP_END;
+        SOURCE_NAME_GROUP_START + PARTIES + SOURCE_NAME_GROUP_END
+            + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
+            + SLASH
+            + WANTED_NAME_GROUP_START + DATASTREAMS + WANTED_NAME_GROUP_END;
 
     String COLLECTION_IDENTIFIED_BY_PARTY_PATH_VARIABLE =
-            PATH_ENTITY + PARTIES + IDENTIFIER_REGEX + CURLY_BRACKET_CLOSE
-                    + PATH_TARGET + DATASTREAMS + CURLY_BRACKET_CLOSE;
+        PATH_ENTITY + PARTIES + IDENTIFIER_REGEX + CURLY_BRACKET_CLOSE
+            + PATH_TARGET + DATASTREAMS + CURLY_BRACKET_CLOSE;
 
     // /Licenses(52)/CSDatastreams
     String COLLECTION_IDENTIFIED_BY_LICENSE =
-            SOURCE_NAME_GROUP_START + LICENSES + SOURCE_NAME_GROUP_END
-                    + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
-                    + SLASH
-                    + WANTED_NAME_GROUP_START + DATASTREAMS + WANTED_NAME_GROUP_END;
+        SOURCE_NAME_GROUP_START + LICENSES + SOURCE_NAME_GROUP_END
+            + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
+            + SLASH
+            + WANTED_NAME_GROUP_START + DATASTREAMS + WANTED_NAME_GROUP_END;
 
     String COLLECTION_IDENTIFIED_BY_LICENSE_PATH_VARIABLE =
-            PATH_ENTITY + LICENSES + IDENTIFIER_REGEX + CURLY_BRACKET_CLOSE
-                    + PATH_TARGET + DATASTREAMS + CURLY_BRACKET_CLOSE;
+        PATH_ENTITY + LICENSES + IDENTIFIER_REGEX + CURLY_BRACKET_CLOSE
+            + PATH_TARGET + DATASTREAMS + CURLY_BRACKET_CLOSE;
 
     // /Projects(52)/CSDatastreams
     String COLLECTION_IDENTIFIED_BY_PROJECT =
-            SOURCE_NAME_GROUP_START + PROJECTS + SOURCE_NAME_GROUP_END
-                    + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
-                    + SLASH
-                    + WANTED_NAME_GROUP_START + DATASTREAMS + WANTED_NAME_GROUP_END;
+        SOURCE_NAME_GROUP_START + PROJECTS + SOURCE_NAME_GROUP_END
+            + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
+            + SLASH
+            + WANTED_NAME_GROUP_START + DATASTREAMS + WANTED_NAME_GROUP_END;
 
     String COLLECTION_IDENTIFIED_BY_PROJECT_PATH_VARIABLE =
-            PATH_ENTITY + PROJECTS + IDENTIFIER_REGEX + CURLY_BRACKET_CLOSE + PATH_TARGET
-                    + DATASTREAMS +
-                    CURLY_BRACKET_CLOSE;
+        PATH_ENTITY + PROJECTS + IDENTIFIER_REGEX + CURLY_BRACKET_CLOSE + PATH_TARGET
+            + DATASTREAMS +
+            CURLY_BRACKET_CLOSE;
 
     // /ObservationGroups(52)
     String ENTITY_IDENTIFIED_DIRECTLY =
-            PATH_ENTITY + BASE_COLLECTION_REGEX + CURLY_BRACKET_CLOSE + PATH_ID + IDENTIFIER_REGEX + DOLLAR +
-                    CURLY_BRACKET_CLOSE;
+        PATH_ENTITY + BASE_COLLECTION_REGEX + CURLY_BRACKET_CLOSE + PATH_ID + IDENTIFIER_REGEX + DOLLAR +
+            CURLY_BRACKET_CLOSE;
 
     // /ObservationRelations(52)/ObservationGroup
     // /ObservationRelations(52)/Observation
     String ENTITY_IDENTIFIED_BY_OBSERVATIONRELATION =
-            SOURCE_NAME_GROUP_START + OBSERVATION_RELATIONS + SOURCE_NAME_GROUP_END
-                    + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
-                    + SLASH
-                    + WANTED_NAME_GROUP_START + OBSERVATION + OR + OBSERVATION_GROUP +
-                    WANTED_NAME_GROUP_END;
+        SOURCE_NAME_GROUP_START + OBSERVATION_RELATIONS + SOURCE_NAME_GROUP_END
+            + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
+            + SLASH
+            + WANTED_NAME_GROUP_START + OBSERVATION + OR + OBSERVATION_GROUP +
+            WANTED_NAME_GROUP_END;
 
     String ENTITY_IDENTIFIED_BY_OBSERVATIONRELATION_PATH_VARIABLE =
-            PATH_ENTITY + OBSERVATION_RELATIONS + IDENTIFIER_REGEX
-                    + CURLY_BRACKET_CLOSE + PATH_TARGET + OBSERVATION + OR + OBSERVATION_GROUP +
-                    CURLY_BRACKET_CLOSE;
+        PATH_ENTITY + OBSERVATION_RELATIONS + IDENTIFIER_REGEX
+            + CURLY_BRACKET_CLOSE + PATH_TARGET + OBSERVATION + OR + OBSERVATION_GROUP +
+            CURLY_BRACKET_CLOSE;
 
     String ENTITY_PROPERTY_IDENTIFIED_BY_OBSERVATIONRELATION_PATH_VARIABLE =
-            ENTITY_IDENTIFIED_BY_OBSERVATIONRELATION_PATH_VARIABLE + SLASH + PATH_PROPERTY;
+        ENTITY_IDENTIFIED_BY_OBSERVATIONRELATION_PATH_VARIABLE + SLASH + PATH_PROPERTY;
 
     // /Datastreams(52)/Party
     // /Datastreams(52)/License
     // /Datastreams(52)/Project
     String ENTITY_IDENTIFIED_BY_DATASTREAM =
-            SOURCE_NAME_GROUP_START + DATASTREAMS + SOURCE_NAME_GROUP_END
-                    + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END + SLASH + WANTED_NAME_GROUP_START
-                    + PROJECT
-                    + OR + PARTY
-                    + OR + LICENSE
-                    + WANTED_NAME_GROUP_END;
+        SOURCE_NAME_GROUP_START + DATASTREAMS + SOURCE_NAME_GROUP_END
+            + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END + SLASH + WANTED_NAME_GROUP_START
+            + PROJECT
+            + OR + PARTY
+            + OR + LICENSE
+            + WANTED_NAME_GROUP_END;
 
     String ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE =
-            PATH_ENTITY + DATASTREAMS + IDENTIFIER_REGEX
-                    + CURLY_BRACKET_CLOSE + PATH_TARGET
-                    + PROJECT
-                    + OR + PARTY
-                    + OR + LICENSE
-                    + CURLY_BRACKET_CLOSE;
+        PATH_ENTITY + DATASTREAMS + IDENTIFIER_REGEX
+            + CURLY_BRACKET_CLOSE + PATH_TARGET
+            + PROJECT
+            + OR + PARTY
+            + OR + LICENSE
+            + CURLY_BRACKET_CLOSE;
 
     String ENTITY_PROPERTY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE =
-            ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE + SLASH + PATH_PROPERTY;
+        ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE + SLASH + PATH_PROPERTY;
 
     // Patterns used for matching Paths in mqtt with named groups
     // Java does not support duplicate names so patterns are handled separately
@@ -206,48 +206,48 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
     Pattern CP_IDENT_BY_PROJECT = Pattern.compile(COLLECTION_IDENTIFIED_BY_PROJECT + DOLLAR);
 
     Pattern[] NAMED_COLL_PATTERNS =
-            new Pattern[] {
-                    CP_BASE,
-                    CP_IDENT_BY_OBSERVATION_GROUP,
-                    CP_IDENT_BY_LICENSE,
-                    CP_IDENT_BY_PARTY,
-                    CP_IDENT_BY_PROJECT
-            };
+        new Pattern[] {
+            CP_BASE,
+            CP_IDENT_BY_OBSERVATION_GROUP,
+            CP_IDENT_BY_LICENSE,
+            CP_IDENT_BY_PARTY,
+            CP_IDENT_BY_PROJECT,
+        };
 
     // OGC-15-078r6 14.2.3
     Pattern PROP_PATTERN_BASE = Pattern.compile(
-            BASE_COLLECTION_REGEX_NAMED_GROUPS + WANTED_ID_GROUP_START + IDENTIFIER_REGEX + WANTED_ID_GROUP_END +
-                    PROPERTY_REGEX_NAMED_GROUPS + DOLLAR);
+        BASE_COLLECTION_REGEX_NAMED_GROUPS + WANTED_ID_GROUP_START + IDENTIFIER_REGEX + WANTED_ID_GROUP_END +
+            PROPERTY_REGEX_NAMED_GROUPS + DOLLAR);
 
     Pattern[] NAMED_PROP_PATTERNS =
-            new Pattern[] {
-                    PROP_PATTERN_BASE
-            };
+        new Pattern[] {
+            PROP_PATTERN_BASE,
+        };
 
     Pattern EP_BASE = Pattern.compile(
-            BASE_COLLECTION_REGEX_NAMED_GROUPS + WANTED_ID_GROUP_START + IDENTIFIER_REGEX + WANTED_ID_GROUP_END +
-                    DOLLAR);
+        BASE_COLLECTION_REGEX_NAMED_GROUPS + WANTED_ID_GROUP_START + IDENTIFIER_REGEX + WANTED_ID_GROUP_END +
+            DOLLAR);
     Pattern EP_IDENT_BY_OBSERVATIONRELATION = Pattern.compile(ENTITY_IDENTIFIED_BY_OBSERVATIONRELATION + DOLLAR);
     Pattern EP_IDENT_BY_DATASTREAM = Pattern.compile(ENTITY_IDENTIFIED_BY_DATASTREAM + DOLLAR);
 
     Pattern[] NAMED_ENTITY_PATTERNS =
-            new Pattern[] {
-                    EP_BASE,
-                    EP_IDENT_BY_OBSERVATIONRELATION,
-                    EP_IDENT_BY_DATASTREAM
-            };
+        new Pattern[] {
+            EP_BASE,
+            EP_IDENT_BY_OBSERVATIONRELATION,
+            EP_IDENT_BY_DATASTREAM,
+        };
 
     // OGC-15-078r6 14.2.4
     Pattern NAMED_SELECT_PATTER_BASE =
-            Pattern.compile(BASE_COLLECTION_REGEX_NAMED_GROUPS + SELECT_REGEX_NAMED_GROUPS + DOLLAR);
+        Pattern.compile(BASE_COLLECTION_REGEX_NAMED_GROUPS + SELECT_REGEX_NAMED_GROUPS + DOLLAR);
 
     Pattern[] NAMED_SELECT_PATTERNS =
-            new Pattern[] {
-                    NAMED_SELECT_PATTER_BASE
-            };
+        new Pattern[] {
+            NAMED_SELECT_PATTER_BASE,
+        };
 
     Pattern BY_ID_PATTERN = Pattern.compile(
-            ROUND_BRACKET_OPEN + BASE_COLLECTION_REGEX_NAMED_GROUPS + ROUND_BRACKET_CLOSE + IDENTIFIER_REGEX);
+        ROUND_BRACKET_OPEN + BASE_COLLECTION_REGEX_NAMED_GROUPS + ROUND_BRACKET_CLOSE + IDENTIFIER_REGEX);
     Pattern BY_OBSERVATION_GROUP_PATTERN = Pattern.compile(IDENTIFIED_BY_OBSERVATION_GROUP_REGEX);
     Pattern BY_OBSERVATION_RELATION_PATTERN = Pattern.compile(IDENTIFIED_BY_OBSERVATION_RELATION_REGEX);
     Pattern BY_LICENSE_PATTERN = Pattern.compile(IDENTIFIED_BY_LICENSE_REGEX);
@@ -258,40 +258,40 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
 
     default Class collectionNameToClass(String collectionName) throws STAInvalidUrlException {
         switch (collectionName) {
-        case OBSERVATION_GROUPS:
-            return ObservationGroupEntity.class;
-        case OBSERVATION_RELATIONS:
-            return ObservationRelationEntity.class;
-        case LICENSES:
-            return LicenseEntity.class;
-        case PROJECTS:
-            return ProjectEntity.class;
-        case PARTIES:
-            return PartyEntity.class;
-        default:
-            throw new STAInvalidUrlException("Could not resolve CollectionName to Entity class!");
+            case OBSERVATION_GROUPS:
+                return ObservationGroupEntity.class;
+            case OBSERVATION_RELATIONS:
+                return ObservationRelationEntity.class;
+            case LICENSES:
+                return LicenseEntity.class;
+            case PROJECTS:
+                return ProjectEntity.class;
+            case PARTIES:
+                return PartyEntity.class;
+            default:
+                throw new STAInvalidUrlException("Could not resolve CollectionName to Entity class!");
         }
     }
 
     default Class collectionNameToPatchClass(String collectionName) throws STAInvalidUrlException {
         switch (collectionName) {
-        case OBSERVATION_GROUP:
-        case OBSERVATION_GROUPS:
-            return ObservationGroupSerDes.ObservationGroupPatch.class;
-        case OBSERVATION_RELATIONS:
-        case OBSERVATION_RELATION:
-            return ObservationRelationSerDes.ObservationRelationPatch.class;
-        case LICENSES:
-        case LICENSE:
-            return LicenseSerDes.LicensePatch.class;
-        case PROJECTS:
-        case PROJECT:
-            return ProjectSerDes.ProjectPatch.class;
-        case PARTIES:
-        case PARTY:
-            return PartySerDes.PartyPatch.class;
-        default:
-            throw new STAInvalidUrlException("Could not resolve CollectionName to PatchEntity class!");
+            case OBSERVATION_GROUP:
+            case OBSERVATION_GROUPS:
+                return ObservationGroupSerDes.ObservationGroupPatch.class;
+            case OBSERVATION_RELATIONS:
+            case OBSERVATION_RELATION:
+                return ObservationRelationSerDes.ObservationRelationPatch.class;
+            case LICENSES:
+            case LICENSE:
+                return LicenseSerDes.LicensePatch.class;
+            case PROJECTS:
+            case PROJECT:
+                return ProjectSerDes.ProjectPatch.class;
+            case PARTIES:
+            case PARTY:
+                return PartySerDes.PartyPatch.class;
+            default:
+                throw new STAInvalidUrlException("Could not resolve CollectionName to PatchEntity class!");
         }
     }
 
@@ -314,22 +314,22 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
                         // Look back at last resource and check if association is valid
                         String resource = uriResources[i - 1] + SLASH + uriResources[i];
                         if (!(BY_OBSERVATION_GROUP_PATTERN.matcher(resource).matches()
-                                || BY_LICENSE_PATTERN.matcher(resource).matches()
-                                || BY_PARTY_PATTERN.matcher(resource).matches()
-                                || BY_PROJECT_PATTERN.matcher(resource).matches()
-                                || BY_DATASTREAM_PATTERN.matcher(resource).matches()
-                                || BY_OBSERVATION_PATTERN.matcher(resource).matches()
-                                || BY_OBSERVATION_RELATION_PATTERN.matcher(resource).matches())) {
+                            || BY_LICENSE_PATTERN.matcher(resource).matches()
+                            || BY_PARTY_PATTERN.matcher(resource).matches()
+                            || BY_PROJECT_PATTERN.matcher(resource).matches()
+                            || BY_DATASTREAM_PATTERN.matcher(resource).matches()
+                            || BY_OBSERVATION_PATTERN.matcher(resource).matches()
+                            || BY_OBSERVATION_RELATION_PATTERN.matcher(resource).matches())) {
                             return new STAInvalidUrlException(URL_INVALID
-                                                                      + uriResources[i - 1]
-                                                                      + SLASH + uriResources[i]
-                                                                      + " is not a valid resource path.");
+                                                                  + uriResources[i - 1]
+                                                                  + SLASH + uriResources[i]
+                                                                  + " is not a valid resource path.");
 
                         }
                     } else {
                         return new STAInvalidUrlException(URL_INVALID
-                                                                  + uriResources[i]
-                                                                  + " is not a valid resource.");
+                                                              + uriResources[i]
+                                                              + " is not a valid resource.");
                     }
                 }
                 // Resource is adressed by Id
