@@ -29,8 +29,10 @@
 
 package org.n52.sta.serdes.json;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.sta.ObservationGroupEntity;
 import org.n52.series.db.beans.sta.ObservationRelationEntity;
@@ -51,6 +53,9 @@ public class JSONObservationGroup extends JSONBase.JSONwithIdNameDescription<Obs
     @JsonManagedReference
     @JsonProperty(StaConstants.OBSERVATION_RELATIONS)
     public JSONObservationRelation[] relations;
+
+    // JSON Properties. Matched by Annotation or variable name
+    public JsonNode properties;
 
     public JSONObservationGroup() {
         self = new ObservationGroupEntity();
@@ -83,6 +88,10 @@ public class JSONObservationGroup extends JSONBase.JSONwithIdNameDescription<Obs
         self.setStaIdentifier(identifier);
         self.setName(name);
         self.setDescription(description);
+
+        if (properties != null) {
+            self.setParameters(convertParameters(properties));
+        }
 
         if (relations != null) {
             Set<ObservationRelationEntity> related = new HashSet<>();

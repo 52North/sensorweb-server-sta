@@ -35,8 +35,10 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.sta.ObservationGroupEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.shetland.ogc.sta.model.ObservationGroupEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONObservationGroup;
@@ -102,6 +104,19 @@ public class ObservationGroupSerDes {
                 gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, obsGroup.getDescription());
             }
 
+            if (!value.hasSelectOption() ||
+                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PROPERTIES)) {
+                if (obsGroup.hasParameters()) {
+                    gen.writeObjectFieldStart(STAEntityDefinition.PROP_PROPERTIES);
+                    for (ParameterEntity<?> parameter : obsGroup.getParameters()) {
+                        gen.writeObjectField(parameter.getName(), parameter.getValue());
+                    }
+                    gen.writeEndObject();
+                } else {
+                    gen.writeNullField(STAEntityDefinition.PROP_PROPERTIES);
+                }
+            }
+
             if (!value.hasSelectOption()
                 || value.getFieldsToSerialize().contains(STAEntityDefinition.OBSERVATION_RELATIONS)) {
                 if (!value.hasExpandOption()
@@ -144,7 +159,7 @@ public class ObservationGroupSerDes {
         private static final long serialVersionUID = -6355786322787893665L;
 
         public ObservationGroupPatchDeserializer() {
-            super(ThingSerDes.PlatformEntityPatch.class);
+            super(ObservationGroupPatch.class);
         }
 
         @Override

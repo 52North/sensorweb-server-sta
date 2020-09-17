@@ -42,6 +42,7 @@ import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.ObservationGroupQuerySpecifications;
 import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.ObservationGroupRepository;
+import org.n52.sta.data.repositories.ParameterRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
@@ -51,7 +52,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -67,9 +70,12 @@ public class ObservationGroupService
     ObservationGroupEntity> {
 
     private static final ObservationGroupQuerySpecifications ogQS = new ObservationGroupQuerySpecifications();
+    private final ParameterRepository parameterRepository;
 
-    public ObservationGroupService(ObservationGroupRepository repository) {
+    public ObservationGroupService(ObservationGroupRepository repository,
+                                   ParameterRepository parameterRepository) {
         super(repository, ObservationGroupEntity.class);
+        this.parameterRepository = parameterRepository;
     }
 
     @Override public EntityTypes[] getTypes() {
@@ -79,16 +85,17 @@ public class ObservationGroupService
     @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
         throws STAInvalidQueryException {
         if (expandOption != null) {
+            Set<EntityGraphRepository.FetchGraph> fetchGraphs = new HashSet<>(5);
             for (ExpandItem expandItem : expandOption.getItems()) {
                 String expandProperty = expandItem.getPath();
-                if (ObservationGroupEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
-                    return new EntityGraphRepository.FetchGraph[] {
-                        EntityGraphRepository.FetchGraph.FETCHGRAPH_OBSERVATION_RELATIONS,
-                    };
-                } else {
-                    throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                                                                     expandProperty,
-                                                                     StaConstants.OBSERVATION_GROUP));
+                switch (expandProperty) {
+                    case ObservationGroupEntityDefinition.OBSERVATION_RELATIONS:
+                        fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_OBSERVATION_RELATIONS);
+                        break;
+                    default:
+                        throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
+                                                                         expandProperty,
+                                                                         StaConstants.OBSERVATION_GROUP));
                 }
             }
         }
@@ -100,17 +107,18 @@ public class ObservationGroupService
         throws STACRUDException, STAInvalidQueryException {
         for (ExpandItem expandItem : expandOption.getItems()) {
             String expandProperty = expandItem.getPath();
-            if (ObservationGroupEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
-                Page<ObservationRelationEntity> obsRelations = getObservationRelationService()
-                    .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
-                                                           STAEntityDefinition.OBSERVATION_GROUPS,
-                                                           expandItem.getQueryOptions());
-                entity.setEntities(obsRelations.get().collect(Collectors.toSet()));
-                break;
-            } else {
-                throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                                                                 expandProperty,
-                                                                 StaConstants.OBSERVATION_GROUP));
+            switch (expandProperty) {
+                case ObservationGroupEntityDefinition.OBSERVATION_RELATIONS:
+                    Page<ObservationRelationEntity> obsRelations = getObservationRelationService()
+                        .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
+                                                               STAEntityDefinition.OBSERVATION_GROUPS,
+                                                               expandItem.getQueryOptions());
+                    entity.setEntities(obsRelations.get().collect(Collectors.toSet()));
+                    break;
+                default:
+                    throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
+                                                                     expandProperty,
+                                                                     StaConstants.OBSERVATION_GROUP));
             }
         }
         return entity;
@@ -157,6 +165,10 @@ public class ObservationGroupService
                     throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS, HTTPStatus.CONFLICT);
                 } else {
                     obsGroup.setProcessed(true);
+                    if (obsGroup.getParameters() != null) {
+                        parameterRepository.saveAll(obsGroup.getParameters());
+                        obsGroup.setParameters(obsGroup.getParameters());
+                    }
                     getRepository().save(obsGroup);
                 }
             }
@@ -192,13 +204,24 @@ public class ObservationGroupService
         return property;
     }
 
-    @Override protected ObservationGroupEntity merge(ObservationGroupEntity existing, ObservationGroupEntity toMerge) {
+    @Override protected ObservationGroupEntity merge(ObservationGroupEntity existing, ObservationGroupEntity toMerge)
+        throws STACRUDException {
         if (toMerge.getStaIdentifier() != null) {
             existing.setStaIdentifier(toMerge.getStaIdentifier());
         }
         mergeName(existing, toMerge);
         mergeDescription(existing, toMerge);
         mergeObservationRelations(existing, toMerge);
+
+        // properties
+        if (toMerge.getParameters() != null) {
+            synchronized (getLock(String.valueOf(existing.getParameters().hashCode()))) {
+                parameterRepository.saveAll(toMerge.getParameters());
+                existing.getParameters().forEach(parameterRepository::delete);
+                existing.setParameters(toMerge.getParameters());
+            }
+        }
+
         return existing;
     }
 
