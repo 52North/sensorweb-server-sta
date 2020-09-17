@@ -86,6 +86,7 @@ public class ObservationGroupService
         throws STAInvalidQueryException {
         if (expandOption != null) {
             Set<EntityGraphRepository.FetchGraph> fetchGraphs = new HashSet<>(5);
+            fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
             for (ExpandItem expandItem : expandOption.getItems()) {
                 String expandProperty = expandItem.getPath();
                 switch (expandProperty) {
@@ -99,7 +100,9 @@ public class ObservationGroupService
                 }
             }
         }
-        return new EntityGraphRepository.FetchGraph[0];
+        return new EntityGraphRepository.FetchGraph[] {
+            EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS,
+        };
     }
 
     @Override protected ObservationGroupEntity fetchExpandEntitiesWithFilter(ObservationGroupEntity entity,
