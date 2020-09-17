@@ -33,6 +33,8 @@ import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.PlatformEntity;
+import org.n52.series.db.beans.parameter.ParameterEntity;
+import org.n52.series.db.beans.parameter.ParameterTextEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
@@ -149,8 +151,6 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
                                                                 switched);
                     default:
                         // We are filtering on variable keys on properties
-
-                        /*
                         if (propertyName.startsWith("properties/")) {
                             String key = propertyName.substring(11);
                             Subquery<ParameterTextEntity> subquery = query.subquery(ParameterTextEntity.class);
@@ -164,26 +164,11 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
                                                                      builder,
                                                                      switched))
                                 );
-
-                            Join<PlatformEntity, ParameterEntity> join = root.join(PlatformEntity.PARAMETERS);
-                            Subquery<PlatformEntityParameterRelation> sq =
-                                query.subquery(PlatformEntityParameterRelation.class);
-                            Root<PlatformEntityParameterRelation> relation =
-                                subquery.from(PlatformEntityParameterRelation.class);
-
-                            Join<PlatformEntity, PlatformEntityParameterRelation> join =
-                                relation.join("fk_platform_id");
-
-                            sq.select(relation.get("fk_platform_id"))
-                                .where(builder.in(relation.get("fk_parameter_id")).value(subquery));
-
-                            //return builder.in(root.get(PlatformEntity.PROPERTY_ID)).value(sq);
-                            return builder.isNotNull(root.get(PlatformEntity.PROPERTY_ID));
+                            Join<Object, Object> join = root.join(PlatformEntity.PARAMETERS);
+                            return builder.in(join.get(PlatformEntity.PROPERTY_ID)).value(subquery);
                         } else {
                             throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP, propertyName));
                         }
-                        */
-                        throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP, propertyName));
                 }
             } catch (STAInvalidFilterExpressionException e) {
                 throw new RuntimeException(e);
