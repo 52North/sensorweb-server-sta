@@ -31,15 +31,12 @@ package org.n52.sta.serdes.json;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.joda.time.DateTime;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.geojson.GeoJsonReader;
-import org.n52.series.db.beans.parameter.ParameterEntity;
-import org.n52.series.db.beans.parameter.ParameterJsonEntity;
 import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
@@ -48,7 +45,6 @@ import org.springframework.util.Assert;
 
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Map;
 
 @SuppressWarnings("VisibilityModifier")
@@ -61,7 +57,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
     public String result;
     public Object resultQuality;
     public String validTime;
-    public ArrayNode parameters;
+    public JsonNode parameters;
 
     @JsonManagedReference
     public JSONFeatureOfInterest FeatureOfInterest;
@@ -76,48 +72,48 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
     }
 
     @Override
-    public ObservationEntity toEntity(JSONBase.EntityType type) {
-        switch (type) {
-        case FULL:
-            parseReferencedFrom();
-            Assert.notNull(result, INVALID_INLINE_ENTITY_MISSING + "result");
-            return createPostEntity();
-        case PATCH:
-            parseReferencedFrom();
-            return createPatchEntity();
-        case REFERENCE:
-            Assert.isNull(phenomenonTime, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(resultTime, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(result, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(resultTime, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(resultQuality, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(parameters, INVALID_REFERENCED_ENTITY);
-
-            self.setIdentifier(identifier);
-            self.setStaIdentifier(identifier);
-            return self;
-        default:
-            return null;
+    protected void parseReferencedFrom() {
+        if (referencedFromType != null) {
+            switch (referencedFromType) {
+                case "Datastreams":
+                    Assert.isNull(Datastream, INVALID_DUPLICATE_REFERENCE);
+                    this.Datastream = new JSONDatastream();
+                    this.Datastream.identifier = referencedFromID;
+                    return;
+                case "FeaturesOfInterest":
+                    Assert.isNull(FeatureOfInterest, INVALID_DUPLICATE_REFERENCE);
+                    this.FeatureOfInterest = new JSONFeatureOfInterest();
+                    this.FeatureOfInterest.identifier = referencedFromID;
+                    return;
+                default:
+                    throw new IllegalArgumentException(INVALID_BACKREFERENCE);
+            }
         }
     }
 
     @Override
-    protected void parseReferencedFrom() {
-        if (referencedFromType != null) {
-            switch (referencedFromType) {
-            case "Datastreams":
-                Assert.isNull(Datastream, INVALID_DUPLICATE_REFERENCE);
-                this.Datastream = new JSONDatastream();
-                this.Datastream.identifier = referencedFromID;
-                return;
-            case "FeaturesOfInterest":
-                Assert.isNull(FeatureOfInterest, INVALID_DUPLICATE_REFERENCE);
-                this.FeatureOfInterest = new JSONFeatureOfInterest();
-                this.FeatureOfInterest.identifier = referencedFromID;
-                return;
+    public ObservationEntity toEntity(JSONBase.EntityType type) {
+        switch (type) {
+            case FULL:
+                parseReferencedFrom();
+                Assert.notNull(result, INVALID_INLINE_ENTITY_MISSING + "result");
+                return createPostEntity();
+            case PATCH:
+                parseReferencedFrom();
+                return createPatchEntity();
+            case REFERENCE:
+                Assert.isNull(phenomenonTime, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(resultTime, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(result, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(resultTime, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(resultQuality, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(parameters, INVALID_REFERENCED_ENTITY);
+
+                self.setIdentifier(identifier);
+                self.setStaIdentifier(identifier);
+                return self;
             default:
-                throw new IllegalArgumentException(INVALID_BACKREFERENCE);
-            }
+                return null;
         }
     }
 
@@ -126,7 +122,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
         self.setStaIdentifier(identifier);
 
         // parameters
-        storeParameters(parameters);
+        self.setParameters(convertParameters(parameters));
 
         // phenomenonTime
         if (phenomenonTime != null) {
@@ -213,7 +209,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
         }
 
         // parameters
-        storeParameters(parameters);
+        self.setParameters(convertParameters(parameters));
 
         // result
         self.setValue(result);
@@ -221,7 +217,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
         // Link to Datastream
         if (Datastream != null) {
             self.setDataset(
-                    Datastream.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+                Datastream.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
         } else if (backReference instanceof JSONDatastream) {
             self.setDataset(((JSONDatastream) backReference).getEntity());
         } else {
@@ -231,34 +227,12 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
         // Link to FOI
         if (FeatureOfInterest != null) {
             self.setFeature(
-                    FeatureOfInterest.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+                FeatureOfInterest.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
         } else if (backReference instanceof JSONFeatureOfInterest) {
             self.setFeature(((JSONFeatureOfInterest) backReference).getEntity());
         }
 
         return self;
-    }
-
-    protected void storeParameters(ArrayNode parameters) {
-        // parameters
-        if (parameters != null) {
-            HashSet<ParameterEntity<?>> parameterJsonEntities = new HashSet<>();
-            for (JsonNode param : parameters) {
-                // Check that structure is correct
-                Assert.isTrue(param.has(NAME));
-                Assert.isTrue(param.has(VALUE));
-                Assert.isTrue(!param.has(2));
-
-                String paramName = param.get(NAME).asText();
-                JsonNode jsonNode = param.get(VALUE);
-
-                ParameterJsonEntity parameterEntity = new ParameterJsonEntity();
-                parameterEntity.setName(paramName);
-                parameterEntity.setValue(jsonNode.toString());
-                parameterJsonEntities.add(parameterEntity);
-            }
-            self.setParameters(parameterJsonEntities);
-        }
     }
 
     public JSONObservation parseParameters(Map<String, String> propertyMapping) {
@@ -269,32 +243,32 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
                     if (paramName.equals(mapping.getValue())) {
                         JsonNode jsonNode = param.get(VALUE);
                         switch (mapping.getKey()) {
-                        case "samplingGeometry":
-                            // Add as samplingGeometry to enable interoperability with SOS
-                            GeometryFactory factory =
+                            case "samplingGeometry":
+                                // Add as samplingGeometry to enable interoperability with SOS
+                                GeometryFactory factory =
                                     new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
-                            GeoJsonReader reader = new GeoJsonReader(factory);
-                            try {
-                                self.setSamplingGeometry(reader.read(jsonNode.toString()));
-                            } catch (ParseException e) {
-                                Assert.notNull(null, "Could not parse" + e.getMessage());
-                            }
-                            break;
-                        case "verticalFrom":
-                            // Add as verticalTo to enable interoperability with SOS
-                            self.setVerticalTo(BigDecimal.valueOf(jsonNode.asDouble()));
-                            break;
-                        case "verticalTo":
-                            // Add as verticalTo to enable interoperability with SOS
-                            self.setVerticalFrom(BigDecimal.valueOf(jsonNode.asDouble()));
-                            break;
-                        case "verticalFromTo":
-                            // Add as verticalTo to enable interoperability with SOS
-                            self.setVerticalTo(BigDecimal.valueOf(jsonNode.asDouble()));
-                            self.setVerticalFrom(BigDecimal.valueOf(jsonNode.asDouble()));
-                            break;
-                        default:
-                            throw new RuntimeException("Unable to parse Parameters!");
+                                GeoJsonReader reader = new GeoJsonReader(factory);
+                                try {
+                                    self.setSamplingGeometry(reader.read(jsonNode.toString()));
+                                } catch (ParseException e) {
+                                    Assert.notNull(null, "Could not parse" + e.getMessage());
+                                }
+                                break;
+                            case "verticalFrom":
+                                // Add as verticalTo to enable interoperability with SOS
+                                self.setVerticalTo(BigDecimal.valueOf(jsonNode.asDouble()));
+                                break;
+                            case "verticalTo":
+                                // Add as verticalTo to enable interoperability with SOS
+                                self.setVerticalFrom(BigDecimal.valueOf(jsonNode.asDouble()));
+                                break;
+                            case "verticalFromTo":
+                                // Add as verticalTo to enable interoperability with SOS
+                                self.setVerticalTo(BigDecimal.valueOf(jsonNode.asDouble()));
+                                self.setVerticalFrom(BigDecimal.valueOf(jsonNode.asDouble()));
+                                break;
+                            default:
+                                throw new RuntimeException("Unable to parse Parameters!");
                         }
                     }
                 }
