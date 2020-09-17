@@ -446,7 +446,8 @@ public class MessageBusRepository<T, I extends Serializable>
         } else if (entity instanceof PlatformEntity) {
             result.put(DESCRIPTION, ((PlatformEntity) entity).getDescription());
             result.put(NAME, ((PlatformEntity) entity).getName());
-            result.put(PROPERTIES, ((PlatformEntity) entity).getProperties());
+            Set<ParameterEntity> parameters = new HashSet<>(((PlatformEntity) entity).getParameters());
+            result.put(PROPERTIES, parameters);
         } else if (entity instanceof AbstractDatasetEntity) {
             result.put(DESCRIPTION, ((AbstractDatasetEntity) entity).getDescription());
             result.put(NAME, ((AbstractDatasetEntity) entity).getName());
@@ -467,8 +468,7 @@ public class MessageBusRepository<T, I extends Serializable>
             result.put(RESULTTIME, ((ObservationEntity<?>) entity).getResultTime());
             result.put(VALIDTIMESTART, ((ObservationEntity<?>) entity).getValidTimeStart());
             result.put(VALIDTIMEEND, ((ObservationEntity<?>) entity).getValidTimeEnd());
-            Set<ParameterEntity> parameters = new HashSet<>();
-            parameters.addAll(((ObservationEntity<?>) entity).getParameters());
+            Set<ParameterEntity> parameters = new HashSet<>(((ObservationEntity<?>) entity).getParameters());
             result.put(PARAMETERS, parameters);
             result.put(RESULT, ((ObservationEntity<?>) entity).getValue());
             //TODO: implement difference map for "resultQuality"

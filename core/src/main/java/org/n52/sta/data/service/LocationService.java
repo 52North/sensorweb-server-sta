@@ -32,6 +32,8 @@ package org.n52.sta.data.service;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PlatformEntity;
+import org.n52.series.db.beans.parameter.ParameterEntity;
+import org.n52.series.db.beans.parameter.ParameterTextEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.filter.ExpandFilter;
@@ -63,8 +65,6 @@ import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -85,8 +85,6 @@ public class LocationService
     private final LocationEncodingRepository locationEncodingRepository;
 
     private final boolean updateFOIFeatureEnabled;
-
-    private Pattern updateFOIPattern = Pattern.compile("(?:.*updateFOI\":\")([0-9A-z'+%-]+)(?:\".*)");
 
     public LocationService(@Value("${server.feature.updateFOI:false}") boolean updateFOI,
                            LocationRepository repository,
@@ -335,24 +333,29 @@ public class LocationService
                 things.add(updated);
 
                 // non-standard feature 'updateFOI'
-                if (updateFOIFeatureEnabled && updated.getProperties() != null
-                    && updated.getProperties().contains("updateFOI")) {
+                if (updateFOIFeatureEnabled && updated.getParameters() != null) {
                     // Try to be more performant and not deserialize whole
                     // properties but only grep relevant parts
                     // via simple regex
-                    Matcher matcher = updateFOIPattern.matcher(updated.getProperties());
-                    if (matcher.matches()) {
-                        LOGGER.debug("Updating FOI with id: " + matcher.group(1));
-                        FeatureOfInterestService foiService = (FeatureOfInterestService) getFeatureOfInterestService();
-                        foiService.updateFeatureOfInterestGeometry(matcher.group(1), location.getGeometry());
-                    } else {
-                        LOGGER.error("Updating FOI failed as ID could not be extracted from properties:"
-                                         + updated.getProperties());
-                        throw new STACRUDException("Could not extract FeatureOfInterest ID from Thing->properties!");
+                    for (ParameterEntity<?> parameter : updated.getParameters()) {
+                        if (parameter instanceof ParameterTextEntity &&
+                            parameter.getName().equals("updateFOI")) {
+                            try {
+                                LOGGER.debug("Updating FOI with id: " + parameter.getValueAsString());
+                                FeatureOfInterestService foiService = getFeatureOfInterestService();
+                                foiService.updateFeatureOfInterestGeometry(parameter.getValueAsString(),
+                                                                           location.getGeometry());
+                            } catch (Exception e) {
+                                LOGGER.error("Updating FOI failed as ID could not be extracted from properties!");
+                                throw new STACRUDException("Could not extract FeatureOfInterest ID from " +
+                                                               "Thing->properties!");
+                            }
+                        }
                     }
                 }
+
+                location.setThings(things);
             }
-            location.setThings(things);
         }
     }
 

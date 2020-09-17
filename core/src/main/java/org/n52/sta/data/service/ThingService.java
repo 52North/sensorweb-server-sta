@@ -44,6 +44,7 @@ import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.ThingQuerySpecifications;
 import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.IdentifierRepository;
+import org.n52.sta.data.repositories.ParameterRepository;
 import org.n52.sta.data.repositories.ThingRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.slf4j.Logger;
@@ -74,9 +75,12 @@ public class ThingService
 
     protected static final ThingQuerySpecifications tQS = new ThingQuerySpecifications();
     private static final Logger logger = LoggerFactory.getLogger(ThingService.class);
+    private final ParameterRepository parameterRepository;
 
-    public ThingService(ThingRepository repository) {
+    public ThingService(ThingRepository repository,
+                        ParameterRepository parameterRepository) {
         super(repository, PlatformEntity.class);
+        this.parameterRepository = parameterRepository;
     }
 
     @Override
@@ -87,6 +91,7 @@ public class ThingService
     @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
         throws STAInvalidQueryException {
         Set<EntityGraphRepository.FetchGraph> fetchGraphs = new HashSet<>(6);
+        fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
         if (expandOption != null) {
             for (ExpandItem expandItem : expandOption.getItems()) {
                 // We cannot handle nested $filter or $expand
@@ -211,6 +216,10 @@ public class ThingService
                     throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS, HTTPStatus.CONFLICT);
                 } else {
                     thing.setProcessed(true);
+                    if (thing.getParameters() != null) {
+                        parameterRepository.saveAll(thing.getParameters());
+                        thing.setParameters(thing.getParameters());
+                    }
                     boolean locationChanged = processLocations(thing, thing.getLocations());
                     thing = getRepository().intermediateSave(thing);
                     processDatastreams(thing);
@@ -269,11 +278,19 @@ public class ThingService
     }
 
     @Override
-    protected PlatformEntity merge(PlatformEntity existing, PlatformEntity toMerge) {
+    protected PlatformEntity merge(PlatformEntity existing, PlatformEntity toMerge) throws STACRUDException {
+        if (existing.equals(toMerge)) {
+            return existing;
+        }
         mergeName(existing, toMerge);
         mergeDescription(existing, toMerge);
-        if (toMerge.hasProperties()) {
-            existing.setProperties(toMerge.getProperties());
+        // properties
+        if (toMerge.getParameters() != null) {
+            synchronized (getLock(String.valueOf(existing.getParameters().hashCode()))) {
+                parameterRepository.saveAll(toMerge.getParameters());
+                existing.getParameters().forEach(parameterRepository::delete);
+                existing.setParameters(toMerge.getParameters());
+            }
         }
         return existing;
     }

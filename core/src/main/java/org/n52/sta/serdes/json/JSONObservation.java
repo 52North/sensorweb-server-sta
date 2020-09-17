@@ -32,15 +32,12 @@ package org.n52.sta.serdes.json;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.joda.time.DateTime;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.geojson.GeoJsonReader;
-import org.n52.series.db.beans.parameter.ParameterEntity;
-import org.n52.series.db.beans.parameter.ParameterJsonEntity;
 import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.series.db.beans.sta.ObservationRelationEntity;
 import org.n52.shetland.ogc.gml.time.Time;
@@ -65,7 +62,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
     public String result;
     public Object resultQuality;
     public String validTime;
-    public ArrayNode parameters;
+    public JsonNode parameters;
 
     @JsonManagedReference
     public JSONFeatureOfInterest FeatureOfInterest;
@@ -140,7 +137,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
         self.setStaIdentifier(identifier);
 
         // parameters
-        storeParameters(parameters);
+        self.setParameters(convertParameters(parameters));
 
         // phenomenonTime
         if (phenomenonTime != null) {
@@ -236,7 +233,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
         }
 
         // parameters
-        storeParameters(parameters);
+        self.setParameters(convertParameters(parameters));
 
         // result
         self.setValue(result);
@@ -269,28 +266,6 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
         }
 
         return self;
-    }
-
-    protected void storeParameters(ArrayNode parameters) {
-        // parameters
-        if (parameters != null) {
-            HashSet<ParameterEntity<?>> parameterJsonEntities = new HashSet<>();
-            for (JsonNode param : parameters) {
-                // Check that structure is correct
-                Assert.isTrue(param.has(NAME));
-                Assert.isTrue(param.has(VALUE));
-                Assert.isTrue(!param.has(2));
-
-                String paramName = param.get(NAME).asText();
-                JsonNode jsonNode = param.get(VALUE);
-
-                ParameterJsonEntity parameterEntity = new ParameterJsonEntity();
-                parameterEntity.setName(paramName);
-                parameterEntity.setValue(jsonNode.toString());
-                parameterJsonEntities.add(parameterEntity);
-            }
-            self.setParameters(parameterJsonEntities);
-        }
     }
 
     public JSONObservation parseParameters(Map<String, String> propertyMapping) {

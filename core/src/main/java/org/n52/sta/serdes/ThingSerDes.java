@@ -32,12 +32,12 @@ package org.n52.sta.serdes;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.PlatformEntity;
+import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.shetland.ogc.sta.model.ThingEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
@@ -106,9 +106,12 @@ public class ThingSerDes {
             }
             if (!value.hasSelectOption() ||
                 value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PROPERTIES)) {
-                if (thing.hasProperties()) {
-                    ObjectMapper mapper = new ObjectMapper();
-                    gen.writeObjectField(STAEntityDefinition.PROP_PROPERTIES, mapper.readTree(thing.getProperties()));
+                if (thing.hasParameters()) {
+                    gen.writeObjectFieldStart(STAEntityDefinition.PROP_PROPERTIES);
+                    for (ParameterEntity<?> parameter : thing.getParameters()) {
+                        gen.writeObjectField(parameter.getName(), parameter.getValue());
+                    }
+                    gen.writeEndObject();
                 } else {
                     gen.writeNullField(STAEntityDefinition.PROP_PROPERTIES);
                 }

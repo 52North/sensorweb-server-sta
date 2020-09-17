@@ -52,6 +52,7 @@ import org.n52.series.db.beans.UnitEntity;
 import org.n52.series.db.beans.dataset.DatasetType;
 import org.n52.series.db.beans.dataset.ObservationType;
 import org.n52.series.db.beans.dataset.ValueType;
+import org.n52.series.db.beans.parameter.ParameterBooleanEntity;
 import org.n52.series.db.beans.sta.AbstractDatastreamEntity;
 import org.n52.series.db.beans.sta.AbstractObservationEntity;
 import org.n52.series.db.beans.sta.BooleanObservationEntity;
@@ -101,7 +102,6 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -127,7 +127,6 @@ public class DatastreamService extends
     private final OfferingRepository offeringRepository;
     private final CategoryRepository categoryRepository;
     private final ObservationRepository observationRepository;
-    private final Pattern isMobilePattern = Pattern.compile(".*\"isMobile\":true.*");
 
     @Autowired
     public DatastreamService(DatastreamRepository repository,
@@ -521,11 +520,13 @@ public class DatastreamService extends
         OfferingEntity offering = getDatastreamService().createOrFetchOffering(datastream);
         DatasetEntity dataset = createDatasetSkeleton(datastream.getOMObservationType().getFormat(),
                                                       (isMobileFeatureEnabled
-                                                          && datastream.getThing().hasProperties())
-                                                          && isMobilePattern.matcher(datastream.getThing()
-                                                                                         .getProperties())
-                                                          .matches());
-        dataset.setProcedure(datastream.getProcedure());
+                                                          && datastream.getThing().hasParameters())
+                                                          && datastream.getThing()
+                                                          .getParameters()
+                                                          .stream()
+                                                          .filter(p -> p instanceof ParameterBooleanEntity)
+                                                          .filter(p -> p.getName().equals("isMobile"))
+                                                          .anyMatch(p -> ((ParameterBooleanEntity) p).getValue()));
         dataset.setIdentifier(UUID.randomUUID().toString());
         dataset.setStaIdentifier(staIdentifier);
         dataset.setName(datastream.getName());

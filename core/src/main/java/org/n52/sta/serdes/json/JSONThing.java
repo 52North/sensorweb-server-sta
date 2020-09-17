@@ -33,6 +33,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.PlatformEntity;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.springframework.util.Assert;
 
 import java.util.Arrays;
@@ -62,7 +63,7 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
     @Override protected void parseReferencedFrom() {
         if (referencedFromType != null) {
             switch (referencedFromType) {
-                case "Locations":
+                case StaConstants.LOCATIONS:
                     Assert.isNull(Locations, INVALID_DUPLICATE_REFERENCE);
                     this.Locations = new JSONLocation[1];
                     this.Locations[0] = new JSONLocation();
@@ -87,9 +88,8 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
                 self.setName(name);
                 self.setDescription(description);
 
-                //TODO: check if this is correct
                 if (properties != null) {
-                    self.setProperties(properties.toString());
+                    self.setParameters(convertParameters(properties));
                 }
 
                 if (Locations != null) {
@@ -136,9 +136,8 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
                 self.setName(name);
                 self.setDescription(description);
 
-                //TODO: check if this is correct
                 if (properties != null) {
-                    self.setProperties(properties.toString());
+                    self.setParameters(convertParameters(properties));
                 }
 
                 if (Locations != null) {

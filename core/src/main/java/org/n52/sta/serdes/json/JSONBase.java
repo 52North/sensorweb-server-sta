@@ -31,8 +31,14 @@ package org.n52.sta.serdes.json;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.joda.time.DateTime;
+import org.n52.series.db.beans.parameter.ParameterBooleanEntity;
+import org.n52.series.db.beans.parameter.ParameterEntity;
+import org.n52.series.db.beans.parameter.ParameterJsonEntity;
+import org.n52.series.db.beans.parameter.ParameterQuantityEntity;
+import org.n52.series.db.beans.parameter.ParameterTextEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
@@ -40,6 +46,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
+import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.UUID;
 
 @SuppressWarnings("VisibilityModifier")
@@ -145,6 +154,56 @@ public class JSONBase {
             }
             // We have errored out on both types so return error message
             throw new IllegalStateException(ex.getMessage() + secondEx.getMessage());
+        }
+
+        protected HashSet<ParameterEntity<?>> convertParameters(JsonNode parameters) {
+            // parameters
+            if (parameters != null) {
+                HashSet<ParameterEntity<?>> parameterEntities = new HashSet<>();
+                // Check that structure is correct
+                Iterator<String> it = parameters.fieldNames();
+                while (it.hasNext()) {
+                    String key = it.next();
+                    JsonNode value = parameters.get(key);
+
+                    ParameterEntity<?> parameterEntity;
+                    switch (value.getNodeType()) {
+                        case ARRAY:
+                            // fallthru
+                        case MISSING:
+                            // fallthru
+                        case NULL:
+                            // fallthru
+                        case OBJECT:
+                            // fallthru
+                        case POJO:
+                            parameterEntity = new ParameterJsonEntity();
+                            ((ParameterJsonEntity) parameterEntity).setValue(value.asText());
+                            break;
+                        case BINARY:
+                            // fallthru
+                        case BOOLEAN:
+                            parameterEntity = new ParameterBooleanEntity();
+                            ((ParameterBooleanEntity) parameterEntity).setValue(value.asBoolean());
+                            break;
+                        case NUMBER:
+                            parameterEntity = new ParameterQuantityEntity();
+                            ((ParameterQuantityEntity) parameterEntity).setValue(BigDecimal.valueOf(value.asDouble()));
+                            break;
+                        case STRING:
+                            parameterEntity = new ParameterTextEntity();
+                            ((ParameterTextEntity) parameterEntity).setValue(value.asText());
+                            break;
+                        default:
+                            throw new RuntimeException("Could not identify value type of parameters!");
+                    }
+                    parameterEntity.setName(key);
+                    parameterEntities.add(parameterEntity);
+                }
+                return parameterEntities;
+            } else {
+                return null;
+            }
         }
     }
 

@@ -128,9 +128,8 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
         FilterConstants.ComparisonOperator operator,
         boolean switched) {
         return (Specification<PlatformEntity>) (root, query, builder) -> {
-            String propName = propertyName.startsWith("properties/") ? "properties" : propertyName;
             try {
-                switch (propName) {
+                switch (propertyName) {
                     case StaConstants.PROP_ID:
                         return handleDirectStringPropertyFilter(root.get(PlatformEntity.STA_IDENTIFIER),
                                                                 propertyValue,
@@ -149,21 +148,42 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
                                                                 operator,
                                                                 builder,
                                                                 switched);
-                    case StaConstants.PROP_PROPERTIES:
-                        Expression<String> first = builder.concat(String.format("%%\"%s\":\"",
-                                                                                propertyName.substring(11)),
-                                                                  (Expression<String>) propertyValue);
-                        Expression<String> second = builder.concat(first, "\"%");
-                        switch (operator) {
-                            case PropertyIsEqualTo:
-                                return builder.like(root.get(PlatformEntity.PROPERTY_PROPERTIES), second);
-                            case PropertyIsNotEqualTo:
-                                return builder.notLike(root.get(PlatformEntity.PROPERTY_PROPERTIES), second);
-                            default:
-                                throw new RuntimeException(
-                                    "Error getting filter for properties. Operator not supported!");
-                        }
                     default:
+                        // We are filtering on variable keys on properties
+
+                        /*
+                        if (propertyName.startsWith("properties/")) {
+                            String key = propertyName.substring(11);
+                            Subquery<ParameterTextEntity> subquery = query.subquery(ParameterTextEntity.class);
+                            Root<ParameterTextEntity> param = subquery.from(ParameterTextEntity.class);
+                            subquery.select(param.get(ParameterEntity.ID))
+                                .where(builder.and(
+                                    builder.equal(param.get(ParameterEntity.NAME), key),
+                                    handleDirectStringPropertyFilter(param.get(ParameterTextEntity.VALUE),
+                                                                     propertyValue,
+                                                                     operator,
+                                                                     builder,
+                                                                     switched))
+                                );
+
+                            Join<PlatformEntity, ParameterEntity> join = root.join(PlatformEntity.PARAMETERS);
+                            Subquery<PlatformEntityParameterRelation> sq =
+                                query.subquery(PlatformEntityParameterRelation.class);
+                            Root<PlatformEntityParameterRelation> relation =
+                                subquery.from(PlatformEntityParameterRelation.class);
+
+                            Join<PlatformEntity, PlatformEntityParameterRelation> join =
+                                relation.join("fk_platform_id");
+
+                            sq.select(relation.get("fk_platform_id"))
+                                .where(builder.in(relation.get("fk_parameter_id")).value(subquery));
+
+                            //return builder.in(root.get(PlatformEntity.PROPERTY_ID)).value(sq);
+                            return builder.isNotNull(root.get(PlatformEntity.PROPERTY_ID));
+                        } else {
+                            throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP, propertyName));
+                        }
+                        */
                         throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP, propertyName));
                 }
             } catch (STAInvalidFilterExpressionException e) {
