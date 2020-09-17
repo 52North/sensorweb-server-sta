@@ -244,7 +244,7 @@ public class HistoricalLocationService
 
     private HistoricalLocationEntity processThing(HistoricalLocationEntity historicalLocation)
         throws STACRUDException {
-        PlatformEntity thing = getThingService().createOrUpdate(historicalLocation.getThing());
+        PlatformEntity thing = getThingService().createOrfetch(historicalLocation.getThing());
         historicalLocation.setThing(thing);
         HistoricalLocationEntity created = getRepository().save(historicalLocation);
         created.setProcessed(true);
