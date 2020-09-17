@@ -533,6 +533,7 @@ public class DatastreamService extends
         dataset.setPhenomenon(datastream.getObservableProperty());
         dataset.setCategory(category);
         dataset.setFeature(feature);
+        dataset.setProcedure(datastream.getProcedure());
         dataset.setOffering(offering);
         dataset.setPlatform(datastream.getThing());
         dataset.setParty(datastream.getParty());

@@ -21,7 +21,7 @@ RUN cd sensorweb-server-db-model \
     && mvn clean install
 
 RUN cd sensorweb-server-sta \
-    && mvn package
+    && mvn clean package
 
 FROM adoptopenjdk/openjdk8:alpine-slim as runstage
 
