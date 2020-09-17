@@ -491,6 +491,9 @@ public class DatastreamService extends
             DatasetAggregationEntity parent = new DatasetAggregationEntity();
             parent.copy(datastream);
             parent.setIdentifier(UUID.randomUUID().toString());
+            parent.setParty(datastream.getParty());
+            parent.setProject(datastream.getProject());
+            parent.setLicense(datastream.getLicense());
             parent.setFeature(null);
 
             // Free up staIdentifier
