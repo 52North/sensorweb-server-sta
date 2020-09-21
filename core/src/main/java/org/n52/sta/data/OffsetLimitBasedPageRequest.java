@@ -88,7 +88,7 @@ public class OffsetLimitBasedPageRequest extends AbstractPageRequest {
 
     @Override
     public int getPageNumber() {
-        return (int) super.getOffset() / getPageSize();
+        return (int) (getOffset() / getPageSize());
     }
 
     @Override
