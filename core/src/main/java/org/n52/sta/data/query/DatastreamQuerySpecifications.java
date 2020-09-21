@@ -58,143 +58,23 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Abs
     @Override
     public Specification<AbstractDatasetEntity> withName(final String name) {
         return (root, query, builder) ->
-                builder.and(builder.isNull(root.get(AbstractDatasetEntity.PROPERTY_AGGREGATION)),
-                            builder.equal(root.get(DescribableEntity.PROPERTY_NAME), name));
+            builder.and(builder.isNull(root.get(AbstractDatasetEntity.PROPERTY_AGGREGATION)),
+                        builder.equal(root.get(DescribableEntity.PROPERTY_NAME), name));
     }
 
     @Override
     public Specification<AbstractDatasetEntity> withStaIdentifier(final String name) {
         return (root, query, builder) ->
-                builder.and(builder.isNull(root.get(AbstractDatasetEntity.PROPERTY_AGGREGATION)),
-                            builder.equal(root.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), name));
+            builder.and(builder.isNull(root.get(AbstractDatasetEntity.PROPERTY_AGGREGATION)),
+                        builder.equal(root.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), name));
     }
 
     @Override
     public Specification<AbstractDatasetEntity> withStaIdentifier(final List<String> identifiers) {
         return (root, query, builder) ->
-                builder.and(builder.isNull(root.get(AbstractDatasetEntity.PROPERTY_AGGREGATION)),
-                            builder.in(root.get(DescribableEntity.PROPERTY_STA_IDENTIFIER))
-                                   .value(identifiers));
-    }
-
-    public Specification<AbstractDatasetEntity> withFeatureStaIdentifier(final String staIdentifier) {
-        return (root, query, builder) -> {
-            final Join<AbstractDatasetEntity, FeatureEntity> join =
-                    root.join(AbstractDatasetEntity.PROPERTY_FEATURE, JoinType.INNER);
-            return builder.equal(join.get(FeatureEntity.PROPERTY_STA_IDENTIFIER), staIdentifier);
-        };
-    }
-
-    public Specification<AbstractDatasetEntity> withObservedPropertyStaIdentifier(
-            final String observablePropertyIdentifier) {
-        return (root, query, builder) -> {
-            final Join<AbstractDatasetEntity, PhenomenonEntity> join =
-                    root.join(AbstractDatasetEntity.PROPERTY_PHENOMENON, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), observablePropertyIdentifier);
-        };
-    }
-
-    public Specification<AbstractDatasetEntity> withObservedPropertyName(final String name) {
-        return (root, query, builder) -> {
-            final Join<AbstractDatasetEntity, PhenomenonEntity> join =
-                    root.join(AbstractDatasetEntity.PROPERTY_PHENOMENON, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_NAME), name);
-        };
-    }
-
-    public Specification<AbstractDatasetEntity> withThingStaIdentifier(final String thingIdentifier) {
-        return (root, query, builder) -> {
-            final Join<AbstractDatasetEntity, PlatformEntity> join =
-                    root.join(AbstractDatasetEntity.PROPERTY_PLATFORM, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), thingIdentifier);
-        };
-    }
-
-    public Specification<AbstractDatasetEntity> withThingName(final String name) {
-        return (root, query, builder) -> {
-            final Join<AbstractDatasetEntity, PlatformEntity> join =
-                    root.join(AbstractDatasetEntity.PROPERTY_PLATFORM, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_NAME), name);
-        };
-    }
-
-    public Specification<AbstractDatasetEntity> withSensorStaIdentifier(final String sensorIdentifier) {
-        return (root, query, builder) -> {
-            final Join<AbstractDatasetEntity, ProcedureEntity> join =
-                    root.join(AbstractDatasetEntity.PROCEDURE, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), sensorIdentifier);
-        };
-    }
-
-    public Specification<AbstractDatasetEntity> withSensorName(final String name) {
-        return (root, query, builder) -> {
-            final Join<AbstractDatasetEntity, ProcedureEntity> join =
-                    root.join(AbstractDatasetEntity.PROCEDURE, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_NAME), name);
-        };
-    }
-
-    public Specification<AbstractDatasetEntity> withObservationStaIdentifier(String observationIdentifier) {
-        return (root, query, builder) -> {
-            Subquery<AbstractDatasetEntity> sq = query.subquery(AbstractDatasetEntity.class);
-            Root<ObservationEntity> data = sq.from(ObservationEntity.class);
-            sq.select(data.get(ObservationEntity.PROPERTY_DATASET_ID))
-              .where(builder.equal(data.get(ObservationEntity.PROPERTY_STA_IDENTIFIER), observationIdentifier));
-
-            Subquery<AbstractDatasetEntity> subquery = query.subquery(AbstractDatasetEntity.class);
-            Root<AbstractDatasetEntity> realDataset = subquery.from(AbstractDatasetEntity.class);
-            subquery.select(realDataset.get(AbstractDatasetEntity.PROPERTY_AGGREGATION))
-                    .where(builder.equal(realDataset.get(AbstractDatasetEntity.PROPERTY_ID), sq));
-
-            // Either id matches or aggregation id matches
-            return builder.or(builder.equal(root.get(AbstractDatasetEntity.PROPERTY_ID), sq),
-                              builder.equal(root.get(AbstractDatasetEntity.PROPERTY_ID), subquery));
-        };
-    }
-
-    @Override protected Specification<AbstractDatasetEntity> handleDirectPropertyFilter(
-            String propertyName,
-            Expression<?> propertyValue,
-            FilterConstants.ComparisonOperator operator,
-            boolean switched) {
-        return (Specification<AbstractDatasetEntity>) (root, query, builder) -> {
-            try {
-                switch (propertyName) {
-                case StaConstants.PROP_ID:
-                    return handleDirectStringPropertyFilter(root.get(AbstractDatasetEntity.PROPERTY_STA_IDENTIFIER),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            false);
-                case StaConstants.PROP_NAME:
-                    return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            switched);
-                case StaConstants.PROP_DESCRIPTION:
-                    return handleDirectStringPropertyFilter(
-                            root.get(DescribableEntity.PROPERTY_DESCRIPTION),
-                            propertyValue,
-                            operator,
-                            builder,
-                            switched);
-                case StaConstants.PROP_OBSERVATION_TYPE:
-                    Join<AbstractDatasetEntity, FormatEntity> join =
-                            root.join(AbstractDatasetEntity.PROPERTY_OM_OBSERVATION_TYPE);
-                    return handleDirectStringPropertyFilter(join.get(FormatEntity.FORMAT),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            switched);
-                default:
-                    throw new RuntimeException("Error getting filter for Property: \"" + propertyName
-                                                       + "\". No such property in Entity.");
-                }
-            } catch (STAInvalidFilterExpressionException e) {
-                throw new RuntimeException(e);
-            }
-        };
+            builder.and(builder.isNull(root.get(AbstractDatasetEntity.PROPERTY_AGGREGATION)),
+                        builder.in(root.get(DescribableEntity.PROPERTY_STA_IDENTIFIER))
+                            .value(identifiers));
     }
 
     /**
@@ -205,54 +85,185 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Abs
      * @return BooleanExpression evaluating to true if Entity is not filtered out
      */
     @Override protected Specification<AbstractDatasetEntity> handleRelatedPropertyFilter(
-            String propertyName,
-            Specification<?> propertyValue) {
+        String propertyName,
+        Specification<?> propertyValue) {
         return (root, query, builder) -> {
             try {
                 switch (propertyName) {
-                case SENSOR: {
-                    Subquery<AbstractDatasetEntity> sq = query.subquery(AbstractDatasetEntity.class);
-                    Root<ProcedureEntity> sensor = sq.from(ProcedureEntity.class);
-                    sq.select(sensor.get(DescribableEntity.PROPERTY_ID))
-                      .where(((Specification<ProcedureEntity>) propertyValue).toPredicate(sensor,
-                                                                                          query,
-                                                                                          builder));
-                    return builder.in(root.get(AbstractDatasetEntity.PROPERTY_PROCEDURE)).value(sq);
-                }
-                case OBSERVED_PROPERTY: {
-                    Subquery<AbstractDatasetEntity> sq = query.subquery(AbstractDatasetEntity.class);
-                    Root<PhenomenonEntity> observedProperty = sq.from(PhenomenonEntity.class);
+                    case SENSOR: {
+                        Subquery<AbstractDatasetEntity> sq = query.subquery(AbstractDatasetEntity.class);
+                        Root<ProcedureEntity> sensor = sq.from(ProcedureEntity.class);
+                        sq.select(sensor.get(DescribableEntity.PROPERTY_ID))
+                            .where(((Specification<ProcedureEntity>) propertyValue).toPredicate(sensor,
+                                                                                                query,
+                                                                                                builder));
+                        return builder.in(root.get(AbstractDatasetEntity.PROPERTY_PROCEDURE)).value(sq);
+                    }
+                    case OBSERVED_PROPERTY: {
+                        Subquery<AbstractDatasetEntity> sq = query.subquery(AbstractDatasetEntity.class);
+                        Root<PhenomenonEntity> observedProperty = sq.from(PhenomenonEntity.class);
 
-                    sq.select(observedProperty.get(DescribableEntity.PROPERTY_ID))
-                      .where(((Specification<PhenomenonEntity>) propertyValue).toPredicate(observedProperty,
-                                                                                           query,
-                                                                                           builder));
-                    return builder.in(root.get(AbstractDatasetEntity.PROPERTY_PHENOMENON)).value(sq);
-                }
-                case THING: {
-                    Subquery<AbstractDatasetEntity> sq = query.subquery(AbstractDatasetEntity.class);
-                    Root<PlatformEntity> thing = sq.from(PlatformEntity.class);
-                    sq.select(thing.get(DescribableEntity.PROPERTY_ID))
-                      .where(((Specification<PlatformEntity>) propertyValue).toPredicate(thing,
-                                                                                         query,
-                                                                                         builder));
-                    return builder.in(root.get(AbstractDatasetEntity.PROPERTY_PLATFORM)).value(sq);
-                }
-                case OBSERVATIONS: {
-                    Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
-                    Root<ObservationEntity> data = sq.from(ObservationEntity.class);
-                    sq.select(data.get(ObservationEntity.PROPERTY_DATASET))
-                      .where(((Specification<ObservationEntity>) propertyValue).toPredicate(data,
-                                                                                            query,
-                                                                                            builder));
-                    return builder.in(root.get(DatasetEntity.PROPERTY_ID)).value(sq);
-                }
-                default:
-                    throw new STAInvalidFilterExpressionException(COULD_NOT_FIND_RELATED_PROPERTY + propertyName);
+                        sq.select(observedProperty.get(DescribableEntity.PROPERTY_ID))
+                            .where(((Specification<PhenomenonEntity>) propertyValue).toPredicate(observedProperty,
+                                                                                                 query,
+                                                                                                 builder));
+                        return builder.in(root.get(AbstractDatasetEntity.PROPERTY_PHENOMENON)).value(sq);
+                    }
+                    case THING: {
+                        Subquery<AbstractDatasetEntity> sq = query.subquery(AbstractDatasetEntity.class);
+                        Root<PlatformEntity> thing = sq.from(PlatformEntity.class);
+                        sq.select(thing.get(DescribableEntity.PROPERTY_ID))
+                            .where(((Specification<PlatformEntity>) propertyValue).toPredicate(thing,
+                                                                                               query,
+                                                                                               builder));
+                        return builder.in(root.get(AbstractDatasetEntity.PROPERTY_PLATFORM)).value(sq);
+                    }
+                    case OBSERVATIONS: {
+                        Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
+                        Root<ObservationEntity> data = sq.from(ObservationEntity.class);
+                        sq.select(data.get(ObservationEntity.PROPERTY_DATASET))
+                            .where(((Specification<ObservationEntity>) propertyValue).toPredicate(data,
+                                                                                                  query,
+                                                                                                  builder));
+                        return builder.in(root.get(DatasetEntity.PROPERTY_ID)).value(sq);
+                    }
+                    default:
+                        throw new STAInvalidFilterExpressionException(COULD_NOT_FIND_RELATED_PROPERTY + propertyName);
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+        };
+    }
+
+    @Override protected Specification<AbstractDatasetEntity> handleDirectPropertyFilter(
+        String propertyName,
+        Expression<?> propertyValue,
+        FilterConstants.ComparisonOperator operator,
+        boolean switched) {
+        return (Specification<AbstractDatasetEntity>) (root, query, builder) -> {
+            try {
+                switch (propertyName) {
+                    case StaConstants.PROP_ID:
+                        return handleDirectStringPropertyFilter(root.get(AbstractDatasetEntity.PROPERTY_STA_IDENTIFIER),
+                                                                propertyValue,
+                                                                operator,
+                                                                builder,
+                                                                false);
+                    case StaConstants.PROP_NAME:
+                        return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
+                                                                propertyValue,
+                                                                operator,
+                                                                builder,
+                                                                switched);
+                    case StaConstants.PROP_DESCRIPTION:
+                        return handleDirectStringPropertyFilter(
+                            root.get(DescribableEntity.PROPERTY_DESCRIPTION),
+                            propertyValue,
+                            operator,
+                            builder,
+                            switched);
+                    case StaConstants.PROP_OBSERVATION_TYPE:
+                        Join<AbstractDatasetEntity, FormatEntity> join =
+                            root.join(AbstractDatasetEntity.PROPERTY_OM_OBSERVATION_TYPE);
+                        return handleDirectStringPropertyFilter(join.get(FormatEntity.FORMAT),
+                                                                propertyValue,
+                                                                operator,
+                                                                builder,
+                                                                switched);
+                    default:
+                        throw new RuntimeException("Error getting filter for Property: \"" + propertyName
+                                                       + "\". No such property in Entity.");
+                }
+            } catch (STAInvalidFilterExpressionException e) {
+                throw new RuntimeException(e);
+            }
+        };
+    }
+
+    public String checkPropertyName(String property) {
+        switch (property) {
+            case "phenomenonTime":
+                return AbstractDatasetEntity.PROPERTY_FIRST_VALUE_AT;
+            case "resultTime":
+                return AbstractDatasetEntity.PROPERTY_RESULT_TIME_START;
+            default:
+                return super.checkPropertyName(property);
+        }
+    }
+
+    public Specification<AbstractDatasetEntity> withFeatureStaIdentifier(final String staIdentifier) {
+        return (root, query, builder) -> {
+            final Join<AbstractDatasetEntity, FeatureEntity> join =
+                root.join(AbstractDatasetEntity.PROPERTY_FEATURE, JoinType.INNER);
+            return builder.equal(join.get(FeatureEntity.PROPERTY_STA_IDENTIFIER), staIdentifier);
+        };
+    }
+
+    public Specification<AbstractDatasetEntity> withObservedPropertyStaIdentifier(
+        final String observablePropertyIdentifier) {
+        return (root, query, builder) -> {
+            final Join<AbstractDatasetEntity, PhenomenonEntity> join =
+                root.join(AbstractDatasetEntity.PROPERTY_PHENOMENON, JoinType.INNER);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), observablePropertyIdentifier);
+        };
+    }
+
+    public Specification<AbstractDatasetEntity> withObservedPropertyName(final String name) {
+        return (root, query, builder) -> {
+            final Join<AbstractDatasetEntity, PhenomenonEntity> join =
+                root.join(AbstractDatasetEntity.PROPERTY_PHENOMENON, JoinType.INNER);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_NAME), name);
+        };
+    }
+
+    public Specification<AbstractDatasetEntity> withThingStaIdentifier(final String thingIdentifier) {
+        return (root, query, builder) -> {
+            final Join<AbstractDatasetEntity, PlatformEntity> join =
+                root.join(AbstractDatasetEntity.PROPERTY_PLATFORM, JoinType.INNER);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), thingIdentifier);
+        };
+    }
+
+    public Specification<AbstractDatasetEntity> withThingName(final String name) {
+        return (root, query, builder) -> {
+            final Join<AbstractDatasetEntity, PlatformEntity> join =
+                root.join(AbstractDatasetEntity.PROPERTY_PLATFORM, JoinType.INNER);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_NAME), name);
+        };
+    }
+
+    public Specification<AbstractDatasetEntity> withSensorStaIdentifier(final String sensorIdentifier) {
+        return (root, query, builder) -> {
+            final Join<AbstractDatasetEntity, ProcedureEntity> join =
+                root.join(AbstractDatasetEntity.PROCEDURE, JoinType.INNER);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), sensorIdentifier);
+        };
+    }
+
+    public Specification<AbstractDatasetEntity> withSensorName(final String name) {
+        return (root, query, builder) -> {
+            final Join<AbstractDatasetEntity, ProcedureEntity> join =
+                root.join(AbstractDatasetEntity.PROCEDURE, JoinType.INNER);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_NAME), name);
+        };
+    }
+
+    public Specification<AbstractDatasetEntity> withObservationStaIdentifier(String observationIdentifier) {
+        return (root, query, builder) -> {
+            Subquery<AbstractDatasetEntity> sq = query.subquery(AbstractDatasetEntity.class);
+            Root<ObservationEntity> data = sq.from(ObservationEntity.class);
+            sq.select(data.get(ObservationEntity.PROPERTY_DATASET_ID))
+                .where(builder.equal(data.get(ObservationEntity.PROPERTY_STA_IDENTIFIER), observationIdentifier));
+
+            Subquery<AbstractDatasetEntity> subquery = query.subquery(AbstractDatasetEntity.class);
+            Root<AbstractDatasetEntity> realDataset = subquery.from(AbstractDatasetEntity.class);
+            subquery.select(realDataset.get(AbstractDatasetEntity.PROPERTY_AGGREGATION))
+                .where(builder.equal(realDataset.get(AbstractDatasetEntity.PROPERTY_ID), sq));
+
+            // Either id matches or aggregation id matches
+            return builder.or(builder.equal(root.get(AbstractDatasetEntity.PROPERTY_ID), sq),
+                              builder.equal(root.get(AbstractDatasetEntity.PROPERTY_ID), subquery));
         };
     }
 }

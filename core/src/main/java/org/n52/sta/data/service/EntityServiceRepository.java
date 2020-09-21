@@ -47,21 +47,29 @@ public class EntityServiceRepository {
 
     private Map<EntityTypes, AbstractSensorThingsEntityService<?, ?, ?>> entityServices = new LinkedHashMap<>();
 
-    @Autowired private ThingService thingService;
+    @Autowired
+    private ThingService thingService;
 
-    @Autowired private LocationService locationService;
+    @Autowired
+    private LocationService locationService;
 
-    @Autowired private HistoricalLocationService historicalLocationService;
+    @Autowired
+    private HistoricalLocationService historicalLocationService;
 
-    @Autowired private SensorService sensorService;
+    @Autowired
+    private SensorService sensorService;
 
-    @Autowired private DatastreamService datastreamService;
+    @Autowired
+    private DatastreamService datastreamService;
 
-    @Autowired private ObservationService observationService;
+    @Autowired
+    private ObservationService observationService;
 
-    @Autowired private ObservedPropertyService observedPropertyService;
+    @Autowired
+    private ObservedPropertyService observedPropertyService;
 
-    @Autowired private FeatureOfInterestService featureOfInterestService;
+    @Autowired
+    private FeatureOfInterestService featureOfInterestService;
 
     @Autowired private STAEventHandler mqttSubscriptionEventHandler;
 

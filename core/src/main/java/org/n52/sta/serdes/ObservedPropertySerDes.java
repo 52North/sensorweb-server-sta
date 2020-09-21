@@ -70,7 +70,7 @@ public class ObservedPropertySerDes {
 
 
     public static class ObservedPropertySerializer
-            extends AbstractSTASerializer<ObservedPropertyWithQueryOptions, PhenomenonEntity> {
+        extends AbstractSTASerializer<ObservedPropertyWithQueryOptions, PhenomenonEntity> {
 
         private static final long serialVersionUID = -393434867481235299L;
 
@@ -82,7 +82,7 @@ public class ObservedPropertySerDes {
 
         @Override
         public void serialize(ObservedPropertyWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers)
-                throws IOException {
+            throws IOException {
             gen.writeStartObject();
             value.unwrap(implicitSelect);
             PhenomenonEntity obsProp = value.getEntity();
@@ -99,11 +99,11 @@ public class ObservedPropertySerDes {
                 gen.writeStringField(STAEntityDefinition.PROP_NAME, obsProp.getName());
             }
             if (!value.hasSelectOption() ||
-                    value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
+                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
                 gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, obsProp.getDescription());
             }
             if (!value.hasSelectOption() ||
-                    value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DEFINITION)) {
+                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DEFINITION)) {
                 gen.writeObjectField(STAEntityDefinition.PROP_DEFINITION, obsProp.getIdentifier());
             }
 
@@ -114,19 +114,19 @@ public class ObservedPropertySerDes {
                         writeNavigationProp(gen, navigationProperty, obsProp.getStaIdentifier());
                     } else {
                         switch (navigationProperty) {
-                        case ObservedPropertyEntityDefinition.DATASTREAMS:
-                            if (obsProp.getDatasets() == null) {
-                                writeNavigationProp(gen, navigationProperty, obsProp.getStaIdentifier());
-                            } else {
-                                gen.writeFieldName(navigationProperty);
-                                writeNestedCollection(Collections.unmodifiableSet(obsProp.getDatasets()),
-                                                      value.getFieldsToExpand().get(navigationProperty),
-                                                      gen,
-                                                      serializers);
-                            }
-                            break;
-                        default:
-                            throw new IllegalStateException("Unexpected value: " + navigationProperty);
+                            case ObservedPropertyEntityDefinition.DATASTREAMS:
+                                if (obsProp.getDatasets() == null) {
+                                    writeNavigationProp(gen, navigationProperty, obsProp.getStaIdentifier());
+                                } else {
+                                    gen.writeFieldName(navigationProperty);
+                                    writeNestedCollection(Collections.unmodifiableSet(obsProp.getDatasets()),
+                                                          value.getFieldsToExpand().get(navigationProperty),
+                                                          gen,
+                                                          serializers);
+                                }
+                                break;
+                            default:
+                                throw new IllegalStateException("Unexpected value: " + navigationProperty);
                         }
                     }
                 }
@@ -162,7 +162,7 @@ public class ObservedPropertySerDes {
         @Override
         public PhenomenonEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return new PhenomenonEntityPatch(p.readValueAs(JSONObservedProperty.class)
-                                              .toEntity(JSONBase.EntityType.PATCH));
+                                                 .toEntity(JSONBase.EntityType.PATCH));
         }
     }
 }

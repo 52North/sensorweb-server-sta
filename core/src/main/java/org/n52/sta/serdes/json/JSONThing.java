@@ -60,8 +60,7 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
         self = new PlatformEntity();
     }
 
-    @Override
-    protected void parseReferencedFrom() {
+    @Override protected void parseReferencedFrom() {
         if (referencedFromType != null) {
             switch (referencedFromType) {
                 case StaConstants.LOCATIONS:
@@ -138,6 +137,12 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
 
                 if (properties != null) {
                     self.setParameters(convertParameters(properties));
+                }
+
+                if (Locations != null) {
+                    self.setLocations(Arrays.stream(Locations)
+                                          .map(loc -> loc.toEntity(JSONBase.EntityType.REFERENCE))
+                                          .collect(Collectors.toSet()));
                 }
 
                 if (Datastreams != null) {

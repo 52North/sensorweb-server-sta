@@ -36,30 +36,21 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.data.service.util.CollectionWrapper;
 import org.n52.sta.utils.AbstractSTARequestHandler;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.n52.sta.utils.RequestUtils;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.HandlerMapping;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashSet;
 
 /**
- * Handles all requests to Entity Collections and Entity Collections association Links
- * e.g. /Things
- * e.g. /Datastreams(52)/Observations
- * e.g. /Things/$ref
- * e.g. /Datastreams(52)/Observations/$ref
- *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@RestController
-public class STACollectionRequestHandler extends AbstractSTARequestHandler {
+public abstract class CollectionRequestHandler<T extends RequestUtils> extends AbstractSTARequestHandler {
 
-    public STACollectionRequestHandler(@Value("${server.rootUrl}") String rootUrl,
-                                       @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
-                                       EntityServiceRepository serviceRepository) {
+    public CollectionRequestHandler(String rootUrl,
+                                    boolean shouldEscapeId,
+                                    EntityServiceRepository serviceRepository) {
         super(rootUrl, shouldEscapeId, serviceRepository);
     }
 
@@ -71,18 +62,14 @@ public class STACollectionRequestHandler extends AbstractSTARequestHandler {
      * @param request        Full request
      * @return CollectionWrapper Requested collection
      */
-    @GetMapping(
-            value = "/{collectionName:" + BASE_COLLECTION_REGEX + "}",
-            produces = "application/json"
-    )
     public CollectionWrapper readCollectionDirect(@PathVariable String collectionName,
                                                   HttpServletRequest request)
-            throws STACRUDException {
+        throws STACRUDException {
         QueryOptions options = decodeQueryString(request);
         return serviceRepository
-                .getEntityService(collectionName)
-                .getEntityCollection(options)
-                .setRequestURL(rootUrl + collectionName);
+            .getEntityService(collectionName)
+            .getEntityCollection(options)
+            .setRequestURL(rootUrl + collectionName);
     }
 
     /**
@@ -93,13 +80,9 @@ public class STACollectionRequestHandler extends AbstractSTARequestHandler {
      * @param request        Full request
      * @return CollectionWrapper Requested collection
      */
-    @GetMapping(
-            value = "/{collectionName:" + BASE_COLLECTION_REGEX + "}" + SLASHREF,
-            produces = "application/json"
-    )
     public CollectionWrapper readCollectionRefDirect(@PathVariable String collectionName,
                                                      HttpServletRequest request)
-            throws STACRUDException {
+        throws STACRUDException {
         HashSet<FilterClause> filters = new HashSet<>();
         String queryString = request.getQueryString();
         if (queryString != null) {
@@ -113,9 +96,9 @@ public class STACollectionRequestHandler extends AbstractSTARequestHandler {
         // Overwrite select filter with filter only returning id
         filters.add(new SelectFilter(ID));
         return serviceRepository
-                .getEntityService(collectionName)
-                .getEntityCollection(QUERY_OPTIONS_FACTORY.createQueryOptions(filters))
-                .setRequestURL(rootUrl + collectionName);
+            .getEntityService(collectionName)
+            .getEntityCollection(QUERY_OPTIONS_FACTORY.createQueryOptions(filters))
+            .setRequestURL(rootUrl + collectionName);
     }
 
     /**
@@ -127,22 +110,10 @@ public class STACollectionRequestHandler extends AbstractSTARequestHandler {
      * @param request full request
      * @return CollectionWrapper Requested collection
      */
-    @GetMapping(
-            value = {
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_THING_PATH_VARIABLE,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_LOCATION_PATH_VARIABLE,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH_VARIABLE,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH_VARIABLE,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_SENSOR_PATH_VARIABLE,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_HIST_LOCATION_PATH_VARIABLE
-            },
-            produces = "application/json"
-    )
     public CollectionWrapper readCollectionRelated(@PathVariable String entity,
                                                    @PathVariable String target,
                                                    HttpServletRequest request)
-            throws Exception {
+        throws Exception {
         validateResource((String) request.getAttribute(HandlerMapping.LOOKUP_PATH), serviceRepository);
 
         String[] split = splitId(entity);
@@ -151,10 +122,10 @@ public class STACollectionRequestHandler extends AbstractSTARequestHandler {
 
         QueryOptions options = decodeQueryString(request);
         return serviceRepository.getEntityService(target)
-                                .getEntityCollectionByRelatedEntity(sourceId,
-                                                                    sourceType,
-                                                                    options)
-                                .setRequestURL(rootUrl + entity + "/" + target);
+            .getEntityCollectionByRelatedEntity(sourceId,
+                                                sourceType,
+                                                options)
+            .setRequestURL(rootUrl + entity + "/" + target);
     }
 
     /**
@@ -166,22 +137,10 @@ public class STACollectionRequestHandler extends AbstractSTARequestHandler {
      * @param request full request
      * @return CollectionWrapper Requested collection
      */
-    @GetMapping(
-            value = {
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_THING_PATH_VARIABLE + SLASHREF,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_LOCATION_PATH_VARIABLE + SLASHREF,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH_VARIABLE + SLASHREF,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH_VARIABLE + SLASHREF,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_SENSOR_PATH_VARIABLE + SLASHREF,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE + SLASHREF,
-                    MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_HIST_LOCATION_PATH_VARIABLE + SLASHREF
-            },
-            produces = "application/json"
-    )
     public CollectionWrapper readCollectionRelatedRef(@PathVariable String entity,
                                                       @PathVariable String target,
                                                       HttpServletRequest request)
-            throws Exception {
+        throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         validateResource(lookupPath.substring(0, lookupPath.length() - 5), serviceRepository);
 
@@ -202,9 +161,9 @@ public class STACollectionRequestHandler extends AbstractSTARequestHandler {
         // Overwrite select filter with filter only returning id
         filters.add(new SelectFilter(ID));
         return serviceRepository.getEntityService(target)
-                                .getEntityCollectionByRelatedEntity(sourceId,
-                                                                    sourceType,
-                                                                    QUERY_OPTIONS_FACTORY.createQueryOptions(filters))
-                                .setRequestURL(rootUrl + entity + "/" + target);
+            .getEntityCollectionByRelatedEntity(sourceId,
+                                                sourceType,
+                                                QUERY_OPTIONS_FACTORY.createQueryOptions(filters))
+            .setRequestURL(rootUrl + entity + "/" + target);
     }
 }

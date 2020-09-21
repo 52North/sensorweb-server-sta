@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.utils;
 
 import org.joda.time.DateTime;
@@ -71,7 +72,7 @@ public class TimeUtil {
             if (obj.contains("/")) {
                 String[] split = obj.split("/");
                 return createTime(DateTime.parse(split[0]),
-                        DateTime.parse(split[1]));
+                                  DateTime.parse(split[1]));
             } else {
                 return new TimeInstant(DateTime.parse(obj));
             }

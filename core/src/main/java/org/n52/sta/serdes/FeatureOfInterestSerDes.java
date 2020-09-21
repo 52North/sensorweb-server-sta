@@ -58,7 +58,7 @@ public class FeatureOfInterestSerDes {
 
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     public static class AbstractFeatureEntityPatch extends AbstractFeatureEntity
-            implements EntityPatch<AbstractFeatureEntity> {
+        implements EntityPatch<AbstractFeatureEntity> {
 
         private static final long serialVersionUID = 4488526324452194583L;
         private final AbstractFeatureEntity entity;
@@ -75,7 +75,7 @@ public class FeatureOfInterestSerDes {
 
 
     public static class FeatureOfInterestSerializer
-            extends AbstractSTASerializer<FeatureOfInterestWithQueryOptions, StaFeatureEntity<?>> {
+        extends AbstractSTASerializer<FeatureOfInterestWithQueryOptions, StaFeatureEntity<?>> {
 
         private static final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
 
@@ -109,11 +109,11 @@ public class FeatureOfInterestSerDes {
                 gen.writeStringField(STAEntityDefinition.PROP_NAME, feature.getName());
             }
             if (!value.hasSelectOption() ||
-                    value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
+                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
                 gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, feature.getDescription());
             }
             if (!value.hasSelectOption() ||
-                    value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ENCODINGTYPE)) {
+                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ENCODINGTYPE)) {
                 // only write out encodingtype if there is a location present
                 if (feature.isSetGeometry()) {
                     gen.writeStringField(STAEntityDefinition.PROP_ENCODINGTYPE, ENCODINGTYPE_GEOJSON);
@@ -131,19 +131,19 @@ public class FeatureOfInterestSerDes {
                         writeNavigationProp(gen, navigationProperty, feature.getStaIdentifier());
                     } else {
                         switch (navigationProperty) {
-                        case STAEntityDefinition.OBSERVATIONS:
-                            if (feature.getObservations() == null) {
-                                writeNavigationProp(gen, navigationProperty, feature.getStaIdentifier());
-                            } else {
-                                gen.writeFieldName(navigationProperty);
-                                writeNestedCollection(Collections.unmodifiableSet(feature.getObservations()),
-                                                      value.getFieldsToExpand().get(navigationProperty),
-                                                      gen,
-                                                      serializers);
-                            }
-                            break;
-                        default:
-                            throw new IllegalStateException("Unexpected value: " + navigationProperty);
+                            case STAEntityDefinition.OBSERVATIONS:
+                                if (feature.getObservations() == null) {
+                                    writeNavigationProp(gen, navigationProperty, feature.getStaIdentifier());
+                                } else {
+                                    gen.writeFieldName(navigationProperty);
+                                    writeNestedCollection(Collections.unmodifiableSet(feature.getObservations()),
+                                                          value.getFieldsToExpand().get(navigationProperty),
+                                                          gen,
+                                                          serializers);
+                                }
+                                break;
+                            default:
+                                throw new IllegalStateException("Unexpected value: " + navigationProperty);
                         }
                     }
                 }
@@ -179,7 +179,7 @@ public class FeatureOfInterestSerDes {
         @Override
         public AbstractFeatureEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return new AbstractFeatureEntityPatch(p.readValueAs(JSONFeatureOfInterest.class)
-                                                   .toEntity(JSONBase.EntityType.PATCH));
+                                                      .toEntity(JSONBase.EntityType.PATCH));
         }
     }
 }

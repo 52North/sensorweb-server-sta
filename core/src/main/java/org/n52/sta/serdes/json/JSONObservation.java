@@ -41,6 +41,7 @@ import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.springframework.util.Assert;
 
 import java.math.BigDecimal;
@@ -75,12 +76,12 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
     protected void parseReferencedFrom() {
         if (referencedFromType != null) {
             switch (referencedFromType) {
-                case "Datastreams":
+                case StaConstants.DATASTREAMS:
                     Assert.isNull(Datastream, INVALID_DUPLICATE_REFERENCE);
                     this.Datastream = new JSONDatastream();
                     this.Datastream.identifier = referencedFromID;
                     return;
-                case "FeaturesOfInterest":
+                case StaConstants.FEATURES_OF_INTEREST:
                     Assert.isNull(FeatureOfInterest, INVALID_DUPLICATE_REFERENCE);
                     this.FeatureOfInterest = new JSONFeatureOfInterest();
                     this.FeatureOfInterest.identifier = referencedFromID;

@@ -36,7 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 @NoRepositoryBean
 @Transactional
 public interface IdentifierNameRepository<T extends DescribableEntity>
-        extends IdentifierRepository<T, Long> {
+    extends IdentifierRepository<T, Long> {
 
     boolean existsByName(String name);
 

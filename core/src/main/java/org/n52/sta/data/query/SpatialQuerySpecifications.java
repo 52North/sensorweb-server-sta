@@ -44,9 +44,9 @@ import javax.persistence.criteria.Root;
 public interface SpatialQuerySpecifications<T> {
 
     Specification<T> handleGeoSpatialPropertyFilter(
-            String propertyName,
-            String spatialFunctionName,
-            String... arguments);
+        String propertyName,
+        String spatialFunctionName,
+        String... arguments);
 
     Expression<Float> handleGeospatial(GeoValueExpr expr,
                                        String spatialFunctionName,

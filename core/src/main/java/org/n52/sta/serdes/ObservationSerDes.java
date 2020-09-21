@@ -80,7 +80,7 @@ public class ObservationSerDes {
 
 
     public static class ObservationSerializer
-            extends AbstractSTASerializer<ObservationWithQueryOptions, ObservationEntity<?>> {
+        extends AbstractSTASerializer<ObservationWithQueryOptions, ObservationEntity<?>> {
 
         private static final long serialVersionUID = -4575044340713191285L;
         private static final String VALUE = "value";
@@ -93,7 +93,7 @@ public class ObservationSerDes {
 
         @Override
         public void serialize(ObservationWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers)
-                throws IOException {
+            throws IOException {
             gen.writeStartObject();
             value.unwrap(implicitSelect);
             ObservationEntity<?> observation = value.getEntity();
@@ -111,7 +111,7 @@ public class ObservationSerDes {
                 gen.writeStringField(STAEntityDefinition.PROP_RESULT, observation.getValue().toString());
             }
             if (!value.hasSelectOption() ||
-                    value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_RESULT_TIME)) {
+                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_RESULT_TIME)) {
                 if (observation.hasResultTime()) {
                     gen.writeStringField(STAEntityDefinition.PROP_RESULT_TIME,
                                          observation.getResultTime().toInstant().toString());
@@ -120,18 +120,18 @@ public class ObservationSerDes {
                 }
             }
             if (!value.hasSelectOption() ||
-                    value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PHENOMENON_TIME)) {
+                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PHENOMENON_TIME)) {
                 String phenomenonTime = DateTimeHelper.format(createPhenomenonTime(observation));
                 gen.writeStringField(STAEntityDefinition.PROP_PHENOMENON_TIME, phenomenonTime);
             }
 
             if (!value.hasSelectOption() ||
-                    value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_RESULT_QUALITY)) {
+                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_RESULT_QUALITY)) {
                 gen.writeNullField(STAEntityDefinition.PROP_RESULT_QUALITY);
             }
 
             if (!value.hasSelectOption() ||
-                    value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_VALID_TIME)) {
+                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_VALID_TIME)) {
                 if (observation.isSetValidTime()) {
                     gen.writeStringField(STAEntityDefinition.PROP_VALID_TIME,
                                          DateTimeHelper.format(createValidTime(observation)));
@@ -141,7 +141,7 @@ public class ObservationSerDes {
             }
 
             if (!value.hasSelectOption() ||
-                    value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PARAMETERS)) {
+                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PARAMETERS)) {
                 gen.writeArrayFieldStart(STAEntityDefinition.PROP_PARAMETERS);
                 if (observation.hasParameters()) {
                     for (ParameterEntity<?> parameter : observation.getParameters()) {
@@ -166,30 +166,30 @@ public class ObservationSerDes {
                         writeNavigationProp(gen, navigationProperty, observation.getStaIdentifier());
                     } else {
                         switch (navigationProperty) {
-                        case ObservationEntityDefinition.DATASTREAM:
-                            if (observation.getDataset() == null) {
-                                writeNavigationProp(gen, navigationProperty, observation.getStaIdentifier());
-                            } else {
-                                gen.writeFieldName(navigationProperty);
-                                writeNestedEntity(observation.getDataset(),
-                                                  value.getFieldsToExpand().get(navigationProperty),
-                                                  gen,
-                                                  serializers);
-                            }
-                            break;
-                        case ObservationEntityDefinition.FEATURE_OF_INTEREST:
-                            if (observation.getFeature() == null) {
-                                writeNavigationProp(gen, navigationProperty, observation.getStaIdentifier());
-                            } else {
-                                gen.writeFieldName(navigationProperty);
-                                writeNestedEntity(observation.getFeature(),
-                                                  value.getFieldsToExpand().get(navigationProperty),
-                                                  gen,
-                                                  serializers);
-                            }
-                            break;
-                        default:
-                            throw new IllegalStateException("Unexpected value: " + navigationProperty);
+                            case ObservationEntityDefinition.DATASTREAM:
+                                if (observation.getDataset() == null) {
+                                    writeNavigationProp(gen, navigationProperty, observation.getStaIdentifier());
+                                } else {
+                                    gen.writeFieldName(navigationProperty);
+                                    writeNestedEntity(observation.getDataset(),
+                                                      value.getFieldsToExpand().get(navigationProperty),
+                                                      gen,
+                                                      serializers);
+                                }
+                                break;
+                            case ObservationEntityDefinition.FEATURE_OF_INTEREST:
+                                if (observation.getFeature() == null) {
+                                    writeNavigationProp(gen, navigationProperty, observation.getStaIdentifier());
+                                } else {
+                                    gen.writeFieldName(navigationProperty);
+                                    writeNestedEntity(observation.getFeature(),
+                                                      value.getFieldsToExpand().get(navigationProperty),
+                                                      gen,
+                                                      serializers);
+                                }
+                                break;
+                            default:
+                                throw new IllegalStateException("Unexpected value: " + navigationProperty);
                         }
                     }
                 }
@@ -242,8 +242,8 @@ public class ObservationSerDes {
         @Override
         public ObservationEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return p.readValueAs(JSONObservation.class)
-                    .parseParameters(parameterMapping)
-                    .toEntity(JSONBase.EntityType.FULL);
+                .parseParameters(parameterMapping)
+                .toEntity(JSONBase.EntityType.FULL);
         }
     }
 
@@ -261,8 +261,8 @@ public class ObservationSerDes {
         @Override
         public ObservationEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return new ObservationEntityPatch(p.readValueAs(JSONObservation.class)
-                                               .parseParameters(parameterMapping)
-                                               .toEntity(JSONBase.EntityType.PATCH));
+                                                  .parseParameters(parameterMapping)
+                                                  .toEntity(JSONBase.EntityType.PATCH));
         }
     }
 }

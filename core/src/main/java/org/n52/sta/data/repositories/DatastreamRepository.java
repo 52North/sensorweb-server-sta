@@ -30,7 +30,7 @@
 package org.n52.sta.data.repositories;
 
 import org.n52.series.db.beans.AbstractDatasetEntity;
-import org.springframework.context.annotation.DependsOn;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
@@ -39,9 +39,9 @@ import java.util.Set;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Transactional
-@DependsOn("ObservationRepository")
+@Repository
 public interface DatastreamRepository
-        extends NameRepository<AbstractDatasetEntity>, StaIdentifierRepository<AbstractDatasetEntity> {
+    extends NameRepository<AbstractDatasetEntity>, StaIdentifierRepository<AbstractDatasetEntity> {
 
     <S extends AbstractDatasetEntity> S intermediateSave(S entity);
 

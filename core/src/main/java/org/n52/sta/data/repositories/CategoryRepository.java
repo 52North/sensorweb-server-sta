@@ -30,11 +30,13 @@
 package org.n52.sta.data.repositories;
 
 import org.n52.series.db.beans.CategoryEntity;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @Transactional
+@Repository
 public interface CategoryRepository extends EntityGraphRepository<CategoryEntity, Long> {
 
     boolean existsByIdentifier(String identifier);

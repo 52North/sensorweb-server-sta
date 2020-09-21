@@ -58,6 +58,44 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
     protected boolean hasSelectOption;
     protected boolean hasExpandOption;
 
+    ElementWithQueryOptions(P entity, QueryOptions queryOptions) {
+        this.entity = entity;
+        this.queryOptions = queryOptions;
+    }
+
+    public static ElementWithQueryOptions from(Object entity, QueryOptions queryOptions) {
+        Object unwrapped = (entity instanceof HibernateProxy) ? Hibernate.unproxy(entity) : entity;
+        switch (unwrapped.getClass().getSimpleName()) {
+            case "PlatformEntity":
+                return new ThingWithQueryOptions((PlatformEntity) unwrapped, queryOptions);
+            case "ProcedureEntity":
+                return new SensorWithQueryOptions((ProcedureEntity) unwrapped, queryOptions);
+            case "PhenomenonEntity":
+                return new ObservedPropertyWithQueryOptions((PhenomenonEntity) unwrapped, queryOptions);
+            case "LocationEntity":
+                return new LocationWithQueryOptions((LocationEntity) unwrapped, queryOptions);
+            case "HistoricalLocationEntity":
+                return new HistoricalLocationWithQueryOptions((HistoricalLocationEntity) unwrapped, queryOptions);
+            case "StaFeatureEntity":
+                return new FeatureOfInterestWithQueryOptions((StaFeatureEntity<?>) unwrapped, queryOptions);
+            case "FeatureEntity":
+                return new FeatureOfInterestWithQueryOptions(
+                    new StaFeatureEntity<>((FeatureEntity) unwrapped), queryOptions);
+            case "DatasetEntity":
+            case "AbstractDatasetEntity":
+            case "DatasetAggregationEntity":
+                return new DatastreamWithQueryOptions((AbstractDatasetEntity) unwrapped, queryOptions);
+            default:
+                if (unwrapped instanceof ObservationEntity) {
+                    return new ObservationWithQueryOptions((ObservationEntity<?>) unwrapped, queryOptions);
+                } else {
+                    throw new RuntimeException(
+                        "Error wrapping object with queryOptions. Could not find Wrapper for class: " +
+                            unwrapped.getClass().getSimpleName());
+                }
+        }
+    }
+
     public QueryOptions getQueryOptions() {
         return queryOptions;
     }
@@ -82,39 +120,6 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
         return hasExpandOption;
     }
 
-    public static ElementWithQueryOptions from(Object entity, QueryOptions queryOptions) {
-        Object unwrapped = (entity instanceof HibernateProxy) ? Hibernate.unproxy(entity) : entity;
-        switch (unwrapped.getClass().getSimpleName()) {
-        case "PlatformEntity":
-            return new ThingWithQueryOptions((PlatformEntity) unwrapped, queryOptions);
-        case "ProcedureEntity":
-            return new SensorWithQueryOptions((ProcedureEntity) unwrapped, queryOptions);
-        case "PhenomenonEntity":
-            return new ObservedPropertyWithQueryOptions((PhenomenonEntity) unwrapped, queryOptions);
-        case "LocationEntity":
-            return new LocationWithQueryOptions((LocationEntity) unwrapped, queryOptions);
-        case "HistoricalLocationEntity":
-            return new HistoricalLocationWithQueryOptions((HistoricalLocationEntity) unwrapped, queryOptions);
-        case "StaFeatureEntity":
-            return new FeatureOfInterestWithQueryOptions((StaFeatureEntity<?>) unwrapped, queryOptions);
-        case "FeatureEntity":
-            return new FeatureOfInterestWithQueryOptions(
-                    new StaFeatureEntity<>((FeatureEntity) unwrapped), queryOptions);
-        case "DatasetEntity":
-        case "AbstractDatasetEntity":
-        case "DatasetAggregationEntity":
-            return new DatastreamWithQueryOptions((AbstractDatasetEntity) unwrapped, queryOptions);
-        default:
-            if (unwrapped instanceof ObservationEntity) {
-                return new ObservationWithQueryOptions((ObservationEntity<?>) unwrapped, queryOptions);
-            } else {
-                throw new RuntimeException(
-                        "Error wrapping object with queryOptions. Could not find Wrapper for class: " +
-                                unwrapped.getClass().getSimpleName());
-            }
-        }
-    }
-
     public void unwrap(boolean enableImplicitSelect) {
         if (queryOptions != null) {
             if (queryOptions.hasSelectFilter()) {
@@ -136,73 +141,68 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
 
     public static class ThingWithQueryOptions extends ElementWithQueryOptions<PlatformEntity> {
 
-        ThingWithQueryOptions(PlatformEntity thing, QueryOptions queryOptions) {
-            this.entity = thing;
-            this.queryOptions = queryOptions;
+        ThingWithQueryOptions(PlatformEntity entity, QueryOptions queryOptions) {
+            super(entity, queryOptions);
         }
     }
 
 
     public static class SensorWithQueryOptions extends ElementWithQueryOptions<ProcedureEntity> {
 
-        SensorWithQueryOptions(ProcedureEntity thing, QueryOptions queryOptions) {
-            this.entity = thing;
-            this.queryOptions = queryOptions;
+        SensorWithQueryOptions(ProcedureEntity entity, QueryOptions queryOptions) {
+            super(entity, queryOptions);
         }
     }
 
 
     public static class ObservedPropertyWithQueryOptions extends ElementWithQueryOptions<PhenomenonEntity> {
 
-        ObservedPropertyWithQueryOptions(PhenomenonEntity thing, QueryOptions queryOptions) {
-            this.entity = thing;
-            this.queryOptions = queryOptions;
+        ObservedPropertyWithQueryOptions(PhenomenonEntity entity, QueryOptions queryOptions) {
+            super(entity, queryOptions);
         }
     }
 
 
     public static class ObservationWithQueryOptions extends ElementWithQueryOptions<ObservationEntity<?>> {
 
-        ObservationWithQueryOptions(ObservationEntity<?> thing, QueryOptions queryOptions) {
-            this.entity = thing;
-            this.queryOptions = queryOptions;
+        ObservationWithQueryOptions(ObservationEntity<?> entity,
+                                    QueryOptions queryOptions) {
+            super(entity, queryOptions);
         }
     }
 
 
     public static class LocationWithQueryOptions extends ElementWithQueryOptions<LocationEntity> {
 
-        LocationWithQueryOptions(LocationEntity thing, QueryOptions queryOptions) {
-            this.entity = thing;
-            this.queryOptions = queryOptions;
+        LocationWithQueryOptions(LocationEntity entity, QueryOptions queryOptions) {
+            super(entity, queryOptions);
         }
     }
 
 
     public static class HistoricalLocationWithQueryOptions
-            extends ElementWithQueryOptions<HistoricalLocationEntity> {
+        extends ElementWithQueryOptions<HistoricalLocationEntity> {
 
-        HistoricalLocationWithQueryOptions(HistoricalLocationEntity hloc, QueryOptions queryOptions) {
-            this.entity = hloc;
-            this.queryOptions = queryOptions;
+        HistoricalLocationWithQueryOptions(HistoricalLocationEntity entity,
+                                           QueryOptions queryOptions) {
+            super(entity, queryOptions);
         }
     }
 
 
     public static class FeatureOfInterestWithQueryOptions extends ElementWithQueryOptions<StaFeatureEntity<?>> {
 
-        FeatureOfInterestWithQueryOptions(StaFeatureEntity<?> foi, QueryOptions queryOptions) {
-            this.entity = foi;
-            this.queryOptions = queryOptions;
+        FeatureOfInterestWithQueryOptions(StaFeatureEntity<?> entity, QueryOptions queryOptions) {
+            super(entity, queryOptions);
         }
     }
 
 
     public static class DatastreamWithQueryOptions extends ElementWithQueryOptions<AbstractDatasetEntity> {
 
-        DatastreamWithQueryOptions(AbstractDatasetEntity datastream, QueryOptions queryOptions) {
-            this.entity = datastream;
-            this.queryOptions = queryOptions;
+        DatastreamWithQueryOptions(AbstractDatasetEntity entity,
+                                   QueryOptions queryOptions) {
+            super(entity, queryOptions);
         }
     }
 

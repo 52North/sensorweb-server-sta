@@ -30,6 +30,7 @@
 package org.n52.sta.data.repositories;
 
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
@@ -38,6 +39,7 @@ import java.util.Set;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Transactional
+@Repository
 public interface LocationRepository extends NameRepository<LocationEntity> {
 
     Set<LocationEntity> findAllByPlatformsIdEquals(Long id);

@@ -35,10 +35,6 @@ import org.n52.shetland.ogc.filter.FilterClause;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
 import org.n52.sta.utils.AbstractSTARequestHandler;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.HandlerMapping;
 
 import javax.servlet.http.HttpServletRequest;
@@ -53,15 +49,14 @@ import java.util.HashSet;
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@RestController
-public class STAPropertyRequestHandler extends AbstractSTARequestHandler {
+public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
 
     private final ObjectMapper mapper;
 
-    public STAPropertyRequestHandler(@Value("${server.rootUrl}") String rootUrl,
-                                     @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
-                                     EntityServiceRepository serviceRepository,
-                                     ObjectMapper mapper) {
+    public PropertyRequestHandler(String rootUrl,
+                                  boolean shouldEscapeId,
+                                  EntityServiceRepository serviceRepository,
+                                  ObjectMapper mapper) {
         super(rootUrl, shouldEscapeId, serviceRepository);
         this.mapper = mapper;
     }
@@ -75,13 +70,9 @@ public class STAPropertyRequestHandler extends AbstractSTARequestHandler {
      * @param property property to be returned. Automatically set by Spring via @PathVariable
      * @param request  Full request object. Automatically set by Spring
      */
-    @GetMapping(
-            value = MAPPING_PREFIX + ENTITY_IDENTIFIED_DIRECTLY + SLASH + PATH_PROPERTY,
-            produces = "application/json"
-    )
-    public ElementWithQueryOptions<?> readEntityPropertyDirect(@PathVariable String entity,
-                                                               @PathVariable String id,
-                                                               @PathVariable String property,
+    public ElementWithQueryOptions<?> readEntityPropertyDirect(String entity,
+                                                               String id,
+                                                               String property,
                                                                HttpServletRequest request) throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         return readEntityPropertyDirect(entity, id, property, lookupPath);
@@ -101,7 +92,7 @@ public class STAPropertyRequestHandler extends AbstractSTARequestHandler {
         // Add select filter with filter only returning property
         filters.add(new SelectFilter(property));
         return serviceRepository.getEntityService(entity)
-                                .getEntity(entityId, QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
+            .getEntity(entityId, QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
     }
 
     /**
@@ -114,19 +105,11 @@ public class STAPropertyRequestHandler extends AbstractSTARequestHandler {
      * @param request  Full request object. Automatically set by Spring
      * @return JSON Object with serialized property
      */
-    @GetMapping(
-            value = {
-                    MAPPING_PREFIX + ENTITY_PROPERTY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
-                    MAPPING_PREFIX + ENTITY_PROPERTY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE,
-                    MAPPING_PREFIX + ENTITY_PROPERTY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE
-            },
-            produces = "application/json"
-    )
-    public ElementWithQueryOptions<?> readRelatedEntityProperty(@PathVariable String entity,
-                                                                @PathVariable String target,
-                                                                @PathVariable String property,
+    public ElementWithQueryOptions<?> readRelatedEntityProperty(String entity,
+                                                                String target,
+                                                                String property,
                                                                 HttpServletRequest request)
-            throws Exception {
+        throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         return readRelatedEntityProperty(entity, target, property, lookupPath);
     }
@@ -148,10 +131,10 @@ public class STAPropertyRequestHandler extends AbstractSTARequestHandler {
         filters.add(new SelectFilter(property));
 
         return serviceRepository.getEntityService(target)
-                                .getEntityByRelatedEntity(sourceId,
-                                                          sourceType,
-                                                          null,
-                                                          QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
+            .getEntityByRelatedEntity(sourceId,
+                                      sourceType,
+                                      null,
+                                      QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
     }
 
     /**
@@ -163,17 +146,13 @@ public class STAPropertyRequestHandler extends AbstractSTARequestHandler {
      * @param property property to be returned. Automatically set by Spring via @PathVariable
      * @param request  Full request object. Automatically set by Spring
      */
-    @GetMapping(
-            value = MAPPING_PREFIX + ENTITY_IDENTIFIED_DIRECTLY + SLASH + PATH_PROPERTY + SLASHVALUE,
-            produces = "text/plain"
-    )
-    public String readEntityPropertyValueDirect(@PathVariable String entity,
-                                                @PathVariable String id,
-                                                @PathVariable String property,
+    public String readEntityPropertyValueDirect(String entity,
+                                                String id,
+                                                String property,
                                                 HttpServletRequest request) throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         ElementWithQueryOptions<?> elementWithQueryOptions =
-                this.readEntityPropertyDirect(entity, id, property, lookupPath.substring(0, lookupPath.length() - 7));
+            this.readEntityPropertyDirect(entity, id, property, lookupPath.substring(0, lookupPath.length() - 7));
         return mapper.valueToTree(elementWithQueryOptions).fields().next().getValue().toString();
     }
 
@@ -187,24 +166,16 @@ public class STAPropertyRequestHandler extends AbstractSTARequestHandler {
      * @param request  Full request object. Automatically set by Spring
      * @return JSON Object with serialized property
      */
-    @GetMapping(
-            value = {
-                    MAPPING_PREFIX + ENTITY_PROPERTY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE + SLASHVALUE,
-                    MAPPING_PREFIX + ENTITY_PROPERTY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE + SLASHVALUE,
-                    MAPPING_PREFIX + ENTITY_PROPERTY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE + SLASHVALUE
-            },
-            produces = "text/plain"
-    )
-    public String readRelatedEntityPropertyValue(@PathVariable String entity,
-                                                 @PathVariable String target,
-                                                 @PathVariable String property,
+    public String readRelatedEntityPropertyValue(String entity,
+                                                 String target,
+                                                 String property,
                                                  HttpServletRequest request) throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         ElementWithQueryOptions<?> elementWithQueryOptions =
-                this.readRelatedEntityProperty(entity,
-                                               target,
-                                               property,
-                                               lookupPath.substring(0, lookupPath.length() - 7));
+            this.readRelatedEntityProperty(entity,
+                                           target,
+                                           property,
+                                           lookupPath.substring(0, lookupPath.length() - 7));
         return mapper.valueToTree(elementWithQueryOptions).fields().next().getValue().toString();
     }
 }

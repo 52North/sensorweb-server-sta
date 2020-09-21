@@ -29,69 +29,62 @@
 
 package org.n52.sta.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.info.BuildProperties;
+import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
- * Handles all requests to the version Endpoint
- * e.g. /version
+ * Handles all requests to the root
+ * e.g. /
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @RestController
-public class STAVersionRequestHandler {
+public class RootRequestHandler {
 
-    private final BuildProperties buildProperties;
-    @Value("${project.version}")
-    private String projectVersion;
+    private final String rootResponse;
 
-    @Value("${git.build.time}")
-    private String buildTime;
-
-    @Value("${git.remote.origin.url}")
-    private String repository;
-
-    @Value("${git.branch}")
-    private String branch;
-
-    @Value("${git.commit.id.full}")
-    private String commitId;
-
-    @Value("${git.commit.time}")
-    private String commitTime;
-
-    @Value("${git.commit.message.short}")
-    private String commitMessage;
-
-    public STAVersionRequestHandler(BuildProperties buildProperties) {
-        this.buildProperties = buildProperties;
+    public RootRequestHandler(@Value("${server.rootUrl}") String rootUrl,
+                              ObjectMapper mapper,
+                              Environment environment) {
+        rootResponse = createRootResponse(rootUrl, mapper, environment.getActiveProfiles());
     }
 
     /**
-     * Matches the request to the version endpoint
-     * e.g. /version
+     * Matches the request to the root resource
+     * e.g. /
      */
     @GetMapping(
-            value = "/version",
-            produces = "application/json"
+        value = "/",
+        produces = "application/json"
     )
-    public Map<String, String> getCommitId() {
-        Map<String, String> result = new HashMap<>();
-        result.put("project.name", "52North SensorThingsAPI");
-        result.put("project.version", buildProperties.getVersion());
-        result.put("project.time", buildProperties.getTime().toString());
-        result.put("git.builddate", buildTime);
-        result.put("git.repository", repository);
-        result.put("git.path", branch);
-        result.put("git.revision", commitId);
-        result.put("git.lastCommitMessage", commitMessage);
-        result.put("git.lastCommitDate", commitTime);
-        return result;
+    public String returnRootResponse() {
+        return rootResponse;
     }
 
+    private String createRootResponse(String rootUrl,
+                                      ObjectMapper mapper,
+                                      String[] activeProfiles) {
+        ArrayNode arrayNode = mapper.createArrayNode();
+
+        addToArray(rootUrl, mapper, arrayNode, STAEntityDefinition.CORECOLLECTIONS);
+
+        ObjectNode node = mapper.createObjectNode();
+        node.put("value", arrayNode);
+        return node.toString();
+    }
+
+    private void addToArray(String rootUrl, ObjectMapper mapper, ArrayNode array, String[] endpoints) {
+        for (String collection : endpoints) {
+            ObjectNode node = mapper.createObjectNode();
+            node.put("name", collection);
+            node.put("url", rootUrl + collection);
+            array.add(node);
+        }
+    }
 }

@@ -59,7 +59,7 @@ public abstract class EntityQuerySpecifications<T> {
     protected static final String OBSERVATIONS = "Observations";
     protected static final String COULD_NOT_FIND_RELATED_PROPERTY = "Could not find related property: ";
     protected static final String ERROR_GETTING_FILTER_NO_PROP = "Error getting filter for Property: '%s'. No such " +
-            "property in Entity.";
+        "property in Entity.";
 
     private static final String ERROR_TEMPLATE = "Operator \"%s\" is not supported for given arguments.";
     private static final String INVALID_DATATYPE_CANNOT_CAST = "Invalid Datatypes found. Cannot cast ";
@@ -74,7 +74,7 @@ public abstract class EntityQuerySpecifications<T> {
      */
     public Specification<T> getFilterForRelation(String propertyName,
                                                  Specification<?> propertyValue)
-            throws STAInvalidFilterExpressionException {
+        throws STAInvalidFilterExpressionException {
         return handleRelatedPropertyFilter(propertyName, propertyValue);
     }
 
@@ -94,7 +94,7 @@ public abstract class EntityQuerySpecifications<T> {
                                                  Expression<?> propertyValue,
                                                  FilterConstants.ComparisonOperator operator,
                                                  boolean switched)
-            throws STAInvalidFilterExpressionException {
+        throws STAInvalidFilterExpressionException {
         return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
     }
 
@@ -108,7 +108,7 @@ public abstract class EntityQuerySpecifications<T> {
 
     public Specification<T> withStaIdentifier(final List<String> identifiers) {
         return (root, query, builder) -> builder.in(root.get(DescribableEntity.PROPERTY_STA_IDENTIFIER))
-                                                .value(identifiers);
+            .value(identifiers);
     }
 
     // Wrapper
@@ -118,22 +118,22 @@ public abstract class EntityQuerySpecifications<T> {
                                                          FilterConstants.ComparisonOperator operator,
                                                          CriteriaBuilder builder,
                                                          boolean switched)
-            throws STAInvalidFilterExpressionException {
+        throws STAInvalidFilterExpressionException {
         if (propertyValue.getJavaType().equals(String.class)) {
             return this.handleStringFilter(stringPath, (Expression<String>) propertyValue, operator, builder, switched);
         } else {
             throw new STAInvalidFilterExpressionException(
-                    INVALID_DATATYPE_CANNOT_CAST + propertyValue.getJavaType() + " to String.class");
+                INVALID_DATATYPE_CANNOT_CAST + propertyValue.getJavaType() + " to String.class");
         }
     }
 
     @SuppressWarnings("unchecked")
-    protected <K extends Comparable<? super K>>
-    Predicate handleDirectNumberPropertyFilter(Path<K> numberPath,
-                                               Expression<?> propertyValue,
-                                               FilterConstants.ComparisonOperator operator,
-                                               CriteriaBuilder builder)
-            throws STAInvalidFilterExpressionException {
+    protected <K extends Comparable<? super K>> Predicate handleDirectNumberPropertyFilter(
+        Path<K> numberPath,
+        Expression<?> propertyValue,
+        FilterConstants.ComparisonOperator operator,
+        CriteriaBuilder builder)
+        throws STAInvalidFilterExpressionException {
         return this.handleComparableFilter(numberPath, (Expression<K>) propertyValue, operator, builder);
     }
 
@@ -142,12 +142,12 @@ public abstract class EntityQuerySpecifications<T> {
                                                            Expression<?> propertyValue,
                                                            FilterConstants.ComparisonOperator operator,
                                                            CriteriaBuilder builder)
-            throws STAInvalidFilterExpressionException {
+        throws STAInvalidFilterExpressionException {
         if (propertyValue.getJavaType().equals(Date.class)) {
             return this.handleComparableFilter(time, (Expression<Date>) propertyValue, operator, builder);
         } else {
             throw new STAInvalidFilterExpressionException(
-                    INVALID_DATATYPE_CANNOT_CAST + propertyValue.getJavaType() + " to Date.class");
+                INVALID_DATATYPE_CANNOT_CAST + propertyValue.getJavaType() + " to Date.class");
         }
     }
 
@@ -156,33 +156,33 @@ public abstract class EntityQuerySpecifications<T> {
                                          FilterConstants.ComparisonOperator operatorKind,
                                          CriteriaBuilder builder,
                                          boolean switched)
-            throws STAInvalidFilterExpressionException {
+        throws STAInvalidFilterExpressionException {
         FilterConstants.ComparisonOperator operator = switched ? reverseOperator(operatorKind) : operatorKind;
         return handleComparableFilter(left, right, operator, builder);
     }
 
-    private <K extends Comparable<? super K>> Predicate
-    handleComparableFilter(Expression<K> left,
-                           Expression<K> right,
-                           FilterConstants.ComparisonOperator operator,
-                           CriteriaBuilder builder)
-            throws STAInvalidFilterExpressionException {
+    private <K extends Comparable<? super K>> Predicate handleComparableFilter(
+        Expression<K> left,
+        Expression<K> right,
+        FilterConstants.ComparisonOperator operator,
+        CriteriaBuilder builder)
+        throws STAInvalidFilterExpressionException {
 
         switch (operator) {
-        case PropertyIsEqualTo:
-            return builder.equal(left, right);
-        case PropertyIsNotEqualTo:
-            return builder.notEqual(left, right);
-        case PropertyIsLessThan:
-            return builder.lessThan(left, right);
-        case PropertyIsLessThanOrEqualTo:
-            return builder.lessThanOrEqualTo(left, right);
-        case PropertyIsGreaterThan:
-            return builder.greaterThan(left, right);
-        case PropertyIsGreaterThanOrEqualTo:
-            return builder.greaterThanOrEqualTo(left, right);
-        default:
-            throw new STAInvalidFilterExpressionException(
+            case PropertyIsEqualTo:
+                return builder.equal(left, right);
+            case PropertyIsNotEqualTo:
+                return builder.notEqual(left, right);
+            case PropertyIsLessThan:
+                return builder.lessThan(left, right);
+            case PropertyIsLessThanOrEqualTo:
+                return builder.lessThanOrEqualTo(left, right);
+            case PropertyIsGreaterThan:
+                return builder.greaterThan(left, right);
+            case PropertyIsGreaterThanOrEqualTo:
+                return builder.greaterThanOrEqualTo(left, right);
+            default:
+                throw new STAInvalidFilterExpressionException(
                     String.format(ERROR_TEMPLATE, operator.toString()));
         }
     }
@@ -195,16 +195,16 @@ public abstract class EntityQuerySpecifications<T> {
      */
     private FilterConstants.ComparisonOperator reverseOperator(FilterConstants.ComparisonOperator operator) {
         switch (operator) {
-        case PropertyIsLessThan:
-            return FilterConstants.ComparisonOperator.PropertyIsGreaterThanOrEqualTo;
-        case PropertyIsLessThanOrEqualTo:
-            return FilterConstants.ComparisonOperator.PropertyIsGreaterThan;
-        case PropertyIsGreaterThan:
-            return FilterConstants.ComparisonOperator.PropertyIsLessThanOrEqualTo;
-        case PropertyIsGreaterThanOrEqualTo:
-            return FilterConstants.ComparisonOperator.PropertyIsLessThan;
-        default:
-            return operator;
+            case PropertyIsLessThan:
+                return FilterConstants.ComparisonOperator.PropertyIsGreaterThanOrEqualTo;
+            case PropertyIsLessThanOrEqualTo:
+                return FilterConstants.ComparisonOperator.PropertyIsGreaterThan;
+            case PropertyIsGreaterThan:
+                return FilterConstants.ComparisonOperator.PropertyIsLessThanOrEqualTo;
+            case PropertyIsGreaterThanOrEqualTo:
+                return FilterConstants.ComparisonOperator.PropertyIsLessThan;
+            default:
+                return operator;
         }
     }
 
