@@ -83,7 +83,6 @@ public class ObservationSerDes {
         extends AbstractSTASerializer<ObservationWithQueryOptions, ObservationEntity<?>> {
 
         private static final long serialVersionUID = -4575044340713191285L;
-        private static final String VALUE = "value";
 
         public ObservationSerializer(String rootUrl, boolean implicitExpand, String... activeExtensions) {
             super(ObservationWithQueryOptions.class, implicitExpand, activeExtensions);
@@ -142,21 +141,18 @@ public class ObservationSerDes {
 
             if (!value.hasSelectOption() ||
                 value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PARAMETERS)) {
-                gen.writeArrayFieldStart(STAEntityDefinition.PROP_PARAMETERS);
+                gen.writeObjectFieldStart(STAEntityDefinition.PROP_PARAMETERS);
                 if (observation.hasParameters()) {
                     for (ParameterEntity<?> parameter : observation.getParameters()) {
-                        gen.writeStartObject();
-                        gen.writeStringField("name", parameter.getName());
                         if (parameter instanceof ParameterJsonEntity) {
                             ObjectMapper mapper = new ObjectMapper();
-                            gen.writeObjectField(VALUE, mapper.readTree(parameter.getValueAsString()));
+                            gen.writeObjectField(parameter.getName(), mapper.readTree(parameter.getValueAsString()));
                         } else {
-                            gen.writeStringField(VALUE, parameter.getValueAsString());
+                            gen.writeStringField(parameter.getName(), parameter.getValueAsString());
                         }
-                        gen.writeEndObject();
                     }
                 }
-                gen.writeEndArray();
+                gen.writeEndObject();
             }
 
             // navigation properties

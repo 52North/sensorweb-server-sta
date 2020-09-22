@@ -30,7 +30,6 @@
 package org.n52.sta.serdes.json;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -70,8 +69,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Abstr
     public JSONObservedProperty ObservedProperty;
     @JsonManagedReference
     public JSONObservation[] Observations;
-    @JsonManagedReference
-    @JsonProperty(StaConstants.LICENSE)
+
     private final GeometryFactory factory =
         new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
     private final String OM_CategoryObservation =

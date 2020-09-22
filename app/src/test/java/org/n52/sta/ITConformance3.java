@@ -992,6 +992,7 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
         urlParameters = "{\"phenomenonTime\": \"2015-07-01T00:40:00.000Z\"}";
         diffs = new HashMap<>();
         diffs.put("phenomenonTime", "2015-07-01T00:40:00.000Z");
+        //TODO: Also check patch on Entity. Currently only tested in ITConformance8.
         updatedEntity = patchEntity(EntityType.OBSERVATION, urlParameters, obsId);
         checkPatch(EntityType.OBSERVATION, obsEntity, updatedEntity, diffs);
     }

@@ -243,8 +243,9 @@ public class ThingService
             synchronized (getLock(id)) {
                 Optional<PlatformEntity> existing =
                     getRepository().findByStaIdentifier(id,
-                                                        IdentifierRepository.FetchGraph.FETCHGRAPH_LOCATIONS,
-                                                        IdentifierRepository.FetchGraph.FETCHGRAPH_HIST_LOCATIONS);
+                                                        EntityGraphRepository.FetchGraph.FETCHGRAPH_LOCATIONS,
+                                                        EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATIONS,
+                                                        EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
                 if (existing.isPresent()) {
                     PlatformEntity merged = merge(existing.get(), newEntity);
                     if (newEntity.hasLocationEntities()) {

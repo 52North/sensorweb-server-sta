@@ -54,8 +54,10 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
     // JSON Properties. Matched by Annotation or variable name
     public String encodingType;
     public JsonNode location;
+
     @JsonManagedReference
     public JSONThing[] Things;
+
     @JsonManagedReference
     public JSONHistoricalLocation[] HistoricalLocations;
     private final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";

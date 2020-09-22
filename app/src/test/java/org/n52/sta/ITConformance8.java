@@ -382,7 +382,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
         patchMap.put("phenomenonTime", "{\"phenomenonTime\":\"2052-07-01T00:40:00.000Z\"}");
         patchMap.put("resultTime", "{\"resultTime\":\"2053-07-01T00:40:00.000Z\"}");
         patchMap.put("validTime", "{\"validTime\":\"2053-07-01T00:40:00.000Z\"}");
-        patchMap.put("parameters", "{\"parameters\":[{\"name\":\"PATCHED Parameters\", \"value\":\"test\"}]}}");
+        patchMap.put("parameters", "{\"parameters\":{\"testKey\":\"testValue\"}}");
 
         testCollectionSubscriptionOnNewEntityCreation(type, source);
         deleteCollection(type);

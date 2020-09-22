@@ -46,6 +46,7 @@ import org.springframework.util.Assert;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Map;
 
 @SuppressWarnings("VisibilityModifier")
@@ -239,10 +240,11 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
     public JSONObservation parseParameters(Map<String, String> propertyMapping) {
         if (parameters != null) {
             for (Map.Entry<String, String> mapping : propertyMapping.entrySet()) {
-                for (JsonNode param : parameters) {
-                    String paramName = param.get(NAME).asText();
+                Iterator<String> keyIt = parameters.fieldNames();
+                while (keyIt.hasNext()) {
+                    String paramName = keyIt.next();
                     if (paramName.equals(mapping.getValue())) {
-                        JsonNode jsonNode = param.get(VALUE);
+                        JsonNode jsonNode = parameters.get(paramName);
                         switch (mapping.getKey()) {
                             case "samplingGeometry":
                                 // Add as samplingGeometry to enable interoperability with SOS

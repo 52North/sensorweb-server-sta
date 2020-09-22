@@ -50,9 +50,12 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
     private static final String COULD_NOT_PARSE = "Could not parse feature to GeoJSON. Error was: ";
     // JSON Properties. Matched by Annotation or variable name
     public String encodingType;
+
     public JsonNode feature;
+
     @JsonManagedReference
     public JSONObservation[] Observations;
+
     private final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
     private final String INVALID_ENCODINGTYPE =
         "Invalid encodingType supplied. Only GeoJSON (application/vnd.geo+json) is supported!";

@@ -96,10 +96,6 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
             "\"result\": 5 }, { \"phenomenonTime\": \"2015-03-06T00:00:00Z\", \"result\": 6 } ] } ] }");
     }
 
-    public ITConformance1(@Value("${server.rootUrl}") String rootUrl, boolean defaultPost) throws Exception {
-        super(rootUrl);
-    }
-
     /**
      * This method is testing GET entities. It should return 200. Then the
      * response entities are tested for control information, mandatory
