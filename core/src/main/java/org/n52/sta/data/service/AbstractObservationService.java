@@ -34,6 +34,7 @@ import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetAggregationEntity;
+import org.n52.series.db.beans.sta.AbstractDatastreamEntity;
 import org.n52.series.db.beans.sta.AbstractObservationEntity;
 import org.n52.series.db.beans.sta.BooleanObservationEntity;
 import org.n52.series.db.beans.sta.CategoryObservationEntity;
@@ -169,6 +170,7 @@ public abstract class AbstractObservationService<
         }
     }
 
+    @Override
     public Page getEntityCollectionByRelatedEntityRaw(String relatedId,
                                                       String relatedType,
                                                       QueryOptions queryOptions)
@@ -283,6 +285,8 @@ public abstract class AbstractObservationService<
     /**
      * Handles updating the phenomenonTime field of the associated Datastream when Observation phenomenonTime is
      * updated or deleted
+     * @param datastreamEntity the {@link AbstractDatastreamEntity} which should be updated
+     * @param observation the observation that was inserted
      */
     protected void updateDatastreamPhenomenonTimeOnObservationUpdate(AbstractDatasetEntity datastreamEntity,
                                                                      I observation) {
@@ -415,7 +419,7 @@ public abstract class AbstractObservationService<
         // Create feature based on Thing.location if there is no feature given
         if (!observation.hasFeature()) {
             AbstractFeatureEntity<?> feature = null;
-            LocationRepository locationRepository = (LocationRepository) getLocationService().getRepository();
+            LocationRepository locationRepository = getLocationService().getRepository();
             Set<LocationEntity> locations = locationRepository.findAllByPlatformsIdEquals(thingId);
             for (LocationEntity location : locations) {
                 if (feature == null) {

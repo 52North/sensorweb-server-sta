@@ -45,9 +45,14 @@ public interface STAEventHandler {
     /**
      * Handles a Create/Update Event emitted by the Database.
      *
-     * @param entity        base entity
-     * @param entityType    java class name of entity
-     * @param differenceMap names of properties that changed. null if all properties changed (e.g. new entity)
+     * @param entity
+     *            base entity
+     * @param entityType
+     *            java class name of entity
+     * @param differenceMap
+     *            names of properties that changed. null if all properties changed (e.g. new entity)
+     * @param relatedCollections
+     *            related collections
      */
     @Async
     void handleEvent(Object entity,
