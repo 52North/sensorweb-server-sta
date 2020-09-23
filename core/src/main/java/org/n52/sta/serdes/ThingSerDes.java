@@ -85,24 +85,27 @@ public class ThingSerDes {
         public void serialize(ThingWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers)
                 throws IOException {
             gen.writeStartObject();
-            PlatformEntity thing = unwrap(value);
+            value.unwrap(implicitSelect);
+            PlatformEntity thing = value.getEntity();
 
             // olingo @iot links
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
+            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ID)) {
                 writeId(gen, thing.getStaIdentifier());
             }
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_SELF_LINK)) {
+            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_SELF_LINK)) {
                 writeSelfLink(gen, thing.getStaIdentifier());
             }
 
             // actual properties
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_NAME)) {
+            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_NAME)) {
                 gen.writeStringField(STAEntityDefinition.PROP_NAME, thing.getName());
             }
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_DESCRIPTION)) {
+            if (!value.hasSelectOption() ||
+                    value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
                 gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, thing.getDescription());
             }
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_PROPERTIES)) {
+            if (!value.hasSelectOption() ||
+                    value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PROPERTIES)) {
                 if (thing.hasProperties()) {
                     ObjectMapper mapper = new ObjectMapper();
                     gen.writeObjectField(STAEntityDefinition.PROP_PROPERTIES, mapper.readTree(thing.getProperties()));
@@ -113,8 +116,8 @@ public class ThingSerDes {
 
             // navigation properties
             for (String navigationProperty : ThingEntityDefinition.NAVIGATION_PROPERTIES) {
-                if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
-                    if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
+                if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(navigationProperty)) {
+                    if (!value.hasExpandOption() || value.getFieldsToExpand().get(navigationProperty) == null) {
                         writeNavigationProp(gen, navigationProperty, thing.getStaIdentifier());
                     } else {
                         switch (navigationProperty) {
@@ -125,7 +128,7 @@ public class ThingSerDes {
                                 gen.writeFieldName(navigationProperty);
                                 writeNestedCollectionOfType(Collections.unmodifiableSet(thing.getDatasets()),
                                                             AbstractDatasetEntity.class,
-                                                            fieldsToExpand.get(navigationProperty),
+                                                            value.getFieldsToExpand().get(navigationProperty),
                                                             gen,
                                                             serializers);
                             }
@@ -136,7 +139,7 @@ public class ThingSerDes {
                             } else {
                                 gen.writeFieldName(navigationProperty);
                                 writeNestedCollection(Collections.unmodifiableSet(thing.getHistoricalLocations()),
-                                                      fieldsToExpand.get(navigationProperty),
+                                                      value.getFieldsToExpand().get(navigationProperty),
                                                       gen,
                                                       serializers);
                             }
@@ -147,7 +150,7 @@ public class ThingSerDes {
                             } else {
                                 gen.writeFieldName(navigationProperty);
                                 writeNestedCollection(Collections.unmodifiableSet(thing.getLocations()),
-                                                      fieldsToExpand.get(navigationProperty),
+                                                      value.getFieldsToExpand().get(navigationProperty),
                                                       gen,
                                                       serializers);
                             }

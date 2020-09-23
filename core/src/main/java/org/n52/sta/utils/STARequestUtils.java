@@ -33,10 +33,10 @@ import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
+import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ObservationEntity;
-import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.sta.serdes.DatastreamSerDes;
@@ -438,7 +438,7 @@ public interface STARequestUtils extends StaConstants {
         case HISTORICAL_LOCATIONS:
             return HistoricalLocationEntity.class;
         case SENSORS:
-            return SensorEntity.class;
+            return ProcedureEntity.class;
         case OBSERVATIONS:
             return ObservationEntity.class;
         case OBSERVED_PROPERTIES:
@@ -466,7 +466,7 @@ public interface STARequestUtils extends StaConstants {
             return HistoricalLocationSerDes.HistoricalLocationEntityPatch.class;
         case SENSORS:
         case SENSOR:
-            return SensorSerDes.SensorEntityPatch.class;
+            return SensorSerDes.ProcedureEntityPatch.class;
         case OBSERVATIONS:
         case OBSERVATION:
             return ObservationSerDes.ObservationEntityPatch.class;

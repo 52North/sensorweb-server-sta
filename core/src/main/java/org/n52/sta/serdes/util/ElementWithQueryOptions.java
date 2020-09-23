@@ -39,16 +39,24 @@ import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
-import org.n52.series.db.beans.sta.ObservablePropertyEntity;
 import org.n52.series.db.beans.sta.ObservationEntity;
-import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.series.db.beans.sta.StaFeatureEntity;
+import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId> {
 
     protected P entity;
     protected QueryOptions queryOptions;
+    protected Set<String> fieldsToSerialize = new HashSet<>();
+    protected Map<String, QueryOptions> fieldsToExpand = new HashMap<>();
+    protected boolean hasSelectOption;
+    protected boolean hasExpandOption;
 
     public QueryOptions getQueryOptions() {
         return queryOptions;
@@ -58,20 +66,31 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
         return entity;
     }
 
+    public Set<String> getFieldsToSerialize() {
+        return fieldsToSerialize;
+    }
+
+    public Map<String, QueryOptions> getFieldsToExpand() {
+        return fieldsToExpand;
+    }
+
+    public boolean hasSelectOption() {
+        return hasSelectOption;
+    }
+
+    public boolean hasExpandOption() {
+        return hasExpandOption;
+    }
+
     public static ElementWithQueryOptions from(Object entity, QueryOptions queryOptions) {
         Object unwrapped = (entity instanceof HibernateProxy) ? Hibernate.unproxy(entity) : entity;
         switch (unwrapped.getClass().getSimpleName()) {
         case "PlatformEntity":
             return new ThingWithQueryOptions((PlatformEntity) unwrapped, queryOptions);
         case "ProcedureEntity":
-            return new SensorWithQueryOptions(new SensorEntity((ProcedureEntity) unwrapped), queryOptions);
-        case "SensorEntity":
-            return new SensorWithQueryOptions((SensorEntity) unwrapped, queryOptions);
+            return new SensorWithQueryOptions((ProcedureEntity) unwrapped, queryOptions);
         case "PhenomenonEntity":
-            return new ObservedPropertyWithQueryOptions(new ObservablePropertyEntity((PhenomenonEntity) unwrapped),
-                                                        queryOptions);
-        case "ObservablePropertyEntity":
-            return new ObservedPropertyWithQueryOptions((ObservablePropertyEntity) unwrapped, queryOptions);
+            return new ObservedPropertyWithQueryOptions((PhenomenonEntity) unwrapped, queryOptions);
         case "LocationEntity":
             return new LocationWithQueryOptions((LocationEntity) unwrapped, queryOptions);
         case "HistoricalLocationEntity":
@@ -96,6 +115,25 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
         }
     }
 
+    public void unwrap(boolean enableImplicitSelect) {
+        if (queryOptions != null) {
+            if (queryOptions.hasSelectFilter()) {
+                hasSelectOption = true;
+                fieldsToSerialize.addAll(queryOptions.getSelectFilter().getItems());
+            }
+            if (queryOptions.hasExpandFilter()) {
+                hasExpandOption = true;
+                for (ExpandItem item : queryOptions.getExpandFilter().getItems()) {
+                    fieldsToExpand.put(item.getPath(), item.getQueryOptions());
+                    // Add expanded items to $select replacing implicit selection with explicit selection
+                    if (hasSelectOption && enableImplicitSelect) {
+                        fieldsToSerialize.add(item.getPath());
+                    }
+                }
+            }
+        }
+    }
+
     public static class ThingWithQueryOptions extends ElementWithQueryOptions<PlatformEntity> {
 
         ThingWithQueryOptions(PlatformEntity thing, QueryOptions queryOptions) {
@@ -105,18 +143,18 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
     }
 
 
-    public static class SensorWithQueryOptions extends ElementWithQueryOptions<SensorEntity> {
+    public static class SensorWithQueryOptions extends ElementWithQueryOptions<ProcedureEntity> {
 
-        SensorWithQueryOptions(SensorEntity thing, QueryOptions queryOptions) {
+        SensorWithQueryOptions(ProcedureEntity thing, QueryOptions queryOptions) {
             this.entity = thing;
             this.queryOptions = queryOptions;
         }
     }
 
 
-    public static class ObservedPropertyWithQueryOptions extends ElementWithQueryOptions<ObservablePropertyEntity> {
+    public static class ObservedPropertyWithQueryOptions extends ElementWithQueryOptions<PhenomenonEntity> {
 
-        ObservedPropertyWithQueryOptions(ObservablePropertyEntity thing, QueryOptions queryOptions) {
+        ObservedPropertyWithQueryOptions(PhenomenonEntity thing, QueryOptions queryOptions) {
             this.entity = thing;
             this.queryOptions = queryOptions;
         }

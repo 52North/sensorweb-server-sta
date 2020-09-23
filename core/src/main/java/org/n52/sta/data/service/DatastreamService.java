@@ -29,16 +29,7 @@
 
 package org.n52.sta.data.service;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import javax.persistence.criteria.Predicate;
-
+import com.google.common.collect.Sets;
 import org.hibernate.Hibernate;
 import org.hibernate.query.criteria.internal.CriteriaBuilderImpl;
 import org.n52.janmayen.http.HTTPStatus;
@@ -79,7 +70,6 @@ import org.n52.shetland.ogc.om.OmConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
-import org.n52.shetland.ogc.sta.model.DatastreamEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
@@ -105,7 +95,14 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.collect.Sets;
+import javax.persistence.criteria.Predicate;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -140,9 +137,7 @@ public class DatastreamService extends
                              CategoryRepository categoryRepository,
                              ObservationRepository observationRepository) {
         super(repository,
-              AbstractDatasetEntity.class,
-              EntityGraphRepository.FetchGraph.FETCHGRAPH_OM_OBS_TYPE,
-              EntityGraphRepository.FetchGraph.FETCHGRAPH_UOM);
+              AbstractDatasetEntity.class);
         this.isMobileFeatureEnabled = isMobileFeatureEnabled;
         this.unitRepository = unitRepository;
         this.formatRepository = formatRepository;
@@ -156,49 +151,88 @@ public class DatastreamService extends
         return new EntityTypes[] {EntityTypes.Datastream, EntityTypes.Datastreams};
     }
 
+    @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
+            throws STAInvalidQueryException {
+        Set<EntityGraphRepository.FetchGraph> fetchGraphs = new HashSet<>();
+        fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_OM_OBS_TYPE);
+        fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_UOM);
+        if (expandOption != null) {
+            for (ExpandItem expandItem : expandOption.getItems()) {
+                // We cannot handle nested $filter or $expand
+                if (expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter()) {
+                    break;
+                }
+                String expandProperty = expandItem.getPath();
+                switch (expandProperty) {
+                case STAEntityDefinition.SENSOR:
+                    fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDURE);
+                    break;
+                case STAEntityDefinition.THING:
+                    fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_PLATFORM);
+                    break;
+                case STAEntityDefinition.OBSERVED_PROPERTY:
+                    fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_PHENOMENON);
+                    break;
+                case STAEntityDefinition.OBSERVATIONS:
+                    break;
+                default:
+                    throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
+                                                                     expandProperty,
+                                                                     StaConstants.DATASTREAM));
+                }
+            }
+        }
+        return fetchGraphs.toArray(new EntityGraphRepository.FetchGraph[0]);
+    }
+
     @Override
-    protected AbstractDatasetEntity fetchExpandEntities(AbstractDatasetEntity entity, ExpandFilter expandOption)
+    protected AbstractDatasetEntity fetchExpandEntitiesWithFilter(AbstractDatasetEntity entity,
+                                                                  ExpandFilter expandOption)
             throws STACRUDException, STAInvalidQueryException {
         for (ExpandItem expandItem : expandOption.getItems()) {
             String expandProperty = expandItem.getPath();
-            if (DatastreamEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
-                switch (expandProperty) {
-                    case STAEntityDefinition.SENSOR:
-                        entity.setProcedure(getSensorService().getEntityByIdRaw(entity.getProcedure().getId(),
-                                expandItem.getQueryOptions()));
+            // We have already handled $expand without filter and expand
+            // Except for $expand on Observations
+            if (!(expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter())
+                    && !expandProperty.equals(STAEntityDefinition.OBSERVATIONS)) {
+                continue;
+            }
+            switch (expandProperty) {
+            case STAEntityDefinition.SENSOR:
+                entity.setProcedure(getSensorService().getEntityByIdRaw(entity.getProcedure().getId(),
+                                                                        expandItem.getQueryOptions()));
+                break;
+            case STAEntityDefinition.THING:
+                entity.setThing(getThingService().getEntityByIdRaw(entity.getThing().getId(),
+                                                                   expandItem.getQueryOptions()));
+                break;
+            case STAEntityDefinition.OBSERVED_PROPERTY:
+                entity.setObservableProperty(getObservedPropertyService().getEntityByIdRaw(
+                        entity.getObservableProperty().getId(), expandItem.getQueryOptions()));
+                break;
+            case STAEntityDefinition.OBSERVATIONS:
+                // Optimize Request when only First/Last Observation is requested as we have already fetched that.
+                if (checkForFirstLastObservation(expandItem)) {
+                    if (checkForFirstObservation(expandItem) && entity.getFirstObservation() != null) {
+                        entity.setObservations(Sets.newHashSet(
+                                mapDataEntityToObservationEntity(entity.getFirstObservation(), expandItem)));
                         break;
-                    case STAEntityDefinition.THING:
-                        entity.setThing(getThingService().getEntityByIdRaw(entity.getThing().getId(),
-                                expandItem.getQueryOptions()));
+                    } else if (checkForLastObservation(expandItem) && entity.getLastObservation() != null) {
+                        entity.setObservations(Sets.newHashSet(
+                                mapDataEntityToObservationEntity(entity.getLastObservation(), expandItem)));
                         break;
-                    case STAEntityDefinition.OBSERVED_PROPERTY:
-                        entity.setObservableProperty(getObservedPropertyService().getEntityByIdRaw(
-                                entity.getObservableProperty().getId(), expandItem.getQueryOptions()));
-                        break;
-                    case STAEntityDefinition.OBSERVATIONS:
-                        if (checkForFirstLastObservation(expandItem)) {
-                            if (checkForFirstObservation(expandItem) && entity.getFirstObservation() != null) {
-                                entity.setObservations(Sets.newHashSet(
-                                        mapDataEntityToObservationEntity(entity.getFirstObservation(), expandItem)));
-                                break;
-                            } else if (checkForLastObservation(expandItem) && entity.getLastObservation() != null) {
-                                entity.setObservations(Sets.newHashSet(
-                                        mapDataEntityToObservationEntity(entity.getLastObservation(), expandItem)));
-                                break;
-                            }
-                        }
-                        Page<ObservationEntity<?>> observations = getObservationService()
-                                .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
-                                        STAEntityDefinition.DATASTREAMS, expandItem.getQueryOptions());
-                        entity.setObservations(observations.get().collect(Collectors.toSet()));
-                        break;
-                    default:
-                        LOGGER.error("Trying to expand unrelated Entity!");
-                        throw new RuntimeException("This can never happen!");
+                    }
                 }
-            } else {
-                throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty
-                        + " on Entity of type 'Datastream'");
+                Page<ObservationEntity<?>> observations = getObservationService()
+                        .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
+                                                               STAEntityDefinition.DATASTREAMS,
+                                                               expandItem.getQueryOptions());
+                entity.setObservations(observations.get().collect(Collectors.toSet()));
+                break;
+            default:
+                throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
+                                                                 expandProperty,
+                                                                 StaConstants.DATASTREAM));
             }
         }
         return entity;
@@ -210,24 +244,24 @@ public class DatastreamService extends
                                                                          String ownId) {
         Specification<AbstractDatasetEntity> filter;
         switch (relatedType) {
-            case STAEntityDefinition.THINGS: {
-                filter = dQS.withThingStaIdentifier(relatedId);
-                break;
-            }
-            case STAEntityDefinition.SENSORS: {
-                filter = dQS.withSensorStaIdentifier(relatedId);
-                break;
-            }
-            case STAEntityDefinition.OBSERVED_PROPERTIES: {
-                filter = dQS.withObservedPropertyStaIdentifier(relatedId);
-                break;
-            }
-            case STAEntityDefinition.OBSERVATIONS: {
-                filter = dQS.withObservationStaIdentifier(relatedId);
-                break;
-            }
-            default:
-                throw new IllegalStateException("Trying to filter by unrelated type: " + relatedType + "not found!");
+        case STAEntityDefinition.THINGS: {
+            filter = dQS.withThingStaIdentifier(relatedId);
+            break;
+        }
+        case STAEntityDefinition.SENSORS: {
+            filter = dQS.withSensorStaIdentifier(relatedId);
+            break;
+        }
+        case STAEntityDefinition.OBSERVED_PROPERTIES: {
+            filter = dQS.withObservedPropertyStaIdentifier(relatedId);
+            break;
+        }
+        case STAEntityDefinition.OBSERVATIONS: {
+            filter = dQS.withObservationStaIdentifier(relatedId);
+            break;
+        }
+        default:
+            throw new IllegalStateException("Trying to filter by unrelated type: " + relatedType + "not found!");
         }
 
         if (ownId != null) {
@@ -239,12 +273,12 @@ public class DatastreamService extends
     @Override
     public String checkPropertyName(String property) {
         switch (property) {
-            case StaConstants.PROP_PHENOMENON_TIME:
-                return AbstractDatasetEntity.PROPERTY_FIRST_VALUE_AT;
-            case StaConstants.PROP_RESULT_TIME:
-                return AbstractDatasetEntity.RESULT_TIME_START;
-            default:
-                return super.checkPropertyName(property);
+        case StaConstants.PROP_PHENOMENON_TIME:
+            return AbstractDatasetEntity.PROPERTY_FIRST_VALUE_AT;
+        case StaConstants.PROP_RESULT_TIME:
+            return AbstractDatasetEntity.RESULT_TIME_START;
+        default:
+            return super.checkPropertyName(property);
         }
     }
 
@@ -372,18 +406,18 @@ public class DatastreamService extends
             dataset = dataset.setDatasetType(DatasetType.timeseries);
         }
         switch (observationType) {
-            case OmConstants.OBS_TYPE_MEASUREMENT:
-                return dataset.setValueType(ValueType.quantity);
-            case OmConstants.OBS_TYPE_CATEGORY_OBSERVATION:
-                return dataset.setValueType(ValueType.category);
-            case OmConstants.OBS_TYPE_COUNT_OBSERVATION:
-                return dataset.setValueType(ValueType.count);
-            case OmConstants.OBS_TYPE_TEXT_OBSERVATION:
-                return dataset.setValueType(ValueType.text);
-            case OmConstants.OBS_TYPE_TRUTH_OBSERVATION:
-                return dataset.setValueType(ValueType.bool);
-            default:
-                return dataset;
+        case OmConstants.OBS_TYPE_MEASUREMENT:
+            return dataset.setValueType(ValueType.quantity);
+        case OmConstants.OBS_TYPE_CATEGORY_OBSERVATION:
+            return dataset.setValueType(ValueType.category);
+        case OmConstants.OBS_TYPE_COUNT_OBSERVATION:
+            return dataset.setValueType(ValueType.count);
+        case OmConstants.OBS_TYPE_TEXT_OBSERVATION:
+            return dataset.setValueType(ValueType.text);
+        case OmConstants.OBS_TYPE_TRUTH_OBSERVATION:
+            return dataset.setValueType(ValueType.bool);
+        default:
+            return dataset;
         }
     }
 
@@ -697,8 +731,8 @@ public class DatastreamService extends
 
     private boolean checkPhenomenonTime(ExpandItem expandItem) {
         return expandItem.getQueryOptions().getOrderByFilter().getSortProperties().stream()
-                .filter(p -> p.getValueReference().equals(StaConstants.PROP_PHENOMENON_TIME)).findAny()
-                .isPresent();
+                         .filter(p -> p.getValueReference().equals(StaConstants.PROP_PHENOMENON_TIME)).findAny()
+                         .isPresent();
     }
 
     private SortOrder getSortOrder(ExpandItem expandItem) {
@@ -746,7 +780,7 @@ public class DatastreamService extends
         observation.setVerticalTo(dataEntity.getVerticalTo());
         if (expandItem.getQueryOptions().hasExpandFilter()
                 && expandItem.getQueryOptions().getExpandFilter().getItems().stream()
-                        .filter(i -> i.getPath().equals(StaConstants.FEATURE_OF_INTEREST)).findAny().isPresent()
+                             .filter(i -> i.getPath().equals(StaConstants.FEATURE_OF_INTEREST)).findAny().isPresent()
                 && dataEntity.getDataset().isSetFeature()) {
             observation
                     .setFeature(Hibernate.unproxy(dataEntity.getDataset().getFeature(), AbstractFeatureEntity.class));

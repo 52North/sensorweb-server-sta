@@ -93,29 +93,32 @@ public class DatastreamSerDes {
                               SerializerProvider serializers)
                 throws IOException {
             gen.writeStartObject();
-            AbstractDatasetEntity datastream = unwrap(value);
+            value.unwrap(implicitSelect);
+            AbstractDatasetEntity datastream = value.getEntity();
 
             // olingo @iot links
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
+            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ID)) {
                 writeId(gen, datastream.getStaIdentifier());
             }
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_SELF_LINK)) {
+            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_SELF_LINK)) {
                 writeSelfLink(gen, datastream.getStaIdentifier());
             }
 
             // actual properties
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_NAME)) {
+            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_NAME)) {
                 gen.writeStringField(STAEntityDefinition.PROP_NAME, datastream.getName());
             }
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_DESCRIPTION)) {
+            if (!value.hasSelectOption() ||
+                    value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
                 gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, datastream.getDescription());
             }
 
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_OBSERVATION_TYPE)) {
+            if (!value.hasSelectOption() ||
+                    value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_OBSERVATION_TYPE)) {
                 gen.writeObjectField(STAEntityDefinition.PROP_OBSERVATION_TYPE,
                                      datastream.getOMObservationType().getFormat());
             }
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_UOM)) {
+            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_UOM)) {
                 gen.writeObjectFieldStart(STAEntityDefinition.PROP_UOM);
                 if (datastream.getUnit() != null) {
                     gen.writeStringField(STAEntityDefinition.PROP_NAME, datastream.getUnit().getName());
@@ -131,7 +134,8 @@ public class DatastreamSerDes {
                 gen.writeEndObject();
             }
 
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_OBSERVED_AREA)) {
+            if (!value.hasSelectOption() ||
+                    value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_OBSERVED_AREA)) {
                 gen.writeFieldName(STAEntityDefinition.PROP_OBSERVED_AREA);
                 if (datastream.getGeometryEntity() != null) {
                     gen.writeRawValue(GEO_JSON_WRITER.write(datastream.getGeometryEntity().getGeometry()));
@@ -140,7 +144,8 @@ public class DatastreamSerDes {
                 }
             }
 
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_RESULT_TIME)) {
+            if (!value.hasSelectOption() ||
+                    value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_RESULT_TIME)) {
                 if (datastream.getResultTimeStart() != null) {
                     Time time = TimeUtil.createTime(TimeUtil.createDateTime(datastream.getResultTimeStart()),
                                                     TimeUtil.createDateTime(datastream.getResultTimeEnd()));
@@ -150,7 +155,8 @@ public class DatastreamSerDes {
                     gen.writeNullField(STAEntityDefinition.PROP_RESULT_TIME);
                 }
             }
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_PHENOMENON_TIME)) {
+            if (!value.hasSelectOption() ||
+                    value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PHENOMENON_TIME)) {
                 if (datastream.getSamplingTimeStart() != null) {
                     Time time = TimeUtil.createTime(TimeUtil.createDateTime(datastream.getSamplingTimeStart()),
                                                     TimeUtil.createDateTime(datastream.getSamplingTimeEnd()));
@@ -163,8 +169,8 @@ public class DatastreamSerDes {
 
             // navigation properties
             for (String navigationProperty : DatastreamEntityDefinition.NAVIGATION_PROPERTIES) {
-                if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
-                    if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
+                if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(navigationProperty)) {
+                    if (!value.hasExpandOption() || value.getFieldsToExpand().get(navigationProperty) == null) {
                         writeNavigationProp(gen, navigationProperty, datastream.getStaIdentifier());
                     } else {
                         switch (navigationProperty) {
@@ -174,7 +180,7 @@ public class DatastreamSerDes {
                             } else {
                                 gen.writeFieldName(navigationProperty);
                                 writeNestedCollection(Collections.unmodifiableSet(datastream.getObservations()),
-                                                      fieldsToExpand.get(navigationProperty),
+                                                      value.getFieldsToExpand().get(navigationProperty),
                                                       gen,
                                                       serializers);
                             }
@@ -185,7 +191,7 @@ public class DatastreamSerDes {
                             } else {
                                 gen.writeFieldName(navigationProperty);
                                 writeNestedEntity(datastream.getObservableProperty(),
-                                                  fieldsToExpand.get(navigationProperty),
+                                                  value.getFieldsToExpand().get(navigationProperty),
                                                   gen,
                                                   serializers);
                             }
@@ -196,7 +202,7 @@ public class DatastreamSerDes {
                             } else {
                                 gen.writeFieldName(navigationProperty);
                                 writeNestedEntity(datastream.getThing(),
-                                                  fieldsToExpand.get(navigationProperty),
+                                                  value.getFieldsToExpand().get(navigationProperty),
                                                   gen,
                                                   serializers);
                             }
@@ -207,7 +213,7 @@ public class DatastreamSerDes {
                             } else {
                                 gen.writeFieldName(navigationProperty);
                                 writeNestedEntity(datastream.getProcedure(),
-                                                  fieldsToExpand.get(navigationProperty),
+                                                  value.getFieldsToExpand().get(navigationProperty),
                                                   gen,
                                                   serializers);
                             }

@@ -7,7 +7,7 @@
 ## Setup
 ### Docker 
 A dockerfile for building the App is provided in the root directory.
-A complete demo setup is provided via a [docker-compose file](https://github.com/52North/sensor-things/docker-compose.yml)
+A complete demo setup is provided via a [docker-compose file](https://github.com/52North/sensorweb-server-sta/docker-compose.yml)
 
 ## Testing
 A [Postman](https://www.getpostman.com/) Collection with a multitude of demo requests is provided in the `etc` subdirectory.

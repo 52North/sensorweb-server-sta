@@ -93,38 +93,41 @@ public class FeatureOfInterestSerDes {
                               JsonGenerator gen,
                               SerializerProvider serializers) throws IOException {
             gen.writeStartObject();
-            StaFeatureEntity<?> feature = unwrap(value);
+            value.unwrap(implicitSelect);
+            StaFeatureEntity<?> feature = value.getEntity();
 
             // olingo @iot links
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
+            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ID)) {
                 writeId(gen, feature.getStaIdentifier());
             }
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_SELF_LINK)) {
+            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_SELF_LINK)) {
                 writeSelfLink(gen, feature.getStaIdentifier());
             }
 
             // actual properties
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_NAME)) {
+            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_NAME)) {
                 gen.writeStringField(STAEntityDefinition.PROP_NAME, feature.getName());
             }
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_DESCRIPTION)) {
+            if (!value.hasSelectOption() ||
+                    value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
                 gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, feature.getDescription());
             }
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ENCODINGTYPE)) {
+            if (!value.hasSelectOption() ||
+                    value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ENCODINGTYPE)) {
                 // only write out encodingtype if there is a location present
                 if (feature.isSetGeometry()) {
                     gen.writeStringField(STAEntityDefinition.PROP_ENCODINGTYPE, ENCODINGTYPE_GEOJSON);
                 }
             }
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_FEATURE)) {
+            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_FEATURE)) {
                 gen.writeFieldName(STAEntityDefinition.PROP_FEATURE);
                 gen.writeRawValue(GEO_JSON_WRITER.write(feature.getGeometryEntity().getGeometry()));
             }
 
             // navigation properties
             for (String navigationProperty : FeatureOfInterestEntityDefinition.NAVIGATION_PROPERTIES) {
-                if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
-                    if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
+                if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(navigationProperty)) {
+                    if (!value.hasExpandOption() || value.getFieldsToExpand().get(navigationProperty) == null) {
                         writeNavigationProp(gen, navigationProperty, feature.getStaIdentifier());
                     } else {
                         switch (navigationProperty) {
@@ -134,7 +137,7 @@ public class FeatureOfInterestSerDes {
                             } else {
                                 gen.writeFieldName(navigationProperty);
                                 writeNestedCollection(Collections.unmodifiableSet(feature.getObservations()),
-                                                      fieldsToExpand.get(navigationProperty),
+                                                      value.getFieldsToExpand().get(navigationProperty),
                                                       gen,
                                                       serializers);
                             }

@@ -89,7 +89,8 @@ public class LocationService
     private Pattern updateFOIPattern = Pattern.compile("(?:.*updateFOI\":\")([0-9A-z'+%-]+)(?:\".*)");
 
     public LocationService(@Value("${server.feature.updateFOI:false}") boolean updateFOI,
-                           LocationRepository repository, LocationEncodingRepository locationEncodingRepository) {
+                           LocationRepository repository,
+                           LocationEncodingRepository locationEncodingRepository) {
         super(repository, LocationEntity.class);
         this.locationEncodingRepository = locationEncodingRepository;
         this.updateFOIFeatureEnabled = updateFOI;
@@ -100,10 +101,40 @@ public class LocationService
         return new EntityTypes[] {EntityTypes.Location, EntityTypes.Locations};
     }
 
+    @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
+            throws STAInvalidQueryException {
+        Set<EntityGraphRepository.FetchGraph> fetchGraphs = new HashSet<>(6);
+        if (expandOption != null) {
+            for (ExpandItem expandItem : expandOption.getItems()) {
+                // We cannot handle nested $filter or $expand
+                if (expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter()) {
+                    break;
+                }
+                String expandProperty = expandItem.getPath();
+                switch (expandProperty) {
+                case STAEntityDefinition.HISTORICAL_LOCATIONS:
+                    fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATIONS);
+                    break;
+                case STAEntityDefinition.THINGS:
+                    fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_PLATFORMS);
+                    break;
+                default:
+                    throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED, expandProperty,
+                                                                     StaConstants.LOCATION));
+                }
+            }
+        }
+        return fetchGraphs.toArray(new EntityGraphRepository.FetchGraph[0]);
+    }
+
     @Override
-    protected LocationEntity fetchExpandEntities(LocationEntity entity, ExpandFilter expandOption)
+    protected LocationEntity fetchExpandEntitiesWithFilter(LocationEntity entity, ExpandFilter expandOption)
             throws STACRUDException, STAInvalidQueryException {
         for (ExpandItem expandItem : expandOption.getItems()) {
+            // We have already handled $expand without filter and expand
+            if (!(expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter())) {
+                break;
+            }
             String expandProperty = expandItem.getPath();
             switch (expandProperty) {
             case STAEntityDefinition.HISTORICAL_LOCATIONS:
@@ -195,8 +226,8 @@ public class LocationService
             synchronized (getLock(id)) {
                 Optional<LocationEntity> existing = getRepository()
                         .findByStaIdentifier(id,
-                                             EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATION,
-                                             EntityGraphRepository.FetchGraph.FETCHGRAPH_THINGS);
+                                             EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATIONS,
+                                             EntityGraphRepository.FetchGraph.FETCHGRAPH_PLATFORMS);
                 if (existing.isPresent()) {
                     LocationEntity merged = merge(existing.get(), entity);
                     LocationEntity result = getRepository().save(merged);
@@ -216,8 +247,8 @@ public class LocationService
             if (getRepository().existsByStaIdentifier(id)) {
                 LocationEntity location = getRepository()
                         .findByStaIdentifier(id,
-                                             EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATION,
-                                             EntityGraphRepository.FetchGraph.FETCHGRAPH_THINGSHISTLOCATION)
+                                             EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATIONS,
+                                             EntityGraphRepository.FetchGraph.FETCHGRAPH_PLATFORMSHISTLOCATION)
                         .get();
                 for (PlatformEntity thing : location.getThings()) {
                     thing.setLocations(null);

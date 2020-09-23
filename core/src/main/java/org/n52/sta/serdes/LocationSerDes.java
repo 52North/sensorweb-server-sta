@@ -87,38 +87,42 @@ public class LocationSerDes {
         public void serialize(LocationWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers)
                 throws IOException {
             gen.writeStartObject();
-            LocationEntity location = unwrap(value);
+            value.unwrap(implicitSelect);
+            LocationEntity location = value.getEntity();
 
             // olingo @iot links
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
+            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ID)) {
                 writeId(gen, location.getStaIdentifier());
             }
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_SELF_LINK)) {
+            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_SELF_LINK)) {
                 writeSelfLink(gen, location.getStaIdentifier());
             }
 
             // actual properties
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_NAME)) {
+            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_NAME)) {
                 gen.writeStringField(STAEntityDefinition.PROP_NAME, location.getName());
             }
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_DESCRIPTION)) {
+            if (!value.hasSelectOption()
+                    || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
                 gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, location.getDescription());
             }
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ENCODINGTYPE)) {
+            if (!value.hasSelectOption()
+                    || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ENCODINGTYPE)) {
                 // only write out encodingtype if there is a location present
                 if (location.isSetGeometry()) {
                     gen.writeStringField(STAEntityDefinition.PROP_ENCODINGTYPE, ENCODINGTYPE_GEOJSON);
                 }
             }
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_LOCATION)) {
+            if (!value.hasSelectOption()
+                    || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_LOCATION)) {
                 gen.writeFieldName(STAEntityDefinition.PROP_LOCATION);
                 gen.writeRawValue(GEO_JSON_WRITER.write(location.getGeometryEntity().getGeometry()));
             }
 
             // navigation properties
             for (String navigationProperty : LocationEntityDefinition.NAVIGATION_PROPERTIES) {
-                if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
-                    if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
+                if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(navigationProperty)) {
+                    if (!value.hasExpandOption() || value.getFieldsToExpand().get(navigationProperty) == null) {
                         writeNavigationProp(gen, navigationProperty, location.getStaIdentifier());
                     } else {
                         switch (navigationProperty) {
@@ -128,7 +132,7 @@ public class LocationSerDes {
                             } else {
                                 gen.writeFieldName(navigationProperty);
                                 writeNestedCollection(Collections.unmodifiableSet(location.getThings()),
-                                                      fieldsToExpand.get(navigationProperty),
+                                                      value.getFieldsToExpand().get(navigationProperty),
                                                       gen,
                                                       serializers);
                             }
@@ -139,7 +143,7 @@ public class LocationSerDes {
                             } else {
                                 gen.writeFieldName(navigationProperty);
                                 writeNestedCollection(Collections.unmodifiableSet(location.getHistoricalLocations()),
-                                                      fieldsToExpand.get(navigationProperty),
+                                                      value.getFieldsToExpand().get(navigationProperty),
                                                       gen,
                                                       serializers);
                             }
