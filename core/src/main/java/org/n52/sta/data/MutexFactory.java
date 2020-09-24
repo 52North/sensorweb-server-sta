@@ -56,7 +56,7 @@ public class MutexFactory {
      *
      * @param key name of the lock
      * @return Object used for holding the lock
-     * @throws STACRUDException if the key is null
+     * @throws STACRUDException If the lock can not be obtained.
      */
     public synchronized Object getLock(String key) throws STACRUDException {
         if (key != null) {

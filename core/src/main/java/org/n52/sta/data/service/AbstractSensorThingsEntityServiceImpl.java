@@ -115,7 +115,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
      *
      * @param key name of the lock
      * @return Object used for holding the lock
-     * @throws org.n52.shetland.ogc.sta.exception.STACRUDException if the key is invalid
+     * @throws STACRUDException If the lock can not be aquired
      */
     protected Object getLock(String key) throws STACRUDException {
         if (key == null) {
