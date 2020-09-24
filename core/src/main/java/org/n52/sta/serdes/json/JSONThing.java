@@ -33,6 +33,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.PlatformEntity;
+import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.springframework.util.Assert;
 
@@ -89,7 +90,8 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
                 self.setDescription(description);
 
                 if (properties != null) {
-                    self.setParameters(convertParameters(properties));
+                    self.setParameters(convertParameters(properties,
+                                                         ParameterFactory.EntityType.PLATFORM));
                 }
 
                 if (Locations != null) {
@@ -136,7 +138,8 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
                 self.setDescription(description);
 
                 if (properties != null) {
-                    self.setParameters(convertParameters(properties));
+                    self.setParameters(convertParameters(properties,
+                                                         ParameterFactory.EntityType.PLATFORM));
                 }
 
                 if (Locations != null) {

@@ -30,14 +30,20 @@
 package org.n52.sta.data.query;
 
 import org.n52.series.db.beans.DescribableEntity;
+import org.n52.series.db.beans.HibernateRelations;
+import org.n52.series.db.beans.parameter.ParameterEntity;
+import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import java.util.Date;
 import java.util.List;
 
@@ -215,6 +221,37 @@ public abstract class EntityQuerySpecifications<T> {
                                                                    Expression<?> propertyValue,
                                                                    FilterConstants.ComparisonOperator operator,
                                                                    boolean switched);
+
+    protected Predicate handleProperties(Root<?> root,
+                                         CriteriaQuery<?> query,
+                                         CriteriaBuilder builder,
+                                         String propertyName,
+                                         Expression<?> propertyValue,
+                                         FilterConstants.ComparisonOperator operator,
+                                         boolean switched,
+                                         String referenceName,
+                                         ParameterFactory.EntityType entityType)
+        throws STAInvalidFilterExpressionException {
+        String key = propertyName.substring(11);
+        if (propertyValue.getJavaType().isAssignableFrom(String.class)) {
+            Class<? extends ParameterEntity> clazz =
+                ParameterFactory.from(entityType, ParameterFactory.ValueType.TEXT).getClass();
+            Subquery<?> subquery = query.subquery(clazz);
+            Root<?> param = subquery.from(clazz);
+            subquery.select(param.get(referenceName))
+                .where(builder.and(
+                    builder.equal(param.get(ParameterEntity.NAME), key),
+                    handleDirectStringPropertyFilter(param.get(HibernateRelations.HasValue.VALUE),
+                                                     propertyValue,
+                                                     operator,
+                                                     builder,
+                                                     switched))
+                );
+            return builder.in(root.get(DescribableEntity.PROPERTY_ID)).value(subquery);
+        } else {
+            return builder.isNotNull(root.get(DescribableEntity.PROPERTY_ID));
+        }
+    }
 
     /**
      * Translate STA property name to Database property name

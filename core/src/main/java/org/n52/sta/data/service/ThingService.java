@@ -33,6 +33,7 @@ import org.joda.time.DateTime;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.PlatformEntity;
+import org.n52.series.db.beans.parameter.platform.PlatformParameterEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.filter.ExpandFilter;
@@ -43,8 +44,7 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.ThingQuerySpecifications;
 import org.n52.sta.data.repositories.EntityGraphRepository;
-import org.n52.sta.data.repositories.IdentifierRepository;
-import org.n52.sta.data.repositories.ParameterRepository;
+import org.n52.sta.data.repositories.PlatformParameterRepository;
 import org.n52.sta.data.repositories.ThingRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.slf4j.Logger;
@@ -75,10 +75,10 @@ public class ThingService
 
     protected static final ThingQuerySpecifications tQS = new ThingQuerySpecifications();
     private static final Logger logger = LoggerFactory.getLogger(ThingService.class);
-    private final ParameterRepository parameterRepository;
+    private final PlatformParameterRepository parameterRepository;
 
     public ThingService(ThingRepository repository,
-                        ParameterRepository parameterRepository) {
+                        PlatformParameterRepository parameterRepository) {
         super(repository, PlatformEntity.class);
         this.parameterRepository = parameterRepository;
     }
@@ -216,12 +216,20 @@ public class ThingService
                     throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS, HTTPStatus.CONFLICT);
                 } else {
                     thing.setProcessed(true);
-                    if (thing.getParameters() != null) {
-                        parameterRepository.saveAll(thing.getParameters());
-                        thing.setParameters(thing.getParameters());
-                    }
                     boolean locationChanged = processLocations(thing, thing.getLocations());
                     thing = getRepository().intermediateSave(thing);
+                    if (thing.getParameters() != null) {
+                        PlatformEntity finalThing = thing;
+                        parameterRepository.saveAll(thing.getParameters()
+                                                        .stream()
+                                                        .filter(t -> t instanceof PlatformParameterEntity)
+                                                        .map(t -> {
+                                                            ((PlatformParameterEntity) t).setPlatform(finalThing);
+                                                            return (PlatformParameterEntity) t;
+                                                        })
+                                                        .collect(Collectors.toSet()));
+                        thing.setParameters(thing.getParameters());
+                    }
                     processDatastreams(thing);
                     boolean hasUnpersistedHLocs = thing.hasHistoricalLocations() &&
                         thing.getHistoricalLocations().stream().anyMatch(p -> p.getId() == null);
@@ -288,8 +296,19 @@ public class ThingService
         // properties
         if (toMerge.getParameters() != null) {
             synchronized (getLock(String.valueOf(existing.getParameters().hashCode()))) {
-                parameterRepository.saveAll(toMerge.getParameters());
-                existing.getParameters().forEach(parameterRepository::delete);
+                parameterRepository.saveAll(toMerge.getParameters()
+                                                .stream()
+                                                .filter(t -> t instanceof PlatformParameterEntity)
+                                                .map(t -> {
+                                                    ((PlatformParameterEntity) t).setPlatform(existing);
+                                                    return (PlatformParameterEntity) t;
+                                                })
+                                                .collect(Collectors.toSet()));
+                existing.getParameters()
+                    .stream()
+                    .filter(t -> t instanceof PlatformParameterEntity)
+                    .map(t -> (PlatformParameterEntity) t)
+                    .forEach(parameterRepository::delete);
                 existing.setParameters(toMerge.getParameters());
             }
         }

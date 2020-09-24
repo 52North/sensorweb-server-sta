@@ -38,8 +38,8 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.n52.series.db.beans.parameter.JsonParameterEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
-import org.n52.series.db.beans.parameter.ParameterJsonEntity;
 import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
@@ -144,7 +144,7 @@ public class ObservationSerDes {
                 gen.writeObjectFieldStart(STAEntityDefinition.PROP_PARAMETERS);
                 if (observation.hasParameters()) {
                     for (ParameterEntity<?> parameter : observation.getParameters()) {
-                        if (parameter instanceof ParameterJsonEntity) {
+                        if (parameter instanceof JsonParameterEntity) {
                             ObjectMapper mapper = new ObjectMapper();
                             gen.writeObjectField(parameter.getName(), mapper.readTree(parameter.getValueAsString()));
                         } else {

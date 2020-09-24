@@ -301,7 +301,9 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
             }
         } else if (expr.getLeft().isMember()) {
             String leftValue = expr.getLeft().asMember().get().getValue();
-            if (leftValue.contains(SLASH) && !leftValue.startsWith("properties/")) {
+            if (leftValue.contains(SLASH)
+                && !leftValue.startsWith(StaConstants.PROP_PROPERTIES)
+                && !leftValue.startsWith(StaConstants.PROP_PARAMETERS)) {
                 return convertToForeignExpression(leftValue,
                                                   expr.getRight().accept(this),
                                                   operator);
@@ -337,7 +339,12 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
         String lastResource = resources[resources.length - 2];
 
         // Get filter on Entity
-        EntityQuerySpecifications<?> stepQS = QuerySpecificationRepository.getSpecification(lastResource);
+        EntityQuerySpecifications<?> stepQS;
+        if (lastResource.equals(StaConstants.PROP_PROPERTIES) || lastResource.equals(StaConstants.PROP_PARAMETERS)) {
+            stepQS = rootQS;
+        } else {
+            stepQS = QuerySpecificationRepository.getSpecification(lastResource);
+        }
 
         Specification<?> filter =
             stepQS.getFilterForProperty(resources[resources.length - 1], value, operator, false);

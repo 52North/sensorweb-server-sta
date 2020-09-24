@@ -34,6 +34,8 @@ import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
+import org.n52.series.db.beans.parameter.ParameterFactory;
+import org.n52.series.db.beans.parameter.observation.ObservationParameterEntity;
 import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
@@ -247,7 +249,20 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Ob
                                     "Unknown operator: " + operator.toString());
                         }
                     default:
-                        throw new STAInvalidFilterExpressionException("Currently not implemented!");
+                        // We are filtering on variable keys on parameters
+                        if (propertyName.startsWith(StaConstants.PROP_PARAMETERS)) {
+                            return handleProperties(root,
+                                                    query,
+                                                    builder,
+                                                    propertyName,
+                                                    propertyValue,
+                                                    operator,
+                                                    switched,
+                                                    ObservationParameterEntity.PROP_OBSERVATION_ID,
+                                                    ParameterFactory.EntityType.OBSERVATION);
+                        } else {
+                            throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP, propertyName));
+                        }
                 }
             } catch (STAInvalidFilterExpressionException e) {
                 throw new RuntimeException(e);

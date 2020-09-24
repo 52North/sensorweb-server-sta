@@ -37,6 +37,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.geojson.GeoJsonReader;
+import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
@@ -124,7 +125,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
         self.setStaIdentifier(identifier);
 
         // parameters
-        self.setParameters(convertParameters(parameters));
+        // self.setParameters(convertParameters(parameters));
 
         // phenomenonTime
         if (phenomenonTime != null) {
@@ -211,7 +212,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
         }
 
         // parameters
-        self.setParameters(convertParameters(parameters));
+        self.setParameters(convertParameters(parameters, ParameterFactory.EntityType.OBSERVATION));
 
         // result
         self.setValue(result);

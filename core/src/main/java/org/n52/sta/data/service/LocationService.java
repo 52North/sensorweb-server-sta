@@ -33,7 +33,7 @@ import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
-import org.n52.series.db.beans.parameter.ParameterTextEntity;
+import org.n52.series.db.beans.parameter.TextParameterEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.filter.ExpandFilter;
@@ -338,7 +338,7 @@ public class LocationService
                     // properties but only grep relevant parts
                     // via simple regex
                     for (ParameterEntity<?> parameter : updated.getParameters()) {
-                        if (parameter instanceof ParameterTextEntity &&
+                        if (parameter instanceof TextParameterEntity &&
                             parameter.getName().equals("updateFOI")) {
                             try {
                                 LOGGER.debug("Updating FOI with id: " + parameter.getValueAsString());
