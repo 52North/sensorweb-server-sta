@@ -72,16 +72,6 @@ public interface TestUtil {
     String FEATURESOFINTEREST = "FeaturesOfInterest";
     String OBSERVEDPROPERTY = "ObservedProperty";
     String OBSERVEDPROPERTIES = "ObservedProperties";
-    String OBSERVATIONRELATIONS = "ObservationRelations";
-    String OBSERVATIONRELATION = "ObservationRelation";
-    String OBSERVATIONGROUPS = "ObservationGroups";
-    String OBSERVATIONGROUP = "ObservationGroup'";
-    String LICENSES = "Licenses";
-    String LICENSE = "License";
-    String PROJECTS = "Projects";
-    String PROJECT = "Project";
-    String PARTIES = "Parties";
-    String PARTY = "Party";
     GeometryFactory factory =
         new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
     HashMap<String, String> relatedEntityEndpoints = new HashMap<String, String>() {{
@@ -325,9 +315,7 @@ public interface TestUtil {
         SENSOR("Sensors"),
         FEATURE_OF_INTEREST("FeaturesOfInterest"),
         OBSERVATION("Observations"),
-        OBSERVED_PROPERTY("ObservedProperties"),
-        OBSERVATIONRELATION("ObservationRelations"),
-        OBSERVATIONGROUP("ObservationGroups");
+        OBSERVED_PROPERTY("ObservedProperties");
 
         String val;
 
