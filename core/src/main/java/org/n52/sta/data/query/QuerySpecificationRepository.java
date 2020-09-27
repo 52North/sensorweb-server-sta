@@ -37,54 +37,79 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 public class QuerySpecificationRepository {
 
     public static EntityQuerySpecifications getSpecification(String name)
-            throws STAInvalidFilterExpressionException {
+        throws STAInvalidFilterExpressionException {
         switch (name) {
-        case "PlatformEntity":
-        case "Thing":
-        case "properties":
-        case "Things": {
-            return new ThingQuerySpecifications();
-        }
-        case "LocationEntity":
-        case "Location":
-        case "Locations": {
-            return new LocationQuerySpecifications();
-        }
-        case "HistoricalLocationEntity":
-        case "HistoricalLocation":
-        case "HistoricalLocations": {
-            return new HistoricalLocationQuerySpecifications();
-        }
-        case "AbstractDatasetEntity":
-        case "DatasetEntity":
-        case "DatasetAggregationEntity":
-        case "Datastream":
-        case "Datastreams": {
-            return new DatastreamQuerySpecifications();
-        }
-        case "ProcedureEntity":
-        case "Sensor":
-        case "Sensors": {
-            return new SensorQuerySpecifications();
-        }
-        case "ObservationEntity":
-        case "Observation":
-        case "Observations": {
-            return new ObservationQuerySpecifications();
-        }
-        case "FeatureEntity":
-        case "AbstractFeatureEntity":
-        case "FeatureOfInterest":
-        case "FeaturesOfInterest": {
-            return new FeatureOfInterestQuerySpecifications();
-        }
-        case "PhenomenonEntity":
-        case "ObservedProperty":
-        case "ObservedProperties": {
-            return new ObservedPropertyQuerySpecifications();
-        }
-        default:
-            throw new STAInvalidFilterExpressionException("Unable to find QuerySpecification for type:" + name);
+            case "PlatformEntity":
+            case "Thing":
+            case "properties":
+            case "Things": {
+                return new ThingQuerySpecifications();
+            }
+            case "LocationEntity":
+            case "Location":
+            case "Locations": {
+                return new LocationQuerySpecifications();
+            }
+            case "HistoricalLocationEntity":
+            case "HistoricalLocation":
+            case "HistoricalLocations": {
+                return new HistoricalLocationQuerySpecifications();
+            }
+            case "AbstractDatasetEntity":
+            case "DatasetEntity":
+            case "DatasetAggregationEntity":
+            case "Datastream":
+            case "Datastreams": {
+                return new DatastreamQuerySpecifications();
+            }
+            case "ProcedureEntity":
+            case "Sensor":
+            case "Sensors": {
+                return new SensorQuerySpecifications();
+            }
+            case "ObservationEntity":
+            case "Observation":
+            case "Observations": {
+                return new ObservationQuerySpecifications();
+            }
+            case "FeatureEntity":
+            case "AbstractFeatureEntity":
+            case "FeatureOfInterest":
+            case "FeaturesOfInterest": {
+                return new FeatureOfInterestQuerySpecifications();
+            }
+            case "PhenomenonEntity":
+            case "ObservedProperty":
+            case "ObservedProperties": {
+                return new ObservedPropertyQuerySpecifications();
+            }
+            case "License":
+            case "LicenseEntity":
+            case "Licenses": {
+                return new LicenseQuerySpecifications();
+            }
+            case "Party":
+            case "PartyEntity":
+            case "Parties": {
+                return new PartyQuerySpecifications();
+            }
+            case "Project":
+            case "ProjectEntity":
+            case "Projects": {
+                return new ProjectQuerySpecifications();
+            }
+            case "ObservationRelation":
+            case "ObservationRelationEntity":
+            case "ObservationRelations": {
+                return new ObservationRelationQuerySpecifications();
+            }
+            case "ObservationGroup":
+            case "ObservationGroupEntity":
+            case "ObservationGroups": {
+                return new ObservationGroupQuerySpecifications();
+            }
+            default:
+                throw new STAInvalidFilterExpressionException("Unable to find QuerySpecification for type: " + name);
         }
     }
 

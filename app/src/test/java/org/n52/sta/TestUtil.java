@@ -51,39 +51,11 @@ import java.util.stream.Collectors;
  */
 public interface TestUtil {
 
-    enum EntityType {
-        THING("Things"),
-        LOCATION("Locations"),
-        HISTORICAL_LOCATION("HistoricalLocations"),
-        DATASTREAM("Datastreams"),
-        SENSOR("Sensors"),
-        FEATURE_OF_INTEREST("FeaturesOfInterest"),
-        OBSERVATION("Observations"),
-        OBSERVED_PROPERTY("ObservedProperties");
-
-        String val;
-
-        EntityType(String value) {
-            val = value;
-        }
-
-        public static EntityType getByVal(String value) {
-            for (EntityType entityType : EntityType.values()) {
-                if (entityType.val.equals(value)) {
-                    return entityType;
-                }
-            }
-            return null;
-        }
-    }
-
-
     String jsonMimeType = "application/json";
     String idKey = "@iot.id";
     String countKey = "@iot.count";
     String selfLinkKey = "@iot.selfLink";
     String value = "value";
-
     String DATASTREAMS = "Datastreams";
     String DATASTREAM = "Datastream";
     String THING = "Thing";
@@ -100,10 +72,18 @@ public interface TestUtil {
     String FEATURESOFINTEREST = "FeaturesOfInterest";
     String OBSERVEDPROPERTY = "ObservedProperty";
     String OBSERVEDPROPERTIES = "ObservedProperties";
-
+    String OBSERVATIONRELATIONS = "ObservationRelations";
+    String OBSERVATIONRELATION = "ObservationRelation";
+    String OBSERVATIONGROUPS = "ObservationGroups";
+    String OBSERVATIONGROUP = "ObservationGroup'";
+    String LICENSES = "Licenses";
+    String LICENSE = "License";
+    String PROJECTS = "Projects";
+    String PROJECT = "Project";
+    String PARTIES = "Parties";
+    String PARTY = "Party";
     GeometryFactory factory =
-            new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
-
+        new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
     HashMap<String, String> relatedEntityEndpoints = new HashMap<String, String>() {{
         put(EntityType.THING.toString() + EntityType.DATASTREAM.toString(),
             "Things(%s)/Datastreams");
@@ -145,13 +125,40 @@ public interface TestUtil {
         put(EntityType.FEATURE_OF_INTEREST.toString() + EntityType.OBSERVATION.toString(),
             "FeaturesOfInterest(%s)/Observations");
 
+        // CitSciExtension
+        put(EntityType.DATASTREAM.toString() + EntityType.LICENSE.toString(),
+            "Datastreams(%s)/License");
+        put(EntityType.DATASTREAM.toString() + EntityType.PARTY.toString(),
+            "Datastreams(%s)/Party");
+        put(EntityType.DATASTREAM.toString() + EntityType.PROJECT.toString(),
+            "Datastreams(%s)/Project");
+
+        put(EntityType.LICENSE.toString() + EntityType.DATASTREAM.toString(),
+            "License(%s)/Datastreams");
+
+        put(EntityType.PARTY.toString() + EntityType.DATASTREAM.toString(),
+            "Party(%s)/Datastreams");
+
+        put(EntityType.PROJECT.toString() + EntityType.DATASTREAM.toString(),
+            "Project(%s)/Datastreams");
+
+        put(EntityType.OBSERVATION.toString() + EntityType.OBSERVATIONRELATION.toString(),
+            "Observations(%s)/ObservationRelations");
+
+        put(EntityType.OBSERVATIONRELATION.toString() + EntityType.OBSERVATION.toString(),
+            "ObservationRelations(%s)/Observation");
+        put(EntityType.OBSERVATIONRELATION.toString() + EntityType.OBSERVATIONGROUP.toString(),
+            "ObservationRelations(%s)/ObservationGroup");
+
+        put(EntityType.OBSERVATIONGROUP.toString() + EntityType.OBSERVATIONRELATION.toString(),
+            "ObservationGroups(%s)/ObservationRelations");
     }};
 
     default Set<String> getRelatedEntityEndpointKeys(EntityType source) {
         return relatedEntityEndpoints.values()
-                                     .stream()
-                                     .filter((val) -> val.startsWith(source.val))
-                                     .collect(Collectors.toSet());
+            .stream()
+            .filter((val) -> val.startsWith(source.val))
+            .collect(Collectors.toSet());
     }
 
     default String getRelatedEntityEndpoint(EntityType source, EntityType target) {
@@ -162,26 +169,26 @@ public interface TestUtil {
         for (Iterator<Map.Entry<String, JsonNode>> it = reference.fields(); it.hasNext(); ) {
             Map.Entry<String, JsonNode> next = it.next();
             switch (next.getKey()) {
-            case "feature":
-            case "location":
-                compareJsonNodesGeo(next.getKey(), next.getValue(), actual.get(next.getKey()));
-                break;
-            case "validTime":
-            case "phenomenonTime":
-            case "resultTime":
-                compareJsonNodesTime(next.getKey(), next.getValue(), actual.get(next.getKey()));
-                break;
-            default:
-                // Skip navigation links as they have different keys in response
-                // e.g. "Things" vs "Things@iot.navigationLink"
-                if (!Character.isUpperCase(next.getKey().charAt(0))) {
-                    if (Objects.equals(next.getKey(), "result")) {
-                        compareJsonNodesNumeric(next.getKey(), next.getValue(), actual.get(next.getKey()));
-                    } else {
-                        compareJsonNodesString(next.getKey(), next.getValue(), actual.get(next.getKey()));
+                case "feature":
+                case "location":
+                    compareJsonNodesGeo(next.getKey(), next.getValue(), actual.get(next.getKey()));
+                    break;
+                case "validTime":
+                case "phenomenonTime":
+                case "resultTime":
+                    compareJsonNodesTime(next.getKey(), next.getValue(), actual.get(next.getKey()));
+                    break;
+                default:
+                    // Skip navigation links as they have different keys in response
+                    // e.g. "Things" vs "Things@iot.navigationLink"
+                    if (!Character.isUpperCase(next.getKey().charAt(0))) {
+                        if (Objects.equals(next.getKey(), "result")) {
+                            compareJsonNodesNumeric(next.getKey(), next.getValue(), actual.get(next.getKey()));
+                        } else {
+                            compareJsonNodesString(next.getKey(), next.getValue(), actual.get(next.getKey()));
+                        }
                     }
-                }
-                break;
+                    break;
             }
 
         }
@@ -189,12 +196,12 @@ public interface TestUtil {
 
     default void compareJsonNodesGeo(String fieldname, JsonNode referenceValue, JsonNode actualValue) {
         Assertions.assertNotNull(
-                referenceValue,
-                "Reference Entity is nonexistent!"
+            referenceValue,
+            "Reference Entity is nonexistent!"
         );
         Assertions.assertNotNull(
-                actualValue,
-                "Actual Entity is nonexistent!"
+            actualValue,
+            "Actual Entity is nonexistent!"
         );
         // GeoJson comparison
         GeoJsonReader reader = new GeoJsonReader(factory);
@@ -211,10 +218,10 @@ public interface TestUtil {
                 actualGeo = reader.read(actualValue.toString());
             }
             Assertions.assertTrue(
-                    referenceGeo.equals(actualGeo),
-                    "ERROR: Deep inserted " + fieldname + " is not created correctly."
-                            + "Reference: " + referenceValue.toPrettyString()
-                            + "Actual: " + actualValue.toPrettyString()
+                referenceGeo.equals(actualGeo),
+                "ERROR: Deep inserted " + fieldname + " is not created correctly."
+                    + "Reference: " + referenceValue.toPrettyString()
+                    + "Actual: " + actualValue.toPrettyString()
             );
         } catch (ParseException e) {
             Assertions.fail("Could not parse to GeoJSON. Error was:" + e.getMessage());
@@ -223,12 +230,12 @@ public interface TestUtil {
 
     default void compareJsonNodesTime(String fieldname, JsonNode reference, JsonNode actual) {
         Assertions.assertNotNull(
-                reference,
-                "Reference Entity is nonexistent!"
+            reference,
+            "Reference Entity is nonexistent!"
         );
         Assertions.assertNotNull(
-                actual,
-                "Actual Entity is nonexistent!"
+            actual,
+            "Actual Entity is nonexistent!"
         );
         String referenceTimeValue, actualTimeValue;
         // Time comparison
@@ -236,37 +243,37 @@ public interface TestUtil {
         actualTimeValue = actual.toString().replace("\"", "");
         if (referenceTimeValue.equals("null")) {
             Assertions.assertEquals(
-                    referenceTimeValue,
-                    actualTimeValue,
-                    "The " + fieldname + " should have been \""
-                            + "null"
-                            + "\" but it is now \""
-                            + actualTimeValue
-                            + "\"."
+                referenceTimeValue,
+                actualTimeValue,
+                "The " + fieldname + " should have been \""
+                    + "null"
+                    + "\" but it is now \""
+                    + actualTimeValue
+                    + "\"."
             );
         } else {
             DateTime referenceTime = ISODateTimeFormat.dateTimeParser().parseDateTime(referenceTimeValue);
             DateTime actualTime = ISODateTimeFormat.dateTimeParser().parseDateTime(actualTimeValue);
             Assertions.assertEquals(
-                    actualTime,
-                    referenceTime,
-                    "The " + fieldname + " should have been \""
-                            + referenceTime.toString()
-                            + "\" but it is now \""
-                            + actualTime.toString()
-                            + "\"."
+                actualTime,
+                referenceTime,
+                "The " + fieldname + " should have been \""
+                    + referenceTime.toString()
+                    + "\" but it is now \""
+                    + actualTime.toString()
+                    + "\"."
             );
         }
     }
 
     default void compareJsonNodesNumeric(String fieldname, JsonNode reference, JsonNode actual) {
         Assertions.assertNotNull(
-                reference,
-                "Reference Entity is nonexistent!"
+            reference,
+            "Reference Entity is nonexistent!"
         );
         Assertions.assertNotNull(
-                actual,
-                "Actual Entity is nonexistent!"
+            actual,
+            "Actual Entity is nonexistent!"
         );
         // Number comparison
         Double referenceValue, actualValue;
@@ -280,12 +287,12 @@ public interface TestUtil {
 
     default void compareJsonNodesString(String fieldname, JsonNode reference, JsonNode actual) {
         Assertions.assertNotNull(
-                reference,
-                "Reference Entity is nonexistent!"
+            reference,
+            "Reference Entity is nonexistent!"
         );
         Assertions.assertNotNull(
-                actual,
-                "Actual Entity is nonexistent!"
+            actual,
+            "Actual Entity is nonexistent!"
         );
         // Simple String comparison
         String referenceValue, actualValue;
@@ -293,9 +300,9 @@ public interface TestUtil {
         actualValue = actual.toString().replace("\"", "");
 
         Assertions.assertEquals(
-                referenceValue,
-                actualValue,
-                "ERROR: Deep inserted " + fieldname + " is not created correctly."
+            referenceValue,
+            actualValue,
+            "ERROR: Deep inserted " + fieldname + " is not created correctly."
         );
     }
 
@@ -305,12 +312,12 @@ public interface TestUtil {
 
     default void assertEmptyResponse(JsonNode response) {
         Assertions.assertTrue(
-                0 == response.get("@iot.count").asDouble(),
-                "Entity count is not zero although it should be"
+            0 == response.get("@iot.count").asDouble(),
+            "Entity count is not zero although it should be"
         );
         Assertions.assertTrue(
-                response.get("value").isEmpty(),
-                "Entity is returned although it shouldn't"
+            response.get("value").isEmpty(),
+            "Entity is returned although it shouldn't"
         );
     }
 
@@ -322,19 +329,54 @@ public interface TestUtil {
                                 response.get("@iot.count").asDouble(),
                                 "@iot.id count is not " + iotCount + " although it should be");
         Assertions.assertFalse(
-                response.get("value").isEmpty(),
-                "Entity is not returned although it should"
+            response.get("value").isEmpty(),
+            "Entity is not returned although it should"
         );
         Assertions.assertEquals(response.get("value").size(),
                                 valueCount,
                                 "value has invalid number of elements! Expected: "
-                                        + valueCount
-                                        + ", Actual: "
-                                        + response.get("value").size());
+                                    + valueCount
+                                    + ", Actual: "
+                                    + response.get("value").size());
     }
 
     default void assertResponseCount(JsonNode response, int count) {
         assertResponseCount(response, count, count);
+    }
+
+    enum EntityType {
+        THING("Things"),
+        LOCATION("Locations"),
+        HISTORICAL_LOCATION("HistoricalLocations"),
+        DATASTREAM("Datastreams"),
+        SENSOR("Sensors"),
+        FEATURE_OF_INTEREST("FeaturesOfInterest"),
+        OBSERVATION("Observations"),
+        OBSERVED_PROPERTY("ObservedProperties"),
+        OBSERVATIONRELATION("ObservationRelations"),
+        OBSERVATIONGROUP("ObservationGroups"),
+        LICENSE("Licenses"),
+        PROJECT("Projects"),
+        PARTY("Parties");
+
+        String val;
+
+        EntityType(String value) {
+            val = value;
+        }
+
+        public static EntityType getByVal(String value) {
+            for (EntityType entityType : EntityType.values()) {
+                if (entityType.val.equals(value)) {
+                    return entityType;
+                }
+            }
+            return null;
+        }
+
+        public String getVal() {
+            return val;
+        }
     }
 
 }

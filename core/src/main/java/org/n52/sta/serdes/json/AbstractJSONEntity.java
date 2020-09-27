@@ -32,18 +32,18 @@ package org.n52.sta.serdes.json;
 public interface AbstractJSONEntity {
 
     String INVALID_REFERENCED_ENTITY =
-            "Cannot parse as Reference: Only @iot.id may be present when referencing an existing entity!";
+        "Cannot parse as Reference: Only @iot.id may be present when referencing an existing entity!";
 
     String INVALID_INLINE_ENTITY_MISSING =
-            "Cannot parse Entity: Not all required properties present! Missing: ";
+        "Cannot parse Entity: Not all required properties present! Missing: ";
 
     String INVALID_INLINE_ENTITY_INVALID_VALUE =
-            "Invalid Entity. Invalid Value: ";
+        "Invalid Entity. Invalid Value: ";
 
     String INVALID_BACKREFERENCE =
-            "Invalid nesting of Entities!";
+        "Invalid nesting of Entities!";
 
     String INVALID_DUPLICATE_REFERENCE =
-            "Duplicate references to related Entity provided! Either specify reference to related Entity in JSON " +
-                    "Payload OR inside Request URL";
+        "Duplicate references to related Entity provided! Either specify reference to related Entity in JSON " +
+            "Payload OR inside Request URL";
 }

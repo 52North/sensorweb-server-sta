@@ -26,15 +26,18 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.repositories;
 
 import org.n52.series.db.beans.PlatformEntity;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Transactional
+@Repository
 public interface ThingRepository extends NameRepository<PlatformEntity> {
 
     <S extends PlatformEntity> S intermediateSave(S entity);

@@ -41,7 +41,7 @@ import java.net.URLDecoder;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public class AbstractSTARequestHandler implements STARequestUtils {
+public abstract class AbstractSTARequestHandler implements RequestUtils {
 
     protected final boolean shouldEscapeId;
     protected final EntityServiceRepository serviceRepository;
@@ -74,7 +74,7 @@ public class AbstractSTARequestHandler implements STARequestUtils {
      */
     protected void validateResource(StringBuffer requestURI,
                                     EntityServiceRepository serviceRepository)
-            throws Exception {
+        throws Exception {
         validateResource(requestURI.toString(), serviceRepository);
     }
 
@@ -87,7 +87,7 @@ public class AbstractSTARequestHandler implements STARequestUtils {
      */
     protected void validateResource(String requestURI,
                                     EntityServiceRepository serviceRepository)
-            throws Exception {
+        throws Exception {
         String[] uriResources;
         if (requestURI.startsWith("/")) {
             uriResources = requestURI.substring(1).split(SLASH);
@@ -117,55 +117,9 @@ public class AbstractSTARequestHandler implements STARequestUtils {
         STAEntityDefinition definition = STAEntityDefinition.definitions.get(entity);
 
         if (!definition.getEntityPropsMandatory().contains(property) &&
-                !definition.getEntityPropsOptional().contains(property)) {
+            !definition.getEntityPropsOptional().contains(property)) {
             throw new STAInvalidUrlException("Entity: " + entity + " does not have property: " + property);
         }
-    }
-
-    /**
-     * Validates a given URI syntactically.
-     *
-     * @param uriResources URI of the Request split by SLASH
-     * @return STAInvalidUrlException if URI is malformed
-     */
-    protected STAInvalidUrlException validateURISyntax(String[] uriResources) {
-        // Validate URL syntax via Regex
-        // Skip validation if no navigationPath is provided as Spring already validated syntax
-        if (uriResources.length > 1) {
-            // check iteratively and fail-fast
-            for (int i = 0; i < uriResources.length; i++) {
-                if (!BY_ID_PATTERN.matcher(uriResources[i]).matches()) {
-                    // Resource is addressed by relation to other entity
-                    // e.g. Datastreams(1)/Thing
-                    if (i > 0) {
-                        // Look back at last resource and check if association is valid
-                        String resource = uriResources[i - 1] + SLASH + uriResources[i];
-                        if (!(BY_DATASTREAM_PATTERN.matcher(resource).matches()
-                                || BY_HIST_LOC_PATTERN.matcher(resource).matches()
-                                || BY_LOCATION_PATTERN.matcher(resource).matches()
-                                || BY_THING_PATTERN.matcher(resource).matches()
-                                || BY_FOI_PATTERN.matcher(resource).matches()
-                                || BY_OBSERVATION_PATTERN.matcher(resource).matches()
-                                || BY_OBSER_PROP_PATTERN.matcher(resource).matches()
-                                || BY_SENSOR_PATTERN.matcher(resource).matches()
-                                || BY_OBSER_PROP_PATTERN.matcher(resource).matches())) {
-                            return new STAInvalidUrlException(URL_INVALID
-                                                                      + uriResources[i - 1]
-                                                                      + SLASH + uriResources[i]
-                                                                      + " is not a valid resource path.");
-
-                        }
-                    } else {
-                        return new STAInvalidUrlException(URL_INVALID
-                                                                  + uriResources[i]
-                                                                  + " is not a valid resource.");
-                    }
-                }
-                // Resource is adressed by Id
-                // e.g. Things(1), no processing required
-            }
-        }
-        return null;
     }
 
     /**
@@ -202,7 +156,7 @@ public class AbstractSTARequestHandler implements STARequestUtils {
                 // e.g. /Datastreams(1)/Thing/
                 // Getting id directly as it is needed for next iteration
                 targetId = serviceRepository.getEntityService(targetType)
-                                            .getEntityIdByRelatedEntity(sourceId, sourceType);
+                    .getEntityIdByRelatedEntity(sourceId, sourceType);
                 if (targetId == null) {
                     return createInvalidUrlExceptionNoEntityAssociated(uriResources[i], uriResources[i - 1]);
                 }
@@ -212,7 +166,7 @@ public class AbstractSTARequestHandler implements STARequestUtils {
                 // Only checking exists as Id is already known
                 targetId = targetEntity[1];
                 if (!serviceRepository.getEntityService(targetType)
-                                      .existsEntityByRelatedEntity(sourceId, sourceType, targetId)) {
+                    .existsEntityByRelatedEntity(sourceId, sourceType, targetId)) {
                     return createInvalidUrlExceptionNoEntityAssociated(uriResources[i], uriResources[i - 1]);
                 }
             }

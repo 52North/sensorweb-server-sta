@@ -66,63 +66,63 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<ProcedureEnti
     @Override
     public ProcedureEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
-        case FULL:
-            Assert.notNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
-            Assert.notNull(description, INVALID_INLINE_ENTITY_MISSING + "description");
-            Assert.notNull(encodingType, INVALID_INLINE_ENTITY_MISSING + "encodingType");
-            Assert.notNull(metadata, INVALID_INLINE_ENTITY_MISSING + "metadata");
-            self.setIdentifier(identifier);
-            self.setStaIdentifier(identifier);
-            self.setName(name);
-            self.setDescription(description);
+            case FULL:
+                Assert.notNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
+                Assert.notNull(description, INVALID_INLINE_ENTITY_MISSING + "description");
+                Assert.notNull(encodingType, INVALID_INLINE_ENTITY_MISSING + "encodingType");
+                Assert.notNull(metadata, INVALID_INLINE_ENTITY_MISSING + "metadata");
+                self.setIdentifier(identifier);
+                self.setStaIdentifier(identifier);
+                self.setName(name);
+                self.setDescription(description);
 
-            handleEncodingType();
-
-            if (Datastreams != null) {
-                self.setDatasets(Arrays.stream(Datastreams)
-                                       .map(ds -> ds.toEntity(JSONBase.EntityType.FULL,
-                                                              JSONBase.EntityType.REFERENCE))
-                                       .collect(Collectors.toSet()));
-            }
-
-            // Deal with back reference during deep insert
-            if (backReference != null) {
-                self.addDatastream(((JSONDatastream) backReference).getEntity());
-            }
-
-            return self;
-        case PATCH:
-            self.setIdentifier(identifier);
-            self.setStaIdentifier(identifier);
-            self.setName(name);
-            self.setDescription(description);
-
-            if (encodingType != null) {
                 handleEncodingType();
-            } else {
-                // Used when PATCHing new metadata
-                self.setDescriptionFile(metadata);
-            }
 
-            if (Datastreams != null) {
-                self.setDatasets(Arrays.stream(Datastreams)
-                                       .map(ds -> ds.toEntity(JSONBase.EntityType.REFERENCE))
-                                       .collect(Collectors.toSet()));
-            }
-            return self;
-        case REFERENCE:
-            Assert.isNull(name, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(description, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(encodingType, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(metadata, INVALID_REFERENCED_ENTITY);
+                if (Datastreams != null) {
+                    self.setDatasets(Arrays.stream(Datastreams)
+                                         .map(ds -> ds.toEntity(JSONBase.EntityType.FULL,
+                                                                JSONBase.EntityType.REFERENCE))
+                                         .collect(Collectors.toSet()));
+                }
 
-            Assert.isNull(Datastreams, INVALID_REFERENCED_ENTITY);
+                // Deal with back reference during deep insert
+                if (backReference != null) {
+                    self.addDatastream(((JSONDatastream) backReference).getEntity());
+                }
 
-            self.setIdentifier(identifier);
-            self.setStaIdentifier(identifier);
-            return self;
-        default:
-            return null;
+                return self;
+            case PATCH:
+                self.setIdentifier(identifier);
+                self.setStaIdentifier(identifier);
+                self.setName(name);
+                self.setDescription(description);
+
+                if (encodingType != null) {
+                    handleEncodingType();
+                } else {
+                    // Used when PATCHing new metadata
+                    self.setDescriptionFile(metadata);
+                }
+
+                if (Datastreams != null) {
+                    self.setDatasets(Arrays.stream(Datastreams)
+                                         .map(ds -> ds.toEntity(JSONBase.EntityType.REFERENCE))
+                                         .collect(Collectors.toSet()));
+                }
+                return self;
+            case REFERENCE:
+                Assert.isNull(name, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(description, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(encodingType, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(metadata, INVALID_REFERENCED_ENTITY);
+
+                Assert.isNull(Datastreams, INVALID_REFERENCED_ENTITY);
+
+                self.setIdentifier(identifier);
+                self.setStaIdentifier(identifier);
+                return self;
+            default:
+                return null;
         }
     }
 

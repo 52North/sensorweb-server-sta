@@ -107,7 +107,8 @@ public class JSONBase {
          * Parses referencedFromType and referencedFromID into the specific JSON Entities.
          * Must be called before any validation is performed on the presence of related Entities!
          */
-        protected void parseReferencedFrom() {}
+        protected void parseReferencedFrom() {
+        }
 
         /**
          * Returns a reference to the result of this classes toEntity() method
@@ -209,6 +210,7 @@ public class JSONBase {
 
     @SuppressFBWarnings("UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD")
     abstract static class JSONwithIdNameDescription<T> extends JSONwithId<T> {
+
         public String name;
         public String description;
     }
@@ -216,6 +218,7 @@ public class JSONBase {
 
     @SuppressFBWarnings("UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD")
     abstract static class JSONwithIdNameDescriptionTime<T> extends JSONwithIdTime<T> {
+
         public String name;
         public String description;
     }

@@ -85,7 +85,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class MessageBusRepository<T, I extends Serializable>
-        extends SimpleJpaRepository<T, I> implements RepositoryConstants {
+    extends SimpleJpaRepository<T, I> implements RepositoryConstants {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageBusRepository.class);
 
@@ -114,7 +114,7 @@ public class MessageBusRepository<T, I extends Serializable>
         this.em = entityManager;
 
         EntityManagerFactory factory =
-                (EntityManagerFactory) SpringApplicationContext.getBean(EntityManagerFactory.class);
+            (EntityManagerFactory) SpringApplicationContext.getBean(EntityManagerFactory.class);
         Assert.notNull(factory, "Could not autowire EntityManagerFactory!");
         this.databaseEm = factory.createEntityManager();
 
@@ -127,10 +127,10 @@ public class MessageBusRepository<T, I extends Serializable>
         Assert.notNull(this.mqttHandler, "Could not autowire Mqtt handler!");
 
         if (this.entityClass.equals(ObservationEntity.class)
-                || this.entityClass.equals(ProcedureEntity.class)
-                || this.entityClass.equals(PhenomenonEntity.class)) {
+            || this.entityClass.equals(ProcedureEntity.class)
+            || this.entityClass.equals(PhenomenonEntity.class)) {
             this.datastreamRepository =
-                    (DatastreamRepository) SpringApplicationContext.getBean(DatastreamRepository.class);
+                (DatastreamRepository) SpringApplicationContext.getBean(DatastreamRepository.class);
             Assert.notNull(this.datastreamRepository, "Could not autowire DatastreamRepository!");
         }
     }
@@ -257,7 +257,7 @@ public class MessageBusRepository<T, I extends Serializable>
     public <S extends T> S save(S newEntity) {
         String entityType = entityTypeToStaType.get(entityInformation.getEntityName());
         boolean intercept =
-                mqttHandler.getWatchedEntityTypes().contains(entityType);
+            mqttHandler.getWatchedEntityTypes().contains(entityType);
 
         if (entityInformation.isNew(newEntity)) {
             em.persist(newEntity);
@@ -298,53 +298,53 @@ public class MessageBusRepository<T, I extends Serializable>
             if (entity.hasDatastreams()) {
                 collections.put(STAEntityDefinition.DATASTREAMS,
                                 entity.getDatasets()
-                                      .stream()
-                                      .map(AbstractDatasetEntity::getStaIdentifier)
-                                      .collect(Collectors.toSet()));
+                                    .stream()
+                                    .map(AbstractDatasetEntity::getStaIdentifier)
+                                    .collect(Collectors.toSet()));
             }
         } else if (rawObject instanceof LocationEntity) {
             LocationEntity entity = (LocationEntity) rawObject;
             if (entity.hasHistoricalLocations()) {
                 collections.put(STAEntityDefinition.HISTORICAL_LOCATIONS,
                                 entity.getHistoricalLocations()
-                                      .stream()
-                                      .map(HistoricalLocationEntity::getStaIdentifier)
-                                      .collect(Collectors.toSet()));
+                                    .stream()
+                                    .map(HistoricalLocationEntity::getStaIdentifier)
+                                    .collect(Collectors.toSet()));
             }
 
             if (entity.hasThings()) {
                 collections.put(STAEntityDefinition.THINGS,
                                 entity.getThings()
-                                      .stream()
-                                      .map(PlatformEntity::getStaIdentifier)
-                                      .collect(Collectors.toSet()));
+                                    .stream()
+                                    .map(PlatformEntity::getStaIdentifier)
+                                    .collect(Collectors.toSet()));
             }
         } else if (rawObject instanceof PlatformEntity) {
             PlatformEntity entity = (PlatformEntity) rawObject;
             if (entity.hasLocationEntities()) {
                 collections.put(
-                        STAEntityDefinition.LOCATIONS,
-                        entity.getLocations()
-                              .stream()
-                              .map(LocationEntity::getStaIdentifier)
-                              .collect(Collectors.toSet()));
+                    STAEntityDefinition.LOCATIONS,
+                    entity.getLocations()
+                        .stream()
+                        .map(LocationEntity::getStaIdentifier)
+                        .collect(Collectors.toSet()));
             }
 
             if (entity.hasHistoricalLocations()) {
                 collections.put(
-                        STAEntityDefinition.HISTORICAL_LOCATIONS,
-                        entity.getHistoricalLocations()
-                              .stream()
-                              .map(HistoricalLocationEntity::getStaIdentifier)
-                              .collect(Collectors.toSet()));
+                    STAEntityDefinition.HISTORICAL_LOCATIONS,
+                    entity.getHistoricalLocations()
+                        .stream()
+                        .map(HistoricalLocationEntity::getStaIdentifier)
+                        .collect(Collectors.toSet()));
             }
 
             if (entity.hasDatastreams()) {
                 collections.put(STAEntityDefinition.DATASTREAMS,
                                 entity.getDatasets()
-                                      .stream()
-                                      .map(AbstractDatasetEntity::getStaIdentifier)
-                                      .collect(Collectors.toSet()));
+                                    .stream()
+                                    .map(AbstractDatasetEntity::getStaIdentifier)
+                                    .collect(Collectors.toSet()));
             }
         } else if (rawObject instanceof AbstractDatasetEntity) {
             AbstractDatasetEntity entity = (AbstractDatasetEntity) rawObject;
@@ -374,9 +374,9 @@ public class MessageBusRepository<T, I extends Serializable>
             if (entity.hasLocationEntities()) {
                 collections.put(STAEntityDefinition.LOCATIONS,
                                 entity.getLocations()
-                                      .stream()
-                                      .map(LocationEntity::getStaIdentifier)
-                                      .collect(Collectors.toSet()));
+                                    .stream()
+                                    .map(LocationEntity::getStaIdentifier)
+                                    .collect(Collectors.toSet()));
             }
         } else if (rawObject instanceof ObservationEntity<?>) {
             ObservationEntity<?> entity = (ObservationEntity<?>) rawObject;
@@ -387,7 +387,7 @@ public class MessageBusRepository<T, I extends Serializable>
             }
 
             Optional<AbstractDatasetEntity> datastreamEntity =
-                    datastreamRepository.findOne(dQs.withObservationStaIdentifier(entity.getStaIdentifier()));
+                datastreamRepository.findOne(dQs.withObservationStaIdentifier(entity.getStaIdentifier()));
             if (datastreamEntity.isPresent()) {
                 collections.put(STAEntityDefinition.DATASTREAMS,
                                 Collections.singleton(datastreamEntity.get().getStaIdentifier()));
@@ -400,13 +400,13 @@ public class MessageBusRepository<T, I extends Serializable>
             PhenomenonEntity entity = (PhenomenonEntity) rawObject;
 
             List<AbstractDatasetEntity> observations = datastreamRepository
-                    .findAll(dQs.withObservedPropertyStaIdentifier(entity.getStaIdentifier()));
+                .findAll(dQs.withObservedPropertyStaIdentifier(entity.getStaIdentifier()));
             collections.put(
-                    STAEntityDefinition.DATASTREAMS,
-                    observations
-                            .stream()
-                            .map(AbstractDatasetEntity::getStaIdentifier)
-                            .collect(Collectors.toSet()));
+                STAEntityDefinition.DATASTREAMS,
+                observations
+                    .stream()
+                    .map(AbstractDatasetEntity::getStaIdentifier)
+                    .collect(Collectors.toSet()));
         } else {
             LOGGER.error("Error while computing related Collections: Could not identify Entity Type");
         }
@@ -455,7 +455,7 @@ public class MessageBusRepository<T, I extends Serializable>
             result.put(UOM, ((AbstractDatasetEntity) entity).getUnit());
             result.put(OBSERVEDAREA,
                        (((AbstractDatasetEntity) entity).getGeometryEntity() != null) ?
-                               ((AbstractDatasetEntity) entity).getGeometryEntity().getGeometry() : null);
+                           ((AbstractDatasetEntity) entity).getGeometryEntity().getGeometry() : null);
             result.put(SAMPLINGTIMESTART, ((AbstractDatasetEntity) entity).getSamplingTimeStart());
             result.put(SAMPLINGTIMEEND, ((AbstractDatasetEntity) entity).getSamplingTimeEnd());
             result.put(RESULTTIMESTART, ((AbstractDatasetEntity) entity).getResultTimeStart());
@@ -495,9 +495,9 @@ public class MessageBusRepository<T, I extends Serializable>
                                             (SessionImplementor) em.getDelegate()));
             }
             return EntityGraphs.merge(
-                    (EntityManager) em.getDelegate(),
-                    entityClass,
-                    roots.toArray(new RootGraph[] {}));
+                (EntityManager) em.getDelegate(),
+                entityClass,
+                roots.toArray(new RootGraph[] {}));
         } else {
             return null;
         }
@@ -518,7 +518,7 @@ public class MessageBusRepository<T, I extends Serializable>
     public Page<T> findAll(Specification<T> spec, Pageable pageable, EntityGraphRepository.FetchGraph... fetchGraphs) {
         TypedQuery<T> query = getQuery(spec, pageable, createEntityGraph(fetchGraphs));
         return pageable.isUnpaged() ? new PageImpl<>(query.getResultList())
-                : readPage(query, getDomainClass(), pageable, spec);
+            : readPage(query, getDomainClass(), pageable, spec);
     }
 
     public List<T> findAll(Specification<T> spec, Sort sort, EntityGraphRepository.FetchGraph... fetchGraphs) {

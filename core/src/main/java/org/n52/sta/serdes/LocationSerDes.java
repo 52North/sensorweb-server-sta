@@ -85,7 +85,7 @@ public class LocationSerDes {
 
         @Override
         public void serialize(LocationWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers)
-                throws IOException {
+            throws IOException {
             gen.writeStartObject();
             value.unwrap(implicitSelect);
             LocationEntity location = value.getEntity();
@@ -103,18 +103,18 @@ public class LocationSerDes {
                 gen.writeStringField(STAEntityDefinition.PROP_NAME, location.getName());
             }
             if (!value.hasSelectOption()
-                    || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
+                || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
                 gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, location.getDescription());
             }
             if (!value.hasSelectOption()
-                    || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ENCODINGTYPE)) {
+                || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ENCODINGTYPE)) {
                 // only write out encodingtype if there is a location present
                 if (location.isSetGeometry()) {
                     gen.writeStringField(STAEntityDefinition.PROP_ENCODINGTYPE, ENCODINGTYPE_GEOJSON);
                 }
             }
             if (!value.hasSelectOption()
-                    || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_LOCATION)) {
+                || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_LOCATION)) {
                 gen.writeFieldName(STAEntityDefinition.PROP_LOCATION);
                 gen.writeRawValue(GEO_JSON_WRITER.write(location.getGeometryEntity().getGeometry()));
             }
@@ -126,30 +126,31 @@ public class LocationSerDes {
                         writeNavigationProp(gen, navigationProperty, location.getStaIdentifier());
                     } else {
                         switch (navigationProperty) {
-                        case LocationEntityDefinition.THINGS:
-                            if (location.getThings() == null) {
-                                writeNavigationProp(gen, navigationProperty, location.getStaIdentifier());
-                            } else {
-                                gen.writeFieldName(navigationProperty);
-                                writeNestedCollection(Collections.unmodifiableSet(location.getThings()),
-                                                      value.getFieldsToExpand().get(navigationProperty),
-                                                      gen,
-                                                      serializers);
-                            }
-                            break;
-                        case LocationEntityDefinition.HISTORICAL_LOCATIONS:
-                            if (location.getHistoricalLocations() == null) {
-                                writeNavigationProp(gen, navigationProperty, location.getStaIdentifier());
-                            } else {
-                                gen.writeFieldName(navigationProperty);
-                                writeNestedCollection(Collections.unmodifiableSet(location.getHistoricalLocations()),
-                                                      value.getFieldsToExpand().get(navigationProperty),
-                                                      gen,
-                                                      serializers);
-                            }
-                            break;
-                        default:
-                            throw new IllegalStateException("Unexpected value: " + navigationProperty);
+                            case LocationEntityDefinition.THINGS:
+                                if (location.getThings() == null) {
+                                    writeNavigationProp(gen, navigationProperty, location.getStaIdentifier());
+                                } else {
+                                    gen.writeFieldName(navigationProperty);
+                                    writeNestedCollection(Collections.unmodifiableSet(location.getThings()),
+                                                          value.getFieldsToExpand().get(navigationProperty),
+                                                          gen,
+                                                          serializers);
+                                }
+                                break;
+                            case LocationEntityDefinition.HISTORICAL_LOCATIONS:
+                                if (location.getHistoricalLocations() == null) {
+                                    writeNavigationProp(gen, navigationProperty, location.getStaIdentifier());
+                                } else {
+                                    gen.writeFieldName(navigationProperty);
+                                    writeNestedCollection(
+                                        Collections.unmodifiableSet(location.getHistoricalLocations()),
+                                        value.getFieldsToExpand().get(navigationProperty),
+                                        gen,
+                                        serializers);
+                                }
+                                break;
+                            default:
+                                throw new IllegalStateException("Unexpected value: " + navigationProperty);
                         }
                     }
                 }

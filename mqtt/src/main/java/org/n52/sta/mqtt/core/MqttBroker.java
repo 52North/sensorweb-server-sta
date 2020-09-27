@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.mqtt.core;
 
 import io.moquette.BrokerConstants;
@@ -113,9 +114,9 @@ public class MqttBroker {
     private void restoreSubscriptionsAndStartServer() {
         if (MOQUETTE_PERSISTENCE_ENABLED) {
             MVStore mvStore = new MVStore.Builder()
-                    .fileName(brokerConfig.getProperty(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME))
-                    .autoCommitDisabled()
-                    .open();
+                .fileName(brokerConfig.getProperty(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME))
+                .autoCommitDisabled()
+                .open();
             MVMap<Object, Object> subscriptions = mvStore.openMap("subscriptions");
             Cursor<Object, Object> subscriptionsCursor = subscriptions.cursor(null);
             while (subscriptionsCursor.hasNext()) {
@@ -128,7 +129,8 @@ public class MqttBroker {
                 } catch (Exception e) {
                     subscriptions.remove(subscriptionsCursor.getKey());
                     LOGGER.error("Error while restoring MQTT subscription. " +
-                            "Invalid Subscription: {} was removed from storage.", subscriptionsCursor.getValue());
+                                     "Invalid Subscription: {} was removed from storage.",
+                                 subscriptionsCursor.getValue());
                     LOGGER.debug("Error while restoring MQTT subscription: {}", e);
                 }
             }
@@ -171,12 +173,12 @@ public class MqttBroker {
                 if (!msg.getClientID().equals(MqttSubscriptionEventHandlerImpl.INTERNAL_CLIENT_ID)) {
                     LOGGER.debug("Received publication for topic: {}", msg.getTopicName());
                     LOGGER.debug("with publication message content: {}",
-                            msg.getPayload().toString(StandardCharsets.UTF_8));
+                                 msg.getPayload().toString(StandardCharsets.UTF_8));
                     try {
                         publishHandler.processPublishMessage(msg);
                     } catch (Exception e) {
                         LOGGER.error("Error while processing MQTT message: {} {}",
-                                e.getClass().getName(), e.getMessage());
+                                     e.getClass().getName(), e.getMessage());
                     }
                 }
             }
@@ -189,7 +191,7 @@ public class MqttBroker {
                     LOGGER.debug("Client successfully subscribed");
                 } catch (Exception e) {
                     LOGGER.error("Error while processing MQTT subscription: {} {}",
-                            e.getClass().getName(), e.getMessage());
+                                 e.getClass().getName(), e.getMessage());
                 }
             }
 
@@ -201,7 +203,7 @@ public class MqttBroker {
                     LOGGER.debug("Removed MQTT subscription");
                 } catch (Exception e) {
                     LOGGER.error("Error while processing MQTT unsubscription: {} {}",
-                            e.getClass().getName(), e.getMessage());
+                                 e.getClass().getName(), e.getMessage());
                 }
             }
 
@@ -230,9 +232,9 @@ public class MqttBroker {
         }
 
         props.put(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME,
-                MOQUETTE_WEBSOCKET_ENABLED ? MOQUETTE_WEBSOCKET_PORT : BrokerConstants.DISABLED_PORT_BIND);
+                  MOQUETTE_WEBSOCKET_ENABLED ? MOQUETTE_WEBSOCKET_PORT : BrokerConstants.DISABLED_PORT_BIND);
         props.put(BrokerConstants.PORT_PROPERTY_NAME,
-                MOQUETTE_PLAINTCP_ENABLED ? MOQUETTE_PLAINTCP_PORT : BrokerConstants.DISABLED_PORT_BIND);
+                  MOQUETTE_PLAINTCP_ENABLED ? MOQUETTE_PLAINTCP_PORT : BrokerConstants.DISABLED_PORT_BIND);
 
         props.put(BrokerConstants.ALLOW_ANONYMOUS_PROPERTY_NAME, Boolean.TRUE.toString());
         return new MemoryConfig(props);

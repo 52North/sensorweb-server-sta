@@ -40,8 +40,19 @@ server:
 # Database Configuration
 database:
   jpa:
-    persistence-location: classpath:META-INF/sensorthings-persistence.xml
+    # Mappings to be loaded. See https://github.com/52North/sensorweb-server-sta/wiki for details
+    # Options:
+    # - Vanilla STA: sta-vanilla.xml
+    # - STA with additional User table: sta-citsci-extension.xml
+    persistence-location: classpath:META-INF/sta-citsci-extension.xml
 spring:
+  # Profile of the application.
+  # Options:
+  # - Vanilla STA: vanilla
+  # - STA with Citizen Science Extension: citSciExtension
+  # - [not implemented yet] STA with MultiDatastream Extension: multiDatastreamExtension
+  profiles:
+    active: citSciExtension
   main:
     show-banner: false
   datasource:

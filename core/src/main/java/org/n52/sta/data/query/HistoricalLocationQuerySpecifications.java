@@ -52,7 +52,7 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
     public Specification<HistoricalLocationEntity> withLocationStaIdentifier(final String locationIdentifier) {
         return (root, query, builder) -> {
             final Join<HistoricalLocationEntity, LocationEntity> join =
-                    root.join(HistoricalLocationEntity.PROPERTY_LOCATIONS, JoinType.INNER);
+                root.join(HistoricalLocationEntity.PROPERTY_LOCATIONS, JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), locationIdentifier);
         };
     }
@@ -60,31 +60,31 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
     public Specification<HistoricalLocationEntity> withThingStaIdentifier(final String thingIdentifier) {
         return (root, query, builder) -> {
             final Join<HistoricalLocationEntity, PlatformEntity> join =
-                    root.join(HistoricalLocationEntity.PROPERTY_THING, JoinType.INNER);
+                root.join(HistoricalLocationEntity.PROPERTY_THING, JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), thingIdentifier);
         };
     }
 
     @Override protected Specification<HistoricalLocationEntity> handleRelatedPropertyFilter(
-            String propertyName,
-            Specification<?> propertyValue) {
+        String propertyName,
+        Specification<?> propertyValue) {
         return (root, query, builder) -> {
             if (StaConstants.THING.equals(propertyName)) {
                 Subquery<HistoricalLocationEntity> sq = query.subquery(HistoricalLocationEntity.class);
                 Root<PlatformEntity> thing = sq.from(PlatformEntity.class);
                 sq.select(thing.get(DescribableEntity.PROPERTY_ID))
-                  .where(((Specification<PlatformEntity>) propertyValue).toPredicate(thing,
-                                                                                     query,
-                                                                                     builder));
+                    .where(((Specification<PlatformEntity>) propertyValue).toPredicate(thing,
+                                                                                       query,
+                                                                                       builder));
                 return builder.in(root.get(HistoricalLocationEntity.PROPERTY_THING)).value(sq);
             } else if (StaConstants.LOCATIONS.equals(propertyName)) {
                 Subquery<HistoricalLocationEntity> sq = query.subquery(HistoricalLocationEntity.class);
                 Root<LocationEntity> location = sq.from(LocationEntity.class);
                 Join<Object, Object> join = root.join(HistoricalLocationEntity.PROPERTY_LOCATIONS);
                 sq.select(location.get(DescribableEntity.PROPERTY_ID))
-                  .where(((Specification<LocationEntity>) propertyValue).toPredicate(location,
-                                                                                     query,
-                                                                                     builder));
+                    .where(((Specification<LocationEntity>) propertyValue).toPredicate(location,
+                                                                                       query,
+                                                                                       builder));
                 return join.in(sq);
             } else {
                 throw new RuntimeException("Could not find related property: " + propertyName);
@@ -93,26 +93,26 @@ public class HistoricalLocationQuerySpecifications extends EntityQuerySpecificat
     }
 
     @Override protected Specification<HistoricalLocationEntity> handleDirectPropertyFilter(
-            String propertyName,
-            Expression<?> propertyValue,
-            FilterConstants.ComparisonOperator operator,
-            boolean switched) {
+        String propertyName,
+        Expression<?> propertyValue,
+        FilterConstants.ComparisonOperator operator,
+        boolean switched) {
         return (Specification<HistoricalLocationEntity>) (root, query, builder) -> {
             try {
                 switch (propertyName) {
-                case StaConstants.PROP_ID:
-                    return handleDirectStringPropertyFilter(root.get(HistoricalLocationEntity.STA_IDENTIFIER),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            false);
-                case StaConstants.PROP_TIME:
-                    return handleDirectDateTimePropertyFilter(root.get(HistoricalLocationEntity.PROPERTY_TIME),
-                                                              propertyValue,
-                                                              operator,
-                                                              builder);
-                default:
-                    throw new RuntimeException("Error getting filter for Property: \"" + propertyName
+                    case StaConstants.PROP_ID:
+                        return handleDirectStringPropertyFilter(root.get(HistoricalLocationEntity.STA_IDENTIFIER),
+                                                                propertyValue,
+                                                                operator,
+                                                                builder,
+                                                                false);
+                    case StaConstants.PROP_TIME:
+                        return handleDirectDateTimePropertyFilter(root.get(HistoricalLocationEntity.PROPERTY_TIME),
+                                                                  propertyValue,
+                                                                  operator,
+                                                                  builder);
+                    default:
+                        throw new RuntimeException("Error getting filter for Property: \"" + propertyName
                                                        + "\". No such property in Entity.");
                 }
             } catch (STAInvalidFilterExpressionException e) {

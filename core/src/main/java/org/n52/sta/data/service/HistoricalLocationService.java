@@ -213,11 +213,6 @@ public class HistoricalLocationService
     }
 
     @Override
-    public void delete(HistoricalLocationEntity entity) throws STACRUDException {
-        delete(entity.getStaIdentifier());
-    }
-
-    @Override
     public HistoricalLocationEntity createOrUpdate(HistoricalLocationEntity entity)
         throws STACRUDException {
         if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
@@ -246,8 +241,9 @@ public class HistoricalLocationService
             throw new STACRUDException("The HistoricalLocation to create is invalid", HTTPStatus.BAD_REQUEST);
         }
     }
-
-    private HistoricalLocationEntity processThing(HistoricalLocationEntity historicalLocation) throws STACRUDException {
+    
+    private HistoricalLocationEntity processThing(HistoricalLocationEntity historicalLocation)
+        throws STACRUDException {
         PlatformEntity thing = getThingService().createOrfetch(historicalLocation.getThing());
         historicalLocation.setThing(thing);
         HistoricalLocationEntity created = getRepository().save(historicalLocation);

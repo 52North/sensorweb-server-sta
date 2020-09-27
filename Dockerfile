@@ -1,27 +1,27 @@
-#FROM alpine/git as gitstage
-#WORKDIR /app
+FROM alpine/git as gitstage
+WORKDIR /app
 
-#RUN git clone https://github.com/52north/arctic-sea \
-#    && cd arctic-sea \
-#    && git checkout master
+RUN git clone https://github.com/speckij/arctic-sea \
+    && cd arctic-sea \
+    && git checkout feature/sta-citsci-extension
 
-#RUN git clone https://github.com/52north/sensorweb-server-db-model \
-#    && cd sensorweb-server-db-model \
-#    && git checkout develop
+RUN git clone https://github.com/52north/sensorweb-server-db-model \
+    && cd sensorweb-server-db-model \
+    && git checkout feature/sta_extension-2
 
 FROM maven:3.6.1-jdk-8-slim as buildstage
 WORKDIR /app
-#COPY --from=gitstage /app /app
+COPY --from=gitstage /app /app
 COPY . /app/sensorweb-server-sta/
 
-#RUN cd arctic-sea \
-#    && mvn clean install
+RUN cd arctic-sea \
+    && mvn clean install
 
-#RUN cd sensorweb-server-db-model \
-#    && mvn clean install
+RUN cd sensorweb-server-db-model \
+    && mvn clean install
 
 RUN cd sensorweb-server-sta \
-    && mvn package
+    && mvn clean package
 
 FROM adoptopenjdk/openjdk8:alpine-slim as runstage
 

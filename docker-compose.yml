@@ -5,15 +5,14 @@ services:
     # build: https://github.com/52North/sensorweb-server-sta.git#develop
     ports:
       - 8081:8081
-      - 1883:1883
-      - 8883:8883
     environment:
       LOGGING_LEVEL_ROOT: INFO
       LOGGING_LEVEL_ORG_N52: TRACE
       SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/sta
-      SPING_JPA_PROPERTIES_HIBERNATE_HBM2DDL: update
-      MQTT_BROKER_PLAINTCP_ENABLED: "true"
-      MQTT_BROKER_WEBSOCKET_ENABLED: "true"
+      SPRING_JPA_PROPERTIES_HIBERNATE_HBM2DDL_AUTO: create
+      MQTT_BROKER_PLAINTCP_ENABLED: "false"
+      MQTT_BROKER_PLAINTCP_PORT: 9876
+      MQTT_BROKER_WEBSOCKET_ENABLED: "false"
       MQTT_BROKER_PERSISTENCE_ENABLED: "false"
       SERVER_ROOTURL: http://localhost:8081/sta/
       SERVER_SERVLET_CONTEXT_PATH: /sta
