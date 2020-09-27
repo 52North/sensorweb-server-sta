@@ -2,8 +2,8 @@
 <persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence
-             http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd"
-    version="2.1">
+             http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd"
+    version="2.2">
     <persistence-unit name="default-unit">
         <description>SensorThings Mappings</description>
         <mapping-file>/hbm/transactional/core/CategoryResource.hbm.xml</mapping-file>
@@ -11,7 +11,6 @@
         <mapping-file>/hbm/transactional/core/FeatureResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/FormatResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/OfferingResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/transactional/core/ParameterResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/PhenomenonResource.hbm.xml</mapping-file>
 
         <mapping-file>/hbm/transactional/core/ProcedureHistoryResource.hbm.xml</mapping-file>
@@ -27,16 +26,17 @@
         <mapping-file>/hbm/transactional/dataset/DatasetResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/TagResource.hbm.xml</mapping-file>
 
-        <!--
-        <mapping-file>/hbm/transactional/sampling/DataResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/transactional/sampling/DatasetResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/transactional/sampling/MeasuringProgram.hbm.xml</mapping-file>
-        <mapping-file>/hbm/transactional/sampling/Sampling.hbm.xml</mapping-file>
-        <mapping-file>/hbm/transactional/core/DatastreamResource.hbm.xml</mapping-file>
-         -->
-
         <mapping-file>/hbm/transactional/core/LocationResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/PlatformResource.hbm.xml</mapping-file>
+
+
+        <mapping-file>/hbm/parameter/PlatformParameterResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/parameter/DatasetParameterResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/parameter/ObservationParameterResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/parameter/LocationParameterResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/parameter/PhenomenonParameterResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/parameter/ProcedureParameterResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/parameter/FeatureParameterResource.hbm.xml</mapping-file>
 
         <!-- Load Classes annoted by @Entity-->
         <class>org.n52.series.db.beans.sta.QuantityObservationEntity</class>

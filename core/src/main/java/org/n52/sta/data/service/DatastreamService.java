@@ -52,7 +52,8 @@ import org.n52.series.db.beans.UnitEntity;
 import org.n52.series.db.beans.dataset.DatasetType;
 import org.n52.series.db.beans.dataset.ObservationType;
 import org.n52.series.db.beans.dataset.ValueType;
-import org.n52.series.db.beans.parameter.ParameterBooleanEntity;
+import org.n52.series.db.beans.parameter.BooleanParameterEntity;
+import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.sta.AbstractDatastreamEntity;
 import org.n52.series.db.beans.sta.AbstractObservationEntity;
 import org.n52.series.db.beans.sta.BooleanObservationEntity;
@@ -527,9 +528,9 @@ public class DatastreamService extends
                                                           && datastream.getThing()
                                                           .getParameters()
                                                           .stream()
-                                                          .filter(p -> p instanceof ParameterBooleanEntity)
+                                                          .filter(p -> p instanceof BooleanParameterEntity)
                                                           .filter(p -> p.getName().equals("isMobile"))
-                                                          .anyMatch(p -> ((ParameterBooleanEntity) p).getValue()));
+                                                          .anyMatch(p -> ((ParameterEntity<Boolean>) p).getValue()));
         dataset.setIdentifier(UUID.randomUUID().toString());
         dataset.setStaIdentifier(staIdentifier);
         dataset.setName(datastream.getName());

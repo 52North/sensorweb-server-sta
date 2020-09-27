@@ -130,9 +130,8 @@ public interface EntityGraphRepository<T, I> extends JpaSpecificationExecutor<T>
     //TODO: expand if necessary
     enum FetchGraph {
         FETCHGRAPH_DEFAULT("identifier"),
-        FETCHGRAPH_PLATFORMS("platforms"),
-        FETCHGRAPH_PLATFORM("platform"),
-        FETCHGRAPH_PLAFORMLOCATION("platform(locations)"),
+        FETCHGRAPH_PLATFORMS("platforms(parameters)"),
+        FETCHGRAPH_PLATFORM("platform(parameters)"),
         FETCHGRAPH_PLATFORMSHISTLOCATION("platforms(historicalLocations)"),
         FETCHGRAPH_LOCATIONS("locations"),
         FETCHGRAPH_LOCATIONHISTLOCATION("locations(historicalLocations)"),

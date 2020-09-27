@@ -266,7 +266,20 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Ob
                                     "Unknown operator: " + operator.toString());
                         }
                     default:
-                        throw new STAInvalidFilterExpressionException("Currently not implemented!");
+                        // We are filtering on variable keys on parameters
+                        if (propertyName.startsWith(StaConstants.PROP_PARAMETERS)) {
+                            return handleProperties(root,
+                                                    query,
+                                                    builder,
+                                                    propertyName,
+                                                    propertyValue,
+                                                    operator,
+                                                    switched,
+                                                    ObservationParameterEntity.PROP_OBSERVATION_ID,
+                                                    ParameterFactory.EntityType.OBSERVATION);
+                        } else {
+                            throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP, propertyName));
+                        }
                 }
             } catch (STAInvalidFilterExpressionException e) {
                 throw new RuntimeException(e);

@@ -30,7 +30,6 @@
 package org.n52.sta.serdes.json;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.joda.time.DateTime;
@@ -38,8 +37,8 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.geojson.GeoJsonReader;
+import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.series.db.beans.sta.ObservationEntity;
-import org.n52.series.db.beans.sta.ObservationRelationEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
@@ -49,8 +48,8 @@ import org.springframework.util.Assert;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 @SuppressWarnings("VisibilityModifier")
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
@@ -264,17 +263,17 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
             }
             self.setRelations(rel);
         }
-
         return self;
     }
 
     public JSONObservation parseParameters(Map<String, String> propertyMapping) {
         if (parameters != null) {
             for (Map.Entry<String, String> mapping : propertyMapping.entrySet()) {
-                for (JsonNode param : parameters) {
-                    String paramName = param.get(NAME).asText();
+                Iterator<String> keyIt = parameters.fieldNames();
+                while (keyIt.hasNext()) {
+                    String paramName = keyIt.next();
                     if (paramName.equals(mapping.getValue())) {
-                        JsonNode jsonNode = param.get(VALUE);
+                        JsonNode jsonNode = parameters.get(paramName);
                         switch (mapping.getKey()) {
                             case "samplingGeometry":
                                 // Add as samplingGeometry to enable interoperability with SOS

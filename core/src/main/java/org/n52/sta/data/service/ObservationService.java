@@ -40,7 +40,6 @@ import org.n52.series.db.beans.sta.CategoryObservationEntity;
 import org.n52.series.db.beans.sta.CountObservationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ObservationEntity;
-import org.n52.series.db.beans.sta.ObservationRelationEntity;
 import org.n52.series.db.beans.sta.QuantityObservationEntity;
 import org.n52.series.db.beans.sta.TextObservationEntity;
 import org.n52.shetland.filter.ExpandFilter;
@@ -57,8 +56,8 @@ import org.n52.sta.data.repositories.DataRepository;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.LocationRepository;
+import org.n52.sta.data.repositories.ObservationParameterRepository;
 import org.n52.sta.data.repositories.ObservationRepository;
-import org.n52.sta.data.repositories.ParameterRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.data.service.util.CollectionWrapper;
 import org.slf4j.Logger;
@@ -78,7 +77,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -95,14 +93,14 @@ public class ObservationService
     private static final Logger LOGGER = LoggerFactory.getLogger(ObservationService.class);
     protected final DataRepository<DataEntity<?>> dataRepository;
     protected final DatastreamRepository datastreamRepository;
-    protected final ParameterRepository parameterRepository;
+    protected final ObservationParameterRepository parameterRepository;
     private final Class entityClass;
 
     @Autowired
     public ObservationService(ObservationRepository<ObservationEntity<?>> repository,
                               DataRepository<DataEntity<?>> dataRepository,
                               DatastreamRepository datastreamRepository,
-                              ParameterRepository parameterRepository) {
+                              ObservationParameterRepository parameterRepository) {
         super(repository, ObservationEntity.class);
         this.entityClass = ObservationEntity.class;
         this.dataRepository = dataRepository;
@@ -399,13 +397,16 @@ public class ObservationService
             existing.setValidTimeEnd(toMerge.getValidTimeEnd());
         }
         // parameter
+        /*
         if (toMerge.getParameters() != null) {
-            synchronized (getLock(String.valueOf(existing.getParameters().hashCode()))) {
+            synchronized (getLock(String.valueOf(
+                toMerge.getParameters().hashCode() + existing.getParameters().hashCode()))) {
                 parameterRepository.saveAll(toMerge.getParameters());
                 existing.getParameters().forEach(parameterRepository::delete);
                 existing.setParameters(toMerge.getParameters());
             }
         }
+        */
         // value
         if (toMerge.getValue() != null) {
             checkValue(existing, toMerge);
@@ -730,10 +731,12 @@ public class ObservationService
         data.setVerticalFrom(observation.getVerticalFrom());
         data.setVerticalTo(observation.getVerticalTo());
 
+        /*
         if (observation.getParameters() != null) {
             parameterRepository.saveAll(observation.getParameters());
             data.setParameters(observation.getParameters());
         }
+         */
         return data;
     }
 }

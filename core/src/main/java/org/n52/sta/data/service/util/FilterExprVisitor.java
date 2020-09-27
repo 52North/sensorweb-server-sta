@@ -301,7 +301,9 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
             }
         } else if (expr.getLeft().isMember()) {
             String leftValue = expr.getLeft().asMember().get().getValue();
-            if (leftValue.contains(SLASH) && !leftValue.startsWith("properties/")) {
+            if (leftValue.contains(SLASH)
+                && !leftValue.startsWith(StaConstants.PROP_PROPERTIES)
+                && !leftValue.startsWith(StaConstants.PROP_PARAMETERS)) {
                 return convertToForeignExpression(leftValue,
                                                   expr.getRight().accept(this),
                                                   operator);
@@ -337,7 +339,12 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
         String lastResource = resources[resources.length - 2];
 
         // Get filter on Entity
-        EntityQuerySpecifications<?> stepQS = QuerySpecificationRepository.getSpecification(lastResource);
+        EntityQuerySpecifications<?> stepQS;
+        if (lastResource.equals(StaConstants.PROP_PROPERTIES) || lastResource.equals(StaConstants.PROP_PARAMETERS)) {
+            stepQS = rootQS;
+        } else {
+            stepQS = QuerySpecificationRepository.getSpecification(lastResource);
+        }
 
         Specification<?> filter =
             stepQS.getFilterForProperty(resources[resources.length - 1], value, operator, false);
@@ -517,16 +524,11 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
                     builder.literal(rawSecondParam.substring(1, rawSecondParam.length() - 1) + DOLLAR),
                     builder::like);
             case ODataConstants.StringFunctions.SUBSTRINGOF:
-                secondParam = expr.getParameters().get(1).accept(this);
+                String rawSecondP = expr.getParameters().get(1).toString();
                 return this.<String, String, Expression<Boolean>>evalFuncOnMember(
                     expr,
-                    (Expression<String>) secondParam,
-                    (param1, param2) -> builder.function(
-                        "CONTAINS",
-                        Boolean.class,
-                        param1,
-                        param2)
-                );
+                    builder.literal(DOLLAR + rawSecondP.substring(1, rawSecondP.length() - 1) + DOLLAR),
+                    builder::like);
             case ODataConstants.StringFunctions.INDEXOF:
                 secondParam = expr.getParameters().get(1).accept(this);
                 return this.<String, String, Expression<Integer>>evalFuncOnMember(expr,
