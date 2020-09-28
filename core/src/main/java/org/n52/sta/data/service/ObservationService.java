@@ -34,6 +34,7 @@ import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetAggregationEntity;
+import org.n52.series.db.beans.parameter.observation.ObservationParameterEntity;
 import org.n52.series.db.beans.sta.AbstractObservationEntity;
 import org.n52.series.db.beans.sta.BooleanObservationEntity;
 import org.n52.series.db.beans.sta.CategoryObservationEntity;
@@ -325,6 +326,22 @@ public class ObservationService
                 // Save Observation
                 ObservationEntity<?> data = saveObservation(observation, observation.getDataset());
 
+                // Save parameters
+                if (observation.getParameters() != null) {
+                    parameterRepository.saveAll(
+                        observation
+                            .getParameters()
+                            .stream()
+                            .filter(o -> o instanceof ObservationParameterEntity)
+                            .map(o -> {
+                                ((ObservationParameterEntity<?>) o).setObservation(data);
+                                return (ObservationParameterEntity) o;
+                            })
+                            .collect(Collectors.toSet())
+                    );
+                    data.setParameters(observation.getParameters());
+                }
+
                 // Save Relations
                 if (observation.getRelations() != null) {
                     for (Object relation : observation.getRelations()) {
@@ -401,16 +418,25 @@ public class ObservationService
             existing.setValidTimeEnd(toMerge.getValidTimeEnd());
         }
         // parameter
-        /*
         if (toMerge.getParameters() != null) {
             synchronized (getLock(String.valueOf(
                 toMerge.getParameters().hashCode() + existing.getParameters().hashCode()))) {
-                parameterRepository.saveAll(toMerge.getParameters());
-                existing.getParameters().forEach(parameterRepository::delete);
+                parameterRepository.saveAll(toMerge.getParameters()
+                                                .stream()
+                                                .filter(o -> o instanceof ObservationParameterEntity)
+                                                .map(o -> {
+                                                    ((ObservationParameterEntity<?>) o).setObservation(existing);
+                                                    return (ObservationParameterEntity) o;
+                                                })
+                                                .collect(Collectors.toSet()));
+                existing.getParameters()
+                    .stream()
+                    .filter(o -> o instanceof ObservationParameterEntity)
+                    .map(o -> (ObservationParameterEntity) o)
+                    .forEach(parameterRepository::delete);
                 existing.setParameters(toMerge.getParameters());
             }
         }
-        */
         // value
         if (toMerge.getValue() != null) {
             checkValue(existing, toMerge);
@@ -470,7 +496,7 @@ public class ObservationService
         return fillConcreteObservationType(data, observation, dataset);
     }
 
-    private CollectionWrapper  getEntityCollectionWrapperByIdentifierList(List<String> identifierList,
+    private CollectionWrapper getEntityCollectionWrapperByIdentifierList(List<String> identifierList,
                                                                          OffsetLimitBasedPageRequest pageableRequest,
                                                                          QueryOptions queryOptions,
                                                                          Specification<ObservationEntity<?>> spec) {
@@ -734,13 +760,6 @@ public class ObservationService
         data.setSamplingGeometry(observation.getSamplingGeometry());
         data.setVerticalFrom(observation.getVerticalFrom());
         data.setVerticalTo(observation.getVerticalTo());
-
-        /*
-        if (observation.getParameters() != null) {
-            parameterRepository.saveAll(observation.getParameters());
-            data.setParameters(observation.getParameters());
-        }
-         */
         return data;
     }
 }
