@@ -56,6 +56,15 @@ public class JSONProject extends JSONBase.JSONwithIdNameDescriptionTime<ProjectE
     @JsonProperty(StaConstants.DATASTREAMS)
     public JSONDatastream[] datastreams;
 
+    @JsonProperty(StaConstants.PROP_CLASSIFICATION)
+    public String classification;
+
+    @JsonProperty(StaConstants.PROP_PRIVACY_POLICY)
+    public String privacyPolicy;
+
+    @JsonProperty(StaConstants.PROP_TERMS_OF_USE)
+    public String termsOfUse;
+
     public JSONProject() {
         self = new ProjectEntity();
     }
@@ -67,6 +76,9 @@ public class JSONProject extends JSONBase.JSONwithIdNameDescriptionTime<ProjectE
                 Assert.notNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
                 Assert.notNull(description, INVALID_INLINE_ENTITY_MISSING + "description");
                 Assert.notNull(runtime, INVALID_INLINE_ENTITY_MISSING + "runtime");
+                Assert.notNull(classification, INVALID_INLINE_ENTITY_MISSING + "classification");
+                Assert.notNull(privacyPolicy, INVALID_INLINE_ENTITY_MISSING + "privacyPolicy");
+                Assert.notNull(termsOfUse, INVALID_INLINE_ENTITY_MISSING + "termsOfUse");
 
                 return createEntity();
             case PATCH:
@@ -77,6 +89,9 @@ public class JSONProject extends JSONBase.JSONwithIdNameDescriptionTime<ProjectE
                 Assert.isNull(runtime, INVALID_REFERENCED_ENTITY);
                 Assert.isNull(name, INVALID_REFERENCED_ENTITY);
                 Assert.isNull(description, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(classification, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(privacyPolicy, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(termsOfUse, INVALID_REFERENCED_ENTITY);
                 self.setStaIdentifier(identifier);
                 return self;
             default:
@@ -88,6 +103,9 @@ public class JSONProject extends JSONBase.JSONwithIdNameDescriptionTime<ProjectE
         self.setStaIdentifier(identifier);
         self.setName(name);
         self.setDescription(description);
+        self.setClassification(classification);
+        self.setTermsOfUse(termsOfUse);
+        self.setPrivacyPolicy(privacyPolicy);
 
         if (runtime != null) {
             Time time = parseTime(runtime);

@@ -113,6 +113,21 @@ public class ProjectSerDes {
                 gen.writeStringField(STAEntityDefinition.PROP_RUNTIME, runtime);
             }
 
+            if (!value.hasSelectOption() ||
+                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_CLASSIFICATION)) {
+                gen.writeStringField(STAEntityDefinition.PROP_CLASSIFICATION, project.getClassification());
+            }
+
+            if (!value.hasSelectOption() ||
+                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PRIVACY_POLICY)) {
+                gen.writeStringField(STAEntityDefinition.PROP_PRIVACY_POLICY, project.getPrivacyPolicy());
+            }
+
+            if (!value.hasSelectOption() ||
+                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_TERMS_OF_USE)) {
+                gen.writeStringField(STAEntityDefinition.PROP_TERMS_OF_USE, project.getTermsOfUse());
+            }
+
             if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.DATASTREAMS)) {
                 if (!value.hasExpandOption() ||
                     value.getFieldsToExpand().get(STAEntityDefinition.DATASTREAMS) == null) {
