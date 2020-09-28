@@ -154,8 +154,10 @@ public class ProjectService
             if (getRepository().existsByStaIdentifier(project.getStaIdentifier())) {
                 throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS, HTTPStatus.CONFLICT);
             } else {
-                for (AbstractDatasetEntity datastream : project.getDatasets()) {
-                    getDatastreamService().create(datastream);
+                if (project.hasDatastreams()) {
+                    for (AbstractDatasetEntity datastream : project.getDatasets()) {
+                        getDatastreamService().create(datastream);
+                    }
                 }
                 getRepository().save(project);
             }
