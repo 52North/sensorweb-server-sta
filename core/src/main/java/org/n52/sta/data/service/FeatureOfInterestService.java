@@ -67,6 +67,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -100,8 +101,10 @@ public class FeatureOfInterestService
     public FeatureOfInterestService(FeatureOfInterestRepository repository,
                                     FormatRepository formatRepository,
                                     ObservationRepository observationRepository,
-                                    DatastreamRepository datastreamRepository) {
+                                    DatastreamRepository datastreamRepository,
+                                    EntityManager em) {
         super(repository,
+              em,
               AbstractFeatureEntity.class);
         this.formatRepository = formatRepository;
         this.observationRepository = observationRepository;

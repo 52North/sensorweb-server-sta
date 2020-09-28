@@ -71,6 +71,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
@@ -100,10 +101,11 @@ public class ObservationService
 
     @Autowired
     public ObservationService(ObservationRepository<ObservationEntity<?>> repository,
+                              EntityManager em,
                               DataRepository<DataEntity<?>> dataRepository,
                               DatastreamRepository datastreamRepository,
                               ObservationParameterRepository parameterRepository) {
-        super(repository, ObservationEntity.class);
+        super(repository, em, ObservationEntity.class);
         this.entityClass = ObservationEntity.class;
         this.dataRepository = dataRepository;
         this.datastreamRepository = datastreamRepository;

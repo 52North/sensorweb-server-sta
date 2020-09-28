@@ -55,6 +55,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -79,8 +80,9 @@ public class ObservedPropertyService
 
     @Autowired
     public ObservedPropertyService(PhenomenonRepository repository,
-                                   DatastreamRepository datastreamRepository) {
-        super(repository, PhenomenonEntity.class);
+                                   DatastreamRepository datastreamRepository,
+                                   EntityManager em) {
+        super(repository, em, PhenomenonEntity.class);
         this.datastreamRepository = datastreamRepository;
     }
 

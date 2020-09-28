@@ -54,6 +54,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Optional;
@@ -78,8 +79,9 @@ public class HistoricalLocationService
 
     @Autowired
     public HistoricalLocationService(HistoricalLocationRepository repository,
-                                     LocationRepository locationRepository) {
-        super(repository, HistoricalLocationEntity.class);
+                                     LocationRepository locationRepository,
+                                     EntityManager em) {
+        super(repository, em, HistoricalLocationEntity.class);
         this.locationRepository = locationRepository;
     }
 
