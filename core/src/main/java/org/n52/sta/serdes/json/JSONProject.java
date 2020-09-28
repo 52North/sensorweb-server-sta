@@ -79,7 +79,6 @@ public class JSONProject extends JSONBase.JSONwithIdNameDescriptionTime<ProjectE
                 Assert.notNull(classification, INVALID_INLINE_ENTITY_MISSING + "classification");
                 Assert.notNull(privacyPolicy, INVALID_INLINE_ENTITY_MISSING + "privacyPolicy");
                 Assert.notNull(termsOfUse, INVALID_INLINE_ENTITY_MISSING + "termsOfUse");
-                Assert.notNull(datastreams, INVALID_INLINE_ENTITY_MISSING + "Datastreams");
 
                 return createEntity();
             case PATCH:
@@ -129,8 +128,6 @@ public class JSONProject extends JSONBase.JSONwithIdNameDescriptionTime<ProjectE
             Set<AbstractDatasetEntity> related = new HashSet<>();
             related.add(((JSONDatastream) backReference).getEntity());
             self.setDatasets(related);
-        } else {
-            Assert.notNull(null, INVALID_INLINE_ENTITY_MISSING + StaConstants.DATASTREAM);
         }
 
         return self;
