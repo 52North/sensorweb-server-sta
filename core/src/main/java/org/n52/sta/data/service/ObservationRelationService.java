@@ -49,6 +49,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -67,8 +68,8 @@ public class ObservationRelationService
 
     private static final ObservationRelationQuerySpecifications orQS = new ObservationRelationQuerySpecifications();
 
-    public ObservationRelationService(ObservationRelationRepository repository) {
-        super(repository, ObservationRelationEntity.class);
+    public ObservationRelationService(ObservationRelationRepository repository, EntityManager em) {
+        super(repository, em, ObservationRelationEntity.class);
     }
 
     @Override public EntityTypes[] getTypes() {

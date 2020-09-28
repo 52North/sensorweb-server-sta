@@ -51,6 +51,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -67,8 +68,8 @@ public class ProjectService
 
     private static final ProjectQuerySpecifications pQS = new ProjectQuerySpecifications();
 
-    public ProjectService(ProjectRepository repository) {
-        super(repository, ProjectEntity.class);
+    public ProjectService(ProjectRepository repository, EntityManager em) {
+        super(repository, em, ProjectEntity.class);
     }
 
     @Override public EntityTypes[] getTypes() {

@@ -53,6 +53,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -74,8 +75,9 @@ public class ObservationGroupService
     private final ObservationGroupParameterRepository parameterRepository;
 
     public ObservationGroupService(ObservationGroupRepository repository,
-                                   ObservationGroupParameterRepository parameterRepository) {
-        super(repository, ObservationGroupEntity.class);
+                                   ObservationGroupParameterRepository parameterRepository,
+                                   EntityManager em) {
+        super(repository, em, ObservationGroupEntity.class);
         this.parameterRepository = parameterRepository;
     }
 

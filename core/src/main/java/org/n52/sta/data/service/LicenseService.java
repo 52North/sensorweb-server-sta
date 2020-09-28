@@ -51,6 +51,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -66,9 +67,12 @@ public class LicenseService
     extends AbstractSensorThingsEntityServiceImpl<LicenseRepository, LicenseEntity, LicenseEntity> {
 
     private static final LicenseQuerySpecifications lQS = new LicenseQuerySpecifications();
+    private final EntityManager em;
 
-    public LicenseService(LicenseRepository repository) {
-        super(repository, LicenseEntity.class);
+    public LicenseService(LicenseRepository repository,
+                          EntityManager em) {
+        super(repository, em, LicenseEntity.class);
+        this.em = em;
     }
 
     @Override public EntityTypes[] getTypes() {
@@ -96,6 +100,7 @@ public class LicenseService
 
     @Override protected LicenseEntity fetchExpandEntitiesWithFilter(LicenseEntity entity, ExpandFilter expandOption)
         throws STACRUDException, STAInvalidQueryException {
+        em.detach(entity);
         for (ExpandItem expandItem : expandOption.getItems()) {
             String expandProperty = expandItem.getPath();
             if (LicenseEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {

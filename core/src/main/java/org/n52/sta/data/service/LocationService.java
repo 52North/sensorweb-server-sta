@@ -60,6 +60,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Optional;
@@ -88,8 +89,9 @@ public class LocationService
 
     public LocationService(@Value("${server.feature.updateFOI:false}") boolean updateFOI,
                            LocationRepository repository,
-                           LocationEncodingRepository locationEncodingRepository) {
-        super(repository, LocationEntity.class);
+                           LocationEncodingRepository locationEncodingRepository,
+                           EntityManager em) {
+        super(repository, em, LocationEntity.class);
         this.locationEncodingRepository = locationEncodingRepository;
         this.updateFOIFeatureEnabled = updateFOI;
     }

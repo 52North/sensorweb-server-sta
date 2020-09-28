@@ -64,6 +64,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import javax.persistence.criteria.Predicate;
 import java.util.Optional;
 import java.util.Set;
@@ -97,6 +98,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     protected static final String NO_S_WITH_ID_S_FOUND = "No %s with id %s found.";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSensorThingsEntityServiceImpl.class);
+    private final EntityManager em;
     private final Class<S> entityClass;
     private EntityServiceRepository serviceRepository;
     @Autowired
@@ -104,7 +106,9 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     private T repository;
 
     public AbstractSensorThingsEntityServiceImpl(T repository,
+                                                 EntityManager em,
                                                  Class entityClass) {
+        this.em = em;
         this.entityClass = entityClass;
         this.repository = repository;
     }
@@ -232,6 +236,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         if (queryOptions.hasExpandFilter()) {
             Page expanded = pages.map(e -> {
                 try {
+                    em.detach(e);
                     return fetchExpandEntitiesWithFilter(e, queryOptions.getExpandFilter());
                 } catch (STACRUDException | STAInvalidQueryException ex) {
                     throw new RuntimeException(ex);

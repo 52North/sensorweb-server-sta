@@ -59,6 +59,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -85,8 +86,9 @@ public class SensorService
     public SensorService(ProcedureRepository repository,
                          FormatRepository formatRepository,
                          ProcedureHistoryRepository procedureHistoryRepository,
-                         DatastreamRepository datastreamRepository) {
-        super(repository, ProcedureEntity.class);
+                         DatastreamRepository datastreamRepository,
+                         EntityManager em) {
+        super(repository, em, ProcedureEntity.class);
         this.formatRepository = formatRepository;
         this.procedureHistoryRepository = procedureHistoryRepository;
         this.datastreamRepository = datastreamRepository;

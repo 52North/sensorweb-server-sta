@@ -118,11 +118,13 @@ public class ObservationRelationSerDes {
                     || value.getFieldsToExpand().get(STAEntityDefinition.OBSERVATION_GROUP) == null) {
                     writeNavigationProp(gen, STAEntityDefinition.OBSERVATION_GROUP, obsRelation.getStaIdentifier());
                 } else {
-                    gen.writeFieldName(STAEntityDefinition.OBSERVATION_GROUP);
-                    writeNestedEntity(obsRelation.getGroup(),
-                                      value.getFieldsToExpand().get(STAEntityDefinition.OBSERVATION_GROUP),
-                                      gen,
-                                      serializers);
+                    if (obsRelation.getGroup() != null) {
+                        gen.writeFieldName(STAEntityDefinition.OBSERVATION_GROUP);
+                        writeNestedEntity(obsRelation.getGroup(),
+                                          value.getFieldsToExpand().get(STAEntityDefinition.OBSERVATION_GROUP),
+                                          gen,
+                                          serializers);
+                    }
                 }
             }
             gen.writeEndObject();

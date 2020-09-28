@@ -97,6 +97,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import javax.persistence.criteria.Predicate;
 import java.util.Collections;
 import java.util.HashSet;
@@ -136,8 +137,10 @@ public class DatastreamService extends
                              FormatRepository formatRepository,
                              OfferingRepository offeringRepository,
                              CategoryRepository categoryRepository,
-                             ObservationRepository observationRepository) {
+                             ObservationRepository observationRepository,
+                             EntityManager em) {
         super(repository,
+              em,
               AbstractDatasetEntity.class);
         this.isMobileFeatureEnabled = isMobileFeatureEnabled;
         this.unitRepository = unitRepository;

@@ -56,6 +56,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Objects;
@@ -78,8 +79,9 @@ public class ThingService
     private final PlatformParameterRepository parameterRepository;
 
     public ThingService(ThingRepository repository,
-                        PlatformParameterRepository parameterRepository) {
-        super(repository, PlatformEntity.class);
+                        PlatformParameterRepository parameterRepository,
+                        EntityManager em) {
+        super(repository, em, PlatformEntity.class);
         this.parameterRepository = parameterRepository;
     }
 

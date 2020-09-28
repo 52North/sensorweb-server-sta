@@ -51,6 +51,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -67,8 +68,8 @@ public class PartyService
 
     private static final PartyQuerySpecifications pQS = new PartyQuerySpecifications();
 
-    public PartyService(PartyRepository repository) {
-        super(repository, PartyEntity.class);
+    public PartyService(PartyRepository repository, EntityManager em) {
+        super(repository, em, PartyEntity.class);
     }
 
     @Override public EntityTypes[] getTypes() {
