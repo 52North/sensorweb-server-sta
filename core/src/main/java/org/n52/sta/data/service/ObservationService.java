@@ -40,6 +40,7 @@ import org.n52.series.db.beans.sta.CategoryObservationEntity;
 import org.n52.series.db.beans.sta.CountObservationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ObservationEntity;
+import org.n52.series.db.beans.sta.ObservationRelationEntity;
 import org.n52.series.db.beans.sta.QuantityObservationEntity;
 import org.n52.series.db.beans.sta.TextObservationEntity;
 import org.n52.shetland.filter.ExpandFilter;
@@ -77,6 +78,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -466,7 +468,7 @@ public class ObservationService
         return fillConcreteObservationType(data, observation, dataset);
     }
 
-    private CollectionWrapper getEntityCollectionWrapperByIdentifierList(List<String> identifierList,
+    private CollectionWrapper  getEntityCollectionWrapperByIdentifierList(List<String> identifierList,
                                                                          OffsetLimitBasedPageRequest pageableRequest,
                                                                          QueryOptions queryOptions,
                                                                          Specification<ObservationEntity<?>> spec) {

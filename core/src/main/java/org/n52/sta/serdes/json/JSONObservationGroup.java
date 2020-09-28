@@ -33,6 +33,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.series.db.beans.sta.ObservationGroupEntity;
 import org.n52.series.db.beans.sta.ObservationRelationEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
@@ -89,7 +90,7 @@ public class JSONObservationGroup extends JSONBase.JSONwithIdNameDescription<Obs
         self.setDescription(description);
 
         if (properties != null) {
-            self.setParameters(convertParameters(properties));
+            self.setParameters(convertParameters(properties, ParameterFactory.EntityType.OBS_GROUP));
         }
 
         if (relations != null) {

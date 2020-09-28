@@ -30,9 +30,8 @@
 package org.n52.sta.data.query;
 
 import org.n52.series.db.beans.DescribableEntity;
-import org.n52.series.db.beans.PlatformEntity;
-import org.n52.series.db.beans.parameter.ParameterEntity;
-import org.n52.series.db.beans.parameter.ParameterTextEntity;
+import org.n52.series.db.beans.parameter.ParameterFactory;
+import org.n52.series.db.beans.parameter.observationgroup.ObservationGroupParameterEntity;
 import org.n52.series.db.beans.sta.ObservationGroupEntity;
 import org.n52.series.db.beans.sta.ObservationRelationEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
@@ -105,25 +104,19 @@ public class ObservationGroupQuerySpecifications extends EntityQuerySpecificatio
                                                                 switched);
                     default:
                         // We are filtering on variable keys on properties
-                        if (propertyName.startsWith("properties/")) {
-                            String key = propertyName.substring(11);
-                            Subquery<ParameterTextEntity> subquery = query.subquery(ParameterTextEntity.class);
-                            Root<ParameterTextEntity> param = subquery.from(ParameterTextEntity.class);
-                            subquery.select(param.get(ParameterEntity.ID))
-                                .where(builder.and(
-                                    builder.equal(param.get(ParameterEntity.NAME), key),
-                                    handleDirectStringPropertyFilter(param.get(ParameterTextEntity.VALUE),
-                                                                     propertyValue,
-                                                                     operator,
-                                                                     builder,
-                                                                     switched))
-                                );
-                            Join<Object, Object> join = root.join(PlatformEntity.PARAMETERS);
-                            return builder.in(join.get(PlatformEntity.PROPERTY_ID)).value(subquery);
+                        if (propertyName.startsWith(StaConstants.PROP_PROPERTIES)) {
+                            return handleProperties(root,
+                                                    query,
+                                                    builder,
+                                                    propertyName,
+                                                    propertyValue,
+                                                    operator,
+                                                    switched,
+                                                    ObservationGroupParameterEntity.PROP_OBS_GROUP_ID,
+                                                    ParameterFactory.EntityType.OBS_GROUP);
                         } else {
                             throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP, propertyName));
                         }
-
                 }
             } catch (STAInvalidFilterExpressionException e) {
                 throw new RuntimeException(e);

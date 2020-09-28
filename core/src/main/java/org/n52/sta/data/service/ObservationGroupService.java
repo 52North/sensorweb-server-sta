@@ -30,6 +30,7 @@
 package org.n52.sta.data.service;
 
 import org.n52.janmayen.http.HTTPStatus;
+import org.n52.series.db.beans.parameter.observationgroup.ObservationGroupParameterEntity;
 import org.n52.series.db.beans.sta.ObservationGroupEntity;
 import org.n52.series.db.beans.sta.ObservationRelationEntity;
 import org.n52.shetland.filter.ExpandFilter;
@@ -41,8 +42,8 @@ import org.n52.shetland.ogc.sta.model.ObservationGroupEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.ObservationGroupQuerySpecifications;
 import org.n52.sta.data.repositories.EntityGraphRepository;
+import org.n52.sta.data.repositories.ObservationGroupParameterRepository;
 import org.n52.sta.data.repositories.ObservationGroupRepository;
-import org.n52.sta.data.repositories.ParameterRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
@@ -70,10 +71,10 @@ public class ObservationGroupService
     ObservationGroupEntity> {
 
     private static final ObservationGroupQuerySpecifications ogQS = new ObservationGroupQuerySpecifications();
-    private final ParameterRepository parameterRepository;
+    private final ObservationGroupParameterRepository parameterRepository;
 
     public ObservationGroupService(ObservationGroupRepository repository,
-                                   ParameterRepository parameterRepository) {
+                                   ObservationGroupParameterRepository parameterRepository) {
         super(repository, ObservationGroupEntity.class);
         this.parameterRepository = parameterRepository;
     }
@@ -168,11 +169,20 @@ public class ObservationGroupService
                     throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS, HTTPStatus.CONFLICT);
                 } else {
                     obsGroup.setProcessed(true);
+                    obsGroup = getRepository().save(obsGroup);
                     if (obsGroup.getParameters() != null) {
-                        parameterRepository.saveAll(obsGroup.getParameters());
+                        ObservationGroupEntity finalObsGroup = obsGroup;
+                        parameterRepository.saveAll(obsGroup.getParameters()
+                                                        .stream()
+                                                        .filter(o -> o instanceof ObservationGroupParameterEntity)
+                                                        .map(t -> {
+                                                            ((ObservationGroupParameterEntity) t).setObsGroup(
+                                                                finalObsGroup);
+                                                            return (ObservationGroupParameterEntity) t;
+                                                        })
+                                                        .collect(Collectors.toSet()));
                         obsGroup.setParameters(obsGroup.getParameters());
                     }
-                    getRepository().save(obsGroup);
                 }
             }
         }
@@ -219,8 +229,18 @@ public class ObservationGroupService
         // properties
         if (toMerge.getParameters() != null) {
             synchronized (getLock(String.valueOf(existing.getParameters().hashCode()))) {
-                parameterRepository.saveAll(toMerge.getParameters());
-                existing.getParameters().forEach(parameterRepository::delete);
+                parameterRepository.saveAll(toMerge.getParameters()
+                                                .stream()
+                                                .filter(o -> o instanceof ObservationGroupParameterEntity)
+                                                .map(t -> {
+                                                    ((ObservationGroupParameterEntity) t).setObsGroup(existing);
+                                                    return (ObservationGroupParameterEntity) t;
+                                                })
+                                                .collect(Collectors.toSet()));
+                existing.getParameters().stream()
+                    .filter(o -> o instanceof ObservationGroupParameterEntity)
+                    .map(o -> (ObservationGroupParameterEntity) o)
+                    .forEach(parameterRepository::delete);
                 existing.setParameters(toMerge.getParameters());
             }
         }

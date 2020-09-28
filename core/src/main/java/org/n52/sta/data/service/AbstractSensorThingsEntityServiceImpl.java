@@ -34,6 +34,7 @@ import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.HibernateRelations;
 import org.n52.series.db.beans.HibernateRelations.HasDescription;
 import org.n52.series.db.beans.HibernateRelations.HasName;
+import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.shetland.filter.ExpandFilter;
@@ -211,11 +212,16 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
 
     public S getEntityByIdRaw(Long id, QueryOptions queryOptions) throws STACRUDException {
         try {
-            S entity = getRepository().findById(id, createFetchGraph(queryOptions.getExpandFilter())).get();
-            if (queryOptions.hasExpandFilter()) {
-                return fetchExpandEntitiesWithFilter(entity, queryOptions.getExpandFilter());
+            Optional<S> entity = getRepository()
+                .findOne(getFilterPredicate(entityClass, queryOptions)
+                             .and(
+                                 (root, query, criteriaBuilder) -> criteriaBuilder.equal(
+                                     root.get(IdEntity.PROPERTY_ID), id)),
+                         createFetchGraph(queryOptions.getExpandFilter()));
+            if (entity.isPresent() && queryOptions.hasExpandFilter()) {
+                return fetchExpandEntitiesWithFilter(entity.get(), queryOptions.getExpandFilter());
             } else {
-                return entity;
+                return entity.isPresent() ? entity.get() : null;
             }
         } catch (RuntimeException | STAInvalidQueryException e) {
             throw new STACRUDException(e.getMessage(), e);

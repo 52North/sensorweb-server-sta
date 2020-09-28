@@ -30,6 +30,7 @@
 package org.n52.sta.serdes.json;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.joda.time.DateTime;
@@ -39,6 +40,7 @@ import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.geojson.GeoJsonReader;
 import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.series.db.beans.sta.ObservationEntity;
+import org.n52.series.db.beans.sta.ObservationRelationEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
@@ -50,6 +52,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 @SuppressWarnings("VisibilityModifier")
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
@@ -72,9 +75,6 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
     @JsonManagedReference
     @JsonProperty(StaConstants.OBSERVATION_RELATIONS)
     public JSONObservationRelation[] relations;
-
-    private final String NAME = "name";
-    private final String VALUE = "value";
 
     public JSONObservation() {
         self = new ObservationEntity();
@@ -136,7 +136,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
         self.setStaIdentifier(identifier);
 
         // parameters
-        self.setParameters(convertParameters(parameters));
+        self.setParameters(convertParameters(parameters, ParameterFactory.EntityType.OBSERVATION));
 
         // phenomenonTime
         if (phenomenonTime != null) {
@@ -232,7 +232,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
         }
 
         // parameters
-        self.setParameters(convertParameters(parameters));
+        self.setParameters(convertParameters(parameters, ParameterFactory.EntityType.OBSERVATION));
 
         // result
         self.setValue(result);

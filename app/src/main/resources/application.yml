@@ -65,14 +65,16 @@ database:
     # Mappings to be loaded. See https://github.com/52North/sensorweb-server-sta/wiki for details
     # Options:
     # - Vanilla STA: sta-vanilla.xml
-    persistence-location: classpath:META-INF/sta-vanilla.xml
+    # - Citizen Science extended STA: sta-citsci-extension.xml
+    persistence-location: classpath:META-INF/sta-citsci-extension.xml
 spring:
   # Profile of the application.
   # Options:
   # - Vanilla STA: vanilla
+  # - Citizen Science extended STA: citSciExtension
   # - [not implemented yet] STA with MultiDatastream Extension: multiDatastreamExtension
   profiles:
-    active: vanilla
+    active: citSciExtension
   datasource:
     platform: postgres
     username: postgres
