@@ -290,6 +290,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
             if (queryOptions.hasExpandFilter()) {
                 return pages.map(e -> {
                     try {
+                        em.detach(e);
                         return fetchExpandEntitiesWithFilter(e, queryOptions.getExpandFilter());
                     } catch (STACRUDException | STAInvalidQueryException ex) {
                         throw new RuntimeException(ex);
