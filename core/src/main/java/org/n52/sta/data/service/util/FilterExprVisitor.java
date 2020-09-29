@@ -478,16 +478,15 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
      * wraps function evaluation to handle function on Observation->value or Observation->parameters->value as the
      * value is split over multiple columns
      *
-     * @param expr        path to property
-     * @param secondParam value to be checked against
+     * @param firstParam  first argument, description to fkt
+     * @param secondParam second argument to fkt
      * @param fkt         function to be used for check
      * @return evaluated Predicate
      */
-    private <P, Q, S extends Expression<?>> S evalFuncOnMember(MethodCallExpr expr,
+    private <P, Q, S extends Expression<?>> S evalFuncOnMember(Expression<P> firstParam,
                                                                Expression<Q> secondParam,
                                                                BiFunction<Expression<P>, Expression<Q>, S> fkt)
         throws STAInvalidQueryException {
-        Expression<P> firstParam = (Expression<P>) expr.getParameters().get(0).accept(this);
         if (firstParam != null) {
             return fkt.apply(firstParam, secondParam);
         } else {
@@ -514,38 +513,41 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
             case ODataConstants.StringFunctions.ENDSWITH:
                 String rawSecondPar = expr.getParameters().get(1).toString();
                 return this.<String, String, Expression<Boolean>>evalFuncOnMember(
-                    expr,
+                    (Expression<String>) expr.getParameters().get(0).accept(this),
                     builder.literal(DOLLAR + rawSecondPar.substring(1, rawSecondPar.length() - 1)),
                     builder::like);
             case ODataConstants.StringFunctions.STARTSWITH:
                 String rawSecondParam = expr.getParameters().get(1).toString();
                 return this.<String, String, Expression<Boolean>>evalFuncOnMember(
-                    expr,
+                    (Expression<String>) expr.getParameters().get(0).accept(this),
                     builder.literal(rawSecondParam.substring(1, rawSecondParam.length() - 1) + DOLLAR),
                     builder::like);
             case ODataConstants.StringFunctions.SUBSTRINGOF:
-                String rawSecondP = expr.getParameters().get(1).toString();
+                String rawFirstP = expr.getParameters().get(0).toString();
                 return this.<String, String, Expression<Boolean>>evalFuncOnMember(
-                    expr,
-                    builder.literal(DOLLAR + rawSecondP.substring(1, rawSecondP.length() - 1) + DOLLAR),
+                    (Expression<String>) expr.getParameters().get(1).accept(this),
+                    builder.literal(DOLLAR + rawFirstP.substring(1, rawFirstP.length() - 1) + DOLLAR),
                     builder::like);
             case ODataConstants.StringFunctions.INDEXOF:
                 secondParam = expr.getParameters().get(1).accept(this);
-                return this.<String, String, Expression<Integer>>evalFuncOnMember(expr,
-                                                                                  (Expression<String>) secondParam,
-                                                                                  builder::locate
+                return this.<String, String, Expression<Integer>>evalFuncOnMember(
+                    (Expression<String>) expr.getParameters().get(0).accept(this),
+                    (Expression<String>) secondParam,
+                    builder::locate
                 );
             case ODataConstants.StringFunctions.SUBSTRING:
                 secondParam = expr.getParameters().get(1).accept(this);
-                return this.<String, Integer, Expression<String>>evalFuncOnMember(expr,
-                                                                                  (Expression<Integer>) secondParam,
-                                                                                  builder::substring
+                return this.<String, Integer, Expression<String>>evalFuncOnMember(
+                    (Expression<String>) expr.getParameters().get(0).accept(this),
+                    (Expression<Integer>) secondParam,
+                    builder::substring
                 );
             case ODataConstants.StringFunctions.CONCAT:
                 secondParam = expr.getParameters().get(1).accept(this);
-                return this.<String, String, Expression<String>>evalFuncOnMember(expr,
-                                                                                 (Expression<String>) secondParam,
-                                                                                 builder::concat);
+                return this.<String, String, Expression<String>>evalFuncOnMember(
+                    (Expression<String>) expr.getParameters().get(0).accept(this),
+                    (Expression<String>) secondParam,
+                    builder::concat);
             // Geospatial Functions + Spatial Relationship Functions
             case ODataConstants.GeoFunctions.GEO_DISTANCE:
                 if (rootQS instanceof SpatialQuerySpecifications) {
