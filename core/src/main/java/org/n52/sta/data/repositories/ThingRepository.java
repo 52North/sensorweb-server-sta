@@ -40,6 +40,4 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public interface ThingRepository extends NameRepository<PlatformEntity> {
 
-    <S extends PlatformEntity> S intermediateSave(S entity);
-
 }

@@ -125,7 +125,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
         self.setStaIdentifier(identifier);
 
         // parameters
-        // self.setParameters(convertParameters(parameters));
+        self.setParameters(convertParameters(parameters, ParameterFactory.EntityType.OBSERVATION));
 
         // phenomenonTime
         if (phenomenonTime != null) {

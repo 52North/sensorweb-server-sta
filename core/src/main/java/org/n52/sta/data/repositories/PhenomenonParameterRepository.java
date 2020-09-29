@@ -29,20 +29,13 @@
 
 package org.n52.sta.data.repositories;
 
-import org.n52.series.db.beans.AbstractDatasetEntity;
+import org.n52.series.db.beans.parameter.phenomenon.PhenomenonParameterEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Set;
-
-/**
- * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- */
 @Transactional
 @Repository
-public interface DatastreamRepository
-    extends NameRepository<AbstractDatasetEntity>, StaIdentifierRepository<AbstractDatasetEntity> {
-
-    Set<AbstractDatasetEntity> findAllByAggregationId(Long id);
+public interface PhenomenonParameterRepository extends JpaRepository<PhenomenonParameterEntity, Long> {
 
 }

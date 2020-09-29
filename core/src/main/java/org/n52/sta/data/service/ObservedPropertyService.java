@@ -32,6 +32,7 @@ package org.n52.sta.data.service;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
+import org.n52.series.db.beans.parameter.phenomenon.PhenomenonParameterEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.ogc.sta.StaConstants;
@@ -43,6 +44,7 @@ import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.ObservedPropertyQuerySpecifications;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.EntityGraphRepository;
+import org.n52.sta.data.repositories.PhenomenonParameterRepository;
 import org.n52.sta.data.repositories.PhenomenonRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.slf4j.Logger;
@@ -77,13 +79,16 @@ public class ObservedPropertyService
     private static final ObservedPropertyQuerySpecifications oQS = new ObservedPropertyQuerySpecifications();
 
     private final DatastreamRepository datastreamRepository;
+    private final PhenomenonParameterRepository parameterRepository;
 
     @Autowired
     public ObservedPropertyService(PhenomenonRepository repository,
                                    DatastreamRepository datastreamRepository,
+                                   PhenomenonParameterRepository parameterRepository,
                                    EntityManager em) {
         super(repository, em, PhenomenonEntity.class);
         this.datastreamRepository = datastreamRepository;
+        this.parameterRepository = parameterRepository;
     }
 
     @Override
@@ -125,6 +130,7 @@ public class ObservedPropertyService
                 if (ObservedPropertyEntityDefinition.DATASTREAMS.equals(expandProperty)) {
                     return new EntityGraphRepository.FetchGraph[] {
                         EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS,
+                        EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS,
                     };
                 }
                 throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
@@ -132,7 +138,9 @@ public class ObservedPropertyService
                                                                  StaConstants.OBSERVED_PROPERTY));
             }
         }
-        return new EntityGraphRepository.FetchGraph[0];
+        return new EntityGraphRepository.FetchGraph[]{
+            EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS
+        };
     }
 
     @Override
@@ -210,6 +218,17 @@ public class ObservedPropertyService
             }
             if (getRepository().existsByStaIdentifier(observableProperty.getStaIdentifier())) {
                 throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS, HTTPStatus.CONFLICT);
+            }
+            PhenomenonEntity intermediateSave = getRepository().intermediateSave(observableProperty);
+            if (observableProperty.getParameters() != null) {
+                parameterRepository.saveAll(observableProperty.getParameters()
+                                                .stream()
+                                                .filter(t -> t instanceof PhenomenonParameterEntity)
+                                                .map(t -> {
+                                                    ((PhenomenonParameterEntity) t).setPhenomenon(intermediateSave);
+                                                    return (PhenomenonParameterEntity) t;
+                                                })
+                                                .collect(Collectors.toSet()));
             }
             return getRepository().save(observableProperty);
         }

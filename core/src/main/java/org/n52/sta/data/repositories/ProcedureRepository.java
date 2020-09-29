@@ -39,6 +39,4 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public interface ProcedureRepository extends IdentifierNameRepository<ProcedureEntity>,
                                              StaIdentifierRepository<ProcedureEntity> {
-
-    <S extends ProcedureEntity> S intermediateSave(S entity);
 }

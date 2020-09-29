@@ -30,11 +30,13 @@
 package org.n52.sta.serdes.json;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.joda.time.DateTime;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
+import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.springframework.util.Assert;
 
 import java.util.Arrays;
@@ -52,7 +54,7 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<ProcedureEnti
     protected static final String PDF = "application/pdf";
 
     // JSON Properties. Matched by Annotation or variable name
-    public String properties;
+    public JsonNode properties;
     public String encodingType;
     public String metadata;
 
@@ -77,6 +79,10 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<ProcedureEnti
                 self.setDescription(description);
 
                 handleEncodingType();
+
+                if (properties != null) {
+                    self.setParameters(convertParameters(properties, ParameterFactory.EntityType.PROCEDURE));
+                }
 
                 if (Datastreams != null) {
                     self.setDatasets(Arrays.stream(Datastreams)
@@ -104,6 +110,10 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<ProcedureEnti
                     self.setDescriptionFile(metadata);
                 }
 
+                if (properties != null) {
+                    self.setParameters(convertParameters(properties, ParameterFactory.EntityType.PROCEDURE));
+                }
+
                 if (Datastreams != null) {
                     self.setDatasets(Arrays.stream(Datastreams)
                                          .map(ds -> ds.toEntity(JSONBase.EntityType.REFERENCE))
@@ -115,6 +125,7 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<ProcedureEnti
                 Assert.isNull(description, INVALID_REFERENCED_ENTITY);
                 Assert.isNull(encodingType, INVALID_REFERENCED_ENTITY);
                 Assert.isNull(metadata, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(properties, INVALID_REFERENCED_ENTITY);
 
                 Assert.isNull(Datastreams, INVALID_REFERENCED_ENTITY);
 

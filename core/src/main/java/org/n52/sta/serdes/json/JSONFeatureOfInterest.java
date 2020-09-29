@@ -37,6 +37,7 @@ import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.geojson.GeoJsonReader;
 import org.n52.series.db.beans.FeatureEntity;
+import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.sta.data.service.ServiceUtils;
 import org.springframework.util.Assert;
 
@@ -52,6 +53,7 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
     public String encodingType;
 
     public JsonNode feature;
+    public JsonNode properties;
 
     @JsonManagedReference
     public JSONObservation[] Observations;
@@ -91,6 +93,10 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
                 self.setName(name);
                 self.setDescription(description);
 
+                if (properties != null) {
+                    self.setParameters(convertParameters(properties, ParameterFactory.EntityType.FEATURE));
+                }
+
                 if (feature != null) {
                     //TODO: check what is actually allowed here
                     GeoJsonReader reader = new GeoJsonReader(factory);
@@ -111,11 +117,6 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
                     }
                     self.setFeatureType(ServiceUtils.createFeatureType(self.getGeometry()));
                 }
-                // TODO: handle nested observations
-                // if (backReference != null) {
-                // TODO: link feature to observations?
-                // throw new NotImplementedException();
-                // }
 
                 return self;
 
@@ -127,6 +128,10 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
 
                 if (encodingType != null) {
                     Assert.state(encodingType.equals(ENCODINGTYPE_GEOJSON), INVALID_ENCODINGTYPE);
+                }
+
+                if (properties != null) {
+                    self.setParameters(convertParameters(properties, ParameterFactory.EntityType.FEATURE));
                 }
 
                 if (feature != null) {
@@ -162,6 +167,7 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
                 Assert.isNull(description, INVALID_REFERENCED_ENTITY);
                 Assert.isNull(encodingType, INVALID_REFERENCED_ENTITY);
                 Assert.isNull(feature, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(properties, INVALID_REFERENCED_ENTITY);
                 Assert.isNull(Observations, INVALID_REFERENCED_ENTITY);
 
                 self.setIdentifier(identifier);

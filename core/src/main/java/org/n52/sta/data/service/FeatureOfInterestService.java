@@ -39,6 +39,7 @@ import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.FormatEntity;
+import org.n52.series.db.beans.parameter.feature.FeatureParameterEntity;
 import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.series.db.beans.sta.StaFeatureEntity;
 import org.n52.shetland.filter.ExpandFilter;
@@ -53,6 +54,7 @@ import org.n52.sta.data.query.FeatureOfInterestQuerySpecifications;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.EntityGraphRepository;
+import org.n52.sta.data.repositories.FeatureOfInterestParameterRepository;
 import org.n52.sta.data.repositories.FeatureOfInterestRepository;
 import org.n52.sta.data.repositories.FormatRepository;
 import org.n52.sta.data.repositories.ObservationRepository;
@@ -76,6 +78,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -96,12 +99,14 @@ public class FeatureOfInterestService
     private final FormatRepository formatRepository;
     private final ObservationRepository observationRepository;
     private final DatastreamRepository datastreamRepository;
+    private final FeatureOfInterestParameterRepository parameterRepository;
 
     @Autowired
     public FeatureOfInterestService(FeatureOfInterestRepository repository,
                                     FormatRepository formatRepository,
                                     ObservationRepository observationRepository,
                                     DatastreamRepository datastreamRepository,
+                                    FeatureOfInterestParameterRepository parameterRepository,
                                     EntityManager em) {
         super(repository,
               em,
@@ -109,6 +114,7 @@ public class FeatureOfInterestService
         this.formatRepository = formatRepository;
         this.observationRepository = observationRepository;
         this.datastreamRepository = datastreamRepository;
+        this.parameterRepository = parameterRepository;
     }
 
     @Override
@@ -117,7 +123,10 @@ public class FeatureOfInterestService
     }
 
     @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption) {
-        return new EntityGraphRepository.FetchGraph[] {EntityGraphRepository.FetchGraph.FETCHGRAPH_FEATURETYPE};
+        return new EntityGraphRepository.FetchGraph[] {
+            EntityGraphRepository.FetchGraph.FETCHGRAPH_FEATURETYPE,
+            EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS
+        };
     }
 
     @Override
@@ -228,6 +237,17 @@ public class FeatureOfInterestService
             } else {
                 feature.setXml(null);
                 checkFeatureType(feature);
+                AbstractFeatureEntity<?> intermediateSave = getRepository().intermediateSave(feature);
+                if (feature.getParameters() != null) {
+                    parameterRepository.saveAll(feature.getParameters()
+                                                    .stream()
+                                                    .filter(t -> t instanceof FeatureParameterEntity)
+                                                    .map(t -> {
+                                                        ((FeatureParameterEntity) t).setFeature(intermediateSave);
+                                                        return (FeatureParameterEntity) t;
+                                                    })
+                                                    .collect(Collectors.toSet()));
+                }
                 return getRepository().save(feature);
             }
         }

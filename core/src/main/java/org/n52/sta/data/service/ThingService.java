@@ -230,7 +230,6 @@ public class ThingService
                                                             return (PlatformParameterEntity) t;
                                                         })
                                                         .collect(Collectors.toSet()));
-                        thing.setParameters(thing.getParameters());
                     }
                     processDatastreams(thing);
                     boolean hasUnpersistedHLocs = thing.hasHistoricalLocations() &&
@@ -306,11 +305,6 @@ public class ThingService
                                                     return (PlatformParameterEntity) t;
                                                 })
                                                 .collect(Collectors.toSet()));
-                existing.getParameters()
-                    .stream()
-                    .filter(t -> t instanceof PlatformParameterEntity)
-                    .map(t -> (PlatformParameterEntity) t)
-                    .forEach(parameterRepository::delete);
                 existing.setParameters(toMerge.getParameters());
             }
         }

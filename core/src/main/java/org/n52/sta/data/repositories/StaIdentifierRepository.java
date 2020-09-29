@@ -66,4 +66,6 @@ public interface StaIdentifierRepository<T> extends EntityGraphRepository<T, Lon
      */
     void deleteByStaIdentifier(String identifier);
 
+    T intermediateSave(T entity);
+
 }

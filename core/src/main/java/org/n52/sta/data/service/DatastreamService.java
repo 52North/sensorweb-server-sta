@@ -54,6 +54,7 @@ import org.n52.series.db.beans.dataset.ObservationType;
 import org.n52.series.db.beans.dataset.ValueType;
 import org.n52.series.db.beans.parameter.BooleanParameterEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
+import org.n52.series.db.beans.parameter.dataset.DatasetParameterEntity;
 import org.n52.series.db.beans.sta.AbstractDatastreamEntity;
 import org.n52.series.db.beans.sta.AbstractObservationEntity;
 import org.n52.series.db.beans.sta.BooleanObservationEntity;
@@ -76,6 +77,7 @@ import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
 import org.n52.sta.data.repositories.CategoryRepository;
+import org.n52.sta.data.repositories.DatastreamParameterRepository;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.FormatRepository;
@@ -129,6 +131,7 @@ public class DatastreamService extends
     private final OfferingRepository offeringRepository;
     private final CategoryRepository categoryRepository;
     private final ObservationRepository observationRepository;
+    private final DatastreamParameterRepository parameterRepository;
 
     @Autowired
     public DatastreamService(DatastreamRepository repository,
@@ -138,6 +141,7 @@ public class DatastreamService extends
                              OfferingRepository offeringRepository,
                              CategoryRepository categoryRepository,
                              ObservationRepository observationRepository,
+                             DatastreamParameterRepository parameterRepository,
                              EntityManager em) {
         super(repository,
               em,
@@ -148,6 +152,7 @@ public class DatastreamService extends
         this.offeringRepository = offeringRepository;
         this.categoryRepository = categoryRepository;
         this.observationRepository = observationRepository;
+        this.parameterRepository = parameterRepository;
     }
 
     @Override
@@ -160,6 +165,7 @@ public class DatastreamService extends
         Set<EntityGraphRepository.FetchGraph> fetchGraphs = new HashSet<>();
         fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_OM_OBS_TYPE);
         fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_UOM);
+        fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
         if (expandOption != null) {
             for (ExpandItem expandItem : expandOption.getItems()) {
                 // We cannot handle nested $filter or $expand
@@ -307,9 +313,18 @@ public class DatastreamService extends
                 datastream.setProcedure(getSensorService().createOrfetch(datastream.getProcedure()));
                 datastream.setThing(getThingService().createOrfetch(datastream.getThing()));
 
-                DatasetEntity dataset = createDataset(datastream, null, datastream.getStaIdentifier());
-                DatasetEntity saved = getRepository().save(dataset);
-                processObservation(saved, entity.getObservations());
+                DatasetEntity dataset = createandSaveDataset(datastream, null, datastream.getStaIdentifier());
+                if (datastream.getParameters() != null) {
+                    parameterRepository.saveAll(datastream.getParameters()
+                                                    .stream()
+                                                    .filter(t -> t instanceof DatasetParameterEntity)
+                                                    .map(t -> {
+                                                        ((DatasetParameterEntity) t).setDataset(dataset);
+                                                        return (DatasetParameterEntity) t;
+                                                    })
+                                                    .collect(Collectors.toSet()));
+                }
+                processObservation(dataset, entity.getObservations());
             }
             return getRepository().findByStaIdentifier(entity.getStaIdentifier(),
                                                        EntityGraphRepository.FetchGraph.FETCHGRAPH_UOM,
@@ -473,9 +488,9 @@ public class DatastreamService extends
             // update existing datastream with new parent
             datastream.setAggregation(aggregation);
             getRepository().intermediateSave(datastream);
-            return createDataset(parent, feature, null);
+            return createandSaveDataset(parent, feature, null);
         } else {
-            return createDataset(datastream, feature, null);
+            return createandSaveDataset(datastream, feature, null);
         }
 
         // We need to create a new dataset
@@ -483,9 +498,9 @@ public class DatastreamService extends
         //datastream.setStaIdentifier(null);
     }
 
-    private DatasetEntity createDataset(AbstractDatasetEntity datastream,
-                                        AbstractFeatureEntity<?> feature,
-                                        String staIdentifier) throws STACRUDException {
+    private DatasetEntity createandSaveDataset(AbstractDatasetEntity datastream,
+                                               AbstractFeatureEntity<?> feature,
+                                               String staIdentifier) throws STACRUDException {
         CategoryEntity category = getDatastreamService().createOrFetchCategory();
         OfferingEntity offering = getDatastreamService().createOrFetchOffering(datastream);
         DatasetEntity dataset = createDatasetSkeleton(datastream.getOMObservationType().getFormat(),
@@ -510,6 +525,7 @@ public class DatastreamService extends
         dataset.setPlatform(datastream.getThing());
         dataset.setUnit(datastream.getUnit());
         dataset.setOMObservationType(datastream.getOMObservationType());
+        dataset.setParameters(datastream.getParameters());
         if (datastream.getId() != null) {
             dataset.setAggregation(datastream);
         }

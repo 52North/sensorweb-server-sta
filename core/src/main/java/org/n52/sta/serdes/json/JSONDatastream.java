@@ -39,6 +39,7 @@ import org.locationtech.jts.io.geojson.GeoJsonReader;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.UnitEntity;
+import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
@@ -61,12 +62,17 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Abstr
     public JsonNode observedArea;
     public String phenomenonTime;
     public String resultTime;
+    public JsonNode properties;
+
     @JsonManagedReference
     public JSONSensor Sensor;
+
     @JsonManagedReference
     public JSONThing Thing;
+
     @JsonManagedReference
     public JSONObservedProperty ObservedProperty;
+
     @JsonManagedReference
     public JSONObservation[] Observations;
 
@@ -153,6 +159,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Abstr
                 Assert.isNull(observedArea, INVALID_REFERENCED_ENTITY);
                 Assert.isNull(phenomenonTime, INVALID_REFERENCED_ENTITY);
                 Assert.isNull(resultTime, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(properties, INVALID_REFERENCED_ENTITY);
 
                 Assert.isNull(Sensor, INVALID_REFERENCED_ENTITY);
                 Assert.isNull(ObservedProperty, INVALID_REFERENCED_ENTITY);
@@ -207,6 +214,10 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Abstr
                 self.setResultTimeStart(((TimePeriod) time).getStart().toDate());
                 self.setResultTimeEnd(((TimePeriod) time).getEnd().toDate());
             }
+        }
+
+        if (properties != null) {
+            self.setParameters(convertParameters(properties, ParameterFactory.EntityType.DATASET));
         }
 
         // if (phenomenonTime != null) {
@@ -266,6 +277,10 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Abstr
                 self.setResultTimeStart(((TimePeriod) time).getStart().toDate());
                 self.setResultTimeEnd(((TimePeriod) time).getEnd().toDate());
             }
+        }
+
+        if (properties != null) {
+            self.setParameters(convertParameters(properties, ParameterFactory.EntityType.DATASET));
         }
 
         if (Thing != null) {

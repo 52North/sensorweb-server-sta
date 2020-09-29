@@ -34,6 +34,7 @@ import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.parameter.TextParameterEntity;
+import org.n52.series.db.beans.parameter.location.LocationParameterEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.filter.ExpandFilter;
@@ -45,6 +46,7 @@ import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.LocationQuerySpecifications;
 import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.LocationEncodingRepository;
+import org.n52.sta.data.repositories.LocationParameterRepository;
 import org.n52.sta.data.repositories.LocationRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.slf4j.Logger;
@@ -86,14 +88,17 @@ public class LocationService
     private final LocationEncodingRepository locationEncodingRepository;
 
     private final boolean updateFOIFeatureEnabled;
+    private final LocationParameterRepository parameterRepository;
 
     public LocationService(@Value("${server.feature.updateFOI:false}") boolean updateFOI,
                            LocationRepository repository,
                            LocationEncodingRepository locationEncodingRepository,
+                           LocationParameterRepository parameterRepository,
                            EntityManager em) {
         super(repository, em, LocationEntity.class);
         this.locationEncodingRepository = locationEncodingRepository;
         this.updateFOIFeatureEnabled = updateFOI;
+        this.parameterRepository = parameterRepository;
     }
 
     @Override
@@ -104,6 +109,7 @@ public class LocationService
     @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
         throws STAInvalidQueryException {
         Set<EntityGraphRepository.FetchGraph> fetchGraphs = new HashSet<>(6);
+        fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
         if (expandOption != null) {
             for (ExpandItem expandItem : expandOption.getItems()) {
                 // We cannot handle nested $filter or $expand
@@ -213,7 +219,18 @@ public class LocationService
                 }
                 location.setProcessed(true);
                 checkLocationEncoding(location);
-                location = getRepository().save(location);
+                LocationEntity intermediateSave = getRepository().intermediateSave(location);
+                if (location.getParameters() != null) {
+                    parameterRepository.saveAll(location.getParameters()
+                                                    .stream()
+                                                    .filter(t -> t instanceof LocationParameterEntity)
+                                                    .map(t -> {
+                                                        ((LocationParameterEntity) t).setLocation(intermediateSave);
+                                                        return (LocationParameterEntity) t;
+                                                    })
+                                                    .collect(Collectors.toSet()));
+                }
+                // location = getRepository().save(lo);
                 processThings(location);
             }
         }
