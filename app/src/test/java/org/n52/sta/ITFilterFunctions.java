@@ -84,10 +84,10 @@ public class ITFilterFunctions extends ConformanceTests implements TestUtil {
     public void testSubstringOf() throws IOException {
         createMeasurementHarness();
         JsonNode collection;
-        collection = getCollection(EntityType.THING, "$filter=substringof(name, 'ing')");
+        collection = getCollection(EntityType.THING, "$filter=substringof('ing', name)");
         assertResponseCount(collection, 1);
 
-        collection = getCollection(EntityType.THING, "$filter=substringof(name, 'pdf')");
+        collection = getCollection(EntityType.THING, "$filter=substringof('invalid', name)");
         assertEmptyResponse(collection);
     }
 
@@ -95,10 +95,10 @@ public class ITFilterFunctions extends ConformanceTests implements TestUtil {
     public void testEndsWith() throws IOException {
         createMeasurementHarness();
         JsonNode collection;
-        collection = getCollection(EntityType.THING, "$filter=startswith(name, '1')");
+        collection = getCollection(EntityType.THING, "$filter=endswith(name, '1')");
         assertResponseCount(collection, 1);
 
-        collection = getCollection(EntityType.THING, "$filter=startswith(name, 'i')");
+        collection = getCollection(EntityType.THING, "$filter=endswith(name, 'i')");
         assertEmptyResponse(collection);
     }
 

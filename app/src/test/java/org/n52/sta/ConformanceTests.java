@@ -261,7 +261,7 @@ abstract class ConformanceTests implements TestUtil {
             Assertions.assertEquals(
                 200,
                 statusCode,
-                "DELETE does not work properly for nonexistent " + request.getURI()
+                "DELETE does not work properly for " + request.getURI()
             );
         }
     }
