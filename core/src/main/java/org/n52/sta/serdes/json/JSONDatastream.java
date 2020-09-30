@@ -36,7 +36,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.geojson.GeoJsonReader;
-import org.n52.series.db.beans.AbstractDatasetEntity;
+import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.UnitEntity;
 import org.n52.series.db.beans.parameter.ParameterFactory;
@@ -52,7 +52,7 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("VisibilityModifier")
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
-public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<AbstractDatasetEntity>
+public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<DatasetEntity>
     implements AbstractJSONEntity {
 
     private static final String COULD_NOT_PARSE_OBS_AREA = "Could not parse observedArea to GeoJSON. Error was: ";
@@ -94,7 +94,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Abstr
     private final String uomDef = "unitOfMeasurement->definition";
 
     public JSONDatastream() {
-        self = new AbstractDatasetEntity();
+        self = new DatasetEntity();
     }
 
     @Override protected void parseReferencedFrom() {
@@ -122,7 +122,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Abstr
     }
 
     @Override
-    public AbstractDatasetEntity toEntity(JSONBase.EntityType type) {
+    public DatasetEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
             case FULL:
                 parseReferencedFrom();
@@ -174,7 +174,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Abstr
         }
     }
 
-    private AbstractDatasetEntity createPatchEntity() {
+    private DatasetEntity createPatchEntity() {
         self.setIdentifier(identifier);
         self.setStaIdentifier(identifier);
         self.setName(name);
@@ -244,7 +244,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Abstr
         return self;
     }
 
-    private AbstractDatasetEntity createPostEntity() {
+    private DatasetEntity createPostEntity() {
         self.setIdentifier(identifier);
         self.setStaIdentifier(identifier);
         self.setName(name);

@@ -35,6 +35,7 @@ import org.hibernate.graph.GraphParser;
 import org.hibernate.graph.RootGraph;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.AbstractFeatureEntity;
+import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
@@ -43,7 +44,6 @@ import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
-import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.SpringApplicationContext;
@@ -126,7 +126,7 @@ public class MessageBusRepository<T, I extends Serializable>
         this.mqttHandler = (STAEventHandler) SpringApplicationContext.getBean(STAEventHandler.class);
         Assert.notNull(this.mqttHandler, "Could not autowire Mqtt handler!");
 
-        if (this.entityClass.equals(ObservationEntity.class)
+        if (this.entityClass.equals(DataEntity.class)
             || this.entityClass.equals(ProcedureEntity.class)
             || this.entityClass.equals(PhenomenonEntity.class)) {
             this.datastreamRepository =
@@ -378,8 +378,8 @@ public class MessageBusRepository<T, I extends Serializable>
                                     .map(LocationEntity::getStaIdentifier)
                                     .collect(Collectors.toSet()));
             }
-        } else if (rawObject instanceof ObservationEntity<?>) {
-            ObservationEntity<?> entity = (ObservationEntity<?>) rawObject;
+        } else if (rawObject instanceof DataEntity<?>) {
+            DataEntity<?> entity = (DataEntity<?>) rawObject;
 
             if (entity.getDataset() != null && entity.getDataset().getFeature() != null) {
                 collections.put(STAEntityDefinition.FEATURES_OF_INTEREST,
@@ -464,17 +464,17 @@ public class MessageBusRepository<T, I extends Serializable>
             result.put(RESULTTIMEEND, ((AbstractDatasetEntity) entity).getResultTimeEnd());
         } else if (entity instanceof HistoricalLocationEntity) {
             result.put(TIME, ((HistoricalLocationEntity) entity).getTime());
-        } else if (entity instanceof ObservationEntity<?>) {
-            result.put(SAMPLINGTIMESTART, ((ObservationEntity<?>) entity).getSamplingTimeStart());
-            result.put(SAMPLINGTIMEEND, ((ObservationEntity<?>) entity).getSamplingTimeEnd());
-            result.put(RESULTTIME, ((ObservationEntity<?>) entity).getResultTime());
-            result.put(VALIDTIMESTART, ((ObservationEntity<?>) entity).getValidTimeStart());
-            result.put(VALIDTIMEEND, ((ObservationEntity<?>) entity).getValidTimeEnd());
-            Set<ParameterEntity> parameters = ((ObservationEntity<?>) entity).hasParameters() ?
-                new HashSet<>(((ObservationEntity<?>) entity).getParameters()) :
+        } else if (entity instanceof DataEntity<?>) {
+            result.put(SAMPLINGTIMESTART, ((DataEntity<?>) entity).getSamplingTimeStart());
+            result.put(SAMPLINGTIMEEND, ((DataEntity<?>) entity).getSamplingTimeEnd());
+            result.put(RESULTTIME, ((DataEntity<?>) entity).getResultTime());
+            result.put(VALIDTIMESTART, ((DataEntity<?>) entity).getValidTimeStart());
+            result.put(VALIDTIMEEND, ((DataEntity<?>) entity).getValidTimeEnd());
+            Set<ParameterEntity> parameters = ((DataEntity<?>) entity).hasParameters() ?
+                new HashSet<>(((DataEntity<?>) entity).getParameters()) :
                 new HashSet<>();
             result.put(PARAMETERS, parameters);
-            result.put(RESULT, ((ObservationEntity<?>) entity).getValue());
+            result.put(RESULT, ((DataEntity<?>) entity).getValue());
             //TODO: implement difference map for "resultQuality"
         } else if (entity instanceof AbstractFeatureEntity) {
             result.put(NAME, ((AbstractFeatureEntity) entity).getName());

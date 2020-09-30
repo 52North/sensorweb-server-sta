@@ -38,9 +38,9 @@ import org.locationtech.jts.geom.Point;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.AbstractFeatureEntity;
+import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.parameter.feature.FeatureParameterEntity;
-import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.series.db.beans.sta.StaFeatureEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
@@ -134,7 +134,7 @@ public class FeatureOfInterestService
                                                                 ExpandFilter expandOption)
         throws STACRUDException, STAInvalidQueryException {
         StaFeatureEntity<?> foi = new StaFeatureEntity<>(entity);
-        Set<ObservationEntity<?>> observations = new HashSet<>();
+        Set<DataEntity<?>> observations = new HashSet<>();
         for (ExpandItem expandItem : expandOption.getItems()) {
             // We have already handled $expand without filter and expand
             if (!(expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter())) {
@@ -142,7 +142,7 @@ public class FeatureOfInterestService
             }
             String expandProperty = expandItem.getPath();
             if (STAEntityDefinition.OBSERVATIONS.equals(expandProperty)) {
-                Page<ObservationEntity<?>> observation = getObservationService()
+                Page<DataEntity<?>> observation = getObservationService()
                     .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
                                                            STAEntityDefinition.FEATURES_OF_INTEREST,
                                                            expandItem.getQueryOptions());

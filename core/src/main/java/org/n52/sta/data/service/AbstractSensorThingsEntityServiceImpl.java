@@ -31,11 +31,11 @@ package org.n52.sta.data.service;
 
 import org.hibernate.query.criteria.internal.CriteriaBuilderImpl;
 import org.n52.series.db.beans.AbstractDatasetEntity;
+import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.HibernateRelations;
 import org.n52.series.db.beans.HibernateRelations.HasDescription;
 import org.n52.series.db.beans.HibernateRelations.HasName;
 import org.n52.series.db.beans.sta.LocationEntity;
-import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.FilterFilter;
 import org.n52.shetland.filter.OrderProperty;
@@ -451,11 +451,11 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
      */
     private Sort handleResultSort(Sort.Direction direction) {
         Sort sort;
-        sort = Sort.by(direction, ObservationEntity.PROPERTY_VALUE_BOOLEAN);
-        sort = sort.and(Sort.by(direction, ObservationEntity.PROPERTY_VALUE_CATEGORY));
-        sort = sort.and(Sort.by(direction, ObservationEntity.PROPERTY_VALUE_COUNT));
-        sort = sort.and(Sort.by(direction, ObservationEntity.PROPERTY_VALUE_TEXT));
-        sort = sort.and(Sort.by(direction, ObservationEntity.PROPERTY_VALUE_QUANTITY));
+        sort = Sort.by(direction, DataEntity.PROPERTY_VALUE_BOOLEAN);
+        sort = sort.and(Sort.by(direction, DataEntity.PROPERTY_VALUE_CATEGORY));
+        sort = sort.and(Sort.by(direction, DataEntity.PROPERTY_VALUE_COUNT));
+        sort = sort.and(Sort.by(direction, DataEntity.PROPERTY_VALUE_TEXT));
+        sort = sort.and(Sort.by(direction, DataEntity.PROPERTY_VALUE_QUANTITY));
         return sort;
     }
 

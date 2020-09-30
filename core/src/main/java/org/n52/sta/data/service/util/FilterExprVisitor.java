@@ -29,7 +29,7 @@
 
 package org.n52.sta.data.service.util;
 
-import org.n52.series.db.beans.sta.ObservationEntity;
+import org.n52.series.db.beans.DataEntity;
 import org.n52.shetland.oasis.odata.ODataConstants;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
@@ -164,7 +164,7 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
     @Override public Expression<?> visitMember(MemberExpr expr) throws STAInvalidQueryException {
         // Add special handling for Observation as they have stored their "value" attribute distributed
         // over several different columns
-        if (root.getJavaType().isAssignableFrom(ObservationEntity.class) &&
+        if (root.getJavaType().isAssignableFrom(DataEntity.class) &&
             expr.getValue().equals(StaConstants.PROP_RESULT)) {
             return null;
         } else {
@@ -493,11 +493,11 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
             if (secondParam.getJavaType().isAssignableFrom(String.class)) {
                 // We could not resolve firstParam to a value, so we are filtering on Observation->result
                 return (S) builder.concat(
-                    fkt.apply(root.get(ObservationEntity.PROPERTY_VALUE_CATEGORY), secondParam),
-                    fkt.apply(root.get(ObservationEntity.PROPERTY_VALUE_TEXT), secondParam)
+                    fkt.apply(root.get(DataEntity.PROPERTY_VALUE_CATEGORY), secondParam),
+                    fkt.apply(root.get(DataEntity.PROPERTY_VALUE_TEXT), secondParam)
                 );
             } else if (secondParam.getJavaType().isAssignableFrom(Double.class)) {
-                return (S) fkt.apply(root.get(ObservationEntity.PROPERTY_VALUE_QUANTITY), secondParam);
+                return (S) fkt.apply(root.get(DataEntity.PROPERTY_VALUE_QUANTITY), secondParam);
             } else {
                 throw new STAInvalidQueryException("Could not evaluate function call on Observation->result. Result " +
                                                        "type not recognized.");

@@ -30,6 +30,7 @@
 package org.n52.sta.data.query;
 
 import org.n52.series.db.beans.AbstractDatasetEntity;
+import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.FeatureEntity;
@@ -37,7 +38,6 @@ import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
-import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
@@ -120,11 +120,11 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Abs
                     }
                     case OBSERVATIONS: {
                         Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
-                        Root<ObservationEntity> data = sq.from(ObservationEntity.class);
-                        sq.select(data.get(ObservationEntity.PROPERTY_DATASET))
-                            .where(((Specification<ObservationEntity>) propertyValue).toPredicate(data,
-                                                                                                  query,
-                                                                                                  builder));
+                        Root<DataEntity> data = sq.from(DataEntity.class);
+                        sq.select(data.get(DataEntity.PROPERTY_DATASET_ID))
+                            .where(((Specification<DataEntity>) propertyValue).toPredicate(data,
+                                                                                           query,
+                                                                                           builder));
                         return builder.in(root.get(DatasetEntity.PROPERTY_ID)).value(sq);
                     }
                     default:
@@ -252,9 +252,9 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Abs
     public Specification<AbstractDatasetEntity> withObservationStaIdentifier(String observationIdentifier) {
         return (root, query, builder) -> {
             Subquery<AbstractDatasetEntity> sq = query.subquery(AbstractDatasetEntity.class);
-            Root<ObservationEntity> data = sq.from(ObservationEntity.class);
-            sq.select(data.get(ObservationEntity.PROPERTY_DATASET_ID))
-                .where(builder.equal(data.get(ObservationEntity.PROPERTY_STA_IDENTIFIER), observationIdentifier));
+            Root<DataEntity> data = sq.from(DataEntity.class);
+            sq.select(data.get(DataEntity.PROPERTY_DATASET_ID))
+                .where(builder.equal(data.get(DataEntity.PROPERTY_STA_IDENTIFIER), observationIdentifier));
 
             Subquery<AbstractDatasetEntity> subquery = query.subquery(AbstractDatasetEntity.class);
             Root<AbstractDatasetEntity> realDataset = subquery.from(AbstractDatasetEntity.class);
