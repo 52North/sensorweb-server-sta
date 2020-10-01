@@ -37,6 +37,7 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
+import org.n52.sta.mqtt.MqttHandlerException;
 import org.n52.sta.utils.AbstractSTARequestHandler;
 import org.n52.sta.utils.CoreRequestUtils;
 import org.slf4j.Logger;
@@ -109,6 +110,10 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
             // This may only be a reference to Observation collection
             // Remove leading slash if present
             String topic = (msg.getTopicName().startsWith("/")) ? msg.getTopicName().substring(1) : msg.getTopicName();
+            if (!topic.startsWith("v1.1/")) {
+                throw new MqttHandlerException("Error while parsing MQTT topic. Missing Version information!");
+            }
+            topic = topic.substring(5);
 
             // Check topic for syntax+semantics
             validateResource(new StringBuffer(topic), serviceRepository);

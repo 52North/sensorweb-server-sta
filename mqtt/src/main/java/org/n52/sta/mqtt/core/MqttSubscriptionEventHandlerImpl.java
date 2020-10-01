@@ -193,8 +193,12 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
     private AbstractMqttSubscription createMqttSubscription(String rawTopic) throws MqttHandlerException {
         try {
             Matcher mt;
-            // Delete possible leading slash
+            // Delete possible leading slash and version information
             String topic = (rawTopic.startsWith("/")) ? rawTopic.substring(1) : rawTopic;
+            if (!topic.startsWith("v1.1/")) {
+                throw new MqttHandlerException("Error while parsing MQTT topic. Missing Version information!");
+            }
+            topic = topic.substring(5);
 
             // Check topic for syntax+semantics
             if (topic.contains("?")) {
