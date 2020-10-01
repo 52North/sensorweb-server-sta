@@ -33,7 +33,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.springframework.beans.factory.annotation.Value;
+import org.n52.sta.ServerProperties;
 import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,12 +47,36 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class RootRequestHandler {
 
+    protected static final String HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_PROPERTIES_MD =
+        "https://github.com/52North/sensorweb-server-sta/extension/server-properties.md";
+    private static final String ENDPOINTS = "endpoints";
+    private static final String COLON = ":";
+    private static final String SLASH = "/";
+    private static final String
+        HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_CREATE_OBSERVATIONS_VIA_MQTT_OBSERVATIONS_CREATION =
+        "http://www.opengis.net/spec/iot_sensing/1.1/req/create-observations-via-mqtt/observations-creation";
+    private static final String
+        HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_RECEIVE_UPDATES_VIA_MQTT_RECEIVE_UPDATES =
+        "http://www.opengis.net/spec/iot_sensing/1.1/req/receive-updates-via-mqtt/receive-updates";
+    private static final String HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_CREATE_UPDATE_DELETE =
+        "http://www.opengis.net/spec/iot_sensing/1.1/req/create-update-delete";
+    private static final String HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_REQUEST_DATA =
+        "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data";
+    private static final String
+        HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_RESOURCE_PATH_RESOURCE_PATH_TO_ENTITIES =
+        "http://www.opengis.net/spec/iot_sensing/1.1/req/resource-path/resource-path-to-entities";
+    private static final String HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_DATAMODEL =
+        "http://www.opengis.net/spec/iot_sensing/1.1/req/datamodel";
+    private static final String HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_CREATE_VIA_MQTT_MD =
+        "https://github.com/52North/sensorweb-server-sta/extension/create-via-mqtt.md";
+    private static final String HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_VERSION_MD =
+        "https://github.com/52North/sensorweb-server-sta/extension/server-version.md";
     private final String rootResponse;
 
-    public RootRequestHandler(@Value("${server.rootUrl}") String rootUrl,
-                              ObjectMapper mapper,
-                              Environment environment) {
-        rootResponse = createRootResponse(rootUrl, mapper, environment.getActiveProfiles());
+    public RootRequestHandler(ObjectMapper mapper,
+                              Environment environment,
+                              ServerProperties serverProperties) {
+        rootResponse = createRootResponse(mapper, environment, serverProperties);
     }
 
     /**
@@ -67,15 +91,105 @@ public class RootRequestHandler {
         return rootResponse;
     }
 
-    private String createRootResponse(String rootUrl,
-                                      ObjectMapper mapper,
-                                      String[] activeProfiles) {
-        ArrayNode arrayNode = mapper.createArrayNode();
+    private String createRootResponse(ObjectMapper mapper,
+                                      Environment environment,
+                                      ServerProperties serverProperties) {
+        ArrayNode endpoints = mapper.createArrayNode();
+        String rootUrl = environment.getRequiredProperty("server.rootUrl");
+        Boolean mqttReadOnly = environment.getRequiredProperty("server.feature.mqttReadOnly", Boolean.class);
+        Boolean httpReadOnly = environment.getRequiredProperty("server.feature.httpReadOnly", Boolean.class);
 
-        addToArray(rootUrl, mapper, arrayNode, STAEntityDefinition.CORECOLLECTIONS);
-
+        // parse Endpoints
+        addToArray(rootUrl, mapper, endpoints, STAEntityDefinition.CORECOLLECTIONS);
         ObjectNode node = mapper.createObjectNode();
-        node.put("value", arrayNode);
+        node.put("value", endpoints);
+
+        // parse ServerSettings based on application.properties
+        ObjectNode serverSettings = mapper.createObjectNode();
+        ArrayNode conformanceClasses = mapper.createArrayNode();
+        conformanceClasses.add(
+            HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_DATAMODEL);
+        conformanceClasses.add(
+            HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_RESOURCE_PATH_RESOURCE_PATH_TO_ENTITIES);
+        conformanceClasses.add(
+            HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_REQUEST_DATA);
+        // Do not list CUD if we are in readOnly-Mode
+        if (!httpReadOnly) {
+            conformanceClasses.add(
+                HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_CREATE_UPDATE_DELETE);
+        }
+
+        // 52N Extensions
+        conformanceClasses.add(
+            HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_PROPERTIES_MD);
+        serverSettings.put(HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_PROPERTIES_MD,
+                           serverProperties.getFeatureInformation(mapper));
+
+        conformanceClasses.add(
+            HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_VERSION_MD);
+        serverSettings.put(HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_VERSION_MD,
+                           serverProperties.getVersionInformation(mapper));
+
+        // MQTT Extensions
+        Boolean plainTcpEnabled = environment.getRequiredProperty("mqtt.broker.plaintcp.enabled", Boolean.class);
+        Boolean wsEnabled = environment.getRequiredProperty("mqtt.broker.websocket.enabled", Boolean.class);
+        if (plainTcpEnabled || wsEnabled) {
+            // Add to conformanceClasses Array
+            conformanceClasses.add(
+                HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_RECEIVE_UPDATES_VIA_MQTT_RECEIVE_UPDATES);
+            if (!mqttReadOnly) {
+                conformanceClasses.add(
+                    HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_CREATE_OBSERVATIONS_VIA_MQTT_OBSERVATIONS_CREATION);
+                conformanceClasses.add(
+                    HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_CREATE_VIA_MQTT_MD);
+            }
+
+            // Parse MQTT Endpoints
+            ArrayNode mqttEndpoints = mapper.createArrayNode();
+            // Check which endpoints are enabled
+            if (plainTcpEnabled) {
+                mqttEndpoints.add("mqtt://"
+                                      + rootUrl.split(SLASH)[2].split(COLON)[0]
+                                      + COLON
+                                      + environment.getProperty("mqtt.broker.plaintcp.port"));
+
+            }
+            if (wsEnabled) {
+                mqttEndpoints.add("ws://"
+                                      + rootUrl.split(SLASH)[2].split(COLON)[0]
+                                      + COLON
+                                      + environment.getProperty("mqtt.broker.websocket.port"));
+
+            }
+
+            // MQTT Updates are always active if mqtt is active
+            ObjectNode mqttEndpointsArray = mapper.createObjectNode();
+            mqttEndpointsArray.put(ENDPOINTS, mqttEndpoints);
+            serverSettings.put(
+                HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_RECEIVE_UPDATES_VIA_MQTT_RECEIVE_UPDATES,
+                mqttEndpointsArray);
+
+            // MQTT Publish
+            if (!mqttReadOnly) {
+                ObjectNode mqttPublishSettings = mapper.createObjectNode();
+                mqttPublishSettings.put(ENDPOINTS, mqttEndpoints);
+                serverSettings.put(
+                    HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_CREATE_OBSERVATIONS_VIA_MQTT_OBSERVATIONS_CREATION,
+                    mqttEndpointsArray);
+
+                ObjectNode mqttCustomPublishSettings = mapper.createObjectNode();
+                ArrayNode availableMqttPublishEndpoints = mapper.createArrayNode();
+                serverProperties.getMqttPublishTopics().forEach(availableMqttPublishEndpoints::add);
+                mqttCustomPublishSettings.put(ENDPOINTS, mqttEndpoints);
+                mqttCustomPublishSettings.put("entities", availableMqttPublishEndpoints);
+                serverSettings.put(
+                    HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_CREATE_VIA_MQTT_MD,
+                    mqttCustomPublishSettings);
+            }
+        }
+
+        serverSettings.put("conformance", conformanceClasses);
+        node.put("serverSettings", serverSettings);
         return node.toString();
     }
 
