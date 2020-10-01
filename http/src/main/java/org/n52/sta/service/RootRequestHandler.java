@@ -96,8 +96,6 @@ public class RootRequestHandler {
                                       ServerProperties serverProperties) {
         ArrayNode endpoints = mapper.createArrayNode();
         String rootUrl = environment.getRequiredProperty("server.rootUrl");
-        Boolean mqttReadOnly = environment.getRequiredProperty("server.feature.mqttReadOnly", Boolean.class);
-        Boolean httpReadOnly = environment.getRequiredProperty("server.feature.httpReadOnly", Boolean.class);
 
         // parse Endpoints
         addToArray(rootUrl, mapper, endpoints, STAEntityDefinition.CORECOLLECTIONS);
@@ -114,7 +112,7 @@ public class RootRequestHandler {
         conformanceClasses.add(
             HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_REQUEST_DATA);
         // Do not list CUD if we are in readOnly-Mode
-        if (!httpReadOnly) {
+        if (!serverProperties.getHttpReadOnly()) {
             conformanceClasses.add(
                 HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_CREATE_UPDATE_DELETE);
         }
@@ -137,7 +135,7 @@ public class RootRequestHandler {
             // Add to conformanceClasses Array
             conformanceClasses.add(
                 HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_RECEIVE_UPDATES_VIA_MQTT_RECEIVE_UPDATES);
-            if (!mqttReadOnly) {
+            if (!serverProperties.getMqttReadOnly()) {
                 conformanceClasses.add(
                     HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_CREATE_OBSERVATIONS_VIA_MQTT_OBSERVATIONS_CREATION);
                 conformanceClasses.add(
@@ -170,7 +168,7 @@ public class RootRequestHandler {
                 mqttEndpointsArray);
 
             // MQTT Publish
-            if (!mqttReadOnly) {
+            if (!serverProperties.getMqttReadOnly()) {
                 ObjectNode mqttPublishSettings = mapper.createObjectNode();
                 mqttPublishSettings.put(ENDPOINTS, mqttEndpoints);
                 serverSettings.put(
