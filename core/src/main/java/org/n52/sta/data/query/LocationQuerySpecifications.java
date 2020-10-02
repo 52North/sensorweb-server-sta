@@ -32,6 +32,8 @@ package org.n52.sta.data.query;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PlatformEntity;
+import org.n52.series.db.beans.parameter.ParameterFactory;
+import org.n52.series.db.beans.parameter.location.LocationParameterEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.oasis.odata.ODataConstants;
@@ -238,8 +240,20 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
                                                                 builder,
                                                                 switched);
                     default:
-                        throw new RuntimeException("Error getting filter for Property: \"" + propertyName
-                                                       + "\". No such property in Entity.");
+                        // We are filtering on variable keys on properties
+                        if (propertyName.startsWith(StaConstants.PROP_PROPERTIES)) {
+                            return handleProperties(root,
+                                                    query,
+                                                    builder,
+                                                    propertyName,
+                                                    propertyValue,
+                                                    operator,
+                                                    switched,
+                                                    LocationParameterEntity.PROP_LOCATION_ID,
+                                                    ParameterFactory.EntityType.LOCATION);
+                        } else {
+                            throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP, propertyName));
+                        }
                 }
             } catch (STAInvalidFilterExpressionException e) {
                 throw new RuntimeException(e);

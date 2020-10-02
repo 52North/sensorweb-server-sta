@@ -38,6 +38,8 @@ import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
+import org.n52.series.db.beans.parameter.ParameterFactory;
+import org.n52.series.db.beans.parameter.dataset.DatasetParameterEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
@@ -172,8 +174,20 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Abs
                                                                 builder,
                                                                 switched);
                     default:
-                        throw new RuntimeException("Error getting filter for Property: \"" + propertyName
-                                                       + "\". No such property in Entity.");
+                        // We are filtering on variable keys on properties
+                        if (propertyName.startsWith(StaConstants.PROP_PROPERTIES)) {
+                            return handleProperties(root,
+                                                    query,
+                                                    builder,
+                                                    propertyName,
+                                                    propertyValue,
+                                                    operator,
+                                                    switched,
+                                                    DatasetParameterEntity.PROP_DATASET_ID,
+                                                    ParameterFactory.EntityType.DATASET);
+                        } else {
+                            throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP, propertyName));
+                        }
                 }
             } catch (STAInvalidFilterExpressionException e) {
                 throw new RuntimeException(e);
@@ -183,9 +197,9 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Abs
 
     public String checkPropertyName(String property) {
         switch (property) {
-            case "phenomenonTime":
+            case StaConstants.PROP_PHENOMENON_TIME:
                 return AbstractDatasetEntity.PROPERTY_FIRST_VALUE_AT;
-            case "resultTime":
+            case StaConstants.PROP_RESULT_TIME:
                 return AbstractDatasetEntity.PROPERTY_RESULT_TIME_START;
             default:
                 return super.checkPropertyName(property);

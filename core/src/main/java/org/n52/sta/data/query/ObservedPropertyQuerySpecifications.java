@@ -32,6 +32,8 @@ package org.n52.sta.data.query;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
+import org.n52.series.db.beans.parameter.ParameterFactory;
+import org.n52.series.db.beans.parameter.phenomenon.PhenomenonParameterEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
@@ -116,7 +118,20 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
                                                                 builder,
                                                                 switched);
                     default:
-                        throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP, propertyName));
+                        // We are filtering on variable keys on properties
+                        if (propertyName.startsWith(StaConstants.PROP_PROPERTIES)) {
+                            return handleProperties(root,
+                                                    query,
+                                                    builder,
+                                                    propertyName,
+                                                    propertyValue,
+                                                    operator,
+                                                    switched,
+                                                    PhenomenonParameterEntity.PROP_PHENOMENON_ID,
+                                                    ParameterFactory.EntityType.PHENOMENON);
+                        } else {
+                            throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP, propertyName));
+                        }
                 }
             } catch (STAInvalidFilterExpressionException e) {
                 throw new RuntimeException(e);
