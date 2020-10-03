@@ -429,41 +429,31 @@ public class ObservationService
         switch (dataset.getOMObservationType().getFormat()) {
             case OmConstants.OBS_TYPE_MEASUREMENT:
                 QuantityDataEntity quantityObservationEntity = new QuantityDataEntity();
-                if (observation.hasValue()) {
-                    if (value.equals("NaN") || value.equals("Inf") || value.equals("-Inf")) {
-                        quantityObservationEntity.setValue(null);
-                    } else {
-                        quantityObservationEntity.setValue(BigDecimal.valueOf(Double.parseDouble(value)));
-                    }
+                if (value.equals("NaN") || value.equals("Inf") || value.equals("-Inf")) {
+                    quantityObservationEntity.setValue(null);
+                } else {
+                    quantityObservationEntity.setValue(BigDecimal.valueOf(Double.parseDouble(value)));
                 }
                 data = quantityObservationEntity;
                 break;
             case OmConstants.OBS_TYPE_CATEGORY_OBSERVATION:
                 CategoryDataEntity categoryObservationEntity = new CategoryDataEntity();
-                if (observation.hasValue()) {
-                    categoryObservationEntity.setValue(value);
-                }
+                categoryObservationEntity.setValue(value);
                 data = categoryObservationEntity;
                 break;
             case OmConstants.OBS_TYPE_COUNT_OBSERVATION:
                 CountDataEntity countObservationEntity = new CountDataEntity();
-                if (observation.hasValue()) {
-                    countObservationEntity.setValue(Integer.parseInt(value));
-                }
+                countObservationEntity.setValue(Integer.parseInt(value));
                 data = countObservationEntity;
                 break;
             case OmConstants.OBS_TYPE_TEXT_OBSERVATION:
                 TextDataEntity textObservationEntity = new TextDataEntity();
-                if (observation.hasValue()) {
-                    textObservationEntity.setValue(value);
-                }
+                textObservationEntity.setValue(value);
                 data = textObservationEntity;
                 break;
             case OmConstants.OBS_TYPE_TRUTH_OBSERVATION:
                 BooleanDataEntity booleanObservationEntity = new BooleanDataEntity();
-                if (observation.hasValue()) {
-                    booleanObservationEntity.setValue(Boolean.parseBoolean(value));
-                }
+                booleanObservationEntity.setValue(Boolean.parseBoolean(value));
                 data = booleanObservationEntity;
                 break;
             default:
