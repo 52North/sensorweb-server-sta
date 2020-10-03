@@ -6,9 +6,13 @@ trace: false
 server:
   port: 8081
   ## Used for response serialization + url parsing. Must be set correctly!
-  rootUrl: "http://localhost:8081/sta/"
+  rootUrl: "http://localhost:${server.port}/sta/"
   servlet:
     context-path: "/sta"
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
 
   ## Used for enabling/disabling custom 52N-STA Features
   feature:
@@ -103,11 +107,6 @@ spring:
         use_sql_comments: false
   jmx:
     enabled: false
-  http:
-    encoding:
-      charset: UTF-8
-      enabled: true
-      force: true
   mvc:
     servlet:
       path: /
