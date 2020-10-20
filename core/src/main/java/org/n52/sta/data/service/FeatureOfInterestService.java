@@ -136,10 +136,6 @@ public class FeatureOfInterestService
         StaFeatureEntity<?> foi = new StaFeatureEntity<>(entity);
         Set<DataEntity<?>> observations = new HashSet<>();
         for (ExpandItem expandItem : expandOption.getItems()) {
-            // We have already handled $expand without filter and expand
-            if (!(expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter())) {
-                break;
-            }
             String expandProperty = expandItem.getPath();
             if (STAEntityDefinition.OBSERVATIONS.equals(expandProperty)) {
                 Page<DataEntity<?>> observation = getObservationService()
@@ -301,7 +297,8 @@ public class FeatureOfInterestService
         throws STACRUDException {
         try {
             Long foiId = datastreamRepository.findById(id).get().getFeature().getId();
-            AbstractFeatureEntity<?> entity = getRepository().findById(foiId).get();
+            AbstractFeatureEntity<?> entity =
+                getRepository().findById(foiId, createFetchGraph(queryOptions.getExpandFilter())).get();
             if (queryOptions.hasExpandFilter()) {
                 return fetchExpandEntitiesWithFilter(entity, queryOptions.getExpandFilter());
             } else {

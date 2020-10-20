@@ -415,7 +415,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
         throws MqttException, Exception {
         MessageListener listener = new MessageListener();
         mqttClient.setCallback(listener);
-        mqttClient.subscribe(type.getVal());
+        mqttClient.subscribe(MQTT_TOPIC_PREFIX + type.getVal());
 
         // Wait for subscription to register properly
         try {
@@ -428,7 +428,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
         MqttMessage message = listener.next();
         Assertions.assertNotNull(message);
         compareJsonNodes(entity, mapper.readTree(message.toString()));
-        mqttClient.unsubscribe(type.getVal());
+        mqttClient.unsubscribe(MQTT_TOPIC_PREFIX + type.getVal());
     }
 
     /**
@@ -448,7 +448,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
         MessageListener listener = new MessageListener();
         JsonNode entity = postEntity(type, source);
         mqttClient.setCallback(listener);
-        mqttClient.subscribe(type.getVal());
+        mqttClient.subscribe(MQTT_TOPIC_PREFIX + type.getVal());
 
         // Wait for subscription to register properly
         try {
@@ -464,7 +464,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
             Assertions.assertNotNull(message);
             compareJsonNodes(updatedEntity, mapper.readTree(message.toString()));
         }
-        mqttClient.unsubscribe(type.getVal());
+        mqttClient.unsubscribe(MQTT_TOPIC_PREFIX + type.getVal());
     }
 
     /**
@@ -489,7 +489,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
 
         for (String key : patchMap.keySet()) {
             String topic = type.getVal() + "(" + entityKey + ")/" + key;
-            mqttClient.subscribe(topic);
+            mqttClient.subscribe(MQTT_TOPIC_PREFIX + topic);
 
             // Wait for subscription to register properly
             try {
@@ -525,7 +525,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
 
         for (String key : patchMap.keySet()) {
             String topic = type.getVal() + "?$select=" + key;
-            mqttClient.subscribe(topic);
+            mqttClient.subscribe(MQTT_TOPIC_PREFIX + topic);
         }
         // Wait for subscription to register properly
         try {
@@ -570,7 +570,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
 
         for (String key : patchMap.keySet()) {
             String topic = type.getVal() + "?$select=" + key;
-            mqttClient.subscribe(topic);
+            mqttClient.subscribe(MQTT_TOPIC_PREFIX + topic);
         }
         // Wait for subscription to register properly
         try {

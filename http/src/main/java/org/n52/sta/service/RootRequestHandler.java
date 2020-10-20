@@ -105,6 +105,7 @@ public class RootRequestHandler {
         // parse ServerSettings based on application.properties
         ObjectNode serverSettings = mapper.createObjectNode();
         ArrayNode conformanceClasses = mapper.createArrayNode();
+        serverSettings.put("conformance", conformanceClasses);
         conformanceClasses.add(
             HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_DATAMODEL);
         conformanceClasses.add(
@@ -185,8 +186,6 @@ public class RootRequestHandler {
                     mqttCustomPublishSettings);
             }
         }
-
-        serverSettings.put("conformance", conformanceClasses);
         node.put("serverSettings", serverSettings);
         return node.toString();
     }

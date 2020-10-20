@@ -124,7 +124,7 @@ public class ObservedPropertyService
             for (ExpandItem expandItem : expandOption.getItems()) {
                 // We cannot handle nested $filter or $expand
                 if (expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter()) {
-                    break;
+                    continue;
                 }
                 String expandProperty = expandItem.getPath();
                 if (ObservedPropertyEntityDefinition.DATASTREAMS.equals(expandProperty)) {
@@ -149,7 +149,7 @@ public class ObservedPropertyService
         for (ExpandItem expandItem : expandOption.getItems()) {
             // We have already handled $expand without filter and expand
             if (!(expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter())) {
-                break;
+                continue;
             }
             String expandProperty = expandItem.getPath();
             if (ObservedPropertyEntityDefinition.DATASTREAMS.equals(expandProperty)) {

@@ -97,7 +97,7 @@ public class HistoricalLocationService
             for (ExpandItem expandItem : expandOption.getItems()) {
                 // We cannot handle nested $filter or $expand
                 if (expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter()) {
-                    break;
+                    continue;
                 }
                 String expandProperty = expandItem.getPath();
                 switch (expandProperty) {
@@ -129,7 +129,7 @@ public class HistoricalLocationService
         for (ExpandItem expandItem : expandOption.getItems()) {
             // We have already handled $expand without filter and expand
             if (!(expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter())) {
-                break;
+                continue;
             }
             String expandProperty = expandItem.getPath();
             switch (expandProperty) {

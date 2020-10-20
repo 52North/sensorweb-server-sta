@@ -157,7 +157,7 @@ public class DatastreamService extends
             for (ExpandItem expandItem : expandOption.getItems()) {
                 // We cannot handle nested $filter or $expand
                 if (expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter()) {
-                    break;
+                    continue;
                 }
                 String expandProperty = expandItem.getPath();
                 switch (expandProperty) {

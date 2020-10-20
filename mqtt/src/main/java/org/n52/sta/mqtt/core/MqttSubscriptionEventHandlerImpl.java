@@ -131,7 +131,7 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
                         serializedCache.put(subscrip.getQueryOptions(), out);
                     }
                     MqttPublishMessage msg = new MqttPublishMessage(mqttFixedHeader,
-                                                                    new MqttPublishVariableHeader(topic, 52),
+                                                                    new MqttPublishVariableHeader("v1.1/" + topic, 52),
                                                                     out);
                     mqttBroker.internalPublish(msg, INTERNAL_CLIENT_ID);
                     LOGGER.debug("Posted Message to Topic: {}", topic);
