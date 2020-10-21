@@ -43,6 +43,7 @@ import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
+import org.n52.shetland.ogc.om.OmConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.springframework.util.Assert;
 
@@ -78,16 +79,10 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
 
     private final GeometryFactory factory =
         new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
-    private final String OM_CategoryObservation =
-        "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CategoryObservation";
-    private final String OM_CountObservation =
-        "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation";
-    private final String OM_Measurement =
-        "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement";
-    private final String OM_Observation =
-        "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation";
-    private final String OM_TruthObservation =
-        "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_TruthObservation";
+
+    private final String OBS_TYPE_SENSORML_OBSERVATION =
+        "http://www.52north.org/def/observationType/OGC-OM/2.0/OM_SensorML20Observation";
+
     private final String obsType = "observationType";
     private final String uomName = "unitOfMeasurement->name";
     private final String uomSymbol = "unitOfMeasurement->symbol";
@@ -129,11 +124,12 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
                 Assert.notNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
                 Assert.notNull(description, INVALID_INLINE_ENTITY_MISSING + "description");
                 Assert.notNull(observationType, INVALID_INLINE_ENTITY_MISSING + obsType);
-                Assert.state(observationType.equals(OM_Measurement)
-                                 || observationType.equals(OM_CountObservation)
-                                 || observationType.equals(OM_CategoryObservation)
-                                 || observationType.equals(OM_Observation)
-                                 || observationType.equals(OM_TruthObservation),
+                Assert.state(observationType.equals(OmConstants.OBS_TYPE_MEASUREMENT)
+                                 || observationType.equals(OmConstants.OBS_TYPE_COUNT_OBSERVATION)
+                                 || observationType.equals(OmConstants.OBS_TYPE_CATEGORY_OBSERVATION)
+                                 || observationType.equals(OmConstants.OBS_TYPE_OBSERVATION)
+                                 || observationType.equals(OmConstants.OBS_TYPE_TRUTH_OBSERVATION)
+                                 || observationType.equals(OBS_TYPE_SENSORML_OBSERVATION),
                              INVALID_INLINE_ENTITY_INVALID_VALUE + obsType);
                 Assert.notNull(unitOfMeasurement, INVALID_INLINE_ENTITY_MISSING + "unitOfMeasurement");
                 // Check if we have special null-unit
