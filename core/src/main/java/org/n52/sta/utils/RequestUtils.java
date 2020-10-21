@@ -54,6 +54,7 @@ public interface RequestUtils extends StaConstants {
     QueryOptionsFactory QUERY_OPTIONS_FACTORY = new QueryOptionsFactory();
 
     String INTERNAL_CLIENT_ID = "POC";
+    String MQTT_PREFIX = "v1.1/";
 
     // Used to store information about referenced entity during related POST
     String REFERENCED_FROM_TYPE = "referencedFromType";
