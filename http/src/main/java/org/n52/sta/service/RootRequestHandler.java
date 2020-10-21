@@ -71,6 +71,9 @@ public class RootRequestHandler {
         "https://github.com/52North/sensorweb-server-sta/extension/create-via-mqtt.md";
     private static final String HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_VERSION_MD =
         "https://github.com/52North/sensorweb-server-sta/extension/server-version.md";
+    private static final String HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_EXTENDED_SENSOR_ENCODINGTYPE =
+        "https://github.com/52North/sensorweb-server-sta/extension/extended-sensor-encodingtype.md";
+
     private final String rootResponse;
 
     public RootRequestHandler(ObjectMapper mapper,
@@ -128,6 +131,12 @@ public class RootRequestHandler {
             HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_VERSION_MD);
         serverSettings.put(HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_VERSION_MD,
                            serverProperties.getVersionInformation(mapper));
+
+        if (environment.getRequiredProperty("server.feature.variableEncodingType", Boolean.class)) {
+            conformanceClasses.add(
+                HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_EXTENDED_SENSOR_ENCODINGTYPE
+            );
+        }
 
         // MQTT Extensions
         Boolean plainTcpEnabled = environment.getRequiredProperty("mqtt.broker.plaintcp.enabled", Boolean.class);
