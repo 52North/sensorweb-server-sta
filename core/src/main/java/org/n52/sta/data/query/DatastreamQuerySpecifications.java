@@ -30,6 +30,7 @@
 package org.n52.sta.data.query;
 
 import org.n52.series.db.beans.AbstractDatasetEntity;
+import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.FeatureEntity;
@@ -37,8 +38,9 @@ import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
+import org.n52.series.db.beans.parameter.ParameterFactory;
+import org.n52.series.db.beans.parameter.dataset.DatasetParameterEntity;
 import org.n52.series.db.beans.sta.LicenseEntity;
-import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.series.db.beans.sta.PartyEntity;
 import org.n52.series.db.beans.sta.ProjectEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
@@ -123,11 +125,11 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Abs
                     }
                     case OBSERVATIONS: {
                         Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
-                        Root<ObservationEntity> data = sq.from(ObservationEntity.class);
-                        sq.select(data.get(ObservationEntity.PROPERTY_DATASET))
-                            .where(((Specification<ObservationEntity>) propertyValue).toPredicate(data,
-                                                                                                  query,
-                                                                                                  builder));
+                        Root<DataEntity> data = sq.from(DataEntity.class);
+                        sq.select(data.get(DataEntity.PROPERTY_DATASET_ID))
+                            .where(((Specification<DataEntity>) propertyValue).toPredicate(data,
+                                                                                           query,
+                                                                                           builder));
                         return builder.in(root.get(DatasetEntity.PROPERTY_ID)).value(sq);
                     }
                     case StaConstants.LICENSE: {
@@ -202,8 +204,20 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Abs
                                                                 builder,
                                                                 switched);
                     default:
-                        throw new RuntimeException("Error getting filter for Property: \"" + propertyName
-                                                       + "\". No such property in Entity.");
+                        // We are filtering on variable keys on properties
+                        if (propertyName.startsWith(StaConstants.PROP_PROPERTIES)) {
+                            return handleProperties(root,
+                                                    query,
+                                                    builder,
+                                                    propertyName,
+                                                    propertyValue,
+                                                    operator,
+                                                    switched,
+                                                    DatasetParameterEntity.PROP_DATASET_ID,
+                                                    ParameterFactory.EntityType.DATASET);
+                        } else {
+                            throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP, propertyName));
+                        }
                 }
             } catch (STAInvalidFilterExpressionException e) {
                 throw new RuntimeException(e);
@@ -213,9 +227,9 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Abs
 
     public String checkPropertyName(String property) {
         switch (property) {
-            case "phenomenonTime":
+            case StaConstants.PROP_PHENOMENON_TIME:
                 return AbstractDatasetEntity.PROPERTY_FIRST_VALUE_AT;
-            case "resultTime":
+            case StaConstants.PROP_RESULT_TIME:
                 return AbstractDatasetEntity.PROPERTY_RESULT_TIME_START;
             default:
                 return super.checkPropertyName(property);
@@ -282,9 +296,9 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Abs
     public Specification<AbstractDatasetEntity> withObservationStaIdentifier(String observationIdentifier) {
         return (root, query, builder) -> {
             Subquery<AbstractDatasetEntity> sq = query.subquery(AbstractDatasetEntity.class);
-            Root<ObservationEntity> data = sq.from(ObservationEntity.class);
-            sq.select(data.get(ObservationEntity.PROPERTY_DATASET_ID))
-                .where(builder.equal(data.get(ObservationEntity.PROPERTY_STA_IDENTIFIER), observationIdentifier));
+            Root<DataEntity> data = sq.from(DataEntity.class);
+            sq.select(data.get(DataEntity.PROPERTY_DATASET_ID))
+                .where(builder.equal(data.get(DataEntity.PROPERTY_STA_IDENTIFIER), observationIdentifier));
 
             Subquery<AbstractDatasetEntity> subquery = query.subquery(AbstractDatasetEntity.class);
             Root<AbstractDatasetEntity> realDataset = subquery.from(AbstractDatasetEntity.class);

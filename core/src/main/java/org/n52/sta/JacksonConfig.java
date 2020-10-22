@@ -37,13 +37,13 @@ import com.fasterxml.jackson.databind.module.SimpleSerializers;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.AbstractFeatureEntity;
+import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LicenseEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
-import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.series.db.beans.sta.ObservationGroupEntity;
 import org.n52.series.db.beans.sta.ObservationRelationEntity;
 import org.n52.series.db.beans.sta.PartyEntity;
@@ -142,7 +142,7 @@ public class JacksonConfig {
                                       new LocationSerDes.LocationDeserializer());
         deserializers.addDeserializer(ProcedureEntity.class,
                                       new SensorSerDes.SensorDeserializer(variableSensorEncodingTypeEnabled));
-        deserializers.addDeserializer(ObservationEntity.class,
+        deserializers.addDeserializer(DataEntity.class,
                                       new ObservationSerDes.ObservationDeserializer(parameterMapping));
         deserializers.addDeserializer(PhenomenonEntity.class,
                                       new ObservedPropertySerDes.ObservedPropertyDeserializer());

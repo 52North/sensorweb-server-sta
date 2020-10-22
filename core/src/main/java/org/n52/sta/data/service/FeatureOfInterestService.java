@@ -38,8 +38,9 @@ import org.locationtech.jts.geom.Point;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.AbstractFeatureEntity;
+import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.FormatEntity;
-import org.n52.series.db.beans.sta.ObservationEntity;
+import org.n52.series.db.beans.parameter.feature.FeatureParameterEntity;
 import org.n52.series.db.beans.sta.StaFeatureEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
@@ -53,10 +54,10 @@ import org.n52.sta.data.query.FeatureOfInterestQuerySpecifications;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.EntityGraphRepository;
+import org.n52.sta.data.repositories.FeatureOfInterestParameterRepository;
 import org.n52.sta.data.repositories.FeatureOfInterestRepository;
 import org.n52.sta.data.repositories.FormatRepository;
 import org.n52.sta.data.repositories.ObservationRepository;
-import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,6 +77,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -84,8 +86,7 @@ import java.util.UUID;
 @DependsOn({"springApplicationContext"})
 @Transactional
 public class FeatureOfInterestService
-    extends AbstractSensorThingsEntityServiceImpl<FeatureOfInterestRepository, AbstractFeatureEntity<?>,
-    StaFeatureEntity<?>> {
+    extends AbstractSensorThingsEntityServiceImpl<FeatureOfInterestRepository, AbstractFeatureEntity<?>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FeatureOfInterestService.class);
 
@@ -96,12 +97,14 @@ public class FeatureOfInterestService
     private final FormatRepository formatRepository;
     private final ObservationRepository observationRepository;
     private final DatastreamRepository datastreamRepository;
+    private final FeatureOfInterestParameterRepository parameterRepository;
 
     @Autowired
     public FeatureOfInterestService(FeatureOfInterestRepository repository,
                                     FormatRepository formatRepository,
                                     ObservationRepository observationRepository,
                                     DatastreamRepository datastreamRepository,
+                                    FeatureOfInterestParameterRepository parameterRepository,
                                     EntityManager em) {
         super(repository,
               em,
@@ -109,31 +112,26 @@ public class FeatureOfInterestService
         this.formatRepository = formatRepository;
         this.observationRepository = observationRepository;
         this.datastreamRepository = datastreamRepository;
-    }
-
-    @Override
-    public EntityTypes[] getTypes() {
-        return new EntityTypes[] {EntityTypes.FeatureOfInterest, EntityTypes.FeaturesOfInterest};
+        this.parameterRepository = parameterRepository;
     }
 
     @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption) {
-        return new EntityGraphRepository.FetchGraph[] {EntityGraphRepository.FetchGraph.FETCHGRAPH_FEATURETYPE};
+        return new EntityGraphRepository.FetchGraph[] {
+            EntityGraphRepository.FetchGraph.FETCHGRAPH_FEATURETYPE,
+            EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS
+        };
     }
 
     @Override
-    protected StaFeatureEntity<?> fetchExpandEntitiesWithFilter(AbstractFeatureEntity<?> entity,
-                                                                ExpandFilter expandOption)
+    protected AbstractFeatureEntity<?> fetchExpandEntitiesWithFilter(AbstractFeatureEntity<?> entity,
+                                                                     ExpandFilter expandOption)
         throws STACRUDException, STAInvalidQueryException {
         StaFeatureEntity<?> foi = new StaFeatureEntity<>(entity);
-        Set<ObservationEntity<?>> observations = new HashSet<>();
+        Set<DataEntity<?>> observations = new HashSet<>();
         for (ExpandItem expandItem : expandOption.getItems()) {
-            // We have already handled $expand without filter and expand
-            if (!(expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter())) {
-                break;
-            }
             String expandProperty = expandItem.getPath();
             if (STAEntityDefinition.OBSERVATIONS.equals(expandProperty)) {
-                Page<ObservationEntity<?>> observation = getObservationService()
+                Page<DataEntity<?>> observation = getObservationService()
                     .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
                                                            STAEntityDefinition.FEATURES_OF_INTEREST,
                                                            expandItem.getQueryOptions());
@@ -228,6 +226,17 @@ public class FeatureOfInterestService
             } else {
                 feature.setXml(null);
                 checkFeatureType(feature);
+                AbstractFeatureEntity<?> intermediateSave = getRepository().intermediateSave(feature);
+                if (feature.getParameters() != null) {
+                    parameterRepository.saveAll(feature.getParameters()
+                                                    .stream()
+                                                    .filter(t -> t instanceof FeatureParameterEntity)
+                                                    .map(t -> {
+                                                        ((FeatureParameterEntity) t).setFeature(intermediateSave);
+                                                        return (FeatureParameterEntity) t;
+                                                    })
+                                                    .collect(Collectors.toSet()));
+                }
                 return getRepository().save(feature);
             }
         }
@@ -281,7 +290,8 @@ public class FeatureOfInterestService
         throws STACRUDException {
         try {
             Long foiId = datastreamRepository.findById(id).get().getFeature().getId();
-            AbstractFeatureEntity<?> entity = getRepository().findById(foiId).get();
+            AbstractFeatureEntity<?> entity =
+                getRepository().findById(foiId, createFetchGraph(queryOptions.getExpandFilter())).get();
             if (queryOptions.hasExpandFilter()) {
                 return fetchExpandEntitiesWithFilter(entity, queryOptions.getExpandFilter());
             } else {

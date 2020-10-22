@@ -131,7 +131,8 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
                         serializedCache.put(subscrip.getQueryOptions(), out);
                     }
                     MqttPublishMessage msg = new MqttPublishMessage(mqttFixedHeader,
-                                                                    new MqttPublishVariableHeader(topic, 52),
+                                                                    new MqttPublishVariableHeader(MQTT_PREFIX + topic,
+                                                                                                  52),
                                                                     out);
                     mqttBroker.internalPublish(msg, INTERNAL_CLIENT_ID);
                     LOGGER.debug("Posted Message to Topic: {}", topic);
@@ -193,8 +194,12 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
     private AbstractMqttSubscription createMqttSubscription(String rawTopic) throws MqttHandlerException {
         try {
             Matcher mt;
-            // Delete possible leading slash
+            // Delete possible leading slash and version information
             String topic = (rawTopic.startsWith("/")) ? rawTopic.substring(1) : rawTopic;
+            if (!topic.startsWith(MQTT_PREFIX)) {
+                throw new MqttHandlerException("Error while parsing MQTT topic. Missing Version information!");
+            }
+            topic = topic.substring(5);
 
             // Check topic for syntax+semantics
             if (topic.contains("?")) {

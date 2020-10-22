@@ -37,9 +37,10 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.geojson.GeoJsonReader;
-import org.n52.series.db.beans.AbstractDatasetEntity;
+import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.UnitEntity;
+import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
@@ -52,7 +53,7 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("VisibilityModifier")
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
-public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<AbstractDatasetEntity>
+public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<DatasetEntity>
     implements AbstractJSONEntity {
 
     private static final String COULD_NOT_PARSE_OBS_AREA = "Could not parse observedArea to GeoJSON. Error was: ";
@@ -62,12 +63,17 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Abstr
     public JsonNode observedArea;
     public String phenomenonTime;
     public String resultTime;
+    public JsonNode properties;
+
     @JsonManagedReference
     public JSONSensor Sensor;
+
     @JsonManagedReference
     public JSONThing Thing;
+
     @JsonManagedReference
     public JSONObservedProperty ObservedProperty;
+
     @JsonManagedReference
     public JSONObservation[] Observations;
     @JsonManagedReference
@@ -97,7 +103,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Abstr
     private final String uomDef = "unitOfMeasurement->definition";
 
     public JSONDatastream() {
-        self = new AbstractDatasetEntity();
+        self = new DatasetEntity();
     }
 
     @Override protected void parseReferencedFrom() {
@@ -140,7 +146,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Abstr
     }
 
     @Override
-    public AbstractDatasetEntity toEntity(JSONBase.EntityType type) {
+    public DatasetEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
             case FULL:
                 parseReferencedFrom();
@@ -177,6 +183,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Abstr
                 Assert.isNull(observedArea, INVALID_REFERENCED_ENTITY);
                 Assert.isNull(phenomenonTime, INVALID_REFERENCED_ENTITY);
                 Assert.isNull(resultTime, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(properties, INVALID_REFERENCED_ENTITY);
 
                 Assert.isNull(Sensor, INVALID_REFERENCED_ENTITY);
                 Assert.isNull(ObservedProperty, INVALID_REFERENCED_ENTITY);
@@ -191,7 +198,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Abstr
         }
     }
 
-    private AbstractDatasetEntity createPatchEntity() {
+    private DatasetEntity createPatchEntity() {
         self.setIdentifier(identifier);
         self.setStaIdentifier(identifier);
         self.setName(name);
@@ -233,6 +240,10 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Abstr
             }
         }
 
+        if (properties != null) {
+            self.setParameters(convertParameters(properties, ParameterFactory.EntityType.DATASET));
+        }
+
         // if (phenomenonTime != null) {
         // phenomenonTime (aka samplingTime) is automatically calculated based on associated Observations
         // phenomenonTime parsed from json is therefore ignored.
@@ -270,7 +281,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Abstr
         return self;
     }
 
-    private AbstractDatasetEntity createPostEntity() {
+    private DatasetEntity createPostEntity() {
         self.setIdentifier(identifier);
         self.setStaIdentifier(identifier);
         self.setName(name);
@@ -303,6 +314,10 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Abstr
                 self.setResultTimeStart(((TimePeriod) time).getStart().toDate());
                 self.setResultTimeEnd(((TimePeriod) time).getEnd().toDate());
             }
+        }
+
+        if (properties != null) {
+            self.setParameters(convertParameters(properties, ParameterFactory.EntityType.DATASET));
         }
 
         if (Thing != null) {

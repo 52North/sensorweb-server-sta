@@ -37,6 +37,7 @@ import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.geojson.GeoJsonReader;
 import org.n52.series.db.beans.FormatEntity;
+import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.springframework.util.Assert;
 
@@ -54,6 +55,7 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
     // JSON Properties. Matched by Annotation or variable name
     public String encodingType;
     public JsonNode location;
+    public JsonNode properties;
 
     @JsonManagedReference
     public JSONThing[] Things;
@@ -136,6 +138,10 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
                     Assert.notNull(null, COULD_NOT_PARSE + e.getMessage());
                 }
 
+                if (properties != null) {
+                    self.setParameters(convertParameters(properties, ParameterFactory.EntityType.LOCATION));
+                }
+
                 if (Things != null) {
                     self.setThings(Arrays.stream(Things)
                                        .map(thing -> thing.toEntity(JSONBase.EntityType.FULL,
@@ -188,6 +194,10 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
                     }
                 }
 
+                if (properties != null) {
+                    self.setParameters(convertParameters(properties, ParameterFactory.EntityType.LOCATION));
+                }
+
                 if (Things != null) {
                     self.setThings(Arrays.stream(Things)
                                        .map(thing -> thing.toEntity(JSONBase.EntityType.REFERENCE))
@@ -205,6 +215,7 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
                 Assert.isNull(description, INVALID_REFERENCED_ENTITY);
                 Assert.isNull(encodingType, INVALID_REFERENCED_ENTITY);
                 Assert.isNull(location, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(properties, INVALID_REFERENCED_ENTITY);
                 Assert.isNull(Things, INVALID_REFERENCED_ENTITY);
 
                 self.setIdentifier(identifier);

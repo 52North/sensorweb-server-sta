@@ -32,6 +32,7 @@ package org.n52.sta.serdes.util;
 import org.hibernate.Hibernate;
 import org.hibernate.proxy.HibernateProxy;
 import org.n52.series.db.beans.AbstractDatasetEntity;
+import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.HibernateRelations;
 import org.n52.series.db.beans.PhenomenonEntity;
@@ -40,7 +41,6 @@ import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LicenseEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
-import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.series.db.beans.sta.ObservationGroupEntity;
 import org.n52.series.db.beans.sta.ObservationRelationEntity;
 import org.n52.series.db.beans.sta.PartyEntity;
@@ -101,8 +101,8 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
             case "ProjectEntity":
                 return new ProjectWithQueryOptions((ProjectEntity) unwrapped, queryOptions);
             default:
-                if (unwrapped instanceof ObservationEntity) {
-                    return new ObservationWithQueryOptions((ObservationEntity<?>) unwrapped, queryOptions);
+                if (unwrapped instanceof DataEntity) {
+                    return new ObservationWithQueryOptions((DataEntity<?>) unwrapped, queryOptions);
                 } else {
                     throw new RuntimeException(
                         "Error wrapping object with queryOptions. Could not find Wrapper for class: " +
@@ -178,9 +178,9 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
     }
 
 
-    public static class ObservationWithQueryOptions extends ElementWithQueryOptions<ObservationEntity<?>> {
+    public static class ObservationWithQueryOptions extends ElementWithQueryOptions<DataEntity<?>> {
 
-        ObservationWithQueryOptions(ObservationEntity<?> entity,
+        ObservationWithQueryOptions(DataEntity<?> entity,
                                     QueryOptions queryOptions) {
             super(entity, queryOptions);
         }

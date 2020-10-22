@@ -27,22 +27,38 @@
  * Public License for more details.
  */
 
-package org.n52.sta.data.repositories;
+package org.n52.sta.data.service;
 
-import org.n52.series.db.beans.AbstractDatasetEntity;
-import org.springframework.stereotype.Repository;
+import org.n52.series.db.beans.CategoryEntity;
+import org.n52.sta.data.repositories.CategoryRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Set;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@Transactional
-@Repository
-public interface DatastreamRepository
-    extends NameRepository<AbstractDatasetEntity>, StaIdentifierRepository<AbstractDatasetEntity> {
+@Component
+@DependsOn({"springApplicationContext"})
+@Transactional(propagation = Propagation.REQUIRES_NEW)
+public class CategoryService {
 
-    Set<AbstractDatasetEntity> findAllByAggregationId(Long id);
+    public static final String DEFAULT_CATEGORY = "DEFAULT_STA_CATEGORY";
+
+    private static final Logger logger = LoggerFactory.getLogger(CategoryService.class);
+
+    public CategoryService(CategoryRepository categoryRepository) {
+        if (!categoryRepository.existsByIdentifier(DEFAULT_CATEGORY)) {
+            CategoryEntity category = new CategoryEntity();
+            category.setIdentifier(DEFAULT_CATEGORY);
+            category.setName(DEFAULT_CATEGORY);
+            category.setDescription("Default SOS category");
+            logger.debug("Persisting default CategoryEntity: " + category.getName());
+            categoryRepository.save(category);
+        }
+    }
 
 }

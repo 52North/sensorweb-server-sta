@@ -31,12 +31,12 @@ package org.n52.sta.utils;
 
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.AbstractFeatureEntity;
+import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
-import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.sta.serdes.DatastreamSerDes;
@@ -54,6 +54,7 @@ public interface RequestUtils extends StaConstants {
     QueryOptionsFactory QUERY_OPTIONS_FACTORY = new QueryOptionsFactory();
 
     String INTERNAL_CLIENT_ID = "POC";
+    String MQTT_PREFIX = "v1.1/";
 
     // Used to store information about referenced entity during related POST
     String REFERENCED_FROM_TYPE = "referencedFromType";
@@ -155,7 +156,7 @@ public interface RequestUtils extends StaConstants {
             case SENSORS:
                 return ProcedureEntity.class;
             case OBSERVATIONS:
-                return ObservationEntity.class;
+                return DataEntity.class;
             case OBSERVED_PROPERTIES:
                 return PhenomenonEntity.class;
             case FEATURES_OF_INTEREST:

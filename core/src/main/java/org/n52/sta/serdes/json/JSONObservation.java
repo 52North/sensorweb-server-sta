@@ -38,8 +38,10 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.geojson.GeoJsonReader;
+import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.GeometryEntity;
+import org.n52.series.db.beans.TextDataEntity;
 import org.n52.series.db.beans.parameter.ParameterFactory;
-import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.series.db.beans.sta.ObservationRelationEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
@@ -56,7 +58,7 @@ import java.util.Set;
 
 @SuppressWarnings("VisibilityModifier")
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
-public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> implements AbstractJSONEntity {
+public class JSONObservation extends JSONBase.JSONwithIdTime<DataEntity<?>> implements AbstractJSONEntity {
 
     // JSON Properties. Matched by Annotation or variable name
     public String phenomenonTime;
@@ -77,7 +79,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
     public JSONObservationRelation[] relations;
 
     public JSONObservation() {
-        self = new ObservationEntity();
+        self = new TextDataEntity();
     }
 
     @Override
@@ -106,7 +108,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
     }
 
     @Override
-    public ObservationEntity toEntity(JSONBase.EntityType type) {
+    public DataEntity<?> toEntity(JSONBase.EntityType type) {
         switch (type) {
             case FULL:
                 parseReferencedFrom();
@@ -131,7 +133,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
         }
     }
 
-    private ObservationEntity createPatchEntity() {
+    private DataEntity<?> createPatchEntity() {
         self.setIdentifier(identifier);
         self.setStaIdentifier(identifier);
 
@@ -168,7 +170,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
             }
         }
 
-        self.setValue(result);
+        self.setValueText(result);
 
         // Link to Datastream
         if (Datastream != null) {
@@ -192,7 +194,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
         return self;
     }
 
-    private ObservationEntity createPostEntity() {
+    private DataEntity<?> createPostEntity() {
         self.setIdentifier(identifier);
         self.setStaIdentifier(identifier);
 
@@ -235,7 +237,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
         self.setParameters(convertParameters(parameters, ParameterFactory.EntityType.OBSERVATION));
 
         // result
-        self.setValue(result);
+        self.setValueText(result);
 
         // Link to Datastream
         if (Datastream != null) {
@@ -281,7 +283,9 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationEntity> 
                                     new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
                                 GeoJsonReader reader = new GeoJsonReader(factory);
                                 try {
-                                    self.setSamplingGeometry(reader.read(jsonNode.toString()));
+                                    GeometryEntity geometryEntity = new GeometryEntity();
+                                    geometryEntity.setGeometry(reader.read(jsonNode.toString()));
+                                    self.setGeometryEntity(geometryEntity);
                                 } catch (ParseException e) {
                                     Assert.notNull(null, "Could not parse" + e.getMessage());
                                 }

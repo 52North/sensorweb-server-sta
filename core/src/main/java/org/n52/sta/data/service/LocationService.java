@@ -34,6 +34,7 @@ import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.parameter.TextParameterEntity;
+import org.n52.series.db.beans.parameter.location.LocationParameterEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.filter.ExpandFilter;
@@ -45,8 +46,8 @@ import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.LocationQuerySpecifications;
 import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.LocationEncodingRepository;
+import org.n52.sta.data.repositories.LocationParameterRepository;
 import org.n52.sta.data.repositories.LocationRepository;
-import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -75,7 +76,7 @@ import java.util.stream.Collectors;
 @DependsOn({"springApplicationContext"})
 @Transactional
 public class LocationService
-    extends AbstractSensorThingsEntityServiceImpl<LocationRepository, LocationEntity, LocationEntity> {
+    extends AbstractSensorThingsEntityServiceImpl<LocationRepository, LocationEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LocationService.class);
 
@@ -86,29 +87,28 @@ public class LocationService
     private final LocationEncodingRepository locationEncodingRepository;
 
     private final boolean updateFOIFeatureEnabled;
+    private final LocationParameterRepository parameterRepository;
 
     public LocationService(@Value("${server.feature.updateFOI:false}") boolean updateFOI,
                            LocationRepository repository,
                            LocationEncodingRepository locationEncodingRepository,
+                           LocationParameterRepository parameterRepository,
                            EntityManager em) {
         super(repository, em, LocationEntity.class);
         this.locationEncodingRepository = locationEncodingRepository;
         this.updateFOIFeatureEnabled = updateFOI;
-    }
-
-    @Override
-    public EntityTypes[] getTypes() {
-        return new EntityTypes[] {EntityTypes.Location, EntityTypes.Locations};
+        this.parameterRepository = parameterRepository;
     }
 
     @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
         throws STAInvalidQueryException {
         Set<EntityGraphRepository.FetchGraph> fetchGraphs = new HashSet<>(6);
+        fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
         if (expandOption != null) {
             for (ExpandItem expandItem : expandOption.getItems()) {
                 // We cannot handle nested $filter or $expand
                 if (expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter()) {
-                    break;
+                    continue;
                 }
                 String expandProperty = expandItem.getPath();
                 switch (expandProperty) {
@@ -133,7 +133,7 @@ public class LocationService
         for (ExpandItem expandItem : expandOption.getItems()) {
             // We have already handled $expand without filter and expand
             if (!(expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter())) {
-                break;
+                continue;
             }
             String expandProperty = expandItem.getPath();
             switch (expandProperty) {
@@ -213,7 +213,18 @@ public class LocationService
                 }
                 location.setProcessed(true);
                 checkLocationEncoding(location);
-                location = getRepository().save(location);
+                LocationEntity intermediateSave = getRepository().intermediateSave(location);
+                if (location.getParameters() != null) {
+                    parameterRepository.saveAll(location.getParameters()
+                                                    .stream()
+                                                    .filter(t -> t instanceof LocationParameterEntity)
+                                                    .map(t -> {
+                                                        ((LocationParameterEntity) t).setLocation(intermediateSave);
+                                                        return (LocationParameterEntity) t;
+                                                    })
+                                                    .collect(Collectors.toSet()));
+                }
+                // location = getRepository().save(lo);
                 processThings(location);
             }
         }

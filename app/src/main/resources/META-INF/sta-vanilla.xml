@@ -29,7 +29,6 @@
         <mapping-file>/hbm/transactional/core/LocationResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/PlatformResource.hbm.xml</mapping-file>
 
-
         <mapping-file>/hbm/parameter/PlatformParameterResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/parameter/DatasetParameterResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/parameter/ObservationParameterResource.hbm.xml</mapping-file>
@@ -37,14 +36,6 @@
         <mapping-file>/hbm/parameter/PhenomenonParameterResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/parameter/ProcedureParameterResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/parameter/FeatureParameterResource.hbm.xml</mapping-file>
-
-        <!-- Load Classes annoted by @Entity-->
-        <class>org.n52.series.db.beans.sta.QuantityObservationEntity</class>
-        <class>org.n52.series.db.beans.sta.TextObservationEntity</class>
-        <class>org.n52.series.db.beans.sta.CountObservationEntity</class>
-        <class>org.n52.series.db.beans.sta.CategoryObservationEntity</class>
-        <class>org.n52.series.db.beans.sta.BooleanObservationEntity</class>
-
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
           <property name="hibernate.archive.autodetection" value="class"/>

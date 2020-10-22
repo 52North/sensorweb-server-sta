@@ -37,6 +37,7 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
+import org.n52.sta.mqtt.MqttHandlerException;
 import org.n52.sta.utils.AbstractSTARequestHandler;
 import org.n52.sta.utils.CoreRequestUtils;
 import org.slf4j.Logger;
@@ -96,7 +97,7 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
     private boolean validateTopics(Set<String> topics) {
         boolean valid = true;
         for (String topic : topics) {
-            valid = Arrays.asList(STAEntityDefinition.CORECOLLECTIONS).contains(topic);
+            valid = Arrays.asList(STAEntityDefinition.ALLCOLLECTIONS).contains(topic);
         }
         return valid;
     }
@@ -109,6 +110,10 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
             // This may only be a reference to Observation collection
             // Remove leading slash if present
             String topic = (msg.getTopicName().startsWith("/")) ? msg.getTopicName().substring(1) : msg.getTopicName();
+            if (!topic.startsWith("v1.1/")) {
+                throw new MqttHandlerException("Error while parsing MQTT topic. Missing Version information!");
+            }
+            topic = topic.substring(5);
 
             // Check topic for syntax+semantics
             validateResource(new StringBuffer(topic), serviceRepository);
@@ -141,7 +146,7 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
                 }
 
                 Class<T> clazz = collectionNameToClass(collection);
-                ((AbstractSensorThingsEntityService<?, T, ? extends T>) serviceRepository.getEntityService(collection))
+                ((AbstractSensorThingsEntityService<T>) serviceRepository.getEntityService(collection))
                     .create(mapper.readValue(payload, clazz));
             } else {
                 throw new STAInvalidUrlException("Topic does not reference a Collection allowed for POSTing via mqtt");

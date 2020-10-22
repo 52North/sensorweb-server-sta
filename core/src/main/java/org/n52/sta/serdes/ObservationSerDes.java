@@ -38,9 +38,9 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.parameter.JsonParameterEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
-import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
@@ -55,6 +55,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Map;
 
 public class ObservationSerDes {
@@ -63,24 +64,28 @@ public class ObservationSerDes {
 
 
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
-    public static class ObservationEntityPatch extends ObservationEntity implements EntityPatch<ObservationEntity> {
+    public static class ObservationEntityPatch<T> extends DataEntity<T> implements EntityPatch<DataEntity<?>> {
 
         private static final long serialVersionUID = 7385044376634149048L;
-        private final ObservationEntity entity;
+        private final DataEntity<?> entity;
 
-        ObservationEntityPatch(ObservationEntity entity) {
+        ObservationEntityPatch(DataEntity<?> entity) {
             this.entity = entity;
         }
 
         @Override
-        public ObservationEntity getEntity() {
+        public DataEntity<?> getEntity() {
             return entity;
+        }
+
+        @Override public boolean isNoDataValue(Collection<String> noDataValues) {
+            return false;
         }
     }
 
 
     public static class ObservationSerializer
-        extends AbstractSTASerializer<ObservationWithQueryOptions, ObservationEntity<?>> {
+        extends AbstractSTASerializer<ObservationWithQueryOptions, DataEntity<?>> {
 
         private static final long serialVersionUID = -4575044340713191285L;
 
@@ -95,7 +100,7 @@ public class ObservationSerDes {
             throws IOException {
             gen.writeStartObject();
             value.unwrap(implicitSelect);
-            ObservationEntity<?> observation = value.getEntity();
+            DataEntity<?> observation = value.getEntity();
 
             // olingo @iot links
             if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ID)) {
@@ -204,7 +209,7 @@ public class ObservationSerDes {
             gen.writeEndObject();
         }
 
-        private Time createPhenomenonTime(ObservationEntity<?> observation) {
+        private Time createPhenomenonTime(DataEntity<?> observation) {
             final DateTime start = new DateTime(observation.getSamplingTimeStart(), DateTimeZone.UTC);
             DateTime end;
             if (observation.getSamplingTimeEnd() != null) {
@@ -215,7 +220,7 @@ public class ObservationSerDes {
             return createTime(start, end);
         }
 
-        private Time createValidTime(ObservationEntity<?> observation) {
+        private Time createValidTime(DataEntity<?> observation) {
             final DateTime start = new DateTime(observation.getValidTimeStart(), DateTimeZone.UTC);
             DateTime end;
             if (observation.getValidTimeEnd() != null) {
@@ -236,18 +241,18 @@ public class ObservationSerDes {
     }
 
 
-    public static class ObservationDeserializer extends StdDeserializer<ObservationEntity> {
+    public static class ObservationDeserializer extends StdDeserializer<DataEntity<?>> {
 
         private static final long serialVersionUID = 2731654401126762133L;
         private final Map<String, String> parameterMapping;
 
         public ObservationDeserializer(Map<String, String> parameterMapping) {
-            super(ObservationEntity.class);
+            super(DataEntity.class);
             this.parameterMapping = parameterMapping;
         }
 
         @Override
-        public ObservationEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+        public DataEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return p.readValueAs(JSONObservation.class)
                 .parseParameters(parameterMapping)
                 .toEntity(JSONBase.EntityType.FULL);

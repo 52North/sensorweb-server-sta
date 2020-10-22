@@ -30,6 +30,7 @@
 package org.n52.sta.utils;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.shetland.ogc.sta.exception.STANotFoundException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
@@ -131,7 +132,7 @@ public abstract class AbstractSTARequestHandler implements RequestUtils {
      * @return STAInvalidUrlException if URI is malformed
      */
     protected Exception validateURISemantic(String[] uriResources,
-                                            EntityServiceRepository serviceRepository) {
+                                            EntityServiceRepository serviceRepository) throws STACRUDException {
         // Check if this is Request to root collection. They are always valid
         if (uriResources.length == 1 && !uriResources[0].contains(ROUND_BRACKET_OPEN)) {
             return null;

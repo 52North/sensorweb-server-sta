@@ -82,8 +82,12 @@ public interface TestUtil {
     String PROJECT = "Project";
     String PARTIES = "Parties";
     String PARTY = "Party";
+
+    String MQTT_TOPIC_PREFIX = "v1.1/";
+
     GeometryFactory factory =
         new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
+
     HashMap<String, String> relatedEntityEndpoints = new HashMap<String, String>() {{
         put(EntityType.THING.toString() + EntityType.DATASTREAM.toString(),
             "Things(%s)/Datastreams");

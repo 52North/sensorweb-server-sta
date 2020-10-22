@@ -85,6 +85,8 @@ spring:
     password: postgres
     url: jdbc:postgresql://localhost:5000/sta
     initialization-mode: always
+    hikari:
+      maximum-pool-size: 10
   jpa:
     openInView: false
     properties:

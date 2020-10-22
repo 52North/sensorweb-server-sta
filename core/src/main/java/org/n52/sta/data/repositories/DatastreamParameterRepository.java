@@ -29,15 +29,13 @@
 
 package org.n52.sta.data.repositories;
 
-import org.n52.series.db.beans.DataEntity;
-import org.springframework.context.annotation.DependsOn;
+import org.n52.series.db.beans.parameter.dataset.DatasetParameterEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
-@DependsOn("DatastreamRepository")
 @Repository
-public interface DataRepository<T extends DataEntity<?>>
-    extends IdentifierRepository<T, Long> {
+public interface DatastreamParameterRepository extends JpaRepository<DatasetParameterEntity, Long> {
 
 }

@@ -30,8 +30,10 @@
 package org.n52.sta.serdes.json;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.PhenomenonEntity;
+import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.springframework.util.Assert;
 
 import java.util.Arrays;
@@ -44,6 +46,7 @@ public class JSONObservedProperty extends JSONBase.JSONwithIdNameDescription<Phe
 
     // JSON Properties. Matched by Annotation or variable name
     public String definition;
+    public JsonNode properties;
 
     @JsonManagedReference
     public JSONDatastream[] Datastreams;
@@ -65,6 +68,10 @@ public class JSONObservedProperty extends JSONBase.JSONwithIdNameDescription<Phe
                 self.setName(name);
                 self.setDescription(description);
 
+                if (properties != null) {
+                    self.setParameters(convertParameters(properties, ParameterFactory.EntityType.PHENOMENON));
+                }
+
                 if (Datastreams != null) {
                     self.setDatasets(Arrays.stream(Datastreams)
                                          .map(ds -> ds.toEntity(JSONBase.EntityType.FULL,
@@ -83,6 +90,10 @@ public class JSONObservedProperty extends JSONBase.JSONwithIdNameDescription<Phe
                 self.setName(name);
                 self.setDescription(description);
 
+                if (properties != null) {
+                    self.setParameters(convertParameters(properties, ParameterFactory.EntityType.PHENOMENON));
+                }
+
                 if (Datastreams != null) {
                     self.setDatasets(Arrays.stream(Datastreams)
                                          .map(ds -> ds.toEntity(JSONBase.EntityType.REFERENCE))
@@ -94,6 +105,7 @@ public class JSONObservedProperty extends JSONBase.JSONwithIdNameDescription<Phe
                 Assert.isNull(name, INVALID_REFERENCED_ENTITY);
                 Assert.isNull(description, INVALID_REFERENCED_ENTITY);
                 Assert.isNull(definition, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(properties, INVALID_REFERENCED_ENTITY);
                 Assert.isNull(Datastreams, INVALID_REFERENCED_ENTITY);
 
                 self.setIdentifier(definition);

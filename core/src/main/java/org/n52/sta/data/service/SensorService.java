@@ -34,6 +34,7 @@ import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
+import org.n52.series.db.beans.parameter.procedure.ProcedureParameterEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.ogc.sta.StaConstants;
@@ -47,8 +48,8 @@ import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.FormatRepository;
 import org.n52.sta.data.repositories.ProcedureHistoryRepository;
+import org.n52.sta.data.repositories.ProcedureParameterRepository;
 import org.n52.sta.data.repositories.ProcedureRepository;
-import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +72,7 @@ import java.util.stream.Collectors;
 @DependsOn({"springApplicationContext"})
 @Transactional
 public class SensorService
-    extends AbstractSensorThingsEntityServiceImpl<ProcedureRepository, ProcedureEntity, ProcedureEntity> {
+    extends AbstractSensorThingsEntityServiceImpl<ProcedureRepository, ProcedureEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SensorService.class);
 
@@ -81,27 +82,20 @@ public class SensorService
     private final FormatRepository formatRepository;
     private final ProcedureHistoryRepository procedureHistoryRepository;
     private final DatastreamRepository datastreamRepository;
+    private final ProcedureParameterRepository parameterRepository;
 
     @Autowired
     public SensorService(ProcedureRepository repository,
                          FormatRepository formatRepository,
                          ProcedureHistoryRepository procedureHistoryRepository,
                          DatastreamRepository datastreamRepository,
+                         ProcedureParameterRepository parameterRepository,
                          EntityManager em) {
         super(repository, em, ProcedureEntity.class);
         this.formatRepository = formatRepository;
         this.procedureHistoryRepository = procedureHistoryRepository;
         this.datastreamRepository = datastreamRepository;
-    }
-
-    /**
-     * Returns the EntityType this Service handles
-     *
-     * @return EntityType this Service handles
-     */
-    @Override
-    public EntityTypes[] getTypes() {
-        return new EntityTypes[] {EntityTypes.Sensor, EntityTypes.Sensors};
+        this.parameterRepository = parameterRepository;
     }
 
     @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
@@ -110,7 +104,7 @@ public class SensorService
             for (ExpandItem expandItem : expandOption.getItems()) {
                 // We cannot handle nested $filter or $expand
                 if (expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter()) {
-                    break;
+                    continue;
                 }
                 String expandProperty = expandItem.getPath();
                 if (SensorEntityDefinition.DATASTREAMS.equals(expandProperty)) {
@@ -118,6 +112,7 @@ public class SensorService
                         EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT,
                         EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDUREHISTORY,
                         EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS,
+                        EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS,
                     };
                 }
                 throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
@@ -128,6 +123,7 @@ public class SensorService
         return new EntityGraphRepository.FetchGraph[] {
             EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT,
             EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDUREHISTORY,
+            EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS,
         };
     }
 
@@ -136,7 +132,7 @@ public class SensorService
         for (ExpandItem expandItem : expandOption.getItems()) {
             // We have already handled $expand without filter and expand
             if (!(expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter())) {
-                break;
+                continue;
             }
             String expandProperty = expandItem.getPath();
             if (SensorEntityDefinition.DATASTREAMS.equals(expandProperty)) {
@@ -210,9 +206,9 @@ public class SensorService
             // Intermediate save to allow DatastreamService->createOrUpdate to use this entity. Does not trigger
             // intercept handling (e.g. mqtt). Needed as Datastream<->Procedure connection is not yet set but
             // required by interceptors
-            getRepository().intermediateSave(sensor);
+            ProcedureEntity intermediateSave = getRepository().intermediateSave(sensor);
             checkProcedureHistory(sensor);
-            if (sensor instanceof ProcedureEntity && sensor.hasDatastreams()) {
+            if (sensor.hasDatastreams()) {
                 for (AbstractDatasetEntity datastreamEntity : sensor.getDatasets()) {
                     try {
                         getDatastreamService().createOrUpdate(datastreamEntity);
@@ -222,6 +218,17 @@ public class SensorService
                     }
                 }
             }
+            if (sensor.getParameters() != null) {
+                parameterRepository.saveAll(sensor.getParameters()
+                                                .stream()
+                                                .filter(t -> t instanceof ProcedureParameterEntity)
+                                                .map(t -> {
+                                                    ((ProcedureParameterEntity) t).setProcedure(intermediateSave);
+                                                    return (ProcedureParameterEntity) t;
+                                                })
+                                                .collect(Collectors.toSet()));
+            }
+
             // Save with Interception as procedure is now linked to Datastream
             getRepository().save(sensor);
             return sensor;
@@ -241,13 +248,12 @@ public class SensorService
                                              EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDUREHISTORY);
                 if (existing.isPresent()) {
                     ProcedureEntity merged = merge(existing.get(), entity);
-                    if (entity instanceof ProcedureEntity) {
-                        if (((ProcedureEntity) entity).hasDatastreams()) {
-                            AbstractSensorThingsEntityServiceImpl<?, AbstractDatasetEntity, AbstractDatasetEntity>
-                                dsService = getDatastreamService();
+                    if (entity != null) {
+                        if (entity.hasDatastreams()) {
+                            AbstractSensorThingsEntityService dsService = getDatastreamService();
                             for (AbstractDatasetEntity datastreamEntity :
-                                ((ProcedureEntity) entity).getDatasets()) {
-                                dsService.createOrUpdate(datastreamEntity);
+                                entity.getDatasets()) {
+                                ((DatastreamService) dsService).createOrUpdate(datastreamEntity);
                             }
                         }
                     }
@@ -311,7 +317,6 @@ public class SensorService
                 for (AbstractDatasetEntity ds : datastreamRepository.findAll(dQS.withSensorStaIdentifier(identifier))) {
                     getDatastreamService().delete(ds.getStaIdentifier());
                 }
-                getRepository().deleteByStaIdentifier(identifier);
             } else {
                 throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }

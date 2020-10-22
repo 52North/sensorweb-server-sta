@@ -79,7 +79,7 @@ public abstract class CudRequestHandler<T extends IdEntity> extends AbstractSTAR
                                                        String body)
         throws IOException, STACRUDException, STAInvalidUrlException {
         Class<T> clazz = collectionNameToClass(collectionName);
-        return ((AbstractSensorThingsEntityService<?, T, ? extends T>)
+        return ((AbstractSensorThingsEntityService<T>)
             serviceRepository.getEntityService(collectionName)).create(mapper.readValue(body, clazz));
     }
 
@@ -110,7 +110,7 @@ public abstract class CudRequestHandler<T extends IdEntity> extends AbstractSTAR
         jsonBody.put(REFERENCED_FROM_ID, sourceId);
 
         Class<T> clazz = collectionNameToClass(target);
-        return ((AbstractSensorThingsEntityService<?, T, ? extends T>)
+        return ((AbstractSensorThingsEntityService<T>)
             serviceRepository.getEntityService(target)).create(mapper.readValue(jsonBody.toString(), clazz));
     }
 
@@ -135,7 +135,7 @@ public abstract class CudRequestHandler<T extends IdEntity> extends AbstractSTAR
         ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
         String strippedId = unescapeIdIfWanted(id.substring(1, id.length() - 1));
         jsonBody.put(StaConstants.AT_IOT_ID, strippedId);
-        return ((AbstractSensorThingsEntityService<?, T, ? extends T>)
+        return ((AbstractSensorThingsEntityService<T>)
             serviceRepository.getEntityService(collectionName)).update(strippedId,
                                                                        (T) ((mapper.readValue(jsonBody.toString(),
                                                                                               clazz))).getEntity(),
@@ -162,8 +162,8 @@ public abstract class CudRequestHandler<T extends IdEntity> extends AbstractSTAR
         String[] split = splitId(entity);
         String sourceType = split[0];
         String sourceId = split[1];
-        AbstractSensorThingsEntityService<?, T, ? extends T> entityService =
-            (AbstractSensorThingsEntityService<?, T, ? extends T>) serviceRepository.getEntityService(target);
+        AbstractSensorThingsEntityService<T> entityService =
+            (AbstractSensorThingsEntityService<T>) serviceRepository.getEntityService(target);
 
         // Get Id from datastore
         String entityId = entityService.getEntityIdByRelatedEntity(sourceId, sourceType);
@@ -221,8 +221,8 @@ public abstract class CudRequestHandler<T extends IdEntity> extends AbstractSTAR
         String[] split = splitId(entity);
         String sourceType = split[0];
         String sourceId = split[1];
-        AbstractSensorThingsEntityService<?, T, ? extends T> entityService =
-            (AbstractSensorThingsEntityService<?, T, ? extends T>) serviceRepository.getEntityService(target);
+        AbstractSensorThingsEntityService<T> entityService =
+            (AbstractSensorThingsEntityService<T>) serviceRepository.getEntityService(target);
 
         // Get Id from datastore
         String entityId = entityService.getEntityIdByRelatedEntity(sourceId, sourceType);

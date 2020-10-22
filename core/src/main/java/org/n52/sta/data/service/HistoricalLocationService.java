@@ -43,7 +43,6 @@ import org.n52.sta.data.query.HistoricalLocationQuerySpecifications;
 import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.HistoricalLocationRepository;
 import org.n52.sta.data.repositories.LocationRepository;
-import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,8 +67,7 @@ import java.util.stream.Collectors;
 @DependsOn({"springApplicationContext"})
 @Transactional
 public class HistoricalLocationService
-    extends AbstractSensorThingsEntityServiceImpl<HistoricalLocationRepository, HistoricalLocationEntity,
-    HistoricalLocationEntity> {
+    extends AbstractSensorThingsEntityServiceImpl<HistoricalLocationRepository, HistoricalLocationEntity> {
 
     private static final Logger logger = LoggerFactory.getLogger(HistoricalLocationService.class);
 
@@ -85,11 +83,6 @@ public class HistoricalLocationService
         this.locationRepository = locationRepository;
     }
 
-    @Override
-    public EntityTypes[] getTypes() {
-        return new EntityTypes[] {EntityTypes.HistoricalLocation, EntityTypes.HistoricalLocations};
-    }
-
     @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
         throws STAInvalidQueryException {
         Set<EntityGraphRepository.FetchGraph> fetchGraphs = new HashSet<>(6);
@@ -97,7 +90,7 @@ public class HistoricalLocationService
             for (ExpandItem expandItem : expandOption.getItems()) {
                 // We cannot handle nested $filter or $expand
                 if (expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter()) {
-                    break;
+                    continue;
                 }
                 String expandProperty = expandItem.getPath();
                 switch (expandProperty) {
@@ -129,7 +122,7 @@ public class HistoricalLocationService
         for (ExpandItem expandItem : expandOption.getItems()) {
             // We have already handled $expand without filter and expand
             if (!(expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter())) {
-                break;
+                continue;
             }
             String expandProperty = expandItem.getPath();
             switch (expandProperty) {

@@ -34,16 +34,12 @@ import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.service.util.CollectionWrapper;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpMethod;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public interface AbstractSensorThingsEntityService<T,
-    S extends HibernateRelations.HasId,
-    E extends S> {
+public interface AbstractSensorThingsEntityService<S extends HibernateRelations.HasId> {
 
     /**
      * Checks if an Entity with given id exists
@@ -51,8 +47,7 @@ public interface AbstractSensorThingsEntityService<T,
      * @param id the id of the Entity
      * @return true if an Entity with given id exists
      */
-    @Transactional(rollbackFor = Exception.class)
-    boolean existsEntity(String id);
+    boolean existsEntity(String id) throws STACRUDException;
 
     /**
      * Gets the Entity with given id
@@ -62,7 +57,6 @@ public interface AbstractSensorThingsEntityService<T,
      * @return ElementWithQueryOptions wrapping requested Entity
      * @throws STACRUDException if an error occurred
      */
-    @Transactional(rollbackFor = Exception.class)
     ElementWithQueryOptions getEntity(String id, QueryOptions queryOptions) throws STACRUDException;
 
     /**
@@ -72,7 +66,6 @@ public interface AbstractSensorThingsEntityService<T,
      * @return the full EntityCollection
      * @throws STACRUDException if the queryOptions are invalid
      */
-    @Transactional(rollbackFor = Exception.class)
     CollectionWrapper getEntityCollection(QueryOptions queryOptions) throws STACRUDException;
 
     /**
@@ -86,7 +79,6 @@ public interface AbstractSensorThingsEntityService<T,
      * @return Entity that matches
      * @throws STACRUDException if an error occurred
      */
-    @Transactional(rollbackFor = Exception.class)
     ElementWithQueryOptions<?> getEntityByRelatedEntity(String relatedId, String relatedType, String ownId,
                                                         QueryOptions queryOptions) throws STACRUDException;
 
@@ -99,7 +91,6 @@ public interface AbstractSensorThingsEntityService<T,
      * @return List of Entities that match
      * @throws STACRUDException if the queryOptions are invalid
      */
-    @Transactional(rollbackFor = Exception.class)
     CollectionWrapper getEntityCollectionByRelatedEntity(String relatedId, String relatedType,
                                                          QueryOptions queryOptions) throws STACRUDException;
 
@@ -111,8 +102,7 @@ public interface AbstractSensorThingsEntityService<T,
      * @param relatedType EntityType of the related Entity
      * @return Id of the Entity. Null if no entity is present
      */
-    @Transactional(rollbackFor = Exception.class)
-    String getEntityIdByRelatedEntity(String relatedId, String relatedType);
+    String getEntityIdByRelatedEntity(String relatedId, String relatedType) throws STACRUDException;
 
     /**
      * Checks if an entity with given ownId exists that relates to an entity with given relatedId and
@@ -123,22 +113,11 @@ public interface AbstractSensorThingsEntityService<T,
      * @param ownId       ID of the requested Entity. Can be null.
      * @return true if an Entity exists
      */
-    @Transactional(rollbackFor = Exception.class)
-    boolean existsEntityByRelatedEntity(String relatedId, String relatedType, String ownId);
+    boolean existsEntityByRelatedEntity(String relatedId, String relatedType, String ownId) throws STACRUDException;
 
-    /**
-     * Get the {@link JpaRepository} for this {@link AbstractSensorThingsEntityService}
-     *
-     * @return the concrete {@link JpaRepository}
-     */
-    T getRepository();
-
-    @Transactional(rollbackFor = Exception.class)
     ElementWithQueryOptions create(S entity) throws STACRUDException;
 
-    @Transactional(rollbackFor = Exception.class)
     ElementWithQueryOptions update(String id, S entity, HttpMethod method) throws STACRUDException;
 
-    @Transactional(rollbackFor = Exception.class)
     void delete(String id) throws STACRUDException;
 }

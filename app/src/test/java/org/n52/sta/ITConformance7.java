@@ -183,7 +183,7 @@ public class ITConformance7 extends ConformanceTests implements TestUtil {
             "        \"@iot.id\": \"ITConformance7FOI\"\n" +
             "    }\n" +
             "}";
-        mqttClient.publish("Observations", observation.getBytes(), 1, false);
+        mqttClient.publish(MQTT_TOPIC_PREFIX + "Observations", observation.getBytes(), 1, false);
 
         JsonNode response = getCollection(EntityType.OBSERVATION);
         Assertions.assertTrue(response.has(value));
@@ -207,7 +207,10 @@ public class ITConformance7 extends ConformanceTests implements TestUtil {
             "        \"@iot.id\": \"ITConformance7FOI\"\n" +
             "    }\n" +
             "}";
-        mqttClient.publish("Datastreams(ITConformance7Datastream)/Observations", observation.getBytes(), 1, false);
+        mqttClient.publish(MQTT_TOPIC_PREFIX + "Datastreams(ITConformance7Datastream)/Observations",
+                           observation.getBytes(),
+                           1,
+                           false);
 
         JsonNode response = getCollection(EntityType.OBSERVATION);
         Assertions.assertTrue(response.has(value));
@@ -231,7 +234,10 @@ public class ITConformance7 extends ConformanceTests implements TestUtil {
             "        \"@iot.id\": \"ITConformance7Datastream\"\n" +
             "    }\n" +
             "}";
-        mqttClient.publish("FeaturesOfInterest(ITConformance7FOI)/Observations", observation.getBytes(), 1, false);
+        mqttClient.publish(MQTT_TOPIC_PREFIX + "FeaturesOfInterest(ITConformance7FOI)/Observations",
+                           observation.getBytes(),
+                           1,
+                           false);
 
         JsonNode response = getCollection(EntityType.OBSERVATION);
         Assertions.assertTrue(response.has(value));
