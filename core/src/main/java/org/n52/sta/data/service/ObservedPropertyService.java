@@ -46,7 +46,6 @@ import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.PhenomenonParameterRepository;
 import org.n52.sta.data.repositories.PhenomenonRepository;
-import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,9 +68,7 @@ import java.util.stream.Collectors;
 @DependsOn({"springApplicationContext"})
 @Transactional
 public class ObservedPropertyService
-    extends AbstractSensorThingsEntityServiceImpl<PhenomenonRepository,
-    PhenomenonEntity,
-    PhenomenonEntity> {
+    extends AbstractSensorThingsEntityServiceImpl<PhenomenonRepository, PhenomenonEntity> {
 
     private static final Logger logger = LoggerFactory.getLogger(ObservedPropertyService.class);
 
@@ -89,11 +86,6 @@ public class ObservedPropertyService
         super(repository, em, PhenomenonEntity.class);
         this.datastreamRepository = datastreamRepository;
         this.parameterRepository = parameterRepository;
-    }
-
-    @Override
-    public EntityTypes[] getTypes() {
-        return new EntityTypes[] {EntityTypes.ObservedProperty, EntityTypes.ObservedProperties};
     }
 
     /**

@@ -71,7 +71,6 @@ import org.n52.sta.data.repositories.FormatRepository;
 import org.n52.sta.data.repositories.ObservationRepository;
 import org.n52.sta.data.repositories.OfferingRepository;
 import org.n52.sta.data.repositories.UnitRepository;
-import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.data.service.util.FilterExprVisitor;
 import org.n52.sta.data.service.util.HibernateSpatialCriteriaBuilderImpl;
 import org.n52.svalbard.odata.core.expr.Expr;
@@ -102,8 +101,7 @@ import java.util.stream.Collectors;
 @DependsOn({"springApplicationContext", "datastreamRepository"})
 @Transactional
 public class DatastreamService extends
-                               AbstractSensorThingsEntityServiceImpl<DatastreamRepository, AbstractDatasetEntity,
-                                   AbstractDatasetEntity> {
+                               AbstractSensorThingsEntityServiceImpl<DatastreamRepository, AbstractDatasetEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatastreamService.class);
     private static final DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
@@ -140,11 +138,6 @@ public class DatastreamService extends
         this.categoryRepository = categoryRepository;
         this.observationRepository = observationRepository;
         this.parameterRepository = parameterRepository;
-    }
-
-    @Override
-    public EntityTypes[] getTypes() {
-        return new EntityTypes[] {EntityTypes.Datastream, EntityTypes.Datastreams};
     }
 
     @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)

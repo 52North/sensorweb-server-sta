@@ -50,7 +50,6 @@ import org.n52.sta.data.repositories.FormatRepository;
 import org.n52.sta.data.repositories.ProcedureHistoryRepository;
 import org.n52.sta.data.repositories.ProcedureParameterRepository;
 import org.n52.sta.data.repositories.ProcedureRepository;
-import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +72,7 @@ import java.util.stream.Collectors;
 @DependsOn({"springApplicationContext"})
 @Transactional
 public class SensorService
-    extends AbstractSensorThingsEntityServiceImpl<ProcedureRepository, ProcedureEntity, ProcedureEntity> {
+    extends AbstractSensorThingsEntityServiceImpl<ProcedureRepository, ProcedureEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SensorService.class);
 
@@ -97,16 +96,6 @@ public class SensorService
         this.procedureHistoryRepository = procedureHistoryRepository;
         this.datastreamRepository = datastreamRepository;
         this.parameterRepository = parameterRepository;
-    }
-
-    /**
-     * Returns the EntityType this Service handles
-     *
-     * @return EntityType this Service handles
-     */
-    @Override
-    public EntityTypes[] getTypes() {
-        return new EntityTypes[] {EntityTypes.Sensor, EntityTypes.Sensors};
     }
 
     @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
@@ -259,13 +248,12 @@ public class SensorService
                                              EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDUREHISTORY);
                 if (existing.isPresent()) {
                     ProcedureEntity merged = merge(existing.get(), entity);
-                    if (entity instanceof ProcedureEntity) {
-                        if (((ProcedureEntity) entity).hasDatastreams()) {
-                            AbstractSensorThingsEntityServiceImpl<?, AbstractDatasetEntity, AbstractDatasetEntity>
-                                dsService = getDatastreamService();
+                    if (entity != null) {
+                        if (entity.hasDatastreams()) {
+                            AbstractSensorThingsEntityService dsService = getDatastreamService();
                             for (AbstractDatasetEntity datastreamEntity :
-                                ((ProcedureEntity) entity).getDatasets()) {
-                                dsService.createOrUpdate(datastreamEntity);
+                                entity.getDatasets()) {
+                                ((DatastreamService) dsService).createOrUpdate(datastreamEntity);
                             }
                         }
                     }

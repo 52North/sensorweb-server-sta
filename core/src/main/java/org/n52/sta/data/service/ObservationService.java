@@ -57,7 +57,6 @@ import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.LocationRepository;
 import org.n52.sta.data.repositories.ObservationParameterRepository;
 import org.n52.sta.data.repositories.ObservationRepository;
-import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.n52.sta.data.service.util.CollectionWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,9 +85,7 @@ import java.util.stream.Collectors;
 @DependsOn({"springApplicationContext"})
 @Transactional
 public class ObservationService
-    extends AbstractSensorThingsEntityServiceImpl<ObservationRepository<DataEntity<?>>,
-    DataEntity<?>,
-    DataEntity<?>> {
+    extends AbstractSensorThingsEntityServiceImpl<ObservationRepository<DataEntity<?>>, DataEntity<?>> {
 
     private static final ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
     private static final Logger LOGGER = LoggerFactory.getLogger(ObservationService.class);
@@ -105,11 +102,6 @@ public class ObservationService
         this.entityClass = DataEntity.class;
         this.datastreamRepository = datastreamRepository;
         this.parameterRepository = parameterRepository;
-    }
-
-    @Override
-    public EntityTypes[] getTypes() {
-        return new EntityTypes[] {EntityTypes.Observation, EntityTypes.Observations};
     }
 
     @Override

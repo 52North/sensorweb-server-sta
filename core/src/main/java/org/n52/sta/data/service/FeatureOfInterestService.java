@@ -58,7 +58,6 @@ import org.n52.sta.data.repositories.FeatureOfInterestParameterRepository;
 import org.n52.sta.data.repositories.FeatureOfInterestRepository;
 import org.n52.sta.data.repositories.FormatRepository;
 import org.n52.sta.data.repositories.ObservationRepository;
-import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,8 +86,7 @@ import java.util.stream.Collectors;
 @DependsOn({"springApplicationContext"})
 @Transactional
 public class FeatureOfInterestService
-    extends AbstractSensorThingsEntityServiceImpl<FeatureOfInterestRepository, AbstractFeatureEntity<?>,
-    StaFeatureEntity<?>> {
+    extends AbstractSensorThingsEntityServiceImpl<FeatureOfInterestRepository, AbstractFeatureEntity<?>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FeatureOfInterestService.class);
 
@@ -117,11 +115,6 @@ public class FeatureOfInterestService
         this.parameterRepository = parameterRepository;
     }
 
-    @Override
-    public EntityTypes[] getTypes() {
-        return new EntityTypes[] {EntityTypes.FeatureOfInterest, EntityTypes.FeaturesOfInterest};
-    }
-
     @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption) {
         return new EntityGraphRepository.FetchGraph[] {
             EntityGraphRepository.FetchGraph.FETCHGRAPH_FEATURETYPE,
@@ -130,8 +123,8 @@ public class FeatureOfInterestService
     }
 
     @Override
-    protected StaFeatureEntity<?> fetchExpandEntitiesWithFilter(AbstractFeatureEntity<?> entity,
-                                                                ExpandFilter expandOption)
+    protected AbstractFeatureEntity<?> fetchExpandEntitiesWithFilter(AbstractFeatureEntity<?> entity,
+                                                                     ExpandFilter expandOption)
         throws STACRUDException, STAInvalidQueryException {
         StaFeatureEntity<?> foi = new StaFeatureEntity<>(entity);
         Set<DataEntity<?>> observations = new HashSet<>();
