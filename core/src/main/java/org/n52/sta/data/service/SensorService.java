@@ -32,6 +32,7 @@ package org.n52.sta.data.service;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
+import org.n52.series.db.beans.OfferingEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
 import org.n52.series.db.beans.parameter.procedure.ProcedureParameterEntity;
@@ -83,6 +84,7 @@ public class SensorService
     private final ProcedureHistoryRepository procedureHistoryRepository;
     private final DatastreamRepository datastreamRepository;
     private final ProcedureParameterRepository parameterRepository;
+    private final OfferingService offeringService;
 
     @Autowired
     public SensorService(ProcedureRepository repository,
@@ -90,12 +92,14 @@ public class SensorService
                          ProcedureHistoryRepository procedureHistoryRepository,
                          DatastreamRepository datastreamRepository,
                          ProcedureParameterRepository parameterRepository,
+                         OfferingService offeringService,
                          EntityManager em) {
         super(repository, em, ProcedureEntity.class);
         this.formatRepository = formatRepository;
         this.procedureHistoryRepository = procedureHistoryRepository;
         this.datastreamRepository = datastreamRepository;
         this.parameterRepository = parameterRepository;
+        this.offeringService = offeringService;
     }
 
     @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
@@ -203,6 +207,7 @@ public class SensorService
                 throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS, HTTPStatus.CONFLICT);
             }
             checkFormat(sensor, sensor);
+            OfferingEntity offering = offeringService.createOrFetchOffering(sensor);
             // Intermediate save to allow DatastreamService->createOrUpdate to use this entity. Does not trigger
             // intercept handling (e.g. mqtt). Needed as Datastream<->Procedure connection is not yet set but
             // required by interceptors

@@ -37,7 +37,12 @@ import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
+import org.n52.series.db.beans.sta.LicenseEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.series.db.beans.sta.ObservationGroupEntity;
+import org.n52.series.db.beans.sta.ObservationRelationEntity;
+import org.n52.series.db.beans.sta.PartyEntity;
+import org.n52.series.db.beans.sta.ProjectEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.DaoSemaphore;
@@ -283,6 +288,56 @@ public class ServiceFacade<S extends HibernateRelations.HasId>
 
         FeatureOfInterestServiceFacade(FeatureOfInterestService serviceImpl,
                                        DaoSemaphore semaphore) {
+            super(serviceImpl, semaphore);
+        }
+    }
+
+
+    @Component
+    static class LicenseServiceFacade extends ServiceFacade<LicenseEntity> {
+
+        LicenseServiceFacade(LicenseService serviceImpl,
+                             DaoSemaphore semaphore) {
+            super(serviceImpl, semaphore);
+        }
+    }
+
+
+    @Component
+    static class PartyServiceFacade extends ServiceFacade<PartyEntity> {
+
+        PartyServiceFacade(PartyService serviceImpl,
+                           DaoSemaphore semaphore) {
+            super(serviceImpl, semaphore);
+        }
+    }
+
+
+    @Component
+    static class ProjectServiceFacade extends ServiceFacade<ProjectEntity> {
+
+        ProjectServiceFacade(ProjectService serviceImpl,
+                             DaoSemaphore semaphore) {
+            super(serviceImpl, semaphore);
+        }
+    }
+
+
+    @Component
+    static class ObservationRelationServiceFacade extends ServiceFacade<ObservationRelationEntity> {
+
+        ObservationRelationServiceFacade(ObservationRelationService serviceImpl,
+                                         DaoSemaphore semaphore) {
+            super(serviceImpl, semaphore);
+        }
+    }
+
+
+    @Component
+    static class ObservationGroupServiceFacade extends ServiceFacade<ObservationGroupEntity> {
+
+        ObservationGroupServiceFacade(ObservationGroupService serviceImpl,
+                                      DaoSemaphore semaphore) {
             super(serviceImpl, semaphore);
         }
     }

@@ -44,7 +44,6 @@ import org.n52.sta.data.query.ObservationGroupQuerySpecifications;
 import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.ObservationGroupParameterRepository;
 import org.n52.sta.data.repositories.ObservationGroupRepository;
-import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
@@ -68,8 +67,7 @@ import java.util.stream.Collectors;
 @Transactional
 @Profile(StaConstants.CITSCIEXTENSION)
 public class ObservationGroupService
-    extends AbstractSensorThingsEntityServiceImpl<ObservationGroupRepository, ObservationGroupEntity,
-    ObservationGroupEntity> {
+    extends AbstractSensorThingsEntityServiceImpl<ObservationGroupRepository, ObservationGroupEntity> {
 
     private static final ObservationGroupQuerySpecifications ogQS = new ObservationGroupQuerySpecifications();
     private final ObservationGroupParameterRepository parameterRepository;
@@ -79,10 +77,6 @@ public class ObservationGroupService
                                    EntityManager em) {
         super(repository, em, ObservationGroupEntity.class);
         this.parameterRepository = parameterRepository;
-    }
-
-    @Override public EntityTypes[] getTypes() {
-        return new EntityTypes[] {EntityTypes.ObservationGroup, EntityTypes.ObservationGroups};
     }
 
     @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)

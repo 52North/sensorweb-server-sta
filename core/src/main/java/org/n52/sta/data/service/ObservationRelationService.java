@@ -41,7 +41,6 @@ import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.ObservationRelationQuerySpecifications;
 import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.ObservationRelationRepository;
-import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.domain.Specification;
@@ -63,17 +62,12 @@ import java.util.UUID;
 @Transactional
 @Profile(StaConstants.CITSCIEXTENSION)
 public class ObservationRelationService
-    extends AbstractSensorThingsEntityServiceImpl<ObservationRelationRepository, ObservationRelationEntity,
-    ObservationRelationEntity> {
+    extends AbstractSensorThingsEntityServiceImpl<ObservationRelationRepository, ObservationRelationEntity> {
 
     private static final ObservationRelationQuerySpecifications orQS = new ObservationRelationQuerySpecifications();
 
     public ObservationRelationService(ObservationRelationRepository repository, EntityManager em) {
         super(repository, em, ObservationRelationEntity.class);
-    }
-
-    @Override public EntityTypes[] getTypes() {
-        return new EntityTypes[] {EntityTypes.ObservationRelation, EntityTypes.ObservationRelations};
     }
 
     @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)

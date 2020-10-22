@@ -42,7 +42,6 @@ import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.PartyQuerySpecifications;
 import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.PartyRepository;
-import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
@@ -64,16 +63,12 @@ import java.util.stream.Collectors;
 @Transactional
 @Profile(StaConstants.CITSCIEXTENSION)
 public class PartyService
-    extends AbstractSensorThingsEntityServiceImpl<PartyRepository, PartyEntity, PartyEntity> {
+    extends AbstractSensorThingsEntityServiceImpl<PartyRepository, PartyEntity> {
 
     private static final PartyQuerySpecifications pQS = new PartyQuerySpecifications();
 
     public PartyService(PartyRepository repository, EntityManager em) {
         super(repository, em, PartyEntity.class);
-    }
-
-    @Override public EntityTypes[] getTypes() {
-        return new EntityTypes[] {EntityTypes.Party, EntityTypes.Parties};
     }
 
     @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)

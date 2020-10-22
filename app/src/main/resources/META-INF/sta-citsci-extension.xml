@@ -22,7 +22,7 @@
         <mapping-file>/hbm/transactional/core/UnitResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/VerticalMetadataResource.hbm.xml</mapping-file>
 
-        <mapping-file>/hbm/transactional/dataset/DataResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/dataset/DataResourceCitSci.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/dataset/DatasetResourceCitSci.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/TagResource.hbm.xml</mapping-file>
 
@@ -39,13 +39,6 @@
         <mapping-file>/hbm/parameter/ObservationGroupParameterResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/parameter/LicenseParameterResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/parameter/ProjectParameterResource.hbm.xml</mapping-file>
-
-        <!-- Load Classes annoted by @Entity-->
-        <class>org.n52.series.db.beans.sta.QuantityObservationEntity</class>
-        <class>org.n52.series.db.beans.sta.TextObservationEntity</class>
-        <class>org.n52.series.db.beans.sta.CountObservationEntity</class>
-        <class>org.n52.series.db.beans.sta.CategoryObservationEntity</class>
-        <class>org.n52.series.db.beans.sta.BooleanObservationEntity</class>
 
         <class>org.n52.series.db.beans.sta.ObservationGroupEntity</class>
         <class>org.n52.series.db.beans.sta.ObservationRelationEntity</class>

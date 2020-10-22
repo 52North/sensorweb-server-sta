@@ -37,7 +37,6 @@ import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.series.db.beans.parameter.observation.ObservationParameterEntity;
-import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.series.db.beans.sta.ObservationRelationEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
@@ -136,13 +135,13 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
                                                                                             builder));
                     return builder.in(join.get(DescribableEntity.PROPERTY_ID)).value(sq);
                 } else if (StaConstants.OBSERVATION_RELATIONS.equals(propertyName)) {
-                    Subquery<ObservationEntity> sq = query.subquery(ObservationEntity.class);
+                    Subquery<DataEntity> sq = query.subquery(DataEntity.class);
                     Root<ObservationRelationEntity> obsRelation = sq.from(ObservationRelationEntity.class);
                     sq.select(obsRelation.get(ObservationRelationEntity.PROPERTY_OBSERVATION)).where(
                         ((Specification<ObservationRelationEntity>) propertyValue).toPredicate(obsRelation,
                                                                                                query,
                                                                                                builder));
-                    return builder.in(root.get(ObservationEntity.ID)).value(sq);
+                    return builder.in(root.get(DataEntity.ID)).value(sq);
 
                 } else {
                     throw new STAInvalidFilterExpressionException(

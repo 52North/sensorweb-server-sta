@@ -42,7 +42,6 @@ import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.LicenseQuerySpecifications;
 import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.LicenseRepository;
-import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
@@ -64,7 +63,7 @@ import java.util.stream.Collectors;
 @Transactional
 @Profile(StaConstants.CITSCIEXTENSION)
 public class LicenseService
-    extends AbstractSensorThingsEntityServiceImpl<LicenseRepository, LicenseEntity, LicenseEntity> {
+    extends AbstractSensorThingsEntityServiceImpl<LicenseRepository, LicenseEntity> {
 
     private static final LicenseQuerySpecifications lQS = new LicenseQuerySpecifications();
     private final EntityManager em;
@@ -73,10 +72,6 @@ public class LicenseService
                           EntityManager em) {
         super(repository, em, LicenseEntity.class);
         this.em = em;
-    }
-
-    @Override public EntityTypes[] getTypes() {
-        return new EntityTypes[] {EntityTypes.License, EntityTypes.Licenses};
     }
 
     @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)

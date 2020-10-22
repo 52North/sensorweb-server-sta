@@ -42,7 +42,6 @@ import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.ProjectQuerySpecifications;
 import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.ProjectRepository;
-import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
@@ -64,16 +63,12 @@ import java.util.stream.Collectors;
 @Transactional
 @Profile(StaConstants.CITSCIEXTENSION)
 public class ProjectService
-    extends AbstractSensorThingsEntityServiceImpl<ProjectRepository, ProjectEntity, ProjectEntity> {
+    extends AbstractSensorThingsEntityServiceImpl<ProjectRepository, ProjectEntity> {
 
     private static final ProjectQuerySpecifications pQS = new ProjectQuerySpecifications();
 
     public ProjectService(ProjectRepository repository, EntityManager em) {
         super(repository, em, ProjectEntity.class);
-    }
-
-    @Override public EntityTypes[] getTypes() {
-        return new EntityTypes[] {EntityTypes.Project, EntityTypes.Projects};
     }
 
     @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)

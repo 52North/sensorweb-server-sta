@@ -29,8 +29,8 @@
 
 package org.n52.sta.data.query;
 
+import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DescribableEntity;
-import org.n52.series.db.beans.sta.ObservationEntity;
 import org.n52.series.db.beans.sta.ObservationGroupEntity;
 import org.n52.series.db.beans.sta.ObservationRelationEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
@@ -60,7 +60,7 @@ public class ObservationRelationQuerySpecifications extends EntityQuerySpecifica
     public static Specification<ObservationRelationEntity> withObservationStaIdentifier(
         final String observationIdentifier) {
         return (root, query, builder) -> {
-            final Join<ObservationRelationEntity, ObservationEntity> join =
+            final Join<ObservationRelationEntity, DataEntity<?>> join =
                 root.join(ObservationRelationEntity.PROPERTY_OBSERVATION, JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), observationIdentifier);
         };
@@ -80,11 +80,11 @@ public class ObservationRelationQuerySpecifications extends EntityQuerySpecifica
                 return builder.in(root.get(ObservationRelationEntity.PROPERTY_GROUP)).value(sq);
             } else if (StaConstants.OBSERVATION.equals(propertyName)) {
                 Subquery<ObservationRelationEntity> sq = query.subquery(ObservationRelationEntity.class);
-                Root<ObservationEntity> csobservation = sq.from(ObservationEntity.class);
-                sq.select(csobservation.get(ObservationEntity.PROPERTY_ID))
-                    .where(((Specification<ObservationEntity>) propertyValue).toPredicate(csobservation,
-                                                                                          query,
-                                                                                          builder));
+                Root<DataEntity> csobservation = sq.from(DataEntity.class);
+                sq.select(csobservation.get(DataEntity.PROPERTY_ID))
+                    .where(((Specification<DataEntity>) propertyValue).toPredicate(csobservation,
+                                                                                   query,
+                                                                                   builder));
                 return builder.in(root.get(ObservationRelationEntity.PROPERTY_OBSERVATION)).value(sq);
 
             } else {

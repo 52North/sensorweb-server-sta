@@ -72,19 +72,19 @@ public class EntityServiceRepository {
     private ServiceFacade.FeatureOfInterestServiceFacade featureOfInterestService;
 
     @Autowired(required = false)
-    private ObservationGroupServiceFacade obsGroupService;
+    private ServiceFacade.ObservationGroupServiceFacade obsGroupService;
 
     @Autowired(required = false)
-    private ObservationRelationServiceFacade obsRelationService;
+    private ServiceFacade.ObservationRelationServiceFacade obsRelationService;
 
     @Autowired(required = false)
-    private LicenseServiceFacade licenseService;
+    private ServiceFacade.LicenseServiceFacade licenseService;
 
     @Autowired(required = false)
-    private PartyServiceFacade partyService;
+    private ServiceFacade.PartyServiceFacade partyService;
 
     @Autowired(required = false)
-    private ProjectServiceFacade projectService;
+    private ServiceFacade.ProjectServiceFacade projectService;
 
     @Autowired
     private STAEventHandler mqttSubscriptionEventHandler;
