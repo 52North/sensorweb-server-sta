@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -151,6 +152,15 @@ public class ErrorHandler {
 
     @ExceptionHandler(value = IllegalStateException.class)
     public ResponseEntity<Object> staIllegalStateException(IllegalStateException exception) {
+        String msg = createErrorMessage(exception.getClass().getName(), exception.getMessage());
+        LOGGER.debug(msg, exception);
+        return new ResponseEntity<>(msg,
+                                    headers,
+                                    HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(value = HttpMessageNotWritableException.class)
+    public ResponseEntity<Object> staHttpMessageNotWritableException(HttpMessageNotWritableException exception) {
         String msg = createErrorMessage(exception.getClass().getName(), exception.getMessage());
         LOGGER.debug(msg, exception);
         return new ResponseEntity<>(msg,
