@@ -52,7 +52,7 @@
         <spotbugs.version>4.1.2</spotbugs.version>
         <paho.version>1.2.5</paho.version>
         <antlr-runtime.version>4.8-1</antlr-runtime.version>
-        <joda.version>2.10.6</joda.version>
+        <joda.version>2.10.8</joda.version>
     </properties>
 
     <dependencyManagement>
