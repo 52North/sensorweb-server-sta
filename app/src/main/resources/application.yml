@@ -59,6 +59,9 @@ server:
     # All HTTP POST & PUT Requests will be dropped with a HTTP Status 405 NOT Allowed
     httpReadOnly: false
 
+keycloak:
+  configurationFile: "classpath:keycloak.json"
+
 # Database Configuration
 database:
   jpa:
@@ -137,6 +140,7 @@ mqtt:
 logging:
   level:
     root: INFO
+#    org.springframework.security: DEBUG
 #    org.opengis.cite: TRACE
 #    org.apache.coyote.http11.Http11InputBuffer: TRACE
 #    org.hibernate: INFO
