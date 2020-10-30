@@ -101,6 +101,9 @@ public class PartySerDes {
             if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_NICKNAME)) {
                 gen.writeStringField(STAEntityDefinition.PROP_NICKNAME, party.getNickname());
             }
+            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_AUTH_ID)) {
+                gen.writeStringField(STAEntityDefinition.PROP_AUTH_ID, party.getAuthId());
+            }
 
             if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.DATASTREAMS)) {
                 if (!value.hasExpandOption() ||

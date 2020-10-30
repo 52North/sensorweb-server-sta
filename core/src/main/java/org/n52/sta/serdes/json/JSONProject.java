@@ -50,8 +50,6 @@ import java.util.Set;
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
 public class JSONProject extends JSONBase.JSONwithIdNameDescriptionTime<ProjectEntity> implements AbstractJSONEntity {
 
-    public String runtime;
-
     @JsonManagedReference
     @JsonProperty(StaConstants.DATASTREAMS)
     public JSONDatastream[] datastreams;
@@ -64,6 +62,12 @@ public class JSONProject extends JSONBase.JSONwithIdNameDescriptionTime<ProjectE
 
     @JsonProperty(StaConstants.PROP_TERMS_OF_USE)
     public String termsOfUse;
+
+    @JsonProperty(StaConstants.PROP_URL)
+    public String url;
+
+    @JsonProperty(StaConstants.PROP_RUNTIME)
+    public String runtime;
 
     public JSONProject() {
         self = new ProjectEntity();
@@ -92,6 +96,7 @@ public class JSONProject extends JSONBase.JSONwithIdNameDescriptionTime<ProjectE
                 Assert.isNull(classification, INVALID_REFERENCED_ENTITY);
                 Assert.isNull(privacyPolicy, INVALID_REFERENCED_ENTITY);
                 Assert.isNull(termsOfUse, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(url, INVALID_REFERENCED_ENTITY);
                 self.setStaIdentifier(identifier);
                 return self;
             default:
@@ -106,6 +111,7 @@ public class JSONProject extends JSONBase.JSONwithIdNameDescriptionTime<ProjectE
         self.setClassification(classification);
         self.setTermsOfUse(termsOfUse);
         self.setPrivacyPolicy(privacyPolicy);
+        self.setUrl(url);
 
         if (runtime != null) {
             Time time = parseTime(runtime);

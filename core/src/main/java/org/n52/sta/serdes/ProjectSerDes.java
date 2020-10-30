@@ -127,6 +127,10 @@ public class ProjectSerDes {
                 value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_TERMS_OF_USE)) {
                 gen.writeStringField(STAEntityDefinition.PROP_TERMS_OF_USE, project.getTermsOfUse());
             }
+            if (!value.hasSelectOption() ||
+                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_URL)) {
+                gen.writeStringField(STAEntityDefinition.PROP_URL, project.getUrl());
+            }
 
             if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.DATASTREAMS)) {
                 if (!value.hasExpandOption() ||

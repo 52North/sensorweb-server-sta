@@ -49,6 +49,7 @@ public class JSONParty extends JSONBase.JSONwithId<PartyEntity> implements Abstr
 
     public String nickName;
     public PartyEntity.Role role;
+    public String authId;
 
     @JsonManagedReference
     @JsonProperty(StaConstants.DATASTREAMS)
@@ -83,6 +84,7 @@ public class JSONParty extends JSONBase.JSONwithId<PartyEntity> implements Abstr
     private PartyEntity createEntity() {
         self.setStaIdentifier(identifier);
         self.setRole(role);
+        self.setAuthId(authId);
 
         if (nickName != null) {
             self.setNickname(nickName);
