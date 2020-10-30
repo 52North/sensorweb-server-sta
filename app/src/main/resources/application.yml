@@ -5,6 +5,7 @@ trace: false
 # General Server Configuration
 server:
   port: 8081
+
   ## Used for response serialization + url parsing. Must be set correctly!
   rootUrl: "http://localhost:8081/sta/"
   servlet:
@@ -128,9 +129,11 @@ mqtt:
   broker:
     plaintcp:
       enabled: true
+      host: "mqtt://localhost"
       port: 1883
     websocket:
       enabled: true
+      host: "ws://localhost"
       port: 8883
     persistence:
       enabled: false
