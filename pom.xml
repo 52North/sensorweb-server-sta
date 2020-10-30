@@ -40,7 +40,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <db-model.version>4.0.0-SNAPSHOT</db-model.version>
         <arctic-sea.version>8.1.0-SNAPSHOT</arctic-sea.version>
-        <spring-boot.version>2.3.4.RELEASE</spring-boot.version>
+        <spring-boot.version>2.3.5.RELEASE</spring-boot.version>
         <geolatte-geom.version>1.6.0</geolatte-geom.version>
         <hibernate.version>5.4.12.Final</hibernate.version>
         <jackson.version>2.11.2</jackson.version>
@@ -49,10 +49,10 @@
         <h2database.version>1.4.200</h2database.version>
         <testcontainers.jupiter.version>1.14.3</testcontainers.jupiter.version>
         <testcontainers.postgres.version>1.14.3</testcontainers.postgres.version>
-        <spotbugs.version>4.1.2</spotbugs.version>
+        <spotbugs.version>4.1.4</spotbugs.version>
         <paho.version>1.2.5</paho.version>
         <antlr-runtime.version>4.8-1</antlr-runtime.version>
-        <joda.version>2.10.6</joda.version>
+        <joda.version>2.10.8</joda.version>
     </properties>
 
     <dependencyManagement>
