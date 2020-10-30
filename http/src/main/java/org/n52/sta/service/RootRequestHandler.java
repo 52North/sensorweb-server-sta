@@ -162,17 +162,15 @@ public class RootRequestHandler {
             ArrayNode mqttEndpoints = mapper.createArrayNode();
             // Check which endpoints are enabled
             if (plainTcpEnabled) {
-                mqttEndpoints.add("mqtt://"
-                                      + rootUrl.split(SLASH)[2].split(COLON)[0]
+                mqttEndpoints.add(environment.getRequiredProperty("mqtt.broker.plaintcp.host")
                                       + COLON
-                                      + environment.getProperty("mqtt.broker.plaintcp.port"));
+                                      + environment.getRequiredProperty("mqtt.broker.plaintcp.port"));
 
             }
             if (wsEnabled) {
-                mqttEndpoints.add("ws://"
-                                      + rootUrl.split(SLASH)[2].split(COLON)[0]
+                mqttEndpoints.add(environment.getRequiredProperty("mqtt.broker.websocket.host")
                                       + COLON
-                                      + environment.getProperty("mqtt.broker.websocket.port"));
+                                      + environment.getRequiredProperty("mqtt.broker.websocket.port"));
 
             }
 
