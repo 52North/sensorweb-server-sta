@@ -39,6 +39,7 @@ import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.shetland.ogc.gml.time.Time;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.model.DatastreamEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.shetland.util.DateTimeHelper;
@@ -81,9 +82,14 @@ public class DatastreamSerDes {
 
         private static final GeoJsonWriter GEO_JSON_WRITER = new GeoJsonWriter();
         private static final long serialVersionUID = -6555417490577181829L;
+        private final boolean includeDatastreamCategory;
 
-        public DatastreamSerializer(String rootUrl, boolean implicitExpand, String... activeExtensions) {
+        public DatastreamSerializer(String rootUrl,
+                                    boolean implicitExpand,
+                                    boolean includeDatastreamCategory,
+                                    String... activeExtensions) {
             super(DatastreamWithQueryOptions.class, implicitExpand, activeExtensions);
+            this.includeDatastreamCategory = includeDatastreamCategory;
             this.rootUrl = rootUrl;
             this.entitySetName = DatastreamEntityDefinition.ENTITY_SET_NAME;
         }
@@ -170,15 +176,21 @@ public class DatastreamSerDes {
 
             if (!value.hasSelectOption() ||
                 value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PROPERTIES)) {
+                gen.writeObjectFieldStart(STAEntityDefinition.PROP_PROPERTIES);
+                if (includeDatastreamCategory) {
+                    // Add Category to parameters
+                    gen.writeObjectFieldStart("category");
+                    gen.writeNumberField(StaConstants.PROP_ID, datastream.getCategory().getId());
+                    gen.writeStringField(StaConstants.PROP_NAME, datastream.getCategory().getName());
+                    gen.writeStringField(StaConstants.PROP_DESCRIPTION, datastream.getCategory().getDescription());
+                    gen.writeEndObject();
+                }
                 if (datastream.hasParameters()) {
-                    gen.writeObjectFieldStart(STAEntityDefinition.PROP_PROPERTIES);
                     for (ParameterEntity<?> parameter : datastream.getParameters()) {
                         gen.writeObjectField(parameter.getName(), parameter.getValue());
                     }
-                    gen.writeEndObject();
-                } else {
-                    gen.writeNullField(STAEntityDefinition.PROP_PROPERTIES);
                 }
+                gen.writeEndObject();
             }
 
             // navigation properties

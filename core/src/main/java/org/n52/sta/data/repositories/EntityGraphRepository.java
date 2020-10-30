@@ -146,7 +146,8 @@ public interface EntityGraphRepository<T, I> extends JpaSpecificationExecutor<T>
         FETCHGRAPH_DATASETS("datasets(unit,omObservationType)"),
         FETCHGRAPH_FEATURE("feature"),
         FETCHGRAPH_DATASET_FIRSTLAST_OBSERVATION("dataset(firstObservation,lastObservation)"),
-        FETCHGRAPH_PROCEDUREHISTORY("procedureHistory");
+        FETCHGRAPH_PROCEDUREHISTORY("procedureHistory"),
+        FETCHGRAPH_CATEGORY("category");
 
         private String val;
 
