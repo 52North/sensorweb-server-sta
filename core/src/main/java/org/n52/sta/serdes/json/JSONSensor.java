@@ -30,11 +30,13 @@
 package org.n52.sta.serdes.json;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.joda.time.DateTime;
 import org.n52.series.db.beans.FormatEntity;
+import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
-import org.n52.series.db.beans.sta.SensorEntity;
+import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.springframework.util.Assert;
 
 import java.util.Arrays;
@@ -44,7 +46,7 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("VisibilityModifier")
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
-public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorEntity> implements AbstractJSONEntity {
+public class JSONSensor extends JSONBase.JSONwithIdNameDescription<ProcedureEntity> implements AbstractJSONEntity {
 
     protected static final String INALID_ENCODING_TYPE = "Invalid encodingType supplied. Only SensorML or PDF allowed.";
     protected static final String STA_SENSORML_2 = "http://www.opengis.net/doc/IS/SensorML/2.0";
@@ -52,7 +54,7 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorEntity>
     protected static final String PDF = "application/pdf";
 
     // JSON Properties. Matched by Annotation or variable name
-    public String properties;
+    public JsonNode properties;
     public String encodingType;
     public String metadata;
 
@@ -60,69 +62,78 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorEntity>
     public JSONDatastream[] Datastreams;
 
     public JSONSensor() {
-        self = new SensorEntity();
+        self = new ProcedureEntity();
     }
 
     @Override
-    public SensorEntity toEntity(JSONBase.EntityType type) {
+    public ProcedureEntity toEntity(JSONBase.EntityType type) {
         switch (type) {
-        case FULL:
-            Assert.notNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
-            Assert.notNull(description, INVALID_INLINE_ENTITY_MISSING + "description");
-            Assert.notNull(encodingType, INVALID_INLINE_ENTITY_MISSING + "encodingType");
-            Assert.notNull(metadata, INVALID_INLINE_ENTITY_MISSING + "metadata");
-            self.setIdentifier(identifier);
-            self.setStaIdentifier(identifier);
-            self.setName(name);
-            self.setDescription(description);
+            case FULL:
+                Assert.notNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
+                Assert.notNull(description, INVALID_INLINE_ENTITY_MISSING + "description");
+                Assert.notNull(encodingType, INVALID_INLINE_ENTITY_MISSING + "encodingType");
+                Assert.notNull(metadata, INVALID_INLINE_ENTITY_MISSING + "metadata");
+                self.setIdentifier(identifier);
+                self.setStaIdentifier(identifier);
+                self.setName(name);
+                self.setDescription(description);
 
-            handleEncodingType();
-
-            if (Datastreams != null) {
-                self.setDatastreams(Arrays.stream(Datastreams)
-                                          .map(ds -> ds.toEntity(JSONBase.EntityType.FULL,
-                                                                 JSONBase.EntityType.REFERENCE))
-                                          .collect(Collectors.toSet()));
-            }
-
-            // Deal with back reference during deep insert
-            if (backReference != null) {
-                self.addDatastream(((JSONDatastream) backReference).getEntity());
-            }
-
-            return self;
-        case PATCH:
-            self.setIdentifier(identifier);
-            self.setStaIdentifier(identifier);
-            self.setName(name);
-            self.setDescription(description);
-
-            if (encodingType != null) {
                 handleEncodingType();
-            } else {
-                // Used when PATCHing new metadata
-                self.setDescriptionFile(metadata);
-            }
 
-            if (Datastreams != null) {
-                self.setDatastreams(Arrays.stream(Datastreams)
-                                          .map(ds -> ds.toEntity(JSONBase.EntityType.REFERENCE))
-                                          .collect(Collectors.toSet()));
-            }
-            return self;
-        case REFERENCE:
-            Assert.isNull(name, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(description, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(encodingType, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(metadata, INVALID_REFERENCED_ENTITY);
+                if (properties != null) {
+                    self.setParameters(convertParameters(properties, ParameterFactory.EntityType.PROCEDURE));
+                }
 
-            Assert.isNull(Datastreams, INVALID_REFERENCED_ENTITY);
+                if (Datastreams != null) {
+                    self.setDatasets(Arrays.stream(Datastreams)
+                                         .map(ds -> ds.toEntity(JSONBase.EntityType.FULL,
+                                                                JSONBase.EntityType.REFERENCE))
+                                         .collect(Collectors.toSet()));
+                }
 
-            self.setIdentifier(identifier);
-            self.setStaIdentifier(identifier);
-            return self;
-        default:
-            return null;
+                // Deal with back reference during deep insert
+                if (backReference != null) {
+                    self.addDatastream(((JSONDatastream) backReference).getEntity());
+                }
+
+                return self;
+            case PATCH:
+                self.setIdentifier(identifier);
+                self.setStaIdentifier(identifier);
+                self.setName(name);
+                self.setDescription(description);
+
+                if (encodingType != null) {
+                    handleEncodingType();
+                } else {
+                    // Used when PATCHing new metadata
+                    self.setDescriptionFile(metadata);
+                }
+
+                if (properties != null) {
+                    self.setParameters(convertParameters(properties, ParameterFactory.EntityType.PROCEDURE));
+                }
+
+                if (Datastreams != null) {
+                    self.setDatasets(Arrays.stream(Datastreams)
+                                         .map(ds -> ds.toEntity(JSONBase.EntityType.REFERENCE))
+                                         .collect(Collectors.toSet()));
+                }
+                return self;
+            case REFERENCE:
+                Assert.isNull(name, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(description, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(encodingType, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(metadata, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(properties, INVALID_REFERENCED_ENTITY);
+
+                Assert.isNull(Datastreams, INVALID_REFERENCED_ENTITY);
+
+                self.setIdentifier(identifier);
+                self.setStaIdentifier(identifier);
+                return self;
+            default:
+                return null;
         }
     }
 

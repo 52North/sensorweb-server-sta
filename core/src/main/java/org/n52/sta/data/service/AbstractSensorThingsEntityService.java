@@ -32,133 +32,92 @@ package org.n52.sta.data.service;
 import org.n52.series.db.beans.HibernateRelations;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
-import org.n52.sta.data.repositories.IdentifierRepository;
 import org.n52.sta.data.service.util.CollectionWrapper;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpMethod;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public interface AbstractSensorThingsEntityService<T extends IdentifierRepository<S, Long>,
-        S extends HibernateRelations.HasId,
-        E extends S> {
+public interface AbstractSensorThingsEntityService<S extends HibernateRelations.HasId> {
+
     /**
      * Checks if an Entity with given id exists
      *
-     * @param id
-     *            the id of the Entity
+     * @param id the id of the Entity
      * @return true if an Entity with given id exists
      */
-    @Transactional(rollbackFor = Exception.class)
-    boolean existsEntity(String id);
+    boolean existsEntity(String id) throws STACRUDException;
 
     /**
      * Gets the Entity with given id
      *
-     * @param id
-     *            the id of the Entity
-     * @param queryOptions
-     *            query Options
+     * @param id           the id of the Entity
+     * @param queryOptions query Options
      * @return ElementWithQueryOptions wrapping requested Entity
-     * @throws STACRUDException
-     *             if an error occurred
+     * @throws STACRUDException if an error occurred
      */
-    @Transactional(rollbackFor = Exception.class)
     ElementWithQueryOptions getEntity(String id, QueryOptions queryOptions) throws STACRUDException;
 
     /**
      * Requests the full EntityCollection
      *
-     * @param queryOptions
-     *            {@link QueryOptions}
+     * @param queryOptions {@link QueryOptions}
      * @return the full EntityCollection
-     * @throws STACRUDException
-     *             if the queryOptions are invalid
+     * @throws STACRUDException if the queryOptions are invalid
      */
-    @Transactional(rollbackFor = Exception.class)
     CollectionWrapper getEntityCollection(QueryOptions queryOptions) throws STACRUDException;
 
     /**
      * Requests the Entity with given ownId that is related to a single Entity with given relatedId and
      * relatedType
      *
-     * @param relatedId
-     *            ID of the related Entity
-     * @param relatedType
-     *            EntityType of the related Entity
-     * @param ownId
-     *            ID of the requested Entity. Can be null.
-     * @param queryOptions
-     *            {@link QueryOptions} used for serialization
+     * @param relatedId    ID of the related Entity
+     * @param relatedType  EntityType of the related Entity
+     * @param ownId        ID of the requested Entity. Can be null.
+     * @param queryOptions {@link QueryOptions} used for serialization
      * @return Entity that matches
-     * @throws STACRUDException
-     *             if an error occurred
+     * @throws STACRUDException if an error occurred
      */
-    @Transactional(rollbackFor = Exception.class)
     ElementWithQueryOptions<?> getEntityByRelatedEntity(String relatedId, String relatedType, String ownId,
-            QueryOptions queryOptions) throws STACRUDException;
+                                                        QueryOptions queryOptions) throws STACRUDException;
 
     /**
      * Requests the EntityCollection that is related to a single Entity with the given ID and type
      *
-     * @param relatedId
-     *            the ID of the Entity the EntityCollection is related to
-     * @param relatedType
-     *            EntityType of the related Entity
-     * @param queryOptions
-     *            {@link QueryOptions}
+     * @param relatedId    the ID of the Entity the EntityCollection is related to
+     * @param relatedType  EntityType of the related Entity
+     * @param queryOptions {@link QueryOptions}
      * @return List of Entities that match
-     * @throws STACRUDException
-     *             if the queryOptions are invalid
+     * @throws STACRUDException if the queryOptions are invalid
      */
-    @Transactional(rollbackFor = Exception.class)
     CollectionWrapper getEntityCollectionByRelatedEntity(String relatedId, String relatedType,
-            QueryOptions queryOptions) throws STACRUDException;
+                                                         QueryOptions queryOptions) throws STACRUDException;
 
     /**
      * Gets the Id on an Entity that is related to a single Entity with given relatedId and relatedType. May
      * be overwritten by classes that use a different field for storing the identifier.
      *
-     * @param relatedId
-     *            ID of the related Entity
-     * @param relatedType
-     *            EntityType of the related Entity
+     * @param relatedId   ID of the related Entity
+     * @param relatedType EntityType of the related Entity
      * @return Id of the Entity. Null if no entity is present
      */
-    @Transactional(rollbackFor = Exception.class)
-    String getEntityIdByRelatedEntity(String relatedId, String relatedType);
+    String getEntityIdByRelatedEntity(String relatedId, String relatedType) throws STACRUDException;
 
     /**
      * Checks if an entity with given ownId exists that relates to an entity with given relatedId and
      * relatedType
      *
-     * @param relatedId
-     *            ID of the related Entity
-     * @param relatedType
-     *            EntityType of the related Entity
-     * @param ownId
-     *            ID of the requested Entity. Can be null.
+     * @param relatedId   ID of the related Entity
+     * @param relatedType EntityType of the related Entity
+     * @param ownId       ID of the requested Entity. Can be null.
      * @return true if an Entity exists
      */
-    @Transactional(rollbackFor = Exception.class)
-    boolean existsEntityByRelatedEntity(String relatedId, String relatedType, String ownId);
+    boolean existsEntityByRelatedEntity(String relatedId, String relatedType, String ownId) throws STACRUDException;
 
-    /**
-     * Get the {@link JpaRepository} for this {@link AbstractSensorThingsEntityService}
-     *
-     * @return the concrete {@link JpaRepository}
-     */
-    T getRepository();
-
-    @Transactional(rollbackFor = Exception.class)
     ElementWithQueryOptions create(S entity) throws STACRUDException;
 
-    @Transactional(rollbackFor = Exception.class)
     ElementWithQueryOptions update(String id, S entity, HttpMethod method) throws STACRUDException;
 
-    @Transactional(rollbackFor = Exception.class)
     void delete(String id) throws STACRUDException;
 }

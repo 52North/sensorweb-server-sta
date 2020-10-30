@@ -51,7 +51,6 @@ import java.util.function.Consumer;
  * 3. $orderby
  * 4. $skip
  * 5. $top
- *
  * After applying any server-driven pagination:
  * 6. $expand
  * 7. $select
@@ -74,8 +73,8 @@ public class ITQueryOptionPrecedence extends ConformanceTests implements TestUti
     private final String expandFilter = "$expand=Datastreams";
 
     private final String[] allFilters = {
-            countFilter, orderByFilter, selectFilter, skipFilter, topFilter,
-            filterFilter, expandFilter
+        countFilter, orderByFilter, selectFilter, skipFilter, topFilter,
+        filterFilter, expandFilter
     };
 
     public ITQueryOptionPrecedence(@Value("${server.rootUrl}") String rootUrl) throws Exception {
@@ -84,42 +83,26 @@ public class ITQueryOptionPrecedence extends ConformanceTests implements TestUti
         // Create required test harness
         // Requires POST with deep insert to work.
         postEntity(EntityType.THING, "{ \"description\": \"thing 1\", \"name\": \"thing name 1\", \"properties\": { " +
-                "\"reference\": \"first\" }, \"Locations\": [ { \"description\": \"location 1\", \"name\": \"location" +
-                " name 1\", \"location\": { \"type\": \"Point\", \"coordinates\": [ -117.05, 51.05 ] }, " +
-                "\"encodingType\": \"application/vnd.geo+json\" } ], \"Datastreams\": [ { \"unitOfMeasurement\": { " +
-                "\"name\": \"Lumen\", \"symbol\": \"lm\", \"definition\": \"http://www.qudt.org/qudt/owl/1.0" +
-                ".0/unit/Instances.html/Lumen\" }, \"description\": \"datastream 1\", \"name\": \"datastream name " +
-                "1\", \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\", " +
-                "\"ObservedProperty\": { \"name\": \"Luminous Flux\", \"definition\": \"http://www.qudt" +
-                ".org/qudt/owl/1.0.0/quantity/Instances.html/LuminousFlux\", \"description\": \"observedProperty 1\" " +
-                "}, \"Sensor\": { \"description\": \"sensor 1\", \"name\": \"sensor name 1\", \"encodingType\": " +
-                "\"application/pdf\", \"metadata\": \"Light flux sensor\" }, \"Observations\":[ { \"phenomenonTime\":" +
-                " \"2015-03-03T00:00:00Z\", \"result\": 3 }, { \"phenomenonTime\": \"2015-03-04T00:00:00Z\", " +
-                "\"result\": 4 } ] }, { \"unitOfMeasurement\": { \"name\": \"Centigrade\", \"symbol\": \"C\", " +
-                "\"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\" }, \"description\":" +
-                " \"datastream 2\", \"name\": \"datastream name 2\", \"observationType\": \"http://www.opengis" +
-                ".net/def/observationType/OGC-OM/2.0/OM_Measurement\", \"ObservedProperty\": { \"name\": " +
-                "\"Tempretaure\", \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances" +
-                ".html/Tempreture\", \"description\": \"observedProperty 2\" }, \"Sensor\": { \"description\": " +
-                "\"sensor 2\", \"name\": \"sensor name 2\", \"encodingType\": \"application/pdf\", \"metadata\": " +
-                "\"Tempreture sensor\" }, \"Observations\":[ { \"phenomenonTime\": \"2015-03-05T00:00:00Z\", " +
-                "\"result\": 5 }, { \"phenomenonTime\": \"2015-03-06T00:00:00Z\", \"result\": 6 } ] } ] }");
-    }
-
-    @Test
-    public void testAllOrderingsThrowNoError() {
-        testPermutations(Arrays.asList(0, 1, 2, 3, 4, 5, 6), 0, (list) -> {
-            StringBuilder filters = new StringBuilder();
-            for (Integer integer : list) {
-                filters.append("&").append(allFilters[integer]);
-            }
-            logger.debug(filters.substring(1));
-            try {
-                getCollection(EntityType.THING, filters.substring(1));
-            } catch (IOException e) {
-                Assertions.fail("Caught IOException:" + e.getMessage());
-            }
-        });
+            "\"reference\": \"first\" }, \"Locations\": [ { \"description\": \"location 1\", \"name\": \"location" +
+            " name 1\", \"location\": { \"type\": \"Point\", \"coordinates\": [ -117.05, 51.05 ] }, " +
+            "\"encodingType\": \"application/vnd.geo+json\" } ], \"Datastreams\": [ { \"unitOfMeasurement\": { " +
+            "\"name\": \"Lumen\", \"symbol\": \"lm\", \"definition\": \"http://www.qudt.org/qudt/owl/1.0" +
+            ".0/unit/Instances.html/Lumen\" }, \"description\": \"datastream 1\", \"name\": \"datastream name " +
+            "1\", \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\", " +
+            "\"ObservedProperty\": { \"name\": \"Luminous Flux\", \"definition\": \"http://www.qudt" +
+            ".org/qudt/owl/1.0.0/quantity/Instances.html/LuminousFlux\", \"description\": \"observedProperty 1\" " +
+            "}, \"Sensor\": { \"description\": \"sensor 1\", \"name\": \"sensor name 1\", \"encodingType\": " +
+            "\"application/pdf\", \"metadata\": \"Light flux sensor\" }, \"Observations\":[ { \"phenomenonTime\":" +
+            " \"2015-03-03T00:00:00Z\", \"result\": 3 }, { \"phenomenonTime\": \"2015-03-04T00:00:00Z\", " +
+            "\"result\": 4 } ] }, { \"unitOfMeasurement\": { \"name\": \"Centigrade\", \"symbol\": \"C\", " +
+            "\"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\" }, \"description\":" +
+            " \"datastream 2\", \"name\": \"datastream name 2\", \"observationType\": \"http://www.opengis" +
+            ".net/def/observationType/OGC-OM/2.0/OM_Measurement\", \"ObservedProperty\": { \"name\": " +
+            "\"Tempretaure\", \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances" +
+            ".html/Tempreture\", \"description\": \"observedProperty 2\" }, \"Sensor\": { \"description\": " +
+            "\"sensor 2\", \"name\": \"sensor name 2\", \"encodingType\": \"application/pdf\", \"metadata\": " +
+            "\"Tempreture sensor\" }, \"Observations\":[ { \"phenomenonTime\": \"2015-03-05T00:00:00Z\", " +
+            "\"result\": 5 }, { \"phenomenonTime\": \"2015-03-06T00:00:00Z\", \"result\": 6 } ] } ] }");
     }
 
     /**
@@ -138,5 +121,21 @@ public class ITQueryOptionPrecedence extends ConformanceTests implements TestUti
         if (k == arr.size() - 1) {
             consumer.accept(arr);
         }
+    }
+
+    @Test
+    public void testAllOrderingsThrowNoError() {
+        testPermutations(Arrays.asList(0, 1, 2, 3, 4, 5, 6), 0, (list) -> {
+            StringBuilder filters = new StringBuilder();
+            for (Integer integer : list) {
+                filters.append("&").append(allFilters[integer]);
+            }
+            logger.debug(filters.substring(1));
+            try {
+                getCollection(EntityType.THING, filters.substring(1));
+            } catch (IOException e) {
+                Assertions.fail("Caught IOException:" + e.getMessage());
+            }
+        });
     }
 }

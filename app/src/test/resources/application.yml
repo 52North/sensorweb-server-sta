@@ -6,12 +6,23 @@ trace: false
 server:
   port: 8081
   ## Used for response serialization + url parsing. Must be set correctly!
-  rootUrl: "http://localhost:8081/v2/"
+  rootUrl: "http://localhost:8081/v1.1/"
   servlet:
-    context-path: "/v2"
+    context-path: "/v1.1"
 
   ## Used for enabling/disabling custom 52N-STA Features
   feature:
+
+    # Controls whether Ids are escaped with single quotes e.g. Things('testThing')/Datastreams. Defaults to true if not given
+    # Note: This only controls inbound requests. navigationLinks+selfLinks are returned without single quotes always
+    # Note: This is currently not affecting MQTT Processing
+    escapeId: true
+
+    # Controls whether properties referenced from $expand need to be explicitly referenced from $select if $select is used or are implicitly included
+    # Resolves ambiguity as discussed in https://github.com/opengeospatial/sensorthings/issues/106
+    # Defaults to false.
+    implicitExpand: false
+
     ## Automatically updates a FeatureOfInterest linked in Thing->properties under
     ## key "updateFOI" with new Locations of the Thing
     updateFOI: true
@@ -37,11 +48,32 @@ server:
     # All HTTP POST & PUT Requests will be dropped with a HTTP Status 405 NOT Allowed
     httpReadOnly: false
 
+    ## Defines if/how Observation->Parameters should be parsed and handled. Enabled by default, empty String disables the key.
+    observation:
+      # Key that holds information about the samplingGeometry
+      samplingGeometry: http://www.opengis.net/def/param-name/OGC-OM/2.0/samplingGeometry
+      # Key that holds information about the lower limit of the vertical extend of the observation (e.g. depth under water).
+      verticalFrom: verticalFrom
+      # Key that holds information about the upper limit of the the vertical extend of the observation (e.g. depth under water).
+      verticalTo: verticalTo
+      # Key that holds information about the vertical extend of the observation (e.g. depth under water).
+      # Uses the same value for upper and lower limit.
+      verticalFromTo: vertical
+
 # Database Configuration
 database:
   jpa:
-    persistence-location: classpath:META-INF/sensorthings-persistence.xml
+    # Mappings to be loaded. See https://github.com/52North/sensorweb-server-sta/wiki for details
+    # Options:
+    # - Vanilla STA: sta-vanilla.xml
+    persistence-location: classpath:META-INF/sta-vanilla.xml
 spring:
+  # Profile of the application.
+  # Options:
+  # - Vanilla STA: vanilla
+  # - [not implemented yet] STA with MultiDatastream Extension: multiDatastreamExtension
+  profiles:
+    active: vanilla
   main:
     show-banner: false
   datasource:

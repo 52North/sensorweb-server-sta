@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.mqtt.core;
 
 import org.springframework.stereotype.Component;
@@ -41,7 +42,7 @@ import java.util.Map;
 public class MqttUtil {
 
     public static final String OBSERVATION_ENTITY = "org.n52.series.db.beans.ObservationEntity";
-    public static final String DATASTREAM_ENTITY = "org.n52.series.db.beans.sta.DatastreamEntity";
+    public static final String DATASTREAM_ENTITY = "org.n52.series.db.beans.sta.AbstractDatasetEntity";
     public static final String FEATURE_ENTITY = "org.n52.series.db.beans.AbstractFeatureEntity";
     public static final String HISTORICAL_LOCATION_ENTITY = "org.n52.series.db.beans.sta.HistoricalLocationEntity";
     public static final String LOCATION_ENTITY = "org.n52.series.db.beans.sta.LocationEntity";

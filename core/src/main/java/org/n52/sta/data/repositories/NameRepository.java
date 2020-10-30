@@ -26,9 +26,10 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.repositories;
 
-import org.n52.series.db.beans.sta.AbstractStaEntity;
+import org.n52.series.db.beans.HibernateRelations;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +37,7 @@ import java.util.Optional;
 
 @NoRepositoryBean
 @Transactional
-public interface NameRepository<T extends AbstractStaEntity> extends AbstractStaRepository<T> {
+public interface NameRepository<T extends HibernateRelations.HasName> extends AbstractStaRepository<T> {
 
     boolean existsByName(String name);
 

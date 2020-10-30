@@ -31,24 +31,70 @@ package org.n52.sta.serdes.util;
 
 import org.hibernate.Hibernate;
 import org.hibernate.proxy.HibernateProxy;
+import org.n52.series.db.beans.AbstractDatasetEntity;
+import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.HibernateRelations;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
-import org.n52.series.db.beans.sta.DatastreamEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
-import org.n52.series.db.beans.sta.ObservablePropertyEntity;
-import org.n52.series.db.beans.sta.ObservationEntity;
-import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.series.db.beans.sta.StaFeatureEntity;
+import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId> {
 
     protected P entity;
     protected QueryOptions queryOptions;
+    protected Set<String> fieldsToSerialize = new HashSet<>();
+    protected Map<String, QueryOptions> fieldsToExpand = new HashMap<>();
+    protected boolean hasSelectOption;
+    protected boolean hasExpandOption;
+
+    ElementWithQueryOptions(P entity, QueryOptions queryOptions) {
+        this.entity = entity;
+        this.queryOptions = queryOptions;
+    }
+
+    public static ElementWithQueryOptions from(Object entity, QueryOptions queryOptions) {
+        Object unwrapped = (entity instanceof HibernateProxy) ? Hibernate.unproxy(entity) : entity;
+        switch (unwrapped.getClass().getSimpleName()) {
+            case "PlatformEntity":
+                return new ThingWithQueryOptions((PlatformEntity) unwrapped, queryOptions);
+            case "ProcedureEntity":
+                return new SensorWithQueryOptions((ProcedureEntity) unwrapped, queryOptions);
+            case "PhenomenonEntity":
+                return new ObservedPropertyWithQueryOptions((PhenomenonEntity) unwrapped, queryOptions);
+            case "LocationEntity":
+                return new LocationWithQueryOptions((LocationEntity) unwrapped, queryOptions);
+            case "HistoricalLocationEntity":
+                return new HistoricalLocationWithQueryOptions((HistoricalLocationEntity) unwrapped, queryOptions);
+            case "StaFeatureEntity":
+                return new FeatureOfInterestWithQueryOptions((StaFeatureEntity<?>) unwrapped, queryOptions);
+            case "FeatureEntity":
+                return new FeatureOfInterestWithQueryOptions(
+                    new StaFeatureEntity<>((FeatureEntity) unwrapped), queryOptions);
+            case "DatasetEntity":
+            case "AbstractDatasetEntity":
+            case "DatasetAggregationEntity":
+                return new DatastreamWithQueryOptions((AbstractDatasetEntity) unwrapped, queryOptions);
+            default:
+                if (unwrapped instanceof DataEntity) {
+                    return new ObservationWithQueryOptions((DataEntity<?>) unwrapped, queryOptions);
+                } else {
+                    throw new RuntimeException(
+                        "Error wrapping object with queryOptions. Could not find Wrapper for class: " +
+                            unwrapped.getClass().getSimpleName());
+                }
+        }
+    }
 
     public QueryOptions getQueryOptions() {
         return queryOptions;
@@ -58,111 +104,105 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
         return entity;
     }
 
-    public static ElementWithQueryOptions from(Object entity, QueryOptions queryOptions) {
-        Object unwrapped = (entity instanceof HibernateProxy) ? Hibernate.unproxy(entity) : entity;
-        switch (unwrapped.getClass().getSimpleName()) {
-        case "PlatformEntity":
-            return new ThingWithQueryOptions((PlatformEntity) unwrapped, queryOptions);
-        case "ProcedureEntity":
-            return new SensorWithQueryOptions(new SensorEntity((ProcedureEntity) unwrapped), queryOptions);
-        case "SensorEntity":
-            return new SensorWithQueryOptions((SensorEntity) unwrapped, queryOptions);
-        case "PhenomenonEntity":
-            return new ObservedPropertyWithQueryOptions(new ObservablePropertyEntity((PhenomenonEntity) unwrapped),
-                                                        queryOptions);
-        case "ObservablePropertyEntity":
-            return new ObservedPropertyWithQueryOptions((ObservablePropertyEntity) unwrapped, queryOptions);
-        case "LocationEntity":
-            return new LocationWithQueryOptions((LocationEntity) unwrapped, queryOptions);
-        case "HistoricalLocationEntity":
-            return new HistoricalLocationWithQueryOptions((HistoricalLocationEntity) unwrapped, queryOptions);
-        case "StaFeatureEntity":
-            return new FeatureOfInterestWithQueryOptions((StaFeatureEntity<?>) unwrapped, queryOptions);
-        case "FeatureEntity":
-            return new FeatureOfInterestWithQueryOptions(
-                    new StaFeatureEntity<>((FeatureEntity) unwrapped), queryOptions);
-        case "DatastreamEntity":
-            return new DatastreamWithQueryOptions((DatastreamEntity) unwrapped, queryOptions);
-        default:
-            if (unwrapped instanceof ObservationEntity) {
-                return new ObservationWithQueryOptions((ObservationEntity<?>) unwrapped, queryOptions);
-            } else {
-                throw new RuntimeException(
-                        "Error wrapping object with queryOptions. Could not find Wrapper for class: " +
-                                unwrapped.getClass().getSimpleName());
+    public Set<String> getFieldsToSerialize() {
+        return fieldsToSerialize;
+    }
+
+    public Map<String, QueryOptions> getFieldsToExpand() {
+        return fieldsToExpand;
+    }
+
+    public boolean hasSelectOption() {
+        return hasSelectOption;
+    }
+
+    public boolean hasExpandOption() {
+        return hasExpandOption;
+    }
+
+    public void unwrap(boolean enableImplicitSelect) {
+        if (queryOptions != null) {
+            if (queryOptions.hasSelectFilter()) {
+                hasSelectOption = true;
+                fieldsToSerialize.addAll(queryOptions.getSelectFilter().getItems());
+            }
+            if (queryOptions.hasExpandFilter()) {
+                hasExpandOption = true;
+                for (ExpandItem item : queryOptions.getExpandFilter().getItems()) {
+                    fieldsToExpand.put(item.getPath(), item.getQueryOptions());
+                    // Add expanded items to $select replacing implicit selection with explicit selection
+                    if (hasSelectOption && enableImplicitSelect) {
+                        fieldsToSerialize.add(item.getPath());
+                    }
+                }
             }
         }
     }
 
     public static class ThingWithQueryOptions extends ElementWithQueryOptions<PlatformEntity> {
 
-        ThingWithQueryOptions(PlatformEntity thing, QueryOptions queryOptions) {
-            this.entity = thing;
-            this.queryOptions = queryOptions;
+        ThingWithQueryOptions(PlatformEntity entity, QueryOptions queryOptions) {
+            super(entity, queryOptions);
         }
     }
 
 
-    public static class SensorWithQueryOptions extends ElementWithQueryOptions<SensorEntity> {
+    public static class SensorWithQueryOptions extends ElementWithQueryOptions<ProcedureEntity> {
 
-        SensorWithQueryOptions(SensorEntity thing, QueryOptions queryOptions) {
-            this.entity = thing;
-            this.queryOptions = queryOptions;
+        SensorWithQueryOptions(ProcedureEntity entity, QueryOptions queryOptions) {
+            super(entity, queryOptions);
         }
     }
 
 
-    public static class ObservedPropertyWithQueryOptions extends ElementWithQueryOptions<ObservablePropertyEntity> {
+    public static class ObservedPropertyWithQueryOptions extends ElementWithQueryOptions<PhenomenonEntity> {
 
-        ObservedPropertyWithQueryOptions(ObservablePropertyEntity thing, QueryOptions queryOptions) {
-            this.entity = thing;
-            this.queryOptions = queryOptions;
+        ObservedPropertyWithQueryOptions(PhenomenonEntity entity, QueryOptions queryOptions) {
+            super(entity, queryOptions);
         }
     }
 
 
-    public static class ObservationWithQueryOptions extends ElementWithQueryOptions<ObservationEntity<?>> {
+    public static class ObservationWithQueryOptions extends ElementWithQueryOptions<DataEntity<?>> {
 
-        ObservationWithQueryOptions(ObservationEntity<?> thing, QueryOptions queryOptions) {
-            this.entity = thing;
-            this.queryOptions = queryOptions;
+        ObservationWithQueryOptions(DataEntity<?> entity,
+                                    QueryOptions queryOptions) {
+            super(entity, queryOptions);
         }
     }
 
 
     public static class LocationWithQueryOptions extends ElementWithQueryOptions<LocationEntity> {
 
-        LocationWithQueryOptions(LocationEntity thing, QueryOptions queryOptions) {
-            this.entity = thing;
-            this.queryOptions = queryOptions;
+        LocationWithQueryOptions(LocationEntity entity, QueryOptions queryOptions) {
+            super(entity, queryOptions);
         }
     }
 
 
     public static class HistoricalLocationWithQueryOptions
-            extends ElementWithQueryOptions<HistoricalLocationEntity> {
+        extends ElementWithQueryOptions<HistoricalLocationEntity> {
 
-        HistoricalLocationWithQueryOptions(HistoricalLocationEntity thing, QueryOptions queryOptions) {
-            this.entity = thing;
-            this.queryOptions = queryOptions;
+        HistoricalLocationWithQueryOptions(HistoricalLocationEntity entity,
+                                           QueryOptions queryOptions) {
+            super(entity, queryOptions);
         }
     }
 
 
     public static class FeatureOfInterestWithQueryOptions extends ElementWithQueryOptions<StaFeatureEntity<?>> {
 
-        FeatureOfInterestWithQueryOptions(StaFeatureEntity<?> thing, QueryOptions queryOptions) {
-            this.entity = thing;
-            this.queryOptions = queryOptions;
+        FeatureOfInterestWithQueryOptions(StaFeatureEntity<?> entity, QueryOptions queryOptions) {
+            super(entity, queryOptions);
         }
     }
 
 
-    public static class DatastreamWithQueryOptions extends ElementWithQueryOptions<DatastreamEntity> {
+    public static class DatastreamWithQueryOptions extends ElementWithQueryOptions<AbstractDatasetEntity> {
 
-        DatastreamWithQueryOptions(DatastreamEntity thing, QueryOptions queryOptions) {
-            this.entity = thing;
-            this.queryOptions = queryOptions;
+        DatastreamWithQueryOptions(AbstractDatasetEntity entity,
+                                   QueryOptions queryOptions) {
+            super(entity, queryOptions);
         }
     }
 

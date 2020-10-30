@@ -39,7 +39,7 @@ import java.util.Optional;
  */
 @NoRepositoryBean
 @Transactional
-public interface StaIdentifierRepository<T> extends IdentifierRepository<T, Long> {
+public interface StaIdentifierRepository<T> extends EntityGraphRepository<T, Long> {
 
     /**
      * Checks whether Entity with given id exists.
@@ -65,5 +65,7 @@ public interface StaIdentifierRepository<T> extends IdentifierRepository<T, Long
      * @param identifier Identifier of the Entity
      */
     void deleteByStaIdentifier(String identifier);
+
+    T intermediateSave(T entity);
 
 }

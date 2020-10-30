@@ -27,15 +27,23 @@
  * Public License for more details.
  */
 
-package org.n52.sta.data.repositories;
+package org.n52.sta;
 
-import org.n52.series.db.beans.DataEntity;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
-@Transactional
-@DependsOn("DatastreamRepository")
-public interface DataRepository<T extends DataEntity<?>>
-        extends IdentifierRepository<T, Long> {
+import java.util.concurrent.Semaphore;
 
+/**
+ * Semaphore controlling access to the Persistence Service Layer. The Persistence Layer can currently only handle as
+ * many running threads as there are database connections available, as each thread uses a seperate Transaction.
+ *
+ * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
+ */
+@Service
+public class DaoSemaphore extends Semaphore {
+
+    public DaoSemaphore(@Value("${spring.datasource.hikari.maximum-pool-size}") int permits) {
+        super(permits, true);
+    }
 }

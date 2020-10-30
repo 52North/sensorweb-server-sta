@@ -57,10 +57,10 @@ public class CORSFilter implements Filter {
     private String CORSMaxAge;
 
     @Value("${http.cors.allowHeaders:" +
-                   "Access-Control-Allow-Headers," +
-                   "Content-Type, Access-Control-Allow-Headers," +
-                   "Authorization," +
-                   "X-Requested-With}")
+               "Access-Control-Allow-Headers," +
+               "Content-Type, Access-Control-Allow-Headers," +
+               "Authorization," +
+               "X-Requested-With}")
     private String CORSHeaders;
 
     @Override
@@ -70,7 +70,7 @@ public class CORSFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
+        throws IOException, ServletException {
         HttpServletResponse res = (HttpServletResponse) response;
 
         res.setHeader("Access-Control-Allow-Origin", CORSOrigin);

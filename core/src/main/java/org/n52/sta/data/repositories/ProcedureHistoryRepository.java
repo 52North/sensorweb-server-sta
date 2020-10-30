@@ -26,13 +26,16 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.repositories;
 
 import org.n52.series.db.beans.ProcedureHistoryEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
+@Repository
 public interface ProcedureHistoryRepository extends JpaRepository<ProcedureHistoryEntity, Long> {
 
 }

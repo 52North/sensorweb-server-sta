@@ -37,7 +37,9 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
+import org.n52.sta.mqtt.MqttHandlerException;
 import org.n52.sta.utils.AbstractSTARequestHandler;
+import org.n52.sta.utils.CoreRequestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,7 +57,8 @@ import java.util.Set;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
-public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler implements MqttPublishMessageHandler {
+public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
+    implements MqttPublishMessageHandler, CoreRequestUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttPublishMessageHandlerImpl.class);
 
@@ -65,12 +68,12 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler imp
     private final boolean readOnly;
 
     public MqttPublishMessageHandlerImpl(
-            @Value("${server.feature.mqttPublishTopics:Observations}") List<String> publishTopics,
-            @Value("${server.feature.mqttReadOnly}") boolean readOnly,
-            @Value("${server.rootUrl}") String rootUrl,
-            @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
-            EntityServiceRepository serviceRepository,
-            ObjectMapper mapper) {
+        @Value("${server.feature.mqttPublishTopics:Observations}") List<String> publishTopics,
+        @Value("${server.feature.mqttReadOnly}") boolean readOnly,
+        @Value("${server.rootUrl}") String rootUrl,
+        @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
+        EntityServiceRepository serviceRepository,
+        ObjectMapper mapper) {
         super(rootUrl, shouldEscapeId, serviceRepository);
         this.mapper = mapper;
         this.readOnly = readOnly;
@@ -107,6 +110,10 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler imp
             // This may only be a reference to Observation collection
             // Remove leading slash if present
             String topic = (msg.getTopicName().startsWith("/")) ? msg.getTopicName().substring(1) : msg.getTopicName();
+            if (!topic.startsWith("v1.1/")) {
+                throw new MqttHandlerException("Error while parsing MQTT topic. Missing Version information!");
+            }
+            topic = topic.substring(5);
 
             // Check topic for syntax+semantics
             validateResource(new StringBuffer(topic), serviceRepository);
@@ -130,7 +137,7 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler imp
                     String sourceType = reference[0];
                     String sourceId = reference[1].replace(")", "");
                     ObjectNode jsonBody =
-                            (ObjectNode) mapper.readTree(msg.getPayload().toString(Charset.defaultCharset()));
+                        (ObjectNode) mapper.readTree(msg.getPayload().toString(Charset.defaultCharset()));
                     jsonBody.put(REFERENCED_FROM_TYPE, sourceType);
                     jsonBody.put(REFERENCED_FROM_ID, sourceId);
                     payload = jsonBody.toString();
@@ -139,8 +146,8 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler imp
                 }
 
                 Class<T> clazz = collectionNameToClass(collection);
-                ((AbstractSensorThingsEntityService<?, T, ? extends T>) serviceRepository.getEntityService(collection))
-                        .create(mapper.readValue(payload, clazz));
+                ((AbstractSensorThingsEntityService<T>) serviceRepository.getEntityService(collection))
+                    .create(mapper.readValue(payload, clazz));
             } else {
                 throw new STAInvalidUrlException("Topic does not reference a Collection allowed for POSTing via mqtt");
             }

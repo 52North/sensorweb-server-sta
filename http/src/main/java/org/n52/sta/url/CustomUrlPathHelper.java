@@ -43,19 +43,13 @@ import java.util.regex.Pattern;
  * @author <a href="mailto:c.autermann@52north.org">Christian Autermann</a>
  */
 public class CustomUrlPathHelper extends ExtendableUrlPathHelper {
+
     private static final String SLASH = "/";
     private static final String ENCODED_SLASH = UriUtils.encode(SLASH, StandardCharsets.UTF_8);
     private static final String DOUBLE_ENCODED_SLASH = UriUtils.encode(ENCODED_SLASH, StandardCharsets.UTF_8);
     private static final Pattern ENCODED_SLASH_PATTERN =
-            Pattern.compile(ENCODED_SLASH,
-                            Pattern.CASE_INSENSITIVE | Pattern.LITERAL);
-
-    @Override
-    public String decodeRequestString(HttpServletRequest request, String source) {
-        String[] split = source.split("\\?", 2);
-        split[0] = ENCODED_SLASH_PATTERN.matcher(split[0]).replaceAll(DOUBLE_ENCODED_SLASH);
-        return super.decodeRequestString(request, split.length <= 1 ? split[0] : split[0] + '?' + split[1]);
-    }
+        Pattern.compile(ENCODED_SLASH,
+                        Pattern.CASE_INSENSITIVE | Pattern.LITERAL);
 
     @Override
     public String getServletPath(HttpServletRequest request) {
@@ -71,6 +65,13 @@ public class CustomUrlPathHelper extends ExtendableUrlPathHelper {
             pathWithinApplication = requestUri;
         }
         return servletPath.equals(pathWithinApplication) ? "" : servletPath;
+    }
+
+    @Override
+    public String decodeRequestString(HttpServletRequest request, String source) {
+        String[] split = source.split("\\?", 2);
+        split[0] = ENCODED_SLASH_PATTERN.matcher(split[0]).replaceAll(DOUBLE_ENCODED_SLASH);
+        return super.decodeRequestString(request, split.length <= 1 ? split[0] : split[0] + '?' + split[1]);
     }
 
     @Override

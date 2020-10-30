@@ -30,10 +30,12 @@
 package org.n52.sta.data.repositories;
 
 import org.n52.series.db.beans.AbstractFeatureEntity;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
+@Repository
 public interface FeatureOfInterestRepository extends IdentifierNameRepository<AbstractFeatureEntity<?>>,
-        StaIdentifierRepository<AbstractFeatureEntity<?>> {
+                                                     StaIdentifierRepository<AbstractFeatureEntity<?>> {
 
 }

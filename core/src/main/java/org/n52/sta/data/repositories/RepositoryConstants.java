@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.repositories;
 
 /**
@@ -58,7 +59,9 @@ public interface RepositoryConstants {
     String RESULT = "result";
 
     String ENTITYNAME_OBSERVATION = "ObservationEntity";
-    String ENTITYNAME_DATASTREAM = "DatastreamEntity";
+    String ENTITYNAME_ABSTRACT_DATASET = "AbstractDatasetEntity";
+    String ENTITYNAME_DATASET = "DatasetEntity";
+    String ENTITYNAME_DATASET_AGGREGATION = "DatasetAggregationEntity";
     String ENTITYNAME_AFEATURE_OF_INTEREST = "AbstractFeatureEntity";
     String ENTITYNAME_FEATURE_OF_INTEREST = "FeatureEntity";
     String ENTITYNAME_HIST_LOCATION = "HistoricalLocationEntity";

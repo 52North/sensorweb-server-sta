@@ -52,7 +52,7 @@ public class CollectionSer extends StdSerializer<CollectionWrapper> {
     }
 
     @Override public void serialize(CollectionWrapper value, JsonGenerator gen, SerializerProvider provider)
-            throws IOException {
+        throws IOException {
         gen.writeStartObject();
 
         gen.writeNumberField("@iot.count", value.getTotalEntityCount());
@@ -68,8 +68,8 @@ public class CollectionSer extends StdSerializer<CollectionWrapper> {
             allFilters.add(new SkipTopFilter(FilterConstants.SkipTopOperator.Skip, oldSkip + oldTop));
             gen.writeStringField("@iot.nextLink",
                                  value.getRequestURL()
-                                         + "?"
-                                         + new QueryOptions("", allFilters).toString()
+                                     + "?"
+                                     + new QueryOptions("", allFilters).toString()
             );
         }
 

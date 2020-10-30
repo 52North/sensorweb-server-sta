@@ -29,17 +29,20 @@
 
 package org.n52.sta.data.repositories;
 
-import org.n52.series.db.beans.sta.DatastreamEntity;
-import org.springframework.context.annotation.DependsOn;
+import org.n52.series.db.beans.AbstractDatasetEntity;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Set;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Transactional
-@DependsOn("ObservationRepository")
+@Repository
 public interface DatastreamRepository
-        extends NameRepository<DatastreamEntity>, StaIdentifierRepository<DatastreamEntity> {
+    extends NameRepository<AbstractDatasetEntity>, StaIdentifierRepository<AbstractDatasetEntity> {
 
-    <S extends DatastreamEntity> S intermediateSave(S entity);
+    Set<AbstractDatasetEntity> findAllByAggregationId(Long id);
+
 }

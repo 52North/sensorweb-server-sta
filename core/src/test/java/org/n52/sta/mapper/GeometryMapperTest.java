@@ -211,7 +211,8 @@
 //    }
 //
 //    private Property getGeospatialProperty(ComplexValue geom) {
-//       Optional<Property> p = geom.getValue().stream().filter(g -> g.getName().equals(FeatureComplexType.PROP_GEOMETRY)).findFirst();
+//       Optional<Property> p = geom.getValue().stream().filter(g -> g.getName().equals(FeatureComplexType
+//       .PROP_GEOMETRY)).findFirst();
 //       assertThat(p.isPresent(), is(true));
 //       return p.get();
 //    }

@@ -31,8 +31,11 @@ package org.n52.sta.serdes.json;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.joda.time.DateTime;
+import org.n52.series.db.beans.parameter.ParameterEntity;
+import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
@@ -40,6 +43,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
+import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.UUID;
 
 @SuppressWarnings("VisibilityModifier")
@@ -98,7 +104,8 @@ public class JSONBase {
          * Parses referencedFromType and referencedFromID into the specific JSON Entities.
          * Must be called before any validation is performed on the presence of related Entities!
          */
-        protected void parseReferencedFrom() {}
+        protected void parseReferencedFrom() {
+        }
 
         /**
          * Returns a reference to the result of this classes toEntity() method
@@ -145,11 +152,64 @@ public class JSONBase {
             // We have errored out on both types so return error message
             throw new IllegalStateException(ex.getMessage() + secondEx.getMessage());
         }
+
+        @SuppressWarnings("unchecked")
+        protected HashSet<ParameterEntity<?>> convertParameters(JsonNode parameters,
+                                                                ParameterFactory.EntityType entityType) {
+            // parameters
+            if (parameters != null) {
+                HashSet<ParameterEntity<?>> parameterEntities = new HashSet<>();
+                // Check that structure is correct
+                Iterator<String> it = parameters.fieldNames();
+                while (it.hasNext()) {
+                    String key = it.next();
+                    JsonNode value = parameters.get(key);
+
+                    ParameterEntity parameterEntity;
+                    switch (value.getNodeType()) {
+                        case ARRAY:
+                            // fallthru
+                        case MISSING:
+                            // fallthru
+                        case NULL:
+                            // fallthru
+                        case OBJECT:
+                            // fallthru
+                        case POJO:
+                            parameterEntity = ParameterFactory.from(entityType, ParameterFactory.ValueType.JSON);
+                            parameterEntity.setValue(value.asText());
+                            break;
+                        case BINARY:
+                            // fallthru
+                        case BOOLEAN:
+                            parameterEntity = ParameterFactory.from(entityType, ParameterFactory.ValueType.BOOLEAN);
+                            parameterEntity.setValue(value.asBoolean());
+                            break;
+                        case NUMBER:
+                            parameterEntity = ParameterFactory.from(entityType, ParameterFactory.ValueType.QUANTITY);
+                            parameterEntity.setValue(BigDecimal.valueOf(value.asDouble()));
+                            break;
+                        case STRING:
+                            parameterEntity = ParameterFactory.from(entityType, ParameterFactory.ValueType.TEXT);
+                            parameterEntity.setValue(value.asText());
+                            break;
+                        default:
+                            throw new RuntimeException("Could not identify value type of parameters!");
+                    }
+                    parameterEntity.setName(key);
+                    parameterEntities.add(parameterEntity);
+                }
+                return parameterEntities;
+            } else {
+                return null;
+            }
+        }
     }
 
 
     @SuppressFBWarnings("UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD")
     abstract static class JSONwithIdNameDescription<T> extends JSONwithId<T> {
+
         public String name;
         public String description;
     }
@@ -157,6 +217,7 @@ public class JSONBase {
 
     @SuppressFBWarnings("UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD")
     abstract static class JSONwithIdNameDescriptionTime<T> extends JSONwithIdTime<T> {
+
         public String name;
         public String description;
     }

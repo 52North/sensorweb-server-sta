@@ -36,29 +36,28 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
 import org.n52.janmayen.http.HTTPStatus;
+import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.AbstractFeatureEntity;
-import org.n52.series.db.beans.DatasetEntity;
+import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.FormatEntity;
-import org.n52.series.db.beans.sta.ObservationEntity;
+import org.n52.series.db.beans.parameter.feature.FeatureParameterEntity;
 import org.n52.series.db.beans.sta.StaFeatureEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
-import org.n52.shetland.ogc.sta.model.FeatureOfInterestEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.data.query.DatasetQuerySpecifications;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.FeatureOfInterestQuerySpecifications;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
-import org.n52.sta.data.repositories.DatasetRepository;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.EntityGraphRepository;
+import org.n52.sta.data.repositories.FeatureOfInterestParameterRepository;
 import org.n52.sta.data.repositories.FeatureOfInterestRepository;
 import org.n52.sta.data.repositories.FormatRepository;
 import org.n52.sta.data.repositories.ObservationRepository;
-import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,11 +68,16 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -82,73 +86,63 @@ import java.util.UUID;
 @DependsOn({"springApplicationContext"})
 @Transactional
 public class FeatureOfInterestService
-        extends AbstractSensorThingsEntityServiceImpl<FeatureOfInterestRepository, AbstractFeatureEntity<?>,
-        StaFeatureEntity<?>> {
+    extends AbstractSensorThingsEntityServiceImpl<FeatureOfInterestRepository, AbstractFeatureEntity<?>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FeatureOfInterestService.class);
 
     private static final ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
     private static final FeatureOfInterestQuerySpecifications foiQS = new FeatureOfInterestQuerySpecifications();
-    private static final DatasetQuerySpecifications dQS = new DatasetQuerySpecifications();
     private static final DatastreamQuerySpecifications dsQS = new DatastreamQuerySpecifications();
 
     private final FormatRepository formatRepository;
     private final ObservationRepository observationRepository;
-    private final DatasetRepository datasetRepository;
     private final DatastreamRepository datastreamRepository;
+    private final FeatureOfInterestParameterRepository parameterRepository;
 
     @Autowired
     public FeatureOfInterestService(FeatureOfInterestRepository repository,
                                     FormatRepository formatRepository,
                                     ObservationRepository observationRepository,
-                                    DatasetRepository datasetRepository,
-                                    DatastreamRepository datastreamRepository) {
+                                    DatastreamRepository datastreamRepository,
+                                    FeatureOfInterestParameterRepository parameterRepository,
+                                    EntityManager em) {
         super(repository,
-              AbstractFeatureEntity.class,
-              EntityGraphRepository.FetchGraph.FETCHGRAPH_FEATURETYPE);
+              em,
+              AbstractFeatureEntity.class);
         this.formatRepository = formatRepository;
         this.observationRepository = observationRepository;
-        this.datasetRepository = datasetRepository;
         this.datastreamRepository = datastreamRepository;
+        this.parameterRepository = parameterRepository;
+    }
+
+    @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption) {
+        return new EntityGraphRepository.FetchGraph[] {
+            EntityGraphRepository.FetchGraph.FETCHGRAPH_FEATURETYPE,
+            EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS
+        };
     }
 
     @Override
-    public EntityTypes[] getTypes() {
-        return new EntityTypes[] {EntityTypes.FeatureOfInterest, EntityTypes.FeaturesOfInterest};
-    }
-
-    public AbstractFeatureEntity<?> getEntityByDatasetIdRaw(Long id, QueryOptions queryOptions)
-            throws STACRUDException {
-        try {
-            Long foiId = datasetRepository.findById(id).get().getFeature().getId();
-            AbstractFeatureEntity<?> entity = getRepository().findById(foiId).get();
-            if (queryOptions.hasExpandFilter()) {
-                return fetchExpandEntities(entity, queryOptions.getExpandFilter());
-            } else {
-                return entity;
-            }
-        } catch (RuntimeException | STAInvalidQueryException e) {
-            throw new STACRUDException(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    protected StaFeatureEntity<?> fetchExpandEntities(AbstractFeatureEntity<?> entity, ExpandFilter expandOption)
-            throws STACRUDException, STAInvalidQueryException {
+    protected AbstractFeatureEntity<?> fetchExpandEntitiesWithFilter(AbstractFeatureEntity<?> entity,
+                                                                     ExpandFilter expandOption)
+        throws STACRUDException, STAInvalidQueryException {
         StaFeatureEntity<?> foi = new StaFeatureEntity<>(entity);
+        Set<DataEntity<?>> observations = new HashSet<>();
         for (ExpandItem expandItem : expandOption.getItems()) {
             String expandProperty = expandItem.getPath();
-            if (FeatureOfInterestEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
-                Page<ObservationEntity<?>> observation = getObservationService()
-                        .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
-                                                               STAEntityDefinition.FEATURES_OF_INTEREST,
-                                                               expandItem.getQueryOptions());
-                return foi.setObservations(observation.toSet());
+            if (STAEntityDefinition.OBSERVATIONS.equals(expandProperty)) {
+                Page<DataEntity<?>> observation = getObservationService()
+                    .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
+                                                           STAEntityDefinition.FEATURES_OF_INTEREST,
+                                                           expandItem.getQueryOptions());
+                observations.addAll(observation.toSet());
             } else {
-                throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty +
-                                                           " on Entity of type 'FeatureOfInterest'");
+                throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
+                                                                 expandProperty,
+                                                                 StaConstants.FEATURE_OF_INTEREST));
             }
         }
+        foi.setObservations(observations);
         return foi;
     }
 
@@ -158,12 +152,12 @@ public class FeatureOfInterestService
                                                                             String ownId) {
         Specification<AbstractFeatureEntity<?>> filter;
         switch (relatedType) {
-        case STAEntityDefinition.OBSERVATIONS: {
-            filter = foiQS.withObservationStaIdentifier(relatedId);
-            break;
-        }
-        default:
-            throw new IllegalStateException("Trying to filter by unrelated type: " + relatedType + "not found!");
+            case STAEntityDefinition.OBSERVATIONS: {
+                filter = foiQS.withObservationStaIdentifier(relatedId);
+                break;
+            }
+            default:
+                throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
         }
 
         if (ownId != null) {
@@ -173,32 +167,24 @@ public class FeatureOfInterestService
     }
 
     @Override
-    public String checkPropertyName(String property) {
-        switch (property) {
-        case "encodingType":
-            return AbstractFeatureEntity.PROPERTY_FEATURE_TYPE;
-        default:
-            return property;
-        }
-    }
-
-    @Override
-    public AbstractFeatureEntity<?> createEntity(AbstractFeatureEntity<?> feature) throws STACRUDException {
+    public AbstractFeatureEntity<?> createOrfetch(AbstractFeatureEntity<?> feature) throws STACRUDException {
         // Get by reference
         if (feature.getStaIdentifier() != null && !feature.isSetName()) {
             Optional<AbstractFeatureEntity<?>> optionalEntity =
-                    getRepository().findByStaIdentifier(feature.getStaIdentifier(),
-                                                        EntityGraphRepository.FetchGraph.FETCHGRAPH_FEATURETYPE);
+                getRepository().findByStaIdentifier(feature.getStaIdentifier(),
+                                                    EntityGraphRepository.FetchGraph.FETCHGRAPH_FEATURETYPE);
             if (optionalEntity.isPresent()) {
                 return optionalEntity.get();
             } else {
-                throw new STACRUDException("No FeatureOfInterest with id '" + feature.getStaIdentifier() + "' found! ");
+                throw new STACRUDException(String.format(NO_S_WITH_ID_S_FOUND,
+                                                         StaConstants.FEATURE_OF_INTEREST,
+                                                         feature.getStaIdentifier()));
             }
         }
         if (feature.getStaIdentifier() == null) {
             if (getRepository().existsByName(feature.getName())) {
                 Iterable<AbstractFeatureEntity<?>> features =
-                        getRepository().findAll(foiQS.withName(feature.getName()));
+                    getRepository().findAll(foiQS.withName(feature.getName()));
                 AbstractFeatureEntity<?> f = alreadyExistsFeature(features, feature);
                 if (f != null) {
                     return f;
@@ -223,7 +209,7 @@ public class FeatureOfInterestService
                     // This should never fail as we checked exist earlier
                     return getRepository().findByStaIdentifier(feature.getStaIdentifier(),
                                                                EntityGraphRepository.FetchGraph.FETCHGRAPH_FEATURETYPE)
-                                          .orElse(null);
+                        .orElse(null);
                 } else {
                     throw new STACRUDException("StaIdentifier already exists!", HTTPStatus.CONFLICT);
                 }
@@ -233,15 +219,86 @@ public class FeatureOfInterestService
                     // This should never fail as we checked exist earlier
                     return getRepository().findByIdentifier(feature.getIdentifier(),
                                                             EntityGraphRepository.FetchGraph.FETCHGRAPH_FEATURETYPE)
-                                          .orElse(null);
+                        .orElse(null);
                 } else {
-                    throw new STACRUDException("Identifier already exists!", HTTPStatus.CONFLICT);
+                    throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS, HTTPStatus.CONFLICT);
                 }
             } else {
                 feature.setXml(null);
                 checkFeatureType(feature);
+                AbstractFeatureEntity<?> intermediateSave = getRepository().intermediateSave(feature);
+                if (feature.getParameters() != null) {
+                    parameterRepository.saveAll(feature.getParameters()
+                                                    .stream()
+                                                    .filter(t -> t instanceof FeatureParameterEntity)
+                                                    .map(t -> {
+                                                        ((FeatureParameterEntity) t).setFeature(intermediateSave);
+                                                        return (FeatureParameterEntity) t;
+                                                    })
+                                                    .collect(Collectors.toSet()));
+                }
                 return getRepository().save(feature);
             }
+        }
+    }
+
+    @Override
+    public AbstractFeatureEntity<?> updateEntity(String id, AbstractFeatureEntity<?> entity, HttpMethod method)
+        throws STACRUDException {
+        if (HttpMethod.PATCH.equals(method)) {
+            synchronized (getLock(id)) {
+                Optional<AbstractFeatureEntity<?>> existing =
+                    getRepository().findByStaIdentifier(id,
+                                                        EntityGraphRepository.FetchGraph.FETCHGRAPH_FEATURETYPE);
+                if (existing.isPresent()) {
+                    AbstractFeatureEntity<?> merged = merge(existing.get(), entity);
+                    return getRepository().save(merged);
+                }
+                throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
+            }
+        } else if (HttpMethod.PUT.equals(method)) {
+            throw new STACRUDException(HTTP_PUT_IS_NOT_YET_SUPPORTED, HTTPStatus.NOT_IMPLEMENTED);
+        }
+        throw new STACRUDException(INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY, HTTPStatus.BAD_REQUEST);
+    }
+
+    @Override
+    public AbstractFeatureEntity<?> createOrUpdate(AbstractFeatureEntity<?> entity)
+        throws STACRUDException {
+        if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
+            return updateEntity(entity.getStaIdentifier(), entity, HttpMethod.PATCH);
+        }
+        return createOrfetch(entity);
+    }
+
+    @Override
+    public String checkPropertyName(String property) {
+        return foiQS.checkPropertyName(property);
+    }
+
+    @Override
+    public AbstractFeatureEntity<?> merge(AbstractFeatureEntity<?> existing, AbstractFeatureEntity<?> toMerge) {
+        mergeIdentifierNameDescription(existing, toMerge);
+        if (toMerge.isSetGeometry()) {
+            existing.setGeometryEntity(toMerge.getGeometryEntity());
+        }
+        mergeFeatureType(existing);
+        return existing;
+    }
+
+    public AbstractFeatureEntity<?> getEntityByDatasetIdRaw(Long id, QueryOptions queryOptions)
+        throws STACRUDException {
+        try {
+            Long foiId = datastreamRepository.findById(id).get().getFeature().getId();
+            AbstractFeatureEntity<?> entity =
+                getRepository().findById(foiId, createFetchGraph(queryOptions.getExpandFilter())).get();
+            if (queryOptions.hasExpandFilter()) {
+                return fetchExpandEntitiesWithFilter(entity, queryOptions.getExpandFilter());
+            } else {
+                return entity;
+            }
+        } catch (RuntimeException | STAInvalidQueryException e) {
+            throw new STACRUDException(e.getMessage(), e);
         }
     }
 
@@ -249,36 +306,11 @@ public class FeatureOfInterestService
                                                           AbstractFeatureEntity<?> feature) {
         for (AbstractFeatureEntity<?> f : features) {
             if (f.isSetGeometry() && feature.isSetGeometry() && f.getGeometry().equals(feature.getGeometry())
-                    && f.getDescription().equals(feature.getDescription())) {
+                && f.getDescription().equals(feature.getDescription())) {
                 return f;
             }
         }
         return null;
-    }
-
-    @Override
-    public AbstractFeatureEntity<?> updateEntity(String id, AbstractFeatureEntity<?> entity, HttpMethod method)
-            throws STACRUDException {
-        if (HttpMethod.PATCH.equals(method)) {
-            synchronized (getLock(id)) {
-                Optional<AbstractFeatureEntity<?>> existing =
-                        getRepository().findByStaIdentifier(id,
-                                                            EntityGraphRepository.FetchGraph.FETCHGRAPH_FEATURETYPE);
-                if (existing.isPresent()) {
-                    AbstractFeatureEntity<?> merged = merge(existing.get(), entity);
-                    return getRepository().save(merged);
-                }
-                throw new STACRUDException("Unable to update. Entity not found.", HTTPStatus.NOT_FOUND);
-            }
-        } else if (HttpMethod.PUT.equals(method)) {
-            throw new STACRUDException("Http PUT is not yet supported!", HTTPStatus.NOT_IMPLEMENTED);
-        }
-        throw new STACRUDException("Invalid http method for updating entity!", HTTPStatus.BAD_REQUEST);
-    }
-
-    @Override
-    protected AbstractFeatureEntity<?> updateEntity(AbstractFeatureEntity<?> entity) {
-        return getRepository().save(entity);
     }
 
     @Override
@@ -289,29 +321,16 @@ public class FeatureOfInterestService
                 deleteRelatedObservationsAndUpdateDatasets(id);
                 getRepository().deleteByStaIdentifier(id);
             } else {
-                throw new STACRUDException("Unable to delete. Entity not found.", HTTPStatus.NOT_FOUND);
+                throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }
         }
-    }
-
-    @Override
-    protected void delete(AbstractFeatureEntity<?> entity) throws STACRUDException {
-        delete(entity.getStaIdentifier());
-    }
-
-    @Override
-    protected AbstractFeatureEntity<?> createOrUpdate(AbstractFeatureEntity<?> entity)
-            throws STACRUDException {
-        if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
-            return updateEntity(entity.getStaIdentifier(), entity, HttpMethod.PATCH);
-        }
-        return createEntity(entity);
     }
 
     private void deleteRelatedObservationsAndUpdateDatasets(String featureId) throws STACRUDException {
         // set dataset first/last to null
         synchronized (getLock(featureId)) {
-            Iterable<DatasetEntity> datasets = datasetRepository.findAll(dQS.matchFeatureStaIdentifier(featureId));
+            Iterable<AbstractDatasetEntity> datasets =
+                datastreamRepository.findAll(dsQS.withFeatureStaIdentifier(featureId));
             // update datasets
             datasets.forEach(d -> {
                 d.setFirstObservation(null);
@@ -320,25 +339,26 @@ public class FeatureOfInterestService
                 d.setLastObservation(null);
                 d.setLastQuantityValue(null);
                 d.setLastValueAt(null);
-                datasetRepository.saveAndFlush(d);
+                d.setFeature(null);
+                datastreamRepository.saveAndFlush(d);
                 // delete observations
-                observationRepository.deleteAll(observationRepository.findAll(oQS.withDatasetId(d.getId())));
+                observationRepository.deleteAllByDatasetIdIn(Collections.singleton(d.getId()));
                 getRepository().flush();
-                datastreamRepository.findAll(dsQS.withDatasetId(d.getId()),
-                                             EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS).forEach(ds -> {
-                    ds.getDatasets().removeIf(e -> e.getId().equals(d.getId()));
-                    datastreamRepository.saveAndFlush(ds);
-                });
             });
-            // delete datasets
+            // delete
             datasets.forEach(d -> {
-                d.setFirstObservation(null);
-                d.setFirstQuantityValue(null);
-                d.setFirstValueAt(null);
-                d.setLastObservation(null);
-                d.setLastQuantityValue(null);
-                d.setLastValueAt(null);
-                datasetRepository.delete(d);
+                // only delete if we are part of an aggregation
+                // if we are not part of an aggregation we must not delete as this would also delete the whole
+                // datastream
+                if (d.isSetAggregation()) {
+                    d.setFirstObservation(null);
+                    d.setFirstQuantityValue(null);
+                    d.setFirstValueAt(null);
+                    d.setLastObservation(null);
+                    d.setLastQuantityValue(null);
+                    d.setLastValueAt(null);
+                    datastreamRepository.delete(d);
+                }
             });
             getRepository().flush();
         }
@@ -368,7 +388,7 @@ public class FeatureOfInterestService
     public void updateFeatureOfInterestGeometry(String id, Geometry geom) throws STACRUDException {
         synchronized (getLock(id)) {
             Optional<AbstractFeatureEntity<?>> existing =
-                    getRepository().findByStaIdentifier(id, EntityGraphRepository.FetchGraph.FETCHGRAPH_FEATURETYPE);
+                getRepository().findByStaIdentifier(id, EntityGraphRepository.FetchGraph.FETCHGRAPH_FEATURETYPE);
             if (existing.isPresent()) {
                 AbstractFeatureEntity<?> featureOfInterest = existing.get();
                 if (featureOfInterest.isSetGeometry()) {
@@ -381,19 +401,19 @@ public class FeatureOfInterestService
                             coords.addAll(Arrays.asList(convert.getCoordinates()));
                         } else {
                             LOGGER.error("Could not update FOI geometry. Unknown GeometryType." +
-                                                 convert.getClass().getSimpleName());
+                                             convert.getClass().getSimpleName());
                             throw new STACRUDException(
-                                    "Could not update FeatureOfInterest. Unknown GeometryType:" +
-                                            convert.getClass().getSimpleName());
+                                "Could not update FeatureOfInterest. Unknown GeometryType:" +
+                                    convert.getClass().getSimpleName());
                         }
                         Geometry newGeometry;
                         if (!coords.isEmpty()) {
                             coords.add(geom.getCoordinate());
                             newGeometry = new GeometryFactory()
-                                    .createLineString(coords.toArray(new Coordinate[coords.size()]));
+                                .createLineString(coords.toArray(new Coordinate[coords.size()]));
                         } else {
                             newGeometry =
-                                    new GeometryFactory().createPoint(geom.getCoordinate());
+                                new GeometryFactory().createPoint(geom.getCoordinate());
                         }
                         newGeometry.setSRID(featureOfInterest.getGeometry().getSRID());
                         featureOfInterest.setGeometry(newGeometry);
@@ -404,19 +424,9 @@ public class FeatureOfInterestService
                 getRepository().save(featureOfInterest);
             } else {
                 throw new STACRUDException("Could not update FeatureOfInterest. No FeatureOfInterest with id \"" + id +
-                                                   "\" found!");
+                                               "\" found!");
             }
         }
-    }
-
-    @Override
-    public AbstractFeatureEntity<?> merge(AbstractFeatureEntity<?> existing, AbstractFeatureEntity<?> toMerge) {
-        mergeIdentifierNameDescription(existing, toMerge);
-        if (toMerge.isSetGeometry()) {
-            existing.setGeometryEntity(toMerge.getGeometryEntity());
-        }
-        mergeFeatureType(existing);
-        return existing;
     }
 
     private void mergeFeatureType(AbstractFeatureEntity<?> existing) {

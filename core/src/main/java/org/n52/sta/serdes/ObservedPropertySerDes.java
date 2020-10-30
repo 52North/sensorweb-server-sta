@@ -36,7 +36,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.PhenomenonEntity;
-import org.n52.series.db.beans.sta.ObservablePropertyEntity;
+import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.shetland.ogc.sta.model.ObservedPropertyEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
@@ -71,7 +71,7 @@ public class ObservedPropertySerDes {
 
 
     public static class ObservedPropertySerializer
-            extends AbstractSTASerializer<ObservedPropertyWithQueryOptions, ObservablePropertyEntity> {
+        extends AbstractSTASerializer<ObservedPropertyWithQueryOptions, PhenomenonEntity> {
 
         private static final long serialVersionUID = -393434867481235299L;
 
@@ -83,48 +83,63 @@ public class ObservedPropertySerDes {
 
         @Override
         public void serialize(ObservedPropertyWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers)
-                throws IOException {
+            throws IOException {
             gen.writeStartObject();
-            ObservablePropertyEntity obsProp = unwrap(value);
+            value.unwrap(implicitSelect);
+            PhenomenonEntity obsProp = value.getEntity();
 
             // olingo @iot links
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
+            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ID)) {
                 writeId(gen, obsProp.getStaIdentifier());
             }
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_SELF_LINK)) {
+            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_SELF_LINK)) {
                 writeSelfLink(gen, obsProp.getStaIdentifier());
             }
 
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_NAME)) {
+            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_NAME)) {
                 gen.writeStringField(STAEntityDefinition.PROP_NAME, obsProp.getName());
             }
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_DESCRIPTION)) {
+            if (!value.hasSelectOption() ||
+                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
                 gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, obsProp.getDescription());
             }
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_DEFINITION)) {
+            if (!value.hasSelectOption() ||
+                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DEFINITION)) {
                 gen.writeObjectField(STAEntityDefinition.PROP_DEFINITION, obsProp.getIdentifier());
+            }
+            if (!value.hasSelectOption() ||
+                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PROPERTIES)) {
+                if (obsProp.hasParameters()) {
+                    gen.writeObjectFieldStart(STAEntityDefinition.PROP_PROPERTIES);
+                    for (ParameterEntity<?> parameter : obsProp.getParameters()) {
+                        gen.writeObjectField(parameter.getName(), parameter.getValue());
+                    }
+                    gen.writeEndObject();
+                } else {
+                    gen.writeNullField(STAEntityDefinition.PROP_PROPERTIES);
+                }
             }
 
             // navigation properties
             for (String navigationProperty : ObservedPropertyEntityDefinition.NAVIGATION_PROPERTIES) {
-                if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
-                    if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
+                if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(navigationProperty)) {
+                    if (!value.hasExpandOption() || value.getFieldsToExpand().get(navigationProperty) == null) {
                         writeNavigationProp(gen, navigationProperty, obsProp.getStaIdentifier());
                     } else {
                         switch (navigationProperty) {
-                        case ObservedPropertyEntityDefinition.DATASTREAMS:
-                            if (obsProp.getDatastreams() == null) {
-                                writeNavigationProp(gen, navigationProperty, obsProp.getStaIdentifier());
-                            } else {
-                                gen.writeFieldName(navigationProperty);
-                                writeNestedCollection(Collections.unmodifiableSet(obsProp.getDatastreams()),
-                                                      fieldsToExpand.get(navigationProperty),
-                                                      gen,
-                                                      serializers);
-                            }
-                            break;
-                        default:
-                            throw new IllegalStateException("Unexpected value: " + navigationProperty);
+                            case ObservedPropertyEntityDefinition.DATASTREAMS:
+                                if (obsProp.getDatasets() == null) {
+                                    writeNavigationProp(gen, navigationProperty, obsProp.getStaIdentifier());
+                                } else {
+                                    gen.writeFieldName(navigationProperty);
+                                    writeNestedCollection(Collections.unmodifiableSet(obsProp.getDatasets()),
+                                                          value.getFieldsToExpand().get(navigationProperty),
+                                                          gen,
+                                                          serializers);
+                                }
+                                break;
+                            default:
+                                throw new IllegalStateException("Unexpected value: " + navigationProperty);
                         }
                     }
                 }
@@ -160,7 +175,7 @@ public class ObservedPropertySerDes {
         @Override
         public PhenomenonEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return new PhenomenonEntityPatch(p.readValueAs(JSONObservedProperty.class)
-                                              .toEntity(JSONBase.EntityType.PATCH));
+                                                 .toEntity(JSONBase.EntityType.PATCH));
         }
     }
 }

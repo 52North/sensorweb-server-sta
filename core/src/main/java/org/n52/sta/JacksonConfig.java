@@ -35,14 +35,14 @@ import com.fasterxml.jackson.databind.module.SimpleDeserializers;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.module.SimpleSerializers;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
+import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.AbstractFeatureEntity;
+import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
-import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
-import org.n52.series.db.beans.sta.ObservationEntity;
-import org.n52.series.db.beans.sta.SensorEntity;
 import org.n52.sta.data.service.util.CollectionWrapper;
 import org.n52.sta.serdes.CollectionSer;
 import org.n52.sta.serdes.DatastreamSerDes;
@@ -68,70 +68,70 @@ public class JacksonConfig {
 
     @Bean
     public ObjectMapper customMapper(
-            @Value("${server.rootUrl}") String rootUrl,
-            @Value("${server.feature.variableEncodingType:false}") boolean variableSensorEncodingTypeEnabled,
-            @Value("${server.feature.observation.samplingGeometry:}") String samplingGeometryMapping,
-            @Value("${server.feature.observation.verticalFrom:}") String verticalFromMapping,
-            @Value("${server.feature.observation.verticalTo:}") String verticalToMapping,
-            @Value("${server.feature.observation.verticalFromTo:}") String verticalFromToMapping,
-            @Value("${server.feature.implicitExpand:false}") boolean implicitExpand,
-            Environment environment
+        @Value("${server.rootUrl}") String rootUrl,
+        @Value("${server.feature.variableEncodingType:false}") boolean variableSensorEncodingTypeEnabled,
+        @Value("${server.feature.observation.samplingGeometry}") String samplingGeometryMapping,
+        @Value("${server.feature.observation.verticalFrom}") String verticalFromMapping,
+        @Value("${server.feature.observation.verticalTo}") String verticalToMapping,
+        @Value("${server.feature.observation.verticalFromTo}") String verticalFromToMapping,
+        @Value("${server.feature.implicitExpand:false}") boolean implicitExpand,
+        Environment environment
     ) {
-
         Map<String, String> parameterMapping = new HashMap<>();
         parameterMapping.put("samplingGeometry", samplingGeometryMapping);
         parameterMapping.put("verticalFrom", verticalFromMapping);
         parameterMapping.put("verticalTo", verticalToMapping);
         parameterMapping.put("verticalFromTo", verticalFromToMapping);
 
+        String[] activeProfiles = environment.getActiveProfiles();
         ArrayList<Module> modules = new ArrayList<>();
 
         SimpleModule module = new SimpleModule();
 
-        // Register Serializers/Deserializers for all custom types
+        // Register Serializers/Deserializers for STA Core Entities
         SimpleSerializers serializers = new SimpleSerializers();
         serializers.addSerializer(new CollectionSer(CollectionWrapper.class));
         serializers.addSerializer(
-                new ThingSerDes.ThingSerializer(rootUrl,
-                                                implicitExpand,
-                                                environment.getActiveProfiles()));
+            new ThingSerDes.ThingSerializer(rootUrl,
+                                            implicitExpand,
+                                            activeProfiles));
         serializers.addSerializer(
-                new LocationSerDes.LocationSerializer(rootUrl,
-                                                      implicitExpand,
-                                                      environment.getActiveProfiles()));
-        serializers.addSerializer(
-                new SensorSerDes.SensorSerializer(rootUrl,
+            new LocationSerDes.LocationSerializer(rootUrl,
                                                   implicitExpand,
-                                                  environment.getActiveProfiles()));
+                                                  activeProfiles));
         serializers.addSerializer(
-                new ObservationSerDes.ObservationSerializer(rootUrl,
-                                                            implicitExpand,
-                                                            environment.getActiveProfiles()));
+            new SensorSerDes.SensorSerializer(rootUrl,
+                                              implicitExpand,
+                                              activeProfiles));
         serializers.addSerializer(
-                new ObservedPropertySerDes.ObservedPropertySerializer(rootUrl,
+            new ObservationSerDes.ObservationSerializer(rootUrl,
+                                                        implicitExpand,
+                                                        activeProfiles));
+        serializers.addSerializer(
+            new ObservedPropertySerDes.ObservedPropertySerializer(rootUrl,
+                                                                  implicitExpand,
+                                                                  activeProfiles));
+        serializers.addSerializer(
+            new FeatureOfInterestSerDes.FeatureOfInterestSerializer(rootUrl,
+                                                                    implicitExpand,
+                                                                    activeProfiles));
+        serializers.addSerializer(
+            new HistoricalLocationSerDes.HistoricalLocationSerializer(rootUrl,
                                                                       implicitExpand,
-                                                                      environment.getActiveProfiles()));
+                                                                      activeProfiles));
         serializers.addSerializer(
-                new FeatureOfInterestSerDes.FeatureOfInterestSerializer(rootUrl,
-                                                                        implicitExpand,
-                                                                        environment.getActiveProfiles()));
-        serializers.addSerializer(
-                new HistoricalLocationSerDes.HistoricalLocationSerializer(rootUrl,
-                                                                          implicitExpand,
-                                                                          environment.getActiveProfiles()));
-        serializers.addSerializer(
-                new DatastreamSerDes.DatastreamSerializer(rootUrl,
-                                                          implicitExpand,
-                                                          environment.getActiveProfiles()));
+            new DatastreamSerDes.DatastreamSerializer(rootUrl,
+                                                      implicitExpand,
+                                                      activeProfiles));
 
         SimpleDeserializers deserializers = new SimpleDeserializers();
         deserializers.addDeserializer(PlatformEntity.class,
                                       new ThingSerDes.ThingDeserializer());
         deserializers.addDeserializer(LocationEntity.class,
                                       new LocationSerDes.LocationDeserializer());
-        deserializers.addDeserializer(SensorEntity.class,
+        deserializers.addDeserializer(ProcedureEntity.class,
                                       new SensorSerDes.SensorDeserializer(variableSensorEncodingTypeEnabled));
-        deserializers.addDeserializer(ObservationEntity.class,
+        deserializers.addDeserializer(DataEntity.class,
                                       new ObservationSerDes.ObservationDeserializer(parameterMapping));
         deserializers.addDeserializer(PhenomenonEntity.class,
                                       new ObservedPropertySerDes.ObservedPropertyDeserializer());
@@ -139,14 +139,14 @@ public class JacksonConfig {
                                       new FeatureOfInterestSerDes.FeatureOfInterestDeserializer());
         deserializers.addDeserializer(HistoricalLocationEntity.class,
                                       new HistoricalLocationSerDes.HistoricalLocationDeserializer());
-        deserializers.addDeserializer(DatastreamEntity.class,
+        deserializers.addDeserializer(AbstractDatasetEntity.class,
                                       new DatastreamSerDes.DatastreamDeserializer());
 
         deserializers.addDeserializer(ThingSerDes.PlatformEntityPatch.class,
                                       new ThingSerDes.ThingPatchDeserializer());
         deserializers.addDeserializer(LocationSerDes.LocationEntityPatch.class,
                                       new LocationSerDes.LocationPatchDeserializer());
-        deserializers.addDeserializer(SensorSerDes.SensorEntityPatch.class,
+        deserializers.addDeserializer(SensorSerDes.ProcedureEntityPatch.class,
                                       new SensorSerDes.SensorPatchDeserializer(variableSensorEncodingTypeEnabled));
         deserializers.addDeserializer(ObservationSerDes.ObservationEntityPatch.class,
                                       new ObservationSerDes.ObservationPatchDeserializer(parameterMapping));
@@ -164,7 +164,7 @@ public class JacksonConfig {
         modules.add(module);
         modules.add(new AfterburnerModule());
         return Jackson2ObjectMapperBuilder.json()
-                                          .modules(modules)
-                                          .build();
+            .modules(modules)
+            .build();
     }
 }

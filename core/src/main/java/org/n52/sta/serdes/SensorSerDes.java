@@ -35,9 +35,10 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.n52.series.db.beans.AbstractDatasetEntity;
+import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
-import org.n52.series.db.beans.sta.DatastreamEntity;
-import org.n52.series.db.beans.sta.SensorEntity;
+import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.shetland.ogc.sta.model.SensorEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
@@ -58,22 +59,22 @@ public class SensorSerDes {
 
 
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
-    public static class SensorEntityPatch extends SensorEntity implements EntityPatch<SensorEntity> {
+    public static class ProcedureEntityPatch extends ProcedureEntity implements EntityPatch<ProcedureEntity> {
 
         private static final long serialVersionUID = 2966462269307558981L;
-        private final SensorEntity entity;
+        private final ProcedureEntity entity;
 
-        SensorEntityPatch(SensorEntity entity) {
+        ProcedureEntityPatch(ProcedureEntity entity) {
             this.entity = entity;
         }
 
-        public SensorEntity getEntity() {
+        public ProcedureEntity getEntity() {
             return entity;
         }
     }
 
 
-    public static class SensorSerializer extends AbstractSTASerializer<SensorWithQueryOptions, SensorEntity> {
+    public static class SensorSerializer extends AbstractSTASerializer<SensorWithQueryOptions, ProcedureEntity> {
 
         private static final String STA_SENSORML_2 = "http://www.opengis.net/doc/IS/SensorML/2.0";
         private static final String SENSORML_2 = "http://www.opengis.net/sensorml/2.0";
@@ -87,26 +88,29 @@ public class SensorSerDes {
 
         @Override
         public void serialize(SensorWithQueryOptions value, JsonGenerator gen, SerializerProvider serializers)
-                throws IOException {
+            throws IOException {
             gen.writeStartObject();
-            SensorEntity sensor = unwrap(value);
+            value.unwrap(implicitSelect);
+            ProcedureEntity sensor = value.getEntity();
 
             // olingo @iot links
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
+            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ID)) {
                 writeId(gen, sensor.getStaIdentifier());
             }
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_SELF_LINK)) {
+            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_SELF_LINK)) {
                 writeSelfLink(gen, sensor.getStaIdentifier());
             }
 
             // actual properties
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_NAME)) {
+            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_NAME)) {
                 gen.writeStringField(STAEntityDefinition.PROP_NAME, sensor.getName());
             }
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_DESCRIPTION)) {
+            if (!value.hasSelectOption() ||
+                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
                 gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, sensor.getDescription());
             }
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ENCODINGTYPE)) {
+            if (!value.hasSelectOption() ||
+                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ENCODINGTYPE)) {
                 String format = sensor.getFormat().getFormat();
                 if (format.equalsIgnoreCase(SENSORML_2)) {
                     format = STA_SENSORML_2;
@@ -114,13 +118,13 @@ public class SensorSerDes {
                 gen.writeObjectField(STAEntityDefinition.PROP_ENCODINGTYPE, format);
             }
 
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_METADATA)) {
+            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_METADATA)) {
                 String metadata = "metadata";
                 if (sensor.getDescriptionFile() != null && !sensor.getDescriptionFile().isEmpty()) {
                     metadata = sensor.getDescriptionFile();
                 } else if (sensor.hasProcedureHistory()) {
                     Optional<ProcedureHistoryEntity> history =
-                            sensor.getProcedureHistory().stream().filter(h -> h.getEndTime() == null).findFirst();
+                        sensor.getProcedureHistory().stream().filter(h -> h.getEndTime() == null).findFirst();
                     if (history.isPresent()) {
                         metadata = history.get().getXml();
                     }
@@ -128,20 +132,33 @@ public class SensorSerDes {
                 gen.writeStringField(STAEntityDefinition.PROP_METADATA, metadata);
             }
 
+            if (!value.hasSelectOption() ||
+                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PROPERTIES)) {
+                if (sensor.hasParameters()) {
+                    gen.writeObjectFieldStart(STAEntityDefinition.PROP_PROPERTIES);
+                    for (ParameterEntity<?> parameter : sensor.getParameters()) {
+                        gen.writeObjectField(parameter.getName(), parameter.getValue());
+                    }
+                    gen.writeEndObject();
+                } else {
+                    gen.writeNullField(STAEntityDefinition.PROP_PROPERTIES);
+                }
+            }
+
             // navigation properties
             for (String navigationProperty : SensorEntityDefinition.NAVIGATION_PROPERTIES) {
-                if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
-                    if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
+                if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(navigationProperty)) {
+                    if (!value.hasExpandOption() || value.getFieldsToExpand().get(navigationProperty) == null) {
                         writeNavigationProp(gen, navigationProperty, sensor.getStaIdentifier());
                     } else {
                         if (SensorEntityDefinition.DATASTREAMS.equals(navigationProperty)) {
-                            if (sensor.getDatastreams() == null) {
+                            if (sensor.getDatasets() == null) {
                                 writeNavigationProp(gen, navigationProperty, sensor.getStaIdentifier());
                             } else {
                                 gen.writeFieldName(navigationProperty);
-                                writeNestedCollectionOfType(Collections.unmodifiableSet(sensor.getDatastreams()),
-                                                            DatastreamEntity.class,
-                                                            fieldsToExpand.get(navigationProperty),
+                                writeNestedCollectionOfType(Collections.unmodifiableSet(sensor.getDatasets()),
+                                                            AbstractDatasetEntity.class,
+                                                            value.getFieldsToExpand().get(navigationProperty),
                                                             gen,
                                                             serializers);
                             }
@@ -156,18 +173,18 @@ public class SensorSerDes {
     }
 
 
-    public static class SensorDeserializer extends StdDeserializer<SensorEntity> {
+    public static class SensorDeserializer extends StdDeserializer<ProcedureEntity> {
 
         private static final long serialVersionUID = -6513819346703020350L;
         private final boolean variableEncodingType;
 
         public SensorDeserializer(boolean variableEncodingType) {
-            super(SensorEntity.class);
+            super(ProcedureEntity.class);
             this.variableEncodingType = variableEncodingType;
         }
 
         @Override
-        public SensorEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+        public ProcedureEntity deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             if (variableEncodingType) {
                 return p.readValueAs(JSONSensorVariableEncoding.class).toEntity(JSONBase.EntityType.FULL);
             } else {
@@ -177,23 +194,23 @@ public class SensorSerDes {
     }
 
 
-    public static class SensorPatchDeserializer extends StdDeserializer<SensorEntityPatch> {
+    public static class SensorPatchDeserializer extends StdDeserializer<ProcedureEntityPatch> {
 
         private static final long serialVersionUID = -6636765136530111251L;
         private final boolean variableEncodingType;
 
         public SensorPatchDeserializer(boolean variableEncodingType) {
-            super(SensorEntityPatch.class);
+            super(ProcedureEntityPatch.class);
             this.variableEncodingType = variableEncodingType;
         }
 
         @Override
-        public SensorEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+        public ProcedureEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             if (variableEncodingType) {
-                return new SensorEntityPatch(p.readValueAs(JSONSensorVariableEncoding.class)
-                                              .toEntity(JSONBase.EntityType.PATCH));
+                return new ProcedureEntityPatch(p.readValueAs(JSONSensorVariableEncoding.class)
+                                                    .toEntity(JSONBase.EntityType.PATCH));
             } else {
-                return new SensorEntityPatch(p.readValueAs(JSONSensor.class).toEntity(JSONBase.EntityType.PATCH));
+                return new ProcedureEntityPatch(p.readValueAs(JSONSensor.class).toEntity(JSONBase.EntityType.PATCH));
             }
         }
     }

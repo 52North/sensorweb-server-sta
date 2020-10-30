@@ -33,66 +33,29 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.n52.series.db.beans.HibernateRelations;
-import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public abstract class AbstractSTASerializer<T extends ElementWithQueryOptions<I>, I extends HibernateRelations.HasId>
-        extends StdSerializer<T> {
+    extends StdSerializer<T> {
 
     private static final String ENCODEDSLASH = "%2F";
     private static final String SLASH = "/";
-
+    protected final String[] activeExtensions;
     protected String rootUrl;
     protected String entitySetName;
-
-    protected Set<String> fieldsToSerialize = new HashSet<>();
-    protected Map<String, QueryOptions> fieldsToExpand = new HashMap<>();
-    protected final String[] activeExtensions;
-    protected boolean hasSelectOption;
-    protected boolean hasExpandOption;
-    private final boolean enableImplicitSelect;
+    protected boolean implicitSelect;
 
     protected AbstractSTASerializer(Class<T> t,
                                     boolean enableImplicitSelect,
                                     String... activeExtensions) {
         super(t);
-        this.enableImplicitSelect = enableImplicitSelect;
         this.activeExtensions = activeExtensions;
-    }
-
-    protected I unwrap(T wrapped) {
-        I unwrapped = wrapped.getEntity();
-        hasSelectOption = false;
-        hasExpandOption = false;
-        fieldsToSerialize.clear();
-        fieldsToExpand.clear();
-        QueryOptions options = wrapped.getQueryOptions();
-
-        if (options != null) {
-            if (options.hasSelectFilter()) {
-                hasSelectOption = true;
-                fieldsToSerialize.addAll(options.getSelectFilter().getItems());
-            }
-            if (options.hasExpandFilter()) {
-                hasExpandOption = true;
-                for (ExpandItem item : options.getExpandFilter().getItems()) {
-                    fieldsToExpand.put(item.getPath(), item.getQueryOptions());
-                    // Add expanded items to $select replacing implicit selection with explicit selection
-                    if (hasSelectOption && enableImplicitSelect) {
-                        fieldsToSerialize.add(item.getPath());
-                    }
-                }
-            }
-        }
-        return unwrapped;
+        this.implicitSelect = enableImplicitSelect;
     }
 
     public void writeSelfLink(JsonGenerator gen, String id) throws IOException {
@@ -122,10 +85,10 @@ public abstract class AbstractSTASerializer<T extends ElementWithQueryOptions<I>
                                          JsonGenerator gen,
                                          SerializerProvider serializers) throws IOException {
         serializers.defaultSerializeValue(
-                expandedElements
-                        .stream()
-                        .map(d -> ElementWithQueryOptions.from(d, queryOptions))
-                        .collect(Collectors.toSet()), gen);
+            expandedElements
+                .stream()
+                .map(d -> ElementWithQueryOptions.from(d, queryOptions))
+                .collect(Collectors.toSet()), gen);
     }
 
     protected void writeNestedCollectionOfType(Set<?> expandedElements,
@@ -134,10 +97,10 @@ public abstract class AbstractSTASerializer<T extends ElementWithQueryOptions<I>
                                                JsonGenerator gen,
                                                SerializerProvider serializers) throws IOException {
         serializers.defaultSerializeValue(
-                expandedElements
-                        .stream()
-                        .filter(type::isInstance)
-                        .map(d -> ElementWithQueryOptions.from(d, queryOptions))
-                        .collect(Collectors.toSet()), gen);
+            expandedElements
+                .stream()
+                .filter(type::isInstance)
+                .map(d -> ElementWithQueryOptions.from(d, queryOptions))
+                .collect(Collectors.toSet()), gen);
     }
 }

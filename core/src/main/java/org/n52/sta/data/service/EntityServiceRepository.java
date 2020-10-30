@@ -45,64 +45,57 @@ import java.util.Map;
 @Component
 public class EntityServiceRepository {
 
-    private Map<EntityTypes, AbstractSensorThingsEntityService<?, ?, ?>> entityServices = new LinkedHashMap<>();
+    private Map<EntityTypes, ServiceFacade<?>> entityServices = new LinkedHashMap<>();
 
-    @Autowired private ThingService thingService;
+    @Autowired
+    private ServiceFacade.ThingServiceFacade thingServiceFacade;
 
-    @Autowired private LocationService locationService;
+    @Autowired
+    private ServiceFacade.LocationServiceFacade locationServiceFacade;
 
-    @Autowired private HistoricalLocationService historicalLocationService;
+    @Autowired
+    private ServiceFacade.HistoricalLocationServiceFacade historicalLocationService;
 
-    @Autowired private SensorService sensorService;
+    @Autowired
+    private ServiceFacade.SensorServiceFacade sensorService;
 
-    @Autowired private DatastreamService datastreamService;
+    @Autowired
+    private ServiceFacade.DatastreamServiceFacade datastreamService;
 
-    @Autowired private ObservationService observationService;
+    @Autowired
+    private ServiceFacade.ObservationServiceFacade observationService;
 
-    @Autowired private ObservedPropertyService observedPropertyService;
+    @Autowired
+    private ServiceFacade.ObservedPropertyServiceFacade observedPropertyService;
 
-    @Autowired private FeatureOfInterestService featureOfInterestService;
+    @Autowired
+    private ServiceFacade.FeatureOfInterestServiceFacade featureOfInterestService;
 
     @Autowired private STAEventHandler mqttSubscriptionEventHandler;
 
-    /*
-    public void addEntityService(AbstractSensorThingsEntityServiceImpl<?, ?, ?> entityService) {
-        for (EntityTypes entityType : entityService.getTypes()) {
-            entityServices.put(entityType, entityService);
-        }
-    }*/
-
     @PostConstruct
     public void postConstruct() {
-        this.thingService.setServiceRepository(this);
-        entityServices.put(EntityTypes.Thing, thingService);
-        entityServices.put(EntityTypes.Things, thingService);
+        entityServices.put(EntityTypes.Thing, thingServiceFacade);
+        entityServices.put(EntityTypes.Things, thingServiceFacade);
 
-        this.locationService.setServiceRepository(this);
-        entityServices.put(EntityTypes.Location, locationService);
-        entityServices.put(EntityTypes.Locations, locationService);
+        entityServices.put(EntityTypes.Location, locationServiceFacade);
+        entityServices.put(EntityTypes.Locations, locationServiceFacade);
 
-        this.historicalLocationService.setServiceRepository(this);
         entityServices.put(EntityTypes.HistoricalLocation, historicalLocationService);
         entityServices.put(EntityTypes.HistoricalLocations, historicalLocationService);
 
-        this.sensorService.setServiceRepository(this);
         entityServices.put(EntityTypes.Sensor, sensorService);
         entityServices.put(EntityTypes.Sensors, sensorService);
 
-        this.datastreamService.setServiceRepository(this);
         entityServices.put(EntityTypes.Datastream, datastreamService);
         entityServices.put(EntityTypes.Datastreams, datastreamService);
 
-        this.observationService.setServiceRepository(this);
         entityServices.put(EntityTypes.Observation, observationService);
         entityServices.put(EntityTypes.Observations, observationService);
 
-        this.observedPropertyService.setServiceRepository(this);
         entityServices.put(EntityTypes.ObservedProperty, observedPropertyService);
         entityServices.put(EntityTypes.ObservedProperties, observedPropertyService);
 
-        this.featureOfInterestService.setServiceRepository(this);
         entityServices.put(EntityTypes.FeatureOfInterest, featureOfInterestService);
         entityServices.put(EntityTypes.FeaturesOfInterest, featureOfInterestService);
 
@@ -115,8 +108,8 @@ public class EntityServiceRepository {
      * @param entityTypeName the type name of the requested entity service
      * @return the requested entity data service
      */
-    public AbstractSensorThingsEntityService<?, ?, ?> getEntityService(String entityTypeName) {
-        return getEntityService(EntityTypes.valueOf(entityTypeName));
+    public AbstractSensorThingsEntityService<?> getEntityService(String entityTypeName) {
+        return entityServices.get(EntityTypes.valueOf(entityTypeName));
     }
 
     /**
@@ -125,8 +118,8 @@ public class EntityServiceRepository {
      * @param entityTypeName the type name of the requested entity service
      * @return the requested entity data service
      */
-    public AbstractSensorThingsEntityService<?, ?, ?> getEntityService(EntityTypes entityTypeName) {
-        return entityServices.get(entityTypeName);
+    AbstractSensorThingsEntityService<?> getEntityServiceRaw(EntityTypes entityTypeName) {
+        return entityServices.get(entityTypeName).getServiceImpl();
     }
 
     public enum EntityTypes {

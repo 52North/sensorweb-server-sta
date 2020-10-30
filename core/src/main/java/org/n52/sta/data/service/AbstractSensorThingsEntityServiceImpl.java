@@ -30,22 +30,12 @@
 package org.n52.sta.data.service;
 
 import org.hibernate.query.criteria.internal.CriteriaBuilderImpl;
-import org.n52.series.db.beans.AbstractFeatureEntity;
-import org.n52.series.db.beans.DescribableEntity;
+import org.n52.series.db.beans.AbstractDatasetEntity;
+import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.HibernateRelations;
 import org.n52.series.db.beans.HibernateRelations.HasDescription;
 import org.n52.series.db.beans.HibernateRelations.HasName;
-import org.n52.series.db.beans.PhenomenonEntity;
-import org.n52.series.db.beans.PlatformEntity;
-import org.n52.series.db.beans.ProcedureEntity;
-import org.n52.series.db.beans.sta.AbstractObservationEntity;
-import org.n52.series.db.beans.sta.DatastreamEntity;
-import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
-import org.n52.series.db.beans.sta.ObservablePropertyEntity;
-import org.n52.series.db.beans.sta.ObservationEntity;
-import org.n52.series.db.beans.sta.SensorEntity;
-import org.n52.series.db.beans.sta.StaFeatureEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.FilterFilter;
 import org.n52.shetland.filter.OrderProperty;
@@ -73,8 +63,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import javax.persistence.criteria.Predicate;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Interface for requesting Sensor Things entities
@@ -82,34 +74,45 @@ import java.util.Optional;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentifierRepository<S>,
-        S extends HibernateRelations.HasId,
-        E extends S> implements AbstractSensorThingsEntityService<T, S, E> {
+    S extends HibernateRelations.HasId> implements AbstractSensorThingsEntityService<S> {
 
     // protected static final String IDENTIFIER = "identifier";
     protected static final String STAIDENTIFIER = "staIdentifier";
     protected static final String ENCODINGTYPE = "encodingType";
     protected static final String RESULT = "result";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSensorThingsEntityServiceImpl.class);
+    protected static final String HTTP_PUT_IS_NOT_YET_SUPPORTED = "Http PUT is not yet supported!";
+    protected static final String IDENTIFIER_ALREADY_EXISTS = "Identifier already exists!";
+    protected static final String UNABLE_TO_UPDATE_ENTITY_NOT_FOUND = "Unable to update. Entity not found.";
+    protected static final String UNABLE_TO_DELETE_ENTITY_NOT_FOUND = "Unable to delete. Entity not found.";
+    protected static final String UNABLE_TO_GET_ENTITY_NOT_FOUND = "Unable to retrieve. Entity not found.";
+    protected static final String INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY = "Invalid http method for updating entity!";
+    protected static final String TRYING_TO_FILTER_BY_UNRELATED_TYPE =
+        "Trying to filter by unrelated type: %s not found!";
+    protected static final String INVALID_EXPAND_OPTION_SUPPLIED =
+        "Invalid expandOption supplied. Cannot find %s on Entity of type '%s'";
+    protected static final String NO_S_WITH_ID_S_FOUND = "No %s with id %s found.";
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSensorThingsEntityServiceImpl.class);
+    private final EntityManager em;
+    private final Class<S> entityClass;
+
+    @Autowired
     private EntityServiceRepository serviceRepository;
 
     @Autowired
     private MutexFactory lock;
 
-    private final Class<S> entityClass;
-    private final EntityGraphRepository.FetchGraph[] defaultFetchGraphs;
-
     private T repository;
 
     public AbstractSensorThingsEntityServiceImpl(T repository,
-                                                 Class entityClass,
-                                                 EntityGraphRepository.FetchGraph... defaultFetchGraphs) {
+                                                 EntityManager em,
+                                                 Class entityClass) {
+        this.em = em;
         this.entityClass = entityClass;
         this.repository = repository;
-        this.defaultFetchGraphs = defaultFetchGraphs;
     }
 
     /**
@@ -119,6 +122,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
      *
      * @param key name of the lock
      * @return Object used for holding the lock
+     * @throws STACRUDException If the lock can not be aquired
      */
     protected Object getLock(String key) throws STACRUDException {
         if (key == null) {
@@ -128,32 +132,20 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         }
     }
 
-    public abstract EntityTypes[] getTypes();
-
-    @Override public boolean existsEntity(String id) {
+    @Override
+    public boolean existsEntity(String id) {
         return getRepository().existsByStaIdentifier(id);
     }
 
-    @Override public ElementWithQueryOptions getEntity(String id, QueryOptions queryOptions) throws STACRUDException {
+    @Override
+    public ElementWithQueryOptions getEntity(String id, QueryOptions queryOptions) throws STACRUDException {
         try {
-            S entity = getRepository().findByStaIdentifier(id, defaultFetchGraphs).get();
+            S entity = getRepository().findByStaIdentifier(id, createFetchGraph(queryOptions.getExpandFilter())).get();
             if (queryOptions.hasExpandFilter()) {
-                return this.createWrapper(fetchExpandEntities(entity, queryOptions.getExpandFilter()), queryOptions);
+                return this.createWrapper(fetchExpandEntitiesWithFilter(entity, queryOptions.getExpandFilter()),
+                                          queryOptions);
             } else {
                 return this.createWrapper(entity, queryOptions);
-            }
-        } catch (RuntimeException | STAInvalidQueryException e) {
-            throw new STACRUDException(e.getMessage(), e);
-        }
-    }
-
-    public S getEntityByIdRaw(Long id, QueryOptions queryOptions) throws STACRUDException {
-        try {
-            S entity = getRepository().findById(id, defaultFetchGraphs).get();
-            if (queryOptions.hasExpandFilter()) {
-                return fetchExpandEntities(entity, queryOptions.getExpandFilter());
-            } else {
-                return entity;
             }
         } catch (RuntimeException | STAInvalidQueryException e) {
             throw new STACRUDException(e.getMessage(), e);
@@ -164,31 +156,10 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         try {
             Page<S> pages = getRepository().findAll(getFilterPredicate(entityClass, queryOptions),
                                                     createPageableRequest(queryOptions),
-                                                    defaultFetchGraphs);
-            return getCollectionWrapper(queryOptions, pages);
-        } catch (RuntimeException e) {
+                                                    createFetchGraph(queryOptions.getExpandFilter()));
+            return createCollectionWrapperAndExpand(queryOptions, pages);
+        } catch (RuntimeException | STAInvalidQueryException e) {
             throw new STACRUDException(e.getMessage(), e);
-        }
-    }
-
-    protected CollectionWrapper getCollectionWrapper(QueryOptions queryOptions, Page<S> pages) {
-        if (queryOptions.hasExpandFilter()) {
-            Page expanded = pages.map(e -> {
-                try {
-                    return fetchExpandEntities(e, queryOptions.getExpandFilter());
-                } catch (STACRUDException | STAInvalidQueryException ex) {
-                    throw new RuntimeException(ex);
-                }
-            });
-            return new CollectionWrapper(expanded.getTotalElements(),
-                                         expanded.map(e -> createWrapper(e, queryOptions))
-                                                 .getContent(),
-                                         expanded.hasNext());
-        } else {
-            return new CollectionWrapper(pages.getTotalElements(),
-                                         pages.map(e -> createWrapper(e, queryOptions))
-                                              .getContent(),
-                                         pages.hasNext());
         }
     }
 
@@ -196,9 +167,9 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
                                                                          String relatedType,
                                                                          String ownId,
                                                                          QueryOptions queryOptions)
-            throws STACRUDException {
+        throws STACRUDException {
         S entityByRelatedEntityRaw =
-                getEntityByRelatedEntityRaw(relatedId, relatedType, ownId, queryOptions);
+            getEntityByRelatedEntityRaw(relatedId, relatedType, ownId, queryOptions);
         if (entityByRelatedEntityRaw != null) {
             return this.createWrapper(entityByRelatedEntityRaw, queryOptions);
         } else {
@@ -206,36 +177,102 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         }
     }
 
-    public S getEntityByRelatedEntityRaw(String relatedId,
-                                         String relatedType,
-                                         String ownId,
-                                         QueryOptions queryOptions)
-            throws STACRUDException {
+    @Override public CollectionWrapper getEntityCollectionByRelatedEntity(String relatedId,
+                                                                          String relatedType,
+                                                                          QueryOptions queryOptions)
+        throws STACRUDException {
+        return createCollectionWrapperAndExpand(queryOptions,
+                                                getEntityCollectionByRelatedEntityRaw(relatedId,
+                                                                                      relatedType,
+                                                                                      queryOptions));
+    }
+
+    @Override public String getEntityIdByRelatedEntity(String relatedId, String relatedType) {
+        Optional<String> entity = getRepository().getColumn(
+            this.byRelatedEntityFilter(relatedId, relatedType, null),
+            STAIDENTIFIER);
+        return entity.orElse(null);
+    }
+
+    @Override public boolean existsEntityByRelatedEntity(String relatedId,
+                                                         String relatedType,
+                                                         String ownId) {
+        return getRepository().count(byRelatedEntityFilter(relatedId, relatedType, ownId)) > 0;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ElementWithQueryOptions create(S entity) throws STACRUDException {
+        return this.createWrapper(createOrfetch(entity), null);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ElementWithQueryOptions update(String id, S entity, HttpMethod method) throws STACRUDException {
+        return this.createWrapper(updateEntity(id, entity, method), null);
+    }
+
+    protected T getRepository() {
+        return this.repository;
+    }
+
+    public S getEntityByIdRaw(Long id, QueryOptions queryOptions) throws STACRUDException {
         try {
-            Optional<S> elem =
-                    getRepository().findOne(byRelatedEntityFilter(relatedId, relatedType, ownId)
-                                                    .and(getFilterPredicate(entityClass, queryOptions)),
-                                            defaultFetchGraphs);
-            if (elem.isPresent()) {
-                if (queryOptions.hasExpandFilter()) {
-                    return fetchExpandEntities(elem.get(), queryOptions.getExpandFilter());
-                } else {
-                    return elem.get();
-                }
+            S entity = getRepository().findById(id, createFetchGraph(queryOptions.getExpandFilter())).get();
+            if (queryOptions.hasExpandFilter()) {
+                return fetchExpandEntitiesWithFilter(entity, queryOptions.getExpandFilter());
             } else {
-                return null;
+                return entity;
             }
         } catch (RuntimeException | STAInvalidQueryException e) {
             throw new STACRUDException(e.getMessage(), e);
         }
     }
 
-    @Override public CollectionWrapper getEntityCollectionByRelatedEntity(String relatedId,
-                                                                          String relatedType,
-                                                                          QueryOptions queryOptions)
-            throws STACRUDException {
-        return getCollectionWrapper(queryOptions,
-                                    getEntityCollectionByRelatedEntityRaw(relatedId, relatedType, queryOptions));
+    protected CollectionWrapper createCollectionWrapperAndExpand(QueryOptions queryOptions, Page<S> pages) {
+        if (queryOptions.hasExpandFilter()) {
+            Page expanded = pages.map(e -> {
+                try {
+                    em.detach(e);
+                    return fetchExpandEntitiesWithFilter(e, queryOptions.getExpandFilter());
+                } catch (STACRUDException | STAInvalidQueryException ex) {
+                    throw new RuntimeException(ex);
+                }
+            });
+            return new CollectionWrapper(expanded.getTotalElements(),
+                                         expanded.map(e -> createWrapper(e, queryOptions))
+                                             .getContent(),
+                                         expanded.hasNext());
+        } else {
+            return new CollectionWrapper(pages.getTotalElements(),
+                                         pages.map(e -> createWrapper(e, queryOptions))
+                                             .getContent(),
+                                         pages.hasNext());
+        }
+    }
+
+    public S getEntityByRelatedEntityRaw(String relatedId,
+                                         String relatedType,
+                                         String ownId,
+                                         QueryOptions queryOptions)
+        throws STACRUDException {
+        try {
+            Optional<S> elem =
+                getRepository().findOne(byRelatedEntityFilter(relatedId, relatedType, ownId)
+                                            .and(getFilterPredicate(entityClass, queryOptions)),
+                                        createFetchGraph(queryOptions.getExpandFilter()));
+            if (elem.isPresent()) {
+                if (queryOptions.hasExpandFilter()) {
+                    return fetchExpandEntitiesWithFilter(elem.get(), queryOptions.getExpandFilter());
+                } else {
+                    return elem.get();
+                }
+            } else {
+                throw new STACRUDException(UNABLE_TO_GET_ENTITY_NOT_FOUND);
+            }
+        } catch (RuntimeException | STAInvalidQueryException e) {
+            throw new STACRUDException(e.getMessage(), e);
+        }
     }
 
     /**
@@ -251,17 +288,18 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     protected Page getEntityCollectionByRelatedEntityRaw(String relatedId,
                                                          String relatedType,
                                                          QueryOptions queryOptions)
-            throws STACRUDException {
+        throws STACRUDException {
         try {
             Page<S> pages = getRepository()
-                    .findAll(byRelatedEntityFilter(relatedId, relatedType, null)
-                                     .and(getFilterPredicate(entityClass, queryOptions)),
-                             createPageableRequest(queryOptions),
-                             defaultFetchGraphs);
+                .findAll(byRelatedEntityFilter(relatedId, relatedType, null)
+                             .and(getFilterPredicate(entityClass, queryOptions)),
+                         createPageableRequest(queryOptions),
+                         createFetchGraph(queryOptions.getExpandFilter()));
             if (queryOptions.hasExpandFilter()) {
                 return pages.map(e -> {
                     try {
-                        return fetchExpandEntities(e, queryOptions.getExpandFilter());
+                        em.detach(e);
+                        return fetchExpandEntitiesWithFilter(e, queryOptions.getExpandFilter());
                     } catch (STACRUDException | STAInvalidQueryException ex) {
                         throw new RuntimeException(ex);
                     }
@@ -269,26 +307,35 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
             } else {
                 return pages;
             }
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | STAInvalidQueryException e) {
             throw new STACRUDException(e.getMessage(), e);
         }
     }
 
-    @Override public String getEntityIdByRelatedEntity(String relatedId, String relatedType) {
-        Optional<String> entity = getRepository().identifier(
-                this.byRelatedEntityFilter(relatedId, relatedType, null),
-                STAIDENTIFIER);
-        return entity.orElse(null);
-    }
+    /**
+     * Creates a Fetchgraph for this Entity. Includes relations that need to be fetched by default as well as directly
+     * fetching $expanded Entities that are NOT  filtered via $filter. As they are not filtered individually they
+     * can be fetched at the same time for all entities.
+     *
+     * @param expandOption Specification of the $expand parameter
+     * @return FetchGraph fetching the required
+     * @throws STAInvalidQueryException if the query is invalid
+     */
+    protected abstract EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
+        throws STAInvalidQueryException;
 
-    @Override public boolean existsEntityByRelatedEntity(String relatedId,
-                                                         String relatedType,
-                                                         String ownId) {
-        return getRepository().count(byRelatedEntityFilter(relatedId, relatedType, ownId)) > 0;
-    }
-
-    protected abstract E fetchExpandEntities(S entity, ExpandFilter expandOption)
-            throws STACRUDException, STAInvalidQueryException;
+    /**
+     * Fetches $expanded Entities that are filtered via $filter. An individual request is needed for each expanded
+     * Item as $filter needs to be evaluated.
+     *
+     * @param entity       Base Entity
+     * @param expandOption Entities to be expanded
+     * @return Base Entity with embedded expanded parameters
+     * @throws STACRUDException         if an error occurred
+     * @throws STAInvalidQueryException if the query is invalid
+     */
+    protected abstract S fetchExpandEntitiesWithFilter(S entity, ExpandFilter expandOption)
+        throws STACRUDException, STAInvalidQueryException;
 
     /**
      * Wraps the raw Entity into a Wrapper object to associate with QueryOptions used for this request
@@ -315,10 +362,6 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
                                                               String relatedType,
                                                               String ownId);
 
-    @Override public T getRepository() {
-        return this.repository;
-    }
-
     /**
      * Query for the number of entities.
      *
@@ -329,28 +372,16 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         return getRepository().count(getFilterPredicate(entityClass, queryOptions));
     }
 
-    @Override
     @Transactional(rollbackFor = Exception.class)
-    public ElementWithQueryOptions create(S entity) throws STACRUDException {
-        return this.createWrapper(createEntity(entity), null);
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    protected abstract S createEntity(S entity) throws STACRUDException;
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public ElementWithQueryOptions update(String id, S entity, HttpMethod method) throws STACRUDException {
-        return this.createWrapper(updateEntity(id, entity, method), null);
-    }
+    protected abstract S createOrfetch(S entity) throws STACRUDException;
 
     @Transactional(rollbackFor = Exception.class)
     protected abstract S updateEntity(String id, S entity, HttpMethod method) throws STACRUDException;
 
     @Transactional(rollbackFor = Exception.class)
-    protected abstract S updateEntity(S entity) throws STACRUDException;
-
-    protected abstract void delete(S entity) throws STACRUDException;
+    protected S save(S entity) {
+        return getRepository().save(entity);
+    }
 
     /**
      * Must be implemented by each Service individually as S is not known to have identifier here.
@@ -369,11 +400,11 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     //    return create(entity);
     //}
 
-    protected void checkInlineDatastream(DatastreamEntity datastream) throws STACRUDException {
+    protected void checkInlineDatastream(AbstractDatasetEntity datastream) throws STACRUDException {
         if (datastream.getStaIdentifier() == null
-                || datastream.isSetName()
-                || datastream.isSetDescription()
-                || datastream.isSetUnit()) {
+            || datastream.isSetName()
+            || datastream.isSetDescription()
+            || datastream.isSetUnit()) {
             throw new STACRUDException("Inlined datastream entities are not allowed for updates!");
         }
     }
@@ -382,10 +413,6 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         if (location.getStaIdentifier() == null || location.isSetName() || location.isSetDescription()) {
             throw new STACRUDException("Inlined location entities are not allowed for updates!");
         }
-    }
-
-    protected AbstractSensorThingsEntityService<?, ?, ?> getEntityService(EntityTypes type) {
-        return serviceRepository.getEntityService(type);
     }
 
     /**
@@ -401,11 +428,11 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
             sort = Sort.unsorted();
             for (OrderProperty sortProperty : queryOptions.getOrderByFilter().getSortProperties()) {
                 Sort.Direction direction =
-                        sortProperty.isSetSortOrder() &&
-                                sortProperty.getSortOrder().equals(FilterConstants.SortOrder.DESC) ?
-                                Sort.Direction.DESC : Sort.Direction.ASC;
+                    sortProperty.isSetSortOrder() &&
+                        sortProperty.getSortOrder().equals(FilterConstants.SortOrder.DESC) ?
+                        Sort.Direction.DESC : Sort.Direction.ASC;
                 sort = sort.and(sortProperty.getValueReference().equals(RESULT) ? handleResultSort(direction) :
-                                        Sort.by(direction, checkPropertyName(sortProperty.getValueReference())));
+                                    Sort.by(direction, checkPropertyName(sortProperty.getValueReference())));
             }
         } else {
             sort = Sort.by(Sort.Direction.ASC, STAIDENTIFIER);
@@ -423,11 +450,11 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
      */
     private Sort handleResultSort(Sort.Direction direction) {
         Sort sort;
-        sort = Sort.by(direction, ObservationEntity.PROPERTY_VALUE_BOOLEAN);
-        sort = sort.and(Sort.by(direction, ObservationEntity.PROPERTY_VALUE_CATEGORY));
-        sort = sort.and(Sort.by(direction, ObservationEntity.PROPERTY_VALUE_COUNT));
-        sort = sort.and(Sort.by(direction, ObservationEntity.PROPERTY_VALUE_TEXT));
-        sort = sort.and(Sort.by(direction, ObservationEntity.PROPERTY_VALUE_QUANTITY));
+        sort = Sort.by(direction, DataEntity.PROPERTY_VALUE_BOOLEAN);
+        sort = sort.and(Sort.by(direction, DataEntity.PROPERTY_VALUE_CATEGORY));
+        sort = sort.and(Sort.by(direction, DataEntity.PROPERTY_VALUE_COUNT));
+        sort = sort.and(Sort.by(direction, DataEntity.PROPERTY_VALUE_TEXT));
+        sort = sort.and(Sort.by(direction, DataEntity.PROPERTY_VALUE_QUANTITY));
         return sort;
     }
 
@@ -447,7 +474,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
                 Expr filter = (Expr) filterOption.getFilter();
                 try {
                     HibernateSpatialCriteriaBuilderImpl staBuilder =
-                            new HibernateSpatialCriteriaBuilderImpl((CriteriaBuilderImpl) builder);
+                        new HibernateSpatialCriteriaBuilderImpl((CriteriaBuilderImpl) builder);
                     return (Predicate) filter.accept(new FilterExprVisitor<S>(root, query, staBuilder));
                 } catch (STAInvalidQueryException e) {
                     throw new RuntimeException(e);
@@ -468,7 +495,8 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
 
     protected abstract S merge(S existing, S toMerge) throws STACRUDException;
 
-    protected void mergeIdentifierNameDescription(DescribableEntity existing, DescribableEntity toMerge) {
+    protected <U extends HibernateRelations.HasIdentifier & HibernateRelations.HasStaIdentifier
+        & HasName & HasDescription> void mergeIdentifierNameDescription(U existing, U toMerge) {
         if (toMerge.isSetIdentifier()) {
             existing.setIdentifier(toMerge.getIdentifier());
         }
@@ -478,7 +506,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         mergeNameDescription(existing, toMerge);
     }
 
-    protected void mergeNameDescription(DescribableEntity existing, DescribableEntity toMerge) {
+    protected <U extends HasName & HasDescription> void mergeNameDescription(U existing, U toMerge) {
         mergeName(existing, toMerge);
         mergeDescription(existing, toMerge);
     }
@@ -505,60 +533,48 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         }
     }
 
-    @SuppressWarnings("unchecked")
-    protected AbstractSensorThingsEntityServiceImpl<?, LocationEntity, LocationEntity> getLocationService() {
-        return (AbstractSensorThingsEntityServiceImpl<?, LocationEntity, LocationEntity>)
-                getEntityService(EntityTypes.Location);
+    protected void mergeDatastreams(HibernateRelations.HasAbstractDatasets existing,
+                                    HibernateRelations.HasAbstractDatasets toMerge)
+        throws STACRUDException {
+        if (toMerge.getDatasets() != null) {
+            for (AbstractDatasetEntity datastream : toMerge.getDatasets()) {
+                checkInlineDatastream(datastream);
+            }
+            Set<AbstractDatasetEntity> ex = existing.getDatasets();
+            ex.addAll(toMerge.getDatasets());
+            existing.setDatasets(ex);
+        }
     }
 
-    @SuppressWarnings("unchecked")
-    protected AbstractSensorThingsEntityServiceImpl<?, HistoricalLocationEntity, HistoricalLocationEntity>
-    getHistoricalLocationService() {
-        return (AbstractSensorThingsEntityServiceImpl<?, HistoricalLocationEntity, HistoricalLocationEntity>)
-                getEntityService(EntityTypes.HistoricalLocation);
+    LocationService getLocationService() {
+        return (LocationService) serviceRepository.getEntityServiceRaw(EntityTypes.Location);
     }
 
-    @SuppressWarnings("unchecked")
-    protected AbstractSensorThingsEntityServiceImpl<?, DatastreamEntity, DatastreamEntity> getDatastreamService() {
-        return (AbstractSensorThingsEntityServiceImpl<?, DatastreamEntity, DatastreamEntity>)
-                getEntityService(EntityTypes.Datastream);
+    HistoricalLocationService getHistoricalLocationService() {
+        return (HistoricalLocationService) serviceRepository.getEntityServiceRaw(EntityTypes.HistoricalLocation);
     }
 
-    @SuppressWarnings("unchecked")
-    protected AbstractSensorThingsEntityServiceImpl<?, AbstractFeatureEntity<?>, StaFeatureEntity<?>>
-    getFeatureOfInterestService() {
-        return (AbstractSensorThingsEntityServiceImpl<?, AbstractFeatureEntity<?>, StaFeatureEntity<?>>)
-                getEntityService(EntityTypes.FeatureOfInterest);
+    DatastreamService getDatastreamService() {
+        return (DatastreamService) serviceRepository.getEntityServiceRaw(EntityTypes.Datastream);
     }
 
-    @SuppressWarnings("unchecked")
-    protected AbstractSensorThingsEntityServiceImpl<?, PlatformEntity, PlatformEntity> getThingService() {
-        return (AbstractSensorThingsEntityServiceImpl<?, PlatformEntity, PlatformEntity>)
-                getEntityService(EntityTypes.Thing);
+    FeatureOfInterestService getFeatureOfInterestService() {
+        return (FeatureOfInterestService) serviceRepository.getEntityServiceRaw(EntityTypes.FeatureOfInterest);
     }
 
-    @SuppressWarnings("unchecked")
-    protected AbstractSensorThingsEntityServiceImpl<?, ProcedureEntity, SensorEntity> getSensorService() {
-        return (AbstractSensorThingsEntityServiceImpl<?, ProcedureEntity, SensorEntity>)
-                getEntityService(EntityTypes.Sensor);
+    ThingService getThingService() {
+        return (ThingService) serviceRepository.getEntityServiceRaw(EntityTypes.Thing);
     }
 
-    @SuppressWarnings("unchecked")
-    protected AbstractSensorThingsEntityServiceImpl<?, PhenomenonEntity, ObservablePropertyEntity>
-    getObservedPropertyService() {
-        return (AbstractSensorThingsEntityServiceImpl<?, PhenomenonEntity, ObservablePropertyEntity>)
-                getEntityService(EntityTypes.ObservedProperty);
+    SensorService getSensorService() {
+        return (SensorService) serviceRepository.getEntityServiceRaw(EntityTypes.Sensor);
     }
 
-    @SuppressWarnings("unchecked")
-    protected AbstractSensorThingsEntityServiceImpl<?, AbstractObservationEntity<?>, AbstractObservationEntity<?>>
-    getObservationService() {
-        return (AbstractSensorThingsEntityServiceImpl<?, AbstractObservationEntity<?>, AbstractObservationEntity<?>>)
-                getEntityService(EntityTypes.Observation);
-
+    ObservedPropertyService getObservedPropertyService() {
+        return (ObservedPropertyService) serviceRepository.getEntityServiceRaw(EntityTypes.ObservedProperty);
     }
 
-    public void setServiceRepository(EntityServiceRepository serviceRepository) {
-        this.serviceRepository = serviceRepository;
+    ObservationService getObservationService() {
+        return (ObservationService) serviceRepository.getEntityServiceRaw(EntityTypes.Observation);
     }
 }

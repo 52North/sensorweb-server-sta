@@ -48,7 +48,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -68,38 +68,32 @@ import java.util.Set;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ITConformance1 extends ConformanceTests implements TestUtil {
 
-    /**
-     * The variable that defines to which recursive level the resource path
-     * should be tested
-     */
-    private final int resourcePathLevel = 4;
-
     public ITConformance1(@Value("${server.rootUrl}") String rootUrl) throws Exception {
         super(rootUrl);
 
         // Create required test harness
         // Requires POST with deep insert to work.
         postEntity(EntityType.THING, "{ \"description\": \"thing 1\", \"name\": \"thing name 1\", \"properties\": { " +
-                "\"reference\": \"first\" }, \"Locations\": [ { \"description\": \"location 1\", \"name\": \"location" +
-                " name 1\", \"location\": { \"type\": \"Point\", \"coordinates\": [ -117.05, 51.05 ] }, " +
-                "\"encodingType\": \"application/vnd.geo+json\" } ], \"Datastreams\": [ { \"unitOfMeasurement\": { " +
-                "\"name\": \"Lumen\", \"symbol\": \"lm\", \"definition\": \"http://www.qudt.org/qudt/owl/1.0" +
-                ".0/unit/Instances.html/Lumen\" }, \"description\": \"datastream 1\", \"name\": \"datastream name " +
-                "1\", \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\", " +
-                "\"ObservedProperty\": { \"name\": \"Luminous Flux\", \"definition\": \"http://www.qudt" +
-                ".org/qudt/owl/1.0.0/quantity/Instances.html/LuminousFlux\", \"description\": \"observedProperty 1\" " +
-                "}, \"Sensor\": { \"description\": \"sensor 1\", \"name\": \"sensor name 1\", \"encodingType\": " +
-                "\"application/pdf\", \"metadata\": \"Light flux sensor\" }, \"Observations\":[ { \"phenomenonTime\":" +
-                " \"2015-03-03T00:00:00Z\", \"result\": 3 }, { \"phenomenonTime\": \"2015-03-04T00:00:00Z\", " +
-                "\"result\": 4 } ] }, { \"unitOfMeasurement\": { \"name\": \"Centigrade\", \"symbol\": \"C\", " +
-                "\"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\" }, \"description\":" +
-                " \"datastream 2\", \"name\": \"datastream name 2\", \"observationType\": \"http://www.opengis" +
-                ".net/def/observationType/OGC-OM/2.0/OM_Measurement\", \"ObservedProperty\": { \"name\": " +
-                "\"Tempretaure\", \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances" +
-                ".html/Tempreture\", \"description\": \"observedProperty 2\" }, \"Sensor\": { \"description\": " +
-                "\"sensor 2\", \"name\": \"sensor name 2\", \"encodingType\": \"application/pdf\", \"metadata\": " +
-                "\"Tempreture sensor\" }, \"Observations\":[ { \"phenomenonTime\": \"2015-03-05T00:00:00Z\", " +
-                "\"result\": 5 }, { \"phenomenonTime\": \"2015-03-06T00:00:00Z\", \"result\": 6 } ] } ] }");
+            "\"reference\": \"first\" }, \"Locations\": [ { \"description\": \"location 1\", \"name\": \"location" +
+            " name 1\", \"location\": { \"type\": \"Point\", \"coordinates\": [ -117.05, 51.05 ] }, " +
+            "\"encodingType\": \"application/vnd.geo+json\" } ], \"Datastreams\": [ { \"unitOfMeasurement\": { " +
+            "\"name\": \"Lumen\", \"symbol\": \"lm\", \"definition\": \"http://www.qudt.org/qudt/owl/1.0" +
+            ".0/unit/Instances.html/Lumen\" }, \"description\": \"datastream 1\", \"name\": \"datastream name " +
+            "1\", \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\", " +
+            "\"ObservedProperty\": { \"name\": \"Luminous Flux\", \"definition\": \"http://www.qudt" +
+            ".org/qudt/owl/1.0.0/quantity/Instances.html/LuminousFlux\", \"description\": \"observedProperty 1\" " +
+            "}, \"Sensor\": { \"description\": \"sensor 1\", \"name\": \"sensor name 1\", \"encodingType\": " +
+            "\"application/pdf\", \"metadata\": \"Light flux sensor\" }, \"Observations\":[ { \"phenomenonTime\":" +
+            " \"2015-03-03T00:00:00Z\", \"result\": 3 }, { \"phenomenonTime\": \"2015-03-04T00:00:00Z\", " +
+            "\"result\": 4 } ] }, { \"unitOfMeasurement\": { \"name\": \"Centigrade\", \"symbol\": \"C\", " +
+            "\"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\" }, \"description\":" +
+            " \"datastream 2\", \"name\": \"datastream name 2\", \"observationType\": \"http://www.opengis" +
+            ".net/def/observationType/OGC-OM/2.0/OM_Measurement\", \"ObservedProperty\": { \"name\": " +
+            "\"Tempretaure\", \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances" +
+            ".html/Tempreture\", \"description\": \"observedProperty 2\" }, \"Sensor\": { \"description\": " +
+            "\"sensor 2\", \"name\": \"sensor name 2\", \"encodingType\": \"application/pdf\", \"metadata\": " +
+            "\"Tempreture sensor\" }, \"Observations\":[ { \"phenomenonTime\": \"2015-03-05T00:00:00Z\", " +
+            "\"result\": 5 }, { \"phenomenonTime\": \"2015-03-06T00:00:00Z\", \"result\": 6 } ] } ] }");
     }
 
     /**
@@ -186,13 +180,77 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
     }
 
     /**
+     * This method is testing the resource paths based on specification to the
+     * specified level.
+     */
+    @Test
+    public void checkResourcePaths() throws Exception {
+        Set<JsonNode> response;
+        response = readEntityWithEntityType(EntityType.THING);
+        checkRelatedEndpoints(EntityType.THING, ((JsonNode) response.toArray()[0]).get(idKey).asText());
+        response = readEntityWithEntityType(EntityType.LOCATION);
+        checkRelatedEndpoints(EntityType.LOCATION, ((JsonNode) response.toArray()[0]).get(idKey).asText());
+        response = readEntityWithEntityType(EntityType.HISTORICAL_LOCATION);
+        checkRelatedEndpoints(EntityType.HISTORICAL_LOCATION, ((JsonNode) response.toArray()[0]).get(idKey).asText());
+        response = readEntityWithEntityType(EntityType.DATASTREAM);
+        checkRelatedEndpoints(EntityType.DATASTREAM, ((JsonNode) response.toArray()[0]).get(idKey).asText());
+        response = readEntityWithEntityType(EntityType.SENSOR);
+        checkRelatedEndpoints(EntityType.SENSOR, ((JsonNode) response.toArray()[0]).get(idKey).asText());
+        response = readEntityWithEntityType(EntityType.OBSERVATION);
+        checkRelatedEndpoints(EntityType.OBSERVATION, ((JsonNode) response.toArray()[0]).get(idKey).asText());
+        response = readEntityWithEntityType(EntityType.OBSERVED_PROPERTY);
+        checkRelatedEndpoints(EntityType.OBSERVED_PROPERTY, ((JsonNode) response.toArray()[0]).get(idKey).asText());
+        response = readEntityWithEntityType(EntityType.FEATURE_OF_INTEREST);
+        checkRelatedEndpoints(EntityType.FEATURE_OF_INTEREST, ((JsonNode) response.toArray()[0]).get(idKey).asText());
+    }
+
+    /**
+     * This method is testing the root URL of the service under test.
+     */
+    @Test()
+    public void checkServiceRootUri() throws Exception {
+        JsonNode response = getRootResponse();
+        ArrayNode entities = (ArrayNode) response.get(value);
+
+        final String ERROR = "The URL for %s in Service Root URI is not compliant to " + "SensorThings API.";
+        Map<String, Boolean> addedLinks = new HashMap<>();
+        for (EntityType entityType : EntityType.values()) {
+            addedLinks.put(entityType.val, false);
+        }
+        for (int i = 0; i < entities.size(); i++) {
+            JsonNode entity = entities.get(i);
+            Assertions.assertNotNull(entity.get("name"));
+            Assertions.assertNotNull(entity.get("url"));
+            String name = entity.get("name").asText();
+            String nameUrl = entity.get("url").asText();
+
+            if (EntityType.getByVal(name) == null) {
+                Assertions.fail(
+                    "There is a component in Service Root URI response that is not in SensorThings API : " + name);
+            } else {
+                Assertions.assertEquals(rootUrl + name,
+                                        nameUrl,
+                                        String.format(
+                                            "The URL for %s in Service Root URI is not compliant to SensorThings " +
+                                                "API.",
+                                            rootUrl + name)
+                );
+                addedLinks.put(name, true);
+            }
+        }
+        for (String key : addedLinks.keySet()) {
+            Assertions.assertTrue(addedLinks.get(key), "The Service Root URI response does not contain " + key);
+        }
+    }
+
+    /**
      * This helper method is testing property and property/$value for single
      * entity of a given entity type
      *
      * @param entityType Entity type from EntityType enum list
      */
-    private void readPropertyOfEntityWithEntityType(EntityType entityType, STAEntityDefinition definition)
-            throws Exception {
+    void readPropertyOfEntityWithEntityType(EntityType entityType, STAEntityDefinition definition)
+        throws Exception {
         JsonNode collection = getCollection(entityType);
         Assertions.assertNotNull(collection.get(value),
                                  "Could not get collection for EntityType: " + entityType.name());
@@ -221,7 +279,7 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
         Assertions.assertEquals(1,
                                 entity.size(),
                                 "The response for getting property " + property + " of Entity " + entityType +
-                                        " returns more properties!");
+                                    " returns more properties!");
     }
 
     /**
@@ -239,115 +297,17 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
     }
 
     /**
-     * This method is testing the resource paths based on specification to the
-     * specified level.
-     */
-    @Test
-    public void checkResourcePaths() {
-        readRelatedEntityOfEntityWithEntityType(EntityType.THING);
-        readRelatedEntityOfEntityWithEntityType(EntityType.LOCATION);
-        readRelatedEntityOfEntityWithEntityType(EntityType.HISTORICAL_LOCATION);
-        readRelatedEntityOfEntityWithEntityType(EntityType.DATASTREAM);
-        readRelatedEntityOfEntityWithEntityType(EntityType.OBSERVED_PROPERTY);
-        readRelatedEntityOfEntityWithEntityType(EntityType.SENSOR);
-        readRelatedEntityOfEntityWithEntityType(EntityType.OBSERVATION);
-        readRelatedEntityOfEntityWithEntityType(EntityType.FEATURE_OF_INTEREST);
-    }
-
-    /**
-     * This helper method is the start point for testing resource path. It adds
-     * the entity type to be tested to resource path chain and call the other
-     * method to test the chain.
+     * Checks that all related Endpoints return HTTP 200 OK
      *
-     * @param entityType Entity type from EntityType enum list
+     * @param type Type of Source Entity
+     * @param id   Id of Source Entity
+     * @throws IOException if an error occurred
      */
-    private void readRelatedEntityOfEntityWithEntityType(EntityType entityType) {
-        List<String> entityTypes = new ArrayList<>();
-        switch (entityType) {
-        case THING:
-            entityTypes.add("Things");
-            break;
-        case LOCATION:
-            entityTypes.add("Locations");
-            break;
-        case HISTORICAL_LOCATION:
-            entityTypes.add("HistoricalLocations");
-            break;
-        case DATASTREAM:
-            entityTypes.add("Datastreams");
-            break;
-        case SENSOR:
-            entityTypes.add("Sensors");
-            break;
-        case OBSERVATION:
-            entityTypes.add("Observations");
-            break;
-        case OBSERVED_PROPERTY:
-            entityTypes.add("ObservedProperties");
-            break;
-        case FEATURE_OF_INTEREST:
-            entityTypes.add("FeaturesOfInterest");
-            break;
-        default:
-            Assertions.fail("Entity type is not recognized in SensorThings API : " + entityType);
+    void checkRelatedEndpoints(EntityType type, String id) throws IOException {
+        Set<String> relatedEntityEndpointKeys = getRelatedEntityEndpointKeys(type);
+        for (String relatedEntityEndpointKey : relatedEntityEndpointKeys) {
+            getEntity(String.format(relatedEntityEndpointKey, id));
         }
-        readRelatedEntity(entityTypes, new ArrayList<>());
-    }
-
-    /**
-     * This helper method is testing the chain to the specified level. It
-     * confirms that the response is 200.
-     *
-     * @param entityTypes List of entity type from EntityType enum list for the
-     *                    chain
-     * @param ids         List of ids for teh chain
-     */
-    private void readRelatedEntity(List<String> entityTypes, List<String> ids) {
-        //        if (entityTypes.size() > resourcePathLevel) {
-        //            return;
-        //        }
-        //        try {
-        //
-        //            getEntity()
-        //            String urlString = ServiceURLBuilder.buildURLString(rootUri, entityTypes, ids, null);
-        //            Map<String, Object> responseMap = HTTPMethods.doGet(urlString);
-        //            Assert.assertEquals(responseMap.get("response-code"),
-        //                                200,
-        //                                "Reading relation of the entity failed: " + entityTypes.toString());
-        //            String response = responseMap.get("response").toString();
-        //            if (!entityTypes.get(entityTypes.size() - 1).toLowerCase().equals("featuresofinterest") &&
-        //                    !entityTypes.get(entityTypes.size() - 1).endsWith("s")) {
-        //                return;
-        //            }
-        //            Long id = new JSONObject(response.toString()).getJSONArray(value)
-        //                                                         .getJSONObject(0)
-        //                                                         .getLong(ControlInformation.ID);
-        //
-        //            //check $ref
-        //            urlString = ServiceURLBuilder.buildURLString(rootUri, entityTypes, ids, "$ref");
-        //            responseMap = HTTPMethods.doGet(urlString);
-        //            Assert.assertEquals(responseMap.get("response-code"),
-        //                                200,
-        //                                "Reading relation of the entity failed: " + entityTypes.toString());
-        //            response = responseMap.get("response").toString();
-        //            checkAssociationLinks(response, entityTypes, ids);
-        //
-        //            if (entityTypes.size() == resourcePathLevel) {
-        //                return;
-        //            }
-        //            ids.add(id);
-        //            for (String relation : EntityRelations.getRelationsListFor(entityTypes.get(entityTypes.size() -
-        //            1))) {
-        //                entityTypes.add(relation);
-        //                readRelatedEntity(entityTypes, ids);
-        //                entityTypes.remove(entityTypes.size() - 1);
-        //            }
-        //            ids.remove(ids.size() - 1);
-        //        } catch (JSONException e) {
-        //            e.printStackTrace();
-        //            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
-        //        }
-
     }
 
     /**
@@ -397,7 +357,7 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
      * @param entityType Entity type from EntityType enum list
      * @return The entity response as a string
      */
-    private Set<JsonNode> readEntityWithEntityType(EntityType entityType) throws Exception {
+    Set<JsonNode> readEntityWithEntityType(EntityType entityType) throws Exception {
         HashSet<JsonNode> responses = new HashSet<>();
         JsonNode collection = getCollection(entityType);
         Assertions.assertNotNull(collection.get(value),
@@ -411,122 +371,13 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
     }
 
     /**
-     * This method is testing the root URL of the service under test.
-     */
-    @Test()
-    public void checkServiceRootUri() throws Exception {
-        JsonNode response = getRootResponse();
-        ArrayNode entities = (ArrayNode) response.get(value);
-
-        Map<String, Boolean> addedLinks = new HashMap<>();
-        addedLinks.put("Things", false);
-        addedLinks.put("Locations", false);
-        addedLinks.put("HistoricalLocations", false);
-        addedLinks.put("Datastreams", false);
-        addedLinks.put("Sensors", false);
-        addedLinks.put("Observations", false);
-        addedLinks.put("ObservedProperties", false);
-        addedLinks.put("FeaturesOfInterest", false);
-        for (int i = 0; i < entities.size(); i++) {
-            JsonNode entity = entities.get(i);
-            Assertions.assertNotNull(entity.get("name"));
-            Assertions.assertNotNull(entity.get("url"));
-            String name = entity.get("name").asText();
-            String nameUrl = entity.get("url").asText();
-            switch (name) {
-            case "Things":
-                Assertions.assertEquals(rootUrl + "Things",
-                                        nameUrl,
-                                        "The URL for Things in Service Root URI is not compliant to SensorThings " +
-                                                "API.");
-                addedLinks.remove("Things");
-                addedLinks.put(name, true);
-                break;
-            case "Locations":
-                Assertions.assertEquals(rootUrl + "Locations",
-                                        nameUrl,
-                                        "The URL for Locations in Service Root URI is not compliant to " +
-                                                "SensorThings " +
-                                                "API.");
-                addedLinks.remove("Locations");
-                addedLinks.put(name, true);
-                break;
-            case "HistoricalLocations":
-                Assertions.assertEquals(rootUrl + "HistoricalLocations",
-                                        nameUrl,
-                                        "The URL for HistoricalLocations in Service Root URI is not compliant to " +
-                                                "SensorThings API.");
-                addedLinks.remove("HistoricalLocations");
-                addedLinks.put(name, true);
-                break;
-            case "Datastreams":
-                Assertions.assertEquals(rootUrl + "Datastreams",
-                                        nameUrl,
-                                        "The URL for Datastreams in Service Root URI is not compliant to " +
-                                                "SensorThings" +
-                                                " API.");
-                addedLinks.remove("Datastreams");
-                addedLinks.put(name, true);
-                break;
-            case "Sensors":
-                Assertions.assertEquals(rootUrl + "Sensors",
-                                        nameUrl,
-                                        "The URL for Sensors in Service Root URI is not compliant to SensorThings" +
-                                                " API" +
-                                                ".");
-                addedLinks.remove("Sensors");
-                addedLinks.put(name, true);
-                break;
-            case "Observations":
-                Assertions.assertEquals(rootUrl + "Observations",
-                                        nameUrl,
-                                        "The URL for Observations in Service Root URI is not compliant to " +
-                                                "SensorThings API.");
-                addedLinks.remove("Observations");
-                addedLinks.put(name, true);
-                break;
-            case "ObservedProperties":
-                Assertions.assertEquals(rootUrl + "ObservedProperties",
-                                        nameUrl,
-                                        "The URL for ObservedProperties in Service Root URI is not compliant to " +
-                                                "SensorThings API.");
-                addedLinks.remove("ObservedProperties");
-                addedLinks.put(name, true);
-                break;
-            case "FeaturesOfInterest":
-                Assertions.assertEquals(rootUrl + "FeaturesOfInterest",
-                                        nameUrl,
-                                        "The URL for FeaturesOfInterest in Service Root URI is not compliant to " +
-                                                "SensorThings API.");
-                addedLinks.remove("FeaturesOfInterest");
-                addedLinks.put(name, true);
-                break;
-            case "MultiDatastreams":
-                Assertions.assertEquals(rootUrl + "/MultiDatastreams",
-                                        nameUrl,
-                                        "The URL for MultiDatastreams in Service Root URI is not compliant to " +
-                                                "SensorThings API.");
-                break;
-            default:
-                Assertions.fail(
-                        "There is a component in Service Root URI response that is not in SensorThings API : " +
-                                name);
-                break;
-            }
-        }
-        for (String key : addedLinks.keySet()) {
-            Assertions.assertTrue(addedLinks.get(key), "The Service Root URI response does not contain " + key);
-        }
-    }
-
-    /**
      * This helper method is the start point for checking the response for a
      * collection in all aspects.
      *
      * @param entityType Entity type from EntityType enum list
      * @param entity     The response of the GET request to be checked
      */
-    private void checkEntitiesAllAspectsForResponse(STAEntityDefinition entityType, JsonNode entity) {
+    void checkEntitiesAllAspectsForResponse(STAEntityDefinition entityType, JsonNode entity) {
         checkEntitiesControlInformation(entity);
         checkEntitiesProperties(this.getEntityPropsMandatory(entityType), entity);
         checkEntitiesProperties(annotateNavigationProperties(entityType.getNavPropsMandatory()), entity);
@@ -607,7 +458,7 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
 
         Assertions.assertTrue(entity.has(StaConstants.AT_IOT_SELFLINK),
                               "The entity does not have mandatory control information :" +
-                                      StaConstants.AT_IOT_SELFLINK);
+                                  StaConstants.AT_IOT_SELFLINK);
     }
 
     /**

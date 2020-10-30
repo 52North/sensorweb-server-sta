@@ -37,6 +37,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 public class STAPostgresContainer extends PostgreSQLContainer<STAPostgresContainer> {
+
     private static final String IMAGE_VERSION = "mdillon/postgis:latest";
     private static STAPostgresContainer container;
 

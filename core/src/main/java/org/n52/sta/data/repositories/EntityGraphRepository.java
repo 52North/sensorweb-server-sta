@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.repositories;
 
 import org.springframework.data.domain.Page;
@@ -48,17 +49,37 @@ import java.util.Optional;
 @NoRepositoryBean
 public interface EntityGraphRepository<T, I> extends JpaSpecificationExecutor<T>, JpaRepository<T, I> {
 
+    /**
+     * Gets content of columnName of entity that is specified by spec. Used for fetching only identifier instead of
+     * whole Entity
+     *
+     * @param spec       Specification of Entity
+     * @param columnName Name of Column
+     * @return Content of the column with columnName if spec matches. Optional.empty() otherwise
+     */
+    Optional<String> getColumn(Specification<T> spec, String columnName);
+
+    /**
+     * Gets content of columnName of entity that is specified by spec. Used for fetching only identifier instead of
+     * whole Entity
+     *
+     * @param spec       Specification of Entity
+     * @param pageable   Pagination Specification
+     * @param columnName Name of Column
+     * @return Content of the column with columnName if spec matches. Optional.empty() otherwise
+     */
+    List<String> getColumnList(Specification<T> spec, Pageable pageable, String columnName);
 
     /**
      * Retrieves an entity by its id. Additionally fetches all related entities given by the provided EntityGraph.
      * All provided Graphs are merged internally.
      *
-     * @param id must not be {@literal null}.
+     * @param id          must not be {@literal null}.
      * @param fetchGraphs string representation of EntityGraph.
      * @return the entity with the given id or {@literal Optional#empty()} if none found.
      * @throws IllegalArgumentException if {@literal id} is {@literal null}.
      */
-     Optional<T> findById(Long id, FetchGraph... fetchGraphs);
+    Optional<T> findById(Long id, FetchGraph... fetchGraphs);
 
     /**
      * Returns a single entity matching the given {@link Specification} or {@link Optional#empty()} if none found.
@@ -77,7 +98,7 @@ public interface EntityGraphRepository<T, I> extends JpaSpecificationExecutor<T>
      * Additionally fetches all related entities given by the provided EntityGraph. All provided Graphs are merged
      * internally.
      *
-     * @param spec can be {@literal null}.
+     * @param spec        can be {@literal null}.
      * @param fetchGraphs string representation of EntityGraph.
      * @return never {@literal null}.
      */
@@ -88,8 +109,8 @@ public interface EntityGraphRepository<T, I> extends JpaSpecificationExecutor<T>
      * Additionally fetches all related entities given by the provided EntityGraph. All provided Graphs are merged
      * internally.
      *
-     * @param spec     can be {@literal null}.
-     * @param pageable must not be {@literal null}.
+     * @param spec        can be {@literal null}.
+     * @param pageable    must not be {@literal null}.
      * @param fetchGraphs string representation of EntityGraph.
      * @return never {@literal null}.
      */
@@ -99,8 +120,8 @@ public interface EntityGraphRepository<T, I> extends JpaSpecificationExecutor<T>
      * Returns all entities matching the given {@link Specification} and {@link Sort}. Additionally fetches all
      * related entities given by the provided EntityGraph. All provided Graphs are merged internally.
      *
-     * @param spec can be {@literal null}.
-     * @param sort must not be {@literal null}.
+     * @param spec        can be {@literal null}.
+     * @param sort        must not be {@literal null}.
      * @param fetchGraphs string representation of EntityGraph.
      * @return never {@literal null}.
      */
@@ -109,25 +130,21 @@ public interface EntityGraphRepository<T, I> extends JpaSpecificationExecutor<T>
     //TODO: expand if necessary
     enum FetchGraph {
         FETCHGRAPH_DEFAULT("identifier"),
-        FETCHGRAPH_THINGS("things"),
-        FETCHGRAPH_THING("thing"),
-        FETCHGRAPH_THINGLOCATION("thing(locations)"),
-        FETCHGRAPH_THINGSHISTLOCATION("things(historicalLocations)"),
-        FETCHGRAPH_LOCATION("locations"),
+        FETCHGRAPH_PLATFORMS("platforms(parameters)"),
+        FETCHGRAPH_PLATFORM("platform(parameters)"),
+        FETCHGRAPH_PLATFORMSHISTLOCATION("platforms(historicalLocations)"),
+        FETCHGRAPH_LOCATIONS("locations(parameters)"),
         FETCHGRAPH_LOCATIONHISTLOCATION("locations(historicalLocations)"),
-        FETCHGRAPH_HIST_LOCATION("historicalLocations"),
-        FETCHGRAPH_DATASTREAMS("datastreams"),
-        FETCHGRAPH_UOM("unitOfMeasurement"),
-        FETCHGRAPH_OBS_TYPE("observationType"),
+        FETCHGRAPH_HIST_LOCATIONS("historicalLocations"),
+        FETCHGRAPH_UOM("unit"),
         FETCHGRAPH_PARAMETERS("parameters"),
         FETCHGRAPH_FORMAT("format"),
         FETCHGRAPH_FEATURETYPE("featureType"),
-        FETCHGRAPH_PROCEDURE("procedure"),
-        FETCHGRAPH_OBSERVABLE_PROP("observableProperty"),
+        FETCHGRAPH_PROCEDURE("procedure(format,procedureHistory,parameters)"),
+        FETCHGRAPH_PHENOMENON("phenomenon(parameters)"),
         FETCHGRAPH_OM_OBS_TYPE("omObservationType"),
-        FETCHGRAPH_DATASETS("datasets"),
+        FETCHGRAPH_DATASETS("datasets(unit,omObservationType)"),
         FETCHGRAPH_FEATURE("feature"),
-        FETCHGRAPH_DATASET("dataset"),
         FETCHGRAPH_DATASET_FIRSTLAST_OBSERVATION("dataset(firstObservation,lastObservation)"),
         FETCHGRAPH_PROCEDUREHISTORY("procedureHistory");
 

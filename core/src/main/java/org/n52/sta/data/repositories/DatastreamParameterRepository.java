@@ -26,26 +26,16 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.repositories;
 
-import org.n52.series.db.beans.DatasetEntity;
+import org.n52.series.db.beans.parameter.dataset.DatasetParameterEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
-public interface DatasetRepository extends EntityGraphRepository<DatasetEntity, Long> {
-
-//    /**
-//     * Qualifies a 'not_initialized' dataset with the given value type. Once set, no update is possible
-//     * anymore.
-//     *
-//     * @param valueType
-//     *        the value type to qualify dataset with
-//     * @param id
-//     *        the dataset id
-//     */
-//    @Modifying(clearAutomatically = true)
-//    @Query("Update DatasetEntity d set d.valueType = :valueType where d.id = :id and valueType = '"
-//            + NotInitializedDatasetEntity.DATASET_TYPE + "'")
-//    void initValueType(@Param("valueType") String valueType, @Param("id") Long id);
+@Repository
+public interface DatastreamParameterRepository extends JpaRepository<DatasetParameterEntity, Long> {
 
 }

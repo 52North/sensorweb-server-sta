@@ -55,7 +55,7 @@ public class HistoricalLocationSerDes {
 
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     public static class HistoricalLocationEntityPatch extends HistoricalLocationEntity
-            implements EntityPatch<HistoricalLocationEntity> {
+        implements EntityPatch<HistoricalLocationEntity> {
 
         private static final long serialVersionUID = -154825501303466727L;
         private final HistoricalLocationEntity entity;
@@ -71,7 +71,7 @@ public class HistoricalLocationSerDes {
 
 
     public static class HistoricalLocationSerializer
-            extends AbstractSTASerializer<HistoricalLocationWithQueryOptions, HistoricalLocationEntity> {
+        extends AbstractSTASerializer<HistoricalLocationWithQueryOptions, HistoricalLocationEntity> {
 
         private static final long serialVersionUID = 8651925159358792370L;
 
@@ -86,59 +86,62 @@ public class HistoricalLocationSerDes {
                               JsonGenerator gen,
                               SerializerProvider serializers) throws IOException {
             gen.writeStartObject();
-            HistoricalLocationEntity histLoc = unwrap(value);
+            value.unwrap(implicitSelect);
+            HistoricalLocationEntity histLoc = value.getEntity();
             // The UML in Section 8.2 of the OGC STA v1.0 defines the relations as "Things"
             // The Definition in Section 8.2.3 of the OGC STA v1.0 defines the relations as "Thing"
             // We will allow both for now
-            if (hasSelectOption && hasExpandOption && fieldsToExpand.containsKey(STAEntityDefinition.THINGS)) {
-                fieldsToSerialize.add(STAEntityDefinition.THING);
-                fieldsToExpand.put(STAEntityDefinition.THING, fieldsToExpand.get(STAEntityDefinition.THINGS));
+            if (value.hasSelectOption() && value.hasExpandOption() &&
+                value.getFieldsToExpand().containsKey(STAEntityDefinition.THINGS)) {
+                value.getFieldsToSerialize().add(STAEntityDefinition.THING);
+                value.getFieldsToExpand()
+                    .put(STAEntityDefinition.THING, value.getFieldsToExpand().get(STAEntityDefinition.THINGS));
             }
 
             // olingo @iot links
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
+            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ID)) {
                 writeId(gen, histLoc.getStaIdentifier());
             }
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_SELF_LINK)) {
+            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_SELF_LINK)) {
                 writeSelfLink(gen, histLoc.getStaIdentifier());
             }
 
             // actual properties
-            if (!hasSelectOption || fieldsToSerialize.contains(STAEntityDefinition.PROP_TIME)) {
+            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_TIME)) {
                 gen.writeStringField(STAEntityDefinition.PROP_TIME, histLoc.getTime().toInstant().toString());
             }
 
             // navigation properties
             for (String navigationProperty : HistoricalLocationEntityDefinition.NAVIGATION_PROPERTIES) {
-                if (!hasSelectOption || fieldsToSerialize.contains(navigationProperty)) {
-                    if (!hasExpandOption || fieldsToExpand.get(navigationProperty) == null) {
+                if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(navigationProperty)) {
+                    if (!value.hasExpandOption() || value.getFieldsToExpand().get(navigationProperty) == null) {
                         writeNavigationProp(gen, navigationProperty, histLoc.getStaIdentifier());
                     } else {
                         switch (navigationProperty) {
-                        case HistoricalLocationEntityDefinition.THING:
-                            if (histLoc.getThing() == null) {
-                                writeNavigationProp(gen, navigationProperty, histLoc.getStaIdentifier());
-                            } else {
-                                gen.writeFieldName(navigationProperty);
-                                writeNestedEntity(histLoc.getThing(),
-                                                  fieldsToExpand.get(navigationProperty),
-                                                  gen,
-                                                  serializers);
-                            }
-                            break;
-                        case HistoricalLocationEntityDefinition.LOCATIONS:
-                            if (histLoc.getLocations() == null) {
-                                writeNavigationProp(gen, navigationProperty, histLoc.getStaIdentifier());
-                            } else {
-                                gen.writeFieldName(navigationProperty);
-                                writeNestedCollection(Collections.unmodifiableSet(histLoc.getLocations()),
-                                                      fieldsToExpand.get(navigationProperty),
+                            case HistoricalLocationEntityDefinition.THING:
+                                if (histLoc.getThing() == null) {
+                                    writeNavigationProp(gen, navigationProperty, histLoc.getStaIdentifier());
+                                } else {
+                                    gen.writeFieldName(navigationProperty);
+                                    writeNestedEntity(histLoc.getThing(),
+                                                      value.getFieldsToExpand().get(navigationProperty),
                                                       gen,
                                                       serializers);
-                            }
-                            break;
-                        default:
-                            throw new IllegalStateException("Unexpected value: " + navigationProperty);
+                                }
+                                break;
+                            case HistoricalLocationEntityDefinition.LOCATIONS:
+                                if (histLoc.getLocations() == null) {
+                                    writeNavigationProp(gen, navigationProperty, histLoc.getStaIdentifier());
+                                } else {
+                                    gen.writeFieldName(navigationProperty);
+                                    writeNestedCollection(Collections.unmodifiableSet(histLoc.getLocations()),
+                                                          value.getFieldsToExpand().get(navigationProperty),
+                                                          gen,
+                                                          serializers);
+                                }
+                                break;
+                            default:
+                                throw new IllegalStateException("Unexpected value: " + navigationProperty);
                         }
                     }
                 }
@@ -174,7 +177,7 @@ public class HistoricalLocationSerDes {
         @Override
         public HistoricalLocationEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return new HistoricalLocationEntityPatch(p.readValueAs(JSONHistoricalLocation.class)
-                                                      .toEntity(JSONBase.EntityType.PATCH));
+                                                         .toEntity(JSONBase.EntityType.PATCH));
         }
     }
 }

@@ -29,12 +29,16 @@
 
 package org.n52.sta.data.query;
 
+import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
+import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.PlatformEntity;
-import org.n52.series.db.beans.sta.DatastreamEntity;
+import org.n52.series.db.beans.parameter.ParameterFactory;
+import org.n52.series.db.beans.parameter.platform.PlatformParameterEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -52,7 +56,7 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
     public Specification<PlatformEntity> withLocationStaIdentifier(final String locationIdentifier) {
         return (root, query, builder) -> {
             final Join<PlatformEntity, LocationEntity> join =
-                    root.join(PlatformEntity.PROPERTY_LOCATIONS, JoinType.INNER);
+                root.join(PlatformEntity.PROPERTY_LOCATIONS, JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), locationIdentifier);
         };
     }
@@ -60,15 +64,15 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
     public Specification<PlatformEntity> withHistoricalLocationStaIdentifier(final String historicalIdentifier) {
         return (root, query, builder) -> {
             final Join<PlatformEntity, HistoricalLocationEntity> join =
-                    root.join(PlatformEntity.PROPERTY_HISTORICAL_LOCATIONS, JoinType.INNER);
+                root.join(PlatformEntity.PROPERTY_HISTORICAL_LOCATIONS, JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), historicalIdentifier);
         };
     }
 
     public Specification<PlatformEntity> withDatastreamStaIdentifier(final String datastreamIdentifier) {
         return (root, query, builder) -> {
-            final Join<PlatformEntity, DatastreamEntity> join =
-                    root.join(PlatformEntity.PROPERTY_DATASTREAMS, JoinType.INNER);
+            final Join<PlatformEntity, AbstractDatasetEntity> join =
+                root.join(PlatformEntity.PROPERTY_DATASETS, JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), datastreamIdentifier);
         };
     }
@@ -78,40 +82,41 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
         return (root, query, builder) -> {
             try {
                 switch (propertyName) {
-                case DATASTREAMS: {
-                    Subquery<DatastreamEntity> subquery = query.subquery(DatastreamEntity.class);
-                    Root<DatastreamEntity> datastream = subquery.from(DatastreamEntity.class);
-                    subquery.select(datastream.get(DatastreamEntity.PROPERTY_THING))
-                            .where(((Specification<DatastreamEntity>) propertyValue).toPredicate(datastream,
-                                                                                                 query,
-                                                                                                 builder));
-                    return builder.in(root.get(PlatformEntity.PROPERTY_ID)).value(subquery);
-                }
-                case LOCATIONS: {
-                    Subquery<LocationEntity> subquery = query.subquery(LocationEntity.class);
-                    Root<LocationEntity> location = subquery.from(LocationEntity.class);
-                    subquery.select(location.get(LocationEntity.PROPERTY_ID))
+                    case StaConstants.DATASTREAMS: {
+                        Subquery<AbstractDatasetEntity> subquery = query.subquery(AbstractDatasetEntity.class);
+                        Root<AbstractDatasetEntity> datastream = subquery.from(AbstractDatasetEntity.class);
+                        subquery.select(datastream.get(AbstractDatasetEntity.PROPERTY_PLATFORM))
+                            .where(((Specification<AbstractDatasetEntity>) propertyValue).toPredicate(datastream,
+                                                                                                      query,
+                                                                                                      builder));
+                        return builder.in(root.get(IdEntity.PROPERTY_ID)).value(subquery);
+                    }
+                    case StaConstants.LOCATIONS: {
+                        Subquery<LocationEntity> subquery = query.subquery(LocationEntity.class);
+                        Root<LocationEntity> location = subquery.from(LocationEntity.class);
+                        subquery.select(location.get(LocationEntity.PROPERTY_ID))
                             .where(((Specification<LocationEntity>) propertyValue).toPredicate(location,
                                                                                                query,
                                                                                                builder));
-                    final Join<PlatformEntity, LocationEntity> join =
+                        final Join<PlatformEntity, LocationEntity> join =
                             root.join(PlatformEntity.PROPERTY_LOCATIONS, JoinType.INNER);
-                    return builder.in(join.get(DescribableEntity.PROPERTY_ID)).value(subquery);
-                }
-                case HISTORICAL_LOCATIONS:
-                    Subquery<HistoricalLocationEntity> subquery = query.subquery(HistoricalLocationEntity.class);
-                    Root<HistoricalLocationEntity> historicalLocation =
+                        return builder.in(join.get(DescribableEntity.PROPERTY_ID)).value(subquery);
+                    }
+                    case StaConstants.HISTORICAL_LOCATIONS:
+                        Subquery<HistoricalLocationEntity> subquery = query.subquery(HistoricalLocationEntity.class);
+                        Root<HistoricalLocationEntity> historicalLocation =
                             subquery.from(HistoricalLocationEntity.class);
-                    subquery.select(historicalLocation.get(HistoricalLocationEntity.PROPERTY_ID))
+                        subquery.select(historicalLocation.get(HistoricalLocationEntity.PROPERTY_ID))
                             .where(((Specification<HistoricalLocationEntity>) propertyValue).toPredicate(
-                                    historicalLocation,
-                                    query,
-                                    builder));
-                    final Join<PlatformEntity, HistoricalLocationEntity> join =
+                                historicalLocation,
+                                query,
+                                builder));
+                        final Join<PlatformEntity, HistoricalLocationEntity> join =
                             root.join(PlatformEntity.PROPERTY_HISTORICAL_LOCATIONS);
-                    return builder.in(join.get(DescribableEntity.PROPERTY_ID)).value(subquery);
-                default:
-                    throw new STAInvalidFilterExpressionException("Could not find related property: " + propertyName);
+                        return builder.in(join.get(DescribableEntity.PROPERTY_ID)).value(subquery);
+                    default:
+                        throw new STAInvalidFilterExpressionException(
+                            "Could not find related property: " + propertyName);
                 }
             } catch (STAInvalidFilterExpressionException e) {
                 throw new RuntimeException(e);
@@ -120,36 +125,46 @@ public class ThingQuerySpecifications extends EntityQuerySpecifications<Platform
     }
 
     @Override protected Specification<PlatformEntity> handleDirectPropertyFilter(
-            String propertyName,
-            Expression<?> propertyValue,
-            FilterConstants.ComparisonOperator operator,
-            boolean switched) {
+        String propertyName,
+        Expression<?> propertyValue,
+        FilterConstants.ComparisonOperator operator,
+        boolean switched) {
         return (Specification<PlatformEntity>) (root, query, builder) -> {
             try {
                 switch (propertyName) {
-                case "id":
-                    return handleDirectStringPropertyFilter(root.get(PlatformEntity.PROPERTY_STA_IDENTIFIER),
-                                                            propertyValue, operator, builder, false);
-                case "name":
-                    return handleDirectStringPropertyFilter(root.get(DescribableEntity.PROPERTY_NAME),
-                                                            propertyValue, operator, builder, switched);
-                case "description":
-                    return handleDirectStringPropertyFilter(
-                            root.get(DescribableEntity.PROPERTY_DESCRIPTION),
-                            propertyValue,
-                            operator,
-                            builder,
-                            switched);
-                case "properties":
-                    return handleDirectStringPropertyFilter(
-                            root.get(PlatformEntity.PROPERTY_PROPERTIES),
-                            propertyValue,
-                            operator,
-                            builder,
-                            switched);
-                default:
-                    throw new RuntimeException("Error getting filter for Property: \"" + propertyName
-                                                       + "\". No such property in Entity.");
+                    case StaConstants.PROP_ID:
+                        return handleDirectStringPropertyFilter(root.get(PlatformEntity.STA_IDENTIFIER),
+                                                                propertyValue,
+                                                                operator,
+                                                                builder,
+                                                                false);
+                    case StaConstants.PROP_NAME:
+                        return handleDirectStringPropertyFilter(root.get(PlatformEntity.NAME),
+                                                                propertyValue,
+                                                                operator,
+                                                                builder,
+                                                                switched);
+                    case StaConstants.PROP_DESCRIPTION:
+                        return handleDirectStringPropertyFilter(root.get(PlatformEntity.DESCRIPTION),
+                                                                propertyValue,
+                                                                operator,
+                                                                builder,
+                                                                switched);
+                    default:
+                        // We are filtering on variable keys on properties
+                        if (propertyName.startsWith(StaConstants.PROP_PROPERTIES)) {
+                            return handleProperties(root,
+                                                    query,
+                                                    builder,
+                                                    propertyName,
+                                                    propertyValue,
+                                                    operator,
+                                                    switched,
+                                                    PlatformParameterEntity.PROP_PLATFORM_ID,
+                                                    ParameterFactory.EntityType.PLATFORM);
+                        } else {
+                            throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP, propertyName));
+                        }
                 }
             } catch (STAInvalidFilterExpressionException e) {
                 throw new RuntimeException(e);

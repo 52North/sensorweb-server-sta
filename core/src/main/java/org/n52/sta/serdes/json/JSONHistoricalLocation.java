@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("VisibilityModifier")
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
 public class JSONHistoricalLocation extends JSONBase.JSONwithIdTime<HistoricalLocationEntity>
-        implements AbstractJSONEntity {
+    implements AbstractJSONEntity {
 
     // JSON Properties. Matched by Annotation or variable name
     public String time;
@@ -62,85 +62,85 @@ public class JSONHistoricalLocation extends JSONBase.JSONwithIdTime<HistoricalLo
         self = new HistoricalLocationEntity();
     }
 
-    @Override
-    public HistoricalLocationEntity toEntity(JSONBase.EntityType type) {
-        switch (type) {
-        case FULL:
-            parseReferencedFrom();
-            Assert.notNull(date, INVALID_INLINE_ENTITY_MISSING + "time");
-
-            self.setIdentifier(identifier);
-            self.setStaIdentifier(identifier);
-            self.setTime(date);
-
-            if (Thing != null) {
-                self.setThing(Thing.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
-            } else if (backReference instanceof JSONThing) {
-                self.setThing(((JSONThing) backReference).getEntity());
-                this.Thing = (JSONThing) backReference;
-            } else {
-                Assert.notNull(null, INVALID_INLINE_ENTITY_MISSING + "Thing");
-            }
-
-            if (Locations != null) {
-                self.setLocations(Arrays.stream(Locations)
-                                        .map(loc -> loc.toEntity(JSONBase.EntityType.FULL,
-                                                                 JSONBase.EntityType.REFERENCE))
-                                        .collect(Collectors.toSet()));
-            } else if (backReference instanceof JSONLocation) {
-                self.setLocations(Collections.singleton(((JSONLocation) backReference).getEntity()));
-            } else {
-                Assert.notNull(null, INVALID_INLINE_ENTITY_MISSING + "Location");
-            }
-
-            return self;
-        case PATCH:
-            parseReferencedFrom();
-            self.setIdentifier(identifier);
-            self.setStaIdentifier(identifier);
-            self.setTime(date);
-
-            if (Thing != null) {
-                self.setThing(Thing.toEntity(JSONBase.EntityType.REFERENCE));
-            }
-
-            if (Locations != null) {
-                self.setLocations(Arrays.stream(Locations)
-                                        .map(loc -> loc.toEntity(JSONBase.EntityType.REFERENCE))
-                                        .collect(Collectors.toSet()));
-            }
-
-            return self;
-        case REFERENCE:
-            Assert.isNull(time, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(Thing, INVALID_REFERENCED_ENTITY);
-            Assert.isNull(Locations, INVALID_REFERENCED_ENTITY);
-
-            self.setIdentifier(identifier);
-            self.setStaIdentifier(identifier);
-            return self;
-        default:
-            return null;
-        }
-    }
-
     @Override protected void parseReferencedFrom() {
         if (referencedFromType != null) {
             switch (referencedFromType) {
-            case "Locations":
-                Assert.isNull(Locations, INVALID_DUPLICATE_REFERENCE);
-                this.Locations = new JSONLocation[1];
-                this.Locations[0] = new JSONLocation();
-                this.Locations[0].identifier = referencedFromID;
-                return;
-            case "Things":
-                Assert.isNull(Thing, INVALID_DUPLICATE_REFERENCE);
-                this.Thing = new JSONThing();
-                this.Thing.identifier = referencedFromID;
-                return;
-            default:
-                throw new IllegalArgumentException(INVALID_BACKREFERENCE);
+                case "Locations":
+                    Assert.isNull(Locations, INVALID_DUPLICATE_REFERENCE);
+                    this.Locations = new JSONLocation[1];
+                    this.Locations[0] = new JSONLocation();
+                    this.Locations[0].identifier = referencedFromID;
+                    return;
+                case "Things":
+                    Assert.isNull(Thing, INVALID_DUPLICATE_REFERENCE);
+                    this.Thing = new JSONThing();
+                    this.Thing.identifier = referencedFromID;
+                    return;
+                default:
+                    throw new IllegalArgumentException(INVALID_BACKREFERENCE);
             }
+        }
+    }
+
+    @Override
+    public HistoricalLocationEntity toEntity(JSONBase.EntityType type) {
+        switch (type) {
+            case FULL:
+                parseReferencedFrom();
+                Assert.notNull(date, INVALID_INLINE_ENTITY_MISSING + "time");
+
+                self.setIdentifier(identifier);
+                self.setStaIdentifier(identifier);
+                self.setTime(date);
+
+                if (Thing != null) {
+                    self.setThing(Thing.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+                } else if (backReference instanceof JSONThing) {
+                    self.setThing(((JSONThing) backReference).getEntity());
+                    this.Thing = (JSONThing) backReference;
+                } else {
+                    Assert.notNull(null, INVALID_INLINE_ENTITY_MISSING + "Thing");
+                }
+
+                if (Locations != null) {
+                    self.setLocations(Arrays.stream(Locations)
+                                          .map(loc -> loc.toEntity(JSONBase.EntityType.FULL,
+                                                                   JSONBase.EntityType.REFERENCE))
+                                          .collect(Collectors.toSet()));
+                } else if (backReference instanceof JSONLocation) {
+                    self.setLocations(Collections.singleton(((JSONLocation) backReference).getEntity()));
+                } else {
+                    Assert.notNull(null, INVALID_INLINE_ENTITY_MISSING + "Location");
+                }
+
+                return self;
+            case PATCH:
+                parseReferencedFrom();
+                self.setIdentifier(identifier);
+                self.setStaIdentifier(identifier);
+                self.setTime(date);
+
+                if (Thing != null) {
+                    self.setThing(Thing.toEntity(JSONBase.EntityType.REFERENCE));
+                }
+
+                if (Locations != null) {
+                    self.setLocations(Arrays.stream(Locations)
+                                          .map(loc -> loc.toEntity(JSONBase.EntityType.REFERENCE))
+                                          .collect(Collectors.toSet()));
+                }
+
+                return self;
+            case REFERENCE:
+                Assert.isNull(time, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(Thing, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(Locations, INVALID_REFERENCED_ENTITY);
+
+                self.setIdentifier(identifier);
+                self.setStaIdentifier(identifier);
+                return self;
+            default:
+                return null;
         }
     }
 

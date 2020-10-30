@@ -35,6 +35,7 @@ import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
@@ -42,7 +43,6 @@ import org.n52.sta.data.query.HistoricalLocationQuerySpecifications;
 import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.HistoricalLocationRepository;
 import org.n52.sta.data.repositories.LocationRepository;
-import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +53,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -65,8 +67,7 @@ import java.util.stream.Collectors;
 @DependsOn({"springApplicationContext"})
 @Transactional
 public class HistoricalLocationService
-        extends AbstractSensorThingsEntityServiceImpl<HistoricalLocationRepository, HistoricalLocationEntity,
-        HistoricalLocationEntity> {
+    extends AbstractSensorThingsEntityServiceImpl<HistoricalLocationRepository, HistoricalLocationEntity> {
 
     private static final Logger logger = LoggerFactory.getLogger(HistoricalLocationService.class);
 
@@ -76,42 +77,75 @@ public class HistoricalLocationService
 
     @Autowired
     public HistoricalLocationService(HistoricalLocationRepository repository,
-                                     LocationRepository locationRepository) {
-        super(repository, HistoricalLocationEntity.class, EntityGraphRepository.FetchGraph.FETCHGRAPH_THING);
+                                     LocationRepository locationRepository,
+                                     EntityManager em) {
+        super(repository, em, HistoricalLocationEntity.class);
         this.locationRepository = locationRepository;
     }
 
-    @Override
-    public EntityTypes[] getTypes() {
-        return new EntityTypes[] {EntityTypes.HistoricalLocation, EntityTypes.HistoricalLocations};
+    @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
+        throws STAInvalidQueryException {
+        Set<EntityGraphRepository.FetchGraph> fetchGraphs = new HashSet<>(6);
+        if (expandOption != null) {
+            for (ExpandItem expandItem : expandOption.getItems()) {
+                // We cannot handle nested $filter or $expand
+                if (expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter()) {
+                    continue;
+                }
+                String expandProperty = expandItem.getPath();
+                switch (expandProperty) {
+                    case STAEntityDefinition.LOCATIONS:
+                        fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_LOCATIONS);
+                        break;
+                    case STAEntityDefinition.THING:
+                        // fallthru
+                        // The UML in Section 8.2 of the OGC STA v1.0 defines the relations as "Things"
+                        // The Definition in Section 8.2.3 of the OGC STA v1.0 defines the relations as "Thing"
+                        // We will allow both for now
+                    case STAEntityDefinition.THINGS:
+                        fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_PLATFORM);
+                        break;
+                    default:
+                        throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
+                                                                         expandProperty,
+                                                                         StaConstants.HISTORICAL_LOCATION));
+                }
+            }
+        }
+        return fetchGraphs.toArray(new EntityGraphRepository.FetchGraph[0]);
     }
 
     @Override
-    protected HistoricalLocationEntity fetchExpandEntities(HistoricalLocationEntity entity,
-                                                           ExpandFilter expandOption)
-            throws STACRUDException, STAInvalidQueryException {
+    protected HistoricalLocationEntity fetchExpandEntitiesWithFilter(HistoricalLocationEntity entity,
+                                                                     ExpandFilter expandOption)
+        throws STACRUDException, STAInvalidQueryException {
         for (ExpandItem expandItem : expandOption.getItems()) {
+            // We have already handled $expand without filter and expand
+            if (!(expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter())) {
+                continue;
+            }
             String expandProperty = expandItem.getPath();
             switch (expandProperty) {
-            case STAEntityDefinition.LOCATIONS:
-                Page<LocationEntity> locations = getLocationService()
+                case STAEntityDefinition.LOCATIONS:
+                    Page<LocationEntity> locations = getLocationService()
                         .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
                                                                STAEntityDefinition.HISTORICAL_LOCATIONS,
                                                                expandItem.getQueryOptions());
-                entity.setLocations(locations.get().collect(Collectors.toSet()));
-                break;
-            case STAEntityDefinition.THING:
-                // fallthru
-                // The UML in Section 8.2 of the OGC STA v1.0 defines the relations as "Things"
-                // The Definition in Section 8.2.3 of the OGC STA v1.0 defines the relations as "Thing"
-                // We will allow both for now
-            case STAEntityDefinition.THINGS:
-                entity.setThing(getThingService()
+                    entity.setLocations(locations.get().collect(Collectors.toSet()));
+                    break;
+                case STAEntityDefinition.THING:
+                    // fallthru
+                    // The UML in Section 8.2 of the OGC STA v1.0 defines the relations as "Things"
+                    // The Definition in Section 8.2.3 of the OGC STA v1.0 defines the relations as "Thing"
+                    // We will allow both for now
+                case STAEntityDefinition.THINGS:
+                    entity.setThing(getThingService()
                                         .getEntityByIdRaw(entity.getThing().getId(), expandItem.getQueryOptions()));
-                break;
-            default:
-                throw new STAInvalidQueryException("Invalid expandOption supplied. Cannot find " + expandProperty +
-                                                           " on Entity of type 'HistoricalLocation'");
+                    break;
+                default:
+                    throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
+                                                                     expandProperty,
+                                                                     StaConstants.HISTORICAL_LOCATION));
             }
         }
         return entity;
@@ -123,16 +157,16 @@ public class HistoricalLocationService
                                                                             String ownId) {
         Specification<HistoricalLocationEntity> filter;
         switch (relatedType) {
-        case STAEntityDefinition.LOCATIONS: {
-            filter = hlQS.withLocationStaIdentifier(relatedId);
-            break;
-        }
-        case STAEntityDefinition.THINGS: {
-            filter = hlQS.withThingStaIdentifier(relatedId);
-            break;
-        }
-        default:
-            throw new IllegalStateException("Trying to filter by unrelated type: " + relatedType + "not found!");
+            case STAEntityDefinition.LOCATIONS: {
+                filter = hlQS.withLocationStaIdentifier(relatedId);
+                break;
+            }
+            case STAEntityDefinition.THINGS: {
+                filter = hlQS.withThingStaIdentifier(relatedId);
+                break;
+            }
+            default:
+                throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
         }
 
         if (ownId != null) {
@@ -142,8 +176,8 @@ public class HistoricalLocationService
     }
 
     @Override
-    public HistoricalLocationEntity createEntity(HistoricalLocationEntity historicalLocation)
-            throws STACRUDException {
+    public HistoricalLocationEntity createOrfetch(HistoricalLocationEntity historicalLocation)
+        throws STACRUDException {
         synchronized (getLock(historicalLocation.getStaIdentifier())) {
             if (!historicalLocation.isProcessed()) {
                 check(historicalLocation);
@@ -155,6 +189,48 @@ public class HistoricalLocationService
         }
     }
 
+    @Override
+    public HistoricalLocationEntity updateEntity(String id, HistoricalLocationEntity entity, HttpMethod method)
+        throws STACRUDException {
+        if (HttpMethod.PATCH.equals(method)) {
+            synchronized (getLock(id)) {
+                Optional<HistoricalLocationEntity> existing = getRepository().findByStaIdentifier(id);
+                if (existing.isPresent()) {
+                    HistoricalLocationEntity merged = merge(existing.get(), entity);
+                    return getRepository().save(merged);
+                }
+                throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
+            }
+        } else if (HttpMethod.PUT.equals(method)) {
+            throw new STACRUDException(HTTP_PUT_IS_NOT_YET_SUPPORTED, HTTPStatus.NOT_IMPLEMENTED);
+        }
+        throw new STACRUDException(INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY, HTTPStatus.BAD_REQUEST);
+    }
+
+    @Override
+    public HistoricalLocationEntity createOrUpdate(HistoricalLocationEntity entity)
+        throws STACRUDException {
+        if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
+            return updateEntity(entity.getStaIdentifier(), entity, HttpMethod.PATCH);
+        }
+        return createOrfetch(entity);
+    }
+
+    @Override public String checkPropertyName(String property) {
+        return hlQS.checkPropertyName(property);
+    }
+
+    @Override
+    public HistoricalLocationEntity merge(HistoricalLocationEntity existing, HistoricalLocationEntity toMerge) {
+        if (toMerge.getTime() != null) {
+            existing.setTime(toMerge.getTime());
+        }
+        if (toMerge.getLocations() != null) {
+            existing.getLocations().addAll(toMerge.getLocations());
+        }
+        return existing;
+    }
+
     private void check(HistoricalLocationEntity historicalLocation) throws STACRUDException {
         if (historicalLocation.getThing() == null && historicalLocation.getLocations() != null) {
             throw new STACRUDException("The HistoricalLocation to create is invalid", HTTPStatus.BAD_REQUEST);
@@ -162,21 +238,22 @@ public class HistoricalLocationService
     }
 
     private HistoricalLocationEntity processThing(HistoricalLocationEntity historicalLocation)
-            throws STACRUDException {
-        PlatformEntity thing = getThingService().createOrUpdate(historicalLocation.getThing());
+        throws STACRUDException {
+        PlatformEntity thing = getThingService().createOrfetch(historicalLocation.getThing());
         historicalLocation.setThing(thing);
         HistoricalLocationEntity created = getRepository().save(historicalLocation);
         created.setProcessed(true);
-        getThingService().updateEntity(thing.addHistoricalLocation(created));
-        return created.setLocations(historicalLocation.getLocations());
+        getThingService().save(thing.addHistoricalLocation(created));
+        created.setLocations(historicalLocation.getLocations());
+        return created;
     }
 
     private void processLocations(HistoricalLocationEntity historicalLocation) throws STACRUDException {
         Set<LocationEntity> locations = new LinkedHashSet<>();
         for (LocationEntity l : historicalLocation.getLocations()) {
             Optional<LocationEntity> location =
-                    locationRepository.findByStaIdentifier(l.getStaIdentifier(),
-                                                           EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATION);
+                locationRepository.findByStaIdentifier(l.getStaIdentifier(),
+                                                       EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATIONS);
             if (location.isPresent()) {
                 location.get().addHistoricalLocation(historicalLocation);
                 locations.add(getLocationService().createOrUpdate(location.get()));
@@ -189,79 +266,31 @@ public class HistoricalLocationService
     }
 
     @Override
-    public HistoricalLocationEntity updateEntity(String id, HistoricalLocationEntity entity, HttpMethod method)
-            throws STACRUDException {
-        if (HttpMethod.PATCH.equals(method)) {
-            synchronized (getLock(id)) {
-                Optional<HistoricalLocationEntity> existing = getRepository().findByStaIdentifier(id);
-                if (existing.isPresent()) {
-                    HistoricalLocationEntity merged = merge(existing.get(), entity);
-                    return getRepository().save(merged);
-                }
-                throw new STACRUDException("Unable to update. Entity not found.", HTTPStatus.NOT_FOUND);
-            }
-        } else if (HttpMethod.PUT.equals(method)) {
-            throw new STACRUDException("Http PUT is not yet supported!", HTTPStatus.NOT_IMPLEMENTED);
-        }
-        throw new STACRUDException("Invalid http method for updating entity!", HTTPStatus.BAD_REQUEST);
-    }
-
-    @Override
-    public HistoricalLocationEntity updateEntity(HistoricalLocationEntity entity) {
-        return getRepository().save(entity);
-    }
-
-    @Override
     public void delete(String id) throws STACRUDException {
         synchronized (getLock(id)) {
             if (getRepository().existsByStaIdentifier(id)) {
                 HistoricalLocationEntity historicalLocation = getRepository()
-                        .findByStaIdentifier(id,
-                                             EntityGraphRepository.FetchGraph.FETCHGRAPH_LOCATIONHISTLOCATION,
-                                             EntityGraphRepository.FetchGraph.FETCHGRAPH_THING)
-                        .get();
+                    .findByStaIdentifier(id,
+                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_LOCATIONHISTLOCATION,
+                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_PLATFORM)
+                    .get();
                 updateLocations(historicalLocation);
                 updateThing(historicalLocation);
                 getRepository().deleteByStaIdentifier(id);
             } else {
-                throw new STACRUDException("Unable to delete. Entity not found.", HTTPStatus.NOT_FOUND);
+                throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }
         }
-    }
-
-    @Override
-    public void delete(HistoricalLocationEntity entity) throws STACRUDException {
-        delete(entity.getStaIdentifier());
-    }
-
-    @Override
-    protected HistoricalLocationEntity createOrUpdate(HistoricalLocationEntity entity)
-            throws STACRUDException {
-        if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
-            return updateEntity(entity.getStaIdentifier(), entity, HttpMethod.PATCH);
-        }
-        return createEntity(entity);
     }
 
     private void updateLocations(HistoricalLocationEntity historicalLocation) throws STACRUDException {
         for (LocationEntity location : historicalLocation.getLocations()) {
             location.getHistoricalLocations().remove(historicalLocation);
-            getLocationService().updateEntity(location);
+            getLocationService().save(location);
         }
     }
 
     private void updateThing(HistoricalLocationEntity historicalLocation) throws STACRUDException {
-        getThingService().updateEntity(historicalLocation.getThing().setHistoricalLocations(null));
-    }
-
-    @Override
-    public HistoricalLocationEntity merge(HistoricalLocationEntity existing, HistoricalLocationEntity toMerge) {
-        if (toMerge.getTime() != null) {
-            existing.setTime(toMerge.getTime());
-        }
-        if (toMerge.getLocations() != null) {
-            existing.getLocations().addAll(toMerge.getLocations());
-        }
-        return existing;
+        getThingService().save(historicalLocation.getThing().setHistoricalLocations(null));
     }
 }

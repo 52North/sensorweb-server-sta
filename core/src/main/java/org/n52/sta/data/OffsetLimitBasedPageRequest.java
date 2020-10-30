@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data;
 
 import org.springframework.data.domain.AbstractPageRequest;
@@ -86,18 +87,13 @@ public class OffsetLimitBasedPageRequest extends AbstractPageRequest {
     }
 
     @Override
+    public int getPageNumber() {
+        return (int) (getOffset() / getPageSize());
+    }
+
+    @Override
     public long getOffset() {
         return super.getPageNumber();
-    }
-
-    @Override
-    public int getPageNumber() {
-        return (int) super.getOffset() / getPageSize();
-    }
-
-    @Override
-    public Sort getSort() {
-        return sort;
     }
 
     @Override
@@ -108,8 +104,8 @@ public class OffsetLimitBasedPageRequest extends AbstractPageRequest {
     @Override
     public Pageable previous() {
         return hasPrevious() ?
-                new OffsetLimitBasedPageRequest((int) getOffset() - getPageSize(), getPageSize(), getSort())
-                : this;
+            new OffsetLimitBasedPageRequest((int) getOffset() - getPageSize(), getPageSize(), getSort())
+            : this;
     }
 
     @Override
@@ -132,6 +128,11 @@ public class OffsetLimitBasedPageRequest extends AbstractPageRequest {
             return this.sort == other.sort;
         }
         return false;
+    }
+
+    @Override
+    public Sort getSort() {
+        return sort;
     }
 
 }

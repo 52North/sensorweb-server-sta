@@ -34,12 +34,12 @@ import io.moquette.interception.messages.InterceptSubscribeMessage;
 import io.moquette.interception.messages.InterceptUnsubscribeMessage;
 import org.n52.sta.data.STAEventHandler;
 import org.n52.sta.mqtt.MqttHandlerException;
-import org.n52.sta.utils.STARequestUtils;
+import org.n52.sta.utils.RequestUtils;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public interface MqttSubscriptionEventHandler extends STARequestUtils, STAEventHandler {
+public interface MqttSubscriptionEventHandler extends RequestUtils, STAEventHandler {
 
     void processSubscribeMessage(InterceptSubscribeMessage msg) throws MqttHandlerException;
 
