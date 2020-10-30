@@ -364,16 +364,12 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
             self.setParty(party.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
         } else if (backReference instanceof JSONParty) {
             self.setParty(((JSONParty) backReference).getEntity());
-        } else {
-            Assert.notNull(null, INVALID_INLINE_ENTITY_MISSING + "Party");
         }
 
         if (project != null) {
             self.setProject(project.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
         } else if (backReference instanceof JSONProject) {
             self.setProject(((JSONProject) backReference).getEntity());
-        } else {
-            Assert.notNull(null, INVALID_INLINE_ENTITY_MISSING + "Project");
         }
         return self;
     }

@@ -320,8 +320,12 @@ public class DatastreamService extends
                 if (datastream.getLicense() != null) {
                     datastream.setLicense(getLicenseService().createOrUpdate(datastream.getLicense()));
                 }
-                datastream.setParty(getPartyService().createOrUpdate(datastream.getParty()));
-                datastream.setProject(getProjectService().createOrUpdate(datastream.getProject()));
+                if (datastream.getParty() != null) {
+                    datastream.setParty(getPartyService().createOrUpdate(datastream.getParty()));
+                }
+                if (datastream.getProject() != null) {
+                    datastream.setProject(getProjectService().createOrUpdate(datastream.getProject()));
+                }
 
                 DatasetEntity dataset = createandSaveDataset(datastream, null, datastream.getStaIdentifier());
                 if (datastream.getParameters() != null) {
