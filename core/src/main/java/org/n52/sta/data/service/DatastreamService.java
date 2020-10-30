@@ -317,7 +317,9 @@ public class DatastreamService extends
                 datastream.setProcedure(getSensorService().createOrfetch(datastream.getProcedure()));
                 datastream.setThing(getThingService().createOrfetch(datastream.getThing()));
 
-                datastream.setLicense(getLicenseService().createOrUpdate(datastream.getLicense()));
+                if (datastream.getLicense() != null) {
+                    datastream.setLicense(getLicenseService().createOrUpdate(datastream.getLicense()));
+                }
                 datastream.setParty(getPartyService().createOrUpdate(datastream.getParty()));
                 datastream.setProject(getProjectService().createOrUpdate(datastream.getProject()));
 

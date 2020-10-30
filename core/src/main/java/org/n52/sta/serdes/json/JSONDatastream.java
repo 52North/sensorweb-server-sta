@@ -358,8 +358,6 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
             self.setLicense(license.toEntity(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
         } else if (backReference instanceof JSONLicense) {
             self.setLicense(((JSONLicense) backReference).getEntity());
-        } else {
-            Assert.notNull(null, INVALID_INLINE_ENTITY_MISSING + "License");
         }
 
         if (party != null) {
