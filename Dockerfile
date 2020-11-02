@@ -1,13 +1,13 @@
 FROM alpine/git as gitstage
 WORKDIR /app
 
-RUN git clone https://github.com/52north/arctic-sea \
+RUN git clone https://github.com/speckij/arctic-sea \
     && cd arctic-sea \
-    && git checkout master
+    && git checkout feature/sta-citsci-extension
 
 RUN git clone https://github.com/52north/sensorweb-server-db-model \
     && cd sensorweb-server-db-model \
-    && git checkout develop
+    && git checkout feature/sta_extension-2
 
 FROM maven:3.6.1-jdk-8-slim as buildstage
 WORKDIR /app
