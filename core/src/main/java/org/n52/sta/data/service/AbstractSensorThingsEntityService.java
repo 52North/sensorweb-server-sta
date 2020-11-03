@@ -120,4 +120,6 @@ public interface AbstractSensorThingsEntityService<S extends HibernateRelations.
     ElementWithQueryOptions update(String id, S entity, HttpMethod method) throws STACRUDException;
 
     void delete(String id) throws STACRUDException;
+
+    void setServiceRepository(EntityServiceRepository serviceRepository);
 }

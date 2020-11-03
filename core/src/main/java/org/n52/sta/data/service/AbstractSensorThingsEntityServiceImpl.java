@@ -99,7 +99,6 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     private final EntityManager em;
     private final Class<S> entityClass;
 
-    @Autowired
     private EntityServiceRepository serviceRepository;
 
     @Autowired
@@ -113,6 +112,10 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         this.em = em;
         this.entityClass = entityClass;
         this.repository = repository;
+    }
+
+    public void setServiceRepository(EntityServiceRepository serviceRepository) {
+        this.serviceRepository = serviceRepository;
     }
 
     /**
