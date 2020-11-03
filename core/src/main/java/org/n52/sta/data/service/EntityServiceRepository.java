@@ -93,45 +93,58 @@ public class EntityServiceRepository {
     public void postConstruct() {
         entityServices.put(EntityTypes.Thing, thingServiceFacade);
         entityServices.put(EntityTypes.Things, thingServiceFacade);
+        thingServiceFacade.setServiceRepository(this);
 
         entityServices.put(EntityTypes.Location, locationServiceFacade);
         entityServices.put(EntityTypes.Locations, locationServiceFacade);
+        locationServiceFacade.setServiceRepository(this);
 
         entityServices.put(EntityTypes.HistoricalLocation, historicalLocationService);
         entityServices.put(EntityTypes.HistoricalLocations, historicalLocationService);
+        historicalLocationService.setServiceRepository(this);
 
         entityServices.put(EntityTypes.Sensor, sensorService);
         entityServices.put(EntityTypes.Sensors, sensorService);
+        sensorService.setServiceRepository(this);
 
         entityServices.put(EntityTypes.Datastream, datastreamService);
         entityServices.put(EntityTypes.Datastreams, datastreamService);
+        datastreamService.setServiceRepository(this);
 
         entityServices.put(EntityTypes.Observation, observationService);
         entityServices.put(EntityTypes.Observations, observationService);
+        observationService.setServiceRepository(this);
 
         entityServices.put(EntityTypes.ObservedProperty, observedPropertyService);
         entityServices.put(EntityTypes.ObservedProperties, observedPropertyService);
+        observedPropertyService.setServiceRepository(this);
 
         entityServices.put(EntityTypes.FeatureOfInterest, featureOfInterestService);
         entityServices.put(EntityTypes.FeaturesOfInterest, featureOfInterestService);
+        featureOfInterestService.setServiceRepository(this);
 
         this.mqttSubscriptionEventHandler.setServiceRepository(this);
 
         if (obsGroupService != null) {
             entityServices.put(EntityTypes.ObservationGroup, obsGroupService);
             entityServices.put(EntityTypes.ObservationGroups, obsGroupService);
+            obsGroupService.setServiceRepository(this);
 
             entityServices.put(EntityTypes.ObservationRelation, obsRelationService);
             entityServices.put(EntityTypes.ObservationRelations, obsRelationService);
+            obsRelationService.setServiceRepository(this);
 
             entityServices.put(EntityTypes.License, licenseService);
             entityServices.put(EntityTypes.Licenses, licenseService);
+            licenseService.setServiceRepository(this);
 
             entityServices.put(EntityTypes.Party, partyService);
             entityServices.put(EntityTypes.Parties, partyService);
+            partyService.setServiceRepository(this);
 
             entityServices.put(EntityTypes.Project, projectService);
             entityServices.put(EntityTypes.Projects, projectService);
+            projectService.setServiceRepository(this);
 
         }
     }

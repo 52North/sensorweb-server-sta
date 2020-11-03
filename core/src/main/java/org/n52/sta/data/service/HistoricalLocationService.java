@@ -236,7 +236,7 @@ public class HistoricalLocationService
             throw new STACRUDException("The HistoricalLocation to create is invalid", HTTPStatus.BAD_REQUEST);
         }
     }
-    
+
     private HistoricalLocationEntity processThing(HistoricalLocationEntity historicalLocation)
         throws STACRUDException {
         PlatformEntity thing = getThingService().createOrfetch(historicalLocation.getThing());
