@@ -74,10 +74,9 @@ import java.util.Set;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentifierRepository<S>,
-    S extends HibernateRelations.HasId,
-    E extends S> implements AbstractSensorThingsEntityService<T, S, E> {
+    S extends HibernateRelations.HasId> implements AbstractSensorThingsEntityService<S> {
 
     // protected static final String IDENTIFIER = "identifier";
     protected static final String STAIDENTIFIER = "staIdentifier";
@@ -99,9 +98,13 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSensorThingsEntityServiceImpl.class);
     private final EntityManager em;
     private final Class<S> entityClass;
+
+    @Autowired
     private EntityServiceRepository serviceRepository;
+
     @Autowired
     private MutexFactory lock;
+
     private T repository;
 
     public AbstractSensorThingsEntityServiceImpl(T repository,
@@ -129,13 +132,13 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         }
     }
 
-    public abstract EntityTypes[] getTypes();
-
-    @Override public boolean existsEntity(String id) {
+    @Override
+    public boolean existsEntity(String id) {
         return getRepository().existsByStaIdentifier(id);
     }
 
-    @Override public ElementWithQueryOptions getEntity(String id, QueryOptions queryOptions) throws STACRUDException {
+    @Override
+    public ElementWithQueryOptions getEntity(String id, QueryOptions queryOptions) throws STACRUDException {
         try {
             S entity = getRepository().findByStaIdentifier(id, createFetchGraph(queryOptions.getExpandFilter())).get();
             if (queryOptions.hasExpandFilter()) {
@@ -197,10 +200,6 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         return getRepository().count(byRelatedEntityFilter(relatedId, relatedType, ownId)) > 0;
     }
 
-    @Override public T getRepository() {
-        return this.repository;
-    }
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ElementWithQueryOptions create(S entity) throws STACRUDException {
@@ -211,6 +210,10 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     @Transactional(rollbackFor = Exception.class)
     public ElementWithQueryOptions update(String id, S entity, HttpMethod method) throws STACRUDException {
         return this.createWrapper(updateEntity(id, entity, method), null);
+    }
+
+    protected T getRepository() {
+        return this.repository;
     }
 
     public S getEntityByIdRaw(Long id, QueryOptions queryOptions) throws STACRUDException {
@@ -331,7 +334,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
      * @throws STACRUDException         if an error occurred
      * @throws STAInvalidQueryException if the query is invalid
      */
-    protected abstract E fetchExpandEntitiesWithFilter(S entity, ExpandFilter expandOption)
+    protected abstract S fetchExpandEntitiesWithFilter(S entity, ExpandFilter expandOption)
         throws STACRUDException, STAInvalidQueryException;
 
     /**
@@ -410,10 +413,6 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         if (location.getStaIdentifier() == null || location.isSetName() || location.isSetDescription()) {
             throw new STACRUDException("Inlined location entities are not allowed for updates!");
         }
-    }
-
-    protected AbstractSensorThingsEntityService<?, ?, ?> getEntityService(EntityTypes type) {
-        return serviceRepository.getEntityService(type);
     }
 
     /**
@@ -548,38 +547,34 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     }
 
     LocationService getLocationService() {
-        return (LocationService) getEntityService(EntityTypes.Location);
+        return (LocationService) serviceRepository.getEntityServiceRaw(EntityTypes.Location);
     }
 
     HistoricalLocationService getHistoricalLocationService() {
-        return (HistoricalLocationService) getEntityService(EntityTypes.HistoricalLocation);
+        return (HistoricalLocationService) serviceRepository.getEntityServiceRaw(EntityTypes.HistoricalLocation);
     }
 
     DatastreamService getDatastreamService() {
-        return (DatastreamService) getEntityService(EntityTypes.Datastream);
+        return (DatastreamService) serviceRepository.getEntityServiceRaw(EntityTypes.Datastream);
     }
 
     FeatureOfInterestService getFeatureOfInterestService() {
-        return (FeatureOfInterestService) getEntityService(EntityTypes.FeatureOfInterest);
+        return (FeatureOfInterestService) serviceRepository.getEntityServiceRaw(EntityTypes.FeatureOfInterest);
     }
 
     ThingService getThingService() {
-        return (ThingService) getEntityService(EntityTypes.Thing);
+        return (ThingService) serviceRepository.getEntityServiceRaw(EntityTypes.Thing);
     }
 
     SensorService getSensorService() {
-        return (SensorService) getEntityService(EntityTypes.Sensor);
+        return (SensorService) serviceRepository.getEntityServiceRaw(EntityTypes.Sensor);
     }
 
     ObservedPropertyService getObservedPropertyService() {
-        return (ObservedPropertyService) getEntityService(EntityTypes.ObservedProperty);
+        return (ObservedPropertyService) serviceRepository.getEntityServiceRaw(EntityTypes.ObservedProperty);
     }
 
     ObservationService getObservationService() {
-        return (ObservationService) getEntityService(EntityTypes.Observation);
-    }
-
-    public void setServiceRepository(EntityServiceRepository serviceRepository) {
-        this.serviceRepository = serviceRepository;
+        return (ObservationService) serviceRepository.getEntityServiceRaw(EntityTypes.Observation);
     }
 }

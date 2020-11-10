@@ -5,6 +5,7 @@ trace: false
 # General Server Configuration
 server:
   port: 8081
+
   ## Used for response serialization + url parsing. Must be set correctly!
   rootUrl: "http://localhost:8081/sta/"
   servlet:
@@ -36,6 +37,9 @@ server:
     ## (currently PDF and SensorML2)
     ## Note: This only influences encodingType when SensorEntity is posted/patched directly, not when it is inserted via nested insertion inside a Datastream
     variableEncodingType: false
+
+    # Toggle whether information about SOS-specific Dataset->Category should be mapped to Datastream->properties->category
+    includeDatastreamCategory: false
 
     ## Defines if/how Observation->Parameters should be parsed and handled. Enabled by default, empty String disables the key.
     observation:
@@ -82,6 +86,8 @@ spring:
     password: postgres
     url: jdbc:postgresql://localhost:5000/sta
     initialization-mode: always
+    hikari:
+      maximum-pool-size: 10
   jpa:
     openInView: false
     properties:
@@ -126,9 +132,11 @@ mqtt:
   broker:
     plaintcp:
       enabled: true
+      host: "mqtt://localhost"
       port: 1883
     websocket:
       enabled: true
+      host: "ws://localhost"
       port: 8883
     persistence:
       enabled: false
