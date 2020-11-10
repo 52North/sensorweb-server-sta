@@ -115,7 +115,7 @@ public class DatastreamService extends
     @Autowired
     public DatastreamService(DatastreamRepository repository,
                              @Value("${server.feature.isMobile:false}") boolean isMobileFeatureEnabled,
-                             @Value("{server.feature.includeDatastreamCategory:false}")
+                             @Value("${server.feature.includeDatastreamCategory:false}")
                                  boolean includeDatastreamCategory,
                              UnitRepository unitRepository,
                              CategoryRepository categoryRepository,
