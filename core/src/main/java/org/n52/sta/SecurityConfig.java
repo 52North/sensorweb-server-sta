@@ -71,10 +71,11 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         super.configure(http);
         http.authorizeRequests()
-            .antMatchers(HttpMethod.POST).hasRole("POST")
-            .antMatchers(HttpMethod.PATCH).hasRole("PATCH")
-            .antMatchers(HttpMethod.DELETE).hasRole("DELETE")
-            .antMatchers(HttpMethod.GET).hasRole("GET")
-            .anyRequest().permitAll();
+            .antMatchers(HttpMethod.POST).hasRole("staPOST")
+            .antMatchers(HttpMethod.PATCH).hasRole("staPATCH")
+            .antMatchers(HttpMethod.DELETE).hasRole("staDELETE")
+            .antMatchers(HttpMethod.GET).hasRole("staGET")
+            .antMatchers(HttpMethod.OPTIONS).permitAll()
+            .anyRequest().denyAll();
     }
 }

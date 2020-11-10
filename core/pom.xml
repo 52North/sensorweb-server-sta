@@ -120,7 +120,15 @@
             <artifactId>jackson-module-afterburner</artifactId>
         </dependency>
 
-
+        <!-- Security -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-spring-security-adapter</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
