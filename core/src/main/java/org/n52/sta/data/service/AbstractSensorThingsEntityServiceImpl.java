@@ -231,7 +231,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
 
     protected CollectionWrapper createCollectionWrapperAndExpand(QueryOptions queryOptions, Page<S> pages) {
         if (queryOptions.hasExpandFilter()) {
-            Page expanded = pages.map(e -> {
+            Page<S> expanded = pages.map(e -> {
                 try {
                     em.detach(e);
                     return fetchExpandEntitiesWithFilter(e, queryOptions.getExpandFilter());
@@ -345,7 +345,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
      * @return instance of ElementWithQueryOptions
      */
     @Transactional(rollbackFor = Exception.class)
-    ElementWithQueryOptions createWrapper(Object entity, QueryOptions queryOptions) {
+    ElementWithQueryOptions createWrapper(S entity, QueryOptions queryOptions) {
         return ElementWithQueryOptions.from(entity, queryOptions);
     }
 
@@ -467,15 +467,19 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
      */
     public Specification<S> getFilterPredicate(Class entityClass, QueryOptions queryOptions) {
         return (root, query, builder) -> {
+            Predicate defaultFilter = builder.isNull(root.get(DataEntity.PROPERTY_PARENT));
             if (!queryOptions.hasFilterFilter()) {
-                return null;
+                // Filter out non-root observations
+                // e.g. Profile-/TrajectoryObservations
+                return defaultFilter;
             } else {
                 FilterFilter filterOption = queryOptions.getFilterFilter();
                 Expr filter = (Expr) filterOption.getFilter();
                 try {
                     HibernateSpatialCriteriaBuilderImpl staBuilder =
                         new HibernateSpatialCriteriaBuilderImpl((CriteriaBuilderImpl) builder);
-                    return (Predicate) filter.accept(new FilterExprVisitor<S>(root, query, staBuilder));
+                    return builder.and(defaultFilter,
+                                       (Predicate) filter.accept(new FilterExprVisitor<S>(root, query, staBuilder)));
                 } catch (STAInvalidQueryException e) {
                     throw new RuntimeException(e);
                 }

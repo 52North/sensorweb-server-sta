@@ -88,7 +88,11 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
     }
 
     public static Specification<DataEntity<?>> withDatasetId(final long datasetId) {
-        return (root, query, builder) -> builder.equal(root.get("datasetId"), datasetId);
+        return (root, query, builder) -> builder.equal(root.get(DataEntity.PROPERTY_DATASET_ID), datasetId);
+    }
+
+    public static Specification<DataEntity<?>> withParent(final long parentId) {
+        return (root, query, builder) -> builder.equal(root.get(DataEntity.PROPERTY_PARENT), parentId);
     }
 
     @Override protected Specification<DataEntity<?>> handleRelatedPropertyFilter(

@@ -261,20 +261,20 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<DataEntity<?>> impl
                                 } catch (ParseException e) {
                                     Assert.notNull(null, "Could not parse" + e.getMessage());
                                 }
-                                break;
+                                continue;
                             case "verticalFrom":
                                 // Add as verticalTo to enable interoperability with SOS
                                 self.setVerticalTo(BigDecimal.valueOf(jsonNode.asDouble()));
-                                break;
+                                continue;
                             case "verticalTo":
                                 // Add as verticalTo to enable interoperability with SOS
                                 self.setVerticalFrom(BigDecimal.valueOf(jsonNode.asDouble()));
-                                break;
+                                continue;
                             case "verticalFromTo":
                                 // Add as verticalTo to enable interoperability with SOS
                                 self.setVerticalTo(BigDecimal.valueOf(jsonNode.asDouble()));
                                 self.setVerticalFrom(BigDecimal.valueOf(jsonNode.asDouble()));
-                                break;
+                                continue;
                             default:
                                 throw new RuntimeException("Unable to parse Parameters!");
                         }

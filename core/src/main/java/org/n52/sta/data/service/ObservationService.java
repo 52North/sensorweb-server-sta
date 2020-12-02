@@ -29,18 +29,22 @@
 
 package org.n52.sta.data.service;
 
+import org.hibernate.Hibernate;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.BooleanDataEntity;
 import org.n52.series.db.beans.CategoryDataEntity;
+import org.n52.series.db.beans.CompositeDataEntity;
 import org.n52.series.db.beans.CountDataEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetAggregationEntity;
 import org.n52.series.db.beans.DatasetEntity;
+import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.SensorML20DataEntity;
 import org.n52.series.db.beans.TextDataEntity;
+import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.parameter.observation.ObservationParameterEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.filter.ExpandFilter;
@@ -150,6 +154,24 @@ public class ObservationService
         }
     }
 
+    @Override
+    public DataEntity<?> getEntityByIdRaw(Long id, QueryOptions queryOptions) throws STACRUDException {
+        DataEntity<?> entity = super.getEntityByIdRaw(id, queryOptions);
+        fetchValueIfCompositeDataEntity(entity);
+        return entity;
+    }
+
+    @Override
+    public DataEntity<?> getEntityByRelatedEntityRaw(String relatedId,
+                                                     String relatedType,
+                                                     String ownId,
+                                                     QueryOptions queryOptions) throws STACRUDException {
+        DataEntity<?> entity =
+            super.getEntityByRelatedEntityRaw(relatedId, relatedType, ownId, queryOptions);
+        fetchValueIfCompositeDataEntity(entity);
+        return entity;
+    }
+
     public Page getEntityCollectionByRelatedEntityRaw(String relatedId,
                                                       String relatedType,
                                                       QueryOptions queryOptions)
@@ -172,6 +194,8 @@ public class ObservationService
                                                     pageableRequest.getPageSize(),
                                                     pageableRequest.getSort()),
                     EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
+
+                pages.forEach(this::fetchValueIfCompositeDataEntity);
                 if (queryOptions.hasExpandFilter()) {
                     return pages.map(e -> {
                         try {
@@ -200,10 +224,6 @@ public class ObservationService
                                                           ExpandFilter expandOption)
         throws STACRUDException, STAInvalidQueryException {
         for (ExpandItem expandItem : expandOption.getItems()) {
-            // We handle all $expands individually as they need to be fetched via staIdentifier and not via fetchgraph
-            //if (!expandItem.getQueryOptions().hasFilterFilter()) {
-            //    break;
-            //}
             String expandProperty = expandItem.getPath();
             switch (expandProperty) {
                 case STAEntityDefinition.DATASTREAM:
@@ -416,6 +436,36 @@ public class ObservationService
         return existing;
     }
 
+    /**
+     * We touch DataEntity->value here to make sure it is fetched from the database and not lazy-loaded.
+     * We cannot fetch it ourselves as any assignment to entity->value will update the database (issue delete+insert
+     * statemenets).
+     *
+     * @param entity to be loaded
+     * @return entity with not-lazy-loaded value and value->parameters
+     */
+    private DataEntity<?> fetchValueIfCompositeDataEntity(DataEntity<?> entity) {
+        // We need to unproxy first to be able to check the type & access properties
+        // As we unproxy later anyway this is no overhead.
+        DataEntity<?> unproxy = (DataEntity<?>) Hibernate.unproxy(entity);
+        if (unproxy instanceof CompositeDataEntity) {
+            // touch each entity + it's parameters to make sure they are loaded
+            if (((Set<DataEntity<?>>) unproxy.getValue()).size() > 0) {
+                ((Set<DataEntity<?>>) unproxy.getValue()).forEach(DescribableEntity::getParameters);
+            }
+
+            // We cannot use em.detach()
+            //em.detach(entity);
+            /*
+            ((CompositeDataEntity) entity)
+                .setValue(new HashSet<>(getRepository().findAll(
+                    ObservationQuerySpecifications.withParent(entity.getId()),
+                    EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS)));
+            */
+        }
+        return unproxy;
+    }
+
     protected DataEntity castToConcreteObservationType(DataEntity<?> observation,
                                                        DatasetEntity dataset)
         throws STACRUDException {
@@ -467,12 +517,14 @@ public class ObservationService
                                                                          OffsetLimitBasedPageRequest pageableRequest,
                                                                          QueryOptions queryOptions,
                                                                          Specification<DataEntity<?>> spec) {
-        Page<DataEntity<?>> pages = getRepository().findAll(
-            oQS.withStaIdentifier(identifierList),
-            new OffsetLimitBasedPageRequest(0,
-                                            pageableRequest.getPageSize(),
-                                            pageableRequest.getSort()),
-            EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
+        Page<DataEntity<?>> pages = getRepository()
+            .findAll(
+                oQS.withStaIdentifier(identifierList),
+                new OffsetLimitBasedPageRequest(0,
+                                                pageableRequest.getPageSize(),
+                                                pageableRequest.getSort()),
+                EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS)
+            .map(this::fetchValueIfCompositeDataEntity);
 
         CollectionWrapper wrapper = createCollectionWrapperAndExpand(queryOptions, pages);
         // Create Page manually as we used Database Pagination and are not sure how many Entities there are in
@@ -587,7 +639,7 @@ public class ObservationService
         // Create feature based on Thing.location if there is no feature given
         if (!observation.hasFeature()) {
             AbstractFeatureEntity<?> feature = null;
-            LocationRepository locationRepository = (LocationRepository) getLocationService().getRepository();
+            LocationRepository locationRepository = getLocationService().getRepository();
             Set<LocationEntity> locations = locationRepository.findAllByPlatformsIdEquals(thingId);
             for (LocationEntity location : locations) {
                 if (feature == null) {

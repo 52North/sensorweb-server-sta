@@ -39,11 +39,16 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.ProfileDataEntity;
+import org.n52.series.db.beans.TrajectoryDataEntity;
 import org.n52.series.db.beans.parameter.JsonParameterEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
+import org.n52.shetland.filter.SelectFilter;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.model.ObservationEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.shetland.util.DateTimeHelper;
@@ -55,8 +60,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class ObservationSerDes {
 
@@ -89,6 +98,20 @@ public class ObservationSerDes {
 
         private static final long serialVersionUID = -4575044340713191285L;
 
+        private QueryOptions profileResultSchema =
+            new QueryOptions("",
+                             Collections.singleton(new SelectFilter(new HashSet<>(
+                                 Arrays.asList(StaConstants.PROP_RESULT,
+                                               StaConstants.PROP_PARAMETERS)))));
+        private QueryOptions trajectoryResultSchema =
+            new QueryOptions("",
+                             Collections.singleton(new SelectFilter(new HashSet<>(
+                                 Arrays.asList(StaConstants.PROP_RESULT,
+                                               StaConstants.PROP_PARAMETERS,
+                                               StaConstants.PROP_PHENOMENON_TIME,
+                                               StaConstants.PROP_RESULT_TIME,
+                                               StaConstants.PROP_VALID_TIME)))));
+
         public ObservationSerializer(String rootUrl, boolean implicitExpand, String... activeExtensions) {
             super(ObservationWithQueryOptions.class, implicitExpand, activeExtensions);
             this.rootUrl = rootUrl;
@@ -112,8 +135,22 @@ public class ObservationSerDes {
 
             // actual properties
             if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_RESULT)) {
-                gen.writeStringField(STAEntityDefinition.PROP_RESULT, observation.getValue().toString());
+                gen.writeFieldName(STAEntityDefinition.PROP_RESULT);
+                if (observation instanceof ProfileDataEntity) {
+                    writeNestedCollection((Set<?>) observation.getValue(),
+                                          profileResultSchema,
+                                          gen,
+                                          serializers);
+                } else if (observation instanceof TrajectoryDataEntity) {
+                    writeNestedCollection((Set<?>) observation.getValue(),
+                                          trajectoryResultSchema,
+                                          gen,
+                                          serializers);
+                } else {
+                    gen.writeRawValue(observation.getValue().toString());
+                }
             }
+
             if (!value.hasSelectOption() ||
                 value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_RESULT_TIME)) {
                 if (observation.hasResultTime()) {
