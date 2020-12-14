@@ -30,6 +30,7 @@
 package org.n52.sta.data.service;
 
 import org.hibernate.Hibernate;
+import org.hibernate.query.criteria.internal.CriteriaBuilderImpl;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.AbstractFeatureEntity;
@@ -40,15 +41,14 @@ import org.n52.series.db.beans.CountDataEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetAggregationEntity;
 import org.n52.series.db.beans.DatasetEntity;
-import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.SensorML20DataEntity;
 import org.n52.series.db.beans.TextDataEntity;
-import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.parameter.observation.ObservationParameterEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
+import org.n52.shetland.filter.FilterFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.om.OmConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
@@ -63,6 +63,9 @@ import org.n52.sta.data.repositories.LocationRepository;
 import org.n52.sta.data.repositories.ObservationParameterRepository;
 import org.n52.sta.data.repositories.ObservationRepository;
 import org.n52.sta.data.service.util.CollectionWrapper;
+import org.n52.sta.data.service.util.FilterExprVisitor;
+import org.n52.sta.data.service.util.HibernateSpatialCriteriaBuilderImpl;
+import org.n52.svalbard.odata.core.expr.Expr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,6 +77,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import javax.persistence.criteria.Predicate;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
@@ -391,6 +395,30 @@ public class ObservationService
     }
 
     @Override
+    public Specification<DataEntity<?>> getFilterPredicate(Class entityClass, QueryOptions queryOptions) {
+        return (root, query, builder) -> {
+            Predicate defaultFilter = builder.isNull(root.get(DataEntity.PROPERTY_PARENT));
+            if (!queryOptions.hasFilterFilter()) {
+                // Filter out non-root observations
+                // e.g. Profile-/TrajectoryObservations
+                return defaultFilter;
+            } else {
+                FilterFilter filterOption = queryOptions.getFilterFilter();
+                Expr filter = (Expr) filterOption.getFilter();
+                try {
+                    HibernateSpatialCriteriaBuilderImpl staBuilder =
+                        new HibernateSpatialCriteriaBuilderImpl((CriteriaBuilderImpl) builder);
+                    return builder.and(defaultFilter,
+                                       (Predicate) filter.accept(
+                                           new FilterExprVisitor<DataEntity<?>>(root, query, staBuilder)));
+                } catch (STAInvalidQueryException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
+    }
+
+    @Override
     public String checkPropertyName(String property) {
         return oQS.checkPropertyName(property);
     }
@@ -451,7 +479,9 @@ public class ObservationService
         if (unproxy instanceof CompositeDataEntity) {
             // touch each entity + it's parameters to make sure they are loaded
             if (((Set<DataEntity<?>>) unproxy.getValue()).size() > 0) {
-                ((Set<DataEntity<?>>) unproxy.getValue()).forEach(DescribableEntity::getParameters);
+                ((Set<DataEntity<?>>) unproxy.getValue()).forEach(e -> {
+                    e.getParameters().forEach(Hibernate::unproxy);
+                });
             }
 
             // We cannot use em.detach()

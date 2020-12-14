@@ -467,19 +467,17 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
      */
     public Specification<S> getFilterPredicate(Class entityClass, QueryOptions queryOptions) {
         return (root, query, builder) -> {
-            Predicate defaultFilter = builder.isNull(root.get(DataEntity.PROPERTY_PARENT));
             if (!queryOptions.hasFilterFilter()) {
                 // Filter out non-root observations
                 // e.g. Profile-/TrajectoryObservations
-                return defaultFilter;
+                return null;
             } else {
                 FilterFilter filterOption = queryOptions.getFilterFilter();
                 Expr filter = (Expr) filterOption.getFilter();
                 try {
                     HibernateSpatialCriteriaBuilderImpl staBuilder =
                         new HibernateSpatialCriteriaBuilderImpl((CriteriaBuilderImpl) builder);
-                    return builder.and(defaultFilter,
-                                       (Predicate) filter.accept(new FilterExprVisitor<S>(root, query, staBuilder)));
+                    return (Predicate) filter.accept(new FilterExprVisitor<S>(root, query, staBuilder));
                 } catch (STAInvalidQueryException e) {
                     throw new RuntimeException(e);
                 }
