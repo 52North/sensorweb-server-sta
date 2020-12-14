@@ -177,7 +177,7 @@ public class JSONBase {
                             // fallthru
                         case POJO:
                             parameterEntity = ParameterFactory.from(entityType, ParameterFactory.ValueType.JSON);
-                            parameterEntity.setValue(value.asText());
+                            parameterEntity.setValue(value.toString());
                             break;
                         case BINARY:
                             // fallthru
