@@ -39,7 +39,6 @@ import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.shetland.ogc.gml.time.Time;
-import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.model.DatastreamEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.shetland.util.DateTimeHelper;
@@ -83,7 +82,7 @@ public class DatastreamSerDes {
         private static final GeoJsonWriter GEO_JSON_WRITER = new GeoJsonWriter();
         private static final long serialVersionUID = -6555417490577181829L;
         private final boolean includeDatastreamCategory;
-        private final String categoryPrefix = "category_";
+        private final String categoryPrefix = "category";
 
         public DatastreamSerializer(String rootUrl,
                                     boolean implicitExpand,
@@ -176,11 +175,11 @@ public class DatastreamSerDes {
                 gen.writeObjectFieldStart(STAEntityDefinition.PROP_PROPERTIES);
                 if (includeDatastreamCategory) {
                     // Add Category to parameters
-                    gen.writeNumberField(categoryPrefix + StaConstants.PROP_ID,
+                    gen.writeNumberField(categoryPrefix + "Id",
                                          datastream.getCategory().getId());
-                    gen.writeStringField(categoryPrefix + StaConstants.PROP_NAME,
+                    gen.writeStringField(categoryPrefix + "Name",
                                          datastream.getCategory().getName());
-                    gen.writeStringField(categoryPrefix + StaConstants.PROP_DESCRIPTION,
+                    gen.writeStringField(categoryPrefix + "Description",
                                          datastream.getCategory().getDescription());
                 }
                 if (datastream.hasParameters()) {
