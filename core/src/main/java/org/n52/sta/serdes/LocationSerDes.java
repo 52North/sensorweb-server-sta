@@ -127,8 +127,6 @@ public class LocationSerDes {
                         gen.writeObjectField(parameter.getName(), parameter.getValue());
                     }
                     gen.writeEndObject();
-                } else {
-                    gen.writeNullField(STAEntityDefinition.PROP_PROPERTIES);
                 }
             }
 

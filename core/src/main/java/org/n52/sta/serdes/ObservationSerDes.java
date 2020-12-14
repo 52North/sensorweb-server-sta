@@ -156,8 +156,6 @@ public class ObservationSerDes {
                 if (observation.hasResultTime()) {
                     gen.writeStringField(STAEntityDefinition.PROP_RESULT_TIME,
                                          observation.getResultTime().toInstant().toString());
-                } else {
-                    gen.writeNullField(STAEntityDefinition.PROP_RESULT_TIME);
                 }
             }
             if (!value.hasSelectOption() ||
@@ -166,25 +164,24 @@ public class ObservationSerDes {
                 gen.writeStringField(STAEntityDefinition.PROP_PHENOMENON_TIME, phenomenonTime);
             }
 
+            /*
             if (!value.hasSelectOption() ||
                 value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_RESULT_QUALITY)) {
-                gen.writeNullField(STAEntityDefinition.PROP_RESULT_QUALITY);
             }
+            */
 
             if (!value.hasSelectOption() ||
                 value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_VALID_TIME)) {
                 if (observation.isSetValidTime()) {
                     gen.writeStringField(STAEntityDefinition.PROP_VALID_TIME,
                                          DateTimeHelper.format(createValidTime(observation)));
-                } else {
-                    gen.writeNullField(STAEntityDefinition.PROP_VALID_TIME);
                 }
             }
 
             if (!value.hasSelectOption() ||
                 value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PARAMETERS)) {
-                gen.writeObjectFieldStart(STAEntityDefinition.PROP_PARAMETERS);
                 if (observation.hasParameters()) {
+                    gen.writeObjectFieldStart(STAEntityDefinition.PROP_PARAMETERS);
                     for (ParameterEntity<?> parameter : observation.getParameters()) {
                         if (parameter instanceof JsonParameterEntity) {
                             ObjectMapper mapper = new ObjectMapper();
@@ -193,8 +190,8 @@ public class ObservationSerDes {
                             gen.writeStringField(parameter.getName(), parameter.getValueAsString());
                         }
                     }
+                    gen.writeEndObject();
                 }
-                gen.writeEndObject();
             }
 
             // navigation properties
