@@ -98,13 +98,10 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSensorThingsEntityServiceImpl.class);
     private final EntityManager em;
     private final Class<S> entityClass;
-
-    @Autowired
     private EntityServiceRepository serviceRepository;
 
     @Autowired
     private MutexFactory lock;
-
     private T repository;
 
     public AbstractSensorThingsEntityServiceImpl(T repository,
@@ -113,6 +110,10 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         this.em = em;
         this.entityClass = entityClass;
         this.repository = repository;
+    }
+
+    public void setServiceRepository(EntityServiceRepository serviceRepository) {
+        this.serviceRepository = serviceRepository;
     }
 
     /**
