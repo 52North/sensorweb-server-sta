@@ -79,11 +79,11 @@ spring:
     # here 'sta' is the name of the database
     url: jdbc:postgresql://localhost:5432/sta
     initialization-mode: always
-  hikari:
-    connection-timeout: 20000
-    maximum-pool-size: 10
-    minimum-idle: 5
-    idle-timeout: 300000 
+    hikari:
+      connection-timeout: 20000
+      maximum-pool-size: 10
+      minimum-idle: 5
+      idle-timeout: 300000
   jpa:
     openInView: false
     properties:
