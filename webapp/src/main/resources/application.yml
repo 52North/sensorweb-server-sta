@@ -4,11 +4,11 @@ trace: false
 
 # General Server Configuration
 server:
-  port: 8081
+  port: 8080
   ## Used for response serialization + url parsing. Must be set correctly!
-  rootUrl: "http://localhost:8081/sta/"
+  rootUrl: "http://localhost:8081/52n-sensorthings-webapp/"
   servlet:
-    context-path: "/sta"
+    context-path: "/52n-sensorthings-webapp"
 
   ## Used for enabling/disabling custom 52N-STA Features
   feature:
