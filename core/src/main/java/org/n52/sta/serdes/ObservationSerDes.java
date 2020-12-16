@@ -40,6 +40,7 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.HibernateRelations;
 import org.n52.series.db.beans.ProfileDataEntity;
 import org.n52.series.db.beans.TrajectoryDataEntity;
 import org.n52.series.db.beans.parameter.JsonParameterEntity;
@@ -61,12 +62,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 public class ObservationSerDes {
 
@@ -139,12 +143,13 @@ public class ObservationSerDes {
             if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_RESULT)) {
                 gen.writeFieldName(STAEntityDefinition.PROP_RESULT);
                 if (observation instanceof ProfileDataEntity) {
-                    writeNestedCollection((Set<?>) observation.getValue(),
+
+                    writeNestedCollection(sortValuesByPhenomenonTime((Set<DataEntity<?>>) observation.getValue()),
                                           profileResultSchema,
                                           gen,
                                           serializers);
                 } else if (observation instanceof TrajectoryDataEntity) {
-                    writeNestedCollection((Set<?>) observation.getValue(),
+                    writeNestedCollection(sortValuesByVerticalFrom((Set<DataEntity<?>>) observation.getValue()),
                                           trajectoryResultSchema,
                                           gen,
                                           serializers);
@@ -277,6 +282,18 @@ public class ObservationSerDes {
                 return new TimePeriod(start, end);
             }
         }
+
+        private TreeSet sortValuesByPhenomenonTime(Set<DataEntity<?>> values) {
+            ArrayList<DataEntity<?>> vals = new ArrayList<>(values);
+            vals.sort(Comparator.comparing(HibernateRelations.HasPhenomenonTime::getPhenomenonTimeStart));
+            return new TreeSet(vals);
+        }
+
+        private TreeSet sortValuesByVerticalFrom(Set<DataEntity<?>> values) {
+            ArrayList<DataEntity<?>> vals = new ArrayList<>(values);
+            vals.sort(Comparator.comparing(DataEntity::getVerticalFrom));
+            return new TreeSet(vals);
+        }
     }
 
 
@@ -297,6 +314,7 @@ public class ObservationSerDes {
                 .toEntity(JSONBase.EntityType.FULL);
         }
     }
+
 
     public static class ObservationPatchDeserializer extends StdDeserializer<ObservationEntityPatch> {
 
