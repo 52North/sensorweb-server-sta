@@ -38,6 +38,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.ProfileDataEntity;
 import org.n52.series.db.beans.TrajectoryDataEntity;
@@ -97,6 +98,7 @@ public class ObservationSerDes {
         extends AbstractSTASerializer<ObservationWithQueryOptions, DataEntity<?>> {
 
         private static final long serialVersionUID = -4575044340713191285L;
+        private static final GeoJsonWriter GEO_JSON_WRITER = new GeoJsonWriter();
 
         private QueryOptions profileResultSchema =
             new QueryOptions("",
@@ -183,14 +185,25 @@ public class ObservationSerDes {
 
             if (!value.hasSelectOption() ||
                 value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PARAMETERS)) {
-                if (observation.hasParameters()) {
+                if (observation.isSetGeometryEntity() || observation.hasParameters() || observation.hasVerticalFrom()) {
                     gen.writeObjectFieldStart(STAEntityDefinition.PROP_PARAMETERS);
-                    for (ParameterEntity<?> parameter : observation.getParameters()) {
-                        if (parameter instanceof JsonParameterEntity) {
-                            ObjectMapper mapper = new ObjectMapper();
-                            gen.writeObjectField(parameter.getName(), mapper.readTree(parameter.getValueAsString()));
-                        } else {
-                            gen.writeStringField(parameter.getName(), parameter.getValueAsString());
+                    if (observation.hasVerticalFrom()) {
+                        gen.writeNumberField("verticalFrom", observation.getVerticalFrom());
+                        gen.writeNumberField("verticalTo", observation.getVerticalTo());
+                    }
+                    if (observation.isSetGeometryEntity()) {
+                        gen.writeFieldName("http://www.opengis.net/def/param-name/OGC-OM/2.0/samplingGeometry");
+                        gen.writeRawValue(GEO_JSON_WRITER.write(observation.getGeometryEntity().getGeometry()));
+                    }
+                    if (observation.hasParameters()) {
+                        for (ParameterEntity<?> parameter : observation.getParameters()) {
+                            if (parameter instanceof JsonParameterEntity) {
+                                ObjectMapper mapper = new ObjectMapper();
+                                gen.writeObjectField(parameter.getName(),
+                                                     mapper.readTree(parameter.getValueAsString()));
+                            } else {
+                                gen.writeStringField(parameter.getName(), parameter.getValueAsString());
+                            }
                         }
                     }
                     gen.writeEndObject();
@@ -284,7 +297,6 @@ public class ObservationSerDes {
                 .toEntity(JSONBase.EntityType.FULL);
         }
     }
-
 
     public static class ObservationPatchDeserializer extends StdDeserializer<ObservationEntityPatch> {
 

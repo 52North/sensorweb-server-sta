@@ -31,6 +31,7 @@ package org.n52.sta.serdes.json;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.joda.time.DateTime;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -62,7 +63,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<DataEntity<?>> impl
     public String result;
     public Object resultQuality;
     public String validTime;
-    public JsonNode parameters;
+    public ObjectNode parameters;
 
     @JsonManagedReference
     public JSONFeatureOfInterest FeatureOfInterest;
@@ -265,10 +266,16 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<DataEntity<?>> impl
                             case "verticalFrom":
                                 // Add as verticalTo to enable interoperability with SOS
                                 self.setVerticalTo(BigDecimal.valueOf(jsonNode.asDouble()));
+                                if (!self.hasVerticalFrom()) {
+                                    self.setVerticalFrom(self.getVerticalTo());
+                                }
                                 continue;
                             case "verticalTo":
                                 // Add as verticalTo to enable interoperability with SOS
                                 self.setVerticalFrom(BigDecimal.valueOf(jsonNode.asDouble()));
+                                if (!self.hasVerticalTo()) {
+                                    self.setVerticalTo(self.getVerticalFrom());
+                                }
                                 continue;
                             case "verticalFromTo":
                                 // Add as verticalTo to enable interoperability with SOS
@@ -280,6 +287,10 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<DataEntity<?>> impl
                         }
                     }
                 }
+            }
+            // Remove parameters
+            for (Map.Entry<String, String> mapping : propertyMapping.entrySet()) {
+                parameters.remove(mapping.getValue());
             }
         }
         return this;
