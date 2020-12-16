@@ -7,9 +7,9 @@ server:
   port: 8081
 
   ## Used for response serialization + url parsing. Must be set correctly!
-  rootUrl: "http://localhost:8081/sta/"
+  rootUrl: "http://localhost:8081/v1.1/"
   servlet:
-    context-path: "/sta"
+    context-path: "/v1.1"
 
   ## Used for enabling/disabling custom 52N-STA Features
   feature:
