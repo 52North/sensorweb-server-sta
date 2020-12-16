@@ -147,7 +147,7 @@ public class ObservationSerDes {
                                           gen,
                                           serializers);
                 } else {
-                    gen.writeRawValue(observation.getValue().toString());
+                    gen.writeString(observation.getValue().toString());
                 }
             }
 
@@ -156,6 +156,9 @@ public class ObservationSerDes {
                 if (observation.hasResultTime()) {
                     gen.writeStringField(STAEntityDefinition.PROP_RESULT_TIME,
                                          observation.getResultTime().toInstant().toString());
+                } else {
+                    // resultTime is mandatory (but null is allowed) so it must be serialized
+                    gen.writeNullField(STAEntityDefinition.PROP_RESULT_TIME);
                 }
             }
             if (!value.hasSelectOption() ||

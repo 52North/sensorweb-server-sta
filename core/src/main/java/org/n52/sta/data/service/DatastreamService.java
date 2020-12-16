@@ -506,7 +506,7 @@ public class DatastreamService extends
         dataset.setPlatform(datastream.getThing());
         dataset.setUnit(datastream.getUnit());
         dataset.setOMObservationType(datastream.getOMObservationType());
-        dataset.setParameters(datastream.getParameters());
+        // dataset.setParameters(datastream.getParameters());
         if (datastream.getId() != null) {
             dataset.setAggregation(datastream);
         }
