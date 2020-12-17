@@ -101,14 +101,15 @@ public class ObservationSerDes {
     public static class ObservationSerializer
         extends AbstractSTASerializer<ObservationWithQueryOptions, DataEntity<?>> {
 
+        protected static final String VERTICAL = "vertical";
         private static final long serialVersionUID = -4575044340713191285L;
         private static final GeoJsonWriter GEO_JSON_WRITER = new GeoJsonWriter();
-
         private QueryOptions profileResultSchema =
             new QueryOptions("",
                              Collections.singleton(new SelectFilter(new HashSet<>(
                                  Arrays.asList(StaConstants.PROP_RESULT,
-                                               StaConstants.PROP_PARAMETERS)))));
+                                               StaConstants.PROP_PARAMETERS,
+                                               VERTICAL)))));
         private QueryOptions trajectoryResultSchema =
             new QueryOptions("",
                              Collections.singleton(new SelectFilter(new HashSet<>(
@@ -190,9 +191,11 @@ public class ObservationSerDes {
 
             if (!value.hasSelectOption() ||
                 value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PARAMETERS)) {
-                if (observation.isSetGeometryEntity() || observation.hasParameters() || observation.hasVerticalFrom()) {
+                if (observation.isSetGeometryEntity() ||
+                    observation.hasParameters() ||
+                    value.getFieldsToSerialize().contains(VERTICAL)) {
                     gen.writeObjectFieldStart(STAEntityDefinition.PROP_PARAMETERS);
-                    if (observation.hasVerticalFrom()) {
+                    if (value.getFieldsToSerialize().contains(VERTICAL)) {
                         gen.writeNumberField("verticalFrom", observation.getVerticalFrom());
                         gen.writeNumberField("verticalTo", observation.getVerticalTo());
                     }
