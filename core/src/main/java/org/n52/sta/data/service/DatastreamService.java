@@ -465,6 +465,9 @@ public class DatastreamService extends
             // Persist parent
             AbstractDatasetEntity aggregation = getRepository().intermediateSave(parent);
 
+            //TODO: check is this is compatible with the SOS
+            datastream.getParameters().forEach(parameterEntity -> parameterEntity.setDescribeableEntity(aggregation));
+
             // update existing datastream with new parent
             datastream.setAggregation(aggregation);
             getRepository().intermediateSave(datastream);
@@ -504,6 +507,7 @@ public class DatastreamService extends
         dataset.setProcedure(datastream.getProcedure());
         dataset.setOffering(offering);
         dataset.setPlatform(datastream.getThing());
+        dataset.setGeometryEntity(datastream.getGeometryEntity());
         dataset.setUnit(datastream.getUnit());
         dataset.setOMObservationType(datastream.getOMObservationType());
         // dataset.setParameters(datastream.getParameters());

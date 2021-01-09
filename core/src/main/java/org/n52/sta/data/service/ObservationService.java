@@ -231,10 +231,7 @@ public class ObservationService
             switch (expandProperty) {
                 case STAEntityDefinition.DATASTREAM:
                     DatasetEntity datastream = (DatasetEntity) getDatastreamService()
-                        .getEntityByRelatedEntityRaw(returned.getStaIdentifier(),
-                                                     STAEntityDefinition.OBSERVATIONS,
-                                                     null,
-                                                     expandItem.getQueryOptions());
+                        .getEntityByIdRaw(returned.getDataset().getId(), expandItem.getQueryOptions());
                     returned.setDataset(datastream);
                     break;
                 case STAEntityDefinition.FEATURE_OF_INTEREST:
