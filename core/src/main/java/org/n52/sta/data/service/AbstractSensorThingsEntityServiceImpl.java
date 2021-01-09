@@ -104,6 +104,12 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     private MutexFactory lock;
     private T repository;
 
+    protected AbstractSensorThingsEntityServiceImpl() {
+        this.em = null;
+        this.entityClass = null;
+        this.repository = null;
+    }
+
     public AbstractSensorThingsEntityServiceImpl(T repository,
                                                  EntityManager em,
                                                  Class entityClass) {

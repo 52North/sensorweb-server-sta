@@ -69,6 +69,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
@@ -92,6 +93,7 @@ import java.util.stream.Collectors;
 @Component
 @DependsOn({"springApplicationContext"})
 @Transactional
+@Profile("!ufz-aggregata")
 public class ObservationService
     extends AbstractSensorThingsEntityServiceImpl<ObservationRepository<DataEntity<?>>, DataEntity<?>> {
 
@@ -112,6 +114,13 @@ public class ObservationService
         this.entityClass = DataEntity.class;
         this.datastreamRepository = datastreamRepository;
         this.parameterRepository = parameterRepository;
+    }
+
+    public ObservationService() {
+        super();
+        this.entityClass = null;
+        this.datastreamRepository = null;
+        this.parameterRepository = null;
     }
 
     @Override
