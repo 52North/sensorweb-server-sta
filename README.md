@@ -47,7 +47,7 @@ Next Key Milestones:
 ## Setup
 ### Docker
 The latest Docker Images are available on [DockerHub](https://hub.docker.com/r/52north/sensorweb-server-sta)
-A complete demo setup is provided via a [docker-compose file](https://github.com/52North/sensorweb-server-sta/docker-compose.yml)
+A complete demo setup is provided via a [docker-compose file](docker-compose.yml)
 
 ### JAR/WAR Packaging
 The latest jar/war packages are available via the GitHub [Releases](https://github.com/52North/sensorweb-server-sta/releases)
