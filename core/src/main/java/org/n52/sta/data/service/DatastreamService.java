@@ -509,7 +509,9 @@ public class DatastreamService extends
             AbstractDatasetEntity aggregation = getRepository().intermediateSave(parent);
 
             //TODO: check is this is compatible with the SOS
-            datastream.getParameters().forEach(parameterEntity -> parameterEntity.setEntity(aggregation));
+            if (datastream.hasParameters()) {
+                datastream.getParameters().forEach(parameterEntity -> parameterEntity.setEntity(aggregation));
+            }
 
             // update existing datastream with new parent
             datastream.setAggregation(aggregation);
