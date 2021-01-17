@@ -59,7 +59,6 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
-import org.n52.sta.data.query.ObservationQuerySpecifications;
 import org.n52.sta.data.repositories.CategoryRepository;
 import org.n52.sta.data.repositories.DatastreamParameterRepository;
 import org.n52.sta.data.repositories.DatastreamRepository;
@@ -100,10 +99,10 @@ public class DatastreamService extends
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatastreamService.class);
     private static final DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
-    private static final ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
     private static final String UNKNOWN = "unknown";
 
     private final boolean isMobileFeatureEnabled;
+    private final boolean includeDatastreamCategory;
 
     private final UnitRepository unitRepository;
     private final CategoryRepository categoryRepository;
@@ -116,6 +115,8 @@ public class DatastreamService extends
     @Autowired
     public DatastreamService(DatastreamRepository repository,
                              @Value("${server.feature.isMobile:false}") boolean isMobileFeatureEnabled,
+                             @Value("${server.feature.includeDatastreamCategory:false}")
+                                 boolean includeDatastreamCategory,
                              UnitRepository unitRepository,
                              CategoryRepository categoryRepository,
                              ObservationRepository observationRepository,
@@ -127,6 +128,8 @@ public class DatastreamService extends
               em,
               AbstractDatasetEntity.class);
         this.isMobileFeatureEnabled = isMobileFeatureEnabled;
+        this.includeDatastreamCategory = includeDatastreamCategory;
+
         this.unitRepository = unitRepository;
         this.observationRepository = observationRepository;
         this.parameterRepository = parameterRepository;
@@ -141,6 +144,9 @@ public class DatastreamService extends
         fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_OM_OBS_TYPE);
         fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_UOM);
         fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
+        if (includeDatastreamCategory) {
+            fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_CATEGORY);
+        }
         if (expandOption != null) {
             for (ExpandItem expandItem : expandOption.getItems()) {
                 // We cannot handle nested $filter or $expand
@@ -502,6 +508,9 @@ public class DatastreamService extends
             // Persist parent
             AbstractDatasetEntity aggregation = getRepository().intermediateSave(parent);
 
+            //TODO: check is this is compatible with the SOS
+            datastream.getParameters().forEach(parameterEntity -> parameterEntity.setEntity(aggregation));
+
             // update existing datastream with new parent
             datastream.setAggregation(aggregation);
             getRepository().intermediateSave(datastream);
@@ -544,9 +553,10 @@ public class DatastreamService extends
         dataset.setParty(datastream.getParty());
         dataset.setProject(datastream.getProject());
         dataset.setLicense(datastream.getLicense());
+        dataset.setGeometryEntity(datastream.getGeometryEntity());
         dataset.setUnit(datastream.getUnit());
         dataset.setOMObservationType(datastream.getOMObservationType());
-        dataset.setParameters(datastream.getParameters());
+        // dataset.setParameters(datastream.getParameters());
         if (datastream.getId() != null) {
             dataset.setAggregation(datastream);
         }

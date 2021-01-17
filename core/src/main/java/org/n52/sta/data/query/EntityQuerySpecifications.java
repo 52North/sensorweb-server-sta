@@ -66,6 +66,8 @@ public abstract class EntityQuerySpecifications<T> {
     protected static final String COULD_NOT_FIND_RELATED_PROPERTY = "Could not find related property: ";
     protected static final String ERROR_GETTING_FILTER_NO_PROP = "Error getting filter for Property: '%s'. No such " +
         "property in Entity.";
+    protected static final String ERROR_GETTING_FILTER_NO_PROP_OR_WRONG_TYPE =
+        "Error getting filter for Property: '%s'. No such property with type %s in Entity.";
 
     private static final String ERROR_TEMPLATE = "Operator \"%s\" is not supported for given arguments.";
     private static final String INVALID_DATATYPE_CANNOT_CAST = "Invalid Datatypes found. Cannot cast ";
@@ -249,7 +251,8 @@ public abstract class EntityQuerySpecifications<T> {
                 );
             return builder.in(root.get(DescribableEntity.PROPERTY_ID)).value(subquery);
         } else {
-            return builder.isNotNull(root.get(DescribableEntity.PROPERTY_ID));
+            throw new STAInvalidFilterExpressionException(
+                String.format(ERROR_GETTING_FILTER_NO_PROP_OR_WRONG_TYPE, key, "String"));
         }
     }
 

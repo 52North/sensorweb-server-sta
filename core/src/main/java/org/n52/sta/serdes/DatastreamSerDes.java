@@ -81,9 +81,15 @@ public class DatastreamSerDes {
 
         private static final GeoJsonWriter GEO_JSON_WRITER = new GeoJsonWriter();
         private static final long serialVersionUID = -6555417490577181829L;
+        private final boolean includeDatastreamCategory;
+        private final String categoryPrefix = "category";
 
-        public DatastreamSerializer(String rootUrl, boolean implicitExpand, String... activeExtensions) {
+        public DatastreamSerializer(String rootUrl,
+                                    boolean implicitExpand,
+                                    boolean includeDatastreamCategory,
+                                    String... activeExtensions) {
             super(DatastreamWithQueryOptions.class, implicitExpand, activeExtensions);
+            this.includeDatastreamCategory = includeDatastreamCategory;
             this.rootUrl = rootUrl;
             this.entitySetName = DatastreamEntityDefinition.ENTITY_SET_NAME;
         }
@@ -152,8 +158,6 @@ public class DatastreamSerDes {
                                                     TimeUtil.createDateTime(datastream.getResultTimeEnd()));
                     gen.writeStringField(STAEntityDefinition.PROP_RESULT_TIME,
                                          DateTimeHelper.format(time));
-                } else {
-                    gen.writeNullField(STAEntityDefinition.PROP_RESULT_TIME);
                 }
             }
             if (!value.hasSelectOption() ||
@@ -163,22 +167,27 @@ public class DatastreamSerDes {
                                                     TimeUtil.createDateTime(datastream.getSamplingTimeEnd()));
                     gen.writeStringField(STAEntityDefinition.PROP_PHENOMENON_TIME,
                                          DateTimeHelper.format(time));
-                } else {
-                    gen.writeNullField(STAEntityDefinition.PROP_PHENOMENON_TIME);
                 }
             }
 
             if (!value.hasSelectOption() ||
                 value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PROPERTIES)) {
+                gen.writeObjectFieldStart(STAEntityDefinition.PROP_PROPERTIES);
+                if (includeDatastreamCategory) {
+                    // Add Category to parameters
+                    gen.writeNumberField(categoryPrefix + "Id",
+                                         datastream.getCategory().getId());
+                    gen.writeStringField(categoryPrefix + "Name",
+                                         datastream.getCategory().getName());
+                    gen.writeStringField(categoryPrefix + "Description",
+                                         datastream.getCategory().getDescription());
+                }
                 if (datastream.hasParameters()) {
-                    gen.writeObjectFieldStart(STAEntityDefinition.PROP_PROPERTIES);
                     for (ParameterEntity<?> parameter : datastream.getParameters()) {
                         gen.writeObjectField(parameter.getName(), parameter.getValue());
                     }
-                    gen.writeEndObject();
-                } else {
-                    gen.writeNullField(STAEntityDefinition.PROP_PROPERTIES);
                 }
+                gen.writeEndObject();
             }
 
             // navigation properties

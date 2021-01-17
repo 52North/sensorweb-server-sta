@@ -149,6 +149,14 @@ public class EntityServiceRepository {
         }
     }
 
+    @PostConstruct
+    private void initServices() {
+        // Set the
+        entityServices.forEach(
+            (t, e) -> ((AbstractSensorThingsEntityServiceImpl) e.getServiceImpl()).setServiceRepository(this)
+        );
+    }
+
     /**
      * Provides an entity data service for a entity type
      *

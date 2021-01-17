@@ -86,6 +86,7 @@ public class JacksonConfig {
         @Value("${server.feature.observation.verticalTo}") String verticalToMapping,
         @Value("${server.feature.observation.verticalFromTo}") String verticalFromToMapping,
         @Value("${server.feature.implicitExpand:false}") boolean implicitExpand,
+        @Value("${server.feature.includeDatastreamCategory:false}") boolean includeDatastreamCategory,
         Environment environment
     ) {
         Map<String, String> parameterMapping = new HashMap<>();
@@ -133,6 +134,7 @@ public class JacksonConfig {
         serializers.addSerializer(
             new DatastreamSerDes.DatastreamSerializer(rootUrl,
                                                       implicitExpand,
+                                                      includeDatastreamCategory,
                                                       activeProfiles));
 
         SimpleDeserializers deserializers = new SimpleDeserializers();

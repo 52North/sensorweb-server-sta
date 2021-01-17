@@ -30,6 +30,7 @@
 package org.n52.sta.data.query;
 
 import org.n52.series.db.beans.AbstractDatasetEntity;
+import org.n52.series.db.beans.CategoryEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
@@ -48,9 +49,12 @@ import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.springframework.data.jpa.domain.Specification;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import java.util.List;
@@ -223,6 +227,75 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Abs
                 throw new RuntimeException(e);
             }
         };
+    }
+
+    @Override
+    protected Predicate handleProperties(Root<?> root,
+                                         CriteriaQuery<?> query,
+                                         CriteriaBuilder builder,
+                                         String propertyName,
+                                         Expression<?> propertyValue,
+                                         FilterConstants.ComparisonOperator operator,
+                                         boolean switched,
+                                         String referenceName,
+                                         ParameterFactory.EntityType entityType)
+        throws STAInvalidFilterExpressionException {
+        String key = propertyName.substring(11);
+        final String categoryPrefix = "category";
+
+        // Handle filter on Category->id
+        if (propertyValue.getJavaType().isAssignableFrom(Double.class)) {
+            if (key.startsWith(categoryPrefix)) {
+                final Join<AbstractDatasetEntity, CategoryEntity> join =
+                    root.join(AbstractDatasetEntity.PROPERTY_CATEGORY, JoinType.INNER);
+                if (key.substring(categoryPrefix.length()).equals("Id")) {
+                    return handleDirectNumberPropertyFilter(join.<Double>get(CategoryEntity.PROPERTY_ID),
+                                                            propertyValue,
+                                                            operator,
+                                                            builder);
+                } else {
+                    throw new STAInvalidFilterExpressionException(
+                        String.format(ERROR_GETTING_FILTER_NO_PROP_OR_WRONG_TYPE, key, "Long"));
+                }
+            }
+        }
+
+        // Handle filter on Category->name and Category->description
+        if (propertyValue.getJavaType().isAssignableFrom(String.class)) {
+            if (key.startsWith(categoryPrefix)) {
+                final Join<AbstractDatasetEntity, CategoryEntity> join =
+                    root.join(AbstractDatasetEntity.PROPERTY_CATEGORY, JoinType.INNER);
+                String property = null;
+                switch (key.substring(categoryPrefix.length())) {
+                    case "Name":
+                        property = CategoryEntity.NAME;
+                        break;
+                    case "Description":
+                        property = CategoryEntity.DESCRIPTION;
+                        break;
+                    default:
+                        throw new STAInvalidFilterExpressionException(
+                            String.format(ERROR_GETTING_FILTER_NO_PROP_OR_WRONG_TYPE, key, "String"));
+                }
+                return handleDirectStringPropertyFilter(join.get(property),
+                                                        propertyValue,
+                                                        operator,
+                                                        builder,
+                                                        switched);
+
+            }
+        }
+
+        return super.handleProperties(root,
+                                      query,
+                                      builder,
+                                      propertyName,
+                                      propertyValue,
+                                      operator,
+                                      switched,
+                                      referenceName,
+                                      entityType);
+
     }
 
     public String checkPropertyName(String property) {

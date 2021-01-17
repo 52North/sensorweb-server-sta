@@ -104,7 +104,6 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
 
     @Autowired
     private MutexFactory lock;
-
     private T repository;
 
     public AbstractSensorThingsEntityServiceImpl(T repository,
@@ -113,10 +112,6 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         this.em = em;
         this.entityClass = entityClass;
         this.repository = repository;
-    }
-
-    public void setServiceRepository(EntityServiceRepository serviceRepository) {
-        this.serviceRepository = serviceRepository;
     }
 
     /**
@@ -216,6 +211,10 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         return this.createWrapper(updateEntity(id, entity, method), null);
     }
 
+    public void setServiceRepository(EntityServiceRepository serviceRepository) {
+        this.serviceRepository = serviceRepository;
+    }
+
     protected T getRepository() {
         return this.repository;
     }
@@ -240,7 +239,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
 
     protected CollectionWrapper createCollectionWrapperAndExpand(QueryOptions queryOptions, Page<S> pages) {
         if (queryOptions.hasExpandFilter()) {
-            Page expanded = pages.map(e -> {
+            Page<S> expanded = pages.map(e -> {
                 try {
                     em.detach(e);
                     return fetchExpandEntitiesWithFilter(e, queryOptions.getExpandFilter());
@@ -354,7 +353,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
      * @return instance of ElementWithQueryOptions
      */
     @Transactional(rollbackFor = Exception.class)
-    ElementWithQueryOptions createWrapper(Object entity, QueryOptions queryOptions) {
+    ElementWithQueryOptions createWrapper(S entity, QueryOptions queryOptions) {
         return ElementWithQueryOptions.from(entity, queryOptions);
     }
 
@@ -477,6 +476,8 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     public Specification<S> getFilterPredicate(Class entityClass, QueryOptions queryOptions) {
         return (root, query, builder) -> {
             if (!queryOptions.hasFilterFilter()) {
+                // Filter out non-root observations
+                // e.g. Profile-/TrajectoryObservations
                 return null;
             } else {
                 FilterFilter filterOption = queryOptions.getFilterFilter();

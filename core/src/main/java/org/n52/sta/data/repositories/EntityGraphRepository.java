@@ -150,6 +150,7 @@ public interface EntityGraphRepository<T, I> extends JpaSpecificationExecutor<T>
         FETCHGRAPH_OBSERVATION_RELATIONS("entities"),
         FETCHGRAPH_OBSERVATION("observation"),
         FETCHGRAPH_OBSERVATION_GROUP("group(parameters)"),
+        FETCHGRAPH_CATEGORY("category"),
 
         // STA CitSci Extension
         FETCHGRAPH_LICENSE("license"),

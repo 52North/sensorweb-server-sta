@@ -33,6 +33,7 @@ import org.hibernate.Hibernate;
 import org.hibernate.proxy.HibernateProxy;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.HibernateRelations;
 import org.n52.series.db.beans.PhenomenonEntity;
@@ -102,6 +103,8 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
                 return new ProjectWithQueryOptions((ProjectEntity) unwrapped, queryOptions);
             default:
                 if (unwrapped instanceof DataEntity) {
+                    ((DataEntity) unwrapped).setDataset(
+                        (DatasetEntity) Hibernate.unproxy(((DataEntity) unwrapped).getDataset()));
                     return new ObservationWithQueryOptions((DataEntity<?>) unwrapped, queryOptions);
                 } else {
                     throw new RuntimeException(

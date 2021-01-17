@@ -7,9 +7,9 @@ server:
   port: 8081
 
   ## Used for response serialization + url parsing. Must be set correctly!
-  rootUrl: "http://localhost:${server.port}/sta/"
+  rootUrl: "http://localhost:${server.port}/v1.1/"
   servlet:
-    context-path: "/sta"
+    context-path: "/v1.1"
     encoding:
       charset: UTF-8
       enabled: true
@@ -41,6 +41,9 @@ server:
     ## (currently PDF and SensorML2)
     ## Note: This only influences encodingType when SensorEntity is posted/patched directly, not when it is inserted via nested insertion inside a Datastream
     variableEncodingType: false
+
+    # Toggle whether information about SOS-specific Dataset->Category should be mapped to Datastream->properties->category
+    includeDatastreamCategory: false
 
     ## Defines if/how Observation->Parameters should be parsed and handled. Enabled by default, empty String disables the key.
     observation:

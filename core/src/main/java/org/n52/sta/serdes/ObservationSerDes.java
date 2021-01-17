@@ -38,12 +38,19 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.HibernateRelations;
+import org.n52.series.db.beans.ProfileDataEntity;
+import org.n52.series.db.beans.TrajectoryDataEntity;
 import org.n52.series.db.beans.parameter.JsonParameterEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
+import org.n52.shetland.filter.SelectFilter;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.model.ObservationEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.shetland.util.DateTimeHelper;
@@ -55,8 +62,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class ObservationSerDes {
 
@@ -87,7 +101,23 @@ public class ObservationSerDes {
     public static class ObservationSerializer
         extends AbstractSTASerializer<ObservationWithQueryOptions, DataEntity<?>> {
 
+        protected static final String VERTICAL = "vertical";
         private static final long serialVersionUID = -4575044340713191285L;
+        private static final GeoJsonWriter GEO_JSON_WRITER = new GeoJsonWriter();
+        private QueryOptions profileResultSchema =
+            new QueryOptions("",
+                             Collections.singleton(new SelectFilter(new HashSet<>(
+                                 Arrays.asList(StaConstants.PROP_RESULT,
+                                               StaConstants.PROP_PARAMETERS,
+                                               VERTICAL)))));
+        private QueryOptions trajectoryResultSchema =
+            new QueryOptions("",
+                             Collections.singleton(new SelectFilter(new HashSet<>(
+                                 Arrays.asList(StaConstants.PROP_RESULT,
+                                               StaConstants.PROP_PARAMETERS,
+                                               StaConstants.PROP_PHENOMENON_TIME,
+                                               StaConstants.PROP_RESULT_TIME,
+                                               StaConstants.PROP_VALID_TIME)))));
 
         public ObservationSerializer(String rootUrl, boolean implicitExpand, String... activeExtensions) {
             super(ObservationWithQueryOptions.class, implicitExpand, activeExtensions);
@@ -112,14 +142,30 @@ public class ObservationSerDes {
 
             // actual properties
             if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_RESULT)) {
-                gen.writeStringField(STAEntityDefinition.PROP_RESULT, observation.getValue().toString());
+                gen.writeFieldName(STAEntityDefinition.PROP_RESULT);
+                if (observation instanceof ProfileDataEntity) {
+
+                    writeNestedCollection(sortValuesByPhenomenonTime((Set<DataEntity<?>>) observation.getValue()),
+                                          profileResultSchema,
+                                          gen,
+                                          serializers);
+                } else if (observation instanceof TrajectoryDataEntity) {
+                    writeNestedCollection(sortValuesByVerticalFrom((Set<DataEntity<?>>) observation.getValue()),
+                                          trajectoryResultSchema,
+                                          gen,
+                                          serializers);
+                } else {
+                    gen.writeString(observation.getValue().toString());
+                }
             }
+
             if (!value.hasSelectOption() ||
                 value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_RESULT_TIME)) {
                 if (observation.hasResultTime()) {
                     gen.writeStringField(STAEntityDefinition.PROP_RESULT_TIME,
                                          observation.getResultTime().toInstant().toString());
                 } else {
+                    // resultTime is mandatory (but null is allowed) so it must be serialized
                     gen.writeNullField(STAEntityDefinition.PROP_RESULT_TIME);
                 }
             }
@@ -129,35 +175,47 @@ public class ObservationSerDes {
                 gen.writeStringField(STAEntityDefinition.PROP_PHENOMENON_TIME, phenomenonTime);
             }
 
+            /*
             if (!value.hasSelectOption() ||
                 value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_RESULT_QUALITY)) {
-                gen.writeNullField(STAEntityDefinition.PROP_RESULT_QUALITY);
             }
+            */
 
             if (!value.hasSelectOption() ||
                 value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_VALID_TIME)) {
                 if (observation.isSetValidTime()) {
                     gen.writeStringField(STAEntityDefinition.PROP_VALID_TIME,
                                          DateTimeHelper.format(createValidTime(observation)));
-                } else {
-                    gen.writeNullField(STAEntityDefinition.PROP_VALID_TIME);
                 }
             }
 
             if (!value.hasSelectOption() ||
                 value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PARAMETERS)) {
-                gen.writeObjectFieldStart(STAEntityDefinition.PROP_PARAMETERS);
-                if (observation.hasParameters()) {
-                    for (ParameterEntity<?> parameter : observation.getParameters()) {
-                        if (parameter instanceof JsonParameterEntity) {
-                            ObjectMapper mapper = new ObjectMapper();
-                            gen.writeObjectField(parameter.getName(), mapper.readTree(parameter.getValueAsString()));
-                        } else {
-                            gen.writeStringField(parameter.getName(), parameter.getValueAsString());
+                if (observation.isSetGeometryEntity() ||
+                    observation.hasParameters() ||
+                    value.getFieldsToSerialize().contains(VERTICAL)) {
+                    gen.writeObjectFieldStart(STAEntityDefinition.PROP_PARAMETERS);
+                    if (value.getFieldsToSerialize().contains(VERTICAL)) {
+                        gen.writeNumberField("verticalFrom", observation.getVerticalFrom());
+                        gen.writeNumberField("verticalTo", observation.getVerticalTo());
+                    }
+                    if (observation.isSetGeometryEntity()) {
+                        gen.writeFieldName("http://www.opengis.net/def/param-name/OGC-OM/2.0/samplingGeometry");
+                        gen.writeRawValue(GEO_JSON_WRITER.write(observation.getGeometryEntity().getGeometry()));
+                    }
+                    if (observation.hasParameters()) {
+                        for (ParameterEntity<?> parameter : observation.getParameters()) {
+                            if (parameter instanceof JsonParameterEntity) {
+                                ObjectMapper mapper = new ObjectMapper();
+                                gen.writeObjectField(parameter.getName(),
+                                                     mapper.readTree(parameter.getValueAsString()));
+                            } else {
+                                gen.writeStringField(parameter.getName(), parameter.getValueAsString());
+                            }
                         }
                     }
+                    gen.writeEndObject();
                 }
-                gen.writeEndObject();
             }
 
             // navigation properties
@@ -237,6 +295,18 @@ public class ObservationSerDes {
             } else {
                 return new TimePeriod(start, end);
             }
+        }
+
+        private TreeSet sortValuesByPhenomenonTime(Set<DataEntity<?>> values) {
+            ArrayList<DataEntity<?>> vals = new ArrayList<>(values);
+            vals.sort(Comparator.comparing(HibernateRelations.HasPhenomenonTime::getPhenomenonTimeStart));
+            return new TreeSet(vals);
+        }
+
+        private TreeSet sortValuesByVerticalFrom(Set<DataEntity<?>> values) {
+            ArrayList<DataEntity<?>> vals = new ArrayList<>(values);
+            vals.sort(Comparator.comparing(DataEntity::getVerticalFrom));
+            return new TreeSet(vals);
         }
     }
 

@@ -29,11 +29,14 @@
 
 package org.n52.sta.data.service;
 
+import org.hibernate.Hibernate;
+import org.hibernate.query.criteria.internal.CriteriaBuilderImpl;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.BooleanDataEntity;
 import org.n52.series.db.beans.CategoryDataEntity;
+import org.n52.series.db.beans.CompositeDataEntity;
 import org.n52.series.db.beans.CountDataEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetAggregationEntity;
@@ -45,6 +48,7 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.ObservationRelationEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
+import org.n52.shetland.filter.FilterFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.om.OmConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
@@ -59,6 +63,9 @@ import org.n52.sta.data.repositories.LocationRepository;
 import org.n52.sta.data.repositories.ObservationParameterRepository;
 import org.n52.sta.data.repositories.ObservationRepository;
 import org.n52.sta.data.service.util.CollectionWrapper;
+import org.n52.sta.data.service.util.FilterExprVisitor;
+import org.n52.sta.data.service.util.HibernateSpatialCriteriaBuilderImpl;
+import org.n52.svalbard.odata.core.expr.Expr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +77,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import javax.persistence.criteria.Predicate;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
@@ -92,6 +100,8 @@ public class ObservationService
     private static final Logger LOGGER = LoggerFactory.getLogger(ObservationService.class);
     protected final DatastreamRepository datastreamRepository;
     protected final ObservationParameterRepository parameterRepository;
+    private final String OBS_TYPE_SENSORML_OBSERVATION =
+        "http://www.52north.org/def/observationType/OGC-OM/2.0/OM_SensorML20Observation";
     private final Class entityClass;
 
     @Autowired
@@ -148,6 +158,24 @@ public class ObservationService
         }
     }
 
+    @Override
+    public DataEntity<?> getEntityByIdRaw(Long id, QueryOptions queryOptions) throws STACRUDException {
+        DataEntity<?> entity = super.getEntityByIdRaw(id, queryOptions);
+        fetchValueIfCompositeDataEntity(entity);
+        return entity;
+    }
+
+    @Override
+    public DataEntity<?> getEntityByRelatedEntityRaw(String relatedId,
+                                                     String relatedType,
+                                                     String ownId,
+                                                     QueryOptions queryOptions) throws STACRUDException {
+        DataEntity<?> entity =
+            super.getEntityByRelatedEntityRaw(relatedId, relatedType, ownId, queryOptions);
+        fetchValueIfCompositeDataEntity(entity);
+        return entity;
+    }
+
     public Page getEntityCollectionByRelatedEntityRaw(String relatedId,
                                                       String relatedType,
                                                       QueryOptions queryOptions)
@@ -170,6 +198,8 @@ public class ObservationService
                                                     pageableRequest.getPageSize(),
                                                     pageableRequest.getSort()),
                     EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
+
+                pages.forEach(this::fetchValueIfCompositeDataEntity);
                 if (queryOptions.hasExpandFilter()) {
                     return pages.map(e -> {
                         try {
@@ -198,18 +228,11 @@ public class ObservationService
                                                           ExpandFilter expandOption)
         throws STACRUDException, STAInvalidQueryException {
         for (ExpandItem expandItem : expandOption.getItems()) {
-            // We handle all $expands individually as they need to be fetched via staIdentifier and not via fetchgraph
-            //if (!expandItem.getQueryOptions().hasFilterFilter()) {
-            //    break;
-            //}
             String expandProperty = expandItem.getPath();
             switch (expandProperty) {
                 case STAEntityDefinition.DATASTREAM:
                     DatasetEntity datastream = (DatasetEntity) getDatastreamService()
-                        .getEntityByRelatedEntityRaw(returned.getStaIdentifier(),
-                                                     STAEntityDefinition.OBSERVATIONS,
-                                                     null,
-                                                     expandItem.getQueryOptions());
+                        .getEntityByIdRaw(returned.getDataset().getId(), expandItem.getQueryOptions());
                     returned.setDataset(datastream);
                     break;
                 case STAEntityDefinition.FEATURE_OF_INTEREST:
@@ -405,6 +428,30 @@ public class ObservationService
     }
 
     @Override
+    public Specification<DataEntity<?>> getFilterPredicate(Class entityClass, QueryOptions queryOptions) {
+        return (root, query, builder) -> {
+            Predicate defaultFilter = builder.isNull(root.get(DataEntity.PROPERTY_PARENT));
+            if (!queryOptions.hasFilterFilter()) {
+                // Filter out non-root observations
+                // e.g. Profile-/TrajectoryObservations
+                return defaultFilter;
+            } else {
+                FilterFilter filterOption = queryOptions.getFilterFilter();
+                Expr filter = (Expr) filterOption.getFilter();
+                try {
+                    HibernateSpatialCriteriaBuilderImpl staBuilder =
+                        new HibernateSpatialCriteriaBuilderImpl((CriteriaBuilderImpl) builder);
+                    return builder.and(defaultFilter,
+                                       (Predicate) filter.accept(
+                                           new FilterExprVisitor<DataEntity<?>>(root, query, staBuilder)));
+                } catch (STAInvalidQueryException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
+    }
+
+    @Override
     public String checkPropertyName(String property) {
         return oQS.checkPropertyName(property);
     }
@@ -450,6 +497,38 @@ public class ObservationService
         return existing;
     }
 
+    /**
+     * We touch DataEntity->value here to make sure it is fetched from the database and not lazy-loaded.
+     * We cannot fetch it ourselves as any assignment to entity->value will update the database (issue delete+insert
+     * statemenets).
+     *
+     * @param entity to be loaded
+     * @return entity with not-lazy-loaded value and value->parameters
+     */
+    private DataEntity<?> fetchValueIfCompositeDataEntity(DataEntity<?> entity) {
+        // We need to unproxy first to be able to check the type & access properties
+        // As we unproxy later anyway this is no overhead.
+        DataEntity<?> unproxy = (DataEntity<?>) Hibernate.unproxy(entity);
+        if (unproxy instanceof CompositeDataEntity) {
+            // touch each entity + it's parameters to make sure they are loaded
+            if (((Set<DataEntity<?>>) unproxy.getValue()).size() > 0) {
+                ((Set<DataEntity<?>>) unproxy.getValue()).forEach(e -> {
+                    e.getParameters().forEach(Hibernate::unproxy);
+                });
+            }
+
+            // We cannot use em.detach()
+            //em.detach(entity);
+            /*
+            ((CompositeDataEntity) entity)
+                .setValue(new HashSet<>(getRepository().findAll(
+                    ObservationQuerySpecifications.withParent(entity.getId()),
+                    EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS)));
+            */
+        }
+        return unproxy;
+    }
+
     protected DataEntity castToConcreteObservationType(DataEntity<?> observation,
                                                        DatasetEntity dataset)
         throws STACRUDException {
@@ -485,6 +564,11 @@ public class ObservationService
                 booleanObservationEntity.setValue(Boolean.parseBoolean(value));
                 data = booleanObservationEntity;
                 break;
+            //            case OBS_TYPE_SENSORML_OBSERVATION:
+            //                SensorML20DataEntity sensorML20DataEntity = new SensorML20DataEntity();
+            //                sensorML20DataEntity.setValue(value);
+            //                data = sensorML20DataEntity;
+            //                break;
             default:
                 throw new STACRUDException(
                     "Unable to handle OMObservation with type: " + dataset.getOMObservationType().getFormat());
@@ -496,12 +580,14 @@ public class ObservationService
                                                                          OffsetLimitBasedPageRequest pageableRequest,
                                                                          QueryOptions queryOptions,
                                                                          Specification<DataEntity<?>> spec) {
-        Page<DataEntity<?>> pages = getRepository().findAll(
-            oQS.withStaIdentifier(identifierList),
-            new OffsetLimitBasedPageRequest(0,
-                                            pageableRequest.getPageSize(),
-                                            pageableRequest.getSort()),
-            EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
+        Page<DataEntity<?>> pages = getRepository()
+            .findAll(
+                oQS.withStaIdentifier(identifierList),
+                new OffsetLimitBasedPageRequest(0,
+                                                pageableRequest.getPageSize(),
+                                                pageableRequest.getSort()),
+                EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS)
+            .map(this::fetchValueIfCompositeDataEntity);
 
         CollectionWrapper wrapper = createCollectionWrapperAndExpand(queryOptions, pages);
         // Create Page manually as we used Database Pagination and are not sure how many Entities there are in
@@ -616,7 +702,7 @@ public class ObservationService
         // Create feature based on Thing.location if there is no feature given
         if (!observation.hasFeature()) {
             AbstractFeatureEntity<?> feature = null;
-            LocationRepository locationRepository = (LocationRepository) getLocationService().getRepository();
+            LocationRepository locationRepository = getLocationService().getRepository();
             Set<LocationEntity> locations = locationRepository.findAllByPlatformsIdEquals(thingId);
             for (LocationEntity location : locations) {
                 if (feature == null) {

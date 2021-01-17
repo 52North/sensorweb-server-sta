@@ -25,11 +25,10 @@ server:
 
     ## Automatically updates a FeatureOfInterest linked in Thing->properties under
     ## key "updateFOI" with new Locations of the Thing
-    updateFOI: true
+    updateFOI: false
 
     ## Defines all Collections that accept POSTing via MQTT.
     ## Default (defined by standard): "Observations" only
-    ## Fallback to default it invalid Topics are given (aka non-root collections)
     mqttPublishTopics: Observations
 
     ## Toggle strict checking of encodingType for Sensor Entity
@@ -38,15 +37,8 @@ server:
     ## Note: This only influences encodingType when SensorEntity is posted/patched directly, not when it is inserted via nested insertion inside a Datastream
     variableEncodingType: false
 
-    ## Toggle support for isMobile Feature
-    ## When true DatasetType is set to trajectory if Thing->property contains KVP '"isMobile": "true"'
-    isMobile: false
-
-    # Toggle whether this Instance should be read-only. Can be toggled separately for MQTT and HTTP
-    # All MQTT Publish Messages will be dropped silently
-    mqttReadOnly: false
-    # All HTTP POST & PUT Requests will be dropped with a HTTP Status 405 NOT Allowed
-    httpReadOnly: false
+    # Toggle whether information about SOS-specific Dataset->Category should be mapped to Datastream->properties->category
+    includeDatastreamCategory: false
 
     ## Defines if/how Observation->Parameters should be parsed and handled. Enabled by default, empty String disables the key.
     observation:
@@ -59,6 +51,16 @@ server:
       # Key that holds information about the vertical extend of the observation (e.g. depth under water).
       # Uses the same value for upper and lower limit.
       verticalFromTo: vertical
+
+    ## Toggle support for isMobile Feature
+    ## When true DatasetType is set to trajectory if Thing->property contains KVP '"isMobile": "true"'
+    isMobile: false
+
+    # Toggle whether this Instance should be read-only. Can be toggled separately for MQTT and HTTP
+    # All MQTT Publish Messages will be dropped silently
+    mqttReadOnly: false
+    # All HTTP POST & PUT Requests will be dropped with a HTTP Status 405 NOT Allowed
+    httpReadOnly: false
 
 # Database Configuration
 database:
@@ -83,6 +85,9 @@ spring:
     url: ${DB_URL}
     initialization-mode: always
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+
   jpa:
     showSql: true
     openInView: false
@@ -120,9 +125,11 @@ mqtt:
   broker:
     plaintcp:
       enabled: true
+      host: "mqtt://localhost"
       port: 1883
     websocket:
-      enabled: false
+      enabled: true
+      host: "ws://localhost"
       port: 8883
     persistence:
       enabled: false

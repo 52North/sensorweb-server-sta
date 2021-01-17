@@ -4,14 +4,25 @@ trace: false
 
 # General Server Configuration
 server:
-  port: 8081
+  port: 8080
   ## Used for response serialization + url parsing. Must be set correctly!
-  rootUrl: "http://localhost:8081/sta/"
+  rootUrl: "http://localhost:8081/52n-sensorthings-webapp/"
   servlet:
-    context-path: "/sta"
+    context-path: "/52n-sensorthings-webapp"
 
   ## Used for enabling/disabling custom 52N-STA Features
   feature:
+
+    # Controls whether Ids are escaped with single quotes e.g. Things('testThing')/Datastreams. Defaults to true if not given
+    # Note: This only controls inbound requests. navigationLinks+selfLinks are returned without single quotes always
+    # Note: This is currently not affecting MQTT Processing
+    escapeId: true
+
+    # Controls whether properties referenced from $expand need to be explicitly referenced from $select if $select is used or are implicitly included
+    # Resolves ambiguity as discussed in https://github.com/opengeospatial/sensorthings/issues/106
+    # Defaults to false.
+    implicitExpand: false
+
     ## Automatically updates a FeatureOfInterest linked in Thing->properties under
     ## key "updateFOI" with new Locations of the Thing
     updateFOI: false
@@ -26,6 +37,21 @@ server:
     ## Note: This only influences encodingType when SensorEntity is posted/patched directly, not when it is inserted via nested insertion inside a Datastream
     variableEncodingType: false
 
+    # Toggle whether information about SOS-specific Dataset->Category should be mapped to Datastream->properties->category
+    includeDatastreamCategory: true
+
+    ## Defines if/how Observation->Parameters should be parsed and handled. Enabled by default, empty String disables the key.
+    observation:
+      # Key that holds information about the samplingGeometry
+      samplingGeometry: http://www.opengis.net/def/param-name/OGC-OM/2.0/samplingGeometry
+      # Key that holds information about the lower limit of the vertical extend of the observation (e.g. depth under water).
+      verticalFrom: verticalFrom
+      # Key that holds information about the upper limit of the the vertical extend of the observation (e.g. depth under water).
+      verticalTo: verticalTo
+      # Key that holds information about the vertical extend of the observation (e.g. depth under water).
+      # Uses the same value for upper and lower limit.
+      verticalFromTo: vertical
+
     ## Toggle support for isMobile Feature
     ## When true DatasetType is set to trajectory if Thing->property contains KVP '"isMobile": "true"'
     isMobile: false
@@ -34,13 +60,16 @@ server:
     # All MQTT Publish Messages will be dropped silently
     mqttReadOnly: false
     # All HTTP POST & PUT Requests will be dropped with a HTTP Status 405 NOT Allowed
-    httpReadOnly: false
+    httpReadOnly: true
 
 # Database Configuration
 database:
   jpa:
-    persistence-location: classpath:META-INF/sensorthings-persistence.xml
+    persistence-location: classpath:META-INF/sta-vanilla.xml
 spring:
+  profiles:
+    active: vanilla
+
   datasource:
     platform: postgres
     # the db user name
@@ -50,11 +79,11 @@ spring:
     # here 'sta' is the name of the database
     url: jdbc:postgresql://localhost:5432/sta
     initialization-mode: always
-  hikari:
-    connection-timeout: 20000
-    maximum-pool-size: 10
-    minimum-idle: 5
-    idle-timeout: 300000 
+    hikari:
+      connection-timeout: 20000
+      maximum-pool-size: 10
+      minimum-idle: 5
+      idle-timeout: 300000
   jpa:
     openInView: false
     properties:
@@ -64,12 +93,10 @@ spring:
         hbm2ddl:
           # hbm2ddl values: validate | update | create | create-drop | none
           auto: validate
-          
         jdbc:
           time_zone: UTC
           # https://hibernate.atlassian.net/browse/HHH-12368
           lob.non_contextual_creation: true
-        format_sql: false
         dialect: org.hibernate.spatial.dialect.postgis.PostgisPG95Dialect
         # disable driver's feature detection
         # see https://stackoverflow.com/questions/46493500/hibernate-with-c3p0-createclob-is-not-yet-implemented
@@ -97,7 +124,7 @@ http:
 mqtt:
   broker:
     plaintcp:
-      enabled: true
+      enabled: false
       port: 1883
     websocket:
       enabled: false
@@ -114,10 +141,5 @@ logging:
     name: 52n-sta-webapp.log
     
   level:
-    # root: TRACE
-    org.apache.coyote.http11.Http11InputBuffer: INFO
+    root: INFO
     org.n52.sta: INFO
-    org.hibernate: INFO
-    org.hibernate.type: INFO
-    org.hibernate.SQL: INFO
-    io.moquette: INFO
