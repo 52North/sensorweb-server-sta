@@ -42,7 +42,9 @@ import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.shetland.filter.ExpandFilter;
+import org.n52.shetland.filter.SelectFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.filter.FilterClause;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
@@ -50,6 +52,7 @@ import org.n52.sta.data.OffsetLimitBasedPageRequest;
 import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.service.util.CollectionWrapper;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
+import org.n52.svalbard.odata.core.QueryOptionsFactory;
 import org.n52.svalbard.odata.core.expr.bool.BooleanBinaryExpr;
 import org.n52.svalbard.odata.core.expr.bool.ComparisonExpr;
 import org.n52.svalbard.odata.core.expr.temporal.TimeValueExpr;
@@ -72,6 +75,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -100,6 +104,8 @@ public class AggregataObservationService
     private HttpHeaders headers;
     private String baseUrl = "https://webapp.ufz.de/rdm/aggregata/lvl1";
 
+    private QueryOptions selectQueryOptions;
+
     public AggregataObservationService(SensorService sensorService,
                                        @Value("${server.security.aggregataToken}") String aggregataToken) {
         this.sensorService = sensorService;
@@ -107,6 +113,16 @@ public class AggregataObservationService
         this.headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBasicAuth(aggregataToken);
+
+        QueryOptionsFactory factory = new QueryOptionsFactory();
+
+        // Add select filter with filter only returning available properties
+        HashSet<FilterClause> filters = new HashSet<>();
+        HashSet<String> items = new HashSet<>();
+        items.add("phenomenonTime");
+        items.add("result");
+        filters.add(new SelectFilter(items));
+        selectQueryOptions = factory.createQueryOptions(filters);
     }
 
     @Override
@@ -120,7 +136,6 @@ public class AggregataObservationService
         throws STACRUDException {
         try {
             checkValidQueryOptions(queryOptions);
-
             if (relatedType.equals(StaConstants.DATASTREAMS)) {
 
                 ProcedureEntity sensor =
@@ -152,7 +167,7 @@ public class AggregataObservationService
                     observation.setPhenomenonTimeStart(timestamp);
                     observation.setPhenomenonTimeEnd(timestamp);
                     observation.setValue(value);
-                    observations.add(ElementWithQueryOptions.from(observation, queryOptions));
+                    observations.add(ElementWithQueryOptions.from(observation, selectQueryOptions));
                 }
                 return new CollectionWrapper(observations.size(), observations, false);
             } else {
