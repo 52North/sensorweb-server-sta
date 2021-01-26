@@ -39,24 +39,27 @@ import org.hibernate.cfg.NotYetImplementedException;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
+import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.api.CollectionWrapper;
-import org.n52.sta.api.dto.ObservationDTO;
+import org.n52.sta.api.dto.StaDTO;
 import org.n52.sta.data.vanilla.DTOTransformer;
 import org.n52.sta.data.vanilla.OffsetLimitBasedPageRequest;
 import org.n52.sta.data.vanilla.SerDesConfig;
 import org.n52.sta.data.vanilla.repositories.EntityGraphRepository;
 import org.n52.sta.data.vanilla.service.ObservationService;
-import org.n52.svalbard.odata.core.expr.StringValueExpr;
+import org.n52.sta.data.vanilla.service.SensorService;
 import org.n52.svalbard.odata.core.expr.bool.BooleanBinaryExpr;
 import org.n52.svalbard.odata.core.expr.bool.ComparisonExpr;
 import org.n52.svalbard.odata.core.expr.temporal.TimeValueExpr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
@@ -74,6 +77,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Service connecting to the UFZ Aggregata API for retrieving Observations
@@ -91,48 +96,30 @@ public class UfzAggregataObservationService extends ObservationService {
     private static final String NOT_YET_IMPLEMENTED = "not yet implemented";
     private static final Logger LOGGER = LoggerFactory.getLogger(UfzAggregataObservationService.class);
     private static final String TARGET = "target";
+    private final Pattern longNamePattern = Pattern.compile(".+\\s\\((.*)\\).*");
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final SerDesConfig config;
+    private final SensorService sensorService;
     private RestTemplate restTemplate;
     private HttpHeaders headers;
     private String baseUrl = "https://webapp.ufz.de/rdm/aggregata/lvl1";
 
-    public UfzAggregataObservationService(SerDesConfig config) {
+    public UfzAggregataObservationService(SerDesConfig config,
+                                          SensorService sensorService,
+                                          @Value("${server.security.aggregataToken}") String aggregataToken) {
+        this.sensorService = sensorService;
         this.config = config;
         this.restTemplate = new RestTemplate();
         this.headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBasicAuth("****************************");
+        headers.setBasicAuth(aggregataToken);
     }
 
     @Override
     public CollectionWrapper getEntityCollection(QueryOptions queryOptions) throws STACRUDException {
-        try {
-            checkValidQueryOptions(queryOptions);
-
-            AggregataRequest aggregataRequest = createAggregataRequest(queryOptions);
-            HttpEntity<String> request = new HttpEntity<>(objectMapper.writeValueAsString(aggregataRequest), headers);
-            AggregataResponse[] response =
-                restTemplate.postForObject(baseUrl + aggregataRequest.getPath(), request, AggregataResponse[].class);
-
-            List<ObservationDTO> observations = new ArrayList<>();
-            DTOTransformer transformer = new DTOTransformer(config);
-            for (List<BigDecimal> datapoint : response[0].getDatapoints()) {
-                QuantityDataEntity observation = new QuantityDataEntity();
-                BigDecimal value = datapoint.get(0);
-                Date timestamp = new Date(datapoint.get(1).longValue());
-                observation.setPhenomenonTimeStart(timestamp);
-                observation.setPhenomenonTimeEnd(timestamp);
-                observation.setValue(value);
-                observations.add((ObservationDTO) transformer.toDTO(observation, queryOptions));
-            }
-            return new CollectionWrapper(observations.size(), observations, false);
-        } catch (RuntimeException | JsonProcessingException e) {
-            throw new STACRUDException(e.getMessage(), e);
-        }
+        throw new NotYetImplementedException(NOT_YET_IMPLEMENTED);
     }
 
-    @Override
     public DataEntity<?> getEntityByIdRaw(Long id, QueryOptions queryOptions) throws STACRUDException {
         throw new NotYetImplementedException(NOT_YET_IMPLEMENTED);
     }
@@ -227,48 +214,67 @@ public class UfzAggregataObservationService extends ObservationService {
                                                                           String relatedType,
                                                                           QueryOptions queryOptions)
         throws STACRUDException {
-
         try {
-            throw new NotYetImplementedException(NOT_YET_IMPLEMENTED);
-        } catch (RuntimeException e) {
+            checkValidQueryOptions(queryOptions);
+
+            if (relatedType.equals(StaConstants.DATASTREAMS)) {
+
+                ProcedureEntity sensor =
+                    sensorService.getEntityByRelatedEntityRaw(relatedId,
+                                                              relatedType,
+                                                              null,
+                                                              new QueryOptions("", null));
+                Matcher matcher = longNamePattern.matcher(sensor.getName());
+                String target;
+                if (matcher.matches()) {
+                    target = matcher.group(1);
+                } else {
+                    throw new STACRUDException("Could not extract target from Sensor name: " + sensor.getName());
+                }
+
+                String[] split = sensor.getIdentifier().split(":");
+                String sensorId = split[split.length - 2];
+
+                AggregataRequest aggregataRequest = createAggregataRequest(target, sensorId, queryOptions);
+                HttpEntity<String> request =
+                    new HttpEntity<>(objectMapper.writeValueAsString(aggregataRequest), headers);
+                AggregataResponse[] response =
+                    restTemplate.postForObject(baseUrl + aggregataRequest.getPath(),
+                                               request,
+                                               AggregataResponse[].class);
+                DTOTransformer transformer = new DTOTransformer(config);
+                List<StaDTO> observations = new ArrayList<>();
+                for (List<BigDecimal> datapoint : response[0].getDatapoints()) {
+                    QuantityDataEntity observation = new QuantityDataEntity();
+                    BigDecimal value = datapoint.get(0);
+                    Date timestamp = new Date(datapoint.get(1).longValue());
+                    observation.setPhenomenonTimeStart(timestamp);
+                    observation.setPhenomenonTimeEnd(timestamp);
+                    observation.setValue(value);
+                    observations.add(transformer.toDTO(observation, queryOptions));
+                }
+                return new CollectionWrapper(observations.size(), observations, false);
+            } else {
+                throw new NotYetImplementedException(NOT_YET_IMPLEMENTED);
+            }
+        } catch (RuntimeException | JsonProcessingException e) {
             throw new STACRUDException(e.getMessage(), e);
         }
     }
 
-    private AggregataRequest createAggregataRequest(QueryOptions queryOptions) {
+    private AggregataRequest createAggregataRequest(String targetId, String sensorId, QueryOptions queryOptions) {
         AggregataRequest request = new AggregataRequest();
 
-        //TODO: refactor to not rely on specific order of queryOptions
         request.setMaxDataPoints(queryOptions.getTopFilter().getValue().intValue());
-
-        BooleanBinaryExpr expr = (BooleanBinaryExpr) queryOptions.getFilterFilter().getFilter();
-
-        // Datastream/Sensor/id
-        String[] sensorIdRaw = ((StringValueExpr)
-            (((ComparisonExpr) expr.getLeft()).getRight())).getValue().split(":");
-        String sensorId = sensorIdRaw[sensorIdRaw.length - 1];
-        // properties/projectId
-        String projectId =
-            ((StringValueExpr)
-                ((ComparisonExpr)
-                    (((BooleanBinaryExpr) expr.getRight()).getLeft())).getRight()).getValue();
-
-        request.setPath(SLASH + projectId + SLASH + sensorId + "/query");
+        request.setPath(SLASH + sensorId + "/query");
 
         Target target = new Target();
-        target.setTarget("Batteriespannung");
+        target.setTarget(targetId);
         request.setTargets(Collections.singletonList(target));
 
-        TimeValueExpr phenTimeStart =
-            (TimeValueExpr)
-                ((ComparisonExpr)
-                    ((BooleanBinaryExpr)
-                        (((BooleanBinaryExpr) expr.getRight()).getRight())).getLeft()).getRight();
-        TimeValueExpr phenTimeEnd =
-            (TimeValueExpr)
-                ((ComparisonExpr)
-                    ((BooleanBinaryExpr)
-                        (((BooleanBinaryExpr) expr.getRight()).getRight())).getRight()).getRight();
+        BooleanBinaryExpr filter = (BooleanBinaryExpr) queryOptions.getFilterFilter().getFilter();
+        TimeValueExpr phenTimeStart = (TimeValueExpr) ((ComparisonExpr) filter.getLeft()).getRight();
+        TimeValueExpr phenTimeEnd = (TimeValueExpr) ((ComparisonExpr) filter.getRight()).getRight();
         Range range = new Range();
         range.setFrom(phenTimeStart.toString());
         range.setTo(phenTimeEnd.toString());
@@ -277,8 +283,7 @@ public class UfzAggregataObservationService extends ObservationService {
     }
 
     private boolean checkValidQueryOptions(QueryOptions queryOptions) {
-        //TODO!
-        return true;
+        return queryOptions.hasTopFilter() && queryOptions.hasFilterFilter();
     }
 
     /**
