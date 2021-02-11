@@ -27,13 +27,13 @@
  * Public License for more details.
  */
 
-package org.n52.sta.service;
+package org.n52.sta.http;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.n52.shetland.filter.SelectFilter;
 import org.n52.shetland.ogc.filter.FilterClause;
-import org.n52.sta.data.service.EntityServiceRepository;
-import org.n52.sta.serdes.util.ElementWithQueryOptions;
+import org.n52.sta.api.EntityServiceFactory;
+import org.n52.sta.api.dto.StaDTO;
 import org.n52.sta.utils.AbstractSTARequestHandler;
 import org.springframework.web.servlet.HandlerMapping;
 
@@ -55,7 +55,7 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
 
     public PropertyRequestHandler(String rootUrl,
                                   boolean shouldEscapeId,
-                                  EntityServiceRepository serviceRepository,
+                                  EntityServiceFactory serviceRepository,
                                   ObjectMapper mapper) {
         super(rootUrl, shouldEscapeId, serviceRepository);
         this.mapper = mapper;
@@ -70,18 +70,18 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
      * @param property property to be returned. Automatically set by Spring via @PathVariable
      * @param request  Full request object. Automatically set by Spring
      */
-    public ElementWithQueryOptions<?> readEntityPropertyDirect(String entity,
-                                                               String id,
-                                                               String property,
-                                                               HttpServletRequest request) throws Exception {
+    public StaDTO readEntityPropertyDirect(String entity,
+                                           String id,
+                                           String property,
+                                           HttpServletRequest request) throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         return readEntityPropertyDirect(entity, id, property, lookupPath);
     }
 
-    private ElementWithQueryOptions<?> readEntityPropertyDirect(String entity,
-                                                                String id,
-                                                                String property,
-                                                                String url) throws Exception {
+    private StaDTO readEntityPropertyDirect(String entity,
+                                            String id,
+                                            String property,
+                                            String url) throws Exception {
         validateResource(url.substring(0, url.length() - property.length() - 1),
                          serviceRepository);
         validateProperty(entity, property);
@@ -105,19 +105,19 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
      * @param request  Full request object. Automatically set by Spring
      * @return JSON Object with serialized property
      */
-    public ElementWithQueryOptions<?> readRelatedEntityProperty(String entity,
-                                                                String target,
-                                                                String property,
-                                                                HttpServletRequest request)
+    public StaDTO readRelatedEntityProperty(String entity,
+                                            String target,
+                                            String property,
+                                            HttpServletRequest request)
         throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         return readRelatedEntityProperty(entity, target, property, lookupPath);
     }
 
-    private ElementWithQueryOptions readRelatedEntityProperty(String entity,
-                                                              String target,
-                                                              String property,
-                                                              String url) throws Exception {
+    private StaDTO readRelatedEntityProperty(String entity,
+                                             String target,
+                                             String property,
+                                             String url) throws Exception {
         validateResource(url.substring(0, url.length() - property.length() - 1),
                          serviceRepository);
 
@@ -151,7 +151,7 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
                                                 String property,
                                                 HttpServletRequest request) throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
-        ElementWithQueryOptions<?> elementWithQueryOptions =
+        StaDTO elementWithQueryOptions =
             this.readEntityPropertyDirect(entity, id, property, lookupPath.substring(0, lookupPath.length() - 7));
         return mapper.valueToTree(elementWithQueryOptions).fields().next().getValue().toString();
     }
@@ -171,7 +171,7 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
                                                  String property,
                                                  HttpServletRequest request) throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
-        ElementWithQueryOptions<?> elementWithQueryOptions =
+        StaDTO elementWithQueryOptions =
             this.readRelatedEntityProperty(entity,
                                            target,
                                            property,

@@ -27,7 +27,7 @@
  * Public License for more details.
  */
 
-package org.n52.sta.service;
+package org.n52.sta.http;
 
 public class STARequestUtilsTest {
 

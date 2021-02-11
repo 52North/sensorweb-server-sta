@@ -27,7 +27,7 @@
  * Public License for more details.
  */
 
-package org.n52.sta.url;
+package org.n52.sta.http;
 
 import org.springframework.web.util.UrlPathHelper;
 

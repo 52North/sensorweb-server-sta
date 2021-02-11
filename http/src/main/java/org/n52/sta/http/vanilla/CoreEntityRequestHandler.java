@@ -27,12 +27,12 @@
  * Public License for more details.
  */
 
-package org.n52.sta.service.core;
+package org.n52.sta.http.vanilla;
 
-import org.n52.sta.data.service.EntityServiceRepository;
-import org.n52.sta.serdes.util.ElementWithQueryOptions;
-import org.n52.sta.service.EntityRequestHandler;
-import org.n52.sta.utils.CoreRequestUtils;
+import org.n52.sta.api.CoreRequestUtils;
+import org.n52.sta.api.EntityServiceFactory;
+import org.n52.sta.api.dto.StaDTO;
+import org.n52.sta.http.EntityRequestHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,7 +54,7 @@ public class CoreEntityRequestHandler extends EntityRequestHandler implements Co
 
     public CoreEntityRequestHandler(@Value("${server.rootUrl}") String rootUrl,
                                     @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
-                                    EntityServiceRepository serviceRepository) {
+                                    EntityServiceFactory serviceRepository) {
         super(rootUrl, shouldEscapeId, serviceRepository);
     }
 
@@ -62,9 +62,9 @@ public class CoreEntityRequestHandler extends EntityRequestHandler implements Co
         value = MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_DIRECTLY,
         produces = "application/json"
     )
-    public ElementWithQueryOptions<?> readEntityDirect(@PathVariable String entity,
-                                                       @PathVariable String id,
-                                                       HttpServletRequest request) throws Exception {
+    public StaDTO readEntityDirect(@PathVariable String entity,
+                                   @PathVariable String id,
+                                   HttpServletRequest request) throws Exception {
         return super.readEntityDirect(entity, id, request);
     }
 
@@ -72,9 +72,9 @@ public class CoreEntityRequestHandler extends EntityRequestHandler implements Co
         value = MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_DIRECTLY + SLASHREF,
         produces = "application/json"
     )
-    public ElementWithQueryOptions<?> readEntityRefDirect(@PathVariable String entity,
-                                                          @PathVariable String id,
-                                                          HttpServletRequest request) throws Exception {
+    public StaDTO readEntityRefDirect(@PathVariable String entity,
+                                      @PathVariable String id,
+                                      HttpServletRequest request) throws Exception {
         return super.readEntityRefDirect(entity, id, request);
     }
 
@@ -86,9 +86,9 @@ public class CoreEntityRequestHandler extends EntityRequestHandler implements Co
         },
         produces = "application/json"
     )
-    public ElementWithQueryOptions<?> readRelatedEntity(@PathVariable String entity,
-                                                        @PathVariable String target,
-                                                        HttpServletRequest request) throws Exception {
+    public StaDTO readRelatedEntity(@PathVariable String entity,
+                                    @PathVariable String target,
+                                    HttpServletRequest request) throws Exception {
         return super.readRelatedEntity(entity, target, request);
     }
 
@@ -100,9 +100,9 @@ public class CoreEntityRequestHandler extends EntityRequestHandler implements Co
         },
         produces = "application/json"
     )
-    public ElementWithQueryOptions<?> readRelatedEntityRef(@PathVariable String entity,
-                                                           @PathVariable String target,
-                                                           HttpServletRequest request)
+    public StaDTO readRelatedEntityRef(@PathVariable String entity,
+                                       @PathVariable String target,
+                                       HttpServletRequest request)
         throws Exception {
         return super.readRelatedEntityRef(entity, target, request);
     }

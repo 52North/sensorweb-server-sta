@@ -27,16 +27,16 @@
  * Public License for more details.
  */
 
-package org.n52.sta.service.core;
+package org.n52.sta.http.vanilla;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.n52.series.db.beans.IdEntity;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
-import org.n52.sta.data.service.EntityServiceRepository;
-import org.n52.sta.serdes.util.ElementWithQueryOptions;
-import org.n52.sta.service.CudRequestHandler;
-import org.n52.sta.utils.CoreRequestUtils;
+import org.n52.sta.api.CoreRequestUtils;
+import org.n52.sta.api.EntityServiceFactory;
+import org.n52.sta.api.dto.StaDTO;
+import org.n52.sta.http.CudRequestHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -60,7 +60,7 @@ public class CoreCudRequestHandler<T extends IdEntity> extends CudRequestHandler
 
     public CoreCudRequestHandler(@Value("${server.rootUrl}") String rootUrl,
                                  @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
-                                 EntityServiceRepository serviceRepository,
+                                 EntityServiceFactory serviceRepository,
                                  ObjectMapper mapper) {
         super(rootUrl, shouldEscapeId, serviceRepository, mapper);
     }
@@ -69,8 +69,8 @@ public class CoreCudRequestHandler<T extends IdEntity> extends CudRequestHandler
         consumes = "application/json",
         value = "/{collectionName:" + CoreRequestUtils.BASE_COLLECTION_REGEX + "$}",
         produces = "application/json")
-    public ElementWithQueryOptions<?> handlePostDirect(@PathVariable String collectionName,
-                                                       @RequestBody String body)
+    public StaDTO handlePostDirect(@PathVariable String collectionName,
+                                   @RequestBody String body)
         throws IOException, STACRUDException, STAInvalidUrlException {
         return super.handlePostDirect(collectionName, body);
     }
@@ -87,10 +87,10 @@ public class CoreCudRequestHandler<T extends IdEntity> extends CudRequestHandler
         },
         produces = "application/json"
     )
-    public ElementWithQueryOptions<?> handlePostRelated(@PathVariable String entity,
-                                                        @PathVariable String target,
-                                                        @RequestBody String body,
-                                                        HttpServletRequest request)
+    public StaDTO handlePostRelated(@PathVariable String entity,
+                                    @PathVariable String target,
+                                    @RequestBody String body,
+                                    HttpServletRequest request)
         throws Exception {
         return super.handlePostRelated(entity, target, body, request);
     }
@@ -99,10 +99,10 @@ public class CoreCudRequestHandler<T extends IdEntity> extends CudRequestHandler
         value = "**/{collectionName:" + CoreRequestUtils.BASE_COLLECTION_REGEX + "}{id:" + IDENTIFIER_REGEX + "$}",
         produces = "application/json"
     )
-    public ElementWithQueryOptions<?> handleDirectPatch(@PathVariable String collectionName,
-                                                        @PathVariable String id,
-                                                        @RequestBody String body,
-                                                        HttpServletRequest request)
+    public StaDTO handleDirectPatch(@PathVariable String collectionName,
+                                    @PathVariable String id,
+                                    @RequestBody String body,
+                                    HttpServletRequest request)
         throws Exception {
         return super.handleDirectPatch(collectionName, id, body, request);
     }
@@ -115,10 +115,10 @@ public class CoreCudRequestHandler<T extends IdEntity> extends CudRequestHandler
         },
         produces = "application/json"
     )
-    public ElementWithQueryOptions<?> handleRelatedPatch(@PathVariable String entity,
-                                                         @PathVariable String target,
-                                                         @RequestBody String body,
-                                                         HttpServletRequest request)
+    public StaDTO handleRelatedPatch(@PathVariable String entity,
+                                     @PathVariable String target,
+                                     @RequestBody String body,
+                                     HttpServletRequest request)
         throws Exception {
         return super.handleRelatedPatch(entity, target, body, request);
     }

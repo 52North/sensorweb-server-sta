@@ -27,13 +27,13 @@
  * Public License for more details.
  */
 
-package org.n52.sta.service.core;
+package org.n52.sta.http.vanilla;
 
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
-import org.n52.sta.data.service.EntityServiceRepository;
-import org.n52.sta.data.service.util.CollectionWrapper;
-import org.n52.sta.service.CollectionRequestHandler;
-import org.n52.sta.utils.CoreRequestUtils;
+import org.n52.sta.api.CollectionWrapper;
+import org.n52.sta.api.CoreRequestUtils;
+import org.n52.sta.api.EntityServiceFactory;
+import org.n52.sta.http.CollectionRequestHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -55,7 +55,7 @@ public class CoreCollectionRequestHandler extends CollectionRequestHandler imple
 
     public CoreCollectionRequestHandler(@Value("${server.rootUrl}") String rootUrl,
                                         @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
-                                        EntityServiceRepository serviceRepository) {
+                                        EntityServiceFactory serviceRepository) {
         super(rootUrl, shouldEscapeId, serviceRepository);
     }
 

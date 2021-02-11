@@ -27,17 +27,18 @@
  * Public License for more details.
  */
 
-package org.n52.sta.service;
+package org.n52.sta.http;
 
 import org.n52.shetland.filter.SelectFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.filter.FilterClause;
-import org.n52.sta.data.service.EntityServiceRepository;
-import org.n52.sta.serdes.util.ElementWithQueryOptions;
+import org.n52.sta.api.EntityServiceFactory;
+import org.n52.sta.api.dto.StaDTO;
 import org.n52.sta.utils.AbstractSTARequestHandler;
 import org.springframework.web.servlet.HandlerMapping;
 
 import javax.servlet.http.HttpServletRequest;
+import java.net.URLDecoder;
 import java.util.HashSet;
 
 /**
@@ -53,8 +54,17 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
 
     public EntityRequestHandler(String rootUrl,
                                 boolean shouldEscapeId,
-                                EntityServiceRepository serviceRepository) {
+                                EntityServiceFactory serviceRepository) {
         super(rootUrl, shouldEscapeId, serviceRepository);
+    }
+
+    protected QueryOptions decodeQueryString(HttpServletRequest request) {
+        if (request.getQueryString() != null) {
+            String decoded = URLDecoder.decode(request.getQueryString());
+            return QUERY_OPTIONS_FACTORY.createQueryOptions(decoded);
+        } else {
+            return QUERY_OPTIONS_FACTORY.createDummy();
+        }
     }
 
     /**
@@ -65,9 +75,9 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
      * @param id      id of entity. Automatically set by Spring via @PathVariable
      * @param request full request
      */
-    public ElementWithQueryOptions<?> readEntityDirect(String entity,
-                                                       String id,
-                                                       HttpServletRequest request) throws Exception {
+    public StaDTO readEntityDirect(String entity,
+                                   String id,
+                                   HttpServletRequest request) throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         validateResource(lookupPath, serviceRepository);
 
@@ -85,9 +95,9 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
      * @param id      id of entity. Automatically set by Spring via @PathVariable
      * @param request full request
      */
-    public ElementWithQueryOptions<?> readEntityRefDirect(String entity,
-                                                          String id,
-                                                          HttpServletRequest request) throws Exception {
+    public StaDTO readEntityRefDirect(String entity,
+                                      String id,
+                                      HttpServletRequest request) throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         validateResource(lookupPath.substring(0, lookupPath.length() - 5), serviceRepository);
 
@@ -107,9 +117,9 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
      * @param request full request
      * @return JSON String representing Entity
      */
-    public ElementWithQueryOptions<?> readRelatedEntity(String entity,
-                                                        String target,
-                                                        HttpServletRequest request)
+    public StaDTO readRelatedEntity(String entity,
+                                    String target,
+                                    HttpServletRequest request)
         throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         validateResource(lookupPath, serviceRepository);
@@ -135,9 +145,9 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
      * @param request full request
      * @return JSON String representing Entity
      */
-    public ElementWithQueryOptions<?> readRelatedEntityRef(String entity,
-                                                           String target,
-                                                           HttpServletRequest request)
+    public StaDTO readRelatedEntityRef(String entity,
+                                       String target,
+                                       HttpServletRequest request)
         throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         validateResource(lookupPath.substring(0, lookupPath.length() - 5), serviceRepository);

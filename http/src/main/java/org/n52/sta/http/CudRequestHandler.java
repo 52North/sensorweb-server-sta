@@ -27,7 +27,7 @@
  * Public License for more details.
  */
 
-package org.n52.sta.service;
+package org.n52.sta.http;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -35,10 +35,10 @@ import org.n52.series.db.beans.IdEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
-import org.n52.sta.data.service.AbstractSensorThingsEntityService;
-import org.n52.sta.data.service.EntityServiceRepository;
-import org.n52.sta.serdes.util.ElementWithQueryOptions;
-import org.n52.sta.serdes.util.EntityPatch;
+import org.n52.sta.api.AbstractSensorThingsEntityService;
+import org.n52.sta.api.EntityServiceFactory;
+import org.n52.sta.api.dto.EntityPatch;
+import org.n52.sta.api.dto.StaDTO;
 import org.n52.sta.utils.AbstractSTARequestHandler;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
@@ -61,7 +61,7 @@ public abstract class CudRequestHandler<T extends IdEntity> extends AbstractSTAR
 
     public CudRequestHandler(String rootUrl,
                              boolean shouldEscapeId,
-                             EntityServiceRepository serviceRepository,
+                             EntityServiceFactory serviceRepository,
                              ObjectMapper mapper) {
         super(rootUrl, shouldEscapeId, serviceRepository);
         this.mapper = mapper;
@@ -75,8 +75,8 @@ public abstract class CudRequestHandler<T extends IdEntity> extends AbstractSTAR
      * @param body           request Body. Automatically set by Spring via @RequestBody
      */
     @SuppressWarnings("unchecked")
-    public ElementWithQueryOptions<?> handlePostDirect(String collectionName,
-                                                       String body)
+    public StaDTO handlePostDirect(String collectionName,
+                                   String body)
         throws IOException, STACRUDException, STAInvalidUrlException {
         Class<T> clazz = collectionNameToClass(collectionName);
         return ((AbstractSensorThingsEntityService<T>)
@@ -93,10 +93,10 @@ public abstract class CudRequestHandler<T extends IdEntity> extends AbstractSTAR
      * @param request full request
      */
     @SuppressWarnings("unchecked")
-    public ElementWithQueryOptions<?> handlePostRelated(String entity,
-                                                        String target,
-                                                        String body,
-                                                        HttpServletRequest request)
+    public StaDTO handlePostRelated(String entity,
+                                    String target,
+                                    String body,
+                                    HttpServletRequest request)
         throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         validateResource(lookupPath, serviceRepository);
@@ -123,10 +123,10 @@ public abstract class CudRequestHandler<T extends IdEntity> extends AbstractSTAR
      * @param request        full request
      */
     @SuppressWarnings("unchecked")
-    public ElementWithQueryOptions<?> handleDirectPatch(@PathVariable String collectionName,
-                                                        @PathVariable String id,
-                                                        @RequestBody String body,
-                                                        HttpServletRequest request)
+    public StaDTO handleDirectPatch(@PathVariable String collectionName,
+                                    @PathVariable String id,
+                                    @RequestBody String body,
+                                    HttpServletRequest request)
         throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         validateResource(lookupPath, serviceRepository);
@@ -151,10 +151,10 @@ public abstract class CudRequestHandler<T extends IdEntity> extends AbstractSTAR
      * @param request full request
      */
     @SuppressWarnings("unchecked")
-    public ElementWithQueryOptions<?> handleRelatedPatch(String entity,
-                                                         String target,
-                                                         String body,
-                                                         HttpServletRequest request)
+    public StaDTO handleRelatedPatch(String entity,
+                                     String target,
+                                     String body,
+                                     HttpServletRequest request)
         throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         validateResource(lookupPath, serviceRepository);

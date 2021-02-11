@@ -27,20 +27,21 @@
  * Public License for more details.
  */
 
-package org.n52.sta.service;
+package org.n52.sta.http;
 
 import org.n52.shetland.filter.SelectFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.filter.FilterClause;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
-import org.n52.sta.data.service.EntityServiceRepository;
-import org.n52.sta.data.service.util.CollectionWrapper;
+import org.n52.sta.api.CollectionWrapper;
+import org.n52.sta.api.EntityServiceFactory;
+import org.n52.sta.api.RequestUtils;
 import org.n52.sta.utils.AbstractSTARequestHandler;
-import org.n52.sta.utils.RequestUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.HandlerMapping;
 
 import javax.servlet.http.HttpServletRequest;
+import java.net.URLDecoder;
 import java.util.HashSet;
 
 /**
@@ -50,8 +51,17 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
 
     public CollectionRequestHandler(String rootUrl,
                                     boolean shouldEscapeId,
-                                    EntityServiceRepository serviceRepository) {
+                                    EntityServiceFactory serviceRepository) {
         super(rootUrl, shouldEscapeId, serviceRepository);
+    }
+
+    protected QueryOptions decodeQueryString(HttpServletRequest request) {
+        if (request.getQueryString() != null) {
+            String decoded = URLDecoder.decode(request.getQueryString());
+            return QUERY_OPTIONS_FACTORY.createQueryOptions(decoded);
+        } else {
+            return QUERY_OPTIONS_FACTORY.createDummy();
+        }
     }
 
     /**

@@ -27,7 +27,7 @@
  * Public License for more details.
  */
 
-package org.n52.sta.service;
+package org.n52.sta.http;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
