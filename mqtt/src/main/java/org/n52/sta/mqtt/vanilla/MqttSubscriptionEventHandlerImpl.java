@@ -27,7 +27,7 @@
  * Public License for more details.
  */
 
-package org.n52.sta.mqtt.core;
+package org.n52.sta.mqtt.vanilla;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,16 +42,16 @@ import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import io.netty.handler.codec.mqtt.MqttPublishVariableHeader;
 import io.netty.handler.codec.mqtt.MqttQoS;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
-import org.n52.sta.data.service.EntityServiceRepository;
+import org.n52.sta.api.CoreRequestUtils;
+import org.n52.sta.api.EntityServiceFactory;
+import org.n52.sta.api.dto.StaDTO;
 import org.n52.sta.mqtt.MqttHandlerException;
-import org.n52.sta.mqtt.core.subscription.AbstractMqttSubscription;
-import org.n52.sta.mqtt.core.subscription.MqttEntityCollectionSubscription;
-import org.n52.sta.mqtt.core.subscription.MqttEntitySubscription;
-import org.n52.sta.mqtt.core.subscription.MqttPropertySubscription;
-import org.n52.sta.mqtt.core.subscription.MqttSelectSubscription;
-import org.n52.sta.serdes.util.ElementWithQueryOptions;
+import org.n52.sta.mqtt.vanilla.subscription.AbstractMqttSubscription;
+import org.n52.sta.mqtt.vanilla.subscription.MqttEntityCollectionSubscription;
+import org.n52.sta.mqtt.vanilla.subscription.MqttEntitySubscription;
+import org.n52.sta.mqtt.vanilla.subscription.MqttPropertySubscription;
+import org.n52.sta.mqtt.vanilla.subscription.MqttSelectSubscription;
 import org.n52.sta.utils.AbstractSTARequestHandler;
-import org.n52.sta.utils.CoreRequestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -83,7 +83,7 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
 
     private final MqttUtil config;
     private final ObjectMapper mapper;
-    private EntityServiceRepository serviceRepository;
+    private EntityServiceFactory serviceRepository;
     private Server mqttBroker;
     private Map<AbstractMqttSubscription, HashSet<String>> subscriptions = new HashMap<>();
     /*
@@ -94,15 +94,16 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
     public MqttSubscriptionEventHandlerImpl(@Value("${server.rootUrl}") String rootUrl,
                                             @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
                                             MqttUtil config,
-                                            ObjectMapper mapper) {
+                                            ObjectMapper mapper, EntityServiceFactory serviceRepository) {
         super(rootUrl, shouldEscapeId, null);
         this.config = config;
         this.mapper = mapper;
+        this.serviceRepository = serviceRepository;
     }
 
     @Override
     @Async
-    public void handleEvent(Object rawObject,
+    public void handleEvent(StaDTO rawObject,
                             String entityType,
                             Set<String> differenceMap,
                             Map<String, Set<String>> collections) {
@@ -125,9 +126,8 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
                     if (serializedCache.containsKey(subscrip.getQueryOptions())) {
                         out = serializedCache.get(subscrip.getQueryOptions());
                     } else {
-                        ElementWithQueryOptions wrapped =
-                            ElementWithQueryOptions.from(rawObject, subscrip.getQueryOptions());
-                        out = Unpooled.wrappedBuffer(mapper.writeValueAsBytes(wrapped));
+                        rawObject.setQueryOptions(subscrip.getQueryOptions());
+                        out = Unpooled.wrappedBuffer(mapper.writeValueAsBytes(rawObject));
                         serializedCache.put(subscrip.getQueryOptions(), out);
                     }
                     MqttPublishMessage msg = new MqttPublishMessage(mqttFixedHeader,
@@ -148,11 +148,6 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
     @Override
     public Set<String> getWatchedEntityTypes() {
         return watchedEntityTypes;
-    }
-
-    @Override
-    public void setServiceRepository(EntityServiceRepository serviceRepository) {
-        this.serviceRepository = serviceRepository;
     }
 
     public void addSubscription(AbstractMqttSubscription subscription, String clientId) {

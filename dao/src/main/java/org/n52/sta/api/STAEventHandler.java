@@ -29,6 +29,7 @@
 
 package org.n52.sta.api;
 
+import org.n52.sta.api.dto.StaDTO;
 import org.springframework.scheduling.annotation.Async;
 
 import java.util.Map;
@@ -50,7 +51,7 @@ public interface STAEventHandler {
      * @param relatedCollections List of related Collections
      */
     @Async
-    void handleEvent(Object entity,
+    void handleEvent(StaDTO entity,
                      String entityType,
                      Set<String> differenceMap,
                      Map<String, Set<String>> relatedCollections);

@@ -27,16 +27,23 @@
  * Public License for more details.
  */
 
-package org.n52.sta.mqtt.core;
+package org.n52.sta.mqtt.vanilla;
 
-import io.moquette.interception.messages.InterceptPublishMessage;
-import org.n52.series.db.beans.IdEntity;
-import org.n52.sta.utils.RequestUtils;
+import io.moquette.broker.Server;
+import io.moquette.interception.messages.InterceptSubscribeMessage;
+import io.moquette.interception.messages.InterceptUnsubscribeMessage;
+import org.n52.sta.api.RequestUtils;
+import org.n52.sta.api.STAEventHandler;
+import org.n52.sta.mqtt.MqttHandlerException;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public interface MqttPublishMessageHandler extends RequestUtils {
+public interface MqttSubscriptionEventHandler extends RequestUtils, STAEventHandler {
 
-    <T extends IdEntity> void processPublishMessage(InterceptPublishMessage msg);
+    void processSubscribeMessage(InterceptSubscribeMessage msg) throws MqttHandlerException;
+
+    void processUnsubscribeMessage(InterceptUnsubscribeMessage msg) throws MqttHandlerException;
+
+    void setMqttBroker(Server mqttBroker);
 }

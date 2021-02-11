@@ -27,7 +27,7 @@
  * Public License for more details.
  */
 
-package org.n52.sta.mqtt.core.subscription;
+package org.n52.sta.mqtt.vanilla.subscription;
 
 import org.n52.series.db.beans.HibernateRelations;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;

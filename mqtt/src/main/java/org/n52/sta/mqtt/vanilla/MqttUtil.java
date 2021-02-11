@@ -27,7 +27,7 @@
  * Public License for more details.
  */
 
-package org.n52.sta.mqtt.core;
+package org.n52.sta.mqtt.vanilla;
 
 import org.springframework.stereotype.Component;
 

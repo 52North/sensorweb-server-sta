@@ -32,13 +32,13 @@
  * and open the template in the editor.
  */
 
-package org.n52.sta.mqtt.core.subscription;
+package org.n52.sta.mqtt.vanilla.subscription;
 
 import org.n52.series.db.beans.HibernateRelations;
 import org.n52.shetland.filter.SelectFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.filter.FilterClause;
-import org.n52.sta.utils.RequestUtils;
+import org.n52.sta.api.RequestUtils;
 import org.n52.svalbard.odata.core.QueryOptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

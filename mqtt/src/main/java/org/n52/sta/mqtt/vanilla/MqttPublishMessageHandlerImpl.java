@@ -27,7 +27,7 @@
  * Public License for more details.
  */
 
-package org.n52.sta.mqtt.core;
+package org.n52.sta.mqtt.vanilla;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -35,11 +35,11 @@ import io.moquette.interception.messages.InterceptPublishMessage;
 import org.n52.series.db.beans.IdEntity;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.data.service.AbstractSensorThingsEntityService;
-import org.n52.sta.data.service.EntityServiceRepository;
+import org.n52.sta.api.AbstractSensorThingsEntityService;
+import org.n52.sta.api.CoreRequestUtils;
+import org.n52.sta.api.EntityServiceFactory;
 import org.n52.sta.mqtt.MqttHandlerException;
 import org.n52.sta.utils.AbstractSTARequestHandler;
-import org.n52.sta.utils.CoreRequestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -72,7 +72,7 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
         @Value("${server.feature.mqttReadOnly}") boolean readOnly,
         @Value("${server.rootUrl}") String rootUrl,
         @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
-        EntityServiceRepository serviceRepository,
+        EntityServiceFactory serviceRepository,
         ObjectMapper mapper) {
         super(rootUrl, shouldEscapeId, serviceRepository);
         this.mapper = mapper;
