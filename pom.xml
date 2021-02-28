@@ -25,11 +25,12 @@
     </scm>
 
     <modules>
-        <module>core</module>
         <module>app</module>
+        <module>dao</module>
         <module>http</module>
         <module>mqtt</module>
         <module>webapp</module>
+        <module>dao-postgres</module>
     </modules>
 
     <properties>
@@ -59,7 +60,12 @@
         <dependencies>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>sta-core</artifactId>
+                <artifactId>sta-dao</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>sta-dao-postgres</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
