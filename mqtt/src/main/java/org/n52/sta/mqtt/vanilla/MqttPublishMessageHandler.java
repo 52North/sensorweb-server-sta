@@ -30,13 +30,13 @@
 package org.n52.sta.mqtt.vanilla;
 
 import io.moquette.interception.messages.InterceptPublishMessage;
-import org.n52.series.db.beans.IdEntity;
 import org.n52.sta.api.RequestUtils;
+import org.n52.sta.api.dto.StaDTO;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 public interface MqttPublishMessageHandler extends RequestUtils {
 
-    <T extends IdEntity> void processPublishMessage(InterceptPublishMessage msg);
+    <T extends StaDTO> void processPublishMessage(InterceptPublishMessage msg);
 }

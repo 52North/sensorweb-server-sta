@@ -94,11 +94,10 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
     public MqttSubscriptionEventHandlerImpl(@Value("${server.rootUrl}") String rootUrl,
                                             @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
                                             MqttUtil config,
-                                            ObjectMapper mapper, EntityServiceFactory serviceRepository) {
+                                            ObjectMapper mapper) {
         super(rootUrl, shouldEscapeId, null);
         this.config = config;
         this.mapper = mapper;
-        this.serviceRepository = serviceRepository;
     }
 
     @Override
@@ -126,7 +125,7 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
                     if (serializedCache.containsKey(subscrip.getQueryOptions())) {
                         out = serializedCache.get(subscrip.getQueryOptions());
                     } else {
-                        rawObject.setQueryOptions(subscrip.getQueryOptions());
+                        rawObject.setAndParseQueryOptions(subscrip.getQueryOptions());
                         out = Unpooled.wrappedBuffer(mapper.writeValueAsBytes(rawObject));
                         serializedCache.put(subscrip.getQueryOptions(), out);
                     }
@@ -148,6 +147,10 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
     @Override
     public Set<String> getWatchedEntityTypes() {
         return watchedEntityTypes;
+    }
+
+    @Override public void setServiceRepository(EntityServiceFactory serviceRepository) {
+        this.serviceRepository = serviceRepository;
     }
 
     public void addSubscription(AbstractMqttSubscription subscription, String clientId) {

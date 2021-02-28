@@ -30,7 +30,6 @@
 package org.n52.sta.http.vanilla;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.n52.series.db.beans.IdEntity;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.sta.api.CoreRequestUtils;
@@ -56,7 +55,7 @@ import java.io.IOException;
  */
 @RestController
 @ConditionalOnProperty(value = "server.feature.httpReadOnly", havingValue = "false", matchIfMissing = true)
-public class CoreCudRequestHandler<T extends IdEntity> extends CudRequestHandler<T> implements CoreRequestUtils {
+public class CoreCudRequestHandler<T extends StaDTO> extends CudRequestHandler<T> implements CoreRequestUtils {
 
     public CoreCudRequestHandler(@Value("${server.rootUrl}") String rootUrl,
                                  @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,

@@ -32,12 +32,12 @@ package org.n52.sta.mqtt.vanilla;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.moquette.interception.messages.InterceptPublishMessage;
-import org.n52.series.db.beans.IdEntity;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.api.AbstractSensorThingsEntityService;
 import org.n52.sta.api.CoreRequestUtils;
 import org.n52.sta.api.EntityServiceFactory;
+import org.n52.sta.api.dto.StaDTO;
 import org.n52.sta.mqtt.MqttHandlerException;
 import org.n52.sta.utils.AbstractSTARequestHandler;
 import org.slf4j.Logger;
@@ -102,7 +102,7 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
         return valid;
     }
 
-    @Override public <T extends IdEntity> void processPublishMessage(InterceptPublishMessage msg) {
+    @Override public <T extends StaDTO> void processPublishMessage(InterceptPublishMessage msg) {
         try {
             if (msg.getClientID().equals(INTERNAL_CLIENT_ID) || readOnly) {
                 return;
