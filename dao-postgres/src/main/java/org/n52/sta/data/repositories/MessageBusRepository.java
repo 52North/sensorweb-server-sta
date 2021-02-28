@@ -46,8 +46,10 @@ import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.sta.DTOTransformer;
 import org.n52.sta.SpringApplicationContext;
-import org.n52.sta.data.STAEventHandler;
+import org.n52.sta.api.STAEventHandler;
+import org.n52.sta.api.dto.StaDTO;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,7 +99,6 @@ public class MessageBusRepository<T, I extends Serializable>
 
     private final JpaEntityInformation entityInformation;
     private final STAEventHandler mqttHandler;
-    // Used actively by the
     private final EntityManager em;
     private final EntityManager databaseEm;
     private final Class<T> entityClass;
@@ -256,6 +257,7 @@ public class MessageBusRepository<T, I extends Serializable>
     @Override
     public <S extends T> S save(S newEntity) {
         String entityType = entityTypeToStaType.get(entityInformation.getEntityName());
+        final DTOTransformer<?, ?> transformer = new DTOTransformer<>();
         boolean intercept =
             mqttHandler.getWatchedEntityTypes().contains(entityType);
 
@@ -263,7 +265,8 @@ public class MessageBusRepository<T, I extends Serializable>
             em.persist(newEntity);
             em.flush();
             if (intercept) {
-                this.mqttHandler.handleEvent(newEntity, entityType, null, getRelatedCollections(newEntity));
+                StaDTO o = transformer.toDTO(newEntity, null);
+                this.mqttHandler.handleEvent(o, entityType, null, getRelatedCollections(newEntity));
             }
         } else {
             if (intercept) {
@@ -278,7 +281,8 @@ public class MessageBusRepository<T, I extends Serializable>
                 Map<String, Object> oldProperties = getPropertyMap(oldEntity);
                 S entity = em.merge(newEntity);
                 em.flush();
-                this.mqttHandler.handleEvent(newEntity,
+                StaDTO o = transformer.toDTO(newEntity, null);
+                this.mqttHandler.handleEvent(o,
                                              entityType,
                                              computeDifference(oldProperties, getPropertyMap(newEntity)),
                                              getRelatedCollections(entity));

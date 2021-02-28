@@ -40,14 +40,14 @@ public class CollectionWrapper {
 
     private final long totalEntityCount;
 
-    private final List<StaDTO> entities;
+    private final List<? extends StaDTO> entities;
 
     private final boolean hasNextPage;
 
     private String requestURL;
 
     public CollectionWrapper(long entityCount,
-                             List<StaDTO> entity,
+                             List<? extends StaDTO> entity,
                              boolean hasNextPage) {
         this.totalEntityCount = entityCount;
         this.entities = entity;
@@ -58,7 +58,7 @@ public class CollectionWrapper {
         return totalEntityCount;
     }
 
-    public List<StaDTO> getEntities() {
+    public List<? extends StaDTO> getEntities() {
         return entities;
     }
 

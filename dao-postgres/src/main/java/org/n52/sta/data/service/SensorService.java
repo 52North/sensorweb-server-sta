@@ -42,6 +42,7 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.shetland.ogc.sta.model.SensorEntityDefinition;
+import org.n52.sta.api.dto.SensorDTO;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.SensorQuerySpecifications;
 import org.n52.sta.data.repositories.DatastreamRepository;
@@ -72,7 +73,7 @@ import java.util.stream.Collectors;
 @DependsOn({"springApplicationContext"})
 @Transactional
 public class SensorService
-    extends AbstractSensorThingsEntityServiceImpl<ProcedureRepository, ProcedureEntity> {
+    extends AbstractSensorThingsEntityServiceImpl<ProcedureRepository, SensorDTO, ProcedureEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SensorService.class);
 
@@ -250,10 +251,10 @@ public class SensorService
                     ProcedureEntity merged = merge(existing.get(), entity);
                     if (entity != null) {
                         if (entity.hasDatastreams()) {
-                            AbstractSensorThingsEntityService dsService = getDatastreamService();
+                            DatastreamService dsService = getDatastreamService();
                             for (AbstractDatasetEntity datastreamEntity :
                                 entity.getDatasets()) {
-                                ((DatastreamService) dsService).createOrUpdate(datastreamEntity);
+                                dsService.createOrUpdate(datastreamEntity);
                             }
                         }
                     }
@@ -298,17 +299,6 @@ public class SensorService
         return existing;
     }
 
-    private void checkUpdate(ProcedureEntity entity) throws STACRUDException {
-        if (entity instanceof ProcedureEntity) {
-            ProcedureEntity sensor = (ProcedureEntity) entity;
-            if (sensor.hasDatastreams()) {
-                for (AbstractDatasetEntity datastream : sensor.getDatasets()) {
-                    checkInlineDatastream(datastream);
-                }
-            }
-        }
-    }
-
     @Override
     public void delete(String identifier) throws STACRUDException {
         synchronized (getLock(identifier)) {
@@ -319,6 +309,17 @@ public class SensorService
                 }
             } else {
                 throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
+            }
+        }
+    }
+
+    private void checkUpdate(ProcedureEntity entity) throws STACRUDException {
+        if (entity instanceof ProcedureEntity) {
+            ProcedureEntity sensor = (ProcedureEntity) entity;
+            if (sensor.hasDatastreams()) {
+                for (AbstractDatasetEntity datastream : sensor.getDatasets()) {
+                    checkInlineDatastream(datastream);
+                }
             }
         }
     }

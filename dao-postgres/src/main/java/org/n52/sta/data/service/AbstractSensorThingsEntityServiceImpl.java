@@ -43,15 +43,16 @@ import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
+import org.n52.sta.DTOTransformer;
+import org.n52.sta.api.CollectionWrapper;
+import org.n52.sta.api.dto.StaDTO;
 import org.n52.sta.data.MutexFactory;
 import org.n52.sta.data.OffsetLimitBasedPageRequest;
 import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.StaIdentifierRepository;
 import org.n52.sta.data.service.EntityServiceRepository.EntityTypes;
-import org.n52.sta.data.service.util.CollectionWrapper;
 import org.n52.sta.data.service.util.FilterExprVisitor;
 import org.n52.sta.data.service.util.HibernateSpatialCriteriaBuilderImpl;
-import org.n52.sta.serdes.util.ElementWithQueryOptions;
 import org.n52.svalbard.odata.core.expr.Expr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,8 +76,10 @@ import java.util.Set;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Transactional(rollbackFor = Exception.class)
-public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentifierRepository<S>,
-    S extends HibernateRelations.HasId> implements AbstractSensorThingsEntityService<S> {
+public abstract class AbstractSensorThingsEntityServiceImpl<
+    T extends StaIdentifierRepository<S>,
+    R extends StaDTO,
+    S extends HibernateRelations.HasId> {
 
     // protected static final String IDENTIFIER = "identifier";
     protected static final String STAIDENTIFIER = "staIdentifier";
@@ -98,10 +101,11 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSensorThingsEntityServiceImpl.class);
     private final EntityManager em;
     private final Class<S> entityClass;
-    private EntityServiceRepository serviceRepository;
+    private final DTOTransformer<R, S> transformer;
 
     @Autowired
     private MutexFactory lock;
+    private EntityServiceRepository serviceRepository;
     private T repository;
 
     public AbstractSensorThingsEntityServiceImpl(T repository,
@@ -110,6 +114,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         this.em = em;
         this.entityClass = entityClass;
         this.repository = repository;
+        this.transformer = new DTOTransformer<>();
     }
 
     public void setServiceRepository(EntityServiceRepository serviceRepository) {
@@ -133,13 +138,11 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         }
     }
 
-    @Override
     public boolean existsEntity(String id) {
         return getRepository().existsByStaIdentifier(id);
     }
 
-    @Override
-    public ElementWithQueryOptions getEntity(String id, QueryOptions queryOptions) throws STACRUDException {
+    public R getEntity(String id, QueryOptions queryOptions) throws STACRUDException {
         try {
             S entity = getRepository().findByStaIdentifier(id, createFetchGraph(queryOptions.getExpandFilter())).get();
             if (queryOptions.hasExpandFilter()) {
@@ -153,7 +156,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         }
     }
 
-    @Override public CollectionWrapper getEntityCollection(QueryOptions queryOptions) throws STACRUDException {
+    public CollectionWrapper getEntityCollection(QueryOptions queryOptions) throws STACRUDException {
         try {
             Page<S> pages = getRepository().findAll(getFilterPredicate(entityClass, queryOptions),
                                                     createPageableRequest(queryOptions),
@@ -164,10 +167,10 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         }
     }
 
-    @Override public ElementWithQueryOptions<?> getEntityByRelatedEntity(String relatedId,
-                                                                         String relatedType,
-                                                                         String ownId,
-                                                                         QueryOptions queryOptions)
+    public R getEntityByRelatedEntity(String relatedId,
+                                      String relatedType,
+                                      String ownId,
+                                      QueryOptions queryOptions)
         throws STACRUDException {
         S entityByRelatedEntityRaw =
             getEntityByRelatedEntityRaw(relatedId, relatedType, ownId, queryOptions);
@@ -178,9 +181,9 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         }
     }
 
-    @Override public CollectionWrapper getEntityCollectionByRelatedEntity(String relatedId,
-                                                                          String relatedType,
-                                                                          QueryOptions queryOptions)
+    public CollectionWrapper getEntityCollectionByRelatedEntity(String relatedId,
+                                                                String relatedType,
+                                                                QueryOptions queryOptions)
         throws STACRUDException {
         return createCollectionWrapperAndExpand(queryOptions,
                                                 getEntityCollectionByRelatedEntityRaw(relatedId,
@@ -188,28 +191,26 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
                                                                                       queryOptions));
     }
 
-    @Override public String getEntityIdByRelatedEntity(String relatedId, String relatedType) {
+    public String getEntityIdByRelatedEntity(String relatedId, String relatedType) {
         Optional<String> entity = getRepository().getColumn(
             this.byRelatedEntityFilter(relatedId, relatedType, null),
             STAIDENTIFIER);
         return entity.orElse(null);
     }
 
-    @Override public boolean existsEntityByRelatedEntity(String relatedId,
-                                                         String relatedType,
-                                                         String ownId) {
+    public boolean existsEntityByRelatedEntity(String relatedId,
+                                               String relatedType,
+                                               String ownId) {
         return getRepository().count(byRelatedEntityFilter(relatedId, relatedType, ownId)) > 0;
     }
 
-    @Override
     @Transactional(rollbackFor = Exception.class)
-    public ElementWithQueryOptions create(S entity) throws STACRUDException {
+    public R create(S entity) throws STACRUDException {
         return this.createWrapper(createOrfetch(entity), null);
     }
 
-    @Override
     @Transactional(rollbackFor = Exception.class)
-    public ElementWithQueryOptions update(String id, S entity, HttpMethod method) throws STACRUDException {
+    public R update(String id, S entity, HttpMethod method) throws STACRUDException {
         return this.createWrapper(updateEntity(id, entity, method), null);
     }
 
@@ -346,8 +347,8 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
      * @return instance of ElementWithQueryOptions
      */
     @Transactional(rollbackFor = Exception.class)
-    ElementWithQueryOptions createWrapper(S entity, QueryOptions queryOptions) {
-        return ElementWithQueryOptions.from(entity, queryOptions);
+    R createWrapper(S entity, QueryOptions queryOptions) {
+        return transformer.toDTO(entity, queryOptions);
     }
 
     /**
@@ -497,6 +498,8 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     }
 
     protected abstract S merge(S existing, S toMerge) throws STACRUDException;
+
+    protected abstract void delete(String id) throws STACRUDException;
 
     protected <U extends HibernateRelations.HasIdentifier & HibernateRelations.HasStaIdentifier
         & HasName & HasDescription> void mergeIdentifierNameDescription(U existing, U toMerge) {

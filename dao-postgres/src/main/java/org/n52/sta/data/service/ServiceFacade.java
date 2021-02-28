@@ -40,9 +40,19 @@ import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
+import org.n52.sta.DTOTransformer;
 import org.n52.sta.DaoSemaphore;
-import org.n52.sta.data.service.util.CollectionWrapper;
-import org.n52.sta.serdes.util.ElementWithQueryOptions;
+import org.n52.sta.api.AbstractSensorThingsEntityService;
+import org.n52.sta.api.CollectionWrapper;
+import org.n52.sta.api.dto.DatastreamDTO;
+import org.n52.sta.api.dto.FeatureOfInterestDTO;
+import org.n52.sta.api.dto.HistoricalLocationDTO;
+import org.n52.sta.api.dto.LocationDTO;
+import org.n52.sta.api.dto.ObservationDTO;
+import org.n52.sta.api.dto.ObservedPropertyDTO;
+import org.n52.sta.api.dto.SensorDTO;
+import org.n52.sta.api.dto.StaDTO;
+import org.n52.sta.api.dto.ThingDTO;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
@@ -53,18 +63,20 @@ import org.springframework.stereotype.Component;
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public class ServiceFacade<S extends HibernateRelations.HasId>
-    implements AbstractSensorThingsEntityService<S> {
+public class ServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
+    implements AbstractSensorThingsEntityService<R> {
 
     private final DaoSemaphore semaphore;
-    private AbstractSensorThingsEntityService<S> serviceImpl;
+    private final DTOTransformer<R, S> transformer;
+    private AbstractSensorThingsEntityServiceImpl<?, R, S> serviceImpl;
 
-    public ServiceFacade(AbstractSensorThingsEntityService<S> serviceImpl, DaoSemaphore semaphore) {
+    public ServiceFacade(AbstractSensorThingsEntityServiceImpl<?, R, S> serviceImpl, DaoSemaphore semaphore) {
         this.serviceImpl = serviceImpl;
         this.semaphore = semaphore;
+        this.transformer = new DTOTransformer<>();
     }
 
-    AbstractSensorThingsEntityService<S> getServiceImpl() {
+    AbstractSensorThingsEntityServiceImpl<?, ?, ?> getServiceImpl() {
         return serviceImpl;
     }
 
@@ -81,8 +93,8 @@ public class ServiceFacade<S extends HibernateRelations.HasId>
         return result;
     }
 
-    @Override public ElementWithQueryOptions getEntity(String id, QueryOptions queryOptions) throws STACRUDException {
-        ElementWithQueryOptions result;
+    @Override public R getEntity(String id, QueryOptions queryOptions) throws STACRUDException {
+        R result;
         try {
             semaphore.acquire();
             result = serviceImpl.getEntity(id, queryOptions);
@@ -107,12 +119,12 @@ public class ServiceFacade<S extends HibernateRelations.HasId>
         return result;
     }
 
-    @Override public ElementWithQueryOptions<?> getEntityByRelatedEntity(String relatedId,
-                                                                         String relatedType,
-                                                                         String ownId,
-                                                                         QueryOptions queryOptions)
+    @Override public R getEntityByRelatedEntity(String relatedId,
+                                                String relatedType,
+                                                String ownId,
+                                                QueryOptions queryOptions)
         throws STACRUDException {
-        ElementWithQueryOptions<?> result;
+        R result;
         try {
             semaphore.acquire();
             result = serviceImpl.getEntityByRelatedEntity(relatedId, relatedType, ownId, queryOptions);
@@ -167,11 +179,11 @@ public class ServiceFacade<S extends HibernateRelations.HasId>
         return result;
     }
 
-    @Override public ElementWithQueryOptions create(S entity) throws STACRUDException {
-        ElementWithQueryOptions result;
+    @Override public R create(R entity) throws STACRUDException {
+        R result;
         try {
             semaphore.acquire();
-            result = serviceImpl.create(entity);
+            result = serviceImpl.create(transformer.fromDTO(entity));
         } catch (InterruptedException e) {
             throw new STACRUDException(e.getMessage(), e);
         } finally {
@@ -180,11 +192,11 @@ public class ServiceFacade<S extends HibernateRelations.HasId>
         return result;
     }
 
-    @Override public ElementWithQueryOptions update(String id, S entity, HttpMethod method) throws STACRUDException {
-        ElementWithQueryOptions result;
+    @Override public R update(String id, R entity, HttpMethod method) throws STACRUDException {
+        R result;
         try {
             semaphore.acquire();
-            result = serviceImpl.update(id, entity, method);
+            result = serviceImpl.update(id, transformer.fromDTO(entity), method);
         } catch (InterruptedException e) {
             throw new STACRUDException(e.getMessage(), e);
         } finally {
@@ -205,7 +217,7 @@ public class ServiceFacade<S extends HibernateRelations.HasId>
     }
 
     @Component
-    static class ThingServiceFacade extends ServiceFacade<PlatformEntity> {
+    static class ThingServiceFacade extends ServiceFacade<ThingDTO, PlatformEntity> {
 
         ThingServiceFacade(ThingService serviceImpl,
                            DaoSemaphore semaphore) {
@@ -215,7 +227,7 @@ public class ServiceFacade<S extends HibernateRelations.HasId>
 
 
     @Component
-    static class LocationServiceFacade extends ServiceFacade<LocationEntity> {
+    static class LocationServiceFacade extends ServiceFacade<LocationDTO, LocationEntity> {
 
         LocationServiceFacade(LocationService serviceImpl,
                               DaoSemaphore semaphore) {
@@ -226,7 +238,7 @@ public class ServiceFacade<S extends HibernateRelations.HasId>
 
     @Component
     static class HistoricalLocationServiceFacade
-        extends ServiceFacade<HistoricalLocationEntity> {
+        extends ServiceFacade<HistoricalLocationDTO, HistoricalLocationEntity> {
 
         HistoricalLocationServiceFacade(HistoricalLocationService serviceImpl,
                                         DaoSemaphore semaphore) {
@@ -236,7 +248,7 @@ public class ServiceFacade<S extends HibernateRelations.HasId>
 
 
     @Component
-    static class SensorServiceFacade extends ServiceFacade<ProcedureEntity> {
+    static class SensorServiceFacade extends ServiceFacade<SensorDTO, ProcedureEntity> {
 
         SensorServiceFacade(SensorService serviceImpl,
                             DaoSemaphore semaphore) {
@@ -247,7 +259,7 @@ public class ServiceFacade<S extends HibernateRelations.HasId>
 
     @Component
     static class ObservedPropertyServiceFacade
-        extends ServiceFacade<PhenomenonEntity> {
+        extends ServiceFacade<ObservedPropertyDTO, PhenomenonEntity> {
 
         ObservedPropertyServiceFacade(ObservedPropertyService serviceImpl,
                                       DaoSemaphore semaphore) {
@@ -258,7 +270,7 @@ public class ServiceFacade<S extends HibernateRelations.HasId>
 
     @Component
     static class ObservationServiceFacade
-        extends ServiceFacade<DataEntity<?>> {
+        extends ServiceFacade<ObservationDTO, DataEntity<?>> {
 
         ObservationServiceFacade(ObservationService serviceImpl,
                                  DaoSemaphore semaphore) {
@@ -268,7 +280,7 @@ public class ServiceFacade<S extends HibernateRelations.HasId>
 
 
     @Component
-    static class DatastreamServiceFacade extends ServiceFacade<AbstractDatasetEntity> {
+    static class DatastreamServiceFacade extends ServiceFacade<DatastreamDTO, AbstractDatasetEntity> {
 
         DatastreamServiceFacade(DatastreamService serviceImpl,
                                 DaoSemaphore semaphore) {
@@ -279,7 +291,7 @@ public class ServiceFacade<S extends HibernateRelations.HasId>
 
     @Component
     static class FeatureOfInterestServiceFacade
-        extends ServiceFacade<AbstractFeatureEntity<?>> {
+        extends ServiceFacade<FeatureOfInterestDTO, AbstractFeatureEntity<?>> {
 
         FeatureOfInterestServiceFacade(FeatureOfInterestService serviceImpl,
                                        DaoSemaphore semaphore) {

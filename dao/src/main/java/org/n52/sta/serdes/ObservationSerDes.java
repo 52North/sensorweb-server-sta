@@ -145,7 +145,7 @@ public class ObservationSerDes {
                 observation.getFieldsToSerialize().contains(STAEntityDefinition.PROP_RESULT_TIME)) {
                 if (observation.getResultTime() != null) {
                     gen.writeStringField(STAEntityDefinition.PROP_RESULT_TIME,
-                                         observation.getResultTime().toString());
+                                         DateTimeHelper.format(observation.getResultTime()));
                 } else {
                     // resultTime is mandatory (but null is allowed) so it must be serialized
                     gen.writeNullField(STAEntityDefinition.PROP_RESULT_TIME);

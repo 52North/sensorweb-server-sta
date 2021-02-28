@@ -47,6 +47,7 @@ import org.n52.sta.api.dto.ThingDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
@@ -55,6 +56,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
+@Primary
 public class JacksonConfig {
 
     @Bean

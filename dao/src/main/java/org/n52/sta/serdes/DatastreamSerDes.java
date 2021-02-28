@@ -134,8 +134,8 @@ public class DatastreamSerDes {
 
             if (!datastream.hasSelectOption() ||
                 datastream.getFieldsToSerialize().contains(STAEntityDefinition.PROP_OBSERVED_AREA)) {
-                gen.writeFieldName(STAEntityDefinition.PROP_OBSERVED_AREA);
                 if (datastream.getObservedArea() != null) {
+                    gen.writeFieldName(STAEntityDefinition.PROP_OBSERVED_AREA);
                     gen.writeRawValue(GEO_JSON_WRITER.write(datastream.getObservedArea()));
                 }
             }
@@ -157,18 +157,6 @@ public class DatastreamSerDes {
 
             if (!datastream.hasSelectOption() ||
                 datastream.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PROPERTIES)) {
-                //TODO: refactor to postgres-dao
-                /*
-                if (includeDatastreamCategory) {
-                    // Add Category to parameters
-                    gen.writeNumberField(categoryPrefix + "Id",
-                                         datastream.getCategory().getId());
-                    gen.writeStringField(categoryPrefix + "Name",
-                                         datastream.getCategory().getName());
-                    gen.writeStringField(categoryPrefix + "Description",
-                                         datastream.getCategory().getDescription());
-                }
-                 */
                 gen.writeObjectField(STAEntityDefinition.PROP_PROPERTIES, datastream.getProperties());
             }
 

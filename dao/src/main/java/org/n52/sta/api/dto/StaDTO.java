@@ -45,7 +45,7 @@ public interface StaDTO {
 
     QueryOptions getQueryOptions();
 
-    void setQueryOptions(QueryOptions qo);
+    void setAndParseQueryOptions(QueryOptions qo);
 
     Set<String> getFieldsToSerialize();
 

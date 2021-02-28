@@ -40,6 +40,7 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.ObservedPropertyEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.sta.api.dto.ObservedPropertyDTO;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.ObservedPropertyQuerySpecifications;
 import org.n52.sta.data.repositories.DatastreamRepository;
@@ -68,7 +69,10 @@ import java.util.stream.Collectors;
 @DependsOn({"springApplicationContext"})
 @Transactional
 public class ObservedPropertyService
-    extends AbstractSensorThingsEntityServiceImpl<PhenomenonRepository, PhenomenonEntity> {
+    extends AbstractSensorThingsEntityServiceImpl<
+    PhenomenonRepository,
+    ObservedPropertyDTO,
+    PhenomenonEntity> {
 
     private static final Logger logger = LoggerFactory.getLogger(ObservedPropertyService.class);
 
@@ -130,7 +134,7 @@ public class ObservedPropertyService
                                                                  StaConstants.OBSERVED_PROPERTY));
             }
         }
-        return new EntityGraphRepository.FetchGraph[]{
+        return new EntityGraphRepository.FetchGraph[] {
             EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS
         };
     }
@@ -264,14 +268,6 @@ public class ObservedPropertyService
         return existing;
     }
 
-    private void checkUpdate(PhenomenonEntity entity) throws STACRUDException {
-        if (entity.hasDatastreams()) {
-            for (AbstractDatasetEntity datastream : entity.getDatasets()) {
-                checkInlineDatastream(datastream);
-            }
-        }
-    }
-
     @Override
     public void delete(String id) throws STACRUDException {
         synchronized (getLock(id)) {
@@ -284,6 +280,14 @@ public class ObservedPropertyService
                 getRepository().deleteByStaIdentifier(id);
             } else {
                 throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
+            }
+        }
+    }
+
+    private void checkUpdate(PhenomenonEntity entity) throws STACRUDException {
+        if (entity.hasDatastreams()) {
+            for (AbstractDatasetEntity datastream : entity.getDatasets()) {
+                checkInlineDatastream(datastream);
             }
         }
     }

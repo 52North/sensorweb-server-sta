@@ -62,4 +62,6 @@ public interface STAEventHandler {
      * @return Set of all watched Entity Types. Empty if Handler is inactive.
      */
     Set<String> getWatchedEntityTypes();
+
+    void setServiceRepository(EntityServiceFactory serviceRepository);
 }

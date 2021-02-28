@@ -37,7 +37,7 @@ import org.springframework.http.HttpMethod;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public interface AbstractSensorThingsEntityService<S> {
+public interface AbstractSensorThingsEntityService<R extends StaDTO> {
 
     /**
      * Checks if an Entity with given id exists
@@ -55,7 +55,7 @@ public interface AbstractSensorThingsEntityService<S> {
      * @return ElementWithQueryOptions wrapping requested Entity
      * @throws STACRUDException if an error occurred
      */
-    StaDTO getEntity(String id, QueryOptions queryOptions) throws STACRUDException;
+    R getEntity(String id, QueryOptions queryOptions) throws STACRUDException;
 
     /**
      * Requests the full EntityCollection
@@ -77,8 +77,8 @@ public interface AbstractSensorThingsEntityService<S> {
      * @return Entity that matches
      * @throws STACRUDException if an error occurred
      */
-    StaDTO getEntityByRelatedEntity(String relatedId, String relatedType, String ownId,
-                                    QueryOptions queryOptions) throws STACRUDException;
+    R getEntityByRelatedEntity(String relatedId, String relatedType, String ownId,
+                               QueryOptions queryOptions) throws STACRUDException;
 
     /**
      * Requests the EntityCollection that is related to a single Entity with the given ID and type
@@ -113,9 +113,9 @@ public interface AbstractSensorThingsEntityService<S> {
      */
     boolean existsEntityByRelatedEntity(String relatedId, String relatedType, String ownId) throws STACRUDException;
 
-    StaDTO create(S entity) throws STACRUDException;
+    StaDTO create(R entity) throws STACRUDException;
 
-    StaDTO update(String id, S entity, HttpMethod method) throws STACRUDException;
+    StaDTO update(String id, R entity, HttpMethod method) throws STACRUDException;
 
     void delete(String id) throws STACRUDException;
 }

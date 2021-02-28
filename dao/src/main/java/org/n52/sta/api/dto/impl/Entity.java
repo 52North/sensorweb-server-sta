@@ -62,7 +62,7 @@ public abstract class Entity implements StaDTO {
         return queryOptions;
     }
 
-    @Override public void setQueryOptions(QueryOptions queryOptions) {
+    @Override public void setAndParseQueryOptions(QueryOptions queryOptions) {
         if (queryOptions != null) {
             if (queryOptions.hasSelectFilter()) {
                 hasSelectOption = true;

@@ -27,51 +27,23 @@
  * Public License for more details.
  */
 
-package org.n52.sta.data.service.util;
+package org.n52.sta;
 
-import org.n52.sta.serdes.util.ElementWithQueryOptions;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.concurrent.Semaphore;
 
 /**
+ * Semaphore controlling access to the Persistence Service Layer. The Persistence Layer can currently only handle as
+ * many running threads as there are database connections available, as each thread uses a separate Transaction.
+ *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public class CollectionWrapper {
+@Service
+public class DaoSemaphore extends Semaphore {
 
-    private final long totalEntityCount;
-
-    private final List<ElementWithQueryOptions> entities;
-
-    private final boolean hasNextPage;
-
-    private String requestURL;
-
-    public CollectionWrapper(long entityCount,
-                             List<ElementWithQueryOptions> entity,
-                             boolean hasNextPage) {
-        this.totalEntityCount = entityCount;
-        this.entities = entity;
-        this.hasNextPage = hasNextPage;
-    }
-
-    public long getTotalEntityCount() {
-        return totalEntityCount;
-    }
-
-    public List<ElementWithQueryOptions> getEntities() {
-        return entities;
-    }
-
-    public boolean hasNextPage() {
-        return hasNextPage;
-    }
-
-    public String getRequestURL() {
-        return requestURL;
-    }
-
-    public CollectionWrapper setRequestURL(String requestURL) {
-        this.requestURL = requestURL;
-        return this;
+    public DaoSemaphore(@Value("${spring.datasource.hikari.maximum-pool-size:10}") int permits) {
+        super(permits, true);
     }
 }

@@ -58,6 +58,7 @@ import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.sta.api.dto.DatastreamDTO;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.repositories.CategoryRepository;
 import org.n52.sta.data.repositories.DatastreamParameterRepository;
@@ -94,8 +95,10 @@ import java.util.stream.Collectors;
 @Component
 @DependsOn({"springApplicationContext", "datastreamRepository"})
 @Transactional
-public class DatastreamService extends
-                               AbstractSensorThingsEntityServiceImpl<DatastreamRepository, AbstractDatasetEntity> {
+public class DatastreamService extends AbstractSensorThingsEntityServiceImpl<
+    DatastreamRepository,
+    DatastreamDTO,
+    AbstractDatasetEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatastreamService.class);
     private static final DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
@@ -438,6 +441,48 @@ public class DatastreamService extends
     }
     */
 
+    @Override
+    public void delete(String id) throws STACRUDException {
+        synchronized (getLock(id)) {
+            if (getRepository().existsByStaIdentifier(id)) {
+                AbstractDatasetEntity datastream =
+                    getRepository().findByStaIdentifier(id).get();
+
+                // Delete first/last to be able to delete observations
+                datastream.setFirstObservation(null);
+                datastream.setLastObservation(null);
+
+                // Delete subdatasets if we are aggregation
+                if (datastream instanceof DatasetAggregationEntity) {
+                    Set<AbstractDatasetEntity> allByAggregationId =
+                        getRepository().findAllByAggregationId(datastream.getId());
+                    Set<Long> datasetIds = allByAggregationId.stream()
+                        .map(IdEntity::getId)
+                        .collect(Collectors.toSet());
+                    allByAggregationId.forEach(dataset -> {
+                        dataset.setFirstObservation(null);
+                        dataset.setLastObservation(null);
+                    });
+
+                    // Flush to disk
+                    getRepository().saveAll(allByAggregationId);
+                    getRepository().flush();
+                    // delete observations
+                    observationRepository.deleteAllByDatasetIdIn(datasetIds);
+                    // delete subdatastreams
+                    datasetIds.forEach(datasetId -> getRepository().deleteById(datasetId));
+                } else {
+                    // delete observations
+                    observationRepository.deleteAllByDatasetIdIn(Collections.singleton(datastream.getId()));
+                }
+                //delete main datastream
+                getRepository().deleteByStaIdentifier(id);
+            } else {
+                throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
+            }
+        }
+    }
+
     /**
      * Creates a DatasetAggregation or expands the existing Aggregation with a new dataset.
      *
@@ -570,48 +615,6 @@ public class DatastreamService extends
         }
         if (entity.getObservations() != null) {
             throw new STACRUDException(ERROR_MSG, HTTPStatus.BAD_REQUEST);
-        }
-    }
-
-    @Override
-    public void delete(String id) throws STACRUDException {
-        synchronized (getLock(id)) {
-            if (getRepository().existsByStaIdentifier(id)) {
-                AbstractDatasetEntity datastream =
-                    getRepository().findByStaIdentifier(id).get();
-
-                // Delete first/last to be able to delete observations
-                datastream.setFirstObservation(null);
-                datastream.setLastObservation(null);
-
-                // Delete subdatasets if we are aggregation
-                if (datastream instanceof DatasetAggregationEntity) {
-                    Set<AbstractDatasetEntity> allByAggregationId =
-                        getRepository().findAllByAggregationId(datastream.getId());
-                    Set<Long> datasetIds = allByAggregationId.stream()
-                        .map(IdEntity::getId)
-                        .collect(Collectors.toSet());
-                    allByAggregationId.forEach(dataset -> {
-                        dataset.setFirstObservation(null);
-                        dataset.setLastObservation(null);
-                    });
-
-                    // Flush to disk
-                    getRepository().saveAll(allByAggregationId);
-                    getRepository().flush();
-                    // delete observations
-                    observationRepository.deleteAllByDatasetIdIn(datasetIds);
-                    // delete subdatastreams
-                    datasetIds.forEach(datasetId -> getRepository().deleteById(datasetId));
-                } else {
-                    // delete observations
-                    observationRepository.deleteAllByDatasetIdIn(Collections.singleton(datastream.getId()));
-                }
-                //delete main datastream
-                getRepository().deleteByStaIdentifier(id);
-            } else {
-                throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
-            }
         }
     }
 

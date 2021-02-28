@@ -39,6 +39,7 @@ import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.sta.api.dto.HistoricalLocationDTO;
 import org.n52.sta.data.query.HistoricalLocationQuerySpecifications;
 import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.HistoricalLocationRepository;
@@ -67,7 +68,10 @@ import java.util.stream.Collectors;
 @DependsOn({"springApplicationContext"})
 @Transactional
 public class HistoricalLocationService
-    extends AbstractSensorThingsEntityServiceImpl<HistoricalLocationRepository, HistoricalLocationEntity> {
+    extends AbstractSensorThingsEntityServiceImpl<
+    HistoricalLocationRepository,
+    HistoricalLocationDTO,
+    HistoricalLocationEntity> {
 
     private static final Logger logger = LoggerFactory.getLogger(HistoricalLocationService.class);
 
@@ -231,6 +235,24 @@ public class HistoricalLocationService
         return existing;
     }
 
+    @Override
+    public void delete(String id) throws STACRUDException {
+        synchronized (getLock(id)) {
+            if (getRepository().existsByStaIdentifier(id)) {
+                HistoricalLocationEntity historicalLocation = getRepository()
+                    .findByStaIdentifier(id,
+                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_LOCATIONHISTLOCATION,
+                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_PLATFORM)
+                    .get();
+                updateLocations(historicalLocation);
+                updateThing(historicalLocation);
+                getRepository().deleteByStaIdentifier(id);
+            } else {
+                throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
+            }
+        }
+    }
+
     private void check(HistoricalLocationEntity historicalLocation) throws STACRUDException {
         if (historicalLocation.getThing() == null && historicalLocation.getLocations() != null) {
             throw new STACRUDException("The HistoricalLocation to create is invalid", HTTPStatus.BAD_REQUEST);
@@ -263,24 +285,6 @@ public class HistoricalLocationService
             }
         }
         historicalLocation.setLocations(locations);
-    }
-
-    @Override
-    public void delete(String id) throws STACRUDException {
-        synchronized (getLock(id)) {
-            if (getRepository().existsByStaIdentifier(id)) {
-                HistoricalLocationEntity historicalLocation = getRepository()
-                    .findByStaIdentifier(id,
-                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_LOCATIONHISTLOCATION,
-                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_PLATFORM)
-                    .get();
-                updateLocations(historicalLocation);
-                updateThing(historicalLocation);
-                getRepository().deleteByStaIdentifier(id);
-            } else {
-                throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
-            }
-        }
     }
 
     private void updateLocations(HistoricalLocationEntity historicalLocation) throws STACRUDException {

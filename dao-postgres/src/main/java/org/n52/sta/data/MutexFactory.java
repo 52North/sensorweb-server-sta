@@ -27,23 +27,44 @@
  * Public License for more details.
  */
 
-package org.n52.sta;
+package org.n52.sta.data;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import java.util.concurrent.Semaphore;
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
- * Semaphore controlling access to the Persistence Service Layer. The Persistence Layer can currently only handle as
- * many running threads as there are database connections available, as each thread uses a seperate Transaction.
- *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@Service
-public class DaoSemaphore extends Semaphore {
+@Component
+public class MutexFactory {
 
-    public DaoSemaphore(@Value("${spring.datasource.hikari.maximum-pool-size}") int permits) {
-        super(permits, true);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MutexFactory.class);
+
+    // MutexMap used for locking during thread-bound in-memory computations on database entities
+    private ConcurrentReferenceHashMap<String, Object> lock;
+
+    public MutexFactory() {
+        this.lock = new ConcurrentReferenceHashMap<>();
     }
+
+    /**
+     * Gets a lock with given name from global lockMap. Name is unique per EntityType.
+     * Uses weak references so Map is automatically cleared by GC.
+     *
+     * @param key name of the lock
+     * @return Object used for holding the lock
+     * @throws STACRUDException If the lock can not be obtained.
+     */
+    public synchronized Object getLock(String key) throws STACRUDException {
+        if (key != null) {
+            LOGGER.trace("Locking:" + key);
+            return this.lock.compute(key, (k, v) -> v == null ? new Object() : v);
+        } else {
+            throw new STACRUDException("Unable to obtain Lock. No name specified!");
+        }
+    }
+
 }

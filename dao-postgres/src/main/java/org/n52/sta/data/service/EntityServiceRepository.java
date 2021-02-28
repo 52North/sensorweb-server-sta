@@ -29,7 +29,9 @@
 
 package org.n52.sta.data.service;
 
-import org.n52.sta.data.STAEventHandler;
+import org.n52.sta.api.AbstractSensorThingsEntityService;
+import org.n52.sta.api.EntityServiceFactory;
+import org.n52.sta.api.STAEventHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -43,9 +45,9 @@ import java.util.Map;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
-public class EntityServiceRepository {
+public class EntityServiceRepository implements EntityServiceFactory {
 
-    private Map<EntityTypes, ServiceFacade<?>> entityServices = new LinkedHashMap<>();
+    private Map<EntityTypes, ServiceFacade<?, ?>> entityServices = new LinkedHashMap<>();
 
     @Autowired
     private ServiceFacade.ThingServiceFacade thingServiceFacade;
@@ -71,7 +73,8 @@ public class EntityServiceRepository {
     @Autowired
     private ServiceFacade.FeatureOfInterestServiceFacade featureOfInterestService;
 
-    @Autowired private STAEventHandler mqttSubscriptionEventHandler;
+    @Autowired
+    private STAEventHandler mqttSubscriptionEventHandler;
 
     @PostConstruct
     public void postConstruct() {
@@ -99,14 +102,15 @@ public class EntityServiceRepository {
         entityServices.put(EntityTypes.FeatureOfInterest, featureOfInterestService);
         entityServices.put(EntityTypes.FeaturesOfInterest, featureOfInterestService);
 
-        this.mqttSubscriptionEventHandler.setServiceRepository(this);
+        mqttSubscriptionEventHandler.setServiceRepository(this);
     }
 
     @PostConstruct
+
     private void initServices() {
         // Set the
         entityServices.forEach(
-            (t, e) -> ((AbstractSensorThingsEntityServiceImpl) e.getServiceImpl()).setServiceRepository(this)
+            (t, e) -> e.getServiceImpl().setServiceRepository(this)
         );
     }
 
@@ -116,7 +120,7 @@ public class EntityServiceRepository {
      * @param entityTypeName the type name of the requested entity service
      * @return the requested entity data service
      */
-    public AbstractSensorThingsEntityService<?> getEntityService(String entityTypeName) {
+    @Override public AbstractSensorThingsEntityService<?> getEntityService(String entityTypeName) {
         return entityServices.get(EntityTypes.valueOf(entityTypeName));
     }
 
@@ -126,7 +130,7 @@ public class EntityServiceRepository {
      * @param entityTypeName the type name of the requested entity service
      * @return the requested entity data service
      */
-    AbstractSensorThingsEntityService<?> getEntityServiceRaw(EntityTypes entityTypeName) {
+    AbstractSensorThingsEntityServiceImpl getEntityServiceRaw(EntityTypes entityTypeName) {
         return entityServices.get(entityTypeName).getServiceImpl();
     }
 

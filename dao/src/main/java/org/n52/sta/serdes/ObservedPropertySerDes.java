@@ -104,7 +104,7 @@ public class ObservedPropertySerDes {
             }
             if (!value.hasSelectOption() ||
                 value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PROPERTIES)) {
-                gen.writeObjectField(STAEntityDefinition.PROP_PROPERTIES, value);
+                gen.writeObjectField(STAEntityDefinition.PROP_PROPERTIES, value.getProperties());
                 /*
                 if (obsProp.hasParameters()) {
                     gen.writeObjectFieldStart(STAEntityDefinition.PROP_PROPERTIES);

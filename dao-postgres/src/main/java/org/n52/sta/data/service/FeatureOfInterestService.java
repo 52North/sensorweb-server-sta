@@ -49,6 +49,7 @@ import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.sta.api.dto.FeatureOfInterestDTO;
 import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.query.FeatureOfInterestQuerySpecifications;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
@@ -86,7 +87,10 @@ import java.util.stream.Collectors;
 @DependsOn({"springApplicationContext"})
 @Transactional
 public class FeatureOfInterestService
-    extends AbstractSensorThingsEntityServiceImpl<FeatureOfInterestRepository, AbstractFeatureEntity<?>> {
+    extends AbstractSensorThingsEntityServiceImpl<
+    FeatureOfInterestRepository,
+    FeatureOfInterestDTO,
+    AbstractFeatureEntity<?>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FeatureOfInterestService.class);
 
@@ -286,6 +290,19 @@ public class FeatureOfInterestService
         return existing;
     }
 
+    @Override
+    public void delete(String id) throws STACRUDException {
+        synchronized (getLock(id)) {
+            if (getRepository().existsByStaIdentifier(id)) {
+                // check observations
+                deleteRelatedObservationsAndUpdateDatasets(id);
+                getRepository().deleteByStaIdentifier(id);
+            } else {
+                throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
+            }
+        }
+    }
+
     public AbstractFeatureEntity<?> getEntityByDatasetIdRaw(Long id, QueryOptions queryOptions)
         throws STACRUDException {
         try {
@@ -311,19 +328,6 @@ public class FeatureOfInterestService
             }
         }
         return null;
-    }
-
-    @Override
-    public void delete(String id) throws STACRUDException {
-        synchronized (getLock(id)) {
-            if (getRepository().existsByStaIdentifier(id)) {
-                // check observations
-                deleteRelatedObservationsAndUpdateDatasets(id);
-                getRepository().deleteByStaIdentifier(id);
-            } else {
-                throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
-            }
-        }
     }
 
     private void deleteRelatedObservationsAndUpdateDatasets(String featureId) throws STACRUDException {

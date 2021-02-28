@@ -54,6 +54,8 @@ import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.sta.api.CollectionWrapper;
+import org.n52.sta.api.dto.ObservationDTO;
 import org.n52.sta.data.OffsetLimitBasedPageRequest;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
 import org.n52.sta.data.repositories.DatastreamRepository;
@@ -61,7 +63,6 @@ import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.LocationRepository;
 import org.n52.sta.data.repositories.ObservationParameterRepository;
 import org.n52.sta.data.repositories.ObservationRepository;
-import org.n52.sta.data.service.util.CollectionWrapper;
 import org.n52.sta.data.service.util.FilterExprVisitor;
 import org.n52.sta.data.service.util.HibernateSpatialCriteriaBuilderImpl;
 import org.n52.svalbard.odata.core.expr.Expr;
@@ -93,7 +94,7 @@ import java.util.stream.Collectors;
 @DependsOn({"springApplicationContext"})
 @Transactional
 public class ObservationService
-    extends AbstractSensorThingsEntityServiceImpl<ObservationRepository<DataEntity<?>>, DataEntity<?>> {
+    extends AbstractSensorThingsEntityServiceImpl<ObservationRepository<DataEntity<?>>, ObservationDTO, DataEntity<?>> {
 
     private static final ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
     private static final Logger LOGGER = LoggerFactory.getLogger(ObservationService.class);
@@ -460,6 +461,27 @@ public class ObservationService
         return existing;
     }
 
+    @Override
+    public void delete(String identifier) throws STACRUDException {
+        synchronized (getLock(identifier)) {
+            if (getRepository().existsByStaIdentifier(identifier)) {
+                DataEntity<?> observation =
+                    getRepository().findByStaIdentifier(
+                        identifier,
+                        EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASET_FIRSTLAST_OBSERVATION)
+                        .get();
+                deleteReferenceFromDatasetFirstLast(observation);
+
+                // Important! Delete first and then update else we find
+                // ourselves again in search for new latest/earliest obs.
+                getRepository().deleteByStaIdentifier(observation.getStaIdentifier());
+                updateDatastreamPhenomenonTimeOnObservationUpdate(observation.getDataset(), observation);
+            } else {
+                throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
+            }
+        }
+    }
+
     /**
      * We touch DataEntity->value here to make sure it is fetched from the database and not lazy-loaded.
      * We cannot fetch it ourselves as any assignment to entity->value will update the database (issue delete+insert
@@ -615,27 +637,6 @@ public class ObservationService
                     datastreamRepository.findById(datastreamEntity.getAggregation()
                                                       .getId()).get(),
                     observation);
-            }
-        }
-    }
-
-    @Override
-    public void delete(String identifier) throws STACRUDException {
-        synchronized (getLock(identifier)) {
-            if (getRepository().existsByStaIdentifier(identifier)) {
-                DataEntity<?> observation =
-                    getRepository().findByStaIdentifier(
-                        identifier,
-                        EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASET_FIRSTLAST_OBSERVATION)
-                        .get();
-                deleteReferenceFromDatasetFirstLast(observation);
-
-                // Important! Delete first and then update else we find
-                // ourselves again in search for new latest/earliest obs.
-                getRepository().deleteByStaIdentifier(observation.getStaIdentifier());
-                updateDatastreamPhenomenonTimeOnObservationUpdate(observation.getDataset(), observation);
-            } else {
-                throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }
         }
     }
