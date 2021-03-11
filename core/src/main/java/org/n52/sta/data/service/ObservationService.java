@@ -458,7 +458,7 @@ public class ObservationService
             }
         }
         // value
-        if (toMerge.getValue() != null) {
+        if (toMerge.getValueText() != null) {
             checkValue(existing, toMerge);
         }
         return existing;
@@ -477,21 +477,7 @@ public class ObservationService
         // As we unproxy later anyway this is no overhead.
         DataEntity<?> unproxy = (DataEntity<?>) Hibernate.unproxy(entity);
         if (unproxy instanceof CompositeDataEntity) {
-            // touch each entity + it's parameters to make sure they are loaded
-            if (((Set<DataEntity<?>>) unproxy.getValue()).size() > 0) {
-                ((Set<DataEntity<?>>) unproxy.getValue()).forEach(e -> {
-                    e.getParameters().forEach(Hibernate::unproxy);
-                });
-            }
-
-            // We cannot use em.detach()
-            //em.detach(entity);
-            /*
-            ((CompositeDataEntity) entity)
-                .setValue(new HashSet<>(getRepository().findAll(
-                    ObservationQuerySpecifications.withParent(entity.getId()),
-                    EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS)));
-            */
+            Hibernate.initialize(unproxy.getParameters());
         }
         return unproxy;
     }
@@ -772,15 +758,15 @@ public class ObservationService
     private void checkValue(DataEntity<?> existing, DataEntity<?> toMerge) throws STACRUDException {
         if (existing instanceof QuantityDataEntity) {
             ((QuantityDataEntity) existing)
-                .setValue(BigDecimal.valueOf(Double.parseDouble(toMerge.getValue().toString())));
+                .setValue(BigDecimal.valueOf(Double.parseDouble(toMerge.getValueText())));
         } else if (existing instanceof CountDataEntity) {
-            ((CountDataEntity) existing).setValue(Integer.parseInt(toMerge.getValue().toString()));
+            ((CountDataEntity) existing).setValue(Integer.parseInt(toMerge.getValueText()));
         } else if (existing instanceof BooleanDataEntity) {
-            ((BooleanDataEntity) existing).setValue(Boolean.parseBoolean(toMerge.getValue().toString()));
+            ((BooleanDataEntity) existing).setValue(Boolean.parseBoolean(toMerge.getValueText()));
         } else if (existing instanceof TextDataEntity) {
-            ((TextDataEntity) existing).setValue(toMerge.getValue().toString());
+            ((TextDataEntity) existing).setValue(toMerge.getValueText());
         } else if (existing instanceof CategoryDataEntity) {
-            ((CategoryDataEntity) existing).setValue(toMerge.getValue().toString());
+            ((CategoryDataEntity) existing).setValue(toMerge.getValueText());
         } else {
             throw new STACRUDException(
                 String.format("The observation value for @iot.id %s can not be updated!",
