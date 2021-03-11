@@ -319,6 +319,7 @@ public class SensorService
                 for (AbstractDatasetEntity ds : datastreamRepository.findAll(dQS.withSensorStaIdentifier(identifier))) {
                     getDatastreamService().delete(ds.getStaIdentifier());
                 }
+                getRepository().deleteByStaIdentifier(identifier);
             } else {
                 throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }
