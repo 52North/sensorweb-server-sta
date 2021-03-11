@@ -378,7 +378,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
             + "}";
 
         Map<String, String> patchMap = new HashMap<>();
-        patchMap.put("result", "{\"result\":\"52.0\"}");
+        patchMap.put("result", "{\"result\":52.0}");
         patchMap.put("phenomenonTime", "{\"phenomenonTime\":\"2052-07-01T00:40:00.000Z\"}");
         patchMap.put("resultTime", "{\"resultTime\":\"2053-07-01T00:40:00.000Z\"}");
         patchMap.put("validTime", "{\"validTime\":\"2053-07-01T00:40:00.000Z\"}");
@@ -488,8 +488,8 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
         String entityKey = entity.get(idKey).asText();
 
         for (String key : patchMap.keySet()) {
-            String topic = type.getVal() + "(" + entityKey + ")/" + key;
-            mqttClient.subscribe(MQTT_TOPIC_PREFIX + topic);
+            String topic = MQTT_TOPIC_PREFIX + type.getVal() + "(" + entityKey + ")/" + key;
+            mqttClient.subscribe(topic);
 
             // Wait for subscription to register properly
             try {
@@ -502,6 +502,8 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
             LOGGER.debug("PATCH returned:" + updatedEntity.toPrettyString());
             MqttMessage message = listener.next();
             Assertions.assertNotNull(message);
+            LOGGER.trace(key);
+            LOGGER.trace(String.valueOf(mapper.readTree(message.toString())));
             Assertions.assertEquals(updatedEntity.get(key), mapper.readTree(message.toString()).get(key));
             mqttClient.unsubscribe(topic);
         }
@@ -524,8 +526,8 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
         mqttClient.setCallback(listener);
 
         for (String key : patchMap.keySet()) {
-            String topic = type.getVal() + "?$select=" + key;
-            mqttClient.subscribe(MQTT_TOPIC_PREFIX + topic);
+            String topic = MQTT_TOPIC_PREFIX + type.getVal() + "?$select=" + key;
+            mqttClient.subscribe(topic);
         }
         // Wait for subscription to register properly
         try {
@@ -546,7 +548,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
         }
 
         for (String key : patchMap.keySet()) {
-            String topic = type.getVal() + "?$select=" + key;
+            String topic = MQTT_TOPIC_PREFIX + type.getVal() + "?$select=" + key;
             mqttClient.unsubscribe(topic);
         }
     }
@@ -569,8 +571,8 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
         JsonNode entity = postEntity(type, source);
 
         for (String key : patchMap.keySet()) {
-            String topic = type.getVal() + "?$select=" + key;
-            mqttClient.subscribe(MQTT_TOPIC_PREFIX + topic);
+            String topic = MQTT_TOPIC_PREFIX + type.getVal() + "?$select=" + key;
+            mqttClient.subscribe(topic);
         }
         // Wait for subscription to register properly
         try {
@@ -611,7 +613,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
         }
 
         for (String key : patchMap.keySet()) {
-            String topic = type.getVal() + "?$select=" + key;
+            String topic = MQTT_TOPIC_PREFIX + type.getVal() + "?$select=" + key;
             mqttClient.unsubscribe(topic);
         }
     }
