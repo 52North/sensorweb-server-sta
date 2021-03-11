@@ -322,6 +322,12 @@ public class FeatureOfInterestService
             if (getRepository().existsByStaIdentifier(id)) {
                 // check observations
                 deleteRelatedObservationsAndUpdateDatasets(id);
+                AbstractFeatureEntity<?> foi = getRepository().findByStaIdentifier(id).get();
+
+                if (foi.hasParameters()) {
+                    foi.getParameters()
+                        .forEach(entity -> parameterRepository.delete((FeatureParameterEntity) entity));
+                }
                 getRepository().deleteByStaIdentifier(id);
             } else {
                 throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);

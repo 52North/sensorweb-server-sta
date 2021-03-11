@@ -303,6 +303,11 @@ public class LocationService
                 for (HistoricalLocationEntity historicalLocation : location.getHistoricalLocations()) {
                     getHistoricalLocationService().delete(historicalLocation.getStaIdentifier());
                 }
+
+                if (location.hasParameters()) {
+                    location.getParameters()
+                        .forEach(entity -> parameterRepository.delete((LocationParameterEntity) entity));
+                }
                 getRepository().deleteByStaIdentifier(id);
             } else {
                 throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);

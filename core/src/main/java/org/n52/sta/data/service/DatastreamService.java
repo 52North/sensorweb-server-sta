@@ -611,6 +611,11 @@ public class DatastreamService extends
                     // delete observations
                     observationRepository.deleteAllByDatasetIdIn(Collections.singleton(datastream.getId()));
                 }
+
+                if (datastream.hasParameters()) {
+                    datastream.getParameters()
+                        .forEach(entity -> parameterRepository.delete((DatasetParameterEntity) entity));
+                }
                 //delete main datastream
                 getRepository().deleteByStaIdentifier(id);
             } else {
