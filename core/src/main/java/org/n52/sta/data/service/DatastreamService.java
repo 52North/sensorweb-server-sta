@@ -337,6 +337,7 @@ public class DatastreamService extends
                     AbstractDatasetEntity merged = merge(existing.get(), entity);
                     createOrfetchUnit(merged, entity);
                     getRepository().save(merged);
+                    Hibernate.initialize(merged.getParameters());
                     return merged;
                 }
                 throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);

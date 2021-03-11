@@ -29,6 +29,7 @@
 
 package org.n52.sta.data.service;
 
+import org.hibernate.Hibernate;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
@@ -260,6 +261,7 @@ public class SensorService
                     checkFormat(merged, entity);
                     checkProcedureHistory(merged);
                     getRepository().save(merged);
+                    Hibernate.initialize(merged.getParameters());
                     return merged;
                 }
             }

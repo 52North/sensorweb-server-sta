@@ -29,6 +29,7 @@
 
 package org.n52.sta.data.service;
 
+import org.hibernate.Hibernate;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
@@ -252,7 +253,9 @@ public class FeatureOfInterestService
                                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_FEATURETYPE);
                 if (existing.isPresent()) {
                     AbstractFeatureEntity<?> merged = merge(existing.get(), entity);
-                    return getRepository().save(merged);
+                    AbstractFeatureEntity<?> result = getRepository().save(merged);
+                    Hibernate.initialize(result.getParameters());
+                    return result;
                 }
                 throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }
