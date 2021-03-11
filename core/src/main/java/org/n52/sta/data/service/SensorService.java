@@ -249,13 +249,11 @@ public class SensorService
                                              EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDUREHISTORY);
                 if (existing.isPresent()) {
                     ProcedureEntity merged = merge(existing.get(), entity);
-                    if (entity != null) {
-                        if (entity.hasDatastreams()) {
-                            AbstractSensorThingsEntityService dsService = getDatastreamService();
-                            for (AbstractDatasetEntity datastreamEntity :
-                                entity.getDatasets()) {
-                                ((DatastreamService) dsService).createOrUpdate(datastreamEntity);
-                            }
+                    if (entity.hasDatastreams()) {
+                        AbstractSensorThingsEntityService dsService = getDatastreamService();
+                        for (AbstractDatasetEntity datastreamEntity :
+                            entity.getDatasets()) {
+                            ((DatastreamService) dsService).createOrUpdate(datastreamEntity);
                         }
                     }
                     checkFormat(merged, entity);
@@ -301,12 +299,9 @@ public class SensorService
     }
 
     private void checkUpdate(ProcedureEntity entity) throws STACRUDException {
-        if (entity instanceof ProcedureEntity) {
-            ProcedureEntity sensor = (ProcedureEntity) entity;
-            if (sensor.hasDatastreams()) {
-                for (AbstractDatasetEntity datastream : sensor.getDatasets()) {
-                    checkInlineDatastream(datastream);
-                }
+        if (entity.hasDatastreams()) {
+            for (AbstractDatasetEntity datastream : entity.getDatasets()) {
+                checkInlineDatastream(datastream);
             }
         }
     }

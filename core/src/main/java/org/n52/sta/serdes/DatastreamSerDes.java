@@ -82,7 +82,6 @@ public class DatastreamSerDes {
         private static final GeoJsonWriter GEO_JSON_WRITER = new GeoJsonWriter();
         private static final long serialVersionUID = -6555417490577181829L;
         private final boolean includeDatastreamCategory;
-        private final String categoryPrefix = "category";
 
         public DatastreamSerializer(String rootUrl,
                                     boolean implicitExpand,
@@ -177,6 +176,7 @@ public class DatastreamSerDes {
                 gen.writeObjectFieldStart(STAEntityDefinition.PROP_PROPERTIES);
                 if (includeDatastreamCategory) {
                     // Add Category to parameters
+                    String categoryPrefix = "category";
                     gen.writeNumberField(categoryPrefix + "Id",
                                          datastream.getCategory().getId());
                     gen.writeStringField(categoryPrefix + "Name",
