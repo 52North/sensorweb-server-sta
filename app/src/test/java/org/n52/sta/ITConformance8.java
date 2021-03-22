@@ -502,8 +502,9 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
             LOGGER.debug("PATCH returned:" + updatedEntity.toPrettyString());
             MqttMessage message = listener.next();
             Assertions.assertNotNull(message);
+            System.out.println(message.toString());
             Assertions.assertEquals(updatedEntity.get(key), mapper.readTree(message.toString()).get(key));
-            mqttClient.unsubscribe(topic);
+            mqttClient.unsubscribe(MQTT_TOPIC_PREFIX + topic);
         }
     }
 
@@ -547,7 +548,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
 
         for (String key : patchMap.keySet()) {
             String topic = type.getVal() + "?$select=" + key;
-            mqttClient.unsubscribe(topic);
+            mqttClient.unsubscribe(MQTT_TOPIC_PREFIX + topic);
         }
     }
 
@@ -612,7 +613,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
 
         for (String key : patchMap.keySet()) {
             String topic = type.getVal() + "?$select=" + key;
-            mqttClient.unsubscribe(topic);
+            mqttClient.unsubscribe(MQTT_TOPIC_PREFIX + topic);
         }
     }
 

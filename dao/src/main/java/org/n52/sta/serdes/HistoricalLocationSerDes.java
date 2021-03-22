@@ -37,6 +37,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.shetland.ogc.sta.model.HistoricalLocationEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.shetland.util.DateTimeHelper;
 import org.n52.sta.api.dto.EntityPatch;
 import org.n52.sta.api.dto.HistoricalLocationDTO;
 import org.n52.sta.serdes.json.JSONBase;
@@ -105,7 +106,7 @@ public class HistoricalLocationSerDes {
 
             // actual properties
             if (!histLoc.hasSelectOption() || histLoc.getFieldsToSerialize().contains(STAEntityDefinition.PROP_TIME)) {
-                gen.writeStringField(STAEntityDefinition.PROP_TIME, histLoc.getTime().toString());
+                gen.writeStringField(STAEntityDefinition.PROP_TIME, DateTimeHelper.format(histLoc.getTime()));
             }
 
             // navigation properties

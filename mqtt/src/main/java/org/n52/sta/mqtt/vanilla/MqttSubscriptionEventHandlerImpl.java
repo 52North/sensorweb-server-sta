@@ -120,6 +120,7 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
                 String topic = subscrip.checkSubscription(rawObject, entityType, collections, differenceMap);
 
                 if (topic != null) {
+                    LOGGER.trace("found matching subscription: " + topic);
                     // Use cache if applicable
                     ByteBuf out;
                     if (serializedCache.containsKey(subscrip.getQueryOptions())) {

@@ -94,15 +94,7 @@ public class ThingSerDes {
             }
             if (!value.hasSelectOption() ||
                 value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PROPERTIES)) {
-                if (value.getProperties() != null) {
-                    gen.writeObjectField(STAEntityDefinition.PROP_PROPERTIES, value.getProperties());
-                    /*
-                    for (ParameterEntity<?> parameter : thing.getProperties()) {
-                        gen.writeObjectField(parameter.getName(), parameter.getValue());
-                    }
-                    gen.writeEndObject();
-                     */
-                }
+                gen.writeObjectField(STAEntityDefinition.PROP_PROPERTIES, value.getProperties());
             }
 
             // navigation properties

@@ -312,6 +312,7 @@ public class FeatureOfInterestService
             Long foiId = datastreamRepository.findById(id).get().getFeature().getId();
             AbstractFeatureEntity<?> entity =
                 getRepository().findById(foiId, createFetchGraph(queryOptions.getExpandFilter())).get();
+            entity = (AbstractFeatureEntity<?>) Hibernate.unproxy(entity);
             if (queryOptions.hasExpandFilter()) {
                 return fetchExpandEntitiesWithFilter(entity, queryOptions.getExpandFilter());
             } else {

@@ -164,7 +164,7 @@ public class ITConformance7 extends ConformanceTests implements TestUtil {
             "    \"result\": 0.29,\n" +
             "    \"phenomenonTime\": \"2019-03-10T17:45:09Z\",\n" +
             "    \"resultTime\": \"2019-03-10T16:58:09Z\",\n" +
-            "    \"parameters\": [\n" +
+            "    \"parameters\":" +
             "        {\n" +
             "            \"name\": \"http://www.opengis.net/def/param-name/OGC-OM/2.0/samplingGeometry\",\n" +
             "            \"value\": {\n" +
@@ -174,8 +174,7 @@ public class ITConformance7 extends ConformanceTests implements TestUtil {
             "                    41.585\n" +
             "                ]\n" +
             "            }\n" +
-            "        }\n" +
-            "    ],\n" +
+            "        },\n" +
             "    \"Datastream\": {\n" +
             "        \"@iot.id\": \"ITConformance7Datastream\"\n" +
             "    },\n" +

@@ -34,8 +34,9 @@
 
 package org.n52.sta.mqtt.vanilla.subscription;
 
-import org.n52.series.db.beans.HibernateRelations;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.RequestUtils;
+import org.n52.sta.api.dto.StaDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
@@ -82,8 +83,12 @@ public class MqttEntityCollectionSubscription extends AbstractMqttSubscription {
         Assert.notNull(wantedEntityType, "Unable to parse topic. Could not extract wantedEntityType");
     }
 
+    @Override public QueryOptions getQueryOptions() {
+        return null;
+    }
+
     @Override
-    public boolean matches(HibernateRelations.HasStaIdentifier entity,
+    public boolean matches(StaDTO entity,
                            String realEntityType,
                            Map<String, Set<String>> collections,
                            Set<String> differenceMap) {

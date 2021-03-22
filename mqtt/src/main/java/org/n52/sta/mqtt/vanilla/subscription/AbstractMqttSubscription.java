@@ -29,8 +29,8 @@
 
 package org.n52.sta.mqtt.vanilla.subscription;
 
-import org.n52.series.db.beans.HibernateRelations;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.sta.api.dto.StaDTO;
 
 import java.util.Map;
 import java.util.Objects;
@@ -63,7 +63,7 @@ public abstract class AbstractMqttSubscription {
      * @return Topic to be posted to. May be null if Entity does not match this
      * subscription.
      */
-    public String checkSubscription(Object rawObject,
+    public String checkSubscription(StaDTO rawObject,
                                     String entityType,
                                     Map<String, Set<String>> relatedEntities,
                                     Set<String> differenceMap) {
@@ -114,19 +114,10 @@ public abstract class AbstractMqttSubscription {
      *
      * @return SelectOption if present, else null
      */
-    public QueryOptions getQueryOptions() {
-        return null;
-    }
+    public abstract QueryOptions getQueryOptions();
 
-    public boolean matches(Object entity,
-                           String realEntityType,
-                           Map<String, Set<String>> collections,
-                           Set<String> differenceMap) {
-        return matches((HibernateRelations.HasStaIdentifier) entity, realEntityType, collections, differenceMap);
-    }
-
-    protected abstract boolean matches(HibernateRelations.HasStaIdentifier entity,
-                                       String realEntityType,
-                                       Map<String, Set<String>> collections,
-                                       Set<String> differenceMap);
+    public abstract boolean matches(StaDTO entity,
+                                    String realEntityType,
+                                    Map<String, Set<String>> collections,
+                                    Set<String> differenceMap);
 }

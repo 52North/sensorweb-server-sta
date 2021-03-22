@@ -198,16 +198,18 @@ public class ObservationService
                                                     pageableRequest.getPageSize(),
                                                     pageableRequest.getSort()),
                     EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
-
+                pages.forEach(Hibernate::initialize);
                 pages.forEach(this::fetchValueIfCompositeDataEntity);
                 if (queryOptions.hasExpandFilter()) {
-                    return pages.map(e -> {
-                        try {
-                            return fetchExpandEntitiesWithFilter(e, queryOptions.getExpandFilter());
-                        } catch (STACRUDException | STAInvalidQueryException ex) {
-                            throw new RuntimeException(ex);
-                        }
-                    });
+                    return pages
+                        .map(e -> (DataEntity) Hibernate.unproxy(e))
+                        .map(e -> {
+                            try {
+                                return fetchExpandEntitiesWithFilter(e, queryOptions.getExpandFilter());
+                            } catch (STACRUDException | STAInvalidQueryException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        });
                 } else {
                     return pages;
                 }
@@ -236,9 +238,8 @@ public class ObservationService
                     returned.setDataset(datastream);
                     break;
                 case STAEntityDefinition.FEATURE_OF_INTEREST:
-                    AbstractFeatureEntity<?> foi = ((FeatureOfInterestService)
-                        getFeatureOfInterestService()).getEntityByDatasetIdRaw(returned.getDataset().getId(),
-                                                                               expandItem.getQueryOptions());
+                    AbstractFeatureEntity<?> foi = getFeatureOfInterestService()
+                        .getEntityByDatasetIdRaw(returned.getDataset().getId(), expandItem.getQueryOptions());
                     returned.setFeature(foi);
                     break;
                 default:
@@ -497,20 +498,7 @@ public class ObservationService
         DataEntity<?> unproxy = (DataEntity<?>) Hibernate.unproxy(entity);
         if (unproxy instanceof CompositeDataEntity) {
             // touch each entity + it's parameters to make sure they are loaded
-            if (((Set<DataEntity<?>>) unproxy.getValue()).size() > 0) {
-                ((Set<DataEntity<?>>) unproxy.getValue()).forEach(e -> {
-                    e.getParameters().forEach(Hibernate::unproxy);
-                });
-            }
-
-            // We cannot use em.detach()
-            //em.detach(entity);
-            /*
-            ((CompositeDataEntity) entity)
-                .setValue(new HashSet<>(getRepository().findAll(
-                    ObservationQuerySpecifications.withParent(entity.getId()),
-                    EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS)));
-            */
+            Hibernate.initialize(unproxy.getValue());
         }
         return unproxy;
     }

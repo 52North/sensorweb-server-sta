@@ -66,10 +66,12 @@ public abstract class Entity implements StaDTO {
         if (queryOptions != null) {
             if (queryOptions.hasSelectFilter()) {
                 hasSelectOption = true;
+                fieldsToSerialize.clear();
                 fieldsToSerialize.addAll(queryOptions.getSelectFilter().getItems());
             }
             if (queryOptions.hasExpandFilter()) {
                 hasExpandOption = true;
+                fieldsToExpand.clear();
                 for (ExpandItem item : queryOptions.getExpandFilter().getItems()) {
                     fieldsToExpand.put(item.getPath(), item.getQueryOptions());
                     // Add expanded items to $select replacing implicit selection with explicit selection

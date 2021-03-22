@@ -34,8 +34,9 @@
 
 package org.n52.sta.mqtt.vanilla.subscription;
 
-import org.n52.series.db.beans.HibernateRelations;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.RequestUtils;
+import org.n52.sta.api.dto.StaDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
@@ -98,8 +99,12 @@ public class MqttEntitySubscription extends AbstractMqttSubscription {
             .toString();
     }
 
+    @Override public QueryOptions getQueryOptions() {
+        return null;
+    }
+
     @Override
-    public boolean matches(HibernateRelations.HasStaIdentifier entity,
+    public boolean matches(StaDTO entity,
                            String realEntityType,
                            Map<String, Set<String>> collections,
                            Set<String> differenceMap) {
@@ -111,7 +116,7 @@ public class MqttEntitySubscription extends AbstractMqttSubscription {
 
         // Direct Entity
         if (wantedIdentifier != null) {
-            return wantedIdentifier.equals(entity.getStaIdentifier());
+            return wantedIdentifier.equals(entity.getId());
         } else {
             // Referenced Entity
             // Check if Entity belongs to collection of this Subscription

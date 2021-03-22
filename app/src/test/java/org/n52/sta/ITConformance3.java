@@ -939,7 +939,7 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
         /* HistoricalLocation */
         urlParameters = "{\"time\": \"2015-07-01T00:00:00Z\"}";
         diffs = new HashMap<>();
-        diffs.put("time", "2015-07-01T00:00:00Z");
+        diffs.put("time", "2015-07-01T00:00:00.000Z");
         updatedEntity = patchEntity(EntityType.HISTORICAL_LOCATION, urlParameters, histLocId);
         checkPatch(EntityType.HISTORICAL_LOCATION, histLocEntity, updatedEntity, diffs);
 

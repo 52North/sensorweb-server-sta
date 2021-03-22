@@ -137,6 +137,8 @@ public class DatastreamSerDes {
                 if (datastream.getObservedArea() != null) {
                     gen.writeFieldName(STAEntityDefinition.PROP_OBSERVED_AREA);
                     gen.writeRawValue(GEO_JSON_WRITER.write(datastream.getObservedArea()));
+                } else {
+                    gen.writeNullField(STAEntityDefinition.PROP_OBSERVED_AREA);
                 }
             }
 

@@ -101,7 +101,6 @@ public abstract class AbstractSensorThingsEntityServiceImpl<
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSensorThingsEntityServiceImpl.class);
     private final EntityManager em;
     private final Class<S> entityClass;
-    private final DTOTransformer<R, S> transformer;
 
     @Autowired
     private MutexFactory lock;
@@ -114,7 +113,6 @@ public abstract class AbstractSensorThingsEntityServiceImpl<
         this.em = em;
         this.entityClass = entityClass;
         this.repository = repository;
-        this.transformer = new DTOTransformer<>();
     }
 
     public void setServiceRepository(EntityServiceRepository serviceRepository) {
@@ -348,7 +346,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<
      */
     @Transactional(rollbackFor = Exception.class)
     R createWrapper(S entity, QueryOptions queryOptions) {
-        return transformer.toDTO(entity, queryOptions);
+        return new DTOTransformer<R, S>().toDTO(entity, queryOptions);
     }
 
     /**
