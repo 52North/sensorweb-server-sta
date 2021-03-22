@@ -30,6 +30,7 @@
 package org.n52.sta.data.service;
 
 import com.google.common.collect.Sets;
+import org.hibernate.Hibernate;
 import org.hibernate.query.criteria.internal.CriteriaBuilderImpl;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractDatasetEntity;
@@ -208,10 +209,16 @@ public class DatastreamService extends AbstractSensorThingsEntityServiceImpl<
                     // Optimize Request when only First/Last Observation is requested as we have already fetched that.
                     if (checkForFirstLastObservation(expandItem)) {
                         if (checkForFirstObservation(expandItem) && entity.getFirstObservation() != null) {
-                            entity.setObservations(Collections.singleton(entity.getFirstObservation()));
+                            DataEntity<?> firstObservation = entity.getFirstObservation();
+                            // make sure parameters are initialized
+                            Hibernate.initialize(firstObservation.getParameters());
+                            entity.setObservations(Collections.singleton(firstObservation));
                             break;
                         } else if (checkForLastObservation(expandItem) && entity.getLastObservation() != null) {
-                            entity.setObservations(Sets.newHashSet(Collections.singleton(entity.getLastObservation())));
+                            DataEntity<?> lastObservation = entity.getLastObservation();
+                            // make sure parameters are initialized
+                            Hibernate.initialize(lastObservation.getParameters());
+                            entity.setObservations(Sets.newHashSet(Collections.singleton(lastObservation)));
                             break;
                         }
                     }
@@ -333,6 +340,7 @@ public class DatastreamService extends AbstractSensorThingsEntityServiceImpl<
                     AbstractDatasetEntity merged = merge(existing.get(), entity);
                     createOrfetchUnit(merged, entity);
                     getRepository().save(merged);
+                    Hibernate.initialize(merged.getParameters());
                     return merged;
                 }
                 throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
@@ -667,7 +675,9 @@ public class DatastreamService extends AbstractSensorThingsEntityServiceImpl<
     }
 
     private boolean checkForFirstLastObservation(ExpandItem expandItem) {
-        return expandItem.getQueryOptions().hasTopFilter() && expandItem.getQueryOptions().hasOrderByFilter()
+        return expandItem.getQueryOptions().hasTopFilter()
+            && expandItem.getQueryOptions().getTopFilter().getValue() == 1
+            && expandItem.getQueryOptions().hasOrderByFilter()
             && checkPhenomenonTime(expandItem);
     }
 

@@ -145,6 +145,8 @@ public class DatastreamSerDes {
                 if (datastream.getResultTime() != null) {
                     gen.writeStringField(STAEntityDefinition.PROP_RESULT_TIME,
                                          DateTimeHelper.format(datastream.getResultTime()));
+                } else {
+                    gen.writeNullField(STAEntityDefinition.PROP_RESULT_TIME);
                 }
             }
             if (!datastream.hasSelectOption() ||

@@ -50,7 +50,7 @@ import javax.persistence.criteria.Subquery;
  */
 public class ObservedPropertyQuerySpecifications extends EntityQuerySpecifications<PhenomenonEntity> {
 
-    private final String IDENTIFIER = "identifier";
+    private static final String IDENTIFIER = "identifier";
 
     public Specification<PhenomenonEntity> withDatastreamStaIdentifier(final String datastreamStaIdentifier) {
         return (root, query, builder) -> {

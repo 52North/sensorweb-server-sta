@@ -29,6 +29,7 @@
 
 package org.n52.sta.data.service;
 
+import org.hibernate.Hibernate;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
@@ -261,6 +262,7 @@ public class SensorService
                     checkFormat(merged, entity);
                     checkProcedureHistory(merged);
                     getRepository().save(merged);
+                    Hibernate.initialize(merged.getParameters());
                     return merged;
                 }
             }
@@ -298,7 +300,7 @@ public class SensorService
 
         return existing;
     }
-
+    
     @Override
     public void delete(String identifier) throws STACRUDException {
         synchronized (getLock(identifier)) {
@@ -307,6 +309,7 @@ public class SensorService
                 for (AbstractDatasetEntity ds : datastreamRepository.findAll(dQS.withSensorStaIdentifier(identifier))) {
                     getDatastreamService().delete(ds.getStaIdentifier());
                 }
+                getRepository().deleteByStaIdentifier(identifier);
             } else {
                 throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }

@@ -29,6 +29,7 @@
 
 package org.n52.sta.data.service;
 
+import org.hibernate.Hibernate;
 import org.joda.time.DateTime;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractDatasetEntity;
@@ -262,7 +263,9 @@ public class ThingService
                             generateHistoricalLocation(merged);
                         }
                     }
-                    return getRepository().save(merged);
+                    PlatformEntity result = getRepository().save(merged);
+                    Hibernate.initialize(result.getParameters());
+                    return result;
                 } else {
                     throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
                 }

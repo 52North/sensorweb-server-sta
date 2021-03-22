@@ -371,6 +371,7 @@ public class ObservationService
                         datastreamRepository.findById(saved.getDataset().getId()).get();
 
                     updateDatastreamPhenomenonTimeOnObservationUpdate(datastreamEntity, saved);
+                    Hibernate.initialize(saved.getParameters());
                     return saved;
                 }
                 throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
