@@ -32,6 +32,7 @@ package org.n52.sta.serdes.json;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.sta.api.dto.HistoricalLocationDTO;
+import org.n52.sta.api.dto.impl.HistoricalLocation;
 import org.springframework.util.Assert;
 
 import java.util.Arrays;
@@ -51,6 +52,7 @@ public class JSONHistoricalLocation extends JSONBase.JSONwithIdTime<HistoricalLo
     public JSONLocation[] Locations;
 
     public JSONHistoricalLocation() {
+        self = new HistoricalLocation();
     }
 
     @Override protected void parseReferencedFrom() {

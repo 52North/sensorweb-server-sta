@@ -67,13 +67,11 @@ public class ServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
     implements AbstractSensorThingsEntityService<R> {
 
     private final DaoSemaphore semaphore;
-    private final DTOTransformer<R, S> transformer;
     private AbstractSensorThingsEntityServiceImpl<?, R, S> serviceImpl;
 
     public ServiceFacade(AbstractSensorThingsEntityServiceImpl<?, R, S> serviceImpl, DaoSemaphore semaphore) {
         this.serviceImpl = serviceImpl;
         this.semaphore = semaphore;
-        this.transformer = new DTOTransformer<>();
     }
 
     AbstractSensorThingsEntityServiceImpl<?, ?, ?> getServiceImpl() {
@@ -183,7 +181,7 @@ public class ServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
         R result;
         try {
             semaphore.acquire();
-            result = serviceImpl.create(transformer.fromDTO(entity));
+            result = serviceImpl.create((S) new DTOTransformer<>().fromDTO(entity));
         } catch (InterruptedException e) {
             throw new STACRUDException(e.getMessage(), e);
         } finally {
@@ -196,7 +194,7 @@ public class ServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
         R result;
         try {
             semaphore.acquire();
-            result = serviceImpl.update(id, transformer.fromDTO(entity), method);
+            result = serviceImpl.update(id, (S) new DTOTransformer<>().fromDTO(entity), method);
         } catch (InterruptedException e) {
             throw new STACRUDException(e.getMessage(), e);
         } finally {

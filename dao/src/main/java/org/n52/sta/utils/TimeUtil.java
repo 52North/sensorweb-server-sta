@@ -64,7 +64,9 @@ public class TimeUtil {
     }
 
     public static Time parseTime(Object object) {
-        if (object instanceof Timestamp) {
+        if (object == null) {
+            return null;
+        } else if (object instanceof Timestamp) {
             Timestamp timestamp = (Timestamp) object;
             return new TimeInstant(timestamp);
         } else {

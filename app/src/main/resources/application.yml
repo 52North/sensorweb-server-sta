@@ -111,7 +111,6 @@ spring:
         use_sql_comments: false
   jmx:
     enabled: false
-  http:
 
   mvc:
     servlet:

@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.dto.ObservationDTO;
+import org.n52.sta.api.dto.impl.Observation;
 import org.springframework.util.Assert;
 
 @SuppressWarnings("VisibilityModifier")
@@ -54,6 +55,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationDTO> imp
     public JSONDatastream Datastream;
 
     public JSONObservation() {
+        self = new Observation();
     }
 
     @Override

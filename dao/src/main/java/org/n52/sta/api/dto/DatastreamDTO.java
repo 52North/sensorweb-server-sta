@@ -94,6 +94,10 @@ public interface DatastreamDTO extends StaDTO {
         private String name;
         private String definition;
 
+        public UnitOfMeasurement() {
+            
+        }
+
         public UnitOfMeasurement(String symbol, String name, String definition) {
             this.symbol = symbol;
             this.name = name;

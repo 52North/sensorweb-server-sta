@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.dto.ThingDTO;
+import org.n52.sta.api.dto.impl.Thing;
 import org.springframework.util.Assert;
 
 import java.util.Arrays;
@@ -57,6 +58,7 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<ThingDTO> impl
     public JSONHistoricalLocation[] HistoricalLocations;
 
     public JSONThing() {
+        self = new Thing();
     }
 
     @Override protected void parseReferencedFrom() {

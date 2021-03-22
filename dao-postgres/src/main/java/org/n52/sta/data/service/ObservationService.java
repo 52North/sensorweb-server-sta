@@ -518,35 +518,35 @@ public class ObservationService
                                                        DatasetEntity dataset)
         throws STACRUDException {
         DataEntity data = null;
-        String value = observation.getValueText();
+        Object value = observation.getValue();
         switch (dataset.getOMObservationType().getFormat()) {
             case OmConstants.OBS_TYPE_MEASUREMENT:
                 QuantityDataEntity quantityObservationEntity = new QuantityDataEntity();
                 if (value.equals("NaN") || value.equals("Inf") || value.equals("-Inf")) {
                     quantityObservationEntity.setValue(null);
                 } else {
-                    quantityObservationEntity.setValue(BigDecimal.valueOf(Double.parseDouble(value)));
+                    quantityObservationEntity.setValue(BigDecimal.valueOf(Double.parseDouble((String) value)));
                 }
                 data = quantityObservationEntity;
                 break;
             case OmConstants.OBS_TYPE_CATEGORY_OBSERVATION:
                 CategoryDataEntity categoryObservationEntity = new CategoryDataEntity();
-                categoryObservationEntity.setValue(value);
+                categoryObservationEntity.setValue((String) value);
                 data = categoryObservationEntity;
                 break;
             case OmConstants.OBS_TYPE_COUNT_OBSERVATION:
                 CountDataEntity countObservationEntity = new CountDataEntity();
-                countObservationEntity.setValue(Integer.parseInt(value));
+                countObservationEntity.setValue(Integer.parseInt((String) value));
                 data = countObservationEntity;
                 break;
             case OmConstants.OBS_TYPE_TEXT_OBSERVATION:
                 TextDataEntity textObservationEntity = new TextDataEntity();
-                textObservationEntity.setValue(value);
+                textObservationEntity.setValue((String) value);
                 data = textObservationEntity;
                 break;
             case OmConstants.OBS_TYPE_TRUTH_OBSERVATION:
                 BooleanDataEntity booleanObservationEntity = new BooleanDataEntity();
-                booleanObservationEntity.setValue(Boolean.parseBoolean(value));
+                booleanObservationEntity.setValue(Boolean.parseBoolean((String) value));
                 data = booleanObservationEntity;
                 break;
             //            case OBS_TYPE_SENSORML_OBSERVATION:

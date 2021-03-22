@@ -33,6 +33,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.sta.api.dto.SensorDTO;
+import org.n52.sta.api.dto.impl.Sensor;
 import org.springframework.util.Assert;
 
 import java.util.Arrays;
@@ -56,6 +57,7 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorDTO> im
     public JSONDatastream[] Datastreams;
 
     public JSONSensor() {
+        self = new Sensor();
     }
 
     @Override
@@ -69,6 +71,7 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorDTO> im
                 self.setId(identifier);
                 self.setName(name);
                 self.setDescription(description);
+                self.setMetadata(metadata);
 
                 handleEncodingType();
 
@@ -93,6 +96,7 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorDTO> im
                 self.setId(identifier);
                 self.setName(name);
                 self.setDescription(description);
+                self.setMetadata(metadata);
 
                 if (encodingType != null) {
                     handleEncodingType();

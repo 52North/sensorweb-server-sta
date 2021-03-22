@@ -71,8 +71,6 @@ public class SensorSerDes {
 
     public static class SensorSerializer extends AbstractSTASerializer<SensorDTO> {
 
-        //private static final String STA_SENSORML_2 = "http://www.opengis.net/doc/IS/SensorML/2.0";
-        //private static final String SENSORML_2 = "http://www.opengis.net/sensorml/2.0";
         private static final long serialVersionUID = -2190624056257407974L;
 
         public SensorSerializer(String rootUrl, String... activeExtensions) {
@@ -105,42 +103,16 @@ public class SensorSerDes {
             if (!value.hasSelectOption() ||
                 value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ENCODINGTYPE)) {
                 gen.writeStringField(STAEntityDefinition.PROP_ENCODINGTYPE, value.getEncodingType());
-                /*
-                String format = value.getFormat().getFormat();
-                if (format.equalsIgnoreCase(SENSORML_2)) {
-                    format = STA_SENSORML_2;
-                }
-                gen.writeObjectField(STAEntityDefinition.PROP_ENCODINGTYPE, format);
-                 */
             }
 
             if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_METADATA)) {
                 gen.writeStringField(STAEntityDefinition.PROP_METADATA, value.getMetadata());
-                /*
-                String metadata = "metadata";
-                if (sensor.getDescriptionFile() != null && !sensor.getDescriptionFile().isEmpty()) {
-                    metadata = sensor.getDescriptionFile();
-                } else if (sensor.hasProcedureHistory()) {
-                    Optional<ProcedureHistoryEntity> history =
-                        sensor.getProcedureHistory().stream().filter(h -> h.getEndTime() == null).findFirst();
-                    if (history.isPresent()) {
-                        metadata = history.get().getXml();
-                    }
-                }
-                gen.writeStringField(STAEntityDefinition.PROP_METADATA, metadata);
-                 */
             }
 
             if (!value.hasSelectOption() ||
                 value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PROPERTIES)) {
                 if (value.getProperties() != null) {
                     gen.writeObjectField(STAEntityDefinition.PROP_PROPERTIES, value.getProperties());
-                    /*
-                    for (ParameterEntity<?> parameter : sensor.getParameters()) {
-                        gen.writeObjectField(parameter.getName(), parameter.getValue());
-                    }
-                    gen.writeEndObject();
-                     */
                 }
             }
 

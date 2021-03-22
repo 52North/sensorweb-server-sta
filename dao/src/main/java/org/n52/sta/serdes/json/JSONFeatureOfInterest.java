@@ -38,6 +38,7 @@ import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.geojson.GeoJsonReader;
 import org.n52.sta.api.dto.FeatureOfInterestDTO;
+import org.n52.sta.api.dto.impl.FeatureOfInterest;
 import org.springframework.util.Assert;
 
 import java.util.Objects;
@@ -73,6 +74,7 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
     private final String FEATURE_GEOM = "feature->geometry";
 
     public JSONFeatureOfInterest() {
+        self = new FeatureOfInterest();
     }
 
     @Override

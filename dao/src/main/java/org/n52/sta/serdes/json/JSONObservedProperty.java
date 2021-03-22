@@ -33,6 +33,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.sta.api.dto.ObservedPropertyDTO;
+import org.n52.sta.api.dto.impl.ObservedProperty;
 import org.springframework.util.Assert;
 
 import java.util.Arrays;
@@ -51,6 +52,7 @@ public class JSONObservedProperty extends JSONBase.JSONwithIdNameDescription<Obs
     public JSONDatastream[] Datastreams;
 
     public JSONObservedProperty() {
+        self = new ObservedProperty();
     }
 
     @Override

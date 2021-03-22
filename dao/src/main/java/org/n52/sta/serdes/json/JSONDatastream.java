@@ -84,6 +84,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
     private final String uomDef = "unitOfMeasurement->definition";
 
     public JSONDatastream() {
+        self = new Datastream();
     }
 
     @Override protected void parseReferencedFrom() {

@@ -37,6 +37,7 @@ import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.geojson.GeoJsonReader;
 import org.n52.sta.api.dto.LocationDTO;
+import org.n52.sta.api.dto.impl.Location;
 import org.springframework.util.Assert;
 
 import java.util.Arrays;
@@ -72,6 +73,7 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationDTO
     private final String LOCATION_GEOM = "location->geometry";
 
     public JSONLocation() {
+        self = new Location();
     }
 
     @Override protected void parseReferencedFrom() {
