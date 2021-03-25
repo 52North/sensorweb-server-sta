@@ -32,8 +32,6 @@ package org.n52.sta;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.hibernate.Hibernate;
-import org.hibernate.proxy.HibernateProxy;
 import org.joda.time.DateTime;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
@@ -171,15 +169,18 @@ public class DTOTransformer<R extends StaDTO, S extends HibernateRelations.HasId
             throw new STAInvalidQueryError(String.format("Could not parse entity %s to Database Entity!",
                                                          type.getClass().getName()));
         }
+    }
 
+    private static String genKey(StaDTO dto) {
+        return dto.getId() + dto.getClass().getSimpleName();
     }
 
     private LocationEntity toLocationEntity(LocationDTO raw) {
-        if (serialized.containsKey(raw.getId())) {
-            return (LocationEntity) serialized.get(raw.getId());
+        if (serialized.containsKey(genKey(raw))) {
+            return (LocationEntity) serialized.get(genKey(raw));
         } else {
             LocationEntity location = new LocationEntity();
-            serialized.put(raw.getId(), location);
+            serialized.put(genKey(raw), location);
             location.setIdentifier(raw.getId());
             location.setStaIdentifier(raw.getId());
             location.setName(raw.getName());
@@ -206,11 +207,11 @@ public class DTOTransformer<R extends StaDTO, S extends HibernateRelations.HasId
     }
 
     private AbstractFeatureEntity<?> toAbstractFeatureEntity(FeatureOfInterestDTO raw) {
-        if (serialized.containsKey(raw.getId())) {
-            return (FeatureEntity) serialized.get(raw.getId());
+        if (serialized.containsKey(genKey(raw))) {
+            return (FeatureEntity) serialized.get(genKey(raw));
         } else {
             FeatureEntity feature = new FeatureEntity();
-            serialized.put(raw.getId(), feature);
+            serialized.put(genKey(raw), feature);
             feature.setIdentifier(raw.getId());
             feature.setStaIdentifier(raw.getId());
             feature.setName(raw.getName());
@@ -225,11 +226,11 @@ public class DTOTransformer<R extends StaDTO, S extends HibernateRelations.HasId
     }
 
     private PhenomenonEntity toPhenomenonEntity(ObservedPropertyDTO raw) {
-        if (serialized.containsKey(raw.getId())) {
-            return (PhenomenonEntity) serialized.get(raw.getId());
+        if (serialized.containsKey(genKey(raw))) {
+            return (PhenomenonEntity) serialized.get(genKey(raw));
         } else {
             PhenomenonEntity phenomenon = new PhenomenonEntity();
-            serialized.put(raw.getId(), phenomenon);
+            serialized.put(genKey(raw), phenomenon);
             phenomenon.setIdentifier(raw.getDefinition());
             phenomenon.setStaIdentifier(raw.getId());
             phenomenon.setName(raw.getName());
@@ -246,11 +247,11 @@ public class DTOTransformer<R extends StaDTO, S extends HibernateRelations.HasId
     }
 
     private ProcedureEntity toProcedureEntity(SensorDTO raw) {
-        if (serialized.containsKey(raw.getId())) {
-            return (ProcedureEntity) serialized.get(raw.getId());
+        if (serialized.containsKey(genKey(raw))) {
+            return (ProcedureEntity) serialized.get(genKey(raw));
         } else {
             ProcedureEntity procedure = new ProcedureEntity();
-            serialized.put(raw.getId(), procedure);
+            serialized.put(genKey(raw), procedure);
             procedure.setIdentifier(raw.getId());
             procedure.setStaIdentifier(raw.getId());
             procedure.setName(raw.getName());
@@ -289,11 +290,11 @@ public class DTOTransformer<R extends StaDTO, S extends HibernateRelations.HasId
     }
 
     private HistoricalLocationEntity toHistoricalLocationEntity(HistoricalLocationDTO raw) {
-        if (serialized.containsKey(raw.getId())) {
-            return (HistoricalLocationEntity) serialized.get(raw.getId());
+        if (serialized.containsKey(genKey(raw))) {
+            return (HistoricalLocationEntity) serialized.get(genKey(raw));
         } else {
             HistoricalLocationEntity histLoc = new HistoricalLocationEntity();
-            serialized.put(raw.getId(), histLoc);
+            serialized.put(genKey(raw), histLoc);
             histLoc.setIdentifier(raw.getId());
             histLoc.setStaIdentifier(raw.getId());
 
@@ -318,11 +319,11 @@ public class DTOTransformer<R extends StaDTO, S extends HibernateRelations.HasId
     }
 
     private DataEntity<?> toDataEntity(ObservationDTO raw) {
-        if (serialized.containsKey(raw.getId())) {
-            return (BlobDataEntity) serialized.get(raw.getId());
+        if (serialized.containsKey(genKey(raw))) {
+            return (BlobDataEntity) serialized.get(genKey(raw));
         } else {
             BlobDataEntity dataEntity = new BlobDataEntity();
-            serialized.put(raw.getId(), dataEntity);
+            serialized.put(genKey(raw), dataEntity);
             dataEntity.setIdentifier(raw.getId());
             dataEntity.setStaIdentifier(raw.getId());
 
@@ -363,11 +364,11 @@ public class DTOTransformer<R extends StaDTO, S extends HibernateRelations.HasId
     }
 
     private DatasetEntity toDatasetEntity(DatastreamDTO raw) {
-        if (serialized.containsKey(raw.getId())) {
-            return (DatasetEntity) serialized.get(raw.getId());
+        if (serialized.containsKey(genKey(raw))) {
+            return (DatasetEntity) serialized.get(genKey(raw));
         } else {
             DatasetEntity dataset = new DatasetEntity();
-            serialized.put(raw.getId(), dataset);
+            serialized.put(genKey(raw), dataset);
             dataset.setIdentifier(raw.getId());
             dataset.setStaIdentifier(raw.getId());
 
@@ -415,11 +416,11 @@ public class DTOTransformer<R extends StaDTO, S extends HibernateRelations.HasId
     }
 
     private PlatformEntity toPlatformEntity(ThingDTO raw) {
-        if (serialized.containsKey(raw.getId())) {
-            return (PlatformEntity) serialized.get(raw.getId());
+        if (serialized.containsKey(genKey(raw))) {
+            return (PlatformEntity) serialized.get(genKey(raw));
         } else {
             PlatformEntity platform = new PlatformEntity();
-            serialized.put(raw.getId(), platform);
+            serialized.put(genKey(raw), platform);
             platform.setIdentifier(raw.getId());
             platform.setStaIdentifier(raw.getId());
             platform.setName(raw.getName());
