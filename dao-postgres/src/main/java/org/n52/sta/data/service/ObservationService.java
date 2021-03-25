@@ -115,6 +115,7 @@ public class ObservationService
         this.parameterRepository = parameterRepository;
     }
 
+
     @Override
     public CollectionWrapper getEntityCollection(QueryOptions queryOptions) throws STACRUDException {
         try {
@@ -125,7 +126,7 @@ public class ObservationService
                                pageableRequest,
                                STAIDENTIFIER);
             if (identifierList.isEmpty()) {
-                return new CollectionWrapper(0, Collections.emptyList(), false);
+                return new CollectionWrapper(-1, Collections.emptyList(), false);
             } else {
                 return getEntityCollectionWrapperByIdentifierList(identifierList, pageableRequest, queryOptions, spec);
             }
@@ -133,7 +134,7 @@ public class ObservationService
             throw new STACRUDException(e.getMessage(), e);
         }
     }
-
+    /*
     @Override public CollectionWrapper getEntityCollectionByRelatedEntity(String relatedId,
                                                                           String relatedType,
                                                                           QueryOptions queryOptions)
@@ -149,7 +150,7 @@ public class ObservationService
                                                                         createPageableRequest(queryOptions),
                                                                         STAIDENTIFIER);
             if (identifierList.isEmpty()) {
-                return new CollectionWrapper(0, Collections.emptyList(), false);
+                return new CollectionWrapper(-1, Collections.emptyList(), false);
             } else {
                 return getEntityCollectionWrapperByIdentifierList(identifierList, pageableRequest, queryOptions, spec);
             }
@@ -157,6 +158,7 @@ public class ObservationService
             throw new STACRUDException(e.getMessage(), e);
         }
     }
+     */
 
     @Override
     public DataEntity<?> getEntityByIdRaw(Long id, QueryOptions queryOptions) throws STACRUDException {
@@ -569,9 +571,20 @@ public class ObservationService
         if (pages.isEmpty()) {
             return wrapper;
         } else {
-            long count = getRepository().count(spec);
-            return new CollectionWrapper(count, wrapper.getEntities(),
-                                         identifierList.size() + pageableRequest.getOffset() < count);
+            long count = -1;
+            boolean hasNextPage = false;
+            if (queryOptions.hasCountFilter() && queryOptions.getCountFilter().getValue()) {
+                count = getRepository().count(spec);
+                // we can calculate whether there is an additional page
+                hasNextPage = identifierList.size() + pageableRequest.getOffset() < count;
+            } else {
+                // we presume there is a next page if this page is filled completely.
+                // In the case that the entity count is divided by the page size directly this nextpage is empty
+                hasNextPage = identifierList.size() == pageableRequest.getPageSize();
+            }
+            return new CollectionWrapper(count,
+                                         wrapper.getEntities(),
+                                         hasNextPage);
         }
     }
 
