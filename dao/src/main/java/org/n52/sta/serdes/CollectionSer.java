@@ -55,8 +55,9 @@ public class CollectionSer extends StdSerializer<CollectionWrapper> {
         throws IOException {
         gen.writeStartObject();
 
-        gen.writeNumberField("@iot.count", value.getTotalEntityCount());
-
+        if (value.getTotalEntityCount() != -1) {
+            gen.writeNumberField("@iot.count", value.getTotalEntityCount());
+        }
         // We have multiple pages
         if (value.hasNextPage() && !value.getEntities().isEmpty()) {
             QueryOptions queryOptions = value.getEntities().get(0).getQueryOptions();

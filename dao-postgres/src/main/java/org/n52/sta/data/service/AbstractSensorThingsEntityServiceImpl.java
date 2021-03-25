@@ -239,15 +239,23 @@ public abstract class AbstractSensorThingsEntityServiceImpl<
                     throw new RuntimeException(ex);
                 }
             });
-            return new CollectionWrapper(expanded.getTotalElements(),
+            long count = (queryOptions.hasCountFilter() && queryOptions.getCountFilter().getValue()) ?
+                expanded.getTotalElements() :
+                -1;
+            boolean hasNext = expanded.getTotalElements() == queryOptions.getTopFilter().getValue();
+            return new CollectionWrapper(count,
                                          expanded.map(e -> createWrapper(e, queryOptions))
                                              .getContent(),
-                                         expanded.hasNext());
+                                         hasNext);
         } else {
-            return new CollectionWrapper(pages.getTotalElements(),
+            long count = (queryOptions.hasCountFilter() && queryOptions.getCountFilter().getValue()) ?
+                pages.getTotalElements() :
+                -1;
+            boolean hasNext = pages.getTotalElements() == queryOptions.getTopFilter().getValue();
+            return new CollectionWrapper(count,
                                          pages.map(e -> createWrapper(e, queryOptions))
                                              .getContent(),
-                                         pages.hasNext());
+                                         hasNext);
         }
     }
 
