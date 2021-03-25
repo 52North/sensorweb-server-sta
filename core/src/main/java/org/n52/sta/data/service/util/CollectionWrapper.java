@@ -38,6 +38,10 @@ import java.util.List;
  */
 public class CollectionWrapper {
 
+    /**
+     * Count of total entities. Value -1 indicates that $count=true was not included in the url and is therefore not
+     * returned by the API
+     */
     private final long totalEntityCount;
 
     private final List<ElementWithQueryOptions> entities;
