@@ -42,6 +42,7 @@ import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.DTOTransformer;
 import org.n52.sta.DaoSemaphore;
+import org.n52.sta.SerDesConfig;
 import org.n52.sta.api.AbstractSensorThingsEntityService;
 import org.n52.sta.api.CollectionWrapper;
 import org.n52.sta.api.dto.DatastreamDTO;
@@ -67,11 +68,15 @@ public class ServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
     implements AbstractSensorThingsEntityService<R> {
 
     private final DaoSemaphore semaphore;
+    private final SerDesConfig config;
     private AbstractSensorThingsEntityServiceImpl<?, R, S> serviceImpl;
 
-    public ServiceFacade(AbstractSensorThingsEntityServiceImpl<?, R, S> serviceImpl, DaoSemaphore semaphore) {
+    public ServiceFacade(AbstractSensorThingsEntityServiceImpl<?, R, S> serviceImpl,
+                         DaoSemaphore semaphore,
+                         SerDesConfig config) {
         this.serviceImpl = serviceImpl;
         this.semaphore = semaphore;
+        this.config = config;
     }
 
     AbstractSensorThingsEntityServiceImpl<?, ?, ?> getServiceImpl() {
@@ -181,7 +186,7 @@ public class ServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
         R result;
         try {
             semaphore.acquire();
-            result = serviceImpl.create((S) new DTOTransformer<>().fromDTO(entity));
+            result = serviceImpl.create((S) new DTOTransformer<>(config).fromDTO(entity));
         } catch (InterruptedException e) {
             throw new STACRUDException(e.getMessage(), e);
         } finally {
@@ -194,7 +199,7 @@ public class ServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
         R result;
         try {
             semaphore.acquire();
-            result = serviceImpl.update(id, (S) new DTOTransformer<>().fromDTO(entity), method);
+            result = serviceImpl.update(id, (S) new DTOTransformer<>(config).fromDTO(entity), method);
         } catch (InterruptedException e) {
             throw new STACRUDException(e.getMessage(), e);
         } finally {
@@ -218,8 +223,9 @@ public class ServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
     static class ThingServiceFacade extends ServiceFacade<ThingDTO, PlatformEntity> {
 
         ThingServiceFacade(ThingService serviceImpl,
-                           DaoSemaphore semaphore) {
-            super(serviceImpl, semaphore);
+                           DaoSemaphore semaphore,
+                           SerDesConfig config) {
+            super(serviceImpl, semaphore, config);
         }
     }
 
@@ -228,8 +234,9 @@ public class ServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
     static class LocationServiceFacade extends ServiceFacade<LocationDTO, LocationEntity> {
 
         LocationServiceFacade(LocationService serviceImpl,
-                              DaoSemaphore semaphore) {
-            super(serviceImpl, semaphore);
+                              DaoSemaphore semaphore,
+                              SerDesConfig config) {
+            super(serviceImpl, semaphore, config);
         }
     }
 
@@ -239,8 +246,9 @@ public class ServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
         extends ServiceFacade<HistoricalLocationDTO, HistoricalLocationEntity> {
 
         HistoricalLocationServiceFacade(HistoricalLocationService serviceImpl,
-                                        DaoSemaphore semaphore) {
-            super(serviceImpl, semaphore);
+                                        DaoSemaphore semaphore,
+                                        SerDesConfig config) {
+            super(serviceImpl, semaphore, config);
         }
     }
 
@@ -249,8 +257,9 @@ public class ServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
     static class SensorServiceFacade extends ServiceFacade<SensorDTO, ProcedureEntity> {
 
         SensorServiceFacade(SensorService serviceImpl,
-                            DaoSemaphore semaphore) {
-            super(serviceImpl, semaphore);
+                            DaoSemaphore semaphore,
+                            SerDesConfig config) {
+            super(serviceImpl, semaphore, config);
         }
     }
 
@@ -260,8 +269,9 @@ public class ServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
         extends ServiceFacade<ObservedPropertyDTO, PhenomenonEntity> {
 
         ObservedPropertyServiceFacade(ObservedPropertyService serviceImpl,
-                                      DaoSemaphore semaphore) {
-            super(serviceImpl, semaphore);
+                                      DaoSemaphore semaphore,
+                                      SerDesConfig config) {
+            super(serviceImpl, semaphore, config);
         }
     }
 
@@ -271,8 +281,9 @@ public class ServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
         extends ServiceFacade<ObservationDTO, DataEntity<?>> {
 
         ObservationServiceFacade(ObservationService serviceImpl,
-                                 DaoSemaphore semaphore) {
-            super(serviceImpl, semaphore);
+                                 DaoSemaphore semaphore,
+                                 SerDesConfig config) {
+            super(serviceImpl, semaphore, config);
         }
     }
 
@@ -281,8 +292,9 @@ public class ServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
     static class DatastreamServiceFacade extends ServiceFacade<DatastreamDTO, AbstractDatasetEntity> {
 
         DatastreamServiceFacade(DatastreamService serviceImpl,
-                                DaoSemaphore semaphore) {
-            super(serviceImpl, semaphore);
+                                DaoSemaphore semaphore,
+                                SerDesConfig config) {
+            super(serviceImpl, semaphore, config);
         }
     }
 
@@ -292,8 +304,9 @@ public class ServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
         extends ServiceFacade<FeatureOfInterestDTO, AbstractFeatureEntity<?>> {
 
         FeatureOfInterestServiceFacade(FeatureOfInterestService serviceImpl,
-                                       DaoSemaphore semaphore) {
-            super(serviceImpl, semaphore);
+                                       DaoSemaphore semaphore,
+                                       SerDesConfig config) {
+            super(serviceImpl, semaphore, config);
         }
     }
 }

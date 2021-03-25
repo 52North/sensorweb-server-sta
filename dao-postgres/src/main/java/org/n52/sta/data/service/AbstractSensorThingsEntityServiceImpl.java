@@ -44,6 +44,7 @@ import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.DTOTransformer;
+import org.n52.sta.SerDesConfig;
 import org.n52.sta.api.CollectionWrapper;
 import org.n52.sta.api.dto.StaDTO;
 import org.n52.sta.data.MutexFactory;
@@ -102,10 +103,10 @@ public abstract class AbstractSensorThingsEntityServiceImpl<
     private final EntityManager em;
     private final Class<S> entityClass;
 
-    @Autowired
-    private MutexFactory lock;
     private EntityServiceRepository serviceRepository;
     private T repository;
+    @Autowired private MutexFactory lock;
+    @Autowired private SerDesConfig config;
 
     public AbstractSensorThingsEntityServiceImpl(T repository,
                                                  EntityManager em,
@@ -354,7 +355,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<
      */
     @Transactional(rollbackFor = Exception.class)
     R createWrapper(S entity, QueryOptions queryOptions) {
-        return new DTOTransformer<R, S>().toDTO(entity, queryOptions);
+        return new DTOTransformer<R, S>(config).toDTO(entity, queryOptions);
     }
 
     /**

@@ -50,7 +50,6 @@ import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
-import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.UnitEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.parameter.ParameterFactory;
@@ -106,7 +105,16 @@ public class DTOTransformer<R extends StaDTO, S extends HibernateRelations.HasId
     private static final String SENSORML_2 = "http://www.opengis.net/sensorml/2.0";
     private static final String PDF = "application/pdf";
     private static final ObjectMapper MAPPER = new ObjectMapper();
+    private final SerDesConfig config;
     private Map<String, Object> serialized;
+
+    public DTOTransformer(SerDesConfig config) {
+        this.config = config;
+    }
+
+    private static String genKey(StaDTO dto) {
+        return dto.getId() + dto.getClass().getSimpleName();
+    }
 
     @SuppressWarnings("unchecked")
     public R toDTO(Object raw, QueryOptions queryOptions) throws STAInvalidQueryError {
@@ -169,10 +177,6 @@ public class DTOTransformer<R extends StaDTO, S extends HibernateRelations.HasId
             throw new STAInvalidQueryError(String.format("Could not parse entity %s to Database Entity!",
                                                          type.getClass().getName()));
         }
-    }
-
-    private static String genKey(StaDTO dto) {
-        return dto.getId() + dto.getClass().getSimpleName();
     }
 
     private LocationEntity toLocationEntity(LocationDTO raw) {
@@ -359,6 +363,8 @@ public class DTOTransformer<R extends StaDTO, S extends HibernateRelations.HasId
                 dataEntity.setFeature(this.toAbstractFeatureEntity(raw.getFeatureOfInterest()));
             }
 
+            parseObservationParameters(dataEntity, raw);
+
             return dataEntity;
         }
     }
@@ -479,6 +485,7 @@ public class DTOTransformer<R extends StaDTO, S extends HibernateRelations.HasId
             raw.getUnit().getName(),
             raw.getUnit().getLink())
         );
+
         if (datastream.getFieldsToExpand().containsKey(StaConstants.OBSERVED_PROPERTY)) {
             datastream.setObservedProperty(
                 toObservedPropertyDTO(raw.getPhenomenon(),
@@ -511,6 +518,7 @@ public class DTOTransformer<R extends StaDTO, S extends HibernateRelations.HasId
         thing.setId(platform.getStaIdentifier());
         thing.setName(platform.getName());
         thing.setDescription(platform.getDescription());
+        thing.setProperties(parseProperties(platform));
 
         if (thing.getFieldsToExpand().containsKey(StaConstants.DATASTREAMS)) {
             thing.setDatastreams(platform.getDatasets()
@@ -707,17 +715,29 @@ public class DTOTransformer<R extends StaDTO, S extends HibernateRelations.HasId
     }
 
     private ObjectNode parseProperties(HibernateRelations.HasParameters raw) {
+        ObjectNode properties = MAPPER.createObjectNode();
+        if (raw.hasParameters()) {
 
-        //        if (includeDatastreamCategory) {
-        //            // Add Category to parameters
-        //            gen.writeNumberField(categoryPrefix + "Id",
-        //                                 datastream.getCategory().getId());
-        //            gen.writeStringField(categoryPrefix + "Name",
-        //                                 datastream.getCategory().getName());
-        //            gen.writeStringField(categoryPrefix + "Description",
-        //                                 datastream.getCategory().getDescription());
-        //        }
-        return MAPPER.createObjectNode();
+            // Handle includeDatastreamCategory
+            if (raw instanceof DatasetEntity && config.isIncludeDatastreamCategory()) {
+                DatasetEntity ds = (DatasetEntity) raw;
+                final String categoryPrefix = "category";
+                properties.put(categoryPrefix + "Id",
+                               ds.getCategory().getId());
+                properties.put(categoryPrefix + "Name",
+                               ds.getCategory().getName());
+                properties.put(categoryPrefix + "Description",
+                               ds.getCategory().getDescription());
+            }
+
+            //TODO: check if this is always properly formatting elements
+            for (ParameterEntity<?> parameter : raw.getParameters()) {
+                properties.put(parameter.getName(), parameter.getValueAsString());
+            }
+            return properties;
+        } else {
+            return null;
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -772,58 +792,48 @@ public class DTOTransformer<R extends StaDTO, S extends HibernateRelations.HasId
         }
     }
 
-    public void parseObservationParameters(DataEntity dataEntity,
-                                           ObservationDTO dto,
-                                           Map<String, String> propertyMapping) {
+    private void parseObservationParameters(DataEntity dataEntity,
+                                            ObservationDTO dto) {
         if (dto.getParameters() != null) {
-            for (Map.Entry<String, String> mapping : propertyMapping.entrySet()) {
-                Iterator<String> keyIt = dto.getParameters().fieldNames();
-                while (keyIt.hasNext()) {
-                    String paramName = keyIt.next();
-                    if (paramName.equals(mapping.getValue())) {
-                        JsonNode jsonNode = dto.getParameters().get(paramName);
-                        switch (mapping.getKey()) {
-                            case "samplingGeometry":
-                                // Add as samplingGeometry to enable interoperability with SOS
-                                GeometryFactory factory =
-                                    new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
-                                GeoJsonReader reader = new GeoJsonReader(factory);
-                                try {
-                                    GeometryEntity geometryEntity = new GeometryEntity();
-                                    geometryEntity.setGeometry(reader.read(jsonNode.toString()));
-                                    dataEntity.setGeometryEntity(geometryEntity);
-                                } catch (ParseException e) {
-                                    Assert.notNull(null, "Could not parse" + e.getMessage());
-                                }
-                                continue;
-                            case "verticalFrom":
-                                // Add as verticalTo to enable interoperability with SOS
-                                dataEntity.setVerticalTo(BigDecimal.valueOf(jsonNode.asDouble()));
-                                continue;
-                            case "verticalTo":
-                                // Add as verticalTo to enable interoperability with SOS
-                                dataEntity.setVerticalFrom(BigDecimal.valueOf(jsonNode.asDouble()));
-                                continue;
-                            case "verticalFromTo":
-                                // Add as verticalTo to enable interoperability with SOS
-                                dataEntity.setVerticalTo(BigDecimal.valueOf(jsonNode.asDouble()));
-                                dataEntity.setVerticalFrom(BigDecimal.valueOf(jsonNode.asDouble()));
-                                continue;
-                            default:
-                                throw new RuntimeException("Unable to parse Parameters!");
-                        }
+            Iterator<String> keyIt = dto.getParameters().fieldNames();
+            while (keyIt.hasNext()) {
+                String paramName = keyIt.next();
+                JsonNode jsonNode = dto.getParameters().get(paramName);
+
+                if (paramName.equals(config.getVerticalFromMapping())) {
+                    // Add as verticalTo to enable interoperability with SOS
+                    dataEntity.setVerticalTo(BigDecimal.valueOf(jsonNode.asDouble()));
+                    dataEntity.setVerticalFrom(BigDecimal.valueOf(jsonNode.asDouble()));
+                } else if (paramName.equals(config.getVerticalToMapping())) {
+                    // Add as verticalTo to enable interoperability with SOS
+                    dataEntity.setVerticalFrom(BigDecimal.valueOf(jsonNode.asDouble()));
+                } else if (paramName.equals(config.getVerticalFromToMapping())) {
+                    // Add as verticalTo to enable interoperability with SOS
+                    dataEntity.setVerticalTo(BigDecimal.valueOf(jsonNode.asDouble()));
+                } else if (paramName.equals(config.getSamplingGeometryMapping())) {
+                    // Add as samplingGeometry to enable interoperability with SOS
+                    GeometryFactory factory =
+                        new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
+                    GeoJsonReader reader = new GeoJsonReader(factory);
+                    try {
+                        GeometryEntity geometryEntity = new GeometryEntity();
+                        geometryEntity.setGeometry(reader.read(jsonNode.toString()));
+                        dataEntity.setGeometryEntity(geometryEntity);
+                    } catch (ParseException e) {
+                        Assert.notNull(null, "Could not parse" + e.getMessage());
                     }
                 }
+
+                // Additionally store as normal parameter
+                dataEntity.setParameters(convertParameters(dto.getParameters(),
+                                                           ParameterFactory.EntityType.OBSERVATION));
             }
         }
     }
 
     private Object parseObservationResult(DataEntity<?> raw) {
-        if (raw instanceof QuantityDataEntity) {
-            return raw.getValue();
-        }
         //TODO:
         // Handling of Profile/TrajectoryObservation
-        return MAPPER.createObjectNode();
+        return raw.getValue();
     }
 }

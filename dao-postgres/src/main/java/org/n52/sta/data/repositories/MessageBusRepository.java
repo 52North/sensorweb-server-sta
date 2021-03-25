@@ -47,6 +47,7 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.DTOTransformer;
+import org.n52.sta.SerDesConfig;
 import org.n52.sta.SpringApplicationContext;
 import org.n52.sta.api.STAEventHandler;
 import org.n52.sta.api.dto.StaDTO;
@@ -103,6 +104,7 @@ public class MessageBusRepository<T, I extends Serializable>
     private final EntityManager databaseEm;
     private final Class<T> entityClass;
     private final CriteriaBuilder criteriaBuilder;
+    private final SerDesConfig config;
 
     // Is set in Repositories that need it to get related Collections for mqtt handling
     private DatastreamRepository datastreamRepository;
@@ -134,6 +136,8 @@ public class MessageBusRepository<T, I extends Serializable>
                 (DatastreamRepository) SpringApplicationContext.getBean(DatastreamRepository.class);
             Assert.notNull(this.datastreamRepository, "Could not autowire DatastreamRepository!");
         }
+
+        this.config = (SerDesConfig) SpringApplicationContext.getBean(SerDesConfig.class);
     }
 
     private TypedQuery<T> createIdentifierQuery(String identifier, String column) {
@@ -257,7 +261,7 @@ public class MessageBusRepository<T, I extends Serializable>
     @Override
     public <S extends T> S save(S newEntity) {
         String entityType = entityTypeToStaType.get(entityInformation.getEntityName());
-        final DTOTransformer<?, ?> transformer = new DTOTransformer<>();
+        final DTOTransformer<?, ?> transformer = new DTOTransformer<>(config);
         boolean intercept =
             mqttHandler.getWatchedEntityTypes().contains(entityType);
 
