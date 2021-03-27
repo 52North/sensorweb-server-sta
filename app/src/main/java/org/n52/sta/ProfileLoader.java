@@ -37,6 +37,8 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.TypeFilter;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * This implements a filter to only load packages that are used by the current Profile.
@@ -49,9 +51,13 @@ public class ProfileLoader implements TypeFilter, EnvironmentAware {
     private static final String STA_PREFIX = "org.n52.sta.";
     private static final String HTTP_PREFIX = STA_PREFIX + "http";
     private static final String MQTT_PREFIX = STA_PREFIX + "mqtt";
+    private static final String DATA_PREFIX = STA_PREFIX + "data";
     private static final String VANILLA = "vanilla";
     private static final String CITSCI = "citsci";
+    private static final String UFZAGGREGATA = "ufz-aggregata";
     private Environment env;
+    private Set<String> blacklist;
+
     private String[] VANILLA_PACKAGES = new String[] {
         HTTP_PREFIX + VANILLA,
         MQTT_PREFIX + VANILLA
@@ -62,18 +68,30 @@ public class ProfileLoader implements TypeFilter, EnvironmentAware {
         MQTT_PREFIX + CITSCI
     };
 
+    private String[] UFZAGGREGATA_PACKAGES = new String[] {
+        DATA_PREFIX + UFZAGGREGATA,
+    };
+
     @Override
     public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory)
         throws IOException {
-
         boolean match = false;
+
+        // Check if class should be loaded
         for (String activeProfile : env.getActiveProfiles()) {
             if (activeProfile.equals(VANILLA)) {
                 match = isClassInPackage(metadataReader.getClassMetadata(), VANILLA_PACKAGES);
             } else if (activeProfile.equals(CITSCI)) {
                 match = isClassInPackage(metadataReader.getClassMetadata(), CITSCI_PACKAGES);
             }
+
+            if (activeProfile.equals(UFZAGGREGATA)) {
+                match = isClassInPackage(metadataReader.getClassMetadata(), UFZAGGREGATA_PACKAGES);
+            }
         }
+
+        // Check against blacklist (some profiles may exclude certain classes from loading)
+        match = match && !blacklist.contains(metadataReader.getClassMetadata().getClassName());
         return match;
     }
 
@@ -89,6 +107,18 @@ public class ProfileLoader implements TypeFilter, EnvironmentAware {
     @Override
     public void setEnvironment(Environment environment) {
         this.env = environment;
+        createBlacklist(env.getActiveProfiles());
+    }
+
+    private Set<String> createBlacklist(String[] activeProfiles) {
+        this.blacklist = new HashSet<>();
+        for (String activeProfile : activeProfiles) {
+            if (activeProfile.equals(UFZAGGREGATA)) {
+                // Block regular ObservationService
+                blacklist.add(DATA_PREFIX + "." + VANILLA + ".service.ObservationService");
+            }
+        }
+        return blacklist;
     }
 
 }
