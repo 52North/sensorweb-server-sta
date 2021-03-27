@@ -29,7 +29,7 @@
 
 package org.n52.sta.webapp;
 
-import org.n52.sta.data.repositories.MessageBusRepository;
+import org.n52.sta.data.vanilla.repositories.MessageBusRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -42,7 +42,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
 @EnableJpaRepositories(repositoryBaseClass = MessageBusRepository.class,
-                       basePackages = {"org.n52.series.db", "org.n52.sta.data.repositories"})
+                       basePackages = {"org.n52.series.db", "org.n52.sta.data.vanilla.repositories"})
 @EnableConfigurationProperties
 @EnableAsync
 @ComponentScan(basePackages = {"org.n52.series.db", "org.n52.sta"})

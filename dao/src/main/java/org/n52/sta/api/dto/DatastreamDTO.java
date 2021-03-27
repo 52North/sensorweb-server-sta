@@ -95,7 +95,7 @@ public interface DatastreamDTO extends StaDTO {
         private String definition;
 
         public UnitOfMeasurement() {
-            
+
         }
 
         public UnitOfMeasurement(String symbol, String name, String definition) {
