@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.n52.sensorweb-server.sta</groupId>
         <artifactId>sta-parent</artifactId>
-        <version>3.0.1-SNAPSHOT</version>
+        <version>4.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>sta-webapp</artifactId>
     <packaging>war</packaging>
