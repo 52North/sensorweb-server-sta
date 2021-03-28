@@ -228,7 +228,7 @@ public class LocationService
                                                     })
                                                     .collect(Collectors.toSet()));
                 }
-                // location = getRepository().save(lo);
+                location = getRepository().save(location);
                 processThings(location);
             }
         }
@@ -305,6 +305,11 @@ public class LocationService
                 // delete all historical locations
                 for (HistoricalLocationEntity historicalLocation : location.getHistoricalLocations()) {
                     getHistoricalLocationService().delete(historicalLocation.getStaIdentifier());
+                }
+
+                if (location.hasParameters()) {
+                    location.getParameters()
+                        .forEach(entity -> parameterRepository.delete((LocationParameterEntity) entity));
                 }
                 getRepository().deleteByStaIdentifier(id);
             } else {

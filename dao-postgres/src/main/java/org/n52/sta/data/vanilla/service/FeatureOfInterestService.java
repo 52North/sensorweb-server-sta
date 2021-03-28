@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.vanilla.service;
 
 import org.hibernate.Hibernate;
@@ -298,6 +299,12 @@ public class FeatureOfInterestService
             if (getRepository().existsByStaIdentifier(id)) {
                 // check observations
                 deleteRelatedObservationsAndUpdateDatasets(id);
+                AbstractFeatureEntity<?> foi = getRepository().findByStaIdentifier(id).get();
+
+                if (foi.hasParameters()) {
+                    foi.getParameters()
+                        .forEach(entity -> parameterRepository.delete((FeatureParameterEntity) entity));
+                }
                 getRepository().deleteByStaIdentifier(id);
             } else {
                 throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);

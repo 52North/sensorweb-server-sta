@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.vanilla.service;
 
 import org.hibernate.Hibernate;
@@ -110,7 +111,6 @@ public class ObservationService
         this.parameterRepository = null;
     }
 
-
     @Autowired
     public ObservationService(ObservationRepository<DataEntity<?>> repository,
                               EntityManager em,
@@ -121,7 +121,6 @@ public class ObservationService
         this.datastreamRepository = datastreamRepository;
         this.parameterRepository = parameterRepository;
     }
-
 
     @Override
     public CollectionWrapper getEntityCollection(QueryOptions queryOptions) throws STACRUDException {
@@ -466,7 +465,7 @@ public class ObservationService
             }
         }
         // value
-        if (toMerge.getValue() != null) {
+        if (toMerge.getValueText() != null) {
             checkValue(existing, toMerge);
         }
         return existing;
@@ -483,6 +482,10 @@ public class ObservationService
                         .get();
                 deleteReferenceFromDatasetFirstLast(observation);
 
+                if (observation.hasParameters()) {
+                    observation.getParameters()
+                        .forEach(entity -> parameterRepository.delete((ObservationParameterEntity) entity));
+                }
                 // Important! Delete first and then update else we find
                 // ourselves again in search for new latest/earliest obs.
                 getRepository().deleteByStaIdentifier(observation.getStaIdentifier());
@@ -508,6 +511,7 @@ public class ObservationService
         if (unproxy instanceof CompositeDataEntity) {
             // touch each entity + it's parameters to make sure they are loaded
             Hibernate.initialize(unproxy.getValue());
+            Hibernate.initialize(unproxy.getParameters());
         }
         return unproxy;
     }

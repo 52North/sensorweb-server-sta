@@ -57,7 +57,7 @@ public interface RepositoryConstants {
     String PARAMETERS = "parameters";
     String RESULT = "result";
 
-    String ENTITYNAME_OBSERVATION = "ObservationEntity";
+    String ENTITYNAME_OBSERVATION = "DataEntity";
     String ENTITYNAME_ABSTRACT_DATASET = "AbstractDatasetEntity";
     String ENTITYNAME_DATASET = "DatasetEntity";
     String ENTITYNAME_DATASET_AGGREGATION = "DatasetAggregationEntity";

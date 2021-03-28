@@ -160,20 +160,18 @@ public class ITConformance7 extends ConformanceTests implements TestUtil {
     public void postObservationDirect() throws Exception {
         init();
         String observation = "{\n" +
-            "    \"result\": 0.29,\n" +
             "    \"phenomenonTime\": \"2019-03-10T17:45:09Z\",\n" +
             "    \"resultTime\": \"2019-03-10T16:58:09Z\",\n" +
-            "    \"parameters\":" +
-            "        {\n" +
-            "            \"name\": \"http://www.opengis.net/def/param-name/OGC-OM/2.0/samplingGeometry\",\n" +
-            "            \"value\": {\n" +
-            "                \"type\": \"Point\",\n" +
-            "                \"coordinates\": [\n" +
-            "                    2.8466,\n" +
-            "                    41.585\n" +
-            "                ]\n" +
-            "            }\n" +
-            "        },\n" +
+            "    \"result\": 0.29,\n" +
+            "    \"parameters\": {\n" +
+            "        \"http://www.opengis.net/def/param-name/OGC-OM/2.0/samplingGeometry\": {\n" +
+            "            \"type\": \"Point\",\n" +
+            "            \"coordinates\": [\n" +
+            "                2,8466,\n" +
+            "                41.585\n" +
+            "            ]\n" +
+            "        }\n" +
+            "    },\n" +
             "    \"Datastream\": {\n" +
             "        \"@iot.id\": \"ITConformance7Datastream\"\n" +
             "    },\n" +

@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.vanilla.service;
 
 import com.google.common.collect.Sets;
@@ -481,6 +482,11 @@ public class DatastreamService extends AbstractSensorThingsEntityServiceImpl<
                 } else {
                     // delete observations
                     observationRepository.deleteAllByDatasetIdIn(Collections.singleton(datastream.getId()));
+                }
+
+                if (datastream.hasParameters()) {
+                    datastream.getParameters()
+                        .forEach(entity -> parameterRepository.delete((DatasetParameterEntity) entity));
                 }
                 //delete main datastream
                 getRepository().deleteByStaIdentifier(id);
