@@ -26,7 +26,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-
 package org.n52.sta.api.dto;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
