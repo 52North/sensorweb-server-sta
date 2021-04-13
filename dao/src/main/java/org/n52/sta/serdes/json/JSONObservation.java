@@ -43,7 +43,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationDTO> imp
     // JSON Properties. Matched by Annotation or variable name
     public String phenomenonTime;
     public String resultTime;
-    public String result;
+    public ObjectNode result;
     public Object resultQuality;
     public String validTime;
     public ObjectNode parameters;

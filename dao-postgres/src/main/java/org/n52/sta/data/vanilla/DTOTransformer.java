@@ -26,8 +26,10 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.vanilla;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -49,6 +51,7 @@ import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
+import org.n52.series.db.beans.SensorML20DataEntity;
 import org.n52.series.db.beans.UnitEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.parameter.ParameterFactory;
@@ -352,7 +355,8 @@ public class DTOTransformer<R extends StaDTO, S extends HibernateRelations.HasId
                 dataEntity.setValidTimeEnd(((TimePeriod) validTime).getEnd().toDate());
             }
 
-            dataEntity.setValue(raw.getResult());
+            // if (raw.getResult() instanceof ObjectNode)
+            dataEntity.setValue(raw.getResult().toString());
 
             if (raw.getDatastream() != null) {
                 dataEntity.setDataset(this.toDatasetEntity(raw.getDatastream()));
@@ -833,6 +837,14 @@ public class DTOTransformer<R extends StaDTO, S extends HibernateRelations.HasId
     private Object parseObservationResult(DataEntity<?> raw) {
         //TODO:
         // Handling of Profile/TrajectoryObservation
-        return raw.getValue();
+        try {
+            if (raw instanceof SensorML20DataEntity) {
+                return MAPPER.readTree((String) raw.getValue());
+            }
+            return raw.getValue();
+        } catch (JsonProcessingException e) {
+            throw new STAInvalidQueryError(String.format("Could not parse Observation->result on Observation:  %s",
+                                                         raw.getIdentifier()));
+        }
     }
 }
