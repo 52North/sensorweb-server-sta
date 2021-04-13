@@ -85,7 +85,7 @@ spring:
   # - UFZ Aggregata backend: ufz-aggregata
   # - [not implemented yet] STA with MultiDatastream Extension: multiDatastreamExtension
   profiles:
-    active: vanilla, ufz-aggregata
+    active: vanilla
   datasource:
     platform: postgres
     username: postgres

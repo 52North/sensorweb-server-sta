@@ -375,8 +375,7 @@ abstract class ConformanceTests implements TestUtil {
      * @param response            The response of the GET request to be checked
      */
     protected void checkEntityProperties(Set<String> mandatoryProperties, JsonNode response) {
-        if (response.has(countKey)) {
-            Assertions.assertTrue(response.has(value));
+        if (response.has(value)) {
             response.get(value).forEach(v -> checkObjectProperties(mandatoryProperties, v));
         } else {
             checkObjectProperties(mandatoryProperties, response);

@@ -59,12 +59,14 @@ public class ProfileLoader implements TypeFilter, EnvironmentAware {
 
     private String[] VANILLA_PACKAGES = new String[] {
         HTTP_PREFIX + VANILLA,
-        MQTT_PREFIX + VANILLA
+        MQTT_PREFIX + VANILLA,
+        DATA_PREFIX + VANILLA
     };
 
     private String[] CITSCI_PACKAGES = new String[] {
         HTTP_PREFIX + CITSCI,
-        MQTT_PREFIX + CITSCI
+        MQTT_PREFIX + CITSCI,
+        DATA_PREFIX + CITSCI
     };
 
     private String[] UFZAGGREGATA_PACKAGES = new String[] {
@@ -74,24 +76,25 @@ public class ProfileLoader implements TypeFilter, EnvironmentAware {
     @Override
     public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory)
         throws IOException {
-        boolean match = false;
+        boolean match = true;
 
         // Check if class should be loaded
         for (String activeProfile : env.getActiveProfiles()) {
             if (activeProfile.equals(VANILLA)) {
                 match = isClassInPackage(metadataReader.getClassMetadata(), VANILLA_PACKAGES);
-            } else if (activeProfile.equals(CITSCI)) {
+            }
+            if (activeProfile.equals(CITSCI)) {
                 match = isClassInPackage(metadataReader.getClassMetadata(), CITSCI_PACKAGES);
             }
-
             if (activeProfile.equals(UFZAGGREGATA)) {
                 match = isClassInPackage(metadataReader.getClassMetadata(), UFZAGGREGATA_PACKAGES);
             }
+            System.out.println(metadataReader.getClassMetadata().getClassName() + "  " + match);
         }
 
         // Check against blacklist (some profiles may exclude certain classes from loading)
         match = match && !blacklist.contains(metadataReader.getClassMetadata().getClassName());
-        return match;
+        return false;
     }
 
     private boolean isClassInPackage(ClassMetadata metadata, String[] name) {

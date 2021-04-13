@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta;
 
 import org.springframework.boot.SpringApplication;
@@ -39,9 +40,12 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableConfigurationProperties
 @EnableAsync
 @SuppressWarnings("uncommentedmain")
-@ComponentScan(includeFilters = @ComponentScan.Filter(
-    type = FilterType.CUSTOM, classes = {ProfileLoader.class}))
-
+@ComponentScan(excludeFilters = {
+    @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*vanilla.*"),
+    @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*citsci.*"),
+    @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*ufzaggregata.*")
+}
+)
 public class Application {
 
     static {

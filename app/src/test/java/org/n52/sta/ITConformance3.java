@@ -1418,7 +1418,7 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
 
         String url = String.format(getRelatedEntityEndpoint(sourceType, targetType), sourceId);
         JsonNode result = getEntity(url);
-        if (result.has("@iot.count")) {
+        if (result.has("value")) {
             result = result.get("value").get(0);
         }
 

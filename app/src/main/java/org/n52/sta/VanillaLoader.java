@@ -29,9 +29,20 @@
 
 package org.n52.sta;
 
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
+@Profile("vanilla")
+@Configuration
+@ComponentScan(basePackages = {
+    "org.n52.sta.http.vanilla",
+    "org.n52.sta.mqtt.vanilla",
+    "org.n52.sta.data.vanilla",
+})
 public class VanillaLoader {
 
 }

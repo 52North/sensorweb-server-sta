@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.ufzaggregata;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -63,7 +64,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpEntity;
@@ -92,7 +92,6 @@ import java.util.regex.Pattern;
 @Component("ObservationService")
 @DependsOn({"springApplicationContext"})
 @Transactional
-@Primary
 public class UfzAggregataObservationService extends ObservationService {
 
     protected static final String SLASH = "/";
