@@ -29,6 +29,7 @@
 
 package org.n52.sta.data.service;
 
+import org.hibernate.Hibernate;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
@@ -253,18 +254,17 @@ public class SensorService
                                              EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDUREHISTORY);
                 if (existing.isPresent()) {
                     ProcedureEntity merged = merge(existing.get(), entity);
-                    if (entity != null) {
-                        if (entity.hasDatastreams()) {
-                            AbstractSensorThingsEntityService dsService = getDatastreamService();
-                            for (AbstractDatasetEntity datastreamEntity :
-                                entity.getDatasets()) {
-                                ((DatastreamService) dsService).createOrUpdate(datastreamEntity);
-                            }
+                    if (entity.hasDatastreams()) {
+                        AbstractSensorThingsEntityService dsService = getDatastreamService();
+                        for (AbstractDatasetEntity datastreamEntity :
+                            entity.getDatasets()) {
+                            ((DatastreamService) dsService).createOrUpdate(datastreamEntity);
                         }
                     }
                     checkFormat(merged, entity);
                     checkProcedureHistory(merged);
                     getRepository().save(merged);
+                    Hibernate.initialize(merged.getParameters());
                     return merged;
                 }
             }
@@ -304,12 +304,9 @@ public class SensorService
     }
 
     private void checkUpdate(ProcedureEntity entity) throws STACRUDException {
-        if (entity instanceof ProcedureEntity) {
-            ProcedureEntity sensor = (ProcedureEntity) entity;
-            if (sensor.hasDatastreams()) {
-                for (AbstractDatasetEntity datastream : sensor.getDatasets()) {
-                    checkInlineDatastream(datastream);
-                }
+        if (entity.hasDatastreams()) {
+            for (AbstractDatasetEntity datastream : entity.getDatasets()) {
+                checkInlineDatastream(datastream);
             }
         }
     }
@@ -322,6 +319,13 @@ public class SensorService
                 for (AbstractDatasetEntity ds : datastreamRepository.findAll(dQS.withSensorStaIdentifier(identifier))) {
                     getDatastreamService().delete(ds.getStaIdentifier());
                 }
+
+                ProcedureEntity sensor = getRepository().findByStaIdentifier(identifier).get();
+                if (sensor.hasParameters()) {
+                    sensor.getParameters()
+                        .forEach(entity -> parameterRepository.delete((ProcedureParameterEntity) entity));
+                }
+                getRepository().deleteByStaIdentifier(identifier);
             } else {
                 throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }

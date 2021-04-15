@@ -29,6 +29,7 @@
 
 package org.n52.sta.data.service;
 
+import org.hibernate.Hibernate;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
@@ -197,7 +198,9 @@ public class HistoricalLocationService
                 Optional<HistoricalLocationEntity> existing = getRepository().findByStaIdentifier(id);
                 if (existing.isPresent()) {
                     HistoricalLocationEntity merged = merge(existing.get(), entity);
-                    return getRepository().save(merged);
+                    HistoricalLocationEntity result = getRepository().save(merged);
+                    Hibernate.initialize(result.getParameters());
+                    return result;
                 }
                 throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }

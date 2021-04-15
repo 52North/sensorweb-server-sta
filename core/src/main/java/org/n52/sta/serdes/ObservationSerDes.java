@@ -104,20 +104,6 @@ public class ObservationSerDes {
         protected static final String VERTICAL = "vertical";
         private static final long serialVersionUID = -4575044340713191285L;
         private static final GeoJsonWriter GEO_JSON_WRITER = new GeoJsonWriter();
-        private QueryOptions profileResultSchema =
-            new QueryOptions("",
-                             Collections.singleton(new SelectFilter(new HashSet<>(
-                                 Arrays.asList(StaConstants.PROP_RESULT,
-                                               StaConstants.PROP_PARAMETERS,
-                                               VERTICAL)))));
-        private QueryOptions trajectoryResultSchema =
-            new QueryOptions("",
-                             Collections.singleton(new SelectFilter(new HashSet<>(
-                                 Arrays.asList(StaConstants.PROP_RESULT,
-                                               StaConstants.PROP_PARAMETERS,
-                                               StaConstants.PROP_PHENOMENON_TIME,
-                                               StaConstants.PROP_RESULT_TIME,
-                                               StaConstants.PROP_VALID_TIME)))));
 
         public ObservationSerializer(String rootUrl, boolean implicitExpand, String... activeExtensions) {
             super(ObservationWithQueryOptions.class, implicitExpand, activeExtensions);
@@ -144,12 +130,25 @@ public class ObservationSerDes {
             if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_RESULT)) {
                 gen.writeFieldName(STAEntityDefinition.PROP_RESULT);
                 if (observation instanceof ProfileDataEntity) {
-
+                    QueryOptions profileResultSchema =
+                        new QueryOptions("",
+                                         Collections.singleton(new SelectFilter(new HashSet<>(
+                                             Arrays.asList(StaConstants.PROP_RESULT,
+                                                           StaConstants.PROP_PARAMETERS,
+                                                           VERTICAL)))));
                     writeNestedCollection(sortValuesByPhenomenonTime((Set<DataEntity<?>>) observation.getValue()),
                                           profileResultSchema,
                                           gen,
                                           serializers);
                 } else if (observation instanceof TrajectoryDataEntity) {
+                    QueryOptions trajectoryResultSchema =
+                        new QueryOptions("",
+                                         Collections.singleton(new SelectFilter(new HashSet<>(
+                                             Arrays.asList(StaConstants.PROP_RESULT,
+                                                           StaConstants.PROP_PARAMETERS,
+                                                           StaConstants.PROP_PHENOMENON_TIME,
+                                                           StaConstants.PROP_RESULT_TIME,
+                                                           StaConstants.PROP_VALID_TIME)))));
                     writeNestedCollection(sortValuesByVerticalFrom((Set<DataEntity<?>>) observation.getValue()),
                                           trajectoryResultSchema,
                                           gen,
@@ -175,17 +174,18 @@ public class ObservationSerDes {
                 gen.writeStringField(STAEntityDefinition.PROP_PHENOMENON_TIME, phenomenonTime);
             }
 
-            /*
             if (!value.hasSelectOption() ||
                 value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_RESULT_QUALITY)) {
+                gen.writeNullField(STAEntityDefinition.PROP_RESULT_QUALITY);
             }
-            */
 
             if (!value.hasSelectOption() ||
                 value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_VALID_TIME)) {
                 if (observation.isSetValidTime()) {
                     gen.writeStringField(STAEntityDefinition.PROP_VALID_TIME,
                                          DateTimeHelper.format(createValidTime(observation)));
+                } else {
+                    gen.writeNullField(STAEntityDefinition.PROP_VALID_TIME);
                 }
             }
 
@@ -215,6 +215,8 @@ public class ObservationSerDes {
                         }
                     }
                     gen.writeEndObject();
+                } else {
+                    gen.writeNullField(STAEntityDefinition.PROP_PARAMETERS);
                 }
             }
 

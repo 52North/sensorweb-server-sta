@@ -6,9 +6,9 @@ trace: false
 server:
   port: 8080
   ## Used for response serialization + url parsing. Must be set correctly!
-  rootUrl: "http://localhost:8081/52n-sensorthings-webapp/"
+  rootUrl: "http://localhost:8080/52n-sensorthings-webapp/v1.1/"
   servlet:
-    context-path: "/52n-sensorthings-webapp"
+    context-path: "/52n-sensorthings-webapp/v1.1"
 
   ## Used for enabling/disabling custom 52N-STA Features
   feature:
@@ -21,7 +21,7 @@ server:
     # Controls whether properties referenced from $expand need to be explicitly referenced from $select if $select is used or are implicitly included
     # Resolves ambiguity as discussed in https://github.com/opengeospatial/sensorthings/issues/106
     # Defaults to false.
-    implicitExpand: false
+    implicitExpand: true
 
     ## Automatically updates a FeatureOfInterest linked in Thing->properties under
     ## key "updateFOI" with new Locations of the Thing
@@ -58,7 +58,7 @@ server:
 
     # Toggle whether this Instance should be read-only. Can be toggled separately for MQTT and HTTP
     # All MQTT Publish Messages will be dropped silently
-    mqttReadOnly: false
+    mqttReadOnly: true
     # All HTTP POST & PUT Requests will be dropped with a HTTP Status 405 NOT Allowed
     httpReadOnly: true
 
@@ -77,7 +77,7 @@ spring:
     # the db user password
     password: postgres
     # here 'sta' is the name of the database
-    url: jdbc:postgresql://localhost:5432/sta
+    url: jdbc:postgresql://localhost:5000/sta
     initialization-mode: always
     hikari:
       connection-timeout: 20000

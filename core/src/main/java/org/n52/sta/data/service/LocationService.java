@@ -29,6 +29,7 @@
 
 package org.n52.sta.data.service;
 
+import org.hibernate.Hibernate;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PlatformEntity;
@@ -224,7 +225,7 @@ public class LocationService
                                                     })
                                                     .collect(Collectors.toSet()));
                 }
-                // location = getRepository().save(lo);
+                location = getRepository().save(location);
                 processThings(location);
             }
         }
@@ -242,6 +243,7 @@ public class LocationService
                 if (existing.isPresent()) {
                     LocationEntity merged = merge(existing.get(), entity);
                     LocationEntity result = getRepository().save(merged);
+                    Hibernate.initialize(result.getParameters());
                     return result;
                 }
                 throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
@@ -300,6 +302,11 @@ public class LocationService
                 // delete all historical locations
                 for (HistoricalLocationEntity historicalLocation : location.getHistoricalLocations()) {
                     getHistoricalLocationService().delete(historicalLocation.getStaIdentifier());
+                }
+
+                if (location.hasParameters()) {
+                    location.getParameters()
+                        .forEach(entity -> parameterRepository.delete((LocationParameterEntity) entity));
                 }
                 getRepository().deleteByStaIdentifier(id);
             } else {
