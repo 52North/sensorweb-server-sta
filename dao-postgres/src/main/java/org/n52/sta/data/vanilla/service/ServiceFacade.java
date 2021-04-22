@@ -218,6 +218,10 @@ public class ServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
         }
     }
 
+    @Override public void setServiceRepository(EntityServiceRepository serviceRepository) {
+        serviceImpl.setServiceRepository(serviceRepository);
+    }
+
     @Component
     static class ThingServiceFacade extends ServiceFacade<ThingDTO, PlatformEntity> {
 

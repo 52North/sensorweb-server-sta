@@ -277,7 +277,7 @@ public class ObservedPropertyService
                 // delete datastreams
                 for (AbstractDatasetEntity datastreamEntity :
                     datastreamRepository.findAll(dQS.withObservedPropertyStaIdentifier(id))) {
-                    getDatastreamService().delete(datastreamEntity.getStaIdentifier());
+                    datastreamRepository.deleteByStaIdentifier(datastreamEntity.getStaIdentifier());
                 }
                 getRepository().deleteByStaIdentifier(id);
             } else {

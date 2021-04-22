@@ -79,27 +79,35 @@ public class EntityServiceRepository implements EntityServiceFactory {
     public void postConstruct() {
         entityServices.put(EntityTypes.Thing, thingServiceFacade);
         entityServices.put(EntityTypes.Things, thingServiceFacade);
+        thingServiceFacade.setServiceRepository(this);
 
         entityServices.put(EntityTypes.Location, locationServiceFacade);
         entityServices.put(EntityTypes.Locations, locationServiceFacade);
+        locationServiceFacade.setServiceRepository(this);
 
         entityServices.put(EntityTypes.HistoricalLocation, historicalLocationService);
         entityServices.put(EntityTypes.HistoricalLocations, historicalLocationService);
+        historicalLocationService.setServiceRepository(this);
 
         entityServices.put(EntityTypes.Sensor, sensorService);
         entityServices.put(EntityTypes.Sensors, sensorService);
+        sensorService.setServiceRepository(this);
 
         entityServices.put(EntityTypes.Datastream, datastreamService);
         entityServices.put(EntityTypes.Datastreams, datastreamService);
+        datastreamService.setServiceRepository(this);
 
         entityServices.put(EntityTypes.Observation, observationService);
         entityServices.put(EntityTypes.Observations, observationService);
+        observationService.setServiceRepository(this);
 
         entityServices.put(EntityTypes.ObservedProperty, observedPropertyService);
         entityServices.put(EntityTypes.ObservedProperties, observedPropertyService);
+        observedPropertyService.setServiceRepository(this);
 
         entityServices.put(EntityTypes.FeatureOfInterest, featureOfInterestService);
         entityServices.put(EntityTypes.FeaturesOfInterest, featureOfInterestService);
+        featureOfInterestService.setServiceRepository(this);
 
         mqttSubscriptionEventHandler.setServiceRepository(this);
     }

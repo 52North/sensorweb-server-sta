@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.security.Principal;
 
 /**
  * Handles all requests to Entity Collections and Entity Collections association Links
@@ -63,7 +64,9 @@ public class CoreCollectionRequestHandler extends CollectionRequestHandler imple
         produces = "application/json"
     )
     public CollectionWrapper readCollectionDirect(@PathVariable String collectionName,
+                                                  Principal principal,
                                                   HttpServletRequest request) throws STACRUDException {
+        System.out.println(principal.getName());
         return super.readCollectionDirect(collectionName, request);
     }
 

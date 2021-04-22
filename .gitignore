@@ -1,3 +1,7 @@
+# Security-related config files
+**/keycloak.json
+
+# Build Artifacts
 target/
 pom.xml.tag
 pom.xml.releaseBackup

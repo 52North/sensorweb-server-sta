@@ -117,4 +117,6 @@ public interface AbstractSensorThingsEntityService<R extends StaDTO> {
     StaDTO update(String id, R entity, HttpMethod method) throws STACRUDException;
 
     void delete(String id) throws STACRUDException;
+
+    void setServiceRepository(EntityServiceRepository serviceRepository);
 }
