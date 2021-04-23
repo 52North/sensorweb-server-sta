@@ -541,6 +541,7 @@ public class ObservationService
                 countObservationEntity.setValue(Integer.parseInt(value));
                 data = countObservationEntity;
                 break;
+            case OmConstants.OBS_TYPE_OBSERVATION:
             case OmConstants.OBS_TYPE_TEXT_OBSERVATION:
                 TextDataEntity textObservationEntity = new TextDataEntity();
                 textObservationEntity.setValue(value);
