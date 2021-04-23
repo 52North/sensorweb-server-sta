@@ -166,6 +166,11 @@ public class ObservationGroupService
                 } else {
                     obsGroup.setProcessed(true);
                     obsGroup = getRepository().save(obsGroup);
+                    if (obsGroup.getEntities() != null) {
+                        for (ObservationRelationEntity relation : obsGroup.getEntities()) {
+                            getObservationRelationService().createOrfetch(relation);
+                        }
+                    }
                     if (obsGroup.getParameters() != null) {
                         ObservationGroupEntity finalObsGroup = obsGroup;
                         parameterRepository.saveAll(obsGroup.getParameters()

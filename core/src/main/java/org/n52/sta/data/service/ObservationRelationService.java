@@ -30,6 +30,7 @@
 package org.n52.sta.data.service;
 
 import org.n52.janmayen.http.HTTPStatus;
+import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.sta.ObservationGroupEntity;
 import org.n52.series.db.beans.sta.ObservationRelationEntity;
 import org.n52.shetland.filter.ExpandFilter;
@@ -162,9 +163,11 @@ public class ObservationRelationService
             if (getRepository().existsByStaIdentifier(obsRel.getStaIdentifier())) {
                 throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS, HTTPStatus.CONFLICT);
             } else {
-
-                ObservationGroupEntity group = getObservationGroupService().createOrUpdate(obsRel.getGroup());
+                ObservationGroupEntity group = getObservationGroupService().createOrfetch(obsRel.getGroup());
                 obsRel.setGroup(group);
+
+                DataEntity<?> obs = getObservationService().createOrfetch(obsRel.getObservation());
+                obsRel.setObservation(obs);
                 return getRepository().save(obsRel);
             }
         }
