@@ -150,7 +150,12 @@ public class JSONBase {
                 secondEx = e;
             }
             // We have errored out on both types so return error message
-            throw new IllegalStateException(ex.getMessage() + secondEx.getMessage());
+            throw new IllegalStateException(
+                "Error while handling "
+                    + this.getClass().getSimpleName()
+                    + ": "
+                    + ex.getMessage() +
+                    secondEx.getMessage());
         }
 
         @SuppressWarnings("unchecked")
