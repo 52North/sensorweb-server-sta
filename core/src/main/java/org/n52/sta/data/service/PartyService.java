@@ -75,6 +75,10 @@ public class PartyService
         throws STAInvalidQueryException {
         if (expandOption != null) {
             for (ExpandItem expandItem : expandOption.getItems()) {
+                // We cannot handle nested $filter or $expand
+                if (expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter()) {
+                    continue;
+                }
                 String expandProperty = expandItem.getPath();
                 if (PartyEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
                     return new EntityGraphRepository.FetchGraph[]

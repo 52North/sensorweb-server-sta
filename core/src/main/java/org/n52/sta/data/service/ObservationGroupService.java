@@ -86,6 +86,10 @@ public class ObservationGroupService
         if (expandOption != null) {
             fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
             for (ExpandItem expandItem : expandOption.getItems()) {
+                // We cannot handle nested $filter or $expand
+                if (expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter()) {
+                    continue;
+                }
                 String expandProperty = expandItem.getPath();
                 switch (expandProperty) {
                     case ObservationGroupEntityDefinition.OBSERVATION_RELATIONS:

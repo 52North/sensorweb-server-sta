@@ -76,6 +76,10 @@ public class ObservationRelationService
         Set<EntityGraphRepository.FetchGraph> fetchGraphs = new HashSet<>();
         if (expandOption != null) {
             for (ExpandItem expandItem : expandOption.getItems()) {
+                // We cannot handle nested $filter or $expand
+                if (expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter()) {
+                    continue;
+                }
                 String expandProperty = expandItem.getPath();
                 switch (expandProperty) {
                     case STAEntityDefinition.OBSERVATION_GROUP:
@@ -103,7 +107,7 @@ public class ObservationRelationService
             if (!(expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter())) {
                 continue;
             }
-            
+
             String expandProperty = expandItem.getPath();
             switch (expandProperty) {
                 case STAEntityDefinition.OBSERVATION_GROUP:
