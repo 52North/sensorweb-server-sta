@@ -97,6 +97,11 @@ public class LicenseService
         throws STACRUDException, STAInvalidQueryException {
         em.detach(entity);
         for (ExpandItem expandItem : expandOption.getItems()) {
+            // We have already handled $expand without filter and expand
+            if (!(expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter())) {
+                continue;
+            }
+            
             String expandProperty = expandItem.getPath();
             if (LicenseEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
                 Page<AbstractDatasetEntity> datastreams = getDatastreamService()

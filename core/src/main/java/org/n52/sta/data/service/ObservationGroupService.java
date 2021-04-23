@@ -106,6 +106,10 @@ public class ObservationGroupService
                                                                              ExpandFilter expandOption)
         throws STACRUDException, STAInvalidQueryException {
         for (ExpandItem expandItem : expandOption.getItems()) {
+            // We have already handled $expand without filter and expand
+            if (!(expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter())) {
+                continue;
+            }
             String expandProperty = expandItem.getPath();
             switch (expandProperty) {
                 case ObservationGroupEntityDefinition.OBSERVATION_RELATIONS:

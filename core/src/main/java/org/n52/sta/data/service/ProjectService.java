@@ -93,6 +93,10 @@ public class ProjectService
     @Override protected ProjectEntity fetchExpandEntitiesWithFilter(ProjectEntity entity, ExpandFilter expandOption)
         throws STACRUDException, STAInvalidQueryException {
         for (ExpandItem expandItem : expandOption.getItems()) {
+            // We have already handled $expand without filter and expand
+            if (!(expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter())) {
+                continue;
+            }
             String expandProperty = expandItem.getPath();
             if (ProjectEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
                 Page<AbstractDatasetEntity> datastreams = getDatastreamService()

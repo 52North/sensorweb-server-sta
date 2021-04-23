@@ -93,6 +93,11 @@ public class PartyService
         throws STACRUDException, STAInvalidQueryException {
         if (expandOption != null) {
             for (ExpandItem expandItem : expandOption.getItems()) {
+                // We have already handled $expand without filter and expand
+                if (!(expandItem.getQueryOptions().hasFilterFilter() ||
+                    expandItem.getQueryOptions().hasExpandFilter())) {
+                    continue;
+                }
                 String expandProperty = expandItem.getPath();
                 if (PartyEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
                     Page<AbstractDatasetEntity> datastreams = getDatastreamService()
