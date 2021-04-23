@@ -101,7 +101,6 @@ public class RootRequestHandler {
         ArrayNode endpoints = mapper.createArrayNode();
         String rootUrl = environment.getRequiredProperty("server.rootUrl");
         // parse Endpoints
-        addToArray(rootUrl, mapper, endpoints, STAEntityDefinition.CITSCICOLLECTIONS);
         addToArray(rootUrl, mapper, endpoints, STAEntityDefinition.CORECOLLECTIONS);
         for (String profile : environment.getActiveProfiles()) {
             if (profile.equals(StaConstants.CITSCIEXTENSION)) {
