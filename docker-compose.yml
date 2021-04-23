@@ -1,8 +1,7 @@
 version: '3'
 services:
   sta:
-    image: 52north/sensorweb-server-sta:3.0.1-SNAPSHOT-CITSCI
-    # build: https://github.com/52North/sensorweb-server-sta.git#develop
+    image: 52north/cos4cloud-sta-citsci:latest
     ports:
       - 8081:8081
       - 1883:1883
