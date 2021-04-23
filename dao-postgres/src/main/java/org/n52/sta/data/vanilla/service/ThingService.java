@@ -216,8 +216,8 @@ public class ThingService
                     throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS, HTTPStatus.CONFLICT);
                 } else {
                     thing.setProcessed(true);
-                    boolean locationChanged = processLocations(thing, thing.getLocations());
                     thing = getRepository().intermediateSave(thing);
+                    boolean locationChanged = processLocations(thing, thing.getLocations());
                     if (thing.getParameters() != null) {
                         PlatformEntity finalThing = thing;
                         parameterRepository.saveAll(thing.getParameters()

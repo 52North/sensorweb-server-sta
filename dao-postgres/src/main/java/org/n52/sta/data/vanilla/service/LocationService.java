@@ -349,35 +349,38 @@ public class LocationService
         if (location.hasThings()) {
             Set<PlatformEntity> things = new LinkedHashSet<>();
             for (PlatformEntity newThing : location.getThings()) {
-                HashSet<LocationEntity> set = new HashSet<>();
-                set.add(createReferencedLocation(location));
-                newThing.setLocations(set);
-                PlatformEntity updated = getThingService().createOrUpdate(newThing);
-                things.add(updated);
+                // The only way for a Thing to be processed is if we are currently persisting said Thing
+                // IF this is the case the Thing takes care of Locations itself and we must not mess with it here
+                if (!newThing.isProcessed()) {
+                    HashSet<LocationEntity> set = new HashSet<>();
+                    set.add(createReferencedLocation(location));
+                    newThing.setLocations(set);
+                    PlatformEntity updated = getThingService().createOrUpdate(newThing);
+                    things.add(updated);
 
-                // non-standard feature 'updateFOI'
-                if (updateFOIFeatureEnabled && updated.getParameters() != null) {
-                    // Try to be more performant and not deserialize whole
-                    // properties but only grep relevant parts
-                    // via simple regex
-                    for (ParameterEntity<?> parameter : updated.getParameters()) {
-                        if (parameter instanceof TextParameterEntity &&
-                            parameter.getName().equals("updateFOI")) {
-                            try {
-                                LOGGER.debug("Updating FOI with id: " + parameter.getValueAsString());
-                                FeatureOfInterestService foiService = getFeatureOfInterestService();
-                                foiService.updateFeatureOfInterestGeometry(parameter.getValueAsString(),
-                                                                           location.getGeometry());
-                            } catch (Exception e) {
-                                LOGGER.error("Updating FOI failed as ID could not be extracted from properties!");
-                                throw new STACRUDException("Could not extract FeatureOfInterest ID from " +
-                                                               "Thing->properties!");
+                    // non-standard feature 'updateFOI'
+                    if (updateFOIFeatureEnabled && updated.getParameters() != null) {
+                        // Try to be more performant and not deserialize whole
+                        // properties but only grep relevant parts
+                        // via simple regex
+                        for (ParameterEntity<?> parameter : updated.getParameters()) {
+                            if (parameter instanceof TextParameterEntity &&
+                                parameter.getName().equals("updateFOI")) {
+                                try {
+                                    LOGGER.debug("Updating FOI with id: " + parameter.getValueAsString());
+                                    FeatureOfInterestService foiService = getFeatureOfInterestService();
+                                    foiService.updateFeatureOfInterestGeometry(parameter.getValueAsString(),
+                                                                               location.getGeometry());
+                                } catch (Exception e) {
+                                    LOGGER.error("Updating FOI failed as ID could not be extracted from properties!");
+                                    throw new STACRUDException("Could not extract FeatureOfInterest ID from " +
+                                                                   "Thing->properties!");
+                                }
                             }
                         }
                     }
+                    location.setThings(things);
                 }
-
-                location.setThings(things);
             }
         }
     }
