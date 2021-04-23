@@ -60,7 +60,7 @@ public class MutexFactory {
      */
     public synchronized Object getLock(String key) throws STACRUDException {
         if (key != null) {
-            LOGGER.debug("Locking:" + key);
+            LOGGER.trace("Locking:" + key);
             return this.lock.compute(key, (k, v) -> v == null ? new Object() : v);
         } else {
             throw new STACRUDException("Unable to obtain Lock. No name specified!");
