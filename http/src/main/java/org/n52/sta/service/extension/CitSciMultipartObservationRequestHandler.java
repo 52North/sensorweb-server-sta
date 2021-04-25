@@ -36,11 +36,20 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -54,6 +63,9 @@ import java.io.IOException;
 @ConditionalOnProperty(value = "server.feature.httpReadOnly", havingValue = "false", matchIfMissing = true)
 @Profile(StaConstants.CITSCIEXTENSION)
 public class CitSciMultipartObservationRequestHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CitSciMultipartObservationRequestHandler.class);
+    private static final String SQ = "\"";
 
     private final EntityServiceRepository serviceRepository;
     private final ObjectMapper mapper;
@@ -76,13 +88,51 @@ public class CitSciMultipartObservationRequestHandler {
         throws IOException, STACRUDException {
 
         //TODO: error checking, better storage, better filename, refactor to not store if observation persistence fails
-        File stored = new File(filePath + System.currentTimeMillis() + "--" + file.getOriginalFilename());
+        String filename = filePath + System.currentTimeMillis() + "--" + file.getOriginalFilename();
+        File stored = new File(filename);
         file.transferTo(stored);
+        LOGGER.info("Stored uploaded file as: {}", filename);
 
         return ((AbstractSensorThingsEntityService<DataEntity<?>>) serviceRepository
             .getEntityService("Observation"))
             .create(mapper.readValue(body, DataEntity.class));
+    }
 
+    @GetMapping("/files/{filename:.+}")
+    @ResponseBody
+    public ResponseEntity serveFile(@PathVariable String filename) {
+        return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + SQ)
+            .body(new FileSystemResource(new File(filePath + filename)));
+    }
+
+    @GetMapping(
+        value = "/files",
+        produces = "application/json"
+    )
+    public String listUploadedFiles() throws IOException {
+        File dir = new File(filePath);
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for (File file : dir.listFiles()) {
+            sb.append(SQ);
+            sb.append(file.getName());
+            sb.append("\",");
+        }
+        sb.replace(sb.length() - 1, sb.length(), "]");
+        return sb.toString();
+    }
+
+    @PostMapping("/files")
+    public ResponseEntity uploadFile(@RequestPart("file") MultipartFile file) throws IOException {
+        String filename = filePath + file.getOriginalFilename();
+        File stored = new File(filename);
+        if (stored.exists()) {
+            return new ResponseEntity(HttpStatus.CONFLICT);
+        } else {
+            file.transferTo(stored);
+            return new ResponseEntity(HttpStatus.CREATED);
+        }
     }
 
 }
