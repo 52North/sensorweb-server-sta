@@ -160,8 +160,10 @@ public class PartyService
             if (getRepository().existsByStaIdentifier(party.getStaIdentifier())) {
                 throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS, HTTPStatus.CONFLICT);
             } else {
-                for (AbstractDatasetEntity datastream : party.getDatasets()) {
-                    getDatastreamService().create(datastream);
+                if (party.hasDatastreams()) {
+                    for (AbstractDatasetEntity datastream : party.getDatasets()) {
+                        getDatastreamService().create(datastream);
+                    }
                 }
                 getRepository().save(party);
             }

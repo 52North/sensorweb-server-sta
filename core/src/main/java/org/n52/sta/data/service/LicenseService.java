@@ -163,8 +163,10 @@ public class LicenseService
             if (getRepository().existsByStaIdentifier(license.getStaIdentifier())) {
                 throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS, HTTPStatus.CONFLICT);
             } else {
-                for (AbstractDatasetEntity datastream : license.getDatasets()) {
-                    getDatastreamService().create(datastream);
+                if (license.hasDatastreams()) {
+                    for (AbstractDatasetEntity datastream : license.getDatasets()) {
+                        getDatastreamService().create(datastream);
+                    }
                 }
                 getRepository().save(license);
             }
