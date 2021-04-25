@@ -45,6 +45,10 @@ server:
     # Toggle whether information about SOS-specific Dataset->Category should be mapped to Datastream->properties->category
     includeDatastreamCategory: false
 
+    # Set Data directory for multipart/mixed observation upload
+    # The directory must exist already!
+    uploadDir: "/tmp/uploads"
+
     ## Defines if/how Observation->Parameters should be parsed and handled. Enabled by default, empty String disables the key.
     observation:
       # Key that holds information about the samplingGeometry
