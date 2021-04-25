@@ -133,11 +133,11 @@ http:
 mqtt:
   broker:
     plaintcp:
-      enabled: true
+      enabled: false
       host: "mqtt://localhost"
       port: 1883
     websocket:
-      enabled: true
+      enabled: false
       host: "ws://localhost"
       port: 8883
     persistence:
@@ -156,6 +156,6 @@ logging:
 #    org.hibernate.type: INFO
 #    org.hibernate: TRACE
 #    io.moquette: TRACE
-#    org.n52: TRACE
+    org.n52: DEBUG
 #    org.springframework.orm.jpa: TRACE
 #    org.springframework.web: DEBUG
