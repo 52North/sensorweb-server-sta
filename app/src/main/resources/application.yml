@@ -47,7 +47,7 @@ server:
 
     # Set Data directory for multipart/mixed observation upload
     # The directory must exist already!
-    uploadDir: "/tmp/uploads"
+    uploadDir: "/tmp/"
 
     ## Defines if/how Observation->Parameters should be parsed and handled. Enabled by default, empty String disables the key.
     observation:
