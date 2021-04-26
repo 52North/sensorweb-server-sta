@@ -29,10 +29,18 @@
 
 package org.n52.sta.service.extension;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import org.n52.series.db.beans.DataEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
+import org.n52.shetland.ogc.sta.exception.STANotFoundException;
 import org.n52.sta.data.service.AbstractSensorThingsEntityService;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
@@ -44,6 +52,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,8 +62,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -69,49 +77,74 @@ public class CitSciMultipartObservationRequestHandler {
 
     private final EntityServiceRepository serviceRepository;
     private final ObjectMapper mapper;
-    private final String filePath;
+    private final Path uploadDirectory;
+    private final String rootUrl;
 
-    public CitSciMultipartObservationRequestHandler(@Value("${server.feature.uploadDir:/tmp/}") String filePath,
+    public CitSciMultipartObservationRequestHandler(@Value("${server.rootUrl}") String rootUrl,
+                                                    @Value("${server.feature.uploadDir:/tmp/}") String uploadDirectory,
                                                     EntityServiceRepository serviceRepository,
                                                     ObjectMapper mapper) {
         this.serviceRepository = serviceRepository;
+        this.rootUrl = rootUrl;
         this.mapper = mapper;
-        this.filePath = filePath;
+
+        this.uploadDirectory = Paths.get(uploadDirectory);
+        if (!Files.exists(this.uploadDirectory)) {
+            try {
+                Files.createDirectories(Paths.get(uploadDirectory));
+            } catch (IOException e) {
+                LOGGER.error("Could not create missing upload directory: " + uploadDirectory);
+            }
+        }
     }
 
     @PostMapping(
-        consumes = {"multipart/form-data", "multipart/mixed"},
+        consumes = {
+            "multipart/form-data",
+            "multipart/mixed"
+        },
         value = "/Observations",
         produces = "application/json")
-    public ElementWithQueryOptions handleFileUpload(@RequestPart("file") MultipartFile file,
+    public ElementWithQueryOptions<?> handleFileUpload(@RequestPart("file") MultipartFile file,
                                                     @RequestPart("body") String body)
-        throws IOException, STACRUDException {
+            throws IOException, STACRUDException {
 
-        //TODO: error checking, better storage, better filename, refactor to not store if observation persistence fails
-        String filename = filePath + System.currentTimeMillis() + "--" + file.getOriginalFilename();
-        File stored = new File(filename);
+        // TODO: error checking, better storage, better filename, refactor to not store if observation
+        // persistence fails
+        long now = System.currentTimeMillis();
+        Path filename = uploadDirectory.resolve(now + "--" + file.getOriginalFilename());
+        File stored = filename.toFile();
         file.transferTo(stored);
         LOGGER.info("Stored uploaded file as: {}", filename);
 
-        return ((AbstractSensorThingsEntityService<DataEntity<?>>) serviceRepository
-            .getEntityService("Observation"))
-            .create(mapper.readValue(body, DataEntity.class));
+        return getObservation().create(mapper.readValue(body, DataEntity.class));
+    }
+
+    private AbstractSensorThingsEntityService<DataEntity< ? >> getObservation() {
+        return (AbstractSensorThingsEntityService<DataEntity< ? >>) serviceRepository.getEntityService("Observation");
     }
 
     @GetMapping("/files/{filename:.+}")
     @ResponseBody
-    public ResponseEntity serveFile(@PathVariable String filename) {
+    public ResponseEntity<?> serveFile(@PathVariable String filename) throws STANotFoundException, IOException {
+        Path pathToFile = uploadDirectory.resolve(filename);
+        File fileToGet = pathToFile.toFile();
+        if (!fileToGet.exists()) {
+            LOGGER.debug("File {} does not exist.", fileToGet);
+            throw new STANotFoundException("File not found: " + filename);
+        }
+        String mediaType = Files.probeContentType(fileToGet.toPath());
         return ResponseEntity.ok()
-            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + SQ)
-            .body(new FileSystemResource(new File(filePath + filename)));
+                             .contentType(MediaType.parseMediaType(mediaType))
+                             .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + SQ + filename + SQ)
+                             .body(new FileSystemResource(fileToGet));
     }
 
     @GetMapping(
         value = "/files",
-        produces = "application/json"
-    )
+        produces = "application/json")
     public String listUploadedFiles() throws IOException {
-        File dir = new File(filePath);
+        File dir = uploadDirectory.toFile();
         StringBuilder sb = new StringBuilder();
         sb.append("[");
         for (File file : dir.listFiles()) {
@@ -124,15 +157,28 @@ public class CitSciMultipartObservationRequestHandler {
     }
 
     @PostMapping("/files")
-    public ResponseEntity uploadFile(@RequestPart("file") MultipartFile file) throws IOException {
-        String filename = filePath + file.getOriginalFilename();
-        File stored = new File(filename);
-        if (stored.exists()) {
-            return new ResponseEntity(HttpStatus.CONFLICT);
+    public ResponseEntity<?> uploadFile(@RequestPart("file") MultipartFile multipartFile) throws IOException, URISyntaxException {
+        
+        Path fileToUpload = uploadDirectory.resolve(multipartFile.getOriginalFilename());
+        File file = fileToUpload.toFile();
+        if (file.exists()) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         } else {
-            file.transferTo(stored);
-            return new ResponseEntity(HttpStatus.CREATED);
+            multipartFile.transferTo(file);
+            String location = ensureTrailingSlash(rootUrl)
+                             .concat(file.getName());
+            return ResponseEntity.created(new URI(location))
+                                 .build();
         }
+    }
+    
+    private String ensureTrailingSlash(String withOrWithoutTrailingSlash) {
+        if (withOrWithoutTrailingSlash == null) {
+            return "/";
+        }
+        return !withOrWithoutTrailingSlash.endsWith("/")
+                ? withOrWithoutTrailingSlash.concat("/")
+                : withOrWithoutTrailingSlash;
     }
 
 }
