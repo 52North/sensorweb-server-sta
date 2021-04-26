@@ -38,6 +38,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.TextDataEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STANotFoundException;
@@ -106,7 +107,7 @@ public class CitSciMultipartObservationRequestHandler {
         value = "/Observations",
         produces = "application/json")
     public ElementWithQueryOptions<?> handleFileUpload(@RequestPart("file") MultipartFile file,
-                                                    @RequestPart("body") String body)
+                                                       @RequestPart("body") String body)
             throws IOException, STACRUDException {
 
         // TODO: error checking, better storage, better filename, refactor to not store if observation
@@ -117,10 +118,12 @@ public class CitSciMultipartObservationRequestHandler {
         file.transferTo(stored);
         LOGGER.info("Stored uploaded file as: {}", filename);
 
-        return getObservation().create(mapper.readValue(body, DataEntity.class));
+        DataEntity observation = mapper.readValue(body, DataEntity.class);
+        observation.setValue(createFileLocation(stored));
+        return getObservationRepository().create(observation);
     }
 
-    private AbstractSensorThingsEntityService<DataEntity< ? >> getObservation() {
+    private AbstractSensorThingsEntityService<DataEntity< ? >> getObservationRepository() {
         return (AbstractSensorThingsEntityService<DataEntity< ? >>) serviceRepository.getEntityService("Observation");
     }
 
@@ -165,11 +168,14 @@ public class CitSciMultipartObservationRequestHandler {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         } else {
             multipartFile.transferTo(file);
-            String location = ensureTrailingSlash(rootUrl)
-                             .concat(file.getName());
+            String location = createFileLocation(file);
             return ResponseEntity.created(new URI(location))
                                  .build();
         }
+    }
+
+    private String createFileLocation(File file) {
+        return ensureTrailingSlash(rootUrl).concat(file.getName());
     }
     
     private String ensureTrailingSlash(String withOrWithoutTrailingSlash) {
