@@ -82,7 +82,7 @@ spring:
   # Profile of the application.
   # Options:
   # - Vanilla STA: vanilla
-  # - UFZ Aggregata backend: ufz-aggregata
+  # - UFZ Aggregata backend: ufzaggregata
   # - [not implemented yet] STA with MultiDatastream Extension: multiDatastreamExtension
   profiles:
     active: vanilla
