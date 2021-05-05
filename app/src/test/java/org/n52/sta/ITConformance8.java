@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2021 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -26,7 +26,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-
 package org.n52.sta;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -505,7 +504,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
             LOGGER.trace(key);
             LOGGER.trace(String.valueOf(mapper.readTree(message.toString())));
             Assertions.assertEquals(updatedEntity.get(key), mapper.readTree(message.toString()).get(key));
-            mqttClient.unsubscribe(topic);
+            mqttClient.unsubscribe(MQTT_TOPIC_PREFIX + topic);
         }
     }
 

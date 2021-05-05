@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.n52.sensorweb-server.sta</groupId>
         <artifactId>sta-parent</artifactId>
-        <version>3.0.1-SNAPSHOT</version>
+        <version>4.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>sta-webapp</artifactId>
     <packaging>war</packaging>
@@ -42,9 +42,16 @@
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-jpa</artifactId>
         </dependency>
+
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>sta-core</artifactId>
+            <artifactId>sta-dao</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>sta-dao-postgres</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -56,6 +63,7 @@
             <artifactId>sta-mqtt</artifactId>
             <scope>runtime</scope>
         </dependency>
+
         <dependency>
             <groupId>org.geolatte</groupId>
             <artifactId>geolatte-geom</artifactId>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2021 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -26,7 +26,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-
 package org.n52.sta;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -939,7 +938,7 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
         /* HistoricalLocation */
         urlParameters = "{\"time\": \"2015-07-01T00:00:00Z\"}";
         diffs = new HashMap<>();
-        diffs.put("time", "2015-07-01T00:00:00Z");
+        diffs.put("time", "2015-07-01T00:00:00.000Z");
         updatedEntity = patchEntity(EntityType.HISTORICAL_LOCATION, urlParameters, histLocId);
         checkPatch(EntityType.HISTORICAL_LOCATION, histLocEntity, updatedEntity, diffs);
 
@@ -1419,7 +1418,7 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
 
         String url = String.format(getRelatedEntityEndpoint(sourceType, targetType), sourceId);
         JsonNode result = getEntity(url);
-        if (result.has("@iot.count")) {
+        if (result.has("value")) {
             result = result.get("value").get(0);
         }
 

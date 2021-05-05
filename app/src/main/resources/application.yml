@@ -10,6 +10,10 @@ server:
   rootUrl: "http://localhost:8081/v1.1/"
   servlet:
     context-path: "/v1.1"
+    encoding:
+      enabled: true
+      charset: UTF-8
+      force: true
 
   ## Used for enabling/disabling custom 52N-STA Features
   feature:
@@ -63,6 +67,10 @@ server:
     # All HTTP POST & PUT Requests will be dropped with a HTTP Status 405 NOT Allowed
     httpReadOnly: false
 
+  # Used for communicating with the UFZ Aggregata API
+  security:
+    aggregataToken: "******************"
+
 # Database Configuration
 database:
   jpa:
@@ -74,6 +82,7 @@ spring:
   # Profile of the application.
   # Options:
   # - Vanilla STA: vanilla
+  # - UFZ Aggregata backend: ufzaggregata
   # - [not implemented yet] STA with MultiDatastream Extension: multiDatastreamExtension
   profiles:
     active: vanilla
@@ -81,7 +90,7 @@ spring:
     platform: postgres
     username: postgres
     password: postgres
-    url: jdbc:postgresql://localhost:5000/sta
+    url: jdbc:postgresql://localhost:5432/sta
     initialization-mode: always
     hikari:
       maximum-pool-size: 10
@@ -91,7 +100,7 @@ spring:
       hibernate:
         hbm2ddl:
           # hbm2ddl values: validate | update | create | create-drop | none
-          auto: update
+          auto: validate
         jdbc:
           time_zone: UTC
           # https://hibernate.atlassian.net/browse/HHH-12368
@@ -107,11 +116,7 @@ spring:
         use_sql_comments: false
   jmx:
     enabled: false
-  http:
-    encoding:
-      charset: UTF-8
-      enabled: true
-      force: true
+
   mvc:
     servlet:
       path: /

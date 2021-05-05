@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2021 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -26,7 +26,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-
 package org.n52.sta;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -376,8 +375,7 @@ abstract class ConformanceTests implements TestUtil {
      * @param response            The response of the GET request to be checked
      */
     protected void checkEntityProperties(Set<String> mandatoryProperties, JsonNode response) {
-        if (response.has(countKey)) {
-            Assertions.assertTrue(response.has(value));
+        if (response.has(value)) {
             response.get(value).forEach(v -> checkObjectProperties(mandatoryProperties, v));
         } else {
             checkObjectProperties(mandatoryProperties, response);

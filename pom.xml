@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.n52</groupId>
@@ -9,7 +10,7 @@
 
     <groupId>org.n52.sensorweb-server.sta</groupId>
     <artifactId>sta-parent</artifactId>
-    <version>3.0.1-SNAPSHOT</version>
+    <version>4.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>52°North Sensor Things API</name>
@@ -25,11 +26,13 @@
     </scm>
 
     <modules>
-        <module>core</module>
         <module>app</module>
+        <module>dao</module>
         <module>http</module>
         <module>mqtt</module>
         <module>webapp</module>
+        <module>dao-ufz</module>
+        <module>dao-postgres</module>
     </modules>
 
     <properties>
@@ -38,8 +41,8 @@
         <java.version>1.8</java.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <db-model.version>4.0.0-PR.1</db-model.version>
-        <arctic-sea.version>8.0.3</arctic-sea.version>
+        <db-model.version>4.0.0-SNAPSHOT</db-model.version>
+        <arctic-sea.version>8.3.0-SNAPSHOT</arctic-sea.version>
         <spring-boot.version>2.3.5.RELEASE</spring-boot.version>
         <geolatte-geom.version>1.6.0</geolatte-geom.version>
         <hibernate.version>5.4.12.Final</hibernate.version>
@@ -59,7 +62,17 @@
         <dependencies>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>sta-core</artifactId>
+                <artifactId>sta-dao</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>sta-dao-postgres</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>sta-dao-ufz</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -413,7 +426,7 @@
                     </excludes>
                     <strictCheck>true</strictCheck>
                     <properties>
-                        <year>${project.inceptionYear}-2020</year>
+                        <year>${project.inceptionYear}-2021</year>
                     </properties>
                     <mapping>
                         <java>SLASHSTAR_STYLE</java>
