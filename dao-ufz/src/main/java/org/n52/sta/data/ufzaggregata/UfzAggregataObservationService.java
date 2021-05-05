@@ -35,10 +35,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.hibernate.cfg.NotYetImplementedException;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.DataEntity;
-import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.shetland.filter.ExpandFilter;
@@ -47,11 +45,11 @@ import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.filter.FilterClause;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
+import org.n52.shetland.ogc.sta.exception.STAInvalidQueryError;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.api.CollectionWrapper;
 import org.n52.sta.api.dto.StaDTO;
 import org.n52.sta.data.vanilla.DTOTransformer;
-import org.n52.sta.data.vanilla.OffsetLimitBasedPageRequest;
 import org.n52.sta.data.vanilla.SerDesConfig;
 import org.n52.sta.data.vanilla.repositories.EntityGraphRepository;
 import org.n52.sta.data.vanilla.service.ObservationService;
@@ -95,7 +93,7 @@ import java.util.regex.Pattern;
 public class UfzAggregataObservationService extends ObservationService {
 
     protected static final String SLASH = "/";
-    private static final String NOT_YET_IMPLEMENTED = "not yet implemented";
+    private static final String NOT_YET_IMPLEMENTED = "not yet implemented for ufzaggregata backend";
     private static final Logger LOGGER = LoggerFactory.getLogger(UfzAggregataObservationService.class);
     private static final String TARGET = "target";
     private final Pattern longNamePattern = Pattern.compile(".+\\s\\((.*)\\).*");
@@ -130,11 +128,11 @@ public class UfzAggregataObservationService extends ObservationService {
 
     @Override
     public CollectionWrapper getEntityCollection(QueryOptions queryOptions) throws STACRUDException {
-        throw new NotYetImplementedException(NOT_YET_IMPLEMENTED);
+        throw new STACRUDException(NOT_YET_IMPLEMENTED);
     }
 
     public DataEntity<?> getEntityByIdRaw(Long id, QueryOptions queryOptions) throws STACRUDException {
-        throw new NotYetImplementedException(NOT_YET_IMPLEMENTED);
+        throw new STACRUDException(NOT_YET_IMPLEMENTED);
     }
 
     @Override
@@ -142,7 +140,7 @@ public class UfzAggregataObservationService extends ObservationService {
                                                      String relatedType,
                                                      String ownId,
                                                      QueryOptions queryOptions) throws STACRUDException {
-        throw new NotYetImplementedException(NOT_YET_IMPLEMENTED);
+        throw new STACRUDException(NOT_YET_IMPLEMENTED);
     }
 
     public Page getEntityCollectionByRelatedEntityRaw(String relatedId,
@@ -150,65 +148,65 @@ public class UfzAggregataObservationService extends ObservationService {
                                                       QueryOptions queryOptions)
         throws STACRUDException {
         try {
-            throw new NotYetImplementedException(NOT_YET_IMPLEMENTED);
+            throw new STACRUDException(NOT_YET_IMPLEMENTED);
         } catch (RuntimeException e) {
             throw new STACRUDException(e.getMessage(), e);
         }
     }
 
     @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption) {
-        throw new NotYetImplementedException(NOT_YET_IMPLEMENTED);
+        throw new STAInvalidQueryError(NOT_YET_IMPLEMENTED);
     }
 
     @Override
     protected DataEntity<?> fetchExpandEntitiesWithFilter(DataEntity<?> returned,
                                                           ExpandFilter expandOption)
         throws STACRUDException, STAInvalidQueryException {
-        throw new NotYetImplementedException(NOT_YET_IMPLEMENTED);
+        throw new STACRUDException(NOT_YET_IMPLEMENTED);
     }
 
     @Override
     public Specification<DataEntity<?>> byRelatedEntityFilter(String relatedId,
                                                               String relatedType,
                                                               String ownId) {
-        throw new NotYetImplementedException(NOT_YET_IMPLEMENTED);
+        throw new STAInvalidQueryError(NOT_YET_IMPLEMENTED);
     }
 
     @Override
     public DataEntity<?> createOrfetch(DataEntity<?> entity) throws STACRUDException {
-        throw new NotYetImplementedException(NOT_YET_IMPLEMENTED);
+        throw new STACRUDException(NOT_YET_IMPLEMENTED);
     }
 
     @Override
     public DataEntity<?> updateEntity(String id, DataEntity<?> entity, HttpMethod method)
         throws STACRUDException {
-        throw new NotYetImplementedException(NOT_YET_IMPLEMENTED);
+        throw new STACRUDException(NOT_YET_IMPLEMENTED);
     }
 
     @Override
     public DataEntity<?> createOrUpdate(DataEntity<?> entity) throws STACRUDException {
-        throw new NotYetImplementedException(NOT_YET_IMPLEMENTED);
+        throw new STACRUDException(NOT_YET_IMPLEMENTED);
     }
 
     @Override
     public Specification<DataEntity<?>> getFilterPredicate(Class entityClass, QueryOptions queryOptions) {
-        throw new NotYetImplementedException(NOT_YET_IMPLEMENTED);
+        throw new STAInvalidQueryError(NOT_YET_IMPLEMENTED);
     }
 
     @Override
     public String checkPropertyName(String property) {
-        throw new NotYetImplementedException(NOT_YET_IMPLEMENTED);
+        throw new STAInvalidQueryError(NOT_YET_IMPLEMENTED);
     }
 
     @Override
     public DataEntity<?> merge(DataEntity<?> existing, DataEntity<?> toMerge)
         throws STACRUDException {
-        throw new NotYetImplementedException(NOT_YET_IMPLEMENTED);
+        throw new STACRUDException(NOT_YET_IMPLEMENTED);
     }
 
     @Override
     public void delete(String identifier) throws STACRUDException {
-        throw new NotYetImplementedException(NOT_YET_IMPLEMENTED);
+        throw new STACRUDException(NOT_YET_IMPLEMENTED);
     }
 
     /**
@@ -220,7 +218,7 @@ public class UfzAggregataObservationService extends ObservationService {
      */
     protected void updateDatastreamPhenomenonTimeOnObservationUpdate(AbstractDatasetEntity datastreamEntity,
                                                                      DataEntity<?> observation) {
-        throw new NotYetImplementedException(NOT_YET_IMPLEMENTED);
+        throw new STAInvalidQueryError(NOT_YET_IMPLEMENTED);
     }
 
     @Override public CollectionWrapper getEntityCollectionByRelatedEntity(String relatedId,
@@ -268,7 +266,7 @@ public class UfzAggregataObservationService extends ObservationService {
                 }
                 return new CollectionWrapper(observations.size(), observations, false);
             } else {
-                throw new NotYetImplementedException(NOT_YET_IMPLEMENTED);
+                throw new STACRUDException(NOT_YET_IMPLEMENTED);
             }
         } catch (RuntimeException | JsonProcessingException e) {
             throw new STACRUDException(e.getMessage(), e);
@@ -297,44 +295,6 @@ public class UfzAggregataObservationService extends ObservationService {
 
     private boolean checkValidQueryOptions(QueryOptions queryOptions) {
         return queryOptions.hasTopFilter() && queryOptions.hasFilterFilter();
-    }
-
-    /**
-     * We touch DataEntity->value here to make sure it is fetched from the database and not lazy-loaded.
-     * We cannot fetch it ourselves as any assignment to entity->value will update the database (issue delete+insert
-     * statemenets).
-     *
-     * @param entity to be loaded
-     * @return entity with not-lazy-loaded value and value->parameters
-     */
-    private DataEntity<?> fetchValueIfCompositeDataEntity(DataEntity<?> entity) {
-        throw new NotYetImplementedException(NOT_YET_IMPLEMENTED);
-    }
-
-    private CollectionWrapper getEntityCollectionWrapperByIdentifierList(List<String> identifierList,
-                                                                         OffsetLimitBasedPageRequest pageableRequest,
-                                                                         QueryOptions queryOptions,
-                                                                         Specification<DataEntity<?>> spec) {
-
-        throw new NotYetImplementedException(NOT_YET_IMPLEMENTED);
-    }
-
-    private DataEntity<?> saveObservation(DataEntity<?> observation, DatasetEntity dataset)
-        throws STACRUDException {
-        throw new NotYetImplementedException(NOT_YET_IMPLEMENTED);
-    }
-
-    /**
-     * Updates FirstValue/LastValue, FirstObservation/LastObservation, Geometry of Dataset and DatasetAggregation
-     *
-     * @param dataset Dataset to be updated
-     * @param data    New Observation
-     * @return update DatasetEntity
-     * @throws STACRUDException if an error occurred
-     */
-    private AbstractDatasetEntity updateDataset(AbstractDatasetEntity dataset, DataEntity<?> data)
-        throws STACRUDException {
-        throw new NotYetImplementedException(NOT_YET_IMPLEMENTED);
     }
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
