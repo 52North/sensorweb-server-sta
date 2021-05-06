@@ -29,7 +29,6 @@
 
 package org.n52.sta.data.vanilla;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -51,7 +50,6 @@ import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
-import org.n52.series.db.beans.SensorML20DataEntity;
 import org.n52.series.db.beans.UnitEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.parameter.ParameterFactory;
@@ -94,6 +92,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+// import org.n52.series.db.beans.SensorML20DataEntity;
+
 
 /**
  * Translates between STA DTO Entities and Entities used by the dao-postgres module internally
@@ -837,14 +838,14 @@ public class DTOTransformer<R extends StaDTO, S extends HibernateRelations.HasId
     private Object parseObservationResult(DataEntity<?> raw) {
         //TODO:
         // Handling of Profile/TrajectoryObservation
-        try {
-            if (raw instanceof SensorML20DataEntity) {
-                return MAPPER.readTree((String) raw.getValue());
-            }
-            return raw.getValue();
-        } catch (JsonProcessingException e) {
-            throw new STAInvalidQueryError(String.format("Could not parse Observation->result on Observation:  %s",
-                                                         raw.getIdentifier()));
-        }
+        //try {
+        //if (raw instanceof SensorML20DataEntity) {
+        //    return MAPPER.readTree((String) raw.getValue());
+        //}
+        return raw.getValue();
+        //} catch (JsonProcessingException e) {
+        //   throw new STAInvalidQueryError(String.format("Could not parse Observation->result on Observation:  %s",
+        //                                                raw.getIdentifier()));
+        //}
     }
 }

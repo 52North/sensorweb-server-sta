@@ -38,7 +38,6 @@ import org.n52.series.db.beans.BooleanDataEntity;
 import org.n52.series.db.beans.CategoryDataEntity;
 import org.n52.series.db.beans.CompositeDataEntity;
 import org.n52.series.db.beans.CountDataEntity;
-import org.n52.series.db.beans.SensorML20DataEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetAggregationEntity;
 import org.n52.series.db.beans.DatasetEntity;
@@ -552,11 +551,11 @@ public class ObservationService
                 booleanObservationEntity.setValue(Boolean.parseBoolean((String) value));
                 data = booleanObservationEntity;
                 break;
-            case OBS_TYPE_SENSORML_OBSERVATION:
-                SensorML20DataEntity sensorML20DataEntity = new SensorML20DataEntity();
-                sensorML20DataEntity.setValue((String) value);
-                data = sensorML20DataEntity;
-                break;
+            //            case OBS_TYPE_SENSORML_OBSERVATION:
+            //                SensorML20DataEntity sensorML20DataEntity = new SensorML20DataEntity();
+            //                sensorML20DataEntity.setValue((String) value);
+            //                data = sensorML20DataEntity;
+            //                break;
             default:
                 throw new STACRUDException(
                     "Unable to handle OMObservation with type: " + dataset.getOMObservationType().getFormat());
