@@ -357,8 +357,9 @@ public class DTOTransformer<R extends StaDTO, S extends HibernateRelations.HasId
             }
 
             // if (raw.getResult() instanceof ObjectNode)
-            dataEntity.setValue(raw.getResult().toString());
-
+            if (raw.getResult() != null) {
+                dataEntity.setValue(raw.getResult().toString());
+            }
             if (raw.getDatastream() != null) {
                 dataEntity.setDataset(this.toDatasetEntity(raw.getDatastream()));
             }
