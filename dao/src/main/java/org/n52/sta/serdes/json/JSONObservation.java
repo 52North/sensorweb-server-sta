@@ -26,9 +26,11 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.serdes.json;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.shetland.ogc.sta.StaConstants;
@@ -43,7 +45,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationDTO> imp
     // JSON Properties. Matched by Annotation or variable name
     public String phenomenonTime;
     public String resultTime;
-    public ObjectNode result;
+    public JsonNode result;
     public Object resultQuality;
     public String validTime;
     public ObjectNode parameters;
