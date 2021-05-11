@@ -14,7 +14,7 @@ This project includes:
   ANTLR 4 Runtime under The BSD License
   AntLR Parser Generator under BSD License
   Apache Commons Codec under Apache License, Version 2.0
-  Apache HttpClient under Apache License, Version 2.0
+  Apache Commons IO under Apache License, Version 2.0
   Apache HttpCore under Apache License, Version 2.0
   Apache Log4j API under Apache License, Version 2.0
   Apache Log4j to SLF4J Adapter under Apache License, Version 2.0
@@ -122,10 +122,11 @@ This project includes:
   spring-boot-starter-tomcat under Apache License, Version 2.0
   spring-boot-starter-web under Apache License, Version 2.0
   sta-app under The Apache Software License, Version 2.0
-  sta-core under The Apache Software License, Version 2.0
+  sta-dao under The Apache Software License, Version 2.0
+  sta-dao-postgres under The Apache Software License, Version 2.0
+  sta-dao-ufz under The Apache Software License, Version 2.0
   sta-http under The Apache Software License, Version 2.0
   sta-mqtt under The Apache Software License, Version 2.0
-  sta-webapp under The Apache Software License, Version 2.0
   tomcat-embed-core under Apache License, Version 2.0
   tomcat-embed-websocket under Apache License, Version 2.0
   TXW2 Runtime under Eclipse Distribution License - v 1.0
