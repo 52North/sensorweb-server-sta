@@ -26,26 +26,11 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api;
 
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
-import org.n52.sta.api.dto.DatastreamDTO;
-import org.n52.sta.api.dto.FeatureOfInterestDTO;
-import org.n52.sta.api.dto.HistoricalLocationDTO;
-import org.n52.sta.api.dto.LocationDTO;
-import org.n52.sta.api.dto.ObservationDTO;
-import org.n52.sta.api.dto.ObservedPropertyDTO;
-import org.n52.sta.api.dto.SensorDTO;
-import org.n52.sta.api.dto.ThingDTO;
-import org.n52.sta.serdes.DatastreamSerDes;
-import org.n52.sta.serdes.FeatureOfInterestSerDes;
-import org.n52.sta.serdes.HistoricalLocationSerDes;
-import org.n52.sta.serdes.LocationSerDes;
-import org.n52.sta.serdes.ObservationSerDes;
-import org.n52.sta.serdes.ObservedPropertySerDes;
-import org.n52.sta.serdes.SensorSerDes;
-import org.n52.sta.serdes.ThingSerDes;
 import org.n52.svalbard.odata.core.QueryOptionsFactory;
 
 /**

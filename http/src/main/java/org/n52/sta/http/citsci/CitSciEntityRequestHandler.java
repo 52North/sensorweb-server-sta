@@ -29,10 +29,11 @@
 
 package org.n52.sta.http.citsci;
 
+import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.sta.api.CitSciExtensionRequestUtils;
 import org.n52.sta.api.EntityServiceFactory;
 import org.n52.sta.api.dto.StaDTO;
 import org.n52.sta.http.EntityRequestHandler;
-import org.n52.sta.utils.CitSciExtensionRequestUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -51,7 +52,7 @@ import javax.servlet.http.HttpServletRequest;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @RestController
-@Profile("citsci")
+@Profile(StaConstants.CITSCIEXTENSION)
 public class CitSciEntityRequestHandler extends EntityRequestHandler implements CitSciExtensionRequestUtils {
 
     public CitSciEntityRequestHandler(@Value("${server.rootUrl}") String rootUrl,

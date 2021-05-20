@@ -50,12 +50,12 @@ import java.io.IOException;
 public class ObservationGroupSerDes {
 
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
-    public static class ObservationGroupPatch implements EntityPatch<ObservationGroupDTO> {
+    public static class ObservationGroupDTOPatch implements EntityPatch<ObservationGroupDTO> {
 
         private static final long serialVersionUID = -2233037380407692718L;
         private final ObservationGroupDTO entity;
 
-        ObservationGroupPatch(ObservationGroupDTO entity) {
+        ObservationGroupDTOPatch(ObservationGroupDTO entity) {
             this.entity = entity;
         }
 
@@ -170,18 +170,18 @@ public class ObservationGroupSerDes {
 
 
     public static class ObservationGroupPatchDeserializer
-        extends StdDeserializer<ObservationGroupPatch> {
+        extends StdDeserializer<ObservationGroupDTOPatch> {
 
         private static final long serialVersionUID = -6355786322787893665L;
 
         public ObservationGroupPatchDeserializer() {
-            super(ObservationGroupPatch.class);
+            super(ObservationGroupDTOPatch.class);
         }
 
         @Override
-        public ObservationGroupPatch deserialize(JsonParser p, DeserializationContext ctxt)
+        public ObservationGroupDTOPatch deserialize(JsonParser p, DeserializationContext ctxt)
             throws IOException {
-            return new ObservationGroupPatch(p.readValueAs(JSONObservationGroup.class)
+            return new ObservationGroupDTOPatch(p.readValueAs(JSONObservationGroup.class)
                                                  .parseToDTO(JSONBase.EntityType.PATCH));
         }
     }

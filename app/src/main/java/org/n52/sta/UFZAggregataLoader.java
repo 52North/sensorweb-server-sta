@@ -29,6 +29,7 @@
 
 package org.n52.sta;
 
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
@@ -37,7 +38,7 @@ import org.springframework.context.annotation.Profile;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@Profile("ufzaggregata")
+@Profile(StaConstants.UFZAGGREGATA)
 @Configuration
 @ComponentScan(
     excludeFilters = {

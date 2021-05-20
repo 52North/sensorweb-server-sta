@@ -45,8 +45,6 @@ import org.n52.sta.serdes.json.JSONProject;
 
 import java.io.IOException;
 
-import static org.n52.shetland.ogc.sta.StaConstants.PROP_RUNTIME;
-
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
@@ -122,9 +120,9 @@ public class ProjectSerDes {
                     gen.writeStringField(CREATED, DateTimeHelper.format(project.getCreated()));
                 }
             }
-            if (!project.hasSelectOption() || project.getFieldsToSerialize().contains(PROP_RUNTIME)) {
+            if (!project.hasSelectOption() || project.getFieldsToSerialize().contains(StaConstants.PROP_RUNTIME)) {
                 if (project.getRuntime() != null) {
-                    gen.writeStringField(PROP_RUNTIME, DateTimeHelper.format(project.getRuntime()));
+                    gen.writeStringField(StaConstants.PROP_RUNTIME, DateTimeHelper.format(project.getRuntime()));
                 }
             }
 

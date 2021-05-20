@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.vanilla.service;
 
 import org.n52.sta.api.AbstractSensorThingsEntityService;
@@ -129,7 +130,7 @@ public class EntityServiceRepository implements EntityServiceFactory {
      * @param entityTypeName the type name of the requested entity service
      * @return the requested entity data service
      */
-    AbstractSensorThingsEntityServiceImpl getEntityServiceRaw(EntityTypes entityTypeName) {
+    public AbstractSensorThingsEntityServiceImpl getEntityServiceRaw(EntityTypes entityTypeName) {
         return entityServices.get(entityTypeName).getServiceImpl();
     }
 

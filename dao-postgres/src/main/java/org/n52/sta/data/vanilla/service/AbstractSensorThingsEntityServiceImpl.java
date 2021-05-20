@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.vanilla.service;
 
 import org.hibernate.query.criteria.internal.CriteriaBuilderImpl;
@@ -42,12 +43,12 @@ import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
-import org.n52.sta.data.vanilla.DTOTransformer;
-import org.n52.sta.data.vanilla.SerDesConfig;
 import org.n52.sta.api.CollectionWrapper;
 import org.n52.sta.api.dto.StaDTO;
+import org.n52.sta.data.vanilla.DTOTransformer;
 import org.n52.sta.data.vanilla.MutexFactory;
 import org.n52.sta.data.vanilla.OffsetLimitBasedPageRequest;
+import org.n52.sta.data.vanilla.SerDesConfig;
 import org.n52.sta.data.vanilla.repositories.EntityGraphRepository;
 import org.n52.sta.data.vanilla.repositories.StaIdentifierRepository;
 import org.n52.sta.data.vanilla.service.EntityServiceRepository.EntityTypes;
@@ -299,9 +300,9 @@ public abstract class AbstractSensorThingsEntityServiceImpl<
      * @return List of Entities that match
      * @throws STACRUDException if the queryOptions are invalid
      */
-    protected Page getEntityCollectionByRelatedEntityRaw(String relatedId,
-                                                         String relatedType,
-                                                         QueryOptions queryOptions)
+    public Page getEntityCollectionByRelatedEntityRaw(String relatedId,
+                                                      String relatedType,
+                                                      QueryOptions queryOptions)
         throws STACRUDException {
         try {
             Page<S> pages = getRepository()
@@ -359,7 +360,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<
      * @return instance of ElementWithQueryOptions
      */
     @Transactional(rollbackFor = Exception.class)
-    R createWrapper(S entity, QueryOptions queryOptions) {
+    protected R createWrapper(S entity, QueryOptions queryOptions) {
         return new DTOTransformer<R, S>(config).toDTO(entity, queryOptions);
     }
 
@@ -564,35 +565,35 @@ public abstract class AbstractSensorThingsEntityServiceImpl<
         }
     }
 
-    LocationService getLocationService() {
+    protected LocationService getLocationService() {
         return (LocationService) serviceRepository.getEntityServiceRaw(EntityTypes.Location);
     }
 
-    HistoricalLocationService getHistoricalLocationService() {
+    protected HistoricalLocationService getHistoricalLocationService() {
         return (HistoricalLocationService) serviceRepository.getEntityServiceRaw(EntityTypes.HistoricalLocation);
     }
 
-    DatastreamService getDatastreamService() {
+    protected DatastreamService getDatastreamService() {
         return (DatastreamService) serviceRepository.getEntityServiceRaw(EntityTypes.Datastream);
     }
 
-    FeatureOfInterestService getFeatureOfInterestService() {
+    protected FeatureOfInterestService getFeatureOfInterestService() {
         return (FeatureOfInterestService) serviceRepository.getEntityServiceRaw(EntityTypes.FeatureOfInterest);
     }
 
-    ThingService getThingService() {
+    protected ThingService getThingService() {
         return (ThingService) serviceRepository.getEntityServiceRaw(EntityTypes.Thing);
     }
 
-    SensorService getSensorService() {
+    protected SensorService getSensorService() {
         return (SensorService) serviceRepository.getEntityServiceRaw(EntityTypes.Sensor);
     }
 
-    ObservedPropertyService getObservedPropertyService() {
+    protected ObservedPropertyService getObservedPropertyService() {
         return (ObservedPropertyService) serviceRepository.getEntityServiceRaw(EntityTypes.ObservedProperty);
     }
 
-    ObservationService getObservationService() {
+    protected ObservationService getObservationService() {
         return (ObservationService) serviceRepository.getEntityServiceRaw(EntityTypes.Observation);
     }
 }

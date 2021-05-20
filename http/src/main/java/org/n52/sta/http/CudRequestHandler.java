@@ -33,11 +33,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
+import org.n52.sta.DTOMapper;
 import org.n52.sta.api.AbstractSensorThingsEntityService;
 import org.n52.sta.api.EntityServiceFactory;
 import org.n52.sta.api.dto.EntityPatch;
 import org.n52.sta.api.dto.StaDTO;
 import org.n52.sta.utils.AbstractSTARequestHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -56,6 +58,9 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
 
     private static final String COULD_NOT_FIND_RELATED_ENTITY = "Could not find related Entity!";
     private final ObjectMapper mapper;
+
+    @Autowired
+    private DTOMapper dtoMapper;
 
     public CudRequestHandler(String rootUrl,
                              boolean shouldEscapeId,
@@ -76,7 +81,7 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
     public StaDTO handlePostDirect(String collectionName,
                                    String body)
         throws IOException, STACRUDException, STAInvalidUrlException {
-        Class<T> clazz = collectionNameToClass(collectionName);
+        Class<T> clazz = dtoMapper.collectionNameToClass(collectionName);
         return ((AbstractSensorThingsEntityService<T>)
             serviceRepository.getEntityService(collectionName)).create(mapper.readValue(body, clazz));
     }
@@ -107,7 +112,7 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
         jsonBody.put(REFERENCED_FROM_TYPE, sourceType);
         jsonBody.put(REFERENCED_FROM_ID, sourceId);
 
-        Class<T> clazz = collectionNameToClass(target);
+        Class<T> clazz = dtoMapper.collectionNameToClass(target);
         return ((AbstractSensorThingsEntityService<T>)
             serviceRepository.getEntityService(target)).create(mapper.readValue(jsonBody.toString(), clazz));
     }
@@ -129,7 +134,7 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         validateResource(lookupPath, serviceRepository);
 
-        Class<EntityPatch> clazz = collectionNameToPatchClass(collectionName);
+        Class<EntityPatch> clazz = dtoMapper.collectionNameToPatchClass(collectionName);
         ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
         String strippedId = unescapeIdIfWanted(id.substring(1, id.length() - 1));
         jsonBody.put(StaConstants.AT_IOT_ID, strippedId);
@@ -168,7 +173,7 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
         Assert.notNull(entityId, COULD_NOT_FIND_RELATED_ENTITY);
 
         // Create Patch Entity
-        Class<EntityPatch> clazz = collectionNameToPatchClass(target);
+        Class<EntityPatch> clazz = dtoMapper.collectionNameToPatchClass(target);
         Assert.notNull(clazz, "Could not find Patch Class!");
 
         ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);

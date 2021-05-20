@@ -54,7 +54,7 @@ import org.springframework.stereotype.Component;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Component
-@Profile("!citsci")
+@Profile("!" + StaConstants.CITSCIEXTENSION)
 public class DTOMapper {
 
     public Class collectionNameToClass(String collectionName) throws STAInvalidUrlException {

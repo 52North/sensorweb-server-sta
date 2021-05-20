@@ -27,18 +27,16 @@
  * Public License for more details.
  */
 
-package org.n52.sta.data.repositories;
+package org.n52.sta.data.citsci.repositories;
 
 import org.n52.series.db.beans.sta.ObservationGroupEntity;
-import org.n52.shetland.ogc.sta.StaConstants;
-import org.springframework.context.annotation.Profile;
+import org.n52.sta.data.vanilla.repositories.NameRepository;
 import org.springframework.stereotype.Repository;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Repository
-@Profile(StaConstants.CITSCIEXTENSION)
 public interface ObservationGroupRepository extends NameRepository<ObservationGroupEntity> {
 
 }

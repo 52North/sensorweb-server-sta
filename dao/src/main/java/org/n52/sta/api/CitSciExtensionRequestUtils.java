@@ -29,34 +29,7 @@
 
 package org.n52.sta.api;
 
-import org.n52.series.db.beans.sta.LicenseEntity;
-import org.n52.series.db.beans.sta.ObservationGroupEntity;
-import org.n52.series.db.beans.sta.ObservationRelationEntity;
-import org.n52.series.db.beans.sta.PartyEntity;
-import org.n52.series.db.beans.sta.ProjectEntity;
-import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
-import org.n52.sta.api.dto.DatastreamDTO;
-import org.n52.sta.api.dto.FeatureOfInterestDTO;
-import org.n52.sta.api.dto.HistoricalLocationDTO;
-import org.n52.sta.api.dto.LocationDTO;
-import org.n52.sta.api.dto.ObservationDTO;
-import org.n52.sta.api.dto.ObservedPropertyDTO;
-import org.n52.sta.api.dto.SensorDTO;
-import org.n52.sta.api.dto.ThingDTO;
-import org.n52.sta.serdes.DatastreamSerDes;
-import org.n52.sta.serdes.FeatureOfInterestSerDes;
-import org.n52.sta.serdes.HistoricalLocationSerDes;
-import org.n52.sta.serdes.LicenseSerDes;
-import org.n52.sta.serdes.LocationSerDes;
-import org.n52.sta.serdes.ObservationGroupSerDes;
-import org.n52.sta.serdes.ObservationRelationSerDes;
-import org.n52.sta.serdes.ObservationSerDes;
-import org.n52.sta.serdes.ObservedPropertySerDes;
-import org.n52.sta.serdes.PartySerDes;
-import org.n52.sta.serdes.ProjectSerDes;
-import org.n52.sta.serdes.SensorSerDes;
-import org.n52.sta.serdes.ThingSerDes;
 
 import java.util.regex.Pattern;
 
@@ -79,12 +52,15 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
     String IDENTIFIED_BY_OBSERVATION_REGEX =
         OBSERVATIONS + IDENTIFIER_REGEX + SLASH
             + ROUND_BRACKET_OPEN
-            + OBSERVATION_RELATIONS
+            + NAV_SUBJECTS
+            + OR + NAV_OBJECTS
+            + OR + OBSERVATION_GROUPS
             + ROUND_BRACKET_CLOSE;
 
     String IDENTIFIED_BY_LICENSE_REGEX =
         LICENSES + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN
-            + DATASTREAMS
+            + OBSERVATION_GROUPS
+            + OR + OBSERVATIONS
             + ROUND_BRACKET_CLOSE;
 
     String IDENTIFIED_BY_PARTY_REGEX =
@@ -98,17 +74,21 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
             + ROUND_BRACKET_CLOSE;
 
     String IDENTIFIED_BY_OBSERVATION_GROUP_REGEX =
-        OBSERVATION_GROUPS + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN + OBSERVATION_RELATIONS +
-            ROUND_BRACKET_CLOSE;
+        OBSERVATION_GROUPS + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN
+            + NAV_SUBJECT
+            + OR + OBSERVATIONS
+            + ROUND_BRACKET_CLOSE;
 
     String IDENTIFIED_BY_OBSERVATION_RELATION_REGEX =
-        OBSERVATION_RELATIONS + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN + OBSERVATION + OR +
-            OBSERVATION_GROUP +
-            ROUND_BRACKET_CLOSE;
+        OBSERVATION_RELATIONS + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN
+            + NAV_SUBJECT
+            + OR + NAV_OBJECT
+            + OBSERVATION_GROUP
+            + ROUND_BRACKET_CLOSE;
 
     String IDENTIFIED_BY_DATASTREAM_REGEX =
         DATASTREAMS + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN
-            + PROJECT + OR + PARTY + OR + LICENSE
+            + PROJECT + OR + PARTY
             + ROUND_BRACKET_CLOSE;
 
     // /Observations(52)/ObservationRelations
@@ -116,11 +96,14 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
         SOURCE_NAME_GROUP_START + OBSERVATIONS + SOURCE_NAME_GROUP_END
             + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
             + SLASH
-            + WANTED_NAME_GROUP_START + OBSERVATION_RELATIONS + WANTED_NAME_GROUP_END;
+            + WANTED_NAME_GROUP_START + NAV_OBJECTS
+            + OR + NAV_SUBJECTS
+            + OR + OBSERVATION_GROUPS
+            + WANTED_NAME_GROUP_END;
 
     String COLLECTION_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE =
         PATH_ENTITY + OBSERVATIONS + IDENTIFIER_REGEX + CURLY_BRACKET_CLOSE + PATH_TARGET +
-            OBSERVATION_RELATIONS +
+            NAV_OBJECTS + OR + NAV_SUBJECTS + OR + OBSERVATION_GROUPS +
             CURLY_BRACKET_CLOSE;
 
     // /ObservationGroups(52)/ObservationRelations
@@ -128,14 +111,15 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
         SOURCE_NAME_GROUP_START + OBSERVATION_GROUPS + SOURCE_NAME_GROUP_END
             + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
             + SLASH
-            + WANTED_NAME_GROUP_START + OBSERVATION_RELATIONS + WANTED_NAME_GROUP_END;
+            + WANTED_NAME_GROUP_START + LICENSE + OR + OBSERVATION_RELATIONS + OR + OBSERVATIONS
+            + WANTED_NAME_GROUP_END;
 
     String COLLECTION_IDENTIFIED_BY_OBSERVATION_GROUP_PATH_VARIABLE =
         PATH_ENTITY + OBSERVATION_GROUPS + IDENTIFIER_REGEX + CURLY_BRACKET_CLOSE + PATH_TARGET +
-            OBSERVATION_RELATIONS +
+            LICENSE + OR + OBSERVATION_RELATIONS + OR + OBSERVATIONS +
             CURLY_BRACKET_CLOSE;
 
-    // /Parties(52)/CSDatastreams
+    // /Parties(52)/Datastreams
     String COLLECTION_IDENTIFIED_BY_PARTY =
         SOURCE_NAME_GROUP_START + PARTIES + SOURCE_NAME_GROUP_END
             + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
@@ -146,18 +130,18 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
         PATH_ENTITY + PARTIES + IDENTIFIER_REGEX + CURLY_BRACKET_CLOSE
             + PATH_TARGET + DATASTREAMS + CURLY_BRACKET_CLOSE;
 
-    // /Licenses(52)/CSDatastreams
+    // /Licenses(52)/Datastreams
     String COLLECTION_IDENTIFIED_BY_LICENSE =
         SOURCE_NAME_GROUP_START + LICENSES + SOURCE_NAME_GROUP_END
             + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
             + SLASH
-            + WANTED_NAME_GROUP_START + DATASTREAMS + WANTED_NAME_GROUP_END;
+            + WANTED_NAME_GROUP_START + OBSERVATION_GROUPS + OR + OBSERVATIONS + WANTED_NAME_GROUP_END;
 
     String COLLECTION_IDENTIFIED_BY_LICENSE_PATH_VARIABLE =
         PATH_ENTITY + LICENSES + IDENTIFIER_REGEX + CURLY_BRACKET_CLOSE
-            + PATH_TARGET + DATASTREAMS + CURLY_BRACKET_CLOSE;
+            + PATH_TARGET + OBSERVATION_GROUPS + OR + OBSERVATIONS + CURLY_BRACKET_CLOSE;
 
-    // /Projects(52)/CSDatastreams
+    // /Projects(52)/Datastreams
     String COLLECTION_IDENTIFIED_BY_PROJECT =
         SOURCE_NAME_GROUP_START + PROJECTS + SOURCE_NAME_GROUP_END
             + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
@@ -180,26 +164,24 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
         SOURCE_NAME_GROUP_START + OBSERVATION_RELATIONS + SOURCE_NAME_GROUP_END
             + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
             + SLASH
-            + WANTED_NAME_GROUP_START + OBSERVATION + OR + OBSERVATION_GROUP +
+            + WANTED_NAME_GROUP_START + NAV_SUBJECT + OR + NAV_OBJECT +
             WANTED_NAME_GROUP_END;
 
     String ENTITY_IDENTIFIED_BY_OBSERVATIONRELATION_PATH_VARIABLE =
         PATH_ENTITY + OBSERVATION_RELATIONS + IDENTIFIER_REGEX
-            + CURLY_BRACKET_CLOSE + PATH_TARGET + OBSERVATION + OR + OBSERVATION_GROUP +
+            + CURLY_BRACKET_CLOSE + PATH_TARGET + NAV_SUBJECT + OR + NAV_OBJECT +
             CURLY_BRACKET_CLOSE;
 
     String ENTITY_PROPERTY_IDENTIFIED_BY_OBSERVATIONRELATION_PATH_VARIABLE =
         ENTITY_IDENTIFIED_BY_OBSERVATIONRELATION_PATH_VARIABLE + SLASH + PATH_PROPERTY;
 
     // /Datastreams(52)/Party
-    // /Datastreams(52)/License
     // /Datastreams(52)/Project
     String ENTITY_IDENTIFIED_BY_DATASTREAM =
         SOURCE_NAME_GROUP_START + DATASTREAMS + SOURCE_NAME_GROUP_END
             + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END + SLASH + WANTED_NAME_GROUP_START
             + PROJECT
             + OR + PARTY
-            + OR + LICENSE
             + WANTED_NAME_GROUP_END;
 
     String ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE =
@@ -207,7 +189,6 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
             + CURLY_BRACKET_CLOSE + PATH_TARGET
             + PROJECT
             + OR + PARTY
-            + OR + LICENSE
             + CURLY_BRACKET_CLOSE;
 
     String ENTITY_PROPERTY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE =

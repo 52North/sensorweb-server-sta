@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.vanilla.service;
 
 import org.n52.series.db.beans.AbstractDatasetEntity;
@@ -39,9 +40,6 @@ import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
-import org.n52.sta.data.vanilla.DTOTransformer;
-import org.n52.sta.data.vanilla.DaoSemaphore;
-import org.n52.sta.data.vanilla.SerDesConfig;
 import org.n52.sta.api.AbstractSensorThingsEntityService;
 import org.n52.sta.api.CollectionWrapper;
 import org.n52.sta.api.dto.DatastreamDTO;
@@ -53,6 +51,9 @@ import org.n52.sta.api.dto.ObservedPropertyDTO;
 import org.n52.sta.api.dto.SensorDTO;
 import org.n52.sta.api.dto.StaDTO;
 import org.n52.sta.api.dto.ThingDTO;
+import org.n52.sta.data.vanilla.DTOTransformer;
+import org.n52.sta.data.vanilla.DaoSemaphore;
+import org.n52.sta.data.vanilla.SerDesConfig;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
@@ -63,12 +64,12 @@ import org.springframework.stereotype.Component;
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public class ServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
+public abstract class ServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
     implements AbstractSensorThingsEntityService<R> {
 
-    private final DaoSemaphore semaphore;
-    private final SerDesConfig config;
-    private AbstractSensorThingsEntityServiceImpl<?, R, S> serviceImpl;
+    protected final DaoSemaphore semaphore;
+    protected final SerDesConfig config;
+    protected final AbstractSensorThingsEntityServiceImpl<?, R, S> serviceImpl;
 
     public ServiceFacade(AbstractSensorThingsEntityServiceImpl<?, R, S> serviceImpl,
                          DaoSemaphore semaphore,
@@ -78,7 +79,7 @@ public class ServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
         this.config = config;
     }
 
-    AbstractSensorThingsEntityServiceImpl<?, ?, ?> getServiceImpl() {
+    public AbstractSensorThingsEntityServiceImpl<?, ?, ?> getServiceImpl() {
         return serviceImpl;
     }
 
@@ -219,7 +220,7 @@ public class ServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
     }
 
     @Component
-    static class ThingServiceFacade extends ServiceFacade<ThingDTO, PlatformEntity> {
+    public static class ThingServiceFacade extends ServiceFacade<ThingDTO, PlatformEntity> {
 
         ThingServiceFacade(ThingService serviceImpl,
                            DaoSemaphore semaphore,
@@ -230,7 +231,7 @@ public class ServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
 
 
     @Component
-    static class LocationServiceFacade extends ServiceFacade<LocationDTO, LocationEntity> {
+    public static class LocationServiceFacade extends ServiceFacade<LocationDTO, LocationEntity> {
 
         LocationServiceFacade(LocationService serviceImpl,
                               DaoSemaphore semaphore,
@@ -241,7 +242,7 @@ public class ServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
 
 
     @Component
-    static class HistoricalLocationServiceFacade
+    public static class HistoricalLocationServiceFacade
         extends ServiceFacade<HistoricalLocationDTO, HistoricalLocationEntity> {
 
         HistoricalLocationServiceFacade(HistoricalLocationService serviceImpl,
@@ -253,7 +254,7 @@ public class ServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
 
 
     @Component
-    static class SensorServiceFacade extends ServiceFacade<SensorDTO, ProcedureEntity> {
+    public static class SensorServiceFacade extends ServiceFacade<SensorDTO, ProcedureEntity> {
 
         SensorServiceFacade(SensorService serviceImpl,
                             DaoSemaphore semaphore,
@@ -264,7 +265,7 @@ public class ServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
 
 
     @Component
-    static class ObservedPropertyServiceFacade
+    public static class ObservedPropertyServiceFacade
         extends ServiceFacade<ObservedPropertyDTO, PhenomenonEntity> {
 
         ObservedPropertyServiceFacade(ObservedPropertyService serviceImpl,
@@ -276,7 +277,7 @@ public class ServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
 
 
     @Component
-    static class ObservationServiceFacade
+    public static class ObservationServiceFacade
         extends ServiceFacade<ObservationDTO, DataEntity<?>> {
 
         ObservationServiceFacade(ObservationService serviceImpl,
@@ -288,7 +289,7 @@ public class ServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
 
 
     @Component
-    static class DatastreamServiceFacade extends ServiceFacade<DatastreamDTO, AbstractDatasetEntity> {
+    public static class DatastreamServiceFacade extends ServiceFacade<DatastreamDTO, AbstractDatasetEntity> {
 
         DatastreamServiceFacade(DatastreamService serviceImpl,
                                 DaoSemaphore semaphore,
@@ -299,7 +300,7 @@ public class ServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
 
 
     @Component
-    static class FeatureOfInterestServiceFacade
+    public static class FeatureOfInterestServiceFacade
         extends ServiceFacade<FeatureOfInterestDTO, AbstractFeatureEntity<?>> {
 
         FeatureOfInterestServiceFacade(FeatureOfInterestService serviceImpl,

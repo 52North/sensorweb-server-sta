@@ -27,27 +27,24 @@
  * Public License for more details.
  */
 
-package org.n52.sta.api;
-
-import org.n52.sta.api.dto.impl.citsci.ObservationGroup;
-import org.n52.sta.api.dto.impl.citsci.ObservationRelation;
+package org.n52.sta.api.dto;
 
 import java.util.Set;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public interface CitSciObservationDTO {
+public interface CitSciObservationDTO extends ObservationDTO {
 
-    Set<ObservationRelation> getSubjects();
+    Set<ObservationRelationDTO> getSubjects();
 
-    void setSubjects(Set<ObservationRelation> subjects);
+    void setSubjects(Set<ObservationRelationDTO> subjects);
 
-    Set<ObservationRelation> getObjects();
+    Set<ObservationRelationDTO> getObjects();
 
-    void setObjects(Set<ObservationRelation> objects);
+    void setObjects(Set<ObservationRelationDTO> objects);
 
-    Set<ObservationGroup> getGroups();
+    Set<ObservationGroupDTO> getGroups();
 
-    void setGroups(Set<ObservationGroup> groups);
+    void setGroups(Set<ObservationGroupDTO> groups);
 }

@@ -29,41 +29,42 @@
 
 package org.n52.sta.api.dto.impl;
 
-import org.n52.sta.api.dto.impl.citsci.ObservationGroup;
-import org.n52.sta.api.dto.impl.citsci.ObservationRelation;
+import org.n52.sta.api.dto.CitSciObservationDTO;
+import org.n52.sta.api.dto.ObservationGroupDTO;
+import org.n52.sta.api.dto.ObservationRelationDTO;
 
 import java.util.Set;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public class CitSciObservation extends Observation implements org.n52.sta.api.CitSciObservationDTO {
+public class CitSciObservation extends Observation implements CitSciObservationDTO {
 
-    private Set<ObservationRelation> subjects;
-    private Set<ObservationRelation> objects;
-    private Set<ObservationGroup> groups;
+    private Set<ObservationRelationDTO> subjects;
+    private Set<ObservationRelationDTO> objects;
+    private Set<ObservationGroupDTO> groups;
 
-    @Override public Set<ObservationRelation> getSubjects() {
+    @Override public Set<ObservationRelationDTO> getSubjects() {
         return subjects;
     }
 
-    @Override public void setSubjects(Set<ObservationRelation> subjects) {
+    @Override public void setSubjects(Set<ObservationRelationDTO> subjects) {
         this.subjects = subjects;
     }
 
-    @Override public Set<ObservationRelation> getObjects() {
+    @Override public Set<ObservationRelationDTO> getObjects() {
         return objects;
     }
 
-    @Override public void setObjects(Set<ObservationRelation> objects) {
+    @Override public void setObjects(Set<ObservationRelationDTO> objects) {
         this.objects = objects;
     }
 
-    @Override public Set<ObservationGroup> getGroups() {
+    @Override public Set<ObservationGroupDTO> getGroups() {
         return groups;
     }
 
-    @Override public void setGroups(Set<ObservationGroup> groups) {
+    @Override public void setGroups(Set<ObservationGroupDTO> groups) {
         this.groups = groups;
     }
 }

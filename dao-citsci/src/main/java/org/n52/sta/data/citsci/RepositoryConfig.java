@@ -27,33 +27,18 @@
  * Public License for more details.
  */
 
-package org.n52.sta.api.dto.impl;
+package org.n52.sta.data.citsci;
 
-import org.n52.sta.api.dto.CitSciDatastreamDTO;
-import org.n52.sta.api.dto.PartyDTO;
-import org.n52.sta.api.dto.ProjectDTO;
+import org.n52.sta.data.vanilla.repositories.MessageBusRepository;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public class CitSciDatastream extends Datastream implements CitSciDatastreamDTO {
+@EnableJpaRepositories(repositoryBaseClass = MessageBusRepository.class,
+                       basePackages = {"org.n52.sta.data.citsci.repositories"})
+@Configuration
+public class RepositoryConfig {
 
-    private ProjectDTO project;
-    private PartyDTO party;
-
-    @Override public ProjectDTO getProject() {
-        return project;
-    }
-
-    @Override public void setProject(ProjectDTO project) {
-        this.project = project;
-    }
-
-    @Override public PartyDTO getParty() {
-        return party;
-    }
-
-    @Override public void setParty(PartyDTO party) {
-        this.party = party;
-    }
 }

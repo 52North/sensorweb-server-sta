@@ -30,13 +30,16 @@
 package org.n52.sta.serdes.json;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import org.n52.sta.api.dto.DatastreamDTO;
-import org.n52.sta.api.dto.impl.CitSciDatastream;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.n52.sta.api.dto.CitSciDatastreamDTO;
+import org.n52.sta.api.dto.impl.citsci.CitSciDatastream;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public class JSONCitSciDatastream extends JSONDatastream {
+@SuppressWarnings("VisibilityModifier")
+@SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
+public class JSONCitSciDatastream extends AbstractJSONDatastream<CitSciDatastreamDTO> {
 
     @JsonManagedReference
     public JSONParty Party;
@@ -48,17 +51,17 @@ public class JSONCitSciDatastream extends JSONDatastream {
         self = new CitSciDatastream();
     }
 
-    public DatastreamDTO parseToDTO(JSONBase.EntityType type) {
+    public CitSciDatastreamDTO parseToDTO(JSONBase.EntityType type) {
         super.parseToDTO(type);
 
         if (Party != null) {
-            ((CitSciDatastream) self).setParty(Party.parseToDTO(JSONBase.EntityType.FULL,
-                                                                JSONBase.EntityType.REFERENCE));
+            self.setParty(Party.parseToDTO(JSONBase.EntityType.FULL,
+                                           JSONBase.EntityType.REFERENCE));
         }
 
         if (Project != null) {
-            ((CitSciDatastream) self).setProject(Project.parseToDTO(JSONBase.EntityType.FULL,
-                                                                    JSONBase.EntityType.REFERENCE));
+            self.setProject(Project.parseToDTO(JSONBase.EntityType.FULL,
+                                               JSONBase.EntityType.REFERENCE));
         }
 
         return self;

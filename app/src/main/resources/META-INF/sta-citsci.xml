@@ -1,0 +1,54 @@
+<!--suppress JpaConfigDomFacetInspection -->
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence
+             http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd"
+             version="2.1">
+    <persistence-unit name="default-unit">
+        <description>SensorThings Mappings</description>
+        <mapping-file>/hbm/transactional/core/CategoryResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/core/CodespaceResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/core/FeatureResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/core/FormatResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/core/OfferingResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/core/PhenomenonResource.hbm.xml</mapping-file>
+
+        <mapping-file>/hbm/transactional/core/ProcedureHistoryResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/core/ProcedureResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/core/RelatedDataResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/core/RelatedDatasetResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/core/RelatedFeatureResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/core/ResultTemplateResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/core/UnitResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/core/VerticalMetadataResource.hbm.xml</mapping-file>
+
+        <mapping-file>/hbm/transactional/dataset/DataResourceCitSci.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/dataset/DatasetResourceCitSci.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/core/TagResource.hbm.xml</mapping-file>
+
+        <mapping-file>/hbm/transactional/core/LocationResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/core/PlatformResource.hbm.xml</mapping-file>
+
+        <mapping-file>/hbm/parameter/PlatformParameterResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/parameter/DatasetParameterResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/parameter/ObservationParameterResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/parameter/LocationParameterResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/parameter/PhenomenonParameterResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/parameter/ProcedureParameterResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/parameter/FeatureParameterResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/parameter/ObservationGroupParameterResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/parameter/LicenseParameterResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/parameter/ProjectParameterResource.hbm.xml</mapping-file>
+
+        <class>org.n52.series.db.beans.sta.ObservationGroupEntity</class>
+        <class>org.n52.series.db.beans.sta.ObservationRelationEntity</class>
+        <class>org.n52.series.db.beans.sta.LicenseEntity</class>
+        <class>org.n52.series.db.beans.sta.PartyEntity</class>
+        <class>org.n52.series.db.beans.sta.ProjectEntity</class>
+
+        <exclude-unlisted-classes>true</exclude-unlisted-classes>
+        <properties>
+            <property name="hibernate.archive.autodetection" value="class"/>
+        </properties>
+    </persistence-unit>
+</persistence>

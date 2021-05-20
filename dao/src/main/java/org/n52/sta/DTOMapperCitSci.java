@@ -31,34 +31,20 @@ package org.n52.sta;
 
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
-import org.n52.sta.api.CitSciObservationDTO;
 import org.n52.sta.api.dto.CitSciDatastreamDTO;
-import org.n52.sta.api.dto.DatastreamDTO;
-import org.n52.sta.api.dto.FeatureOfInterestDTO;
-import org.n52.sta.api.dto.HistoricalLocationDTO;
+import org.n52.sta.api.dto.CitSciObservationDTO;
 import org.n52.sta.api.dto.LicenseDTO;
-import org.n52.sta.api.dto.LocationDTO;
-import org.n52.sta.api.dto.ObservationDTO;
 import org.n52.sta.api.dto.ObservationGroupDTO;
 import org.n52.sta.api.dto.ObservationRelationDTO;
-import org.n52.sta.api.dto.ObservedPropertyDTO;
 import org.n52.sta.api.dto.PartyDTO;
 import org.n52.sta.api.dto.ProjectDTO;
-import org.n52.sta.api.dto.SensorDTO;
-import org.n52.sta.api.dto.ThingDTO;
-import org.n52.sta.serdes.DatastreamSerDes;
-import org.n52.sta.serdes.FeatureOfInterestSerDes;
-import org.n52.sta.serdes.HistoricalLocationSerDes;
+import org.n52.sta.serdes.CitSciDatastreamSerDes;
+import org.n52.sta.serdes.CitSciObservationSerDes;
 import org.n52.sta.serdes.LicenseSerDes;
-import org.n52.sta.serdes.LocationSerDes;
+import org.n52.sta.serdes.ObservationGroupSerDes;
 import org.n52.sta.serdes.ObservationRelationSerDes;
-import org.n52.sta.serdes.ObservationSerDes;
-import org.n52.sta.serdes.ObservedPropertySerDes;
 import org.n52.sta.serdes.PartySerDes;
 import org.n52.sta.serdes.ProjectSerDes;
-import org.n52.sta.serdes.SensorSerDes;
-import org.n52.sta.serdes.ThingSerDes;
-import org.n52.sta.serdes.json.JSONCitSciDatastream;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
@@ -68,8 +54,8 @@ import org.springframework.stereotype.Component;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Component
-@Profile("citsci")
-public class DTOMapperCitSci extends DTOMapper{
+@Profile(StaConstants.CITSCIEXTENSION)
+public class DTOMapperCitSci extends DTOMapper {
 
     public Class collectionNameToClass(String collectionName) throws STAInvalidUrlException {
         switch (collectionName) {
@@ -77,6 +63,7 @@ public class DTOMapperCitSci extends DTOMapper{
                 // We use custom Datastream DTO to be able to represent link to Party/Project
                 return CitSciDatastreamDTO.class;
             case StaConstants.OBSERVATIONS:
+                // We use custom Observation DTO to be able to represent link to Groups/Relations
                 return CitSciObservationDTO.class;
             case StaConstants.OBSERVATION_GROUPS:
                 return ObservationGroupDTO.class;
@@ -97,25 +84,25 @@ public class DTOMapperCitSci extends DTOMapper{
         switch (collectionName) {
             case StaConstants.DATASTREAMS:
             case StaConstants.DATASTREAM:
-                return JSONCitSciDatastream.class;
+                return CitSciDatastreamSerDes.CitSciDatastreamDTOPatch.class;
             case StaConstants.OBSERVATIONS:
             case StaConstants.OBSERVATION:
-                return .class;
+                return CitSciObservationSerDes.CitSciObservationPatchDeserializer.class;
             case StaConstants.OBSERVATION_GROUP:
             case StaConstants.OBSERVATION_GROUPS:
-                return .class ;
+                return ObservationGroupSerDes.ObservationGroupDTOPatch.class;
             case StaConstants.OBSERVATION_RELATIONS:
             case StaConstants.OBSERVATION_RELATION:
-                return ObservationRelationSerDes.ObservationRelationPatch.class;
+                return ObservationRelationSerDes.ObservationRelationDTOPatch.class;
             case StaConstants.LICENSES:
             case StaConstants.LICENSE:
-                return LicenseSerDes.LicensePatch.class;
+                return LicenseSerDes.LicenseDTOPatch.class;
             case StaConstants.PROJECTS:
             case StaConstants.PROJECT:
-                return ProjectSerDes.ProjectPatch.class;
+                return ProjectSerDes.ProjectDTOPatch.class;
             case StaConstants.PARTIES:
             case StaConstants.PARTY:
-                return PartySerDes.PartyPatch.class;
+                return PartySerDes.PartyDTOPatch.class;
             default:
                 return super.collectionNameToPatchClass(collectionName);
         }

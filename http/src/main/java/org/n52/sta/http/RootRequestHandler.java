@@ -100,7 +100,8 @@ public class RootRequestHandler {
         String rootUrl = environment.getRequiredProperty("server.rootUrl");
 
         // parse Endpoints
-        addToArray(rootUrl, mapper, endpoints, STAEntityDefinition.ALLCOLLECTIONS);
+        addToArray(rootUrl, mapper, endpoints, STAEntityDefinition.CORECOLLECTIONS);
+        addToArray(rootUrl, mapper, endpoints, STAEntityDefinition.CITSCICOLLECTIONS);
         ObjectNode node = mapper.createObjectNode();
         node.put("value", endpoints);
 

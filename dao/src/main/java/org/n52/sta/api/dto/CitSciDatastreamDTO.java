@@ -29,13 +29,10 @@
 
 package org.n52.sta.api.dto;
 
-import org.n52.sta.api.dto.impl.citsci.Party;
-import org.n52.sta.api.dto.impl.citsci.Project;
-
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public interface CitSciDatastreamDTO {
+public interface CitSciDatastreamDTO extends DatastreamDTO {
 
     ProjectDTO getProject();
 

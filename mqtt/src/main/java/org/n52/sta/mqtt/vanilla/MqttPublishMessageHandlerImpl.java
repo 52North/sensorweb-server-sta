@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.mqtt.vanilla;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,6 +34,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.moquette.interception.messages.InterceptPublishMessage;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.sta.DTOMapper;
 import org.n52.sta.api.AbstractSensorThingsEntityService;
 import org.n52.sta.api.CoreRequestUtils;
 import org.n52.sta.api.EntityServiceFactory;
@@ -65,6 +67,7 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
     private final Set<String> publishTopics;
 
     private final boolean readOnly;
+    private final DTOMapper dtoMapper;
 
     public MqttPublishMessageHandlerImpl(
         @Value("${server.feature.mqttPublishTopics:Observations}") List<String> publishTopics,
@@ -72,10 +75,12 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
         @Value("${server.rootUrl}") String rootUrl,
         @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
         EntityServiceFactory serviceRepository,
-        ObjectMapper mapper) {
+        ObjectMapper mapper,
+        DTOMapper dtoMapper) {
         super(rootUrl, shouldEscapeId, serviceRepository);
         this.mapper = mapper;
         this.readOnly = readOnly;
+        this.dtoMapper = dtoMapper;
         Set topics = new HashSet<>(publishTopics);
 
         // Fallback to default if parameter was invalid
@@ -96,7 +101,8 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
     private boolean validateTopics(Set<String> topics) {
         boolean valid = true;
         for (String topic : topics) {
-            valid = Arrays.asList(STAEntityDefinition.ALLCOLLECTIONS).contains(topic);
+            valid = Arrays.asList(STAEntityDefinition.CORECOLLECTIONS).contains(topic)
+                || Arrays.asList(STAEntityDefinition.CITSCICOLLECTIONS).contains(topic);
         }
         return valid;
     }
@@ -144,7 +150,7 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
                     payload = msg.getPayload().toString(Charset.defaultCharset());
                 }
 
-                Class<T> clazz = collectionNameToClass(collection);
+                Class<T> clazz = dtoMapper.collectionNameToClass(collection);
                 ((AbstractSensorThingsEntityService<T>) serviceRepository.getEntityService(collection))
                     .create(mapper.readValue(payload, clazz));
             } else {

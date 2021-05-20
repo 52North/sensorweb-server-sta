@@ -29,7 +29,7 @@
 
 package org.n52.sta.api.dto.impl.citsci;
 
-import jdk.nashorn.internal.ir.ObjectNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.n52.sta.api.dto.DatastreamDTO;
 import org.n52.sta.api.dto.PartyDTO;
 import org.n52.sta.api.dto.impl.Entity;

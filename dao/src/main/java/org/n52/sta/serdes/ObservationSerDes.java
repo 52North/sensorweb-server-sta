@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.serdes;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -34,10 +35,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.shetland.ogc.sta.model.ObservationEntityDefinition;
-import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.shetland.util.DateTimeHelper;
 import org.n52.sta.api.dto.EntityPatch;
 import org.n52.sta.api.dto.ObservationDTO;
 import org.n52.sta.serdes.json.JSONBase;
@@ -70,12 +68,9 @@ public class ObservationSerDes {
     }
 
 
-    public static class ObservationSerializer
-        extends AbstractSTASerializer<ObservationDTO> {
+    public static class ObservationSerializer extends AbstractObservationSerializer<ObservationDTO> {
 
-        protected static final String VERTICAL = "vertical";
         private static final long serialVersionUID = -4575044340713191285L;
-        private static final GeoJsonWriter GEO_JSON_WRITER = new GeoJsonWriter();
 
         public ObservationSerializer(String rootUrl, String... activeExtensions) {
             super(ObservationDTO.class, activeExtensions);
@@ -83,200 +78,12 @@ public class ObservationSerDes {
             this.entitySetName = ObservationEntityDefinition.ENTITY_SET_NAME;
         }
 
-        @Override
-        public void serialize(ObservationDTO observation, JsonGenerator gen, SerializerProvider serializers)
+        @Override public void serialize(ObservationDTO observation, JsonGenerator gen, SerializerProvider serializers)
             throws IOException {
             gen.writeStartObject();
-
-            // olingo @iot links
-            if (!observation.hasSelectOption() ||
-                observation.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ID)) {
-                writeId(gen, observation.getId());
-            }
-            if (!observation.hasSelectOption() ||
-                observation.getFieldsToSerialize().contains(STAEntityDefinition.PROP_SELF_LINK)) {
-                writeSelfLink(gen, observation.getId());
-            }
-
-            // actual properties
-            if (!observation.hasSelectOption() ||
-                observation.getFieldsToSerialize().contains(STAEntityDefinition.PROP_RESULT)) {
-                gen.writeObjectField(STAEntityDefinition.PROP_RESULT, observation.getResult());
-                /*
-                if (observation instanceof ProfileDataEntity) {
-                    QueryOptions profileResultSchema =
-                        new QueryOptions("",
-                                         Collections.singleton(new SelectFilter(new HashSet<>(
-                                             Arrays.asList(StaConstants.PROP_RESULT,
-                                                           StaConstants.PROP_PARAMETERS,
-                                                           VERTICAL)))));
-                    writeNestedCollection(sortValuesByPhenomenonTime((Set<DataEntity<?>>) observation.getValue()),
-                                          profileResultSchema,
-                                          gen,
-                                          serializers);
-                } else if (observation instanceof TrajectoryDataEntity) {
-                    QueryOptions trajectoryResultSchema =
-                        new QueryOptions("",
-                                         Collections.singleton(new SelectFilter(new HashSet<>(
-                                             Arrays.asList(StaConstants.PROP_RESULT,
-                                                           StaConstants.PROP_PARAMETERS,
-                                                           StaConstants.PROP_PHENOMENON_TIME,
-                                                           StaConstants.PROP_RESULT_TIME,
-                                                           StaConstants.PROP_VALID_TIME)))));
-                    writeNestedCollection(sortValuesByVerticalFrom((Set<DataEntity<?>>) observation.getValue()),
-                                          trajectoryResultSchema,
-                                          gen,
-                                          serializers);
-                } else {
-                    gen.writeString(observation.getValue().toString());
-                }
-                 */
-            }
-
-            if (!observation.hasSelectOption() ||
-                observation.getFieldsToSerialize().contains(STAEntityDefinition.PROP_RESULT_TIME)) {
-                if (observation.getResultTime() != null) {
-                    gen.writeStringField(STAEntityDefinition.PROP_RESULT_TIME,
-                                         DateTimeHelper.format(observation.getResultTime()));
-                } else {
-                    // resultTime is mandatory (but null is allowed) so it must be serialized
-                    gen.writeNullField(STAEntityDefinition.PROP_RESULT_TIME);
-                }
-            }
-            if (!observation.hasSelectOption() ||
-                observation.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PHENOMENON_TIME)) {
-                String phenomenonTime = DateTimeHelper.format(observation.getPhenomenonTime());
-                gen.writeStringField(STAEntityDefinition.PROP_PHENOMENON_TIME, phenomenonTime);
-            }
-
-            if (!observation.hasSelectOption() ||
-                observation.getFieldsToSerialize().contains(STAEntityDefinition.PROP_RESULT_QUALITY)) {
-                gen.writeNullField(STAEntityDefinition.PROP_RESULT_QUALITY);
-            }
-
-            if (!observation.hasSelectOption() ||
-                observation.getFieldsToSerialize().contains(STAEntityDefinition.PROP_VALID_TIME)) {
-                if (observation.getValidTime() != null) {
-                    gen.writeStringField(STAEntityDefinition.PROP_VALID_TIME,
-                                         DateTimeHelper.format(observation.getValidTime()));
-                } else {
-                    gen.writeNullField(STAEntityDefinition.PROP_VALID_TIME);
-                }
-            }
-
-            if (!observation.hasSelectOption() ||
-                observation.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PARAMETERS)) {
-                gen.writeObjectField(STAEntityDefinition.PROP_PARAMETERS, observation.getParameters());
-                /*
-                if (observation.getParameters() != null ||
-                    observation.getFieldsToSerialize().contains(VERTICAL)) {
-                    gen.writeObjectFieldStart(STAEntityDefinition.PROP_PARAMETERS);
-                    if (observation.getFieldsToSerialize().contains(VERTICAL)) {
-                        gen.writeNumberField("verticalFrom", observation.getVerticalFrom());
-                        gen.writeNumberField("verticalTo", observation.getVerticalTo());
-                    }
-                    if (observation.isSetGeometryEntity()) {
-                        gen.writeFieldName("http://www.opengis.net/def/param-name/OGC-OM/2.0/samplingGeometry");
-                        gen.writeRawValue(GEO_JSON_WRITER.write(observation.getGeometryEntity().getGeometry()));
-                    }
-                    if (observation.hasParameters()) {
-                        for (ParameterEntity<?> parameter : observation.getParameters()) {
-                            if (parameter instanceof JsonParameterEntity) {
-                                ObjectMapper mapper = new ObjectMapper();
-                                gen.writeObjectField(parameter.getName(),
-                                                     mapper.readTree(parameter.getValueAsString()));
-                            } else {
-                                gen.writeStringField(parameter.getName(), parameter.getValueAsString());
-                            }
-                        }
-                    }
-                    gen.writeEndObject();
-                } else {
-                    gen.writeNullField(STAEntityDefinition.PROP_PARAMETERS);
-                }
-                 */
-            }
-
-            // navigation properties
-            for (String navigationProperty : ObservationEntityDefinition.NAVIGATION_PROPERTIES) {
-                if (!observation.hasSelectOption() || observation.getFieldsToSerialize().contains(navigationProperty)) {
-                    if (!observation.hasExpandOption() ||
-                        observation.getFieldsToExpand().get(navigationProperty) == null) {
-                        writeNavigationProp(gen, navigationProperty, observation.getId());
-                    } else {
-                        switch (navigationProperty) {
-                            case ObservationEntityDefinition.DATASTREAM:
-                                if (observation.getDatastream() == null) {
-                                    writeNavigationProp(gen, navigationProperty, observation.getId());
-                                } else {
-                                    gen.writeFieldName(navigationProperty);
-                                    writeNestedEntity(observation.getDatastream(),
-                                                      gen,
-                                                      serializers);
-                                }
-                                break;
-                            case ObservationEntityDefinition.FEATURE_OF_INTEREST:
-                                if (observation.getFeatureOfInterest() == null) {
-                                    writeNavigationProp(gen, navigationProperty, observation.getId());
-                                } else {
-                                    gen.writeFieldName(navigationProperty);
-                                    writeNestedEntity(observation.getFeatureOfInterest(),
-                                                      gen,
-                                                      serializers);
-                                }
-                                break;
-                            default:
-                                throw new IllegalStateException("Unexpected value: " + navigationProperty);
-                        }
-                    }
-                }
-            }
+            super.serialize(observation, gen, serializers);
             gen.writeEndObject();
         }
-
-        /*
-        private Time createPhenomenonTime(ObservationDTO observation) {
-            final DateTime start = new DateTime(observation.getPhenomenonTime(), DateTimeZone.UTC);
-            DateTime end;
-            if (observation.getPhenomenonTime() != null) {
-                end = new DateTime(observation.getPhenomenonTime(), DateTimeZone.UTC);
-            } else {
-                end = start;
-            }
-            return createTime(start, end);
-        }
-
-        private Time createValidTime(ObservationDTO observation) {
-            final DateTime start = new DateTime(observation.getValidTime(), DateTimeZone.UTC);
-            DateTime end;
-            if (observation.getValidTime() != null) {
-                end = new DateTime(observation.getValidTime(), DateTimeZone.UTC);
-            } else {
-                end = start;
-            }
-            return createTime(start, end);
-        }
-
-        private Time createTime(DateTime start, DateTime end) {
-            if (start.equals(end)) {
-                return new TimeInstant(start);
-            } else {
-                return new TimePeriod(start, end);
-            }
-        }
-
-        private TreeSet sortValuesByPhenomenonTime(Set<DataEntity<?>> values) {
-            ArrayList<DataEntity<?>> vals = new ArrayList<>(values);
-            vals.sort(Comparator.comparing(HibernateRelations.HasPhenomenonTime::getPhenomenonTimeStart));
-            return new TreeSet(vals);
-        }
-
-        private TreeSet sortValuesByVerticalFrom(Set<DataEntity<?>> values) {
-            ArrayList<DataEntity<?>> vals = new ArrayList<>(values);
-            vals.sort(Comparator.comparing(DataEntity::getVerticalFrom));
-            return new TreeSet(vals);
-        }
-        */
     }
 
 
@@ -312,8 +119,8 @@ public class ObservationSerDes {
         @Override
         public ObservationDTOPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return new ObservationDTOPatch(p.readValueAs(JSONObservation.class)
-                                                  //.parseParameters(parameterMapping)
-                                                  .parseToDTO(JSONBase.EntityType.PATCH));
+                                               //.parseParameters(parameterMapping)
+                                               .parseToDTO(JSONBase.EntityType.PATCH));
         }
     }
 }

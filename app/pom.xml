@@ -107,6 +107,10 @@
             <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.n52.arctic-sea</groupId>
+            <artifactId>shetland</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

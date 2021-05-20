@@ -27,7 +27,7 @@
  * Public License for more details.
  */
 
-package org.n52.sta.data.query;
+package org.n52.sta.data.citsci.query;
 
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.DataEntity;
@@ -41,6 +41,7 @@ import org.n52.series.db.beans.sta.ObservationRelationEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
+import org.n52.sta.data.vanilla.query.EntityQuerySpecifications;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.Expression;
@@ -86,6 +87,12 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
 
             return builder.or(builder.in(root.get(DataEntity.PROPERTY_DATASET_ID)).value(subquery),
                               builder.in(root.get(DataEntity.PROPERTY_DATASET_ID)).value(sq));
+        };
+    }
+
+    public static Specification<DataEntity<?>> asSubject(final String relationIdentifier) {
+        return (root, query, builder) -> {
+            return builder.in(root.get(DataEntity.PROPERTY_SUBJECTS)).value(relationIdentifier);
         };
     }
 

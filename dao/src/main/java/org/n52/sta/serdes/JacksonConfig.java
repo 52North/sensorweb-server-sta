@@ -35,13 +35,21 @@ import com.fasterxml.jackson.databind.module.SimpleDeserializers;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.module.SimpleSerializers;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.CollectionWrapper;
+import org.n52.sta.api.dto.CitSciDatastreamDTO;
+import org.n52.sta.api.dto.CitSciObservationDTO;
 import org.n52.sta.api.dto.DatastreamDTO;
 import org.n52.sta.api.dto.FeatureOfInterestDTO;
 import org.n52.sta.api.dto.HistoricalLocationDTO;
+import org.n52.sta.api.dto.LicenseDTO;
 import org.n52.sta.api.dto.LocationDTO;
 import org.n52.sta.api.dto.ObservationDTO;
+import org.n52.sta.api.dto.ObservationGroupDTO;
+import org.n52.sta.api.dto.ObservationRelationDTO;
 import org.n52.sta.api.dto.ObservedPropertyDTO;
+import org.n52.sta.api.dto.PartyDTO;
+import org.n52.sta.api.dto.ProjectDTO;
 import org.n52.sta.api.dto.SensorDTO;
 import org.n52.sta.api.dto.ThingDTO;
 import org.springframework.beans.factory.annotation.Value;
@@ -141,6 +149,65 @@ public class JacksonConfig {
                                       new HistoricalLocationSerDes.HistoricalLocationPatchDeserializer());
         deserializers.addDeserializer(DatastreamSerDes.DatastreamDTOPatch.class,
                                       new DatastreamSerDes.DatastreamPatchDeserializer());
+
+        for (String activeProfile : environment.getActiveProfiles()) {
+            if (activeProfile.equals(StaConstants.CITSCIEXTENSION)) {
+                serializers.addSerializer(
+                    new CitSciDatastreamSerDes.CitSciDatastreamSerializer(rootUrl,
+                                                                          activeProfiles));
+                serializers.addSerializer(
+                    new CitSciObservationSerDes.CitSciObservationSerializer(rootUrl,
+                                                                            activeProfiles));
+                serializers.addSerializer(
+                    new ObservationGroupSerDes.ObservationGroupSerializer(rootUrl,
+                                                                          activeProfiles));
+                serializers.addSerializer(
+                    new ObservationRelationSerDes.ObservationRelationSerializer(rootUrl,
+                                                                                activeProfiles));
+                serializers.addSerializer(
+                    new LicenseSerDes.LicenseSerializer(rootUrl,
+                                                        activeProfiles));
+                serializers.addSerializer(
+                    new PartySerDes.PartySerializer(rootUrl,
+                                                    activeProfiles));
+                serializers.addSerializer(
+                    new ProjectSerDes.ProjectSerializer(rootUrl,
+                                                        activeProfiles));
+
+                deserializers.addDeserializer(CitSciDatastreamDTO.class,
+                                              new CitSciDatastreamSerDes.CitSciDatastreamDeserializer());
+                deserializers.addDeserializer(CitSciObservationDTO.class,
+                                              new CitSciObservationSerDes.CitSciObservationDeserializer());
+                deserializers.addDeserializer(ObservationGroupDTO.class,
+                                              new ObservationGroupSerDes.ObservationGroupDeserializer());
+                deserializers.addDeserializer(ObservationRelationDTO.class,
+                                              new ObservationRelationSerDes.ObservationRelationDeserializer());
+                deserializers.addDeserializer(LicenseDTO.class,
+                                              new LicenseSerDes.LicenseDeserializer());
+                deserializers.addDeserializer(PartyDTO.class,
+                                              new PartySerDes.PartyDeserializer());
+                deserializers.addDeserializer(ProjectDTO.class,
+                                              new ProjectSerDes.ProjectDeserializer());
+
+                deserializers.addDeserializer(CitSciDatastreamSerDes.CitSciDatastreamDTOPatch.class,
+                                              new CitSciDatastreamSerDes.CitSciDatastreamPatchDeserializer());
+                deserializers.addDeserializer(CitSciObservationSerDes.CitSciObservationDTOPatch.class,
+                                              new CitSciObservationSerDes.CitSciObservationPatchDeserializer());
+                deserializers.addDeserializer(ObservationGroupSerDes.ObservationGroupDTOPatch.class,
+                                              new ObservationGroupSerDes.ObservationGroupPatchDeserializer());
+                deserializers.addDeserializer(ObservationRelationSerDes.ObservationRelationDTOPatch.class,
+                                              new ObservationRelationSerDes.ObservationRelationPatchDeserializer());
+                deserializers.addDeserializer(LicenseSerDes.LicenseDTOPatch.class,
+                                              new LicenseSerDes.LicensePatchDeserializer());
+                deserializers.addDeserializer(PartySerDes.PartyDTOPatch.class,
+                                              new PartySerDes.PartyPatchDeserializer());
+                deserializers.addDeserializer(ProjectSerDes.ProjectDTOPatch.class,
+                                              new ProjectSerDes.ProjectPatchDeserializer());
+
+                deserializers.addDeserializer(ThingDTO.class,
+                                              new ThingSerDes.ThingDeserializer());
+            }
+        }
 
         module.setSerializers(serializers);
         module.setDeserializers(deserializers);

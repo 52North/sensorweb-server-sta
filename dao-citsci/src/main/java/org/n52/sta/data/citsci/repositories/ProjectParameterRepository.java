@@ -27,7 +27,7 @@
  * Public License for more details.
  */
 
-package org.n52.sta.data.repositories;
+package org.n52.sta.data.citsci.repositories;
 
 import org.n52.series.db.beans.parameter.project.ProjectParameterEntity;
 import org.n52.shetland.ogc.sta.StaConstants;

@@ -29,7 +29,7 @@
 
 package org.n52.sta.api.dto;
 
-import jdk.nashorn.internal.ir.ObjectNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.Set;
 

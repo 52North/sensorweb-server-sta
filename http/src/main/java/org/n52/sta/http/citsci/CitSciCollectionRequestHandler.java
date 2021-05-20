@@ -31,10 +31,10 @@ package org.n52.sta.http.citsci;
 
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
-import org.n52.sta.data.service.EntityServiceRepository;
-import org.n52.sta.data.service.util.CollectionWrapper;
-import org.n52.sta.service.CollectionRequestHandler;
-import org.n52.sta.utils.CitSciExtensionRequestUtils;
+import org.n52.sta.api.CitSciExtensionRequestUtils;
+import org.n52.sta.api.CollectionWrapper;
+import org.n52.sta.api.EntityServiceFactory;
+import org.n52.sta.http.CollectionRequestHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -59,7 +59,7 @@ public class CitSciCollectionRequestHandler extends CollectionRequestHandler imp
 
     public CitSciCollectionRequestHandler(@Value("${server.rootUrl}") String rootUrl,
                                           @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
-                                          EntityServiceRepository serviceRepository) {
+                                          EntityServiceFactory serviceRepository) {
         super(rootUrl, shouldEscapeId, serviceRepository);
     }
 

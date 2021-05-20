@@ -31,15 +31,11 @@ package org.n52.sta.http.citsci;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.sta.api.CitSciExtensionRequestUtils;
 import org.n52.sta.api.EntityServiceFactory;
 import org.n52.sta.api.RequestUtils;
 import org.n52.sta.api.dto.StaDTO;
-import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.http.PropertyRequestHandler;
-import org.n52.sta.serdes.util.ElementWithQueryOptions;
-import org.n52.sta.service.PropertyRequestHandler;
-import org.n52.sta.utils.CitSciExtensionRequestUtils;
-import org.n52.sta.utils.RequestUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -76,9 +72,9 @@ public class CitSciPropertyRequestHandler extends PropertyRequestHandler impleme
         produces = "application/json"
     )
     public StaDTO readEntityPropertyDirect(@PathVariable String entity,
-                                              @PathVariable String id,
-                                              @PathVariable String property,
-                                              HttpServletRequest request) throws Exception {
+                                           @PathVariable String id,
+                                           @PathVariable String property,
+                                           HttpServletRequest request) throws Exception {
         return super.readEntityPropertyDirect(entity, id, property, request);
     }
 

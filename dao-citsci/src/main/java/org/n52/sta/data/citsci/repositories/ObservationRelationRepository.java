@@ -27,10 +27,11 @@
  * Public License for more details.
  */
 
-package org.n52.sta.data.repositories;
+package org.n52.sta.data.citsci.repositories;
 
 import org.n52.series.db.beans.sta.ObservationRelationEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.sta.data.vanilla.repositories.StaIdentifierRepository;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
@@ -41,7 +42,4 @@ import org.springframework.stereotype.Repository;
 @Profile(StaConstants.CITSCIEXTENSION)
 public interface ObservationRelationRepository extends StaIdentifierRepository<ObservationRelationEntity> {
 
-    void deleteAllByObservationStaIdentifier(String id);
-
-    void deleteAllByGroupStaIdentifier(String id);
 }

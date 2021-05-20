@@ -27,7 +27,7 @@
  * Public License for more details.
  */
 
-package org.n52.sta.data.query;
+package org.n52.sta.data.citsci.query;
 
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DescribableEntity;
@@ -36,6 +36,7 @@ import org.n52.series.db.beans.sta.ObservationRelationEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
+import org.n52.sta.data.vanilla.query.EntityQuerySpecifications;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.Expression;
