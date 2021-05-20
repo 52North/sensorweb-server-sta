@@ -299,7 +299,7 @@ public class SensorService
 
         return existing;
     }
-    
+
     @Override
     public void delete(String identifier) throws STACRUDException {
         synchronized (getLock(identifier)) {

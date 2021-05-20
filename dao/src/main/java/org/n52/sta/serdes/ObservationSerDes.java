@@ -54,12 +54,12 @@ public class ObservationSerDes {
 
 
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
-    public static class ObservationEntityPatch<T> implements EntityPatch<ObservationDTO> {
+    public static class ObservationDTOPatch<T> implements EntityPatch<ObservationDTO> {
 
         private static final long serialVersionUID = 7385044376634149048L;
         private final ObservationDTO entity;
 
-        ObservationEntityPatch(ObservationDTO entity) {
+        ObservationDTOPatch(ObservationDTO entity) {
             this.entity = entity;
         }
 
@@ -299,19 +299,19 @@ public class ObservationSerDes {
     }
 
 
-    public static class ObservationPatchDeserializer extends StdDeserializer<ObservationEntityPatch> {
+    public static class ObservationPatchDeserializer extends StdDeserializer<ObservationDTOPatch> {
 
         private static final long serialVersionUID = 9042768872493184420L;
         private final Map<String, String> parameterMapping;
 
         public ObservationPatchDeserializer(Map<String, String> parameterMapping) {
-            super(ObservationEntityPatch.class);
+            super(ObservationDTOPatch.class);
             this.parameterMapping = parameterMapping;
         }
 
         @Override
-        public ObservationEntityPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return new ObservationEntityPatch(p.readValueAs(JSONObservation.class)
+        public ObservationDTOPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+            return new ObservationDTOPatch(p.readValueAs(JSONObservation.class)
                                                   //.parseParameters(parameterMapping)
                                                   .parseToDTO(JSONBase.EntityType.PATCH));
         }

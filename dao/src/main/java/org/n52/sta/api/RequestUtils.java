@@ -145,59 +145,5 @@ public interface RequestUtils extends StaConstants {
         SLASH + PROPERTY_GROUP_START + SQUARE_BRACKET_OPEN + "A-z," + SQUARE_BRACKET_CLOSE + PLUS +
             PROPERTY_GROUP_END;
 
-    default Class collectionNameToClass(String collectionName) throws STAInvalidUrlException {
-        switch (collectionName) {
-            case StaConstants.THINGS:
-                return ThingDTO.class;
-            case StaConstants.LOCATIONS:
-                return LocationDTO.class;
-            case StaConstants.DATASTREAMS:
-                return DatastreamDTO.class;
-            case StaConstants.HISTORICAL_LOCATIONS:
-                return HistoricalLocationDTO.class;
-            case StaConstants.SENSORS:
-                return SensorDTO.class;
-            case StaConstants.OBSERVATIONS:
-                return ObservationDTO.class;
-            case StaConstants.OBSERVED_PROPERTIES:
-                return ObservedPropertyDTO.class;
-            case StaConstants.FEATURES_OF_INTEREST:
-                return FeatureOfInterestDTO.class;
-            default:
-                throw new STAInvalidUrlException("could not resolve collectionName to entity");
-        }
-    }
-
-    default Class collectionNameToPatchClass(String collectionName) throws STAInvalidUrlException {
-        switch (collectionName) {
-            case StaConstants.THINGS:
-            case StaConstants.THING:
-                return ThingSerDes.ThingDTOPatch.class;
-            case StaConstants.LOCATIONS:
-            case StaConstants.LOCATION:
-                return LocationSerDes.LocationDTOPatch.class;
-            case StaConstants.DATASTREAMS:
-            case StaConstants.DATASTREAM:
-                return DatastreamSerDes.DatastreamDTOPatch.class;
-            case StaConstants.HISTORICAL_LOCATIONS:
-            case StaConstants.HISTORICAL_LOCATION:
-                return HistoricalLocationSerDes.HistoricalLocationDTOPatch.class;
-            case StaConstants.SENSORS:
-            case StaConstants.SENSOR:
-                return SensorSerDes.SensorDTOPatch.class;
-            case StaConstants.OBSERVATIONS:
-            case StaConstants.OBSERVATION:
-                return ObservationSerDes.ObservationEntityPatch.class;
-            case StaConstants.OBSERVED_PROPERTIES:
-            case StaConstants.OBSERVED_PROPERTY:
-                return ObservedPropertySerDes.ObservedPropertyDTOPatch.class;
-            case StaConstants.FEATURES_OF_INTEREST:
-            case StaConstants.FEATURE_OF_INTEREST:
-                return FeatureOfInterestSerDes.FeatureOfInterestDTOPatch.class;
-            default:
-                throw new STAInvalidUrlException("Could not resolve CollectionName to PatchEntity class!");
-        }
-    }
-
     STAInvalidUrlException validateURISyntax(String[] uriResources);
 }

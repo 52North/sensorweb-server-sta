@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.serdes;
 
 import com.fasterxml.jackson.databind.Module;
@@ -46,7 +47,6 @@ import org.n52.sta.api.dto.ThingDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
@@ -55,7 +55,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-@Primary
 public class JacksonConfig {
 
     @Bean
@@ -132,7 +131,7 @@ public class JacksonConfig {
                                       new LocationSerDes.LocationPatchDeserializer());
         deserializers.addDeserializer(SensorSerDes.SensorDTOPatch.class,
                                       new SensorSerDes.SensorPatchDeserializer(variableSensorEncodingTypeEnabled));
-        deserializers.addDeserializer(ObservationSerDes.ObservationEntityPatch.class,
+        deserializers.addDeserializer(ObservationSerDes.ObservationDTOPatch.class,
                                       new ObservationSerDes.ObservationPatchDeserializer(parameterMapping));
         deserializers.addDeserializer(ObservedPropertySerDes.ObservedPropertyDTOPatch.class,
                                       new ObservedPropertySerDes.ObservedPropertyPatchDeserializer());
