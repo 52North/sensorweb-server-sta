@@ -101,7 +101,7 @@ spring:
       hibernate:
         hbm2ddl:
           # hbm2ddl values: validate | update | create | create-drop | none
-          auto: validate
+          auto: create
         jdbc:
           time_zone: UTC
           # https://hibernate.atlassian.net/browse/HHH-12368
@@ -112,8 +112,8 @@ spring:
         # see https://stackoverflow.com/questions/46493500/hibernate-with-c3p0-createclob-is-not-yet-implemented
         temp.use_jdbc_metadata_defaults: false
 
-        show_sql: true
-        format_sql: true
+        show_sql: false
+        format_sql: false
         use_sql_comments: false
   jmx:
     enabled: false
