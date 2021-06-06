@@ -607,7 +607,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<
 
     protected ObservationRelationService getObservationRelationService() {
         return (ObservationRelationService)
-            serviceRepository.getEntityServiceRaw(EntityTypes.Subject);
+            serviceRepository.getEntityServiceRaw(EntityTypes.ObservationRelation);
     }
 
     protected LicenseService getLicenseService() {
