@@ -42,6 +42,7 @@ import org.n52.sta.api.dto.LicenseDTO;
 import org.n52.sta.data.citsci.query.LicenseQuerySpecifications;
 import org.n52.sta.data.citsci.repositories.LicenseRepository;
 import org.n52.sta.data.vanilla.repositories.EntityGraphRepository;
+import org.n52.sta.data.vanilla.service.AbstractSensorThingsEntityServiceImpl;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.domain.Specification;
@@ -61,7 +62,7 @@ import java.util.UUID;
 @Transactional
 @Profile(StaConstants.CITSCIEXTENSION)
 public class LicenseService
-    extends AbstractCitSciSensorThingsEntityServiceImpl<LicenseRepository, LicenseDTO, LicenseEntity> {
+    extends AbstractSensorThingsEntityServiceImpl<LicenseRepository, LicenseDTO, LicenseEntity> {
 
     private static final LicenseQuerySpecifications lQS = new LicenseQuerySpecifications();
     private final EntityManager em;
@@ -86,9 +87,10 @@ public class LicenseService
                         EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS,
                     };
                 } else {
-                    throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                                                                     expandProperty,
-                                                                     StaConstants.LICENSE));
+                    throw new STAInvalidQueryException(
+                        String.format(AbstractSensorThingsEntityServiceImpl.INVALID_EXPAND_OPTION_SUPPLIED,
+                                      expandProperty,
+                                      StaConstants.LICENSE));
                 }
             }
         }
@@ -116,9 +118,10 @@ public class LicenseService
                 */
                 return entity;
             } else {
-                throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                                                                 expandProperty,
-                                                                 StaConstants.LICENSE));
+                throw new STAInvalidQueryException(
+                    String.format(AbstractSensorThingsEntityServiceImpl.INVALID_EXPAND_OPTION_SUPPLIED,
+                                  expandProperty,
+                                  StaConstants.LICENSE));
             }
         }
         return entity;
@@ -129,11 +132,16 @@ public class LicenseService
                                                                            String ownId) {
         Specification<LicenseEntity> filter;
         switch (relatedType) {
-            case STAEntityDefinition.DATASTREAMS:
-                filter = lQS.withDatastreamStaIdentifier(relatedId);
+            case STAEntityDefinition.OBSERVATIONS:
+                filter = lQS.withObservationStaIdentifier(relatedId);
+                break;
+            case STAEntityDefinition.OBSERVATION_GROUPS:
+                filter = lQS.withObservationGroupStaIdentifier(relatedId);
                 break;
             default:
-                throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
+                throw new IllegalStateException(
+                    String.format(AbstractSensorThingsEntityServiceImpl.TRYING_TO_FILTER_BY_UNRELATED_TYPE,
+                                  relatedType));
         }
 
         if (ownId != null) {
@@ -151,7 +159,7 @@ public class LicenseService
             if (optionalEntity.isPresent()) {
                 return optionalEntity.get();
             } else {
-                throw new STACRUDException(String.format(NO_S_WITH_ID_S_FOUND,
+                throw new STACRUDException(String.format(AbstractSensorThingsEntityServiceImpl.NO_S_WITH_ID_S_FOUND,
                                                          StaConstants.LICENSE,
                                                          license.getStaIdentifier()));
             }
@@ -162,7 +170,8 @@ public class LicenseService
         }
         synchronized (getLock(license.getStaIdentifier())) {
             if (getRepository().existsByStaIdentifier(license.getStaIdentifier())) {
-                throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS, HTTPStatus.CONFLICT);
+                throw new STACRUDException(AbstractSensorThingsEntityServiceImpl.IDENTIFIER_ALREADY_EXISTS,
+                                           HTTPStatus.CONFLICT);
             } else {
                 //TODO: nested
                 getRepository().save(license);
@@ -181,12 +190,15 @@ public class LicenseService
                     LicenseEntity merged = merge(existing.get(), entity);
                     return getRepository().save(merged);
                 }
-                throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
+                throw new STACRUDException(AbstractSensorThingsEntityServiceImpl.UNABLE_TO_UPDATE_ENTITY_NOT_FOUND,
+                                           HTTPStatus.NOT_FOUND);
             }
         } else if (HttpMethod.PUT.equals(method)) {
-            throw new STACRUDException(HTTP_PUT_IS_NOT_YET_SUPPORTED, HTTPStatus.NOT_IMPLEMENTED);
+            throw new STACRUDException(AbstractSensorThingsEntityServiceImpl.HTTP_PUT_IS_NOT_YET_SUPPORTED,
+                                       HTTPStatus.NOT_IMPLEMENTED);
         }
-        throw new STACRUDException(INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY, HTTPStatus.BAD_REQUEST);
+        throw new STACRUDException(AbstractSensorThingsEntityServiceImpl.INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY,
+                                   HTTPStatus.BAD_REQUEST);
     }
 
     @Override public LicenseEntity createOrUpdate(LicenseEntity entity) throws STACRUDException {
@@ -223,7 +235,8 @@ public class LicenseService
             if (getRepository().existsByStaIdentifier(id)) {
                 getRepository().deleteByStaIdentifier(id);
             } else {
-                throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
+                throw new STACRUDException(AbstractSensorThingsEntityServiceImpl.UNABLE_TO_DELETE_ENTITY_NOT_FOUND,
+                                           HTTPStatus.NOT_FOUND);
             }
         }
     }

@@ -37,7 +37,12 @@ import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
+import org.n52.series.db.beans.sta.LicenseEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.series.db.beans.sta.ObservationGroupEntity;
+import org.n52.series.db.beans.sta.ObservationRelationEntity;
+import org.n52.series.db.beans.sta.PartyEntity;
+import org.n52.series.db.beans.sta.ProjectEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.api.AbstractSensorThingsEntityService;
@@ -45,13 +50,23 @@ import org.n52.sta.api.CollectionWrapper;
 import org.n52.sta.api.dto.DatastreamDTO;
 import org.n52.sta.api.dto.FeatureOfInterestDTO;
 import org.n52.sta.api.dto.HistoricalLocationDTO;
+import org.n52.sta.api.dto.LicenseDTO;
 import org.n52.sta.api.dto.LocationDTO;
 import org.n52.sta.api.dto.ObservationDTO;
+import org.n52.sta.api.dto.ObservationGroupDTO;
+import org.n52.sta.api.dto.ObservationRelationDTO;
 import org.n52.sta.api.dto.ObservedPropertyDTO;
+import org.n52.sta.api.dto.PartyDTO;
+import org.n52.sta.api.dto.ProjectDTO;
 import org.n52.sta.api.dto.SensorDTO;
 import org.n52.sta.api.dto.StaDTO;
 import org.n52.sta.api.dto.ThingDTO;
-import org.n52.sta.data.vanilla.DTOTransformer;
+import org.n52.sta.data.citsci.service.LicenseService;
+import org.n52.sta.data.citsci.service.ObservationGroupService;
+import org.n52.sta.data.citsci.service.ObservationRelationService;
+import org.n52.sta.data.citsci.service.PartyService;
+import org.n52.sta.data.citsci.service.ProjectService;
+import org.n52.sta.data.vanilla.DTOTransformerImpl;
 import org.n52.sta.data.vanilla.DaoSemaphore;
 import org.n52.sta.data.vanilla.SerDesConfig;
 import org.springframework.http.HttpMethod;
@@ -186,7 +201,7 @@ public abstract class ServiceFacade<R extends StaDTO, S extends HibernateRelatio
         R result;
         try {
             semaphore.acquire();
-            result = serviceImpl.create((S) new DTOTransformer<>(config).fromDTO(entity));
+            result = serviceImpl.create((S) new DTOTransformerImpl<>(config).fromDTO(entity));
         } catch (InterruptedException e) {
             throw new STACRUDException(e.getMessage(), e);
         } finally {
@@ -199,7 +214,7 @@ public abstract class ServiceFacade<R extends StaDTO, S extends HibernateRelatio
         R result;
         try {
             semaphore.acquire();
-            result = serviceImpl.update(id, (S) new DTOTransformer<>(config).fromDTO(entity), method);
+            result = serviceImpl.update(id, (S) new DTOTransformerImpl<>(config).fromDTO(entity), method);
         } catch (InterruptedException e) {
             throw new STACRUDException(e.getMessage(), e);
         } finally {
@@ -306,6 +321,62 @@ public abstract class ServiceFacade<R extends StaDTO, S extends HibernateRelatio
         FeatureOfInterestServiceFacade(FeatureOfInterestService serviceImpl,
                                        DaoSemaphore semaphore,
                                        SerDesConfig config) {
+            super(serviceImpl, semaphore, config);
+        }
+    }
+
+
+    @Component
+    static class LicenseServiceFacade extends ServiceFacade<LicenseDTO, LicenseEntity> {
+
+        LicenseServiceFacade(LicenseService serviceImpl,
+                             DaoSemaphore semaphore,
+                             SerDesConfig config) {
+            super(serviceImpl, semaphore, config);
+        }
+    }
+
+
+    @Component
+    static class PartyServiceFacade extends ServiceFacade<PartyDTO, PartyEntity> {
+
+        PartyServiceFacade(PartyService serviceImpl,
+                           DaoSemaphore semaphore,
+                           SerDesConfig config) {
+            super(serviceImpl, semaphore, config);
+        }
+    }
+
+
+    @Component
+    static class ProjectServiceFacade extends ServiceFacade<ProjectDTO, ProjectEntity> {
+
+        ProjectServiceFacade(ProjectService serviceImpl,
+                             DaoSemaphore semaphore,
+                             SerDesConfig config) {
+            super(serviceImpl, semaphore, config);
+        }
+    }
+
+
+    @Component
+    static class ObservationRelationServiceFacade
+        extends ServiceFacade<ObservationRelationDTO, ObservationRelationEntity> {
+
+        ObservationRelationServiceFacade(ObservationRelationService serviceImpl,
+                                         DaoSemaphore semaphore,
+                                         SerDesConfig config) {
+            super(serviceImpl, semaphore, config);
+        }
+    }
+
+
+    @Component
+    static class ObservationGroupServiceFacade extends ServiceFacade<ObservationGroupDTO, ObservationGroupEntity> {
+
+        ObservationGroupServiceFacade(ObservationGroupService serviceImpl,
+                                      DaoSemaphore semaphore,
+                                      SerDesConfig config) {
             super(serviceImpl, semaphore, config);
         }
     }

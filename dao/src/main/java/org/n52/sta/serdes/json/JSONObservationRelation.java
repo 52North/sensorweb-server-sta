@@ -53,13 +53,13 @@ public class JSONObservationRelation extends JSONBase.JSONwithId<ObservationRela
     public String namespace;
 
     @JsonManagedReference
-    public JSONObservationGroup[] group;
+    public JSONObservationGroup[] ObservationGroups;
 
     @JsonManagedReference
-    public JSONObservation subject;
+    public JSONObservation Subject;
 
     @JsonManagedReference
-    public JSONObservation object;
+    public JSONObservation Object;
 
     public JSONObservationRelation() {
         self = new ObservationRelation();
@@ -71,8 +71,8 @@ public class JSONObservationRelation extends JSONBase.JSONwithId<ObservationRela
                 parseReferencedFrom();
                 Assert.notNull(role, INVALID_INLINE_ENTITY_MISSING + "role");
                 Assert.notNull(namespace, INVALID_INLINE_ENTITY_MISSING + "namespace");
-                Assert.isNull(object, INVALID_INLINE_ENTITY_MISSING + "object");
-                Assert.isNull(subject, INVALID_INLINE_ENTITY_MISSING + "subject");
+                Assert.notNull(Object, INVALID_INLINE_ENTITY_MISSING + "object");
+                Assert.notNull(Subject, INVALID_INLINE_ENTITY_MISSING + "subject");
 
                 return createEntity();
             case PATCH:
@@ -80,9 +80,9 @@ public class JSONObservationRelation extends JSONBase.JSONwithId<ObservationRela
                 return createEntity();
 
             case REFERENCE:
-                Assert.isNull(group, INVALID_REFERENCED_ENTITY);
-                Assert.isNull(object, INVALID_REFERENCED_ENTITY);
-                Assert.isNull(subject, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(ObservationGroups, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(Object, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(Subject, INVALID_REFERENCED_ENTITY);
                 Assert.isNull(type, INVALID_REFERENCED_ENTITY);
                 self.setId(identifier);
                 return self;
@@ -97,19 +97,17 @@ public class JSONObservationRelation extends JSONBase.JSONwithId<ObservationRela
         self.setNamespace(namespace);
         self.setRole(role);
 
-        if (object != null) {
-            self.setObject(object.parseToDTO(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
-        } else if (backReference instanceof JSONObservation) {
-            self.setObject(((JSONObservation) backReference).getEntity());
+        if (Object != null) {
+            self.setObject(Object.parseToDTO(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
         }
 
-        if (subject != null) {
-            self.setSubject(subject.parseToDTO(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+        if (Subject != null) {
+            self.setSubject(Subject.parseToDTO(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
         }
 
-        if (group != null) {
+        if (ObservationGroups != null) {
             Set<ObservationGroupDTO> groups = new HashSet<>();
-            for (JSONObservationGroup jsonObservationGroup : group) {
+            for (JSONObservationGroup jsonObservationGroup : ObservationGroups) {
                 groups.add(jsonObservationGroup.parseToDTO(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
             }
             self.setObservationGroups(groups);

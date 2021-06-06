@@ -26,10 +26,13 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.dto;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.n52.shetland.ogc.gml.time.Time;
+
+import java.util.Set;
 
 /**
  * Data Transfer Object for handling an Observation as specified in 18-088 OGC SensorThingsAPI Part I Section 8.2.7
@@ -75,4 +78,20 @@ public interface ObservationDTO extends StaDTO {
     DatastreamDTO getDatastream();
 
     void setDatastream(DatastreamDTO datastream);
+
+    Set<ObservationRelationDTO> getSubjects();
+
+    void setSubjects(Set<ObservationRelationDTO> subjects);
+
+    Set<ObservationRelationDTO> getObjects();
+
+    void setObjects(Set<ObservationRelationDTO> objects);
+
+    Set<ObservationGroupDTO> getObservationGroups();
+
+    void setObservationGroups(Set<ObservationGroupDTO> groups);
+
+    LicenseDTO getLicense();
+
+    void setLicense(LicenseDTO license);
 }

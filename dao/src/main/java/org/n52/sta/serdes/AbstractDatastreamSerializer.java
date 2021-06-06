@@ -131,6 +131,29 @@ public class AbstractDatastreamSerializer<T extends DatastreamDTO> extends Abstr
             gen.writeObjectField(STAEntityDefinition.PROP_PROPERTIES, datastream.getProperties());
         }
 
+        if (!datastream.hasSelectOption() ||
+            datastream.getFieldsToSerialize().contains(STAEntityDefinition.PARTY)) {
+            if (datastream.getParty() == null) {
+                writeNavigationProp(gen, STAEntityDefinition.PARTY, datastream.getId());
+            } else {
+                gen.writeFieldName(STAEntityDefinition.PARTY);
+                writeNestedEntity(datastream.getParty(),
+                                  gen,
+                                  serializers);
+            }
+        }
+        if (!datastream.hasSelectOption() ||
+            datastream.getFieldsToSerialize().contains(STAEntityDefinition.PROJECT)) {
+            if (datastream.getParty() == null) {
+                writeNavigationProp(gen, STAEntityDefinition.PROJECT, datastream.getId());
+            } else {
+                gen.writeFieldName(STAEntityDefinition.PROJECT);
+                writeNestedEntity(datastream.getParty(),
+                                  gen,
+                                  serializers);
+            }
+        }
+
         // navigation properties
         for (String navigationProperty : DatastreamEntityDefinition.NAVIGATION_PROPERTIES) {
             if (!datastream.hasSelectOption() || datastream.getFieldsToSerialize().contains(navigationProperty)) {

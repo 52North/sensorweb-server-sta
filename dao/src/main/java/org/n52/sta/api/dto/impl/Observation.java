@@ -26,13 +26,19 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.dto.impl;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.sta.api.dto.DatastreamDTO;
 import org.n52.sta.api.dto.FeatureOfInterestDTO;
+import org.n52.sta.api.dto.LicenseDTO;
 import org.n52.sta.api.dto.ObservationDTO;
+import org.n52.sta.api.dto.ObservationGroupDTO;
+import org.n52.sta.api.dto.ObservationRelationDTO;
+
+import java.util.Set;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -57,6 +63,14 @@ public class Observation extends Entity implements ObservationDTO {
     private DatastreamDTO datastream;
 
     private FeatureOfInterestDTO featureOfInterest;
+
+    private LicenseDTO license;
+
+    private Set<ObservationRelationDTO> subjects;
+
+    private Set<ObservationRelationDTO> objects;
+
+    private Set<ObservationGroupDTO> observationGroups;
 
     public void setResultQuality(Object resultQuality) {
         this.resultQuality = resultQuality;
@@ -116,5 +130,37 @@ public class Observation extends Entity implements ObservationDTO {
 
     public void setDatastream(DatastreamDTO datastream) {
         this.datastream = datastream;
+    }
+
+    @Override public Set<ObservationRelationDTO> getSubjects() {
+        return subjects;
+    }
+
+    public void setSubjects(Set<ObservationRelationDTO> subjects) {
+        this.subjects = subjects;
+    }
+
+    @Override public Set<ObservationRelationDTO> getObjects() {
+        return objects;
+    }
+
+    public void setObjects(Set<ObservationRelationDTO> objects) {
+        this.objects = objects;
+    }
+
+    @Override public Set<ObservationGroupDTO> getObservationGroups() {
+        return observationGroups;
+    }
+
+    @Override public void setObservationGroups(Set<ObservationGroupDTO> observationGroups) {
+        this.observationGroups = observationGroups;
+    }
+
+    @Override public LicenseDTO getLicense() {
+        return license;
+    }
+
+    @Override public void setLicense(LicenseDTO license) {
+        this.license = license;
     }
 }

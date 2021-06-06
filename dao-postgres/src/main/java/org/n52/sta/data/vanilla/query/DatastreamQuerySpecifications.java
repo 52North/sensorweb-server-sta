@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.vanilla.query;
 
 import org.n52.series.db.beans.AbstractDatasetEntity;
@@ -40,6 +41,8 @@ import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.series.db.beans.parameter.dataset.DatasetParameterEntity;
+import org.n52.series.db.beans.sta.PartyEntity;
+import org.n52.series.db.beans.sta.ProjectEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
@@ -293,6 +296,18 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Abs
                 root.join(AbstractDatasetEntity.PROPERTY_PHENOMENON, JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), observablePropertyIdentifier);
         };
+    }
+
+    public Specification<AbstractDatasetEntity> withPartyStaIdentifier(
+        final String partyIdentifier) {
+        return (root, query, builder) -> builder.equal(root.get(AbstractDatasetEntity.PROPERTY_PARTY)
+                                                           .get(PartyEntity.STA_IDENTIFIER), partyIdentifier);
+    }
+
+    public Specification<AbstractDatasetEntity> withProjectStaIdentifier(
+        final String projectIdentifier) {
+        return (root, query, builder) -> builder.equal(root.get(AbstractDatasetEntity.PROPERTY_PROJECT)
+                                                           .get(ProjectEntity.STA_IDENTIFIER), projectIdentifier);
     }
 
     public Specification<AbstractDatasetEntity> withObservedPropertyName(final String name) {

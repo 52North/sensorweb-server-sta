@@ -34,27 +34,35 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.sta.api.dto.DatastreamDTO;
 import org.n52.sta.api.dto.FeatureOfInterestDTO;
 import org.n52.sta.api.dto.HistoricalLocationDTO;
+import org.n52.sta.api.dto.LicenseDTO;
 import org.n52.sta.api.dto.LocationDTO;
 import org.n52.sta.api.dto.ObservationDTO;
+import org.n52.sta.api.dto.ObservationGroupDTO;
+import org.n52.sta.api.dto.ObservationRelationDTO;
 import org.n52.sta.api.dto.ObservedPropertyDTO;
+import org.n52.sta.api.dto.PartyDTO;
+import org.n52.sta.api.dto.ProjectDTO;
 import org.n52.sta.api.dto.SensorDTO;
 import org.n52.sta.api.dto.ThingDTO;
 import org.n52.sta.serdes.DatastreamSerDes;
 import org.n52.sta.serdes.FeatureOfInterestSerDes;
 import org.n52.sta.serdes.HistoricalLocationSerDes;
+import org.n52.sta.serdes.LicenseSerDes;
 import org.n52.sta.serdes.LocationSerDes;
+import org.n52.sta.serdes.ObservationGroupSerDes;
+import org.n52.sta.serdes.ObservationRelationSerDes;
 import org.n52.sta.serdes.ObservationSerDes;
 import org.n52.sta.serdes.ObservedPropertySerDes;
+import org.n52.sta.serdes.PartySerDes;
+import org.n52.sta.serdes.ProjectSerDes;
 import org.n52.sta.serdes.SensorSerDes;
 import org.n52.sta.serdes.ThingSerDes;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Component
-@Profile("!" + StaConstants.CITSCIEXTENSION)
 public class DTOMapper {
 
     public Class collectionNameToClass(String collectionName) throws STAInvalidUrlException {
@@ -75,6 +83,16 @@ public class DTOMapper {
                 return ObservedPropertyDTO.class;
             case StaConstants.FEATURES_OF_INTEREST:
                 return FeatureOfInterestDTO.class;
+            case StaConstants.OBSERVATION_GROUPS:
+                return ObservationGroupDTO.class;
+            case StaConstants.OBSERVATION_RELATIONS:
+                return ObservationRelationDTO.class;
+            case StaConstants.LICENSES:
+                return LicenseDTO.class;
+            case StaConstants.PROJECTS:
+                return ProjectDTO.class;
+            case StaConstants.PARTIES:
+                return PartyDTO.class;
             default:
                 throw new STAInvalidUrlException("could not resolve collectionName to entity");
         }
@@ -106,49 +124,23 @@ public class DTOMapper {
             case StaConstants.FEATURES_OF_INTEREST:
             case StaConstants.FEATURE_OF_INTEREST:
                 return FeatureOfInterestSerDes.FeatureOfInterestDTOPatch.class;
-            default:
-                throw new STAInvalidUrlException("Could not resolve CollectionName to PatchEntity class!");
-        }
-    }
-
-       /*
-    Class collectionNameToPatchClass(String collectionName) throws STAInvalidUrlException {
-        switch (collectionName) {
             case StaConstants.OBSERVATION_GROUP:
             case StaConstants.OBSERVATION_GROUPS:
-                return .class ;
+                return ObservationGroupSerDes.ObservationGroupDTOPatch.class;
             case StaConstants.OBSERVATION_RELATIONS:
             case StaConstants.OBSERVATION_RELATION:
-                return ObservationRelationSerDes.ObservationRelationPatch.class;
+                return ObservationRelationSerDes.ObservationRelationDTOPatch.class;
             case StaConstants.LICENSES:
             case StaConstants.LICENSE:
-                return LicenseSerDes.LicensePatch.class;
+                return LicenseSerDes.LicenseDTOPatch.class;
             case StaConstants.PROJECTS:
             case StaConstants.PROJECT:
-                return ProjectSerDes.ProjectPatch.class;
+                return ProjectSerDes.ProjectDTOPatch.class;
             case StaConstants.PARTIES:
             case StaConstants.PARTY:
-                return PartySerDes.PartyPatch.class;
+                return PartySerDes.PartyDTOPatch.class;
             default:
                 throw new STAInvalidUrlException("Could not resolve CollectionName to PatchEntity class!");
         }
     }
-
-    Class collectionNameToClass(String collectionName) throws STAInvalidUrlException {
-        switch (collectionName) {
-            case StaConstants.OBSERVATION_GROUPS:
-                return ObservationGroupEntity.class;
-            case StaConstants.OBSERVATION_RELATIONS:
-                return ObservationRelationEntity.class;
-            case StaConstants.LICENSES:
-                return LicenseEntity.class;
-            case StaConstants.PROJECTS:
-                return ProjectEntity.class;
-            case StaConstants.PARTIES:
-                return PartyEntity.class;
-            default:
-                throw new STAInvalidUrlException("Could not resolve CollectionName to Entity class!");
-        }
-    }
-     */
 }

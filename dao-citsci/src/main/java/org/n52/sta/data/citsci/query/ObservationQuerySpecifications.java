@@ -37,6 +37,7 @@ import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.series.db.beans.parameter.observation.ObservationParameterEntity;
+import org.n52.series.db.beans.sta.LicenseEntity;
 import org.n52.series.db.beans.sta.ObservationRelationEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
@@ -112,6 +113,11 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
         return (root, query, builder) -> builder.equal(root.get(DataEntity.PROPERTY_PARENT), parentId);
     }
 
+    public static Specification<DataEntity<?>> withLicenseStaIdentifier(String relatedId) {
+        return (root, query, builder) -> builder.equal(root.get(DataEntity.PROPERTY_LICENSE)
+                                                           .get(LicenseEntity.STA_IDENTIFIER), relatedId);
+    }
+
     @Override protected Specification<DataEntity<?>> handleRelatedPropertyFilter(
         String propertyName,
         Specification<?> propertyValue) {
@@ -145,15 +151,6 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
                                                                                             query,
                                                                                             builder));
                     return builder.in(join.get(DescribableEntity.PROPERTY_ID)).value(sq);
-                } else if (StaConstants.OBSERVATION_RELATIONS.equals(propertyName)) {
-                    Subquery<DataEntity> sq = query.subquery(DataEntity.class);
-                    Root<ObservationRelationEntity> obsRelation = sq.from(ObservationRelationEntity.class);
-                    sq.select(obsRelation.get(ObservationRelationEntity.PROPERTY_OBSERVATION)).where(
-                        ((Specification<ObservationRelationEntity>) propertyValue).toPredicate(obsRelation,
-                                                                                               query,
-                                                                                               builder));
-                    return builder.in(root.get(DataEntity.ID)).value(sq);
-
                 } else {
                     throw new STAInvalidFilterExpressionException(
                         "Could not find related property: " + propertyName);

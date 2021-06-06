@@ -46,6 +46,7 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.vanilla.DTOTransformer;
+import org.n52.sta.data.vanilla.DTOTransformerImpl;
 import org.n52.sta.data.vanilla.SerDesConfig;
 import org.n52.sta.SpringApplicationContext;
 import org.n52.sta.api.STAEventHandler;
@@ -260,7 +261,7 @@ public class MessageBusRepository<T, I extends Serializable>
     @Override
     public <S extends T> S save(S newEntity) {
         String entityType = entityTypeToStaType.get(entityInformation.getEntityName());
-        final DTOTransformer<?, ?> transformer = new DTOTransformer<>(config);
+        final DTOTransformer<?, ?> transformer = new DTOTransformerImpl<>(config);
         boolean intercept =
             mqttHandler.getWatchedEntityTypes().contains(entityType);
 

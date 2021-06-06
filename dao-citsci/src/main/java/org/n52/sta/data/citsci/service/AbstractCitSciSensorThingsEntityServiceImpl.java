@@ -32,7 +32,7 @@ package org.n52.sta.data.citsci.service;
 import org.n52.series.db.beans.HibernateRelations;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.dto.StaDTO;
-import org.n52.sta.data.citsci.CitSciDTOTransformer;
+import org.n52.sta.data.citsci.CitSciDTOTransformerImpl;
 import org.n52.sta.data.citsci.CitSciEntityServiceRepository;
 import org.n52.sta.data.vanilla.repositories.StaIdentifierRepository;
 import org.n52.sta.data.vanilla.service.AbstractSensorThingsEntityServiceImpl;
@@ -59,32 +59,32 @@ public abstract class AbstractCitSciSensorThingsEntityServiceImpl<
 
     @Transactional(rollbackFor = Exception.class)
     protected R createWrapper(S entity, QueryOptions queryOptions) {
-        return new CitSciDTOTransformer<R, S>().toDTO(entity, queryOptions);
+        return new CitSciDTOTransformerImpl<R, S>(null).toDTO(entity, queryOptions);
     }
 
     ObservationGroupService getObservationGroupService() {
         return (ObservationGroupService)
-            serviceRepository.getEntityServiceRaw(CitSciEntityServiceRepository.EntityTypes.ObservationGroup);
+            serviceRepository.getEntityServiceRaw(CitSciEntityServiceRepository.CitSciEntityTypes.ObservationGroup);
     }
 
     ObservationRelationService getObservationRelationService() {
         return (ObservationRelationService)
-            serviceRepository.getEntityServiceRaw(CitSciEntityServiceRepository.EntityTypes.ObservationRelation);
+            serviceRepository.getEntityServiceRaw(CitSciEntityServiceRepository.CitSciEntityTypes.Subject);
     }
 
     LicenseService getLicenseService() {
         return (LicenseService)
-            serviceRepository.getEntityServiceRaw(CitSciEntityServiceRepository.EntityTypes.License);
+            serviceRepository.getEntityServiceRaw(CitSciEntityServiceRepository.CitSciEntityTypes.License);
     }
 
     PartyService getPartyService() {
         return (PartyService)
-            serviceRepository.getEntityServiceRaw(CitSciEntityServiceRepository.EntityTypes.Party);
+            serviceRepository.getEntityServiceRaw(CitSciEntityServiceRepository.CitSciEntityTypes.Party);
     }
 
     ProjectService getProjectService() {
         return (ProjectService)
-            serviceRepository.getEntityServiceRaw(CitSciEntityServiceRepository.EntityTypes.Project);
+            serviceRepository.getEntityServiceRaw(CitSciEntityServiceRepository.CitSciEntityTypes.Project);
     }
 
 }

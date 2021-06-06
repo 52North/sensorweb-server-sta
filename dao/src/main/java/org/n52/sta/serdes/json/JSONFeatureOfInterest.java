@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.serdes.json;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -58,6 +59,7 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
     public JSONObservation[] Observations;
 
     private final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
+    private final String ENCODINGTYPE_GEOJSON_ALT = "application/geo+json";
     private final String INVALID_ENCODINGTYPE =
         "Invalid encodingType supplied. Only GeoJSON (application/vnd.geo+json) is supported!";
     private final GeometryFactory factory =
@@ -86,7 +88,8 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
                 Assert.notNull(feature, INVALID_INLINE_ENTITY_MISSING + "feature");
                 Assert.notNull(feature.get(TYPE), INVALID_INLINE_ENTITY_MISSING + FEATURE_TYPE);
                 Assert.notNull(encodingType, INVALID_ENCODINGTYPE);
-                Assert.isTrue(Objects.equals(encodingType, ENCODINGTYPE_GEOJSON), INVALID_ENCODINGTYPE);
+                Assert.isTrue(Objects.equals(encodingType, ENCODINGTYPE_GEOJSON) ||
+                                  Objects.equals(encodingType, ENCODINGTYPE_GEOJSON_ALT), INVALID_ENCODINGTYPE);
 
                 self.setId(identifier);
                 self.setName(name);
@@ -124,7 +127,8 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
                 self.setDescription(description);
 
                 if (encodingType != null) {
-                    Assert.state(encodingType.equals(ENCODINGTYPE_GEOJSON), INVALID_ENCODINGTYPE);
+                    Assert.state(encodingType.equals(ENCODINGTYPE_GEOJSON) ||
+                                     Objects.equals(encodingType, ENCODINGTYPE_GEOJSON_ALT), INVALID_ENCODINGTYPE);
                 }
 
                 if (properties != null) {

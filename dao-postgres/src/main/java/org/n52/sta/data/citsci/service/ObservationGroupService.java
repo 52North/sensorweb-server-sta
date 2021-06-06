@@ -30,23 +30,23 @@
 package org.n52.sta.data.citsci.service;
 
 import org.n52.janmayen.http.HTTPStatus;
+import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.parameter.observationgroup.ObservationGroupParameterEntity;
 import org.n52.series.db.beans.sta.ObservationGroupEntity;
 import org.n52.series.db.beans.sta.ObservationRelationEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.ObservationGroupEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.api.dto.ObservationGroupDTO;
-import org.n52.sta.data.citsci.CitSciDTOTransformer;
 import org.n52.sta.data.citsci.query.ObservationGroupQuerySpecifications;
 import org.n52.sta.data.citsci.repositories.ObservationGroupParameterRepository;
 import org.n52.sta.data.citsci.repositories.ObservationGroupRepository;
 import org.n52.sta.data.vanilla.repositories.EntityGraphRepository;
+import org.n52.sta.data.vanilla.service.AbstractSensorThingsEntityServiceImpl;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
@@ -70,7 +70,7 @@ import java.util.stream.Collectors;
 @Transactional
 @Profile(StaConstants.CITSCIEXTENSION)
 public class ObservationGroupService
-    extends AbstractCitSciSensorThingsEntityServiceImpl<ObservationGroupRepository, ObservationGroupDTO,
+    extends AbstractSensorThingsEntityServiceImpl<ObservationGroupRepository, ObservationGroupDTO,
     ObservationGroupEntity> {
 
     private static final ObservationGroupQuerySpecifications ogQS = new ObservationGroupQuerySpecifications();
@@ -81,11 +81,6 @@ public class ObservationGroupService
                                    EntityManager em) {
         super(repository, em, ObservationGroupEntity.class);
         this.parameterRepository = parameterRepository;
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    protected ObservationGroupDTO createWrapper(ObservationGroupEntity entity, QueryOptions queryOptions) {
-        return new CitSciDTOTransformer<ObservationGroupDTO, ObservationGroupEntity>().toDTO(entity, queryOptions);
     }
 
     @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
@@ -105,9 +100,10 @@ public class ObservationGroupService
                         fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_OBSERVATION_RELATIONS);
                         break;
                     default:
-                        throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                                                                         expandProperty,
-                                                                         StaConstants.OBSERVATION_GROUP));
+                        throw new STAInvalidQueryException(
+                            String.format(AbstractSensorThingsEntityServiceImpl.INVALID_EXPAND_OPTION_SUPPLIED,
+                                          expandProperty,
+                                          StaConstants.OBSERVATION_GROUP));
                 }
             }
         }
@@ -129,12 +125,17 @@ public class ObservationGroupService
                         .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
                                                                STAEntityDefinition.OBSERVATION_GROUPS,
                                                                expandItem.getQueryOptions());
-                    entity.setEntities(obsRelations.get().collect(Collectors.toSet()));
+                    entity.setObservationRelations(obsRelations.get().collect(Collectors.toSet()));
+                    break;
+                case ObservationGroupEntityDefinition.LICENSES:
+                    entity.setLicense(getLicenseService().getEntityByIdRaw(entity.getLicense().getId(),
+                                                                           expandItem.getQueryOptions()));
                     break;
                 default:
-                    throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                                                                     expandProperty,
-                                                                     StaConstants.OBSERVATION_GROUP));
+                    throw new STAInvalidQueryException(
+                        String.format(AbstractSensorThingsEntityServiceImpl.INVALID_EXPAND_OPTION_SUPPLIED,
+                                      expandProperty,
+                                      StaConstants.OBSERVATION_GROUP));
             }
         }
         return entity;
@@ -146,10 +147,18 @@ public class ObservationGroupService
         Specification<ObservationGroupEntity> filter;
         switch (relatedType) {
             case STAEntityDefinition.OBSERVATION_RELATIONS:
-                filter = ogQS.withRelationStaIdentifier(relatedId);
+                filter = ObservationGroupQuerySpecifications.withRelationStaIdentifier(relatedId);
+                break;
+            case STAEntityDefinition.LICENSES:
+                filter = ObservationGroupQuerySpecifications.withLicenseStaIdentifier(relatedId);
+                break;
+            case STAEntityDefinition.OBSERVATIONS:
+                filter = ObservationGroupQuerySpecifications.withObservationStaIdentifier(relatedId);
                 break;
             default:
-                throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
+                throw new IllegalStateException(
+                    String.format(AbstractSensorThingsEntityServiceImpl.TRYING_TO_FILTER_BY_UNRELATED_TYPE,
+                                  relatedType));
         }
 
         if (ownId != null) {
@@ -167,7 +176,7 @@ public class ObservationGroupService
                 if (optionalEntity.isPresent()) {
                     return optionalEntity.get();
                 } else {
-                    throw new STACRUDException(String.format(NO_S_WITH_ID_S_FOUND,
+                    throw new STACRUDException(String.format(AbstractSensorThingsEntityServiceImpl.NO_S_WITH_ID_S_FOUND,
                                                              StaConstants.OBSERVATION_GROUP,
                                                              obsGroup.getStaIdentifier()));
                 }
@@ -178,15 +187,32 @@ public class ObservationGroupService
             }
             synchronized (getLock(obsGroup.getStaIdentifier())) {
                 if (getRepository().existsByStaIdentifier(obsGroup.getStaIdentifier())) {
-                    throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS, HTTPStatus.CONFLICT);
+                    throw new STACRUDException(AbstractSensorThingsEntityServiceImpl.IDENTIFIER_ALREADY_EXISTS,
+                                               HTTPStatus.CONFLICT);
                 } else {
                     obsGroup.setProcessed(true);
-                    obsGroup = getRepository().save(obsGroup);
-                    if (obsGroup.getEntities() != null) {
-                        for (ObservationRelationEntity relation : obsGroup.getEntities()) {
-                            getObservationRelationService().createOrfetch(relation);
+                    if (obsGroup.getObservations() != null) {
+                        Set<DataEntity> persisted = new HashSet<>();
+                        for (DataEntity obs : obsGroup.getObservations()) {
+                            persisted.add(getObservationService().createOrfetch(obs));
                         }
+                        obsGroup.setObservations(persisted);
                     }
+
+                    if (obsGroup.getObservationRelations() != null) {
+                        Set<ObservationRelationEntity> relations = new HashSet<>();
+                        for (ObservationRelationEntity relation : obsGroup.getObservationRelations()) {
+                            relations.add(getObservationRelationService().createOrfetch(relation));
+                        }
+                        obsGroup.setObservationRelations(relations);
+                    }
+
+                    if (obsGroup.getLicense() != null) {
+                        obsGroup.setLicense(getLicenseService().createOrfetch(obsGroup.getLicense()));
+                    }
+
+                    obsGroup = getRepository().save(obsGroup);
+
                     if (obsGroup.getParameters() != null) {
                         ObservationGroupEntity finalObsGroup = obsGroup;
                         parameterRepository.saveAll(obsGroup.getParameters()
@@ -215,12 +241,15 @@ public class ObservationGroupService
                     ObservationGroupEntity merged = merge(existing.get(), entity);
                     return getRepository().save(merged);
                 }
-                throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
+                throw new STACRUDException(AbstractSensorThingsEntityServiceImpl.UNABLE_TO_UPDATE_ENTITY_NOT_FOUND,
+                                           HTTPStatus.NOT_FOUND);
             }
         } else if (HttpMethod.PUT.equals(method)) {
-            throw new STACRUDException(HTTP_PUT_IS_NOT_YET_SUPPORTED, HTTPStatus.NOT_IMPLEMENTED);
+            throw new STACRUDException(AbstractSensorThingsEntityServiceImpl.HTTP_PUT_IS_NOT_YET_SUPPORTED,
+                                       HTTPStatus.NOT_IMPLEMENTED);
         }
-        throw new STACRUDException(INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY, HTTPStatus.BAD_REQUEST);
+        throw new STACRUDException(AbstractSensorThingsEntityServiceImpl.INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY,
+                                   HTTPStatus.BAD_REQUEST);
     }
 
     @Override public ObservationGroupEntity createOrUpdate(ObservationGroupEntity entity) throws STACRUDException {
@@ -274,7 +303,8 @@ public class ObservationGroupService
                 //TODO: fix!
                 getRepository().deleteByStaIdentifier(id);
             } else {
-                throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
+                throw new STACRUDException(AbstractSensorThingsEntityServiceImpl.UNABLE_TO_DELETE_ENTITY_NOT_FOUND,
+                                           HTTPStatus.NOT_FOUND);
             }
         }
     }
@@ -282,6 +312,7 @@ public class ObservationGroupService
     private void mergeObservationRelations(ObservationGroupEntity existing,
                                            ObservationGroupEntity toMerge) {
 
+        /*
         if (existing.getEntities() == null) {
             existing.setEntities(toMerge.getEntities());
         } else {
@@ -289,5 +320,6 @@ public class ObservationGroupService
                 existing.getEntities().addAll(toMerge.getEntities());
             }
         }
+         */
     }
 }

@@ -50,8 +50,6 @@ import java.io.IOException;
 public class ObservationRelationSerDes {
 
     protected static final String NAMESPACE = "namespace";
-    protected static final String SUBJECT = "subject";
-    protected static final String OBJECT = "object";
 
 
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
@@ -114,23 +112,25 @@ public class ObservationRelationSerDes {
                 gen.writeStringField(NAMESPACE, obsRelation.getNamespace());
             }
 
-            if (!obsRelation.hasSelectOption() || obsRelation.getFieldsToSerialize().contains(SUBJECT)) {
+            if (!obsRelation.hasSelectOption() ||
+                obsRelation.getFieldsToSerialize().contains(StaConstants.NAV_SUBJECT)) {
                 if (!obsRelation.hasExpandOption() ||
-                    obsRelation.getFieldsToExpand().get(SUBJECT) == null) {
-                    writeNavigationProp(gen, SUBJECT, obsRelation.getId());
+                    obsRelation.getFieldsToExpand().get(StaConstants.NAV_SUBJECT) == null) {
+                    writeNavigationProp(gen, StaConstants.NAV_SUBJECT, obsRelation.getId());
                 } else {
-                    gen.writeFieldName(SUBJECT);
+                    gen.writeFieldName(StaConstants.NAV_SUBJECT);
                     writeNestedEntity(obsRelation.getSubject(),
                                       gen,
                                       serializers);
                 }
             }
-            if (!obsRelation.hasSelectOption() || obsRelation.getFieldsToSerialize().contains(OBJECT)) {
+            if (!obsRelation.hasSelectOption() ||
+                obsRelation.getFieldsToSerialize().contains(StaConstants.NAV_OBJECT)) {
                 if (!obsRelation.hasExpandOption() ||
-                    obsRelation.getFieldsToExpand().get(OBJECT) == null) {
-                    writeNavigationProp(gen, OBJECT, obsRelation.getId());
+                    obsRelation.getFieldsToExpand().get(StaConstants.NAV_OBJECT) == null) {
+                    writeNavigationProp(gen, StaConstants.NAV_OBJECT, obsRelation.getId());
                 } else {
-                    gen.writeFieldName(OBJECT);
+                    gen.writeFieldName(StaConstants.NAV_OBJECT);
                     writeNestedEntity(obsRelation.getObject(),
                                       gen,
                                       serializers);

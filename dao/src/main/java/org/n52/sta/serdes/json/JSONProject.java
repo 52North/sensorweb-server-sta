@@ -83,7 +83,7 @@ public class JSONProject extends JSONBase.JSONwithIdNameDescriptionTime<ProjectD
                 Assert.isNull(description, INVALID_REFERENCED_ENTITY);
                 Assert.isNull(classification, INVALID_REFERENCED_ENTITY);
                 Assert.isNull(privacyPolicy, INVALID_REFERENCED_ENTITY);
-                Assert.notNull(created, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(created, INVALID_REFERENCED_ENTITY);
                 Assert.isNull(termsOfUse, INVALID_REFERENCED_ENTITY);
                 Assert.isNull(url, INVALID_REFERENCED_ENTITY);
                 self.setId(identifier);
@@ -107,7 +107,7 @@ public class JSONProject extends JSONBase.JSONwithIdNameDescriptionTime<ProjectD
         }
 
         if (created != null) {
-            self.setRuntime(parseTime(created));
+            self.setCreated(parseTime(created));
         }
 
         Set<DatastreamDTO> related = new HashSet<>();

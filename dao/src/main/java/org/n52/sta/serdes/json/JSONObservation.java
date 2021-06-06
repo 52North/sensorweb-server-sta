@@ -29,16 +29,207 @@
 
 package org.n52.sta.serdes.json;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.dto.ObservationDTO;
+import org.n52.sta.api.dto.ObservationGroupDTO;
+import org.n52.sta.api.dto.ObservationRelationDTO;
 import org.n52.sta.api.dto.impl.Observation;
+import org.springframework.util.Assert;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @SuppressWarnings("VisibilityModifier")
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
-public class JSONObservation extends AbstractJSONObservation<ObservationDTO> {
+public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationDTO> implements AbstractJSONEntity {
+
+    // JSON Properties. Matched by Annotation or variable name
+    public String phenomenonTime;
+    public String resultTime;
+    public JsonNode result;
+    public Object resultQuality;
+    public String validTime;
+    public ObjectNode parameters;
+    @JsonManagedReference
+    public JSONFeatureOfInterest FeatureOfInterest;
+    @JsonManagedReference
+    public JSONDatastream Datastream;
+    @JsonManagedReference
+    public JSONObservationGroup[] ObservationGroups;
+    @JsonManagedReference
+    public JSONObservationRelation[] Subjects;
+    @JsonManagedReference
+    public JSONObservationRelation[] Objects;
+    @JsonManagedReference
+    public JSONLicense License;
 
     public JSONObservation() {
         self = new Observation();
+    }
+
+    @Override
+    protected void parseReferencedFrom() {
+        if (referencedFromType != null) {
+            switch (referencedFromType) {
+                case StaConstants.DATASTREAMS:
+                    Assert.isNull(Datastream, INVALID_DUPLICATE_REFERENCE);
+                    this.Datastream = new JSONDatastream();
+                    this.Datastream.identifier = referencedFromID;
+                    return;
+                case StaConstants.FEATURES_OF_INTEREST:
+                    Assert.isNull(FeatureOfInterest, INVALID_DUPLICATE_REFERENCE);
+                    this.FeatureOfInterest = new JSONFeatureOfInterest();
+                    this.FeatureOfInterest.identifier = referencedFromID;
+                    return;
+                default:
+                    throw new IllegalArgumentException(INVALID_BACKREFERENCE);
+            }
+        }
+    }
+
+    @Override
+    public ObservationDTO parseToDTO(JSONBase.EntityType type) {
+        switch (type) {
+            case FULL:
+                parseReferencedFrom();
+                Assert.notNull(result, INVALID_INLINE_ENTITY_MISSING + "result");
+                return createPostEntity();
+            case PATCH:
+                parseReferencedFrom();
+                return createPatchEntity();
+            case REFERENCE:
+                Assert.isNull(phenomenonTime, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(resultTime, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(result, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(resultTime, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(resultQuality, INVALID_REFERENCED_ENTITY);
+                Assert.isNull(parameters, INVALID_REFERENCED_ENTITY);
+
+                self.setId(identifier);
+                return self;
+            default:
+                return null;
+        }
+    }
+
+    private ObservationDTO createPatchEntity() {
+        self.setId(identifier);
+
+        // parameters
+        self.setParameters(parameters);
+
+        // phenomenonTime
+        if (phenomenonTime != null) {
+            self.setPhenomenonTime(parseTime(phenomenonTime));
+        }
+
+        // Set resultTime only when supplied
+        if (resultTime != null) {
+            self.setResultTime(parseTime(resultTime));
+        }
+
+        // validTime
+        if (validTime != null) {
+            self.setPhenomenonTime(parseTime(validTime));
+        }
+
+        self.setResult(result);
+
+        // Link to Datastream
+        if (Datastream != null) {
+            self.setDatastream(Datastream.parseToDTO(JSONBase.EntityType.REFERENCE));
+        }
+
+        // Link to FOI
+        if (FeatureOfInterest != null) {
+            self.setFeatureOfInterest(FeatureOfInterest.parseToDTO(JSONBase.EntityType.REFERENCE));
+        }
+
+        if (License != null) {
+            self.setLicense(License.parseToDTO(JSONBase.EntityType.REFERENCE));
+        }
+
+        return self;
+    }
+
+    private ObservationDTO createPostEntity() {
+        self.setId(identifier);
+
+        // phenomenonTime
+        if (phenomenonTime != null) {
+            self.setPhenomenonTime(parseTime(phenomenonTime));
+        }
+
+        // Set resultTime only when supplied
+        if (resultTime != null) {
+            self.setResultTime(parseTime(resultTime));
+        }
+
+        // validTime
+        if (validTime != null) {
+            self.setPhenomenonTime(parseTime(validTime));
+        }
+
+        // parameters
+        self.setParameters(parameters);
+
+        // result
+        self.setResult(result);
+
+        // Link to Datastream
+        if (Datastream != null) {
+            self.setDatastream(
+                Datastream.parseToDTO(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+        } else if (backReference instanceof JSONDatastream) {
+            self.setDatastream(((JSONDatastream) backReference).getEntity());
+        } else {
+            Assert.notNull(null, INVALID_INLINE_ENTITY_MISSING + "Datastream");
+        }
+
+        // Link to FOI
+        if (FeatureOfInterest != null) {
+            self.setFeatureOfInterest(
+                FeatureOfInterest.parseToDTO(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+        } else if (backReference instanceof JSONFeatureOfInterest) {
+            self.setFeatureOfInterest(((JSONFeatureOfInterest) backReference).getEntity());
+        }
+
+        if (Subjects != null) {
+            Set<ObservationRelationDTO> subjects = new HashSet<>();
+            for (JSONObservationRelation sub : Subjects) {
+                subjects.add(sub.parseToDTO(JSONBase.EntityType.FULL,
+                                            JSONBase.EntityType.REFERENCE));
+            }
+            self.setSubjects(subjects);
+        }
+
+        if (Objects != null) {
+            Set<ObservationRelationDTO> objects = new HashSet<>();
+            for (JSONObservationRelation obj : Objects) {
+                objects.add(obj.parseToDTO(JSONBase.EntityType.FULL,
+                                           JSONBase.EntityType.REFERENCE));
+            }
+            self.setObjects(objects);
+        }
+
+        if (ObservationGroups != null) {
+            Set<ObservationGroupDTO> objects = new HashSet<>();
+            for (JSONObservationGroup obj : ObservationGroups) {
+                objects.add(obj.parseToDTO(JSONBase.EntityType.FULL,
+                                           JSONBase.EntityType.REFERENCE));
+            }
+            self.setObservationGroups(objects);
+        }
+
+        if (License != null) {
+            self.setLicense(License.parseToDTO(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+        }
+
+        return self;
     }
 
     //TODO: refactor into dao-postgres as is implementation-specific

@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.serdes.json;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -60,7 +61,8 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationDTO
     @JsonManagedReference
     public JSONHistoricalLocation[] HistoricalLocations;
 
-    private final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
+    private final String ENCODINGTYPE_GEOJSON = "application/geo+json";
+    private final String ENCODINGTYPE_GEOJSON_ALT = "application/vnd.geo+json";
     private final String INVALID_ENCODINGTYPE =
         "Invalid encodingType supplied. Only GeoJSON (application/vnd.geo+json) is supported!";
     private final GeometryFactory factory =
@@ -106,7 +108,8 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationDTO
                 Assert.notNull(description, INVALID_INLINE_ENTITY_MISSING + "description");
                 Assert.notNull(encodingType, INVALID_INLINE_ENTITY_MISSING + "encodingType");
                 Assert.notNull(encodingType, INVALID_ENCODINGTYPE);
-                Assert.isTrue(Objects.equals(encodingType, ENCODINGTYPE_GEOJSON), INVALID_ENCODINGTYPE);
+                Assert.isTrue(Objects.equals(encodingType, ENCODINGTYPE_GEOJSON) ||
+                                  Objects.equals(encodingType, ENCODINGTYPE_GEOJSON_ALT), INVALID_ENCODINGTYPE);
 
                 Assert.notNull(location, INVALID_INLINE_ENTITY_MISSING + "location");
                 //TODO: check what is actually allowed here.
@@ -178,7 +181,9 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationDTO
                 // self.setEncodingType(encodingType);
 
                 if (encodingType != null) {
-                    Assert.state(encodingType.equals(ENCODINGTYPE_GEOJSON), INVALID_ENCODINGTYPE);
+                    Assert.isTrue(
+                        encodingType.equals(ENCODINGTYPE_GEOJSON) || encodingType.equals(ENCODINGTYPE_GEOJSON_ALT),
+                        INVALID_ENCODINGTYPE);
                 }
 
                 if (location != null) {

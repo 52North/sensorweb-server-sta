@@ -45,7 +45,12 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.api.CollectionWrapper;
 import org.n52.sta.api.dto.StaDTO;
-import org.n52.sta.data.vanilla.DTOTransformer;
+import org.n52.sta.data.citsci.service.LicenseService;
+import org.n52.sta.data.citsci.service.ObservationGroupService;
+import org.n52.sta.data.citsci.service.ObservationRelationService;
+import org.n52.sta.data.citsci.service.PartyService;
+import org.n52.sta.data.citsci.service.ProjectService;
+import org.n52.sta.data.vanilla.DTOTransformerImpl;
 import org.n52.sta.data.vanilla.MutexFactory;
 import org.n52.sta.data.vanilla.OffsetLimitBasedPageRequest;
 import org.n52.sta.data.vanilla.SerDesConfig;
@@ -98,12 +103,10 @@ public abstract class AbstractSensorThingsEntityServiceImpl<
     protected static final String INVALID_EXPAND_OPTION_SUPPLIED =
         "Invalid expandOption supplied. Cannot find %s on Entity of type '%s'";
     protected static final String NO_S_WITH_ID_S_FOUND = "No %s with id %s found.";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSensorThingsEntityServiceImpl.class);
+    protected EntityServiceRepository serviceRepository;
     private final EntityManager em;
     private final Class<S> entityClass;
-
-    private EntityServiceRepository serviceRepository;
     private T repository;
     @Autowired private MutexFactory lock;
     @Autowired private SerDesConfig config;
@@ -361,7 +364,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<
      */
     @Transactional(rollbackFor = Exception.class)
     protected R createWrapper(S entity, QueryOptions queryOptions) {
-        return new DTOTransformer<R, S>(config).toDTO(entity, queryOptions);
+        return new DTOTransformerImpl<R, S>(config).toDTO(entity, queryOptions);
     }
 
     /**
@@ -595,5 +598,30 @@ public abstract class AbstractSensorThingsEntityServiceImpl<
 
     protected ObservationService getObservationService() {
         return (ObservationService) serviceRepository.getEntityServiceRaw(EntityTypes.Observation);
+    }
+
+    protected ObservationGroupService getObservationGroupService() {
+        return (ObservationGroupService)
+            serviceRepository.getEntityServiceRaw(EntityTypes.ObservationGroup);
+    }
+
+    protected ObservationRelationService getObservationRelationService() {
+        return (ObservationRelationService)
+            serviceRepository.getEntityServiceRaw(EntityTypes.Subject);
+    }
+
+    protected LicenseService getLicenseService() {
+        return (LicenseService)
+            serviceRepository.getEntityServiceRaw(EntityTypes.License);
+    }
+
+    protected PartyService getPartyService() {
+        return (PartyService)
+            serviceRepository.getEntityServiceRaw(EntityTypes.Party);
+    }
+
+    protected ProjectService getProjectService() {
+        return (ProjectService)
+            serviceRepository.getEntityServiceRaw(EntityTypes.Project);
     }
 }

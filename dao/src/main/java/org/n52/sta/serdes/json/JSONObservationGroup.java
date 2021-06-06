@@ -34,6 +34,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.sta.api.dto.ObservationDTO;
 import org.n52.sta.api.dto.ObservationGroupDTO;
 import org.n52.sta.api.dto.ObservationRelationDTO;
 import org.n52.sta.api.dto.impl.citsci.ObservationGroup;
@@ -56,6 +57,10 @@ public class JSONObservationGroup extends JSONBase.JSONwithIdNameDescriptionTime
     public String runtime;
     public String created;
     public ObjectNode properties;
+
+    @JsonManagedReference
+    @JsonProperty(StaConstants.LICENSE)
+    public JSONLicense license;
 
     @JsonManagedReference
     @JsonProperty(StaConstants.OBSERVATION_RELATIONS)
@@ -118,6 +123,19 @@ public class JSONObservationGroup extends JSONBase.JSONwithIdNameDescriptionTime
             related.add(((JSONObservationRelation) backReference).getEntity());
             self.setObservationRelations(related);
         }
+
+        if (observations != null) {
+            Set<ObservationDTO> obs = new HashSet<>();
+            for (JSONObservation observation : observations) {
+                obs.add(observation.parseToDTO(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+            }
+            self.setObservations(obs);
+        }
+
+        if (license != null) {
+            self.setLicense(license.parseToDTO(JSONBase.EntityType.FULL, JSONBase.EntityType.REFERENCE));
+        }
+
         return self;
     }
 }

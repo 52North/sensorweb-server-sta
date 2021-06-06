@@ -35,7 +35,7 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STANotFoundException;
 import org.n52.sta.api.AbstractSensorThingsEntityService;
 import org.n52.sta.api.EntityServiceFactory;
-import org.n52.sta.api.dto.CitSciObservationDTO;
+import org.n52.sta.api.dto.ObservationDTO;
 import org.n52.sta.api.dto.StaDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,13 +116,13 @@ public class CitSciMultipartObservationRequestHandler {
         file.transferTo(stored);
         LOGGER.info("Stored uploaded file as: {}", filename);
 
-        CitSciObservationDTO observation = mapper.readValue(body, CitSciObservationDTO.class);
+        ObservationDTO observation = mapper.readValue(body, ObservationDTO.class);
         observation.setResult(createFileLocation(stored));
         return getObservationRepository().create(observation);
     }
 
-    private AbstractSensorThingsEntityService<CitSciObservationDTO> getObservationRepository() {
-        return (AbstractSensorThingsEntityService<CitSciObservationDTO>) serviceRepository.getEntityService(
+    private AbstractSensorThingsEntityService<ObservationDTO> getObservationRepository() {
+        return (AbstractSensorThingsEntityService<ObservationDTO>) serviceRepository.getEntityService(
             "Observation");
     }
 

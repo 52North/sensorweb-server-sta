@@ -259,6 +259,14 @@ public class DatastreamService extends AbstractSensorThingsEntityServiceImpl<
                 filter = dQS.withObservationStaIdentifier(relatedId);
                 break;
             }
+            case STAEntityDefinition.PARTIES: {
+                filter = dQS.withPartyStaIdentifier(relatedId);
+                break;
+            }
+            case STAEntityDefinition.PROJECTS: {
+                filter = dQS.withProjectStaIdentifier(relatedId);
+                break;
+            }
             default:
                 throw new IllegalStateException("Trying to filter by unrelated type: " + relatedType + "not found!");
         }
@@ -302,6 +310,14 @@ public class DatastreamService extends AbstractSensorThingsEntityServiceImpl<
                     getObservedPropertyService().createOrfetch(datastream.getObservableProperty()));
                 datastream.setProcedure(getSensorService().createOrfetch(datastream.getProcedure()));
                 datastream.setThing(getThingService().createOrfetch(datastream.getThing()));
+
+                if (datastream.getParty() != null) {
+                    datastream.setParty(getPartyService().createOrfetch(datastream.getParty()));
+                }
+
+                if (datastream.getProject() != null) {
+                    datastream.setProject(getProjectService().createOrfetch(datastream.getProject()));
+                }
 
                 DatasetEntity dataset = createandSaveDataset(datastream, null, datastream.getStaIdentifier());
                 if (datastream.getParameters() != null) {
@@ -504,8 +520,8 @@ public class DatastreamService extends AbstractSensorThingsEntityServiceImpl<
      * @return specific Dataset that was created (not the aggregation)
      * @throws STACRUDException if an error occurred
      */
-    DatasetEntity createOrExpandAggregation(AbstractDatasetEntity datastream,
-                                            AbstractFeatureEntity<?> feature)
+    public DatasetEntity createOrExpandAggregation(AbstractDatasetEntity datastream,
+                                                   AbstractFeatureEntity<?> feature)
         throws STACRUDException {
         if (datastream.getAggregation() == null && !(datastream instanceof DatasetAggregationEntity)) {
             LOGGER.debug("Creating new DatasetAggregation");
@@ -568,6 +584,8 @@ public class DatastreamService extends AbstractSensorThingsEntityServiceImpl<
         dataset.setGeometryEntity(datastream.getGeometryEntity());
         dataset.setUnit(datastream.getUnit());
         dataset.setOMObservationType(datastream.getOMObservationType());
+        dataset.setParty(datastream.getParty());
+        dataset.setProject(datastream.getProject());
         // dataset.setParameters(datastream.getParameters());
         if (datastream.getId() != null) {
             dataset.setAggregation(datastream);

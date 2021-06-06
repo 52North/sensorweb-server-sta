@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.vanilla.query;
 
 import org.n52.series.db.beans.AbstractDatasetEntity;
@@ -36,6 +37,8 @@ import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.series.db.beans.parameter.observation.ObservationParameterEntity;
+import org.n52.series.db.beans.sta.ObservationGroupEntity;
+import org.n52.series.db.beans.sta.ObservationRelationEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
@@ -43,6 +46,7 @@ import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
@@ -83,6 +87,33 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
 
             return builder.or(builder.in(root.get(DataEntity.PROPERTY_DATASET_ID)).value(subquery),
                               builder.in(root.get(DataEntity.PROPERTY_DATASET_ID)).value(sq));
+        };
+    }
+
+    public static Specification<DataEntity<?>> withObservationGroupStaIdentifier(
+        final String obsGroupIdentifier) {
+        return (root, query, builder) -> {
+            final Join<DataEntity, ObservationGroupEntity> join =
+                root.join(DataEntity.PROPERTY_OBSERVATION_GROUPS, JoinType.INNER);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), obsGroupIdentifier);
+        };
+    }
+
+    public static Specification<DataEntity<?>> withObservationRelationStaIdentifierAsSubject(
+        final String relationIdentifier) {
+        return (root, query, builder) -> {
+            final Join<DataEntity, ObservationRelationEntity> join =
+                root.join(DataEntity.PROPERTY_SUBJECTS, JoinType.INNER);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), relationIdentifier);
+        };
+    }
+
+    public static Specification<DataEntity<?>> withObservationRelationStaIdentifierAsObject(
+        final String relationIdentifier) {
+        return (root, query, builder) -> {
+            final Join<DataEntity, ObservationRelationEntity> join =
+                root.join(DataEntity.PROPERTY_OBJECTS, JoinType.INNER);
+            return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), relationIdentifier);
         };
     }
 

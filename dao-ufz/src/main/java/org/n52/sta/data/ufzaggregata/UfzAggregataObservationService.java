@@ -50,6 +50,7 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.api.CollectionWrapper;
 import org.n52.sta.api.dto.StaDTO;
 import org.n52.sta.data.vanilla.DTOTransformer;
+import org.n52.sta.data.vanilla.DTOTransformerImpl;
 import org.n52.sta.data.vanilla.SerDesConfig;
 import org.n52.sta.data.vanilla.repositories.EntityGraphRepository;
 import org.n52.sta.data.vanilla.service.ObservationService;
@@ -253,7 +254,7 @@ public class UfzAggregataObservationService extends ObservationService {
                     restTemplate.postForObject(baseUrl + aggregataRequest.getPath(),
                                                request,
                                                AggregataResponse[].class);
-                DTOTransformer transformer = new DTOTransformer(config);
+                DTOTransformer transformer = new DTOTransformerImpl(config);
                 List<StaDTO> observations = new ArrayList<>();
                 for (List<BigDecimal> datapoint : response[0].getDatapoints()) {
                     QuantityDataEntity observation = new QuantityDataEntity();

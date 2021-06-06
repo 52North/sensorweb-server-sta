@@ -29,7 +29,6 @@
 
 package org.n52.sta.data.citsci;
 
-import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.HibernateRelations;
 import org.n52.series.db.beans.sta.LicenseEntity;
@@ -37,16 +36,12 @@ import org.n52.series.db.beans.sta.ObservationRelationEntity;
 import org.n52.series.db.beans.sta.PartyEntity;
 import org.n52.series.db.beans.sta.ProjectEntity;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
-import org.n52.sta.api.dto.CitSciDatastreamDTO;
-import org.n52.sta.api.dto.CitSciObservationDTO;
 import org.n52.sta.api.dto.LicenseDTO;
 import org.n52.sta.api.dto.ObservationGroupDTO;
 import org.n52.sta.api.dto.ObservationRelationDTO;
 import org.n52.sta.api.dto.PartyDTO;
 import org.n52.sta.api.dto.ProjectDTO;
 import org.n52.sta.api.dto.StaDTO;
-import org.n52.sta.data.citsci.service.CitSciDatastreamService;
-import org.n52.sta.data.citsci.service.CitSciObservationService;
 import org.n52.sta.data.citsci.service.LicenseService;
 import org.n52.sta.data.citsci.service.ObservationGroupService;
 import org.n52.sta.data.citsci.service.ObservationRelationService;
@@ -73,7 +68,7 @@ public abstract class CitSciServiceFacade<R extends StaDTO, S extends HibernateR
         R result;
         try {
             semaphore.acquire();
-            result = serviceImpl.create((S) new CitSciDTOTransformer().fromDTO(entity));
+            result = serviceImpl.create((S) new CitSciDTOTransformerImpl(null).fromDTO(entity));
         } catch (InterruptedException e) {
             throw new STACRUDException(e.getMessage(), e);
         } finally {
@@ -86,7 +81,7 @@ public abstract class CitSciServiceFacade<R extends StaDTO, S extends HibernateR
         R result;
         try {
             semaphore.acquire();
-            result = serviceImpl.update(id, (S) new CitSciDTOTransformer().fromDTO(entity), method);
+            result = serviceImpl.update(id, (S) new CitSciDTOTransformerImpl(null).fromDTO(entity), method);
         } catch (InterruptedException e) {
             throw new STACRUDException(e.getMessage(), e);
         } finally {
@@ -94,26 +89,6 @@ public abstract class CitSciServiceFacade<R extends StaDTO, S extends HibernateR
         }
         return result;
     }
-
-    @Component
-    static class CitSciObservationServiceFacade extends CitSciServiceFacade<CitSciObservationDTO, DataEntity<?>> {
-
-        CitSciObservationServiceFacade(CitSciObservationService serviceImpl,
-                                       DaoSemaphore semaphore) {
-            super(serviceImpl, semaphore);
-        }
-    }
-
-
-    @Component
-    static class CitSciDatastreamServiceFacade extends CitSciServiceFacade<CitSciDatastreamDTO, AbstractDatasetEntity> {
-
-        CitSciDatastreamServiceFacade(CitSciDatastreamService serviceImpl,
-                                      DaoSemaphore semaphore) {
-            super(serviceImpl, semaphore);
-        }
-    }
-
 
     @Component
     static class LicenseServiceFacade extends CitSciServiceFacade<LicenseDTO, LicenseEntity> {

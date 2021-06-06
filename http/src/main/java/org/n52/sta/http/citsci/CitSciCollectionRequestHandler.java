@@ -29,6 +29,7 @@
 
 package org.n52.sta.http.citsci;
 
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.api.CitSciExtensionRequestUtils;
@@ -40,6 +41,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.HandlerMapping;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -96,7 +98,9 @@ public class CitSciCollectionRequestHandler extends CollectionRequestHandler imp
             MAPPING_PREFIX +
                 CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_PARTY_PATH_VARIABLE,
             MAPPING_PREFIX +
-                CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE
+                CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE,
+            MAPPING_PREFIX +
+                CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVATIONRELATION_PATH_VARIABLE
         },
         produces = "application/json"
     )
@@ -104,7 +108,22 @@ public class CitSciCollectionRequestHandler extends CollectionRequestHandler imp
                                                    @PathVariable String target,
                                                    HttpServletRequest request)
         throws Exception {
-        return super.readCollectionRelated(entity, target, request);
+        if (target.equals(StaConstants.NAV_SUBJECTS) || target.equals(StaConstants.NAV_OBJECTS)) {
+            validateResource((String) request.getAttribute(HandlerMapping.LOOKUP_PATH), serviceRepository);
+
+            String[] split = splitId(entity);
+            String sourceType = split[0];
+            String sourceId = split[1];
+
+            QueryOptions options = decodeQueryString(request);
+            return serviceRepository.getEntityService(target)
+                .getEntityCollectionByRelatedEntity(sourceId,
+                                                    target,
+                                                    options)
+                .setRequestURL(rootUrl + entity + "/" + target);
+        } else {
+            return super.readCollectionRelated(entity, target, request);
+        }
     }
 
     @Override
@@ -124,6 +143,9 @@ public class CitSciCollectionRequestHandler extends CollectionRequestHandler imp
                 + SLASHREF,
             MAPPING_PREFIX +
                 CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE
+                + SLASHREF,
+            MAPPING_PREFIX +
+                CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVATIONRELATION_PATH_VARIABLE
                 + SLASHREF,
         },
         produces = "application/json"

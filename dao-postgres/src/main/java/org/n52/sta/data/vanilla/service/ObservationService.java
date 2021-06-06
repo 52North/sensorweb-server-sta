@@ -45,6 +45,7 @@ import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.TextDataEntity;
 import org.n52.series.db.beans.parameter.observation.ObservationParameterEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.series.db.beans.sta.ObservationRelationEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.filter.FilterFilter;
@@ -81,6 +82,7 @@ import javax.persistence.criteria.Predicate;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -273,6 +275,18 @@ public class ObservationService
                 filter = ObservationQuerySpecifications.withFeatureOfInterestStaIdentifier(relatedId);
                 break;
             }
+            case STAEntityDefinition.OBSERVATION_GROUPS: {
+                filter = ObservationQuerySpecifications.withObservationGroupStaIdentifier(relatedId);
+                break;
+            }
+            case STAEntityDefinition.NAV_SUBJECT: {
+                filter = ObservationQuerySpecifications.withObservationRelationStaIdentifierAsSubject(relatedId);
+                break;
+            }
+            case STAEntityDefinition.NAV_OBJECT: {
+                filter = ObservationQuerySpecifications.withObservationRelationStaIdentifierAsObject(relatedId);
+                break;
+            }
             default:
                 throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
         }
@@ -287,6 +301,18 @@ public class ObservationService
         synchronized (getLock(entity.getStaIdentifier())) {
             DataEntity<?> observation = entity;
             if (!observation.isProcessed()) {
+                if (entity.getStaIdentifier() != null && entity.getSamplingTimeStart() == null) {
+                    Optional<DataEntity<?>> optionalEntity =
+                        getRepository().findByStaIdentifier(entity.getStaIdentifier());
+                    if (optionalEntity.isPresent()) {
+                        return optionalEntity.get();
+                    } else {
+                        throw new STACRUDException(String.format(NO_S_WITH_ID_S_FOUND,
+                                                                 StaConstants.THING,
+                                                                 entity.getStaIdentifier()));
+                    }
+                }
+
                 observation.setProcessed(true);
                 check(observation);
 
@@ -332,6 +358,18 @@ public class ObservationService
                     // We have not found a matching dataset so we need to create a new one
                     LOGGER.debug("Creating new dataset as none with matching FOI exists");
                     observation.setDataset(getDatastreamService().createOrExpandAggregation(datastream, feature));
+                }
+
+                if (observation.getLicense() != null) {
+                    observation.setLicense(getLicenseService().createOrfetch(observation.getLicense()));
+                }
+
+                if (observation.getSubjects() != null) {
+                    Set<ObservationRelationEntity> subjects = new HashSet<>();
+                    for (ObservationRelationEntity subject : observation.getSubjects()) {
+                        subjects.add(getObservationRelationService().createOrUpdate(subject));
+                    }
+                    observation.setSubjects(subjects);
                 }
 
                 // Save Observation
@@ -599,7 +637,7 @@ public class ObservationService
         }
     }
 
-    private void check(DataEntity<?> observation) throws STACRUDException {
+    protected void check(DataEntity<?> observation) throws STACRUDException {
         if (observation.getDataset() == null) {
             throw new STACRUDException("The observation to create is invalid. Missing datastream!",
                                        HTTPStatus.BAD_REQUEST);
@@ -673,8 +711,8 @@ public class ObservationService
         observation.setDataset(datastreamRepository.saveAndFlush(dataset));
     }
 
-    private AbstractFeatureEntity<?> createOrfetchFeature(DataEntity observation,
-                                                          Long thingId)
+    protected AbstractFeatureEntity<?> createOrfetchFeature(DataEntity observation,
+                                                            Long thingId)
         throws STACRUDException {
         // Create feature based on Thing.location if there is no feature given
         if (!observation.hasFeature()) {
@@ -702,7 +740,7 @@ public class ObservationService
         return feature;
     }
 
-    private DataEntity<?> saveObservation(DataEntity<?> observation, DatasetEntity dataset)
+    protected DataEntity<?> saveObservation(DataEntity<?> observation, DatasetEntity dataset)
         throws STACRUDException {
         DataEntity<?> data = castToConcreteObservationType(observation, dataset);
         return getRepository().save(data);
@@ -716,7 +754,7 @@ public class ObservationService
      * @return update DatasetEntity
      * @throws STACRUDException if an error occurred
      */
-    private AbstractDatasetEntity updateDataset(AbstractDatasetEntity dataset, DataEntity<?> data)
+    protected AbstractDatasetEntity updateDataset(AbstractDatasetEntity dataset, DataEntity<?> data)
         throws STACRUDException {
         Optional<DataEntity<?>> rawObservation = getRepository().findById(data.getId());
         if (rawObservation.isPresent()) {
@@ -819,6 +857,10 @@ public class ObservationService
         data.setGeometryEntity(observation.getGeometryEntity());
         data.setVerticalFrom(observation.getVerticalFrom());
         data.setVerticalTo(observation.getVerticalTo());
+        data.setLicense(observation.getLicense());
+        data.setSubjects(observation.getSubjects());
+        data.setObjects(observation.getObjects());
+        data.setObservationGroups(observation.getObservationGroups());
         return data;
     }
 }

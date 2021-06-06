@@ -29,6 +29,7 @@
 
 package org.n52.sta.http.citsci;
 
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.CitSciExtensionRequestUtils;
 import org.n52.sta.api.EntityServiceFactory;
@@ -39,6 +40,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.HandlerMapping;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -84,7 +86,8 @@ public class CitSciEntityRequestHandler extends EntityRequestHandler implements 
     @GetMapping(
         value = {
             MAPPING_PREFIX + CitSciExtensionRequestUtils.ENTITY_IDENTIFIED_BY_OBSERVATIONRELATION_PATH_VARIABLE,
-            MAPPING_PREFIX + CitSciExtensionRequestUtils.ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE
+            MAPPING_PREFIX + CitSciExtensionRequestUtils.ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
+            MAPPING_PREFIX + CitSciExtensionRequestUtils.ENTITY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE
         },
         produces = "application/json"
     )
@@ -92,7 +95,22 @@ public class CitSciEntityRequestHandler extends EntityRequestHandler implements 
                                     @PathVariable String target,
                                     HttpServletRequest request)
         throws Exception {
-        return super.readRelatedEntity(entity, target, request);
+        if (target.equals(StaConstants.NAV_SUBJECT) || target.equals(StaConstants.NAV_OBJECT)) {
+            validateResource((String) request.getAttribute(HandlerMapping.LOOKUP_PATH), serviceRepository);
+
+            String[] split = splitId(entity);
+            String sourceType = split[0];
+            String sourceId = split[1];
+
+            QueryOptions options = decodeQueryString(request);
+            return serviceRepository.getEntityService(target)
+                .getEntityByRelatedEntity(sourceId,
+                                          target,
+                                          null,
+                                          options);
+        } else {
+            return super.readRelatedEntity(entity, target, request);
+        }
     }
 
     @GetMapping(

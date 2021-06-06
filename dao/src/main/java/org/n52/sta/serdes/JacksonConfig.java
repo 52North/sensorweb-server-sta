@@ -37,8 +37,6 @@ import com.fasterxml.jackson.databind.module.SimpleSerializers;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.CollectionWrapper;
-import org.n52.sta.api.dto.CitSciDatastreamDTO;
-import org.n52.sta.api.dto.CitSciObservationDTO;
 import org.n52.sta.api.dto.DatastreamDTO;
 import org.n52.sta.api.dto.FeatureOfInterestDTO;
 import org.n52.sta.api.dto.HistoricalLocationDTO;
@@ -153,12 +151,6 @@ public class JacksonConfig {
         for (String activeProfile : environment.getActiveProfiles()) {
             if (activeProfile.equals(StaConstants.CITSCIEXTENSION)) {
                 serializers.addSerializer(
-                    new CitSciDatastreamSerDes.CitSciDatastreamSerializer(rootUrl,
-                                                                          activeProfiles));
-                serializers.addSerializer(
-                    new CitSciObservationSerDes.CitSciObservationSerializer(rootUrl,
-                                                                            activeProfiles));
-                serializers.addSerializer(
                     new ObservationGroupSerDes.ObservationGroupSerializer(rootUrl,
                                                                           activeProfiles));
                 serializers.addSerializer(
@@ -174,10 +166,6 @@ public class JacksonConfig {
                     new ProjectSerDes.ProjectSerializer(rootUrl,
                                                         activeProfiles));
 
-                deserializers.addDeserializer(CitSciDatastreamDTO.class,
-                                              new CitSciDatastreamSerDes.CitSciDatastreamDeserializer());
-                deserializers.addDeserializer(CitSciObservationDTO.class,
-                                              new CitSciObservationSerDes.CitSciObservationDeserializer());
                 deserializers.addDeserializer(ObservationGroupDTO.class,
                                               new ObservationGroupSerDes.ObservationGroupDeserializer());
                 deserializers.addDeserializer(ObservationRelationDTO.class,
@@ -189,10 +177,6 @@ public class JacksonConfig {
                 deserializers.addDeserializer(ProjectDTO.class,
                                               new ProjectSerDes.ProjectDeserializer());
 
-                deserializers.addDeserializer(CitSciDatastreamSerDes.CitSciDatastreamDTOPatch.class,
-                                              new CitSciDatastreamSerDes.CitSciDatastreamPatchDeserializer());
-                deserializers.addDeserializer(CitSciObservationSerDes.CitSciObservationDTOPatch.class,
-                                              new CitSciObservationSerDes.CitSciObservationPatchDeserializer());
                 deserializers.addDeserializer(ObservationGroupSerDes.ObservationGroupDTOPatch.class,
                                               new ObservationGroupSerDes.ObservationGroupPatchDeserializer());
                 deserializers.addDeserializer(ObservationRelationSerDes.ObservationRelationDTOPatch.class,
@@ -203,9 +187,6 @@ public class JacksonConfig {
                                               new PartySerDes.PartyPatchDeserializer());
                 deserializers.addDeserializer(ProjectSerDes.ProjectDTOPatch.class,
                                               new ProjectSerDes.ProjectPatchDeserializer());
-
-                deserializers.addDeserializer(ThingDTO.class,
-                                              new ThingSerDes.ThingDeserializer());
             }
         }
 

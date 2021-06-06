@@ -55,6 +55,7 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
             + NAV_SUBJECTS
             + OR + NAV_OBJECTS
             + OR + OBSERVATION_GROUPS
+            + OR + LICENSE
             + ROUND_BRACKET_CLOSE;
 
     String IDENTIFIED_BY_LICENSE_REGEX =
@@ -75,21 +76,36 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
 
     String IDENTIFIED_BY_OBSERVATION_GROUP_REGEX =
         OBSERVATION_GROUPS + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN
-            + NAV_SUBJECT
+            + OBSERVATION_RELATIONS
             + OR + OBSERVATIONS
+            + OR + LICENSE
             + ROUND_BRACKET_CLOSE;
 
     String IDENTIFIED_BY_OBSERVATION_RELATION_REGEX =
         OBSERVATION_RELATIONS + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN
             + NAV_SUBJECT
             + OR + NAV_OBJECT
-            + OBSERVATION_GROUP
+            + OR + OBSERVATION_GROUPS
             + ROUND_BRACKET_CLOSE;
 
     String IDENTIFIED_BY_DATASTREAM_REGEX =
         DATASTREAMS + IDENTIFIER_REGEX + SLASH + ROUND_BRACKET_OPEN
             + PROJECT + OR + PARTY
             + ROUND_BRACKET_CLOSE;
+
+    // /ObservationRelations(52)/ObservationGroup
+    // /ObservationRelations(52)/Observation
+    String COLLECTION_IDENTIFIED_BY_OBSERVATIONRELATION =
+        SOURCE_NAME_GROUP_START + OBSERVATION_RELATIONS + SOURCE_NAME_GROUP_END
+            + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END
+            + SLASH
+            + WANTED_NAME_GROUP_START + OBSERVATION_GROUPS
+            + WANTED_NAME_GROUP_END;
+
+    String COLLECTION_IDENTIFIED_BY_OBSERVATIONRELATION_PATH_VARIABLE =
+        PATH_ENTITY + OBSERVATION_RELATIONS + IDENTIFIER_REGEX
+            + CURLY_BRACKET_CLOSE + PATH_TARGET + OBSERVATION_GROUPS +
+            CURLY_BRACKET_CLOSE;
 
     // /Observations(52)/ObservationRelations
     String COLLECTION_IDENTIFIED_BY_OBSERVATION =
@@ -194,11 +210,25 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
     String ENTITY_PROPERTY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE =
         ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE + SLASH + PATH_PROPERTY;
 
+    // /Observations(52)/License
+    String ENTITY_IDENTIFIED_BY_OBSERVATION =
+        SOURCE_NAME_GROUP_START + OBSERVATIONS + SOURCE_NAME_GROUP_END
+            + SOURCE_ID_GROUP_START + IDENTIFIER_REGEX + SOURCE_ID_GROUP_END + SLASH + WANTED_NAME_GROUP_START
+            + LICENSE
+            + WANTED_NAME_GROUP_END;
+
+    String ENTITY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE =
+        PATH_ENTITY + OBSERVATIONS + IDENTIFIER_REGEX
+            + CURLY_BRACKET_CLOSE + PATH_TARGET
+            + LICENSE
+            + CURLY_BRACKET_CLOSE;
+
     // Patterns used for matching Paths in mqtt with named groups
     // Java does not support duplicate names so patterns are handled separately
     // OGC-15-078r6 14.2.1
     Pattern CP_BASE = Pattern.compile(BASE_COLLECTION_REGEX_NAMED_GROUPS + DOLLAR);
     Pattern CP_IDENT_BY_OBSERVATION_GROUP = Pattern.compile(COLLECTION_IDENTIFIED_BY_OBSERVATION_GROUP + DOLLAR);
+    Pattern CP_IDENT_BY_OBSERVATION_RELATION = Pattern.compile(COLLECTION_IDENTIFIED_BY_OBSERVATIONRELATION + DOLLAR);
     Pattern CP_IDENT_BY_LICENSE = Pattern.compile(COLLECTION_IDENTIFIED_BY_LICENSE + DOLLAR);
     Pattern CP_IDENT_BY_PARTY = Pattern.compile(COLLECTION_IDENTIFIED_BY_PARTY + DOLLAR);
     Pattern CP_IDENT_BY_PROJECT = Pattern.compile(COLLECTION_IDENTIFIED_BY_PROJECT + DOLLAR);
@@ -207,6 +237,7 @@ public interface CitSciExtensionRequestUtils extends RequestUtils {
         new Pattern[] {
             CP_BASE,
             CP_IDENT_BY_OBSERVATION_GROUP,
+            CP_IDENT_BY_OBSERVATION_RELATION,
             CP_IDENT_BY_LICENSE,
             CP_IDENT_BY_PARTY,
             CP_IDENT_BY_PROJECT,

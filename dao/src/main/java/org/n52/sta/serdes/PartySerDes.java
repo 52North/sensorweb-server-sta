@@ -49,6 +49,8 @@ import java.io.IOException;
  */
 public class PartySerDes {
 
+    private static final String PROP_AUTH_ID = "authId";
+
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     public static class PartyDTOPatch implements EntityPatch<PartyDTO> {
 
@@ -69,6 +71,7 @@ public class PartySerDes {
     public static class PartySerializer extends AbstractSTASerializer<PartyDTO> {
 
         private static final long serialVersionUID = -1618289129123682794L;
+
 
         public PartySerializer(String rootUrl, String... activeExtensions) {
             super(PartyDTO.class, activeExtensions);
@@ -91,8 +94,8 @@ public class PartySerDes {
                 writeSelfLink(gen, party.getId());
             }
 
-            if (!party.hasSelectOption() || party.getFieldsToSerialize().contains(STAEntityDefinition.PROP_AUTH_ID)) {
-                gen.writeStringField(STAEntityDefinition.PROP_AUTH_ID, party.getAuthId());
+            if (!party.hasSelectOption() || party.getFieldsToSerialize().contains(PROP_AUTH_ID)) {
+                gen.writeStringField(PROP_AUTH_ID, party.getAuthId());
             }
             if (!party.hasSelectOption() || party.getFieldsToSerialize().contains(STAEntityDefinition.PROP_NICKNAME)) {
                 gen.writeStringField(STAEntityDefinition.PROP_NICKNAME, party.getNickname());

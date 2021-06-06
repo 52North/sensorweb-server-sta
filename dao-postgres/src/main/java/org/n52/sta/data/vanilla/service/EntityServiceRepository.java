@@ -74,6 +74,21 @@ public class EntityServiceRepository implements EntityServiceFactory {
     private ServiceFacade.FeatureOfInterestServiceFacade featureOfInterestService;
 
     @Autowired
+    private ServiceFacade.ObservationGroupServiceFacade obsGroupService;
+
+    @Autowired
+    private ServiceFacade.ObservationRelationServiceFacade obsRelationService;
+
+    @Autowired
+    private ServiceFacade.LicenseServiceFacade licenseService;
+
+    @Autowired
+    private ServiceFacade.PartyServiceFacade partyService;
+
+    @Autowired
+    private ServiceFacade.ProjectServiceFacade projectService;
+
+    @Autowired
     private STAEventHandler mqttSubscriptionEventHandler;
 
     @PostConstruct
@@ -102,11 +117,31 @@ public class EntityServiceRepository implements EntityServiceFactory {
         entityServices.put(EntityTypes.FeatureOfInterest, featureOfInterestService);
         entityServices.put(EntityTypes.FeaturesOfInterest, featureOfInterestService);
 
+        entityServices.put(EntityTypes.ObservationGroup, obsGroupService);
+        entityServices.put(EntityTypes.ObservationGroups, obsGroupService);
+
+        entityServices.put(EntityTypes.ObservationRelation, obsRelationService);
+        entityServices.put(EntityTypes.ObservationRelations, obsRelationService);
+
+        entityServices.put(EntityTypes.Objects, obsRelationService);
+        entityServices.put(EntityTypes.Object, observationService);
+
+        entityServices.put(EntityTypes.Subjects, obsRelationService);
+        entityServices.put(EntityTypes.Subject, observationService);
+
+        entityServices.put(EntityTypes.License, licenseService);
+        entityServices.put(EntityTypes.Licenses, licenseService);
+
+        entityServices.put(EntityTypes.Party, partyService);
+        entityServices.put(EntityTypes.Parties, partyService);
+
+        entityServices.put(EntityTypes.Project, projectService);
+        entityServices.put(EntityTypes.Projects, projectService);
+
         mqttSubscriptionEventHandler.setServiceRepository(this);
     }
 
     @PostConstruct
-
     private void initServices() {
         // Set the
         entityServices.forEach(
@@ -137,7 +172,9 @@ public class EntityServiceRepository implements EntityServiceFactory {
     public enum EntityTypes {
         Thing, Location, HistoricalLocation, Sensor, Datastream, Observation, ObservedProperty, FeatureOfInterest,
         Things, Locations, HistoricalLocations, Sensors, Datastreams, Observations, ObservedProperties,
-        FeaturesOfInterest
+        FeaturesOfInterest, ObservationGroup, ObservationGroups, Subject, Subjects, Object, Objects,
+        ObservationRelation,
+        ObservationRelations, License, Licenses, Party, Parties, Project, Projects
     }
 
 }

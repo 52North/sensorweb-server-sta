@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.vanilla;
 
 import org.hibernate.boot.model.TypeContributor;
@@ -55,7 +56,7 @@ import java.util.Map;
  */
 @Configuration
 @EnableJpaRepositories(repositoryBaseClass = MessageBusRepository.class,
-                       basePackages = {"org.n52.sta.data.vanilla.repositories"})
+                       basePackages = {"org.n52.sta.data.vanilla.repositories", "org.n52.sta.data.citsci.repositories"})
 @EnableTransactionManagement
 @ConfigurationProperties(prefix = "dao-postgres")
 public class DaoConfig {

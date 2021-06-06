@@ -48,31 +48,7 @@ import java.util.Map;
 @Component
 public class CitSciEntityServiceRepository extends EntityServiceRepository implements EntityServiceFactory {
 
-    private Map<EntityTypes, ServiceFacade<?, ?>> entityServices = new LinkedHashMap<>();
-
-    @Autowired
-    private ServiceFacade.ThingServiceFacade thingServiceFacade;
-
-    @Autowired
-    private ServiceFacade.LocationServiceFacade locationServiceFacade;
-
-    @Autowired
-    private ServiceFacade.HistoricalLocationServiceFacade historicalLocationService;
-
-    @Autowired
-    private ServiceFacade.SensorServiceFacade sensorService;
-
-    @Autowired
-    private ServiceFacade.ObservedPropertyServiceFacade observedPropertyService;
-
-    @Autowired
-    private ServiceFacade.FeatureOfInterestServiceFacade featureOfInterestService;
-
-    @Autowired
-    private CitSciServiceFacade.DatastreamServiceFacade datastreamService;
-
-    @Autowired
-    private CitSciServiceFacade.ObservationServiceFacade observationService;
+    private Map<CitSciEntityTypes, ServiceFacade<?, ?>> entityServices = new LinkedHashMap<>();
 
     @Autowired
     private CitSciServiceFacade.ObservationGroupServiceFacade obsGroupService;
@@ -94,48 +70,42 @@ public class CitSciEntityServiceRepository extends EntityServiceRepository imple
 
     @PostConstruct
     public void postConstruct() {
-        entityServices.put(EntityTypes.Thing, thingServiceFacade);
-        entityServices.put(EntityTypes.Things, thingServiceFacade);
+        super.postConstruct();
+        entityServices.put(CitSciEntityTypes.ObservationGroup, obsGroupService);
+        entityServices.put(CitSciEntityTypes.ObservationGroups, obsGroupService);
 
-        entityServices.put(EntityTypes.Location, locationServiceFacade);
-        entityServices.put(EntityTypes.Locations, locationServiceFacade);
+        entityServices.put(CitSciEntityTypes.ObservationRelation, obsRelationService);
+        entityServices.put(CitSciEntityTypes.ObservationRelations, obsRelationService);
 
-        entityServices.put(EntityTypes.HistoricalLocation, historicalLocationService);
-        entityServices.put(EntityTypes.HistoricalLocations, historicalLocationService);
+        entityServices.put(CitSciEntityTypes.Objects, obsRelationService);
+        entityServices.put(CitSciEntityTypes.Object, obsRelationService);
 
-        entityServices.put(EntityTypes.Sensor, sensorService);
-        entityServices.put(EntityTypes.Sensors, sensorService);
+        entityServices.put(CitSciEntityTypes.Subjects, obsRelationService);
+        entityServices.put(CitSciEntityTypes.Subject, obsRelationService);
 
-        entityServices.put(EntityTypes.Datastream, datastreamService);
-        entityServices.put(EntityTypes.Datastreams, datastreamService);
+        entityServices.put(CitSciEntityTypes.License, licenseService);
+        entityServices.put(CitSciEntityTypes.Licenses, licenseService);
 
-        entityServices.put(EntityTypes.Observation, observationService);
-        entityServices.put(EntityTypes.Observations, observationService);
+        entityServices.put(CitSciEntityTypes.Party, partyService);
+        entityServices.put(CitSciEntityTypes.Parties, partyService);
 
-        entityServices.put(EntityTypes.ObservedProperty, observedPropertyService);
-        entityServices.put(EntityTypes.ObservedProperties, observedPropertyService);
+        entityServices.put(CitSciEntityTypes.Project, projectService);
+        entityServices.put(CitSciEntityTypes.Projects, projectService);
+    }
 
-        entityServices.put(EntityTypes.FeatureOfInterest, featureOfInterestService);
-        entityServices.put(EntityTypes.FeaturesOfInterest, featureOfInterestService);
-
-        this.mqttSubscriptionEventHandler.setServiceRepository(this);
-
-        if (obsGroupService != null) {
-            entityServices.put(EntityTypes.ObservationGroup, obsGroupService);
-            entityServices.put(EntityTypes.ObservationGroups, obsGroupService);
-
-            entityServices.put(EntityTypes.ObservationRelation, obsRelationService);
-            entityServices.put(EntityTypes.ObservationRelations, obsRelationService);
-
-            entityServices.put(EntityTypes.License, licenseService);
-            entityServices.put(EntityTypes.Licenses, licenseService);
-
-            entityServices.put(EntityTypes.Party, partyService);
-            entityServices.put(EntityTypes.Parties, partyService);
-
-            entityServices.put(EntityTypes.Project, projectService);
-            entityServices.put(EntityTypes.Projects, projectService);
+    /**
+     * Provides an entity data service for a entity type
+     *
+     * @param entityTypeName the type name of the requested entity service
+     * @return the requested entity data service
+     */
+    public AbstractSensorThingsEntityService<?> getEntityService(String entityTypeName) {
+        for (CitSciEntityTypes value : CitSciEntityTypes.values()) {
+            if (entityTypeName.equals(value.name())) {
+                return entityServices.get(CitSciEntityTypes.valueOf(entityTypeName));
+            }
         }
+        return super.getEntityService(entityTypeName);
     }
 
     @PostConstruct
@@ -152,24 +122,12 @@ public class CitSciEntityServiceRepository extends EntityServiceRepository imple
      * @param entityTypeName the type name of the requested entity service
      * @return the requested entity data service
      */
-    public AbstractSensorThingsEntityService<?> getEntityService(String entityTypeName) {
-        return entityServices.get(EntityTypes.valueOf(entityTypeName));
-    }
-
-    /**
-     * Provides an entity data service for a entity type
-     *
-     * @param entityTypeName the type name of the requested entity service
-     * @return the requested entity data service
-     */
-    public AbstractSensorThingsEntityServiceImpl getEntityServiceRaw(EntityTypes entityTypeName) {
+    public AbstractSensorThingsEntityServiceImpl getEntityServiceRaw(CitSciEntityTypes entityTypeName) {
         return entityServices.get(entityTypeName).getServiceImpl();
     }
 
-    public enum EntityTypes {
-        Thing, Location, HistoricalLocation, Sensor, Datastream, Observation, ObservedProperty, FeatureOfInterest,
-        Things, Locations, HistoricalLocations, Sensors, Datastreams, Observations, ObservedProperties,
-        FeaturesOfInterest, ObservationGroup, ObservationGroups, ObservationRelation, ObservationRelations,
-        License, Licenses, Party, Parties, Project, Projects
+    public enum CitSciEntityTypes {
+        ObservationGroup, ObservationGroups, Subject, Subjects, Object, Objects, ObservationRelation,
+        ObservationRelations, License, Licenses, Party, Parties, Project, Projects
     }
 }

@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.dto;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -86,6 +87,14 @@ public interface DatastreamDTO extends StaDTO {
     Set<ObservationDTO> getObservations();
 
     void setObservations(Set<ObservationDTO> observations);
+
+    ProjectDTO getProject();
+
+    void setProject(ProjectDTO project);
+
+    PartyDTO getParty();
+
+    void setParty(PartyDTO party);
 
     class UnitOfMeasurement {
 
