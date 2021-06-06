@@ -287,6 +287,10 @@ public class ObservationService
                 filter = ObservationQuerySpecifications.withObservationRelationStaIdentifierAsObject(relatedId);
                 break;
             }
+            case STAEntityDefinition.LICENSES: {
+                filter = ObservationQuerySpecifications.withLicenseStaIdentifier(relatedId);
+                break;
+            }
             default:
                 throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
         }

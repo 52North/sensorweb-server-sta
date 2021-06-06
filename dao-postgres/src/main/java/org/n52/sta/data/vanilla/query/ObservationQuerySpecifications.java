@@ -37,6 +37,7 @@ import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.series.db.beans.parameter.observation.ObservationParameterEntity;
+import org.n52.series.db.beans.sta.LicenseEntity;
 import org.n52.series.db.beans.sta.ObservationGroupEntity;
 import org.n52.series.db.beans.sta.ObservationRelationEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
@@ -88,6 +89,13 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
             return builder.or(builder.in(root.get(DataEntity.PROPERTY_DATASET_ID)).value(subquery),
                               builder.in(root.get(DataEntity.PROPERTY_DATASET_ID)).value(sq));
         };
+    }
+
+    public static Specification<DataEntity<?>> withLicenseStaIdentifier(
+        final String licenseIdentifier) {
+        return (root, query, builder) -> builder.equal(
+            root.get(DataEntity.PROPERTY_LICENSE).get(LicenseEntity.STA_IDENTIFIER),
+            licenseIdentifier);
     }
 
     public static Specification<DataEntity<?>> withObservationGroupStaIdentifier(
