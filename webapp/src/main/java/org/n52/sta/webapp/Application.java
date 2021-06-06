@@ -26,27 +26,28 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.webapp;
 
-import org.n52.sta.data.vanilla.repositories.MessageBusRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
-@EnableJpaRepositories(repositoryBaseClass = MessageBusRepository.class,
-                       basePackages = {"org.n52.series.db", "org.n52.sta.data.vanilla.repositories"})
 @EnableConfigurationProperties
 @EnableAsync
-@ComponentScan(basePackages = {"org.n52.series.db", "org.n52.sta"})
-@EnableTransactionManagement
 @SuppressWarnings("uncommentedmain")
+@ComponentScan(excludeFilters = {
+    @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*vanilla.*"),
+    @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*citsci.*"),
+    @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*ufzaggregata.*")
+}
+)
 public class Application extends SpringBootServletInitializer {
 
     public static void main(String[] args) throws Exception {
