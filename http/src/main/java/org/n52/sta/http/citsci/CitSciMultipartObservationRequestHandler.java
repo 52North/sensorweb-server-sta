@@ -73,6 +73,7 @@ public class CitSciMultipartObservationRequestHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CitSciMultipartObservationRequestHandler.class);
     private static final String SQ = "\"";
+    private static final String FILES_ENDPOINT = "/files";
 
     private final EntityServiceFactory serviceRepository;
     private final ObjectMapper mapper;
@@ -126,7 +127,7 @@ public class CitSciMultipartObservationRequestHandler {
             "Observation");
     }
 
-    @GetMapping("/files/{filename:.+}")
+    @GetMapping(FILES_ENDPOINT + "/{filename:.+}")
     @ResponseBody
     public ResponseEntity<?> serveFile(@PathVariable String filename) throws STANotFoundException, IOException {
         Path pathToFile = uploadDirectory.resolve(filename);
@@ -143,7 +144,7 @@ public class CitSciMultipartObservationRequestHandler {
     }
 
     @GetMapping(
-        value = "/files",
+        value = FILES_ENDPOINT,
         produces = "application/json")
     public String listUploadedFiles() throws IOException {
         File dir = uploadDirectory.toFile();
@@ -158,7 +159,7 @@ public class CitSciMultipartObservationRequestHandler {
         return sb.toString();
     }
 
-    @PostMapping("/files")
+    @PostMapping(FILES_ENDPOINT)
     public ResponseEntity<?> uploadFile(@RequestPart("file") MultipartFile multipartFile)
         throws IOException, URISyntaxException {
 
@@ -175,7 +176,7 @@ public class CitSciMultipartObservationRequestHandler {
     }
 
     private String createFileLocation(File file) {
-        return ensureTrailingSlash(rootUrl).concat(file.getName());
+        return ensureTrailingSlash(rootUrl.concat(FILES_ENDPOINT)).concat(file.getName());
     }
 
     private String ensureTrailingSlash(String withOrWithoutTrailingSlash) {
