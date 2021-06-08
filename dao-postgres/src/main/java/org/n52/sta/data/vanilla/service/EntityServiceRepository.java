@@ -139,11 +139,7 @@ public class EntityServiceRepository implements EntityServiceFactory {
         entityServices.put(EntityTypes.Projects, projectService);
 
         mqttSubscriptionEventHandler.setServiceRepository(this);
-    }
-
-    @PostConstruct
-    private void initServices() {
-        // Set the
+        
         entityServices.forEach(
             (t, e) -> e.getServiceImpl().setServiceRepository(this)
         );
