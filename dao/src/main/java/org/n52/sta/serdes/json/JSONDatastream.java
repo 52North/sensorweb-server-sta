@@ -202,6 +202,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
                 Assert.state(observationType.equals(OmConstants.OBS_TYPE_MEASUREMENT)
                                  || observationType.equals(OmConstants.OBS_TYPE_COUNT_OBSERVATION)
                                  || observationType.equals(OmConstants.OBS_TYPE_CATEGORY_OBSERVATION)
+                                 || observationType.equals(OmConstants.OBS_TYPE_TEXT_OBSERVATION)
                                  || observationType.equals(OmConstants.OBS_TYPE_OBSERVATION)
                                  || observationType.equals(OmConstants.OBS_TYPE_TRUTH_OBSERVATION)
                                  || observationType.equals(OBS_TYPE_SENSORML_OBSERVATION),
