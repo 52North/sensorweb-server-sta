@@ -170,6 +170,9 @@ public class DatastreamService extends AbstractSensorThingsEntityServiceImpl<
                         break;
                     case STAEntityDefinition.OBSERVATIONS:
                         break;
+                    case STAEntityDefinition.PARTY:
+                        fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_PARTY);
+                        break;
                     default:
                         throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
                                                                          expandProperty,
