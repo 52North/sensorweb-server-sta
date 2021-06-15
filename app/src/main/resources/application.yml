@@ -66,6 +66,8 @@ server:
     mqttReadOnly: false
     # All HTTP POST & PUT Requests will be dropped with a HTTP Status 405 NOT Allowed
     httpReadOnly: false
+    
+    blobUploadDir: /tmp/sta_blobs
 
   # Used for communicating with the UFZ Aggregata API
   security:
