@@ -176,15 +176,16 @@ public class CitSciMultipartObservationRequestHandler {
     }
 
     private String createFileLocation(File file) {
-        return ensureTrailingSlash(rootUrl.concat(FILES_ENDPOINT)).concat(file.getName());
+        return removeTrailingSlash(rootUrl.concat(FILES_ENDPOINT)).concat(file.getName());
     }
 
-    private String ensureTrailingSlash(String withOrWithoutTrailingSlash) {
+    private String removeTrailingSlash(String withOrWithoutTrailingSlash) {
         if (withOrWithoutTrailingSlash == null) {
-            return "/";
+            return null;
         }
-        return !withOrWithoutTrailingSlash.endsWith("/")
-            ? withOrWithoutTrailingSlash.concat("/")
+        int l = withOrWithoutTrailingSlash.length();
+        return withOrWithoutTrailingSlash.endsWith("/")
+            ? withOrWithoutTrailingSlash.substring(0, l - 1)
             : withOrWithoutTrailingSlash;
     }
 
