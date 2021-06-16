@@ -138,8 +138,11 @@ public class CitSciMultipartObservationRequestHandler {
             throw new STANotFoundException("File not found: " + filename);
         }
         String mediaType = Files.probeContentType(fileToGet.toPath());
+        MediaType parsedMediaType = MediaType.parseMediaType(mediaType);
+        parsedMediaType = parsedMediaType == null ? MediaType.APPLICATION_OCTET_STREAM : parsedMediaType;
+        LOGGER.debug("Serving file (MediaType: {}): {}", mediaType, fileToGet.getAbsoluteFile());
         return ResponseEntity.ok()
-            .contentType(MediaType.parseMediaType(mediaType))
+            .contentType(parsedMediaType)
             .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + SQ + filename + SQ)
             .body(new FileSystemResource(fileToGet));
     }
@@ -177,16 +180,19 @@ public class CitSciMultipartObservationRequestHandler {
     }
 
     private String createFileLocation(File file) {
-        return removeTrailingSlash(rootUrl.concat(FILES_ENDPOINT)).concat(file.getName());
+        String baseUrl = rootUrl.endsWith("/")
+                ? rootUrl.substring(0, rootUrl.length() - 1)
+                : rootUrl;
+        String filesEndpoint = ensureTrailingSlash(baseUrl.concat(FILES_ENDPOINT));
+        return filesEndpoint.concat(file.getName());
     }
 
-    private String removeTrailingSlash(String withOrWithoutTrailingSlash) {
+    private String ensureTrailingSlash(String withOrWithoutTrailingSlash) {
         if (withOrWithoutTrailingSlash == null) {
-            return null;
+            return "/";
         }
-        int l = withOrWithoutTrailingSlash.length();
-        return withOrWithoutTrailingSlash.endsWith("/")
-            ? withOrWithoutTrailingSlash.substring(0, l - 1)
+        return !withOrWithoutTrailingSlash.endsWith("/")
+            ? withOrWithoutTrailingSlash.concat("/")
             : withOrWithoutTrailingSlash;
     }
 
