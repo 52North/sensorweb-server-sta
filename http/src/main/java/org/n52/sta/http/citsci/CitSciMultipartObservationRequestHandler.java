@@ -138,8 +138,9 @@ public class CitSciMultipartObservationRequestHandler {
             throw new STANotFoundException("File not found: " + filename);
         }
         String mediaType = Files.probeContentType(fileToGet.toPath());
-        MediaType parsedMediaType = MediaType.parseMediaType(mediaType);
-        parsedMediaType = parsedMediaType == null ? MediaType.APPLICATION_OCTET_STREAM : parsedMediaType;
+        MediaType parsedMediaType = mediaType == null
+                ? MediaType.APPLICATION_OCTET_STREAM
+                : MediaType.parseMediaType(mediaType);
         LOGGER.debug("Serving file (MediaType: {}): {}", mediaType, fileToGet.getAbsoluteFile());
         return ResponseEntity.ok()
             .contentType(parsedMediaType)
