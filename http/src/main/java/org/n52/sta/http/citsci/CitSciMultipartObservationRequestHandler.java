@@ -80,10 +80,11 @@ public class CitSciMultipartObservationRequestHandler {
     private final Path uploadDirectory;
     private final String rootUrl;
 
-    public CitSciMultipartObservationRequestHandler(@Value("${server.rootUrl}") String rootUrl,
-                                                    @Value("${server.feature.blobUploadDir:/tmp/sta_blobs}") String uploadDirectory,
-                                                    EntityServiceFactory serviceRepository,
-                                                    ObjectMapper mapper) {
+    public CitSciMultipartObservationRequestHandler(
+                                     @Value("${server.rootUrl}") String rootUrl,
+                                     @Value("${server.feature.blobUploadDir:/tmp/sta_blobs}") String uploadDirectory,
+                                     EntityServiceFactory serviceRepository,
+                                     ObjectMapper mapper) {
         this.serviceRepository = serviceRepository;
         this.rootUrl = rootUrl;
         this.mapper = mapper;
