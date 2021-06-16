@@ -180,10 +180,9 @@ public class CitSciMultipartObservationRequestHandler {
     }
 
     private String createFileLocation(File file) {
-        String baseUrl = rootUrl.endsWith("/")
-                ? rootUrl.substring(0, rootUrl.length() - 1)
-                : rootUrl;
-        String filesEndpoint = ensureTrailingSlash(baseUrl.concat(FILES_ENDPOINT));
+        // server.rootUrl has to be configured with a trailing slash
+        String endpoint = FILES_ENDPOINT.substring(1);
+        String filesEndpoint = ensureTrailingSlash(rootUrl.concat(endpoint));
         return filesEndpoint.concat(file.getName());
     }
 
