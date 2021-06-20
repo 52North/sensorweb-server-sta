@@ -279,7 +279,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
         // phenomenonTime (aka samplingTime) is automatically calculated based on associated Observations
         // phenomenonTime parsed from json is therefore ignored.
         // }
-        
+
         if (Thing != null) {
             self.setThing(Thing.parseToDTO(JSONBase.EntityType.REFERENCE));
         }
