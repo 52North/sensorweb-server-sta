@@ -91,6 +91,10 @@ public class CitSciEntityServiceRepository extends EntityServiceRepository imple
 
         entityServices.put(CitSciEntityTypes.Project, projectService);
         entityServices.put(CitSciEntityTypes.Projects, projectService);
+
+        entityServices.forEach(
+            (t, e) -> e.getServiceImpl().setServiceRepository(this)
+        );
     }
 
     /**
@@ -106,14 +110,6 @@ public class CitSciEntityServiceRepository extends EntityServiceRepository imple
             }
         }
         return super.getEntityService(entityTypeName);
-    }
-
-    @PostConstruct
-    private void initServices() {
-        // Set the
-        entityServices.forEach(
-            (t, e) -> e.getServiceImpl().setServiceRepository(this)
-        );
     }
 
     /**
