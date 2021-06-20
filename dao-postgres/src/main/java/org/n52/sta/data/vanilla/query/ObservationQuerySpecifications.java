@@ -29,6 +29,14 @@
 
 package org.n52.sta.data.vanilla.query;
 
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
+
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
@@ -44,13 +52,6 @@ import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.springframework.data.jpa.domain.Specification;
-
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -75,19 +76,17 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
     public static Specification<DataEntity<?>> withDatastreamStaIdentifier(
         final String datastreamStaIdentifier) {
         return (root, query, builder) -> {
-            Subquery<AbstractDatasetEntity> sq = query.subquery(AbstractDatasetEntity.class);
-            Root<AbstractDatasetEntity> dataset = sq.from(AbstractDatasetEntity.class);
-            sq.select(dataset.get(AbstractDatasetEntity.PROPERTY_ID))
-                .where(builder.equal(dataset.get(AbstractDatasetEntity.PROPERTY_STA_IDENTIFIER),
-                                     datastreamStaIdentifier));
+            Join<DataEntity<?>, DatasetEntity> join = root.join(DataEntity.PROPERTY_DATASET);
+            Path<DatasetEntity> pathSta = join.get(DatasetEntity.PROPERTY_STA_IDENTIFIER);
+            Path<DatasetEntity> pathAggregation = join.get(DatasetEntity.PROPERTY_AGGREGATION);
 
             Subquery<AbstractDatasetEntity> subquery = query.subquery(AbstractDatasetEntity.class);
             Root<AbstractDatasetEntity> realDataset = subquery.from(AbstractDatasetEntity.class);
-            subquery.select(realDataset.get(AbstractDatasetEntity.PROPERTY_ID))
-                .where(builder.equal(realDataset.get(AbstractDatasetEntity.PROPERTY_AGGREGATION), sq));
+            subquery.select(realDataset.get(AbstractDatasetEntity.PROPERTY_ID)).where(builder
+                    .equal(realDataset.get(AbstractDatasetEntity.PROPERTY_STA_IDENTIFIER), datastreamStaIdentifier));
 
-            return builder.or(builder.in(root.get(DataEntity.PROPERTY_DATASET_ID)).value(subquery),
-                              builder.in(root.get(DataEntity.PROPERTY_DATASET_ID)).value(sq));
+            return builder.or(builder.equal(pathAggregation, subquery),
+                              builder.equal(pathSta, datastreamStaIdentifier));
         };
     }
 
