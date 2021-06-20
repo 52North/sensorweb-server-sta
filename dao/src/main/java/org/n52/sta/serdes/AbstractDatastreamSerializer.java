@@ -202,6 +202,16 @@ public class AbstractDatastreamSerializer<T extends DatastreamDTO> extends Abstr
                                                   serializers);
                             }
                             break;
+                        case STAEntityDefinition.PARTY:
+                            if (datastream.getParty() == null) {
+                                writeNavigationProp(gen, navigationProperty, datastream.getId());
+                            } else {
+                                gen.writeFieldName(navigationProperty);
+                                writeNestedEntity(datastream.getParty(),
+                                                  gen,
+                                                  serializers);
+                            }
+                            break;
                         default:
                             throw new IllegalStateException("Unexpected value: " + navigationProperty);
                     }
