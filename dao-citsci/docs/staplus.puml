@@ -1,0 +1,147 @@
+@startuml 
+title SensorThings API+
+
+class Sensor {
+    +name: String+name: String
+    +description: String
+    +encodingType: ValueCode
+    +metadata: Any
+    +properties: JSON_Object
+}
+
+class ObservedProperty {
+    +name: String
+    +description: String
+    +definition: URI
+    +properties: JSON_Object
+}
+
+class Datastream {
+    +name: String
+    +description: String
+    +observationType: ValueCode 
+    +unitOfMeasurement: JSONObject
+    +observedArea: GM_Envelope
+    +phenomenonTime: TM_Period
+    +resultTime: TM_Period
+    +properties: JSON_Object
+}
+
+class Thing {
+    +name: String
+    +description: String
+    +properties: JSON_Object
+}
+
+
+class Location {
+    +name: String
+    +description: String
+    +encodingType: ValueCode
+    +location: Any
+    +properties: JSON_Object
+}
+
+class HistoricalLocation {
+    +name: String
+    +description: String
+    +time: TM_Instant
+    +properties: JSON_Object
+}
+
+class Observation {
+    +name: String
+    +description: String
+    +resultTime: TM_Instant
+    +result: Any
+    +resultQuality: DQ_Element
+    +validTime: TM_Period
+    +properties: JSON_Object
+}
+
+class ValueCode {}
+
+class FeatureOfInterest {
+    +name: String
+    +description: String
+    +encodingType: ValueCode
+    +feature: Any
+    +properties: JSON_Object
+
+}
+
+class Project #00EEDD {
+    +name: String
+    +description: String
+    +classification: ValueCode
+    +termsOfUse: String
+    +pricacyPolicy: String
+    +created: TM_Instant
+    +runtime: TM_Period
+    +url: URI
+    +properties: JSON_Object
+}
+
+class Party #00EEDD {
+    +name: String
+    +description: String
+    +name: String
+    +role*: ValueCode
+    +properties: JSON_Object
+    ---
+    <i>*: [individual|institutional]</i>
+}
+
+class License #00EEDD {
+    +name: String
+    +description: 
+    +definition: URI
+    +logo: URI
+    +properties: JSON_Object
+}
+
+class Group #00EEDD {
+    +name: String
+    +description: String
+    +purpose: ValueCode
+    +created: TM_Instant
+    +runtime: TM_Period
+    +properties: JSON_Object
+}
+
+class Relation #00EEDD {
+    +name: String
+    +description: String
+    +role*: ValueCode
+    +namespace**: URI
+    +properties: JSON_Object
+    ---
+    <i>*: ns-prefix: ValueCode</i>
+    <i>**: <ns-prefix={namespace}></i>
+
+}
+
+
+Datastream "0..n" -left- "1" Sensor: "           "
+Datastream "0..n" -up- "1" ObservedProperty
+Datastream "0..n" -- "1" Thing
+Datastream "1" -right- "0..n" Observation: "           "
+
+Observation "0..n" -- "1" FeatureOfInterest
+
+Location "0..n" -up- "0..n" Thing
+Location "1" -right- "0..n" HistoricalLocation: "         "
+HistoricalLocation "0..n" -right- "1" Thing
+
+Datastream "0..n" -- "0..1" Project
+Datastream "0..n" -up- "0..1" Party
+Datastream "0..n" -up- "0..1" License
+
+Group "0..n" -- "0..1" License
+Group "0..n" -- "0..n" Party
+Group "0..n" -- "0..n" Observation
+Group "0..n" -- "0..n" Relation
+Observation "1" - "0..n" Relation: "Subject       "      
+Observation "1" - "0..n" Relation: "Object       "
+
+@enduml
