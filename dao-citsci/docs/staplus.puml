@@ -1,6 +1,6 @@
 @startuml 
-title SensorThings API+
-version 4.3
+title sta-plus
+
 
 class Sensor {
     +name: String+name: String
