@@ -1,5 +1,5 @@
-@startuml 
-title sta-plus
+@startuml sta_plus_v4.4
+title sta-plus (v4.4, June 2021)
 
 
 class Sensor {
