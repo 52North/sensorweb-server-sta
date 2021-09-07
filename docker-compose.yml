@@ -1,7 +1,7 @@
 version: '3'
 services:
   sta:
-    image: 52north/sensorweb-server-sta:latest
+    image: 52north/sensorweb-server-sta:3.0.2
     # build: https://github.com/52North/sensorweb-server-sta.git#develop
     ports:
       - 8081:8081
@@ -15,8 +15,8 @@ services:
       MQTT_BROKER_PLAINTCP_ENABLED: "true"
       MQTT_BROKER_WEBSOCKET_ENABLED: "true"
       MQTT_BROKER_PERSISTENCE_ENABLED: "false"
-      SERVER_ROOTURL: http://localhost:8081/sta/
-      SERVER_SERVLET_CONTEXT_PATH: /sta
+      SERVER_ROOTURL: http://localhost:8081/v1.1/
+      SERVER_SERVLET_CONTEXT_PATH: /v1.1
       SERVER_FEATURE_UPDATEFOI: "false"
       SERVER_FEATURE_MQTTPUBLISHTOPICS: Observations
       SERVER_FEATURE_VARIABLEENCODINGTYPE: "false"
