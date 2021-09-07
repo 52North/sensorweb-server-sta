@@ -31,6 +31,9 @@ package org.n52.sta.serdes.json;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
@@ -47,6 +50,7 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("VisibilityModifier")
+@SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION"})
 public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<DatastreamDTO>
     implements AbstractJSONEntity {
 

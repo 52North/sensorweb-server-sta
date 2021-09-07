@@ -62,6 +62,11 @@ public class Observation extends Entity implements ObservationDTO {
         this.resultQuality = resultQuality;
     }
 
+    @Override
+    public Object getResultQuality() {
+        return resultQuality;
+    }
+
     @Override public Time getPhenomenonTime() {
         return phenomenonTime;
     }
@@ -82,6 +87,7 @@ public class Observation extends Entity implements ObservationDTO {
         return result;
     }
 
+    @Override
     public void setResult(Object result) {
         this.result = result;
     }
@@ -98,6 +104,7 @@ public class Observation extends Entity implements ObservationDTO {
         return parameters;
     }
 
+    @Override
     public void setParameters(ObjectNode parameters) {
         this.parameters = parameters;
     }
@@ -106,6 +113,7 @@ public class Observation extends Entity implements ObservationDTO {
         return featureOfInterest;
     }
 
+    @Override
     public void setFeatureOfInterest(FeatureOfInterestDTO featureOfInterest) {
         this.featureOfInterest = featureOfInterest;
     }
@@ -114,6 +122,7 @@ public class Observation extends Entity implements ObservationDTO {
         return datastream;
     }
 
+    @Override
     public void setDatastream(DatastreamDTO datastream) {
         this.datastream = datastream;
     }
