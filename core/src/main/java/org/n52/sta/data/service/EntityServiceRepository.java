@@ -75,9 +75,10 @@ public class EntityServiceRepository {
 
     @PostConstruct
     public void postConstruct() {
+
         entityServices.put(EntityTypes.Thing, thingServiceFacade);
         entityServices.put(EntityTypes.Things, thingServiceFacade);
-
+        
         entityServices.put(EntityTypes.Location, locationServiceFacade);
         entityServices.put(EntityTypes.Locations, locationServiceFacade);
 
@@ -100,11 +101,7 @@ public class EntityServiceRepository {
         entityServices.put(EntityTypes.FeaturesOfInterest, featureOfInterestService);
 
         this.mqttSubscriptionEventHandler.setServiceRepository(this);
-    }
 
-    @PostConstruct
-    private void initServices() {
-        // Set the
         entityServices.forEach(
             (t, e) -> ((AbstractSensorThingsEntityServiceImpl) e.getServiceImpl()).setServiceRepository(this)
         );
