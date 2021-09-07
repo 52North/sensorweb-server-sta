@@ -43,7 +43,7 @@
         <db-model.version>4.0.0-PR.2</db-model.version>
         <arctic-sea.version>8.2.1</arctic-sea.version>
         <spring-boot.version>2.3.5.RELEASE</spring-boot.version>
-        <geolatte-geom.version>1.6.0</geolatte-geom.version>
+        <geolatte-geom.version>1.8.2</geolatte-geom.version>
         <hibernate.version>5.4.12.Final</hibernate.version>
         <jackson.version>2.11.3</jackson.version>
         <hamcrest.version>2.2</hamcrest.version>
