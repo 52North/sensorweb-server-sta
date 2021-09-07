@@ -1,0 +1,31 @@
+version: 2
+updates:
+- package-ecosystem: maven
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "04:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: io.moquette:moquette-broker
+    versions:
+    - "> 0.12.1, < 1"
+  - dependency-name: com.github.spotbugs:spotbugs-annotations
+    versions:
+    - 4.2.0
+    - 4.2.1
+    - 4.2.2
+  - dependency-name: org.testcontainers:junit-jupiter
+    versions:
+    - 1.15.1
+    - 1.15.2
+  - dependency-name: org.testcontainers:postgresql
+    versions:
+    - 1.15.1
+    - 1.15.2
+  - dependency-name: org.antlr:antlr4-runtime
+    versions:
+    - 4.9.1
+  - dependency-name: pl.project13.maven:git-commit-id-plugin
+    versions:
+    - 4.0.3
