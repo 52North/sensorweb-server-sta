@@ -40,7 +40,7 @@ import org.springframework.util.Assert;
 import java.util.UUID;
 
 @SuppressWarnings("VisibilityModifier")
-@SuppressFBWarnings({"UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
+@SuppressFBWarnings({"UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD", "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD"})
 public class JSONBase {
 
     public enum EntityType {

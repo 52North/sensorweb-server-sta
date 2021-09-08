@@ -131,6 +131,7 @@ public class UfzAggregataObservationService extends ObservationService {
         throw new STACRUDException(NOT_YET_IMPLEMENTED);
     }
 
+    @Override
     public DataEntity<?> getEntityByIdRaw(Long id, QueryOptions queryOptions) throws STACRUDException {
         throw new STACRUDException(NOT_YET_IMPLEMENTED);
     }
@@ -143,6 +144,7 @@ public class UfzAggregataObservationService extends ObservationService {
         throw new STACRUDException(NOT_YET_IMPLEMENTED);
     }
 
+    @Override
     public Page getEntityCollectionByRelatedEntityRaw(String relatedId,
                                                       String relatedType,
                                                       QueryOptions queryOptions)
@@ -216,6 +218,7 @@ public class UfzAggregataObservationService extends ObservationService {
      * @param datastreamEntity DatstreamEntity
      * @param observation      ObservationEntity
      */
+    @Override
     protected void updateDatastreamPhenomenonTimeOnObservationUpdate(AbstractDatasetEntity datastreamEntity,
                                                                      DataEntity<?> observation) {
         throw new STAInvalidQueryError(NOT_YET_IMPLEMENTED);
@@ -226,7 +229,6 @@ public class UfzAggregataObservationService extends ObservationService {
                                                                           QueryOptions queryOptions)
         throws STACRUDException {
         try {
-            checkValidQueryOptions(queryOptions);
 
             if (relatedType.equals(StaConstants.DATASTREAMS)) {
 
@@ -255,14 +257,16 @@ public class UfzAggregataObservationService extends ObservationService {
                                                AggregataResponse[].class);
                 DTOTransformer transformer = new DTOTransformer(config);
                 List<StaDTO> observations = new ArrayList<>();
-                for (List<BigDecimal> datapoint : response[0].getDatapoints()) {
-                    QuantityDataEntity observation = new QuantityDataEntity();
-                    BigDecimal value = datapoint.get(0);
-                    Date timestamp = new Date(datapoint.get(1).longValue());
-                    observation.setPhenomenonTimeStart(timestamp);
-                    observation.setPhenomenonTimeEnd(timestamp);
-                    observation.setValue(value);
-                    observations.add(transformer.toDTO(observation, selectQueryOptions));
+                if (response != null && response.length > 0) {
+                    for (List<BigDecimal> datapoint : response[0].getDatapoints()) {
+                        QuantityDataEntity observation = new QuantityDataEntity();
+                        BigDecimal value = datapoint.get(0);
+                        Date timestamp = new Date(datapoint.get(1).longValue());
+                        observation.setSamplingTimeStart(timestamp);
+                        observation.setSamplingTimeEnd(timestamp);
+                        observation.setValue(value);
+                        observations.add(transformer.toDTO(observation, selectQueryOptions));
+                    }
                 }
                 return new CollectionWrapper(observations.size(), observations, false);
             } else {

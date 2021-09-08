@@ -38,7 +38,6 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.geojson.GeoJsonReader;
-import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.om.OmConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.dto.DatastreamDTO;
@@ -242,7 +241,6 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
         }
 
         if (resultTime != null) {
-            Time time = parseTime(resultTime);
             self.setResultTime(parseTime(resultTime));
         }
 
