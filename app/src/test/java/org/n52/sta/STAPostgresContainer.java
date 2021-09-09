@@ -30,6 +30,7 @@
 package org.n52.sta;
 
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.utility.DockerImageName;
 
 /**
  * Starts a Postgis Container to be used in IT Tests
@@ -38,11 +39,13 @@ import org.testcontainers.containers.PostgreSQLContainer;
  */
 public class STAPostgresContainer extends PostgreSQLContainer<STAPostgresContainer> {
 
-    private static final String IMAGE_VERSION = "mdillon/postgis:latest";
+    private static final DockerImageName DEFAULT_IMAGE_NAME =
+            DockerImageName.parse("postgis/postgis").asCompatibleSubstituteFor("postgres");
+    private static final String DEFAULT_TAG = "12-3.0";
     private static STAPostgresContainer container;
 
     private STAPostgresContainer() {
-        super(IMAGE_VERSION);
+        super(DEFAULT_IMAGE_NAME.withTag(DEFAULT_TAG));
     }
 
     public static STAPostgresContainer instance() {
