@@ -127,6 +127,7 @@ This project includes:
   sta-dao-ufz under The Apache Software License, Version 2.0
   sta-http under The Apache Software License, Version 2.0
   sta-mqtt under The Apache Software License, Version 2.0
+  sta-webapp under The Apache Software License, Version 2.0
   tomcat-embed-core under Apache License, Version 2.0
   tomcat-embed-websocket under Apache License, Version 2.0
   TXW2 Runtime under Eclipse Distribution License - v 1.0

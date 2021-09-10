@@ -29,7 +29,7 @@
         <module>dao</module>
         <module>http</module>
         <module>mqtt</module>
-<!--        <module>webapp</module>-->
+        <module>webapp</module>
         <module>dao-ufz</module>
         <module>dao-postgres</module>
     </modules>

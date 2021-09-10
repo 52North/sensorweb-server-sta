@@ -41,7 +41,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
 @EnableJpaRepositories(repositoryBaseClass = MessageBusRepository.class,
-                       basePackages = {"org.n52.series.db", "org.n52.sta.data.vanilla.repositories"})
+                       basePackages = {"org.n52.series.db"})
 @EnableConfigurationProperties
 @EnableAsync
 @ComponentScan(basePackages = {"org.n52.series.db", "org.n52.sta"})
