@@ -78,7 +78,7 @@ public class EntityServiceRepository {
 
         entityServices.put(EntityTypes.Thing, thingServiceFacade);
         entityServices.put(EntityTypes.Things, thingServiceFacade);
-        
+
         entityServices.put(EntityTypes.Location, locationServiceFacade);
         entityServices.put(EntityTypes.Locations, locationServiceFacade);
 

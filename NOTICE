@@ -14,17 +14,17 @@ This project includes:
   ANTLR 4 Runtime under The BSD License
   AntLR Parser Generator under BSD License
   Apache Commons Codec under Apache License, Version 2.0
+  Apache Commons IO under Apache License, Version 2.0
   Apache HttpClient under Apache License, Version 2.0
   Apache HttpCore under Apache License, Version 2.0
   Apache Log4j API under Apache License, Version 2.0
   Apache Log4j to SLF4J Adapter under Apache License, Version 2.0
-  AspectJ runtime under Eclipse Public License - v 1.0
-  AspectJ weaver under Eclipse Public License - v 1.0
+  AspectJ Runtime under Eclipse Public License - v 2.0
+  AspectJ Weaver under Eclipse Public License - v 2.0
   Byte Buddy (without dependencies) under Apache License, Version 2.0
   Checker Qual under The MIT License
   ClassMate under Apache License, Version 2.0
   Commons Lang under The Apache Software License, Version 2.0
-  dom4j under BSD 3-clause New License
   error-prone annotations under Apache 2.0
   FindBugs-jsr305 under The Apache Software License, Version 2.0
   geolatte-geom under LGPL 3.0
@@ -48,7 +48,6 @@ This project includes:
   Jackson-module-parameter-names under The Apache Software License, Version 2.0
   Jakarta Activation under EDL 1.0
   Jakarta Annotations API under EPL 2.0 or GPL2 w/ CPE
-  Jakarta Expression Language 3.0 under EPL 2.0 or GPL2 w/ CPE
   Jakarta Persistence API under Eclipse Public License v. 2.0 or Eclipse Distribution License v. 1.0
   Jakarta XML Binding API under Eclipse Distribution License - v 1.0
   Java Annotation Indexer under Apache License, Version 2.0
@@ -88,8 +87,8 @@ This project includes:
   odata-commons-core under The Apache Software License, Version 2.0
   odata-server-api under The Apache Software License, Version 2.0
   odata-server-core under The Apache Software License, Version 2.0
-  org.locationtech.jts.io:jts-io-common under Eclipse Publish License, Version 1.0 or Eclipse Distribution License - v 1.0
-  org.locationtech.jts:jts-core under Eclipse Publish License, Version 1.0 or Eclipse Distribution License - v 1.0
+  org.locationtech.jts.io:jts-io-common under Eclipse Public License, Version 2.0 or Eclipse Distribution License - v 1.0
+  org.locationtech.jts:jts-core under Eclipse Public License, Version 2.0 or Eclipse Distribution License - v 1.0
   PostgreSQL JDBC Driver under BSD-2-Clause
   Sensor Web Server Database Model - Entities under The Apache Software License, Version 2.0
   Sensor Web Server Database Model - Hibernate Types under The Apache Software License, Version 2.0
@@ -127,6 +126,7 @@ This project includes:
   sta-mqtt under The Apache Software License, Version 2.0
   sta-webapp under The Apache Software License, Version 2.0
   tomcat-embed-core under Apache License, Version 2.0
+  tomcat-embed-el under Apache License, Version 2.0
   tomcat-embed-websocket under Apache License, Version 2.0
   TXW2 Runtime under Eclipse Distribution License - v 1.0
   XmlBeans under The Apache Software License, Version 2.0

@@ -114,6 +114,11 @@ public class OffsetLimitBasedPageRequest extends AbstractPageRequest {
     }
 
     @Override
+    public Pageable withPage(int pageNumber) {
+        return new OffsetLimitBasedPageRequest(pageNumber, getPageSize(), getSort());
+    }
+
+    @Override
     public int hashCode() {
         final int prime = 7;
         int result = super.hashCode();
