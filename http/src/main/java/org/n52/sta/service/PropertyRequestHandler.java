@@ -35,7 +35,7 @@ import org.n52.shetland.ogc.filter.FilterClause;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
 import org.n52.sta.utils.AbstractSTARequestHandler;
-import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.util.UrlPathHelper;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashSet;
@@ -74,7 +74,7 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
                                                                String id,
                                                                String property,
                                                                HttpServletRequest request) throws Exception {
-        String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
+        String lookupPath = (String) request.getAttribute(UrlPathHelper.PATH_ATTRIBUTE);
         return readEntityPropertyDirect(entity, id, property, lookupPath);
     }
 
@@ -110,7 +110,7 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
                                                                 String property,
                                                                 HttpServletRequest request)
         throws Exception {
-        String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
+        String lookupPath = (String) request.getAttribute(UrlPathHelper.PATH_ATTRIBUTE);
         return readRelatedEntityProperty(entity, target, property, lookupPath);
     }
 
@@ -150,7 +150,7 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
                                                 String id,
                                                 String property,
                                                 HttpServletRequest request) throws Exception {
-        String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
+        String lookupPath = (String) request.getAttribute(UrlPathHelper.PATH_ATTRIBUTE);
         ElementWithQueryOptions<?> elementWithQueryOptions =
             this.readEntityPropertyDirect(entity, id, property, lookupPath.substring(0, lookupPath.length() - 7));
         return mapper.valueToTree(elementWithQueryOptions).fields().next().getValue().toString();
@@ -170,7 +170,7 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
                                                  String target,
                                                  String property,
                                                  HttpServletRequest request) throws Exception {
-        String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
+        String lookupPath = (String) request.getAttribute(UrlPathHelper.PATH_ATTRIBUTE);
         ElementWithQueryOptions<?> elementWithQueryOptions =
             this.readRelatedEntityProperty(entity,
                                            target,
