@@ -9,7 +9,7 @@
 
     <groupId>org.n52.sensorweb-server.sta</groupId>
     <artifactId>sta-parent</artifactId>
-    <version>3.0.3-SNAPSHOT</version>
+    <version>3.0.3-PR.1</version>
     <packaging>pom</packaging>
 
     <name>52°North Sensor Things API</name>
@@ -21,7 +21,7 @@
         <url>https://github.com/52North/sensor-things</url>
         <connection>scm:git:https://github.com/52North/sensor-things.git</connection>
         <developerConnection>scm:git:https://github.com/52North/sensor-things.git</developerConnection>
-        <tag>v3.0.2</tag>
+        <tag>v3.0.3-PR.1</tag>
     </scm>
 
     <modules>
@@ -309,6 +309,17 @@
                             </goals>
                         </execution>
                     </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <configuration>
+                        <tagNameFormat>v@{project.version}</tagNameFormat>
+                        <autoVersionSubmodules>true</autoVersionSubmodules>
+                        <releaseProfiles>check,sign</releaseProfiles>
+                        <localCheckout>true</localCheckout>
+                        <preparationGoals>clean package</preparationGoals>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
