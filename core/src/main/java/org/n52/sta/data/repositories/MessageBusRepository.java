@@ -52,13 +52,12 @@ import org.n52.sta.data.query.DatastreamQuerySpecifications;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.query.QueryUtils;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
+import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -68,20 +67,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.ParameterExpression;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class MessageBusRepository<T, I extends Serializable>
@@ -176,33 +164,6 @@ public class MessageBusRepository<T, I extends Serializable>
             return Optional.of((String) em.createQuery(query).getSingleResult());
         } catch (NoResultException ex) {
             return Optional.empty();
-        }
-    }
-
-    @Transactional(readOnly = true)
-    public List<String> getColumnList(Specification<T> spec, Pageable pageable, String columnName) {
-        CriteriaQuery<String> query = criteriaBuilder.createQuery(String.class);
-        Root<T> root = query.from(getDomainClass());
-        if (spec != null) {
-            Predicate predicate = spec.toPredicate(root, query, criteriaBuilder);
-            if (predicate != null) {
-                query.where(predicate);
-            }
-        }
-        if (columnName != null) {
-            query.select(root.get(columnName));
-        }
-        if (pageable.getSort().isSorted()) {
-            query.orderBy(QueryUtils.toOrders(pageable.getSort(), root, criteriaBuilder));
-        }
-
-        TypedQuery<String> typedQuery = em.createQuery(query);
-        if (pageable.isUnpaged()) {
-            return typedQuery.getResultList();
-        } else {
-            typedQuery.setFirstResult((int) pageable.getOffset());
-            typedQuery.setMaxResults(pageable.getPageSize());
-            return typedQuery.getResultList();
         }
     }
 
@@ -509,56 +470,88 @@ public class MessageBusRepository<T, I extends Serializable>
 
     public Optional<T> findOne(Specification<T> spec, EntityGraphRepository.FetchGraph... fetchGraphs) {
         try {
-            return Optional.of(getQuery(spec, Sort.unsorted(), createEntityGraph(fetchGraphs)).getSingleResult());
+            CriteriaQuery<T> query = criteriaBuilder.createQuery(this.entityInformation.getIdType());
+            Root<T> root = query.from(getDomainClass());
+            if (spec != null) {
+                Predicate predicate = spec.toPredicate(root, query, criteriaBuilder);
+                if (predicate != null) {
+                    query.where(predicate);
+                }
+            }
+            query.select(root);
+            TypedQuery<T> typedQuery = em.createQuery(query);
+            EntityGraph<T> entityGraph = createEntityGraph(fetchGraphs);
+            if (entityGraph != null) {
+                typedQuery.setHint(FETCHGRAPH_HINT, entityGraph);
+            }
+            return Optional.of(typedQuery.getSingleResult());
         } catch (NoResultException e) {
             return Optional.empty();
         }
     }
 
-    public List<T> findAll(Specification<T> spec, EntityGraphRepository.FetchGraph... fetchGraphs) {
-        return getQuery(spec, Sort.unsorted(), createEntityGraph(fetchGraphs)).getResultList();
-    }
-
+    /**
+     * To work around Hibernate-HHH000104 we retrieve all entities in a 2 step process.
+     * 1. Get all IDs
+     * 2. Get with Fetchgraph
+     * I
+     *
+     * @param spec        Specification
+     * @param pageable    Pageable
+     * @param fetchGraphs Fetchgraphs
+     * @return Page with elements
+     */
     public Page<T> findAll(Specification<T> spec, Pageable pageable, EntityGraphRepository.FetchGraph... fetchGraphs) {
-        TypedQuery<T> query = getQuery(spec, pageable, createEntityGraph(fetchGraphs));
-        return pageable.isUnpaged() ? new PageImpl<>(query.getResultList())
-            : readPage(query, getDomainClass(), pageable, spec);
+        TypedQuery<I> idQuery = getIdQuery(spec, getDomainClass(), pageable);
+        Page<I> page = PageableExecutionUtils.getPage(
+            idQuery.getResultList(),
+            pageable,
+            () -> 0
+        );
+
+        CriteriaQuery<T> objectQuery = criteriaBuilder.createQuery(getDomainClass());
+        Root<T> root = objectQuery.from(getDomainClass());
+        objectQuery.select(root);
+
+        Predicate predicate = root.get(IdEntity.PROPERTY_ID).in(page.getContent());
+        objectQuery.where(predicate);
+
+        TypedQuery<T> typedQuery = em.createQuery(objectQuery);
+        EntityGraph<T> entityGraph = createEntityGraph(fetchGraphs);
+        if (entityGraph != null) {
+            typedQuery.setHint(FETCHGRAPH_HINT, entityGraph);
+        }
+
+        return PageableExecutionUtils.getPage(
+            typedQuery.getResultList(),
+            pageable,
+            () -> executeCountQuery(this.getCountQuery(null, this.getDomainClass()))
+        );
     }
 
-    public List<T> findAll(Specification<T> spec, Sort sort, EntityGraphRepository.FetchGraph... fetchGraphs) {
-        return getQuery(spec, sort, createEntityGraph(fetchGraphs)).getResultList();
+    /**
+     * Copied from SimpleJPARepository as it is private there.
+     *
+     * @param query query
+     * @return count
+     */
+    private static long executeCountQuery(TypedQuery<Long> query) {
+        Assert.notNull(query, "TypedQuery must not be null!");
+        List<Long> totals = query.getResultList();
+        long total = 0L;
+
+        Long element;
+        for (Iterator var4 = totals.iterator(); var4.hasNext(); total += element == null ? 0L : element) {
+            element = (Long) var4.next();
+        }
+
+        return total;
     }
 
-    protected TypedQuery<T> getQuery(@Nullable Specification<T> spec,
-                                     Pageable pageable,
-                                     EntityGraph<T> entityGraph) {
-
-        Sort sort = pageable.isPaged() ? pageable.getSort() : Sort.unsorted();
-        return getQuery(spec, getDomainClass(), sort, entityGraph);
-    }
-
-    /*
-    private <S extends T> TypedQuery<S> getQuery(@Nullable Specification<S> spec,
-                                                 Class<S> domainClass,
-                                                 Pageable pageable,
-                                                 EntityGraph<S> entityGraph) {
-
-        Sort sort = pageable.isPaged() ? pageable.getSort() : Sort.unsorted();
-        return getQuery(spec, domainClass, sort, entityGraph);
-    }
-    */
-
-    private TypedQuery<T> getQuery(@Nullable Specification<T> spec,
-                                   Sort sort,
-                                   EntityGraph<T> entityGraph) {
-        return getQuery(spec, getDomainClass(), sort, entityGraph);
-    }
-
-    private <S extends T> TypedQuery<S> getQuery(@Nullable Specification<S> spec,
-                                                 Class<S> domainClass,
-                                                 Sort sort,
-                                                 EntityGraph<S> entityGraph) {
-        CriteriaQuery<S> query = criteriaBuilder.createQuery(domainClass);
+    private <S extends T> TypedQuery<I> getIdQuery(@Nullable Specification<S> spec,
+                                                   Class<S> domainClass,
+                                                   Pageable pageable) {
+        CriteriaQuery<I> query = criteriaBuilder.createQuery(this.entityInformation.getIdType());
         Root<S> root = query.from(domainClass);
         if (spec != null) {
             Predicate predicate = spec.toPredicate(root, query, criteriaBuilder);
@@ -566,16 +559,15 @@ public class MessageBusRepository<T, I extends Serializable>
                 query.where(predicate);
             }
         }
-        query.select(root);
+        query.select(root.get(IdEntity.PROPERTY_ID));
 
-        if (sort.isSorted()) {
-            query.orderBy(QueryUtils.toOrders(sort, root, criteriaBuilder));
+        if (pageable.getSort().isSorted()) {
+            query.orderBy(QueryUtils.toOrders(pageable.getSort(), root, criteriaBuilder));
         }
 
-        TypedQuery<S> typedQuery = em.createQuery(query);
-        if (entityGraph != null) {
-            typedQuery.setHint(FETCHGRAPH_HINT, entityGraph);
-        }
+        TypedQuery<I> typedQuery = em.createQuery(query);
+        typedQuery.setFirstResult((int) pageable.getOffset());
+        typedQuery.setMaxResults(pageable.getPageSize());
         return typedQuery;
     }
 

@@ -101,6 +101,8 @@ spring:
         # disable driver's feature detection
         # see https://stackoverflow.com/questions/46493500/hibernate-with-c3p0-createclob-is-not-yet-implemented
         temp.use_jdbc_metadata_defaults: false
+        query:
+          fail_on_pagination_over_collection_fetch: true
 
         show_sql: false
         format_sql: false

@@ -31,14 +31,12 @@ package org.n52.sta.data.repositories;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.lang.Nullable;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -58,17 +56,6 @@ public interface EntityGraphRepository<T, I> extends JpaSpecificationExecutor<T>
      * @return Content of the column with columnName if spec matches. Optional.empty() otherwise
      */
     Optional<String> getColumn(Specification<T> spec, String columnName);
-
-    /**
-     * Gets content of columnName of entity that is specified by spec. Used for fetching only identifier instead of
-     * whole Entity
-     *
-     * @param spec       Specification of Entity
-     * @param pageable   Pagination Specification
-     * @param columnName Name of Column
-     * @return Content of the column with columnName if spec matches. Optional.empty() otherwise
-     */
-    List<String> getColumnList(Specification<T> spec, Pageable pageable, String columnName);
 
     /**
      * Retrieves an entity by its id. Additionally fetches all related entities given by the provided EntityGraph.
@@ -94,17 +81,6 @@ public interface EntityGraphRepository<T, I> extends JpaSpecificationExecutor<T>
     Optional<T> findOne(@Nullable Specification<T> spec, FetchGraph... fetchGraphs);
 
     /**
-     * Returns all entities matching the given {@link Specification}.
-     * Additionally fetches all related entities given by the provided EntityGraph. All provided Graphs are merged
-     * internally.
-     *
-     * @param spec        can be {@literal null}.
-     * @param fetchGraphs string representation of EntityGraph.
-     * @return never {@literal null}.
-     */
-    List<T> findAll(@Nullable Specification<T> spec, FetchGraph... fetchGraphs);
-
-    /**
      * Returns a {@link Page} of entities matching the given {@link Specification}.
      * Additionally fetches all related entities given by the provided EntityGraph. All provided Graphs are merged
      * internally.
@@ -115,17 +91,6 @@ public interface EntityGraphRepository<T, I> extends JpaSpecificationExecutor<T>
      * @return never {@literal null}.
      */
     Page<T> findAll(@Nullable Specification<T> spec, Pageable pageable, FetchGraph... fetchGraphs);
-
-    /**
-     * Returns all entities matching the given {@link Specification} and {@link Sort}. Additionally fetches all
-     * related entities given by the provided EntityGraph. All provided Graphs are merged internally.
-     *
-     * @param spec        can be {@literal null}.
-     * @param sort        must not be {@literal null}.
-     * @param fetchGraphs string representation of EntityGraph.
-     * @return never {@literal null}.
-     */
-    List<T> findAll(@Nullable Specification<T> spec, Sort sort, FetchGraph... fetchGraphs);
 
     //TODO: expand if necessary
     enum FetchGraph {

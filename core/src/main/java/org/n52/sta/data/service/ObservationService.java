@@ -115,49 +115,6 @@ public class ObservationService
     }
 
     @Override
-    public CollectionWrapper getEntityCollection(QueryOptions queryOptions) throws STACRUDException {
-        try {
-            OffsetLimitBasedPageRequest pageableRequest = createPageableRequest(queryOptions);
-            Specification<DataEntity<?>> spec = getFilterPredicate(DataEntity.class, queryOptions);
-            List<String> identifierList = getRepository()
-                .getColumnList(spec,
-                               pageableRequest,
-                               STAIDENTIFIER);
-            if (identifierList.isEmpty()) {
-                return new CollectionWrapper(0, Collections.emptyList(), false);
-            } else {
-                return getEntityCollectionWrapperByIdentifierList(identifierList, pageableRequest, queryOptions, spec);
-            }
-        } catch (RuntimeException e) {
-            throw new STACRUDException(e.getMessage(), e);
-        }
-    }
-
-    @Override public CollectionWrapper getEntityCollectionByRelatedEntity(String relatedId,
-                                                                          String relatedType,
-                                                                          QueryOptions queryOptions)
-        throws STACRUDException {
-
-        try {
-            OffsetLimitBasedPageRequest pageableRequest = createPageableRequest(queryOptions);
-            Specification<DataEntity<?>> spec =
-                byRelatedEntityFilter(relatedId, relatedType, null)
-                    .and(getFilterPredicate(entityClass, queryOptions));
-
-            List<String> identifierList = getRepository().getColumnList(spec,
-                                                                        createPageableRequest(queryOptions),
-                                                                        STAIDENTIFIER);
-            if (identifierList.isEmpty()) {
-                return new CollectionWrapper(0, Collections.emptyList(), false);
-            } else {
-                return getEntityCollectionWrapperByIdentifierList(identifierList, pageableRequest, queryOptions, spec);
-            }
-        } catch (RuntimeException e) {
-            throw new STACRUDException(e.getMessage(), e);
-        }
-    }
-
-    @Override
     public DataEntity<?> getEntityByIdRaw(Long id, QueryOptions queryOptions) throws STACRUDException {
         DataEntity<?> entity = super.getEntityByIdRaw(id, queryOptions);
         fetchValueIfCompositeDataEntity(entity);
@@ -175,6 +132,7 @@ public class ObservationService
         return entity;
     }
 
+    /*
     public Page getEntityCollectionByRelatedEntityRaw(String relatedId,
                                                       String relatedType,
                                                       QueryOptions queryOptions)
@@ -215,6 +173,7 @@ public class ObservationService
             throw new STACRUDException(e.getMessage(), e);
         }
     }
+    */
 
     @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption) {
         return new EntityGraphRepository.FetchGraph[] {
