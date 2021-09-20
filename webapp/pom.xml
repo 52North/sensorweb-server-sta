@@ -8,6 +8,14 @@
     </parent>
     <artifactId>sta-webapp</artifactId>
     <packaging>war</packaging>
+    <properties>
+        <conf.sta.name>52n-sensorthings-webapp</conf.sta.name>
+        <config.logger.fileappender.filename>${conf.sta.name}</config.logger.fileappender.filename>
+        <config.logger.level.main.n52>INFO</config.logger.level.main.n52>
+        <config.logger.level.main.global>WARN</config.logger.level.main.global>
+        <config.logger.history.max>10</config.logger.history.max>
+        <config.logger.maxFileSize>10MB</config.logger.maxFileSize>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -71,6 +79,12 @@
             <artifactId>hibernate-spatial</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>org.codehaus.janino</groupId>
+            <artifactId>janino</artifactId>
+            <version>3.1.6</version>
+            <scope>runtime</scope>
+        </dependency>
     </dependencies>
     <build>
         <resources>
@@ -82,7 +96,7 @@
                 <directory>src/main/resources</directory>
             </resource>
         </resources>
-        <finalName>52n-sensorthings-webapp</finalName>
+        <finalName>${conf.sta.name}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -104,11 +118,13 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <version>3.3.1</version>
                 <configuration>
+                    <filteringDeploymentDescriptors>true</filteringDeploymentDescriptors>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                     <webResources>
                         <resource>
-                            <directory>src/main/resources/version</directory>
+                            <directory>src/main/resources</directory>
                             <filtering>true</filtering>
+                            <targetPath>WEB-INF/classes</targetPath>
                         </resource>
                     </webResources>
                 </configuration>

@@ -4,11 +4,8 @@ trace: false
 
 # General Server Configuration
 server:
-  port: 8080
   ## Used for response serialization + url parsing. Must be set correctly!
-  rootUrl: "http://localhost:8080/52n-sensorthings-webapp/v1.1/"
-  servlet:
-    context-path: "/52n-sensorthings-webapp/v1.1"
+  rootUrl: "http://localhost:8080/52n-sensorthings-webapp/"
 
   ## Used for enabling/disabling custom 52N-STA Features
   feature:
@@ -60,7 +57,7 @@ server:
     # All MQTT Publish Messages will be dropped silently
     mqttReadOnly: true
     # All HTTP POST & PUT Requests will be dropped with a HTTP Status 405 NOT Allowed
-    httpReadOnly: true
+    httpReadOnly: false
 
 # Database Configuration
 database:
@@ -77,7 +74,7 @@ spring:
     # the db user password
     password: postgres
     # here 'sta' is the name of the database
-    url: jdbc:postgresql://localhost:5000/sta
+    url: jdbc:postgresql://localhost:5432/sta
     initialization-mode: always
     hikari:
       connection-timeout: 20000
@@ -137,9 +134,6 @@ mqtt:
     
 # Logging
 logging:
-  file:
-    name: 52n-sta-webapp.log
-    
   level:
     root: INFO
     org.n52.sta: INFO
