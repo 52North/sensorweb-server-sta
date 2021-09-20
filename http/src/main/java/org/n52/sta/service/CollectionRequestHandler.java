@@ -38,7 +38,7 @@ import org.n52.sta.data.service.util.CollectionWrapper;
 import org.n52.sta.utils.AbstractSTARequestHandler;
 import org.n52.sta.utils.RequestUtils;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.util.UrlPathHelper;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashSet;
@@ -114,7 +114,7 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
                                                    @PathVariable String target,
                                                    HttpServletRequest request)
         throws Exception {
-        validateResource((String) request.getAttribute(HandlerMapping.LOOKUP_PATH), serviceRepository);
+        validateResource((String) request.getAttribute(UrlPathHelper.PATH_ATTRIBUTE), serviceRepository);
 
         String[] split = splitId(entity);
         String sourceType = split[0];
@@ -141,7 +141,7 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
                                                       @PathVariable String target,
                                                       HttpServletRequest request)
         throws Exception {
-        String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
+        String lookupPath = (String) request.getAttribute(UrlPathHelper.PATH_ATTRIBUTE);
         validateResource(lookupPath.substring(0, lookupPath.length() - 5), serviceRepository);
 
         String[] split = splitId(entity);

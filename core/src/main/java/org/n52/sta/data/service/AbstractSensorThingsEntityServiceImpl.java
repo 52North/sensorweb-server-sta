@@ -153,7 +153,8 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         }
     }
 
-    @Override public CollectionWrapper getEntityCollection(QueryOptions queryOptions) throws STACRUDException {
+    @Override
+    public CollectionWrapper getEntityCollection(QueryOptions queryOptions) throws STACRUDException {
         try {
             Page<S> pages = getRepository().findAll(getFilterPredicate(entityClass, queryOptions),
                                                     createPageableRequest(queryOptions),
@@ -164,10 +165,11 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         }
     }
 
-    @Override public ElementWithQueryOptions<?> getEntityByRelatedEntity(String relatedId,
-                                                                         String relatedType,
-                                                                         String ownId,
-                                                                         QueryOptions queryOptions)
+    @Override
+    public ElementWithQueryOptions<?> getEntityByRelatedEntity(String relatedId,
+                                                               String relatedType,
+                                                               String ownId,
+                                                               QueryOptions queryOptions)
         throws STACRUDException {
         S entityByRelatedEntityRaw =
             getEntityByRelatedEntityRaw(relatedId, relatedType, ownId, queryOptions);
@@ -178,9 +180,10 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         }
     }
 
-    @Override public CollectionWrapper getEntityCollectionByRelatedEntity(String relatedId,
-                                                                          String relatedType,
-                                                                          QueryOptions queryOptions)
+    @Override
+    public CollectionWrapper getEntityCollectionByRelatedEntity(String relatedId,
+                                                                String relatedType,
+                                                                QueryOptions queryOptions)
         throws STACRUDException {
         return createCollectionWrapperAndExpand(queryOptions,
                                                 getEntityCollectionByRelatedEntityRaw(relatedId,
@@ -188,16 +191,18 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
                                                                                       queryOptions));
     }
 
-    @Override public String getEntityIdByRelatedEntity(String relatedId, String relatedType) {
+    @Override
+    public String getEntityIdByRelatedEntity(String relatedId, String relatedType) {
         Optional<String> entity = getRepository().getColumn(
             this.byRelatedEntityFilter(relatedId, relatedType, null),
             STAIDENTIFIER);
         return entity.orElse(null);
     }
 
-    @Override public boolean existsEntityByRelatedEntity(String relatedId,
-                                                         String relatedType,
-                                                         String ownId) {
+    @Override
+    public boolean existsEntityByRelatedEntity(String relatedId,
+                                               String relatedType,
+                                               String ownId) {
         return getRepository().count(byRelatedEntityFilter(relatedId, relatedType, ownId)) > 0;
     }
 
