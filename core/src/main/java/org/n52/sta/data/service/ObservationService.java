@@ -54,14 +54,12 @@ import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.data.OffsetLimitBasedPageRequest;
 import org.n52.sta.data.query.ObservationQuerySpecifications;
 import org.n52.sta.data.repositories.DatastreamRepository;
 import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.LocationRepository;
 import org.n52.sta.data.repositories.ObservationParameterRepository;
 import org.n52.sta.data.repositories.ObservationRepository;
-import org.n52.sta.data.service.util.CollectionWrapper;
 import org.n52.sta.data.service.util.FilterExprVisitor;
 import org.n52.sta.data.service.util.HibernateSpatialCriteriaBuilderImpl;
 import org.n52.svalbard.odata.core.expr.Expr;
@@ -69,7 +67,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
@@ -80,7 +77,6 @@ import javax.persistence.criteria.Predicate;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -486,31 +482,6 @@ public class ObservationService
                     "Unable to handle OMObservation with type: " + dataset.getOMObservationType().getFormat());
         }
         return fillConcreteObservationType(data, observation, dataset);
-    }
-
-    private CollectionWrapper getEntityCollectionWrapperByIdentifierList(List<String> identifierList,
-                                                                         OffsetLimitBasedPageRequest pageableRequest,
-                                                                         QueryOptions queryOptions,
-                                                                         Specification<DataEntity<?>> spec) {
-        Page<DataEntity<?>> pages = getRepository()
-            .findAll(
-                oQS.withStaIdentifier(identifierList),
-                new OffsetLimitBasedPageRequest(0,
-                                                pageableRequest.getPageSize(),
-                                                pageableRequest.getSort()),
-                EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS)
-            .map(this::fetchValueIfCompositeDataEntity);
-
-        CollectionWrapper wrapper = createCollectionWrapperAndExpand(queryOptions, pages);
-        // Create Page manually as we used Database Pagination and are not sure how many Entities there are in
-        // the Database
-        if (pages.isEmpty()) {
-            return wrapper;
-        } else {
-            long count = getRepository().count(spec);
-            return new CollectionWrapper(count, wrapper.getEntities(),
-                                         identifierList.size() + pageableRequest.getOffset() < count);
-        }
     }
 
     private void check(DataEntity<?> observation) throws STACRUDException {
