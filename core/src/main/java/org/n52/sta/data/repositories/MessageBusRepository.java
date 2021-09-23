@@ -516,6 +516,9 @@ public class MessageBusRepository<T, I extends Serializable>
         Predicate predicate = root.get(IdEntity.PROPERTY_ID).in(page.getContent());
         objectQuery.where(predicate);
 
+        if (pageable.getSort().isSorted()) {
+            objectQuery.orderBy(QueryUtils.toOrders(pageable.getSort(), root, criteriaBuilder));
+        }
         TypedQuery<T> typedQuery = em.createQuery(objectQuery);
         EntityGraph<T> entityGraph = createEntityGraph(fetchGraphs);
         if (entityGraph != null) {
