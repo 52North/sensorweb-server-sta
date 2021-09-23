@@ -87,10 +87,12 @@ public interface EntityGraphRepository<T, I> extends JpaSpecificationExecutor<T>
      *
      * @param spec        can be {@literal null}.
      * @param pageable    must not be {@literal null}.
+     * @param shallCount  toggle whether the totalCount of the returned Page shall be calculated. If false optimized
+     *                    implementations may omit the totalCount for performance reasons.
      * @param fetchGraphs string representation of EntityGraph.
      * @return never {@literal null}.
      */
-    Page<T> findAll(@Nullable Specification<T> spec, Pageable pageable, FetchGraph... fetchGraphs);
+    Page<T> findAll(@Nullable Specification<T> spec, Pageable pageable, boolean shallCount, FetchGraph... fetchGraphs);
 
     //TODO: expand if necessary
     enum FetchGraph {

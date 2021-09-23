@@ -67,9 +67,21 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.ParameterExpression;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.io.Serializable;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class MessageBusRepository<T, I extends Serializable>
@@ -121,6 +133,25 @@ public class MessageBusRepository<T, I extends Serializable>
                 (DatastreamRepository) SpringApplicationContext.getBean(DatastreamRepository.class);
             Assert.notNull(this.datastreamRepository, "Could not autowire DatastreamRepository!");
         }
+    }
+
+    /**
+     * Copied from SimpleJPARepository as it is private there.
+     *
+     * @param query query
+     * @return count
+     */
+    private static long executeCountQuery(TypedQuery<Long> query) {
+        Assert.notNull(query, "TypedQuery must not be null!");
+        List<Long> totals = query.getResultList();
+        long total = 0L;
+
+        Long element;
+        for (Iterator var4 = totals.iterator(); var4.hasNext(); total += element == null ? 0L : element) {
+            element = (Long) var4.next();
+        }
+
+        return total;
     }
 
     private TypedQuery<T> createIdentifierQuery(String identifier, String column) {
@@ -498,10 +529,15 @@ public class MessageBusRepository<T, I extends Serializable>
      *
      * @param spec        Specification
      * @param pageable    Pageable
+     * @param shallCount  toggle whether the totalCount of the returned Page shall be calculated. if false the
+     *                    caluclaiton may be omitted for performance
      * @param fetchGraphs Fetchgraphs
      * @return Page with elements
      */
-    public Page<T> findAll(Specification<T> spec, Pageable pageable, EntityGraphRepository.FetchGraph... fetchGraphs) {
+    public Page<T> findAll(Specification<T> spec,
+                           Pageable pageable,
+                           boolean shallCount,
+                           EntityGraphRepository.FetchGraph... fetchGraphs) {
         TypedQuery<I> idQuery = getIdQuery(spec, getDomainClass(), pageable);
         Page<I> page = PageableExecutionUtils.getPage(
             idQuery.getResultList(),
@@ -519,6 +555,7 @@ public class MessageBusRepository<T, I extends Serializable>
         if (pageable.getSort().isSorted()) {
             objectQuery.orderBy(QueryUtils.toOrders(pageable.getSort(), root, criteriaBuilder));
         }
+
         TypedQuery<T> typedQuery = em.createQuery(objectQuery);
         EntityGraph<T> entityGraph = createEntityGraph(fetchGraphs);
         if (entityGraph != null) {
@@ -528,27 +565,8 @@ public class MessageBusRepository<T, I extends Serializable>
         return PageableExecutionUtils.getPage(
             typedQuery.getResultList(),
             pageable,
-            () -> executeCountQuery(this.getCountQuery(null, this.getDomainClass()))
+            () -> shallCount ? executeCountQuery(this.getCountQuery(spec, this.getDomainClass())) : -1
         );
-    }
-
-    /**
-     * Copied from SimpleJPARepository as it is private there.
-     *
-     * @param query query
-     * @return count
-     */
-    private static long executeCountQuery(TypedQuery<Long> query) {
-        Assert.notNull(query, "TypedQuery must not be null!");
-        List<Long> totals = query.getResultList();
-        long total = 0L;
-
-        Long element;
-        for (Iterator var4 = totals.iterator(); var4.hasNext(); total += element == null ? 0L : element) {
-            element = (Long) var4.next();
-        }
-
-        return total;
     }
 
     private <S extends T> TypedQuery<I> getIdQuery(@Nullable Specification<S> spec,

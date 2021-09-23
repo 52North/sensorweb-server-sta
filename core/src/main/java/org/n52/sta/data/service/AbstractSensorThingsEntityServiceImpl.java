@@ -158,6 +158,8 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         try {
             Page<S> pages = getRepository().findAll(getFilterPredicate(entityClass, queryOptions),
                                                     createPageableRequest(queryOptions),
+                                                    queryOptions.hasCountFilter() &&
+                                                        queryOptions.getCountFilter().getValue(),
                                                     createFetchGraph(queryOptions.getExpandFilter()));
             return createCollectionWrapperAndExpand(queryOptions, pages);
         } catch (RuntimeException | STAInvalidQueryException e) {
@@ -308,6 +310,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
                 .findAll(byRelatedEntityFilter(relatedId, relatedType, null)
                              .and(getFilterPredicate(entityClass, queryOptions)),
                          createPageableRequest(queryOptions),
+                         queryOptions.hasCountFilter() && queryOptions.getCountFilter().getValue(),
                          createFetchGraph(queryOptions.getExpandFilter()));
             if (queryOptions.hasExpandFilter()) {
                 return pages.map(e -> {
