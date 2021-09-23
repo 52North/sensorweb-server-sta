@@ -379,16 +379,6 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
                                                               String relatedType,
                                                               String ownId);
 
-    /**
-     * Query for the number of entities.
-     *
-     * @param queryOptions {@link QueryOptions}
-     * @return count of entities
-     */
-    public long getCount(QueryOptions queryOptions) {
-        return getRepository().count(getFilterPredicate(entityClass, queryOptions));
-    }
-
     @Transactional(rollbackFor = Exception.class)
     protected abstract S createOrfetch(S entity) throws STACRUDException;
 
