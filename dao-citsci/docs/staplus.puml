@@ -1,6 +1,8 @@
+'diagram from https://plantuml.com/creole
 @startuml sta_plus_v4.4
-title sta-plus (v4.4, June 2021)
+title sta-plus (<b>v4.4</b>, June 2021)
 
+right footer <img:https://cos4cloud-eosc.eu/wp-content/uploads/2020/07/logo-cos4cloud-middle.png{scale=0.25}>
 
 class Sensor {
     +name: String+name: String
@@ -119,9 +121,7 @@ class Relation #00EEDD {
     ---
     <i>*: ns-prefix: ValueCode</i>
     <i>**: <ns-prefix={namespace}></i>
-
 }
-
 
 Datastream "0..n" -left- "1" Sensor: "           "
 Datastream "0..n" -up- "1" ObservedProperty
