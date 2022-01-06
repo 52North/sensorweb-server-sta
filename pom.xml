@@ -51,7 +51,7 @@
         <h2database.version>1.4.200</h2database.version>
         <testcontainers.jupiter.version>1.16.0</testcontainers.jupiter.version>
         <testcontainers.postgres.version>1.16.0</testcontainers.postgres.version>
-        <spotbugs.version>4.1.4</spotbugs.version>
+        <spotbugs.version>4.5.3</spotbugs.version>
         <paho.version>1.2.5</paho.version>
         <antlr-runtime.version>4.9.2</antlr-runtime.version>
         <joda.version>2.10.8</joda.version>
