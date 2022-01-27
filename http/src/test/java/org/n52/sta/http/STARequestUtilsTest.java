@@ -28,6 +28,8 @@
  */
 package org.n52.sta.http;
 
+import org.junit.Test;
+
 public class STARequestUtilsTest {
 
     /*
@@ -43,4 +45,11 @@ public class STARequestUtilsTest {
                 STARequestUtils.ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE);
     }
     */
+
+    @Test
+    public void test() {
+        String rootUrl = "http://localhost/v1.1/";
+        System.out.println(rootUrl);
+        System.out.println(rootUrl.substring(0, rootUrl.length() - 1));
+    }
 }

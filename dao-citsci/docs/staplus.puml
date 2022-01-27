@@ -1,6 +1,6 @@
 'diagram from https://plantuml.com/creole
-@startuml sta_plus_v4.4
-title sta-plus (<b>v4.4</b>, June 2021)
+@startuml sta_plus_v4.5
+title sta-plus (<b>v4.5</b>, November 2021)
 
 right footer <img:https://cos4cloud-eosc.eu/wp-content/uploads/2020/07/logo-cos4cloud-middle.png{scale=0.25}>
 
@@ -123,6 +123,8 @@ class Relation #00EEDD {
     <i>**: <ns-prefix={namespace}></i>
 }
 
+Party "0..1" -up- "0..n" Thing
+
 Datastream "0..n" -left- "1" Sensor: "           "
 Datastream "0..n" -up- "1" ObservedProperty
 Datastream "0..n" -- "1" Thing
@@ -137,6 +139,7 @@ HistoricalLocation "0..n" -right- "1" Thing
 Datastream "0..n" -- "0..1" Project
 Datastream "0..n" -up- "0..1" Party
 Datastream "0..n" -up- "0..1" License
+
 
 Group "0..n" -- "0..1" License
 Group "0..n" -- "0..n" Party
