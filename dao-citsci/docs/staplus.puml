@@ -1,6 +1,6 @@
 'diagram from https://plantuml.com/creole
-@startuml sta_plus_v4.5
-title sta-plus (<b>v4.5</b>, November 2021)
+@startuml sta_plus_v4.6
+title sta-plus (<b>v4.6</b>, January 2022)
 
 right footer <img:https://cos4cloud-eosc.eu/wp-content/uploads/2020/07/logo-cos4cloud-middle.png{scale=0.25}>
 
@@ -62,7 +62,7 @@ class Observation {
     +properties: JSON_Object
 }
 
-class ValueCode {}
+class ValueCode <<CodeList>> {}
 
 class FeatureOfInterest {
     +name: String
@@ -70,7 +70,6 @@ class FeatureOfInterest {
     +encodingType: ValueCode
     +feature: Any
     +properties: JSON_Object
-
 }
 
 class Project #00EEDD {
@@ -79,8 +78,8 @@ class Project #00EEDD {
     +classification: ValueCode
     +termsOfUse: String
     +pricacyPolicy: String
-    +created: TM_Instant
-    +runtime: TM_Period
+    +creationTime: TM_Instant
+    +runTime: TM_Period
     +url: URI
     +properties: JSON_Object
 }
@@ -88,18 +87,21 @@ class Project #00EEDD {
 class Party #00EEDD {
     +name: String
     +description: String
-    +name: String
-    +role*: ValueCode
+    +authId: String
+    +role: PartyRoleCode
     +properties: JSON_Object
-    ---
-    <i>*: [individual|institutional]</i>
+}
+
+enum PartyRoleCode #00EEDD {
+    +institutional
+    +individual
 }
 
 class License #00EEDD {
     +name: String
     +description: 
     +definition: URI
-    +logo: URI
+    +logo: String
     +properties: JSON_Object
 }
 
@@ -107,20 +109,18 @@ class Group #00EEDD {
     +name: String
     +description: String
     +purpose: ValueCode
-    +created: TM_Instant
-    +runtime: TM_Period
+    +runTime: TM_Period
+    +creationTime: TM_Instant
     +properties: JSON_Object
 }
 
 class Relation #00EEDD {
-    +name: String
+    +role: URI
     +description: String
-    +role*: ValueCode
-    +namespace**: URI
+    +externalObject: URI
     +properties: JSON_Object
     ---
-    <i>*: ns-prefix: ValueCode</i>
-    <i>**: <ns-prefix={namespace}></i>
+    {count(object) + count(externalObject) == 1}
 }
 
 Party "0..1" -up- "0..n" Thing
@@ -145,7 +145,16 @@ Group "0..n" -- "0..1" License
 Group "0..n" -- "0..n" Party
 Group "0..n" -- "0..n" Observation
 Group "0..n" -- "0..n" Relation
-Observation "1" - "0..n" Relation: "Subject       "      
-Observation "1" - "0..n" Relation: "Object       "
+
+Observation "1" - "0..n" Relation: "subject       "
+Observation "1" - "0..n" Relation: "object        "
+note bottom of Relation
+    count(object) = 0: requires to use externalObject to
+    express relation to subject.
+
+    count(object) = 1: expresses a relation between two 
+    observations using the role.
+end note
+
 
 @enduml
