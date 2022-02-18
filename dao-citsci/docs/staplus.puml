@@ -1,6 +1,6 @@
 'diagram from https://plantuml.com/creole
-@startuml sta_plus_v4.6
-title sta-plus (<b>v4.6</b>, January 2022)
+@startuml sta_plus_v4.7
+title sta-plus (<b>v4.7</b>, February 2022)
 
 right footer <img:https://cos4cloud-eosc.eu/wp-content/uploads/2020/07/logo-cos4cloud-middle.png{scale=0.25}>
 
@@ -89,7 +89,7 @@ class Party #00EEDD {
     +description: String
     +authId: String
     +role: PartyRoleCode
-    +properties: JSON_Object
+    +properties: 
 }
 
 enum PartyRoleCode #00EEDD {
