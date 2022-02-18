@@ -89,6 +89,7 @@ class Party #00EEDD {
     +description: String
     +authId: String
     +role: PartyRoleCode
+    +displayName: String
 }
 
 enum PartyRoleCode #00EEDD {
