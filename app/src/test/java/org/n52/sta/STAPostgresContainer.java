@@ -29,6 +29,7 @@
 package org.n52.sta;
 
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.utility.DockerImageName;
 
 /**
  * Starts a Postgis Container to be used in IT Tests
@@ -41,7 +42,7 @@ public class STAPostgresContainer extends PostgreSQLContainer<STAPostgresContain
     private static STAPostgresContainer container;
 
     private STAPostgresContainer() {
-        super(IMAGE_VERSION);
+        super(DockerImageName.parse(IMAGE_VERSION).asCompatibleSubstituteFor("postgres"));
     }
 
     public static STAPostgresContainer instance() {
