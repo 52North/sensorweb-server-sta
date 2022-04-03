@@ -1,0 +1,2466 @@
+{
+	"info": {
+		"_postman_id": "1a8252f2-fc5a-4547-9f16-f633d796ce8c",
+		"name": "STA CitizenScienceExtension",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "POST",
+			"item": [
+				{
+					"name": "Observation with nested Group",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"@iot.id\": \"testCSObservation\",\n    \"result\": \"52\",\n    \"phenomenonTime\": \"2099-03-11T17:55:09Z\",\n    \"parameters\": {\n        \"demo\": \"test\"\n    },\n    \"FeatureOfInterest\": {\n        \"@iot.id\": \"foi\"\n    },\n    \"Datastream\": {\n        \"@iot.id\": \"testDatastream\"\n    },\n    \"ObservationRelations\": [\n        {\n            \"@iot.id\": \"testRelation\",\n            \"type\": \"root\",\n            \"Group\": {\n                \"@iot.id\": \"testGroup\",\n                \"name\": \"Test Group 1\",\n                \"description\": \"Test Group 1 description\"\n            }\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Observations",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"Observations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Observation with nested Group Copy",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"@iot.id\": \"FirstLevel\",\n    \"name\": \"Level 1\",\n    \"description\": \"Level 1\",\n    \"parent\": {\n        \"name\": \"Level 0\",\n        \"description\": \"Level 0\"\n    },\n    \"children\": [\n        {\n        \"name\": \"Level 2 1\",\n        \"description\": \"Level 2 1\"},\n        {\n        \"name\": \"Level 2 2\",\n        \"description\": \"2 2\"}\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/ObservationGroups",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"ObservationGroups"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "FeatureOfInterest",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"@iot.id\": \"foi\",\n    \"name\": \"ITConformance27\",\n    \"description\": \"ITConfo2rmance7 FOI\",\n    \"encodingType\": \"application/vnd.geo+json\",\n    \"feature\": {\n    \t\"type\": \"Feature\",\n      \"geometry\": {\n        \"type\": \"LineString\",\n        \"coordinates\": [\n          [0, 0.0], [52, 52]\n        ]\n      }\n    }\n}"
+						},
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/FeaturesOfInterest",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"FeaturesOfInterest"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Full Test Harness",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"@iot.id\": \"DemoThing\",\n    \"description\": \"This is the Lobby of the 52N HQ\",\n    \"name\": \"52N HQ Lobby\",\n    \"Locations\": [\n        {\n            \"@iot.id\": \"DemoLocation\",\n            \"name\": \"Location of 52N HQ\",\n            \"description\": \"Somewhere in the Loddenheide\",\n            \"encodingType\": \"application/vnd.geo+json\",\n            \"location\": {\n                \"type\": \"Feature\",\n                \"geometry\": {\n                    \"type\": \"Point\",\n                    \"coordinates\": [\n                        52,\n                        7\n                    ]\n                }\n            }\n        }\n    ],\n    \"Datastreams\": [\n        {\n            \"@iot.id\": \"DemoCSDatastream\",\n            \"name\": \"Air Temperature\",\n            \"description\": \"This Datastreams measures Air Temperature\",\n            \"unitOfMeasurement\": {\n                \"name\": \"degree Celsius\",\n                \"symbol\": \"°C\",\n                \"definition\": \"http://unitsofmeasure.org/ucum.html#para-30\"\n            },\n            \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n            \"phenomenonTime\": \"2009-01-11T16:22:25.00Z/2011-08-21T08:32:10.00Z\",\n            \"ObservedProperty\": {\n                \"@iot.id\": \"DemoAirTemp\",\n                \"name\": \"Air Temperature\",\n                \"definition\": \"http://sweet.jpl.nasa.gov/ontology/property.owl#AirTemperature\",\n                \"description\": \"The air temperature is the temperature of the air.\"\n            },\n            \"Sensor\": {\n                \"@iot.id\": \"DemoDS18B2022\",\n                \"name\": \"sensor 1\",\n                \"description\": \"sensor 1\",\n                \"encodingType\": \"application/pdf\",\n                \"metadata\": \"http://datasheets.maxim-ic.com/en/ds/DS18B20.pdf\"\n            },\n            \"Project\": {\n                \"@iot.id\": \"DemoProject\",\n                \"name\": \"Demo Project.\",\n                \"description\": \"This is a demo project\",\n                \"runtime\": \"2020-06-25T03:42:02-02:00\",\n                \"classification\": \"ClassificationTest\",\n                \"privacyPolicy\": \"privacyPolicyTest\",\n                \"termsOfUse\": \"termsOfUseTest\",\n                \"url\": \"http://google.com\"\n            },\n            \"Party\": {\n                \"@iot.id\": \"DemoParty\",\n                \"nickName\": \"Demo Party nickName\",\n                \"role\": \"individual\",\n                \"description\": \"Demo Party description\",\n                \"authId\": \"testUUID\"\n            },\n            \"Observations\": [\n                {\n                    \"@iot.id\": \"DemoCSObservation\",\n                    \"result\": 52,\n                    \"phenomenonTime\": \"2099-03-11T17:55:09Z\",\n                    \"License\": {\n                        \"@iot.id\": \"DemoMIT\",\n                        \"name\": \"Demo MIT License\",\n                        \"definition\": \"https://opensource.org/licenses/MIT\"\n                    },\n                    \"FeatureOfInterest\": {\n                        \"@iot.id\": \"DemoFOI\",\n                        \"name\": \"DemoFeatureOfInterest\",\n                        \"description\": \"DemoFeatureOfInterest\",\n                        \"encodingType\": \"application/vnd.geo+json\",\n                        \"feature\": {\n                            \"type\": \"Feature\",\n                            \"geometry\": {\n                                \"type\": \"LineString\",\n                                \"coordinates\": [\n                                    [\n                                        0,\n                                        0.0\n                                    ],\n                                    [\n                                        52,\n                                        52\n                                    ]\n                                ]\n                            }\n                        }\n                    }\n                }\n            ]\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Things",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"Things"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Full Test Harness with Linking via @iot.id",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"@iot.id\": \"DemoThing2\",\n    \"description\": \"This is the Lobby of the 52N HQ\",\n    \"name\": \"52N HQ Lobby\",\n    \"Locations\": [\n        {\n            \"@iot.id\": \"DemoLocation2\",\n            \"name\": \"Location of 52N HQ\",\n            \"description\": \"Somewhere in the Loddenheide\",\n            \"encodingType\": \"application/vnd.geo+json\",\n            \"location\": {\n                \"type\": \"Feature\",\n                \"geometry\": {\n                    \"type\": \"Point\",\n                    \"coordinates\": [\n                        52,\n                        7\n                    ]\n                }\n            }\n        }\n    ],\n    \"Datastreams\": [\n        {\n            \"@iot.id\": \"DemoCSDatastream2\",\n            \"name\": \"Air Temperature\",\n            \"description\": \"This Datastreams measures Air Temperature\",\n            \"unitOfMeasurement\": {\n                \"name\": \"degree Celsius\",\n                \"symbol\": \"°C\",\n                \"definition\": \"http://unitsofmeasure.org/ucum.html#para-30\"\n            },\n            \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n            \"phenomenonTime\": \"2009-01-11T16:22:25.00Z/2011-08-21T08:32:10.00Z\",\n            \"ObservedProperty\": {\n                \"@iot.id\": \"DemoAirTemp\"\n            },\n            \"Sensor\": {\n                \"@iot.id\": \"DemoDS18B2022\"\n            },\n            \"License\": {\n                \"@iot.id\": \"DemoMIT\"\n            },\n            \"Project\": {\n                \"@iot.id\": \"DemoProject\"\n            },\n            \"Party\": {\n                \"@iot.id\": \"DemoParty\"\n            }\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Things",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"Things"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "License",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"@iot.id\": \"DemoMIT\",\n    \"name\": \"MIT License\",\n    \"definition\": \"https://opensource.org/licenses/MIT\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Licenses",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"Licenses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Project",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"@iot.id\": \"DemoProject\",\n    \"name\": \"Demo Project.\",\n    \"description\": \"This is a demo project\",\n    \"runtime\": \"2020-06-25T03:42:02-02:00\",\n    \"classification\": \"ClassificationTest\",\n    \"privacyPolicy\": \"privacyPolicyTest\",\n    \"termsOfUse\": \"termsOfUseTest\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Projects",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"Projects"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Parties",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"@iot.id\": \"DemoParty\",\n    \"nickName\": \"Demo Party nickName\",\n    \"role\": \"individual\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Parties",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"Parties"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ObservationRelation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"@iot.id\": \"DemoRelation\",\n    \"name\": \"demoname\",\n    \"description\": \"demodescription\",\n    \"role\": \"individual\",\n    \"namespace\": \"demonamespace\",\n    \"Subject\": {\n        \"@iot.id\": \"DemoCSObservation\"\n    },\n    \"Object\": {\n        \"@iot.id\": \"DemoCSObservation\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/ObservationRelations",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"ObservationRelations"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "PATCH",
+			"item": [
+				{
+					"name": "License",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"PATCHed MIT License\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Licenses(DemoMIT)",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"Licenses(DemoMIT)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Project",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"PATCHed name\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Projects(DemoProject)",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"Projects(DemoProject)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Party",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nickName\": \"PATCHed\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Parties(DemoParty)",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"Parties(DemoParty)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ObservationRelation",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"PATCHed name\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/ObservationRelations(DemoRelation)",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"ObservationRelations(DemoRelation)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ObservationGroup",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"PATCHed name\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/ObservationGroups(DemoGroup)",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"{{BREADCRUMBS}}",
+								"ObservationGroups(DemoGroup)"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "DELETE",
+			"item": [
+				{
+					"name": "License",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"PATCHed MIT License\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Licenses(DemoMIT)",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"Licenses(DemoMIT)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Project",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"PATCHed name\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Projects(DemoProject)",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"Projects(DemoProject)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Party",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nickName\": \"PATCHed\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Parties(DemoParty)",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"Parties(DemoParty)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ObservationRelation",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"PATCHed name\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/ObservationRelations(DemoRelation)",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"ObservationRelations(DemoRelation)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ObservationGroup",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"PATCHed name\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/ObservationGroups(DemoGroup)",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"ObservationGroups(DemoGroup)"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "GET Root Collections",
+			"item": [
+				{
+					"name": "Parties Collection",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Parties",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"Parties"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Licenses Collection",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Licenses",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"{{BREADCRUMBS}}",
+								"Licenses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Projects Collection",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Projects",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"Projects"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ObservationGroups Collection",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/ObservationGroups",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"ObservationGroups"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ObservationRelations Collection",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/ObservationRelations",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"ObservationRelations"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "GET Collections with $filter",
+			"item": [
+				{
+					"name": "empty response",
+					"item": [
+						{
+							"name": "Observations $filter Datastream",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Observations?$filter=Datastream/id eq 'invalid'",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"Observations"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "Datastream/id eq 'invalid'"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Observations $filter FOI",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Observations?$filter=FeatureOfInterest/id eq 'invalid'",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"Observations"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "FeatureOfInterest/id eq 'invalid'"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Observations $filter ObservationRelation",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Observations?$filter=ObservationRelations/id eq 'invalid'",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"Observations"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "ObservationRelations/id eq 'invalid'"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Datastreams $filter License",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Datastreams?$filter=License/id eq 'invalid'",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"Datastreams"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "License/id eq 'invalid'"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Datastreams $filter Party",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Datastreams?$filter=Party/id eq 'invalid'",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"Datastreams"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "Party/id eq 'invalid'"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Datastreams $filter Project",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Datastreams?$filter=Project/id eq 'invalid'",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"Datastreams"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "Project/id eq 'invalid'"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Datastreams $filter Sensor",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Datastreams?$filter=Sensor/id eq 'invalid'",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"Datastreams"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "Sensor/id eq 'invalid'"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Datastreams $filter Thing",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Datastreams?$filter=Thing/id eq 'invalid'",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"Datastreams"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "Thing/id eq 'invalid'"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Datastreams $filter ObservedProperty",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Datastreams?$filter=ObservedProperty/id eq 'invalid'",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"Datastreams"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "ObservedProperty/id eq 'invalid'"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Parties $filter Datastreams",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Parties?$filter=Datastreams/id eq 'invalid'",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"Parties"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "Datastreams/id eq 'invalid'"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Licenses $filter Datastreams",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Licenses?$filter=Datastreams/id eq 'invalid'",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"Licenses"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "Datastreams/id eq 'invalid'"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Projects $filter Datastreams",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Your test name\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData[\"@iot.count\"]).to.eql(0);",
+											"    pm.expect(jsonData[\"value\"]).to.eql([]);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Projects?$filter=Datastreams/id eq 'invalid'",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"Projects"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "Datastreams/id eq 'invalid'"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Things $filter Datastreams",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Your test name\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData[\"@iot.count\"]).to.eql(0);",
+											"    pm.expect(jsonData[\"value\"]).to.eql([]);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Things?$filter=Datastreams/id eq 'invalid'",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"Things"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "Datastreams/id eq 'invalid'"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Sensors $filter Datastreams",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Your test name\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData[\"@iot.count\"]).to.eql(0);",
+											"    pm.expect(jsonData[\"value\"]).to.eql([]);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Sensors?$filter=Datastreams/id eq 'invalid'",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"Sensors"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "Datastreams/id eq 'invalid'"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "ObservedProperties $filter Datastreams",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Your test name\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData[\"@iot.count\"]).to.eql(0);",
+											"    pm.expect(jsonData[\"value\"]).to.eql([]);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/ObservedProperties?$filter=Datastreams/id eq 'invalid'",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"ObservedProperties"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "Datastreams/id eq 'invalid'"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "ObservationGroups $filter ObservationRelation",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/ObservationGroups?$filter=ObservationRelations/id eq 'invalid'",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"ObservationGroups"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "ObservationRelations/id eq 'invalid'"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "ObservationRelations $filter ObservationGroups",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/ObservationRelations?$filter=ObservationGroup/id eq 'invalid'",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"ObservationRelations"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "ObservationGroup/id eq 'invalid'"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "ObservationRelations $filter Observation",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/ObservationRelations?$filter=Observation/id eq 'invalid'",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"ObservationRelations"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "Observation/id eq 'invalid'"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "expanded response",
+					"item": [
+						{
+							"name": "Observations $filter Datastream",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Observations?$filter=Datastream/id eq 'DemoCSDatastream'&$expand=Datastream",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"Observations"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "Datastream/id eq 'DemoCSDatastream'"
+										},
+										{
+											"key": "$expand",
+											"value": "Datastream"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Observations $filter ObservationRelation",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Observations?$filter=ObservationRelations/id eq 'DemoRelation'&$expand=ObservationRelations",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"Observations"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "ObservationRelations/id eq 'DemoRelation'"
+										},
+										{
+											"key": "$expand",
+											"value": "ObservationRelations"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Datastreams $filter License",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Datastreams?$filter=License/id eq 'DemoMIT'&$expand=License",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"Datastreams"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "License/id eq 'DemoMIT'"
+										},
+										{
+											"key": "$expand",
+											"value": "License"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Datastreams $filter Party",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Datastreams?$filter=Party/id eq 'DemoParty'&$expand=Party",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"Datastreams"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "Party/id eq 'DemoParty'"
+										},
+										{
+											"key": "$expand",
+											"value": "Party"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Datastreams $filter Project",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Datastreams?$filter=Project/id eq 'DemoProject'&$expand=Project",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"Datastreams"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "Project/id eq 'DemoProject'"
+										},
+										{
+											"key": "$expand",
+											"value": "Project"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Datastreams $filter Sensor",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Datastreams?$filter=Sensor/id eq 'DemoDS18B2022'&$expand=Sensor",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"Datastreams"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "Sensor/id eq 'DemoDS18B2022'"
+										},
+										{
+											"key": "$expand",
+											"value": "Sensor"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Datastreams $filter Thing",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Datastreams?$filter=Thing/id eq 'DemoThing'&$expand=Thing",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"Datastreams"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "Thing/id eq 'DemoThing'"
+										},
+										{
+											"key": "$expand",
+											"value": "Thing"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Datastreams $filter ObservedProperty",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Datastreams?$filter=ObservedProperty/id eq 'DemoAirTemp'&$expand=ObservedProperty",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"Datastreams"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "ObservedProperty/id eq 'DemoAirTemp'"
+										},
+										{
+											"key": "$expand",
+											"value": "ObservedProperty"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Parties $filter Datastreams",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Parties?$filter=Datastreams/id eq 'DemoCSDatastream'&$expand=Datastreams",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"Parties"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "Datastreams/id eq 'DemoCSDatastream'"
+										},
+										{
+											"key": "$expand",
+											"value": "Datastreams"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Licenses $filter Datastreams",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Licenses?$filter=Datastreams/id eq 'DemoCSDatastream'&$expand=Datastreams",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"Licenses"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "Datastreams/id eq 'DemoCSDatastream'"
+										},
+										{
+											"key": "$expand",
+											"value": "Datastreams"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Projects $filter Datastreams",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Your test name\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData[\"@iot.count\"]).to.eql(0);",
+											"    pm.expect(jsonData[\"value\"]).to.eql([]);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Projects?$filter=Datastreams/id eq 'DemoCSDatastream'&$expand=Datastreams",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"Projects"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "Datastreams/id eq 'DemoCSDatastream'"
+										},
+										{
+											"key": "$expand",
+											"value": "Datastreams"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "ObservationGroups $filter ObservationRelation",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/ObservationGroups?$filter=ObservationRelations/id eq 'DemoRelation'&$expand=ObservationRelations",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"ObservationGroups"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "ObservationRelations/id eq 'DemoRelation'"
+										},
+										{
+											"key": "$expand",
+											"value": "ObservationRelations"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "ObservationRelations $filter ObservationGroups",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/ObservationRelations?$filter=ObservationGroup/id eq 'DemoGroup'&$expand=ObservationGroup",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"ObservationRelations"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "ObservationGroup/id eq 'DemoGroup'"
+										},
+										{
+											"key": "$expand",
+											"value": "ObservationGroup"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "ObservationRelations $filter Observation",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/ObservationRelations?$filter=Observation/id eq 'DemoCSObservation'&$expand=Observation",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"ObservationRelations"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "Observation/id eq 'DemoCSObservation'"
+										},
+										{
+											"key": "$expand",
+											"value": "Observation"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "ObservedProperties $filter Datastreams",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/ObservedProperties?$filter=Datastreams/id eq 'DemoCSDatastream'&$expand=Datastreams",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"ObservedProperties"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "Datastreams/id eq 'DemoCSDatastream'"
+										},
+										{
+											"key": "$expand",
+											"value": "Datastreams"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Sensors $filter Datastreams",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Sensors?$filter=Datastreams/id eq 'DemoCSDatastream'&$expand=Datastreams",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"Sensors"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "Datastreams/id eq 'DemoCSDatastream'"
+										},
+										{
+											"key": "$expand",
+											"value": "Datastreams"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Things $filter Datastreams",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Things?$filter=Datastreams/id eq 'DemoCSDatastream'&$expand=Datastreams",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"Things"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "Datastreams/id eq 'DemoCSDatastream'"
+										},
+										{
+											"key": "$expand",
+											"value": "Datastreams"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "FOI $filter Observations",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/FeaturesOfInterest?$filter=Observations/id eq 'DemoCSObservation'&$expand=Observations",
+									"protocol": "{{PROTOCOL}}",
+									"host": [
+										"{{HOST}}"
+									],
+									"port": "{{PORT}}",
+									"path": [
+										"{{BREADCRUMBS}}",
+										"sta",
+										"FeaturesOfInterest"
+									],
+									"query": [
+										{
+											"key": "$filter",
+											"value": "Observations/id eq 'DemoCSObservation'"
+										},
+										{
+											"key": "$expand",
+											"value": "Observations"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "GET Root Collections with $expand",
+			"item": [
+				{
+					"name": "Observations Collection $expand",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Observations?$expand=ObservationRelations,Datastream,FeatureOfInterest",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"sta",
+								"Observations"
+							],
+							"query": [
+								{
+									"key": "$expand",
+									"value": "ObservationRelations,Datastream,FeatureOfInterest"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Datastreams Collection $expand",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Datastreams?$expand=Sensor,Thing,ObservedProperty,License,Observations,Party,Project",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"sta",
+								"Datastreams"
+							],
+							"query": [
+								{
+									"key": "$expand",
+									"value": "Sensor,Thing,ObservedProperty,License,Observations,Party,Project"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Parties Collection $expand",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Parties?$expand=Datastreams",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"sta",
+								"Parties"
+							],
+							"query": [
+								{
+									"key": "$expand",
+									"value": "Datastreams"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Licenses Collection $expand",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Licenses?$expand=Datastreams",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"sta",
+								"Licenses"
+							],
+							"query": [
+								{
+									"key": "$expand",
+									"value": "Datastreams"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Projects Collection $expand",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Projects?$expand=Datastreams",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"sta",
+								"Projects"
+							],
+							"query": [
+								{
+									"key": "$expand",
+									"value": "Datastreams"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Thing Collection $expand",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Things?$expand=Datastreams",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"sta",
+								"Things"
+							],
+							"query": [
+								{
+									"key": "$expand",
+									"value": "Datastreams"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sensor Collection $expand",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Sensors?$expand=Datastreams",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"sta",
+								"Sensors"
+							],
+							"query": [
+								{
+									"key": "$expand",
+									"value": "Datastreams"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ObservedProperty Collection $expand",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/ObservedProperties?$expand=Datastreams",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"sta",
+								"ObservedProperties"
+							],
+							"query": [
+								{
+									"key": "$expand",
+									"value": "Datastreams"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ObservationGroups Collection $expand",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/ObservationGroups?$expand=ObservationRelations",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"sta",
+								"ObservationGroups"
+							],
+							"query": [
+								{
+									"key": "$expand",
+									"value": "ObservationRelations"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ObservationRelations Collection $expand",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/ObservationRelations?$expand=Observation,ObservationGroup",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"sta",
+								"ObservationRelations"
+							],
+							"query": [
+								{
+									"key": "$expand",
+									"value": "Observation,ObservationGroup"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "GET Related Collections",
+			"item": [
+				{
+					"name": "ObservationRelations via Observation",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Observations(DemoCSObservation)/ObservationRelations",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"sta",
+								"Observations(DemoCSObservation)",
+								"ObservationRelations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Datastreams via Licenses",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Licenses(DemoMIT)/Datastreams",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"sta",
+								"Licenses(DemoMIT)",
+								"Datastreams"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Datastreams via Parties",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Parties(DemoParty)/Datastreams",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"sta",
+								"Parties(DemoParty)",
+								"Datastreams"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Datastreams via Projects",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Projects(DemoProject)/Datastreams",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"sta",
+								"Projects(DemoProject)",
+								"Datastreams"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Datastreams via Observations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Observations(DemoCSObservation)/Datastream",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"sta",
+								"Observations(DemoCSObservation)",
+								"Datastream"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ObservationRelations via ObservationGroup",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/ObservationGroups(testGroup)/ObservationRelations",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"sta",
+								"ObservationGroups(testGroup)",
+								"ObservationRelations"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "GET Related Entities",
+			"item": [
+				{
+					"name": "Observation via  ObservationRelation",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/ObservationRelations(DemoRelation)/Observation",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"sta",
+								"ObservationRelations(DemoRelation)",
+								"Observation"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ObservationGroup via  ObservationRelation",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/ObservationRelations(DemoRelation)/ObservationGroup",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"sta",
+								"ObservationRelations(DemoRelation)",
+								"ObservationGroup"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "GET Entities",
+			"item": [
+				{
+					"name": "GET Project",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Projects(DemoProject)",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"sta",
+								"Projects(DemoProject)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET License",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PROTOCOL}}://{{HOST}}:{{PORT}}/{{BREADCRUMBS}}/Licenses(DemoMIT)",
+							"protocol": "{{PROTOCOL}}",
+							"host": [
+								"{{HOST}}"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"{{BREADCRUMBS}}",
+								"sta",
+								"Licenses(DemoMIT)"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "HOST",
+			"value": "localhost"
+		},
+		{
+			"key": "PORT",
+			"value": "8080"
+		},
+		{
+			"key": "BREADCRUMBS",
+			"value": "v1.1"
+		},
+		{
+			"key": "PROTOCOL",
+			"value": "http"
+		}
+	]
+}
