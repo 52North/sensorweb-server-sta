@@ -54,7 +54,7 @@ import javax.servlet.http.HttpServletRequest;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @RestController
-@Profile(StaConstants.CITSCIEXTENSION)
+@Profile(StaConstants.STAPLUS)
 public class CitSciPropertyRequestHandler extends PropertyRequestHandler implements CitSciExtensionRequestUtils {
 
     public CitSciPropertyRequestHandler(@Value("${server.rootUrl}") String rootUrl,

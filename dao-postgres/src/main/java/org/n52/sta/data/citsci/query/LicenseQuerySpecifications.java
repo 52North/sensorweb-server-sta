@@ -29,15 +29,13 @@
 
 package org.n52.sta.data.citsci.query;
 
-import org.n52.series.db.beans.AbstractDatasetEntity;
-import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DescribableEntity;
-import org.n52.series.db.beans.sta.LicenseEntity;
-import org.n52.series.db.beans.sta.ObservationGroupEntity;
+import org.n52.series.db.beans.sta.plus.GroupEntity;
+import org.n52.series.db.beans.sta.plus.LicenseEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
-import org.n52.sta.data.vanilla.query.EntityQuerySpecifications;
+import org.n52.sta.data.common.query.EntityQuerySpecifications;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.Expression;
@@ -49,21 +47,11 @@ import javax.persistence.criteria.Subquery;
  */
 public class LicenseQuerySpecifications extends EntityQuerySpecifications<LicenseEntity> {
 
-    public Specification<LicenseEntity> withObservationStaIdentifier(final String identifier) {
-        return (root, query, builder) -> {
-            Subquery<DataEntity> subquery = query.subquery(DataEntity.class);
-            Root<DataEntity> obs = subquery.from(DataEntity.class);
-            subquery.select(obs.get(DataEntity.PROPERTY_LICENSE).get(DescribableEntity.PROPERTY_ID))
-                .where(builder.equal(obs.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), identifier));
-            return builder.equal(root.get(DescribableEntity.PROPERTY_ID), subquery);
-        };
-    }
-
     public Specification<LicenseEntity> withObservationGroupStaIdentifier(final String identifier) {
         return (root, query, builder) -> {
-            Subquery<ObservationGroupEntity> subquery = query.subquery(ObservationGroupEntity.class);
-            Root<ObservationGroupEntity> obs = subquery.from(ObservationGroupEntity.class);
-            subquery.select(obs.get(ObservationGroupEntity.PROPERTY_LICENSE).get(DescribableEntity.PROPERTY_ID))
+            Subquery<GroupEntity> subquery = query.subquery(GroupEntity.class);
+            Root<GroupEntity> obs = subquery.from(GroupEntity.class);
+            subquery.select(obs.get(GroupEntity.PROPERTY_LICENSE).get(DescribableEntity.PROPERTY_ID))
                 .where(builder.equal(obs.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), identifier));
             return builder.equal(root.get(DescribableEntity.PROPERTY_ID), subquery);
         };
@@ -73,10 +61,11 @@ public class LicenseQuerySpecifications extends EntityQuerySpecifications<Licens
     protected Specification<LicenseEntity> handleRelatedPropertyFilter(String propertyName,
                                                                        Specification<?> propertyValue) {
         return (root, query, builder) -> {
+            /*
             if (StaConstants.DATASTREAMS.equals(propertyName)) {
                 Subquery<LicenseEntity> sq = query.subquery(LicenseEntity.class);
                 Root<AbstractDatasetEntity> datastream = sq.from(AbstractDatasetEntity.class);
-                sq.select(datastream.get(AbstractDatasetEntity.PROPERTY_LICENSE))
+                sq.select(datastream.get(StaPlusDataEntity.PROPERTY_LICENSE))
                     .where(((Specification<AbstractDatasetEntity>) propertyValue).toPredicate(datastream,
                                                                                               query,
                                                                                               builder));
@@ -84,6 +73,8 @@ public class LicenseQuerySpecifications extends EntityQuerySpecifications<Licens
             } else {
                 throw new RuntimeException("Could not find related property: " + propertyName);
             }
+            */
+            throw new RuntimeException("Could not find related property: " + propertyName);
         };
     }
 

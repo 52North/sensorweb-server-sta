@@ -29,17 +29,19 @@
 
 package org.n52.sta.data.citsci.repositories;
 
-import org.n52.series.db.beans.sta.ObservationRelationEntity;
+import org.n52.series.db.beans.sta.plus.RelationEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
-import org.n52.sta.data.vanilla.repositories.StaIdentifierRepository;
+import org.n52.sta.data.common.repositories.StaIdentifierRepository;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Repository
-@Profile(StaConstants.CITSCIEXTENSION)
-public interface ObservationRelationRepository extends StaIdentifierRepository<ObservationRelationEntity> {
+@Profile(StaConstants.STAPLUS)
+@Transactional
+public interface ObservationRelationRepository extends StaIdentifierRepository<RelationEntity> {
 
 }

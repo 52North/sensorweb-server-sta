@@ -68,7 +68,7 @@ import java.nio.file.Paths;
  */
 @RestController
 @ConditionalOnProperty(value = "server.feature.httpReadOnly", havingValue = "false", matchIfMissing = true)
-@Profile(StaConstants.CITSCIEXTENSION)
+@Profile(StaConstants.STAPLUS)
 public class CitSciMultipartObservationRequestHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CitSciMultipartObservationRequestHandler.class);

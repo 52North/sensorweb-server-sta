@@ -29,19 +29,6 @@
 
 package org.n52.sta.data.vanilla.service;
 
-import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.Predicate;
-
 import org.hibernate.Hibernate;
 import org.hibernate.query.criteria.internal.CriteriaBuilderImpl;
 import org.n52.janmayen.http.HTTPStatus;
@@ -52,13 +39,13 @@ import org.n52.series.db.beans.CategoryDataEntity;
 import org.n52.series.db.beans.CompositeDataEntity;
 import org.n52.series.db.beans.CountDataEntity;
 import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.Dataset;
 import org.n52.series.db.beans.DatasetAggregationEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.TextDataEntity;
 import org.n52.series.db.beans.parameter.observation.ObservationParameterEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
-import org.n52.series.db.beans.sta.ObservationRelationEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.filter.FilterFilter;
@@ -70,6 +57,7 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.api.CollectionWrapper;
 import org.n52.sta.api.dto.ObservationDTO;
+import org.n52.sta.data.common.CommonSTAServiceImpl;
 import org.n52.sta.data.vanilla.OffsetLimitBasedPageRequest;
 import org.n52.sta.data.vanilla.query.ObservationQuerySpecifications;
 import org.n52.sta.data.vanilla.repositories.DatastreamRepository;
@@ -90,6 +78,17 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.Predicate;
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
@@ -97,7 +96,8 @@ import org.springframework.transaction.annotation.Transactional;
 @DependsOn({"springApplicationContext"})
 @Transactional
 public class ObservationService
-    extends AbstractSensorThingsEntityServiceImpl<ObservationRepository<DataEntity<?>>, ObservationDTO, DataEntity<?>> {
+    extends CommonSTAServiceImpl<ObservationRepository<DataEntity<?>>, ObservationDTO,
+        DataEntity<?>> {
 
     private static final ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
     private static final Logger LOGGER = LoggerFactory.getLogger(ObservationService.class);
@@ -276,22 +276,6 @@ public class ObservationService
                 filter = ObservationQuerySpecifications.withFeatureOfInterestStaIdentifier(relatedId);
                 break;
             }
-            case STAEntityDefinition.OBSERVATION_GROUPS: {
-                filter = ObservationQuerySpecifications.withObservationGroupStaIdentifier(relatedId);
-                break;
-            }
-            case STAEntityDefinition.NAV_SUBJECT: {
-                filter = ObservationQuerySpecifications.withObservationRelationStaIdentifierAsSubject(relatedId);
-                break;
-            }
-            case STAEntityDefinition.NAV_OBJECT: {
-                filter = ObservationQuerySpecifications.withObservationRelationStaIdentifierAsObject(relatedId);
-                break;
-            }
-            case STAEntityDefinition.LICENSES: {
-                filter = ObservationQuerySpecifications.withLicenseStaIdentifier(relatedId);
-                break;
-            }
             default:
                 throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
         }
@@ -322,7 +306,7 @@ public class ObservationService
                 check(observation);
 
                 // Fetch dataset and check if FOI matches to reuse existing dataset
-                AbstractDatasetEntity datastream = datastreamRepository
+                Dataset datastream = datastreamRepository
                     .findByStaIdentifier(entity.getDataset().getStaIdentifier(),
                                          EntityGraphRepository.FetchGraph.FETCHGRAPH_FEATURE)
                     .orElseThrow(() -> new STACRUDException("Unable to find Datastream!"));
@@ -362,19 +346,8 @@ public class ObservationService
                 if (!found) {
                     // We have not found a matching dataset so we need to create a new one
                     LOGGER.debug("Creating new dataset as none with matching FOI exists");
-                    observation.setDataset(getDatastreamService().createOrExpandAggregation(datastream, feature));
-                }
-
-                if (observation.getLicense() != null) {
-                    observation.setLicense(getLicenseService().createOrfetch(observation.getLicense()));
-                }
-
-                if (observation.getSubjects() != null) {
-                    Set<ObservationRelationEntity> subjects = new HashSet<>();
-                    for (ObservationRelationEntity subject : observation.getSubjects()) {
-                        subjects.add(getObservationRelationService().createOrUpdate(subject));
-                    }
-                    observation.setSubjects(subjects);
+                    observation.setDataset(
+                        (DatasetEntity) getDatastreamService().createOrExpandAggregation(datastream, feature));
                 }
 
                 // Save Observation
@@ -520,8 +493,8 @@ public class ObservationService
             if (getRepository().existsByStaIdentifier(identifier)) {
                 DataEntity<?> observation =
                     getRepository().findByStaIdentifier(
-                        identifier,
-                        EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASET_FIRSTLAST_OBSERVATION)
+                            identifier,
+                            EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASET_FIRSTLAST_OBSERVATION)
                         .get();
                 deleteReferenceFromDatasetFirstLast(observation);
 
@@ -686,7 +659,7 @@ public class ObservationService
                     datastreamEntity.setPhenomenonTimeEnd(null);
                 }
             }
-            datastreamRepository.save(datastreamEntity);
+            datastreamRepository.save((Dataset) datastreamEntity);
             // update parent if its part of the aggregation
             if (datastreamEntity.isSetAggregation()) {
                 updateDatastreamPhenomenonTimeOnObservationUpdate(
@@ -803,7 +776,7 @@ public class ObservationService
                     updateDataset(dataset.getAggregation(), data);
                 }
 
-                return datastreamRepository.save(dataset);
+                return datastreamRepository.save((Dataset) dataset);
             }
         } else {
             throw new STACRUDException("Could not update Dataset->firstObservation or Dataset->firstObservation. " +
@@ -862,10 +835,6 @@ public class ObservationService
         data.setGeometryEntity(observation.getGeometryEntity());
         data.setVerticalFrom(observation.getVerticalFrom());
         data.setVerticalTo(observation.getVerticalTo());
-        data.setLicense(observation.getLicense());
-        data.setSubjects(observation.getSubjects());
-        data.setObjects(observation.getObjects());
-        data.setObservationGroups(observation.getObservationGroups());
         return data;
     }
 }

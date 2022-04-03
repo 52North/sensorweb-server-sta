@@ -29,9 +29,9 @@
 
 package org.n52.sta.data.citsci.repositories;
 
-import org.n52.series.db.beans.sta.LicenseEntity;
+import org.n52.series.db.beans.sta.plus.LicenseEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
-import org.n52.sta.data.vanilla.repositories.StaIdentifierRepository;
+import org.n52.sta.data.common.repositories.StaIdentifierRepository;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Repository
-@Profile(StaConstants.CITSCIEXTENSION)
+@Profile(StaConstants.STAPLUS)
 @Transactional
 public interface LicenseRepository extends StaIdentifierRepository<LicenseEntity> {
 

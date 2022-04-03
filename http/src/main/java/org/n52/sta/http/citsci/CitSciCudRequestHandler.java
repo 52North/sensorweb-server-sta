@@ -59,7 +59,7 @@ import java.io.IOException;
  */
 @RestController
 @ConditionalOnProperty(value = "server.feature.httpReadOnly", havingValue = "false", matchIfMissing = true)
-@Profile(StaConstants.CITSCIEXTENSION)
+@Profile(StaConstants.STAPLUS)
 public class CitSciCudRequestHandler<T extends HibernateRelations.HasId>
     extends CudRequestHandler implements CitSciExtensionRequestUtils {
 

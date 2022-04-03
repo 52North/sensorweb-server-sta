@@ -29,6 +29,7 @@
 package org.n52.sta.data.vanilla.repositories;
 
 import org.n52.series.db.beans.AbstractFeatureEntity;
+import org.n52.sta.data.common.repositories.StaIdentifierRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 

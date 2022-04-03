@@ -54,7 +54,7 @@ import javax.servlet.http.HttpServletRequest;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @RestController
-@Profile(StaConstants.CITSCIEXTENSION)
+@Profile(StaConstants.STAPLUS)
 public class CitSciEntityRequestHandler extends EntityRequestHandler implements CitSciExtensionRequestUtils {
 
     public CitSciEntityRequestHandler(@Value("${server.rootUrl}") String rootUrl,
@@ -95,7 +95,7 @@ public class CitSciEntityRequestHandler extends EntityRequestHandler implements 
                                     @PathVariable String target,
                                     HttpServletRequest request)
         throws Exception {
-        if (target.equals(StaConstants.NAV_SUBJECT) || target.equals(StaConstants.NAV_OBJECT)) {
+        if (target.equals(StaConstants.SUBJECT) || target.equals(StaConstants.OBJECT)) {
             validateResource((String) request.getAttribute(HandlerMapping.LOOKUP_PATH), serviceRepository);
 
             String[] split = splitId(entity);

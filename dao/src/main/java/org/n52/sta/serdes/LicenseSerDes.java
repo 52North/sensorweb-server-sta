@@ -120,12 +120,12 @@ public class LicenseSerDes {
             }
 
             if (!license.hasSelectOption() ||
-                license.getFieldsToSerialize().contains(STAEntityDefinition.OBSERVATION_GROUPS)) {
+                license.getFieldsToSerialize().contains(STAEntityDefinition.GROUPS)) {
                 if (!license.hasExpandOption() ||
-                    license.getFieldsToExpand().get(STAEntityDefinition.OBSERVATION_GROUPS) == null) {
-                    writeNavigationProp(gen, STAEntityDefinition.OBSERVATION_GROUPS, license.getId());
+                    license.getFieldsToExpand().get(STAEntityDefinition.GROUPS) == null) {
+                    writeNavigationProp(gen, STAEntityDefinition.GROUPS, license.getId());
                 } else {
-                    gen.writeFieldName(STAEntityDefinition.OBSERVATION_GROUPS);
+                    gen.writeFieldName(STAEntityDefinition.GROUPS);
                     writeNestedCollection(license.getObservationGroups(),
                                           gen,
                                           serializers);

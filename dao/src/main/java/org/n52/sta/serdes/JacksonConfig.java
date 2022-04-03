@@ -149,7 +149,7 @@ public class JacksonConfig {
                                       new DatastreamSerDes.DatastreamPatchDeserializer());
 
         for (String activeProfile : environment.getActiveProfiles()) {
-            if (activeProfile.equals(StaConstants.CITSCIEXTENSION)) {
+            if (activeProfile.equals(StaConstants.STAPLUS)) {
                 serializers.addSerializer(
                     new ObservationGroupSerDes.ObservationGroupSerializer(rootUrl,
                                                                           activeProfiles));

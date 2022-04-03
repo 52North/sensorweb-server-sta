@@ -63,7 +63,7 @@ public class JSONObservationGroup extends JSONBase.JSONwithIdNameDescriptionTime
     public JSONLicense license;
 
     @JsonManagedReference
-    @JsonProperty(StaConstants.OBSERVATION_RELATIONS)
+    @JsonProperty(StaConstants.RELATIONS)
     public JSONObservationRelation[] relations;
 
     @JsonManagedReference

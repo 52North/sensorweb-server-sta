@@ -29,6 +29,7 @@
 package org.n52.sta.data.vanilla.query;
 
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
+import org.n52.sta.data.common.query.EntityQuerySpecifications;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>

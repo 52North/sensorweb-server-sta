@@ -26,13 +26,13 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.vanilla.repositories;
 
-import org.n52.series.db.beans.AbstractDatasetEntity;
+import org.n52.series.db.beans.Dataset;
+import org.n52.sta.data.common.repositories.StaIdentifierRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Set;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -40,8 +40,8 @@ import java.util.Set;
 @Transactional
 @Repository
 public interface DatastreamRepository
-    extends NameRepository<AbstractDatasetEntity>, StaIdentifierRepository<AbstractDatasetEntity> {
-
-    Set<AbstractDatasetEntity> findAllByAggregationId(Long id);
+    extends NameRepository<Dataset>,
+            StaIdentifierRepository<Dataset>,
+            AggregateRepository<Dataset> {
 
 }

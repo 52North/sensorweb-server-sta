@@ -56,7 +56,7 @@ import javax.servlet.http.HttpServletRequest;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @RestController
-@Profile(StaConstants.CITSCIEXTENSION)
+@Profile(StaConstants.STAPLUS)
 public class CitSciCollectionRequestHandler extends CollectionRequestHandler implements CitSciExtensionRequestUtils {
 
     public CitSciCollectionRequestHandler(@Value("${server.rootUrl}") String rootUrl,
@@ -108,7 +108,7 @@ public class CitSciCollectionRequestHandler extends CollectionRequestHandler imp
                                                    @PathVariable String target,
                                                    HttpServletRequest request)
         throws Exception {
-        if (target.equals(StaConstants.NAV_SUBJECTS) || target.equals(StaConstants.NAV_OBJECTS)) {
+        if (target.equals(StaConstants.SUBJECTS) || target.equals(StaConstants.OBJECTS)) {
             validateResource((String) request.getAttribute(HandlerMapping.LOOKUP_PATH), serviceRepository);
 
             String[] split = splitId(entity);

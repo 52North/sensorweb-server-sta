@@ -31,17 +31,17 @@ package org.n52.sta.data.citsci.query;
 
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
-import org.n52.series.db.beans.sta.ProjectEntity;
+import org.n52.series.db.beans.sta.plus.ProjectEntity;
+import org.n52.series.db.beans.sta.plus.StaPlusDatasetEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
-import org.n52.sta.data.vanilla.query.EntityQuerySpecifications;
+import org.n52.sta.data.common.query.EntityQuerySpecifications;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
@@ -65,7 +65,7 @@ public class ProjectQuerySpecifications extends EntityQuerySpecifications<Projec
             if (StaConstants.DATASTREAMS.equals(propertyName)) {
                 Subquery<ProjectEntity> sq = query.subquery(ProjectEntity.class);
                 Root<AbstractDatasetEntity> datastream = sq.from(AbstractDatasetEntity.class);
-                sq.select(datastream.get(AbstractDatasetEntity.PROPERTY_PROJECT))
+                sq.select(datastream.get(StaPlusDatasetEntity.PROPERTY_PROJECT))
                     .where(((Specification<AbstractDatasetEntity>) propertyValue).toPredicate(datastream,
                                                                                               query,
                                                                                               builder));
@@ -110,6 +110,7 @@ public class ProjectQuerySpecifications extends EntityQuerySpecifications<Projec
                                                                 switched);
                     case StaConstants.PROP_RUNTIME:
                         switch (operator) {
+                            /*
                             case PropertyIsLessThan:
                             case PropertyIsLessThanOrEqualTo:
                                 return handleDirectDateTimePropertyFilter(
@@ -152,6 +153,7 @@ public class ProjectQuerySpecifications extends EntityQuerySpecifications<Projec
                                         operator,
                                         builder);
                                 return builder.or(neStart, neEnd);
+                                */
                             default:
                                 throw new STAInvalidFilterExpressionException(
                                     "Unknown operator: " + operator.toString());

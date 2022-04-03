@@ -30,11 +30,12 @@
 package org.n52.sta.data.citsci.query;
 
 import org.n52.series.db.beans.AbstractDatasetEntity;
-import org.n52.series.db.beans.sta.PartyEntity;
+import org.n52.series.db.beans.sta.plus.PartyEntity;
+import org.n52.series.db.beans.sta.plus.StaPlusDatasetEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
-import org.n52.sta.data.vanilla.query.EntityQuerySpecifications;
+import org.n52.sta.data.common.query.EntityQuerySpecifications;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.Expression;
@@ -63,7 +64,7 @@ public class PartyQuerySpecifications extends EntityQuerySpecifications<PartyEnt
             if (StaConstants.DATASTREAMS.equals(propertyName)) {
                 Subquery<PartyEntity> sq = query.subquery(PartyEntity.class);
                 Root<AbstractDatasetEntity> datastream = sq.from(AbstractDatasetEntity.class);
-                sq.select(datastream.get(AbstractDatasetEntity.PROPERTY_PARTY))
+                sq.select(datastream.get(StaPlusDatasetEntity.PROPERTY_PARTY))
                     .where(((Specification<AbstractDatasetEntity>) propertyValue).toPredicate(datastream,
                                                                                               query,
                                                                                               builder));
@@ -88,8 +89,8 @@ public class PartyQuerySpecifications extends EntityQuerySpecifications<PartyEnt
                                                                 operator,
                                                                 builder,
                                                                 false);
-                    case StaConstants.PROP_NICKNAME:
-                        return handleDirectStringPropertyFilter(root.get(PartyEntity.PROPERTY_NICKNAME),
+                    case StaConstants.PROP_DISPLAY_NAME:
+                        return handleDirectStringPropertyFilter(root.get(PartyEntity.PROPERTY_DISPLAY_NAME),
                                                                 propertyValue,
                                                                 operator,
                                                                 builder,

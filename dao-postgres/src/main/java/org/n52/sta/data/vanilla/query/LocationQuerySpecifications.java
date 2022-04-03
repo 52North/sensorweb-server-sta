@@ -39,6 +39,8 @@ import org.n52.shetland.oasis.odata.ODataConstants;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
+import org.n52.sta.data.common.query.EntityQuerySpecifications;
+import org.n52.sta.data.common.query.SpatialQuerySpecifications;
 import org.n52.sta.data.vanilla.service.util.HibernateSpatialCriteriaBuilder;
 import org.n52.svalbard.odata.core.expr.GeoValueExpr;
 import org.springframework.data.jpa.domain.Specification;

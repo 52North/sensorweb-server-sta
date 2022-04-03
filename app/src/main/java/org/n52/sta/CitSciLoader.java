@@ -37,7 +37,7 @@ import org.springframework.context.annotation.Profile;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@Profile(StaConstants.CITSCIEXTENSION)
+@Profile(StaConstants.STAPLUS)
 @Configuration
 @ComponentScan(
     excludeFilters = {

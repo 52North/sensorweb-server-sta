@@ -27,7 +27,7 @@
  * Public License for more details.
  */
 
-package org.n52.sta.data.vanilla.service;
+package org.n52.sta.data.common;
 
 import org.hibernate.query.criteria.internal.CriteriaBuilderImpl;
 import org.n52.series.db.beans.AbstractDatasetEntity;
@@ -45,18 +45,20 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.api.CollectionWrapper;
 import org.n52.sta.api.dto.StaDTO;
-import org.n52.sta.data.citsci.service.LicenseService;
-import org.n52.sta.data.citsci.service.ObservationGroupService;
-import org.n52.sta.data.citsci.service.ObservationRelationService;
-import org.n52.sta.data.citsci.service.PartyService;
-import org.n52.sta.data.citsci.service.ProjectService;
+import org.n52.sta.data.common.repositories.StaIdentifierRepository;
 import org.n52.sta.data.vanilla.DTOTransformerImpl;
 import org.n52.sta.data.vanilla.MutexFactory;
 import org.n52.sta.data.vanilla.OffsetLimitBasedPageRequest;
 import org.n52.sta.data.vanilla.SerDesConfig;
 import org.n52.sta.data.vanilla.repositories.EntityGraphRepository;
-import org.n52.sta.data.vanilla.repositories.StaIdentifierRepository;
-import org.n52.sta.data.vanilla.service.EntityServiceRepository.EntityTypes;
+import org.n52.sta.data.vanilla.service.DatastreamService;
+import org.n52.sta.data.vanilla.service.FeatureOfInterestService;
+import org.n52.sta.data.vanilla.service.HistoricalLocationService;
+import org.n52.sta.data.vanilla.service.LocationService;
+import org.n52.sta.data.vanilla.service.ObservationService;
+import org.n52.sta.data.vanilla.service.ObservedPropertyService;
+import org.n52.sta.data.vanilla.service.SensorService;
+import org.n52.sta.data.vanilla.service.ThingService;
 import org.n52.sta.data.vanilla.service.util.FilterExprVisitor;
 import org.n52.sta.data.vanilla.service.util.HibernateSpatialCriteriaBuilderImpl;
 import org.n52.svalbard.odata.core.expr.Expr;
@@ -82,7 +84,7 @@ import java.util.Set;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Transactional(rollbackFor = Exception.class)
-public abstract class AbstractSensorThingsEntityServiceImpl<
+public abstract class CommonSTAServiceImpl<
     T extends StaIdentifierRepository<S>,
     R extends StaDTO,
     S extends HibernateRelations.HasId> {
@@ -103,29 +105,29 @@ public abstract class AbstractSensorThingsEntityServiceImpl<
     protected static final String INVALID_EXPAND_OPTION_SUPPLIED =
         "Invalid expandOption supplied. Cannot find %s on Entity of type '%s'";
     protected static final String NO_S_WITH_ID_S_FOUND = "No %s with id %s found.";
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSensorThingsEntityServiceImpl.class);
-    protected EntityServiceRepository serviceRepository;
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommonSTAServiceImpl.class);
+    protected CommonEntityServiceRepository serviceRepository;
     private final EntityManager em;
     private final Class<S> entityClass;
     private T repository;
     @Autowired private MutexFactory lock;
     @Autowired private SerDesConfig config;
 
-    protected AbstractSensorThingsEntityServiceImpl() {
+    protected CommonSTAServiceImpl() {
         this.em = null;
         this.entityClass = null;
         this.repository = null;
     }
 
-    public AbstractSensorThingsEntityServiceImpl(T repository,
-                                                 EntityManager em,
-                                                 Class entityClass) {
+    public CommonSTAServiceImpl(T repository,
+                                EntityManager em,
+                                Class entityClass) {
         this.em = em;
         this.entityClass = entityClass;
         this.repository = repository;
     }
 
-    public void setServiceRepository(EntityServiceRepository serviceRepository) {
+    public void setServiceRepository(CommonEntityServiceRepository serviceRepository) {
         this.serviceRepository = serviceRepository;
     }
 
@@ -222,7 +224,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<
         return this.createWrapper(updateEntity(id, entity, method), null);
     }
 
-    protected T getRepository() {
+    public T getRepository() {
         return this.repository;
     }
 
@@ -396,8 +398,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<
     @Transactional(rollbackFor = Exception.class)
     protected abstract S updateEntity(String id, S entity, HttpMethod method) throws STACRUDException;
 
-    @Transactional(rollbackFor = Exception.class)
-    protected S save(S entity) {
+    @Transactional(rollbackFor = Exception.class) public S save(S entity) {
         return getRepository().save(entity);
     }
 
@@ -439,7 +440,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<
      * @param queryOptions {@link QueryOptions} to create {@link PageRequest}
      * @return {@link PageRequest} of type {@link OffsetLimitBasedPageRequest}
      */
-    OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions) {
+    protected OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions) {
         long offset = queryOptions.hasSkipFilter() ? queryOptions.getSkipFilter().getValue() : 0;
         Sort sort;
         if (queryOptions.hasOrderByFilter()) {
@@ -569,59 +570,42 @@ public abstract class AbstractSensorThingsEntityServiceImpl<
     }
 
     protected LocationService getLocationService() {
-        return (LocationService) serviceRepository.getEntityServiceRaw(EntityTypes.Location);
+        return (LocationService)
+            serviceRepository.getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.Location.name());
     }
 
     protected HistoricalLocationService getHistoricalLocationService() {
-        return (HistoricalLocationService) serviceRepository.getEntityServiceRaw(EntityTypes.HistoricalLocation);
+        return (HistoricalLocationService)
+            serviceRepository.getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.HistoricalLocation.name());
     }
 
     protected DatastreamService getDatastreamService() {
-        return (DatastreamService) serviceRepository.getEntityServiceRaw(EntityTypes.Datastream);
+        return (DatastreamService)
+            serviceRepository.getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.Datastream.name());
     }
 
     protected FeatureOfInterestService getFeatureOfInterestService() {
-        return (FeatureOfInterestService) serviceRepository.getEntityServiceRaw(EntityTypes.FeatureOfInterest);
+        return (FeatureOfInterestService)
+            serviceRepository.getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.FeatureOfInterest.name());
     }
 
     protected ThingService getThingService() {
-        return (ThingService) serviceRepository.getEntityServiceRaw(EntityTypes.Thing);
+        return (ThingService)
+            serviceRepository.getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.Thing.name());
     }
 
     protected SensorService getSensorService() {
-        return (SensorService) serviceRepository.getEntityServiceRaw(EntityTypes.Sensor);
+        return (SensorService)
+            serviceRepository.getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.Sensor.name());
     }
 
     protected ObservedPropertyService getObservedPropertyService() {
-        return (ObservedPropertyService) serviceRepository.getEntityServiceRaw(EntityTypes.ObservedProperty);
+        return (ObservedPropertyService)
+            serviceRepository.getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.ObservedProperty.name());
     }
 
     protected ObservationService getObservationService() {
-        return (ObservationService) serviceRepository.getEntityServiceRaw(EntityTypes.Observation);
-    }
-
-    protected ObservationGroupService getObservationGroupService() {
-        return (ObservationGroupService)
-            serviceRepository.getEntityServiceRaw(EntityTypes.ObservationGroup);
-    }
-
-    protected ObservationRelationService getObservationRelationService() {
-        return (ObservationRelationService)
-            serviceRepository.getEntityServiceRaw(EntityTypes.ObservationRelation);
-    }
-
-    protected LicenseService getLicenseService() {
-        return (LicenseService)
-            serviceRepository.getEntityServiceRaw(EntityTypes.License);
-    }
-
-    protected PartyService getPartyService() {
-        return (PartyService)
-            serviceRepository.getEntityServiceRaw(EntityTypes.Party);
-    }
-
-    protected ProjectService getProjectService() {
-        return (ProjectService)
-            serviceRepository.getEntityServiceRaw(EntityTypes.Project);
+        return (ObservationService)
+            serviceRepository.getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.Observation.name());
     }
 }

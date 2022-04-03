@@ -1,5 +1,5 @@
 # Log Bean initiation process
-debug: true
+debug: false
 trace: false
 
 # General Server Configuration
@@ -79,7 +79,7 @@ database:
     # Mappings to be loaded. See https://github.com/52North/sensorweb-server-sta/wiki for details
     # Options:
     # - Vanilla STA: sta-vanilla.xml
-    persistence-location: classpath:META-INF/sta-citsci.xml
+    persistence-location: classpath:META-INF/sta-vanilla.xml
 spring:
   # Profile of the application.
   # Options:
@@ -88,12 +88,12 @@ spring:
   # - STA Plus (CitSci Extension): citSci
   # - [not implemented yet] STA with MultiDatastream Extension: multiDatastreamExtension
   profiles:
-    active: citSci
+    active: vanilla
   datasource:
     platform: postgres
     username: postgres
     password: postgres
-    url: jdbc:postgresql://localhost:5432/sta
+    url: jdbc:postgresql://localhost:5000/sta
     initialization-mode: always
     hikari:
       maximum-pool-size: 10
@@ -161,6 +161,9 @@ logging:
     #    org.hibernate: INFO
     #    org.hibernate.type: INFO
     #    org.hibernate: TRACE
+    org:
+      hibernate:
+        boot: DEBUG
     #    io.moquette: TRACE
     org.n52: TRACE
 #    org.springframework.orm.jpa: TRACE

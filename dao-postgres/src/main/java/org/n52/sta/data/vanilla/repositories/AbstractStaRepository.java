@@ -28,6 +28,7 @@
  */
 package org.n52.sta.data.vanilla.repositories;
 
+import org.n52.sta.data.common.repositories.StaIdentifierRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.transaction.annotation.Transactional;
 

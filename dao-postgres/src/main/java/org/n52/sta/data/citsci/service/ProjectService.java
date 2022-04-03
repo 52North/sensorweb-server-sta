@@ -30,8 +30,9 @@
 package org.n52.sta.data.citsci.service;
 
 import org.n52.janmayen.http.HTTPStatus;
-import org.n52.series.db.beans.AbstractDatasetEntity;
-import org.n52.series.db.beans.sta.ProjectEntity;
+import org.n52.series.db.beans.sta.StaPlusDataset;
+import org.n52.series.db.beans.sta.plus.ProjectEntity;
+import org.n52.series.db.beans.sta.plus.StaPlusAbstractDatasetEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.ogc.sta.StaConstants;
@@ -43,7 +44,6 @@ import org.n52.sta.api.dto.ProjectDTO;
 import org.n52.sta.data.citsci.query.ProjectQuerySpecifications;
 import org.n52.sta.data.citsci.repositories.ProjectRepository;
 import org.n52.sta.data.vanilla.repositories.EntityGraphRepository;
-import org.n52.sta.data.vanilla.service.AbstractSensorThingsEntityServiceImpl;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
@@ -63,9 +63,9 @@ import java.util.stream.Collectors;
 @Component
 @DependsOn({"springApplicationContext"})
 @Transactional
-@Profile(StaConstants.CITSCIEXTENSION)
+@Profile(StaConstants.STAPLUS)
 public class ProjectService
-    extends AbstractSensorThingsEntityServiceImpl<ProjectRepository, ProjectDTO, ProjectEntity> {
+    extends CitSciSTAServiceImpl<ProjectRepository, ProjectDTO, ProjectEntity> {
 
     private static final ProjectQuerySpecifications pQS = new ProjectQuerySpecifications();
 
@@ -105,11 +105,11 @@ public class ProjectService
             }
             String expandProperty = expandItem.getPath();
             if (ProjectEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
-                Page<AbstractDatasetEntity> datastreams = getDatastreamService()
+                Page<StaPlusDataset> datastreams = getDatastreamService()
                     .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
                                                            STAEntityDefinition.PROJECTS,
                                                            expandItem.getQueryOptions());
-                entity.setDatasets(datastreams.get().collect(Collectors.toSet()));
+                entity.setDatastreams(datastreams.get().collect(Collectors.toSet()));
                 return entity;
             } else {
                 throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
@@ -160,9 +160,9 @@ public class ProjectService
             if (getRepository().existsByStaIdentifier(project.getStaIdentifier())) {
                 throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS, HTTPStatus.CONFLICT);
             } else {
-                if (project.hasDatastreams()) {
-                    for (AbstractDatasetEntity datastream : project.getDatasets()) {
-                        getDatastreamService().create(datastream);
+                if (project.getDatastreams() != null) {
+                    for (StaPlusDataset datastream : project.getDatastreams()) {
+                        getStaPlusDatastreamService().create(datastream);
                     }
                 }
                 getRepository().save(project);
@@ -209,12 +209,12 @@ public class ProjectService
         if (toMerge.getName() != null) {
             existing.setName(toMerge.getName());
         }
+        /*
         if (toMerge.getRuntimeStart() != null) {
             existing.setRuntimeStart(toMerge.getRuntimeStart());
         }
-        if (toMerge.getRuntimeEnd() != null) {
-            existing.setRuntimeEnd(toMerge.getRuntimeEnd());
-        }
+        if (toMerge.getRuntimeEnd() != null)
+        */
         if (toMerge.getDescription() != null) {
             existing.setDescription(toMerge.getDescription());
         }
@@ -222,7 +222,7 @@ public class ProjectService
             existing.setUrl(toMerge.getUrl());
         }
 
-        mergeDatastreams(existing, toMerge);
+        //mergeDatastreams(existing, toMerge);
         return existing;
     }
 
@@ -231,7 +231,7 @@ public class ProjectService
             if (getRepository().existsByStaIdentifier(id)) {
                 ProjectEntity project = getRepository().findByStaIdentifier(id).get();
                 // Delete related Datastreams
-                for (AbstractDatasetEntity ds : project.getDatasets()) {
+                for (StaPlusAbstractDatasetEntity ds : project.getDatastreams()) {
                     getDatastreamService().delete(ds.getStaIdentifier());
                 }
                 getRepository().deleteByStaIdentifier(id);

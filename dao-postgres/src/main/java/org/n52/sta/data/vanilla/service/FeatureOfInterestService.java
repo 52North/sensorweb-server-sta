@@ -51,6 +51,7 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.api.dto.FeatureOfInterestDTO;
+import org.n52.sta.data.common.CommonSTAServiceImpl;
 import org.n52.sta.data.vanilla.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.vanilla.query.FeatureOfInterestQuerySpecifications;
 import org.n52.sta.data.vanilla.query.ObservationQuerySpecifications;
@@ -88,10 +89,10 @@ import java.util.stream.Collectors;
 @DependsOn({"springApplicationContext"})
 @Transactional
 public class FeatureOfInterestService
-    extends AbstractSensorThingsEntityServiceImpl<
-    FeatureOfInterestRepository,
-    FeatureOfInterestDTO,
-    AbstractFeatureEntity<?>> {
+    extends CommonSTAServiceImpl<
+            FeatureOfInterestRepository,
+            FeatureOfInterestDTO,
+            AbstractFeatureEntity<?>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FeatureOfInterestService.class);
 
@@ -354,7 +355,8 @@ public class FeatureOfInterestService
                 d.setLastQuantityValue(null);
                 d.setLastValueAt(null);
                 d.setFeature(null);
-                datastreamRepository.saveAndFlush(d);
+                //TODO: fix
+                //datastreamRepository.saveAndFlush(d);
                 // delete observations
                 observationRepository.deleteAllByDatasetIdIn(Collections.singleton(d.getId()));
                 getRepository().flush();
@@ -371,7 +373,8 @@ public class FeatureOfInterestService
                     d.setLastObservation(null);
                     d.setLastQuantityValue(null);
                     d.setLastValueAt(null);
-                    datastreamRepository.delete(d);
+                    // TODO: fix
+                    // datastreamRepository.delete(d);
                 }
             });
             getRepository().flush();

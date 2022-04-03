@@ -62,6 +62,10 @@ public interface PartyDTO extends StaDTO {
 
     void setDescription(String description);
 
+    Set<ThingDTO> getThings();
+
+    void setThings(Set<ThingDTO> things);
+
     enum Role {
         individual, institution;
     }

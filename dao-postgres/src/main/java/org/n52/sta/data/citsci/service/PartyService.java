@@ -30,8 +30,10 @@
 package org.n52.sta.data.citsci.service;
 
 import org.n52.janmayen.http.HTTPStatus;
-import org.n52.series.db.beans.AbstractDatasetEntity;
-import org.n52.series.db.beans.sta.PartyEntity;
+import org.n52.series.db.beans.sta.StaPlusDataset;
+import org.n52.series.db.beans.sta.plus.PartyEntity;
+import org.n52.series.db.beans.sta.plus.StaPlusAbstractDatasetEntity;
+import org.n52.series.db.beans.sta.plus.StaPlusDatasetEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.ogc.sta.StaConstants;
@@ -43,7 +45,6 @@ import org.n52.sta.api.dto.PartyDTO;
 import org.n52.sta.data.citsci.query.PartyQuerySpecifications;
 import org.n52.sta.data.citsci.repositories.PartyRepository;
 import org.n52.sta.data.vanilla.repositories.EntityGraphRepository;
-import org.n52.sta.data.vanilla.service.AbstractSensorThingsEntityServiceImpl;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
@@ -63,9 +64,9 @@ import java.util.stream.Collectors;
 @Component
 @DependsOn({"springApplicationContext"})
 @Transactional
-@Profile(StaConstants.CITSCIEXTENSION)
+@Profile(StaConstants.STAPLUS)
 public class PartyService
-    extends AbstractSensorThingsEntityServiceImpl<PartyRepository, PartyDTO, PartyEntity> {
+    extends CitSciSTAServiceImpl<PartyRepository, PartyDTO, PartyEntity> {
 
     private static final PartyQuerySpecifications pQS = new PartyQuerySpecifications();
 
@@ -106,11 +107,11 @@ public class PartyService
                 }
                 String expandProperty = expandItem.getPath();
                 if (PartyEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
-                    Page<AbstractDatasetEntity> datastreams = getDatastreamService()
+                    Page<StaPlusDatasetEntity> datastreams = getDatastreamService()
                         .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
                                                                STAEntityDefinition.PARTIES,
                                                                expandItem.getQueryOptions());
-                    entity.setDatasets(datastreams.get().collect(Collectors.toSet()));
+                    entity.setDatastreams(datastreams.get().collect(Collectors.toSet()));
                     break;
                 } else {
                     throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
@@ -162,9 +163,9 @@ public class PartyService
             if (getRepository().existsByStaIdentifier(party.getStaIdentifier())) {
                 throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS, HTTPStatus.CONFLICT);
             } else {
-                if (party.hasDatastreams()) {
-                    for (AbstractDatasetEntity datastream : party.getDatasets()) {
-                        getDatastreamService().create(datastream);
+                if (party.getDatastreams() != null) {
+                    for (StaPlusDataset datastream : party.getDatastreams()) {
+                        getStaPlusDatastreamService().create(datastream);
                     }
                 }
                 getRepository().save(party);
@@ -208,13 +209,13 @@ public class PartyService
         if (toMerge.getStaIdentifier() != null) {
             existing.setStaIdentifier(toMerge.getStaIdentifier());
         }
-        if (toMerge.getNickname() != null) {
-            existing.setNickname(toMerge.getNickname());
+        if (toMerge.getDisplayName() != null) {
+            existing.setDisplayName(toMerge.getDisplayName());
         }
         if (toMerge.getRole() != null) {
             existing.setRole(toMerge.getRole());
         }
-        mergeDatastreams(existing, toMerge);
+        // mergeDatastreams(existing, toMerge);
         return existing;
     }
 
@@ -223,7 +224,7 @@ public class PartyService
             if (getRepository().existsByStaIdentifier(id)) {
                 PartyEntity party = getRepository().findByStaIdentifier(id).get();
                 // Delete related Datastreams
-                for (AbstractDatasetEntity ds : party.getDatasets()) {
+                for (StaPlusAbstractDatasetEntity ds : party.getDatastreams()) {
                     getDatastreamService().delete(ds.getStaIdentifier());
                 }
                 getRepository().deleteByStaIdentifier(id);

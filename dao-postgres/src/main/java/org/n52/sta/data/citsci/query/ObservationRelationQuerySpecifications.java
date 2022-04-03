@@ -31,12 +31,12 @@ package org.n52.sta.data.citsci.query;
 
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DescribableEntity;
-import org.n52.series.db.beans.sta.ObservationGroupEntity;
-import org.n52.series.db.beans.sta.ObservationRelationEntity;
+import org.n52.series.db.beans.sta.plus.GroupEntity;
+import org.n52.series.db.beans.sta.plus.RelationEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
-import org.n52.sta.data.vanilla.query.EntityQuerySpecifications;
+import org.n52.sta.data.common.query.EntityQuerySpecifications;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.Expression;
@@ -48,85 +48,79 @@ import javax.persistence.criteria.Subquery;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public class ObservationRelationQuerySpecifications extends EntityQuerySpecifications<ObservationRelationEntity> {
+public class ObservationRelationQuerySpecifications extends EntityQuerySpecifications<RelationEntity> {
 
-    public static Specification<ObservationRelationEntity> withGroupStaIdentifier(final String groupIdentifier) {
+    public static Specification<RelationEntity> withGroupStaIdentifier(final String groupIdentifier) {
         return (root, query, builder) -> {
-            final Join<ObservationGroupEntity, ObservationRelationEntity> join =
-                root.join(ObservationRelationEntity.PROPERTY_GROUP, JoinType.INNER);
+            final Join<GroupEntity, RelationEntity> join =
+                root.join(RelationEntity.PROPERTY_GROUPS, JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), groupIdentifier);
         };
     }
 
-    public static Specification<ObservationRelationEntity> withSubjectStaIdentifier(
+    public static Specification<RelationEntity> withSubjectStaIdentifier(
         final String observationIdentifier) {
         return (root, query, builder) -> {
-            final Join<ObservationRelationEntity, DataEntity<?>> join =
-                root.join(ObservationRelationEntity.PROPERTY_SUBJECT, JoinType.INNER);
+            final Join<RelationEntity, DataEntity<?>> join =
+                root.join(RelationEntity.PROPERTY_SUBJECT, JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), observationIdentifier);
         };
     }
 
-    public static Specification<ObservationRelationEntity> withObjectStaIdentifier(
+    public static Specification<RelationEntity> withObjectStaIdentifier(
         final String observationIdentifier) {
         return (root, query, builder) -> {
-            final Join<ObservationRelationEntity, DataEntity<?>> join =
-                root.join(ObservationRelationEntity.PROPERTY_OBJECT, JoinType.INNER);
+            final Join<RelationEntity, DataEntity<?>> join =
+                root.join(RelationEntity.PROPERTY_OBJECT, JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), observationIdentifier);
         };
     }
 
-    @Override protected Specification<ObservationRelationEntity> handleRelatedPropertyFilter(
+    @Override protected Specification<RelationEntity> handleRelatedPropertyFilter(
         String propertyName,
         Specification<?> propertyValue) {
         return (root, query, builder) -> {
-            if (StaConstants.OBSERVATION_GROUP.equals(propertyName)) {
-                Subquery<ObservationRelationEntity> sq = query.subquery(ObservationRelationEntity.class);
-                Root<ObservationGroupEntity> obsGroup = sq.from(ObservationGroupEntity.class);
-                sq.select(obsGroup.get(ObservationGroupEntity.ID))
-                    .where(((Specification<ObservationGroupEntity>) propertyValue).toPredicate(obsGroup,
+            if (StaConstants.GROUP.equals(propertyName)) {
+                Subquery<RelationEntity> sq = query.subquery(RelationEntity.class);
+                Root<GroupEntity> obsGroup = sq.from(GroupEntity.class);
+                sq.select(obsGroup.get(GroupEntity.ID))
+                    .where(((Specification<GroupEntity>) propertyValue).toPredicate(obsGroup,
                                                                                                query,
                                                                                                builder));
-                return builder.in(root.get(ObservationRelationEntity.PROPERTY_GROUP)).value(sq);
+                return builder.in(root.get(RelationEntity.PROPERTY_GROUPS)).value(sq);
             } else {
                 throw new RuntimeException("Could not find related property: " + propertyName);
             }
         };
     }
 
-    @Override protected Specification<ObservationRelationEntity> handleDirectPropertyFilter(
+    @Override protected Specification<RelationEntity> handleDirectPropertyFilter(
         String propertyName,
         Expression<?> propertyValue,
         FilterConstants.ComparisonOperator operator,
         boolean switched) {
-        return (Specification<ObservationRelationEntity>) (root, query, builder) -> {
+        return (Specification<RelationEntity>) (root, query, builder) -> {
             try {
                 switch (propertyName) {
                     case StaConstants.PROP_ID:
-                        return handleDirectStringPropertyFilter(root.get(ObservationRelationEntity.STA_IDENTIFIER),
+                        return handleDirectStringPropertyFilter(root.get(RelationEntity.STA_IDENTIFIER),
                                                                 propertyValue,
                                                                 operator,
                                                                 builder,
                                                                 false);
                     case StaConstants.PROP_ROLE:
-                        return handleDirectStringPropertyFilter(root.get(ObservationRelationEntity.PROPERTY_ROLE),
+                        return handleDirectStringPropertyFilter(root.get(RelationEntity.PROPERTY_ROLE),
                                                                 propertyValue,
                                                                 operator,
                                                                 builder,
                                                                 switched);
                     case StaConstants.PROP_DESCRIPTION:
                         return handleDirectStringPropertyFilter(
-                            root.get(ObservationRelationEntity.PROPERTY_DESCRIPTION),
+                            root.get(RelationEntity.PROPERTY_DESCRIPTION),
                             propertyValue,
                             operator,
                             builder,
                             switched);
-                    case "namespace":
-                        return handleDirectStringPropertyFilter(root.get(ObservationRelationEntity.PROPERTY_NAMESPACE),
-                                                                propertyValue,
-                                                                operator,
-                                                                builder,
-                                                                switched);
                     default:
                         throw new RuntimeException("Error getting filter for Property: \"" + propertyName
                                                        + "\". No such property in Entity.");

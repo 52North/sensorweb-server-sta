@@ -83,9 +83,9 @@ public class DTOMapper {
                 return ObservedPropertyDTO.class;
             case StaConstants.FEATURES_OF_INTEREST:
                 return FeatureOfInterestDTO.class;
-            case StaConstants.OBSERVATION_GROUPS:
+            case StaConstants.GROUPS:
                 return ObservationGroupDTO.class;
-            case StaConstants.OBSERVATION_RELATIONS:
+            case StaConstants.RELATIONS:
                 return ObservationRelationDTO.class;
             case StaConstants.LICENSES:
                 return LicenseDTO.class;
@@ -124,11 +124,11 @@ public class DTOMapper {
             case StaConstants.FEATURES_OF_INTEREST:
             case StaConstants.FEATURE_OF_INTEREST:
                 return FeatureOfInterestSerDes.FeatureOfInterestDTOPatch.class;
-            case StaConstants.OBSERVATION_GROUP:
-            case StaConstants.OBSERVATION_GROUPS:
+            case StaConstants.GROUP:
+            case StaConstants.GROUPS:
                 return ObservationGroupSerDes.ObservationGroupDTOPatch.class;
-            case StaConstants.OBSERVATION_RELATIONS:
-            case StaConstants.OBSERVATION_RELATION:
+            case StaConstants.RELATIONS:
+            case StaConstants.RELATION:
                 return ObservationRelationSerDes.ObservationRelationDTOPatch.class;
             case StaConstants.LICENSES:
             case StaConstants.LICENSE:

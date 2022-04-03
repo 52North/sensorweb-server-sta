@@ -31,6 +31,7 @@ package org.n52.sta.data.vanilla.service;
 import org.hibernate.Hibernate;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractDatasetEntity;
+import org.n52.series.db.beans.Dataset;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
@@ -43,6 +44,7 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.shetland.ogc.sta.model.SensorEntityDefinition;
 import org.n52.sta.api.dto.SensorDTO;
+import org.n52.sta.data.common.CommonDatastreamService;
 import org.n52.sta.data.vanilla.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.vanilla.query.SensorQuerySpecifications;
 import org.n52.sta.data.vanilla.repositories.DatastreamRepository;
@@ -73,12 +75,13 @@ import java.util.stream.Collectors;
 @DependsOn({"springApplicationContext"})
 @Transactional
 public class SensorService
-    extends AbstractSensorThingsEntityServiceImpl<ProcedureRepository, SensorDTO, ProcedureEntity> {
+    extends
+    org.n52.sta.data.common.CommonSTAServiceImpl<ProcedureRepository, SensorDTO, ProcedureEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SensorService.class);
 
     private static final SensorQuerySpecifications sQS = new SensorQuerySpecifications();
-    private static final DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
+    private static final DatastreamQuerySpecifications<Dataset> dQS = new DatastreamQuerySpecifications<>();
 
     private final FormatRepository formatRepository;
     private final ProcedureHistoryRepository procedureHistoryRepository;
@@ -212,7 +215,7 @@ public class SensorService
             if (sensor.hasDatastreams()) {
                 for (AbstractDatasetEntity datastreamEntity : sensor.getDatasets()) {
                     try {
-                        getDatastreamService().createOrUpdate(datastreamEntity);
+                        getDatastreamService().createOrUpdate((Dataset) datastreamEntity);
                     } catch (STACRUDException e) {
                         // Datastream might be currently processing.
                         //TODO: check if we need to do something here
@@ -251,7 +254,7 @@ public class SensorService
                     ProcedureEntity merged = merge(existing.get(), entity);
                     if (entity != null) {
                         if (entity.hasDatastreams()) {
-                            DatastreamService dsService = getDatastreamService();
+                            CommonDatastreamService dsService = getDatastreamService();
                             for (AbstractDatasetEntity datastreamEntity :
                                 entity.getDatasets()) {
                                 dsService.createOrUpdate(datastreamEntity);

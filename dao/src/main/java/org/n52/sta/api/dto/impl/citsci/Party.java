@@ -32,6 +32,7 @@ package org.n52.sta.api.dto.impl.citsci;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.n52.sta.api.dto.DatastreamDTO;
 import org.n52.sta.api.dto.PartyDTO;
+import org.n52.sta.api.dto.ThingDTO;
 import org.n52.sta.api.dto.impl.Entity;
 
 import java.util.Set;
@@ -46,6 +47,7 @@ public class Party extends Entity implements PartyDTO {
     private String authId;
     private String description;
     private Set<DatastreamDTO> datastreams;
+    private Set<ThingDTO> things;
     private ObjectNode properties;
 
     @Override public String getNickname() {
@@ -94,5 +96,13 @@ public class Party extends Entity implements PartyDTO {
 
     @Override public void setDescription(String description) {
         this.description = description;
+    }
+
+    @Override public Set<ThingDTO> getThings() {
+        return things;
+    }
+
+    @Override public void setThings(Set<ThingDTO> things) {
+        this.things = things;
     }
 }

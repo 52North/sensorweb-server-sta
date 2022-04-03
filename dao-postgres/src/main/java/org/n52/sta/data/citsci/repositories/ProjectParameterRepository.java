@@ -39,7 +39,7 @@ import org.springframework.stereotype.Repository;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Repository
-@Profile(StaConstants.CITSCIEXTENSION)
+@Profile(StaConstants.STAPLUS)
 public interface ProjectParameterRepository extends JpaRepository<ProjectParameterEntity, Long> {
 
 }

@@ -26,45 +26,29 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data.vanilla.repositories;
+package org.n52.sta.data.citsci.repositories;
 
-import org.springframework.data.repository.NoRepositoryBean;
+import org.n52.series.db.beans.sta.plus.StaPlusDataEntity;
+import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.sta.data.vanilla.repositories.IdentifierRepository;
+import org.n52.sta.data.common.repositories.StaIdentifierRepository;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import java.util.Set;
 
-/**
- * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- */
-@NoRepositoryBean
 @Transactional
-public interface StaIdentifierRepository<T> extends EntityGraphRepository<T, Long> {
+@DependsOn("DatastreamRepository")
+@Profile(StaConstants.STAPLUS)
+@Repository
+public interface ObservationRepository<T extends StaPlusDataEntity<?>>
+    extends IdentifierRepository<T, Long>, StaIdentifierRepository<T> {
 
-    /**
-     * Checks whether Entity with given id exists.
-     *
-     * @param identifier Identifier of the Entity
-     * @return true if Entity exists. false otherwise
-     */
-    boolean existsByStaIdentifier(String identifier);
+    StaPlusDataEntity<T> findFirstByDataset_idOrderBySamplingTimeStartAsc(Long datasetIdentifier);
 
-    /**
-     * Finds Entity by identifier. Fetches Entity and all related Entities given by EntityGraphs
-     *
-     * @param identifier      Identifier of the wanted Entity
-     * @param relatedEntities EntityGraphs describing related Entities to be fetched. All graphs are merged into one
-     *                        graph internally. may be null.
-     * @return Entity found in Database. Optional.empty() otherwise
-     */
-    Optional<T> findByStaIdentifier(String identifier, EntityGraphRepository.FetchGraph... relatedEntities);
+    StaPlusDataEntity<T> findFirstByDataset_idOrderBySamplingTimeEndDesc(Long datasetIdentifier);
 
-    /**
-     * Deletes Entity with given Identifier
-     *
-     * @param identifier Identifier of the Entity
-     */
-    void deleteByStaIdentifier(String identifier);
-
-    T intermediateSave(T entity);
-
+    void deleteAllByDatasetIdIn(Set<Long> datasetId);
 }

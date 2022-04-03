@@ -72,7 +72,7 @@ public class ObservationGroupSerDes {
         public ObservationGroupSerializer(String rootUrl, String... activeExtensions) {
             super(ObservationGroupDTO.class, activeExtensions);
             this.rootUrl = rootUrl;
-            this.entitySetName = StaConstants.OBSERVATION_GROUPS;
+            this.entitySetName = StaConstants.GROUPS;
         }
 
         @Override
@@ -105,14 +105,14 @@ public class ObservationGroupSerDes {
             }
 
             if (!obsGroup.hasSelectOption()
-                || obsGroup.getFieldsToSerialize().contains(STAEntityDefinition.OBSERVATION_RELATIONS)) {
+                || obsGroup.getFieldsToSerialize().contains(STAEntityDefinition.RELATIONS)) {
                 if (!obsGroup.hasExpandOption()
-                    || obsGroup.getFieldsToExpand().get(STAEntityDefinition.OBSERVATION_RELATIONS) == null) {
+                    || obsGroup.getFieldsToExpand().get(STAEntityDefinition.RELATIONS) == null) {
                     writeNavigationProp(gen,
-                                        STAEntityDefinition.OBSERVATION_RELATIONS,
+                                        STAEntityDefinition.RELATIONS,
                                         obsGroup.getId());
                 } else {
-                    gen.writeFieldName(STAEntityDefinition.OBSERVATION_RELATIONS);
+                    gen.writeFieldName(STAEntityDefinition.RELATIONS);
                     writeNestedCollection(obsGroup.getObservationRelations(),
                                           gen,
                                           serializers);

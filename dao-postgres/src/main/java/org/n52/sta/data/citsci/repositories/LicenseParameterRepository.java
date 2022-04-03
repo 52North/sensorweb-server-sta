@@ -34,12 +34,14 @@ import org.n52.shetland.ogc.sta.StaConstants;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Repository
-@Profile(StaConstants.CITSCIEXTENSION)
+@Profile(StaConstants.STAPLUS)
+@Transactional
 public interface LicenseParameterRepository extends JpaRepository<LicenseParameterEntity, Long> {
 
 }

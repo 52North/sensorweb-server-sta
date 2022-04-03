@@ -123,6 +123,18 @@ public class PartySerDes {
                                           serializers);
                 }
             }
+
+            if (!party.hasSelectOption() || party.getFieldsToSerialize().contains(STAEntityDefinition.DATASTREAMS)) {
+                if (!party.hasExpandOption() ||
+                    party.getFieldsToExpand().get(STAEntityDefinition.DATASTREAMS) == null) {
+                    writeNavigationProp(gen, STAEntityDefinition.DATASTREAMS, party.getId());
+                } else {
+                    gen.writeFieldName(STAEntityDefinition.DATASTREAMS);
+                    writeNestedCollection(party.getDatastreams(),
+                                          gen,
+                                          serializers);
+                }
+            }
             gen.writeEndObject();
         }
 

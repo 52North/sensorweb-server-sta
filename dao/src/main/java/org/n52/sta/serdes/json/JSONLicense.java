@@ -58,7 +58,7 @@ public class JSONLicense extends JSONBase.JSONwithId<License> implements Abstrac
     public JSONObservation[] Observations;
 
     @JsonManagedReference
-    @JsonProperty(StaConstants.OBSERVATION_GROUPS)
+    @JsonProperty(StaConstants.GROUPS)
     public JSONObservationGroup[] Groups;
 
     public JSONLicense() {

@@ -29,14 +29,6 @@
 
 package org.n52.sta.data.vanilla.query;
 
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
-
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
@@ -45,13 +37,18 @@ import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.series.db.beans.parameter.observation.ObservationParameterEntity;
-import org.n52.series.db.beans.sta.LicenseEntity;
-import org.n52.series.db.beans.sta.ObservationGroupEntity;
-import org.n52.series.db.beans.sta.ObservationRelationEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
+import org.n52.sta.data.common.query.EntityQuerySpecifications;
 import org.springframework.data.jpa.domain.Specification;
+
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -87,40 +84,6 @@ public class ObservationQuerySpecifications extends EntityQuerySpecifications<Da
 
             return builder.or(builder.equal(pathAggregation, subquery),
                               builder.equal(pathSta, datastreamStaIdentifier));
-        };
-    }
-
-    public static Specification<DataEntity<?>> withLicenseStaIdentifier(
-        final String licenseIdentifier) {
-        return (root, query, builder) -> builder.equal(
-            root.get(DataEntity.PROPERTY_LICENSE).get(LicenseEntity.STA_IDENTIFIER),
-            licenseIdentifier);
-    }
-
-    public static Specification<DataEntity<?>> withObservationGroupStaIdentifier(
-        final String obsGroupIdentifier) {
-        return (root, query, builder) -> {
-            final Join<DataEntity, ObservationGroupEntity> join =
-                root.join(DataEntity.PROPERTY_OBSERVATION_GROUPS, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), obsGroupIdentifier);
-        };
-    }
-
-    public static Specification<DataEntity<?>> withObservationRelationStaIdentifierAsSubject(
-        final String relationIdentifier) {
-        return (root, query, builder) -> {
-            final Join<DataEntity, ObservationRelationEntity> join =
-                root.join(DataEntity.PROPERTY_SUBJECTS, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), relationIdentifier);
-        };
-    }
-
-    public static Specification<DataEntity<?>> withObservationRelationStaIdentifierAsObject(
-        final String relationIdentifier) {
-        return (root, query, builder) -> {
-            final Join<DataEntity, ObservationRelationEntity> join =
-                root.join(DataEntity.PROPERTY_OBJECTS, JoinType.INNER);
-            return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), relationIdentifier);
         };
     }
 

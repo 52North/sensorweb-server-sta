@@ -32,6 +32,7 @@ import org.hibernate.Hibernate;
 import org.joda.time.DateTime;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractDatasetEntity;
+import org.n52.series.db.beans.Dataset;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.parameter.platform.PlatformParameterEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
@@ -43,6 +44,7 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.api.dto.ThingDTO;
+import org.n52.sta.data.common.CommonSTAServiceImpl;
 import org.n52.sta.data.vanilla.query.ThingQuerySpecifications;
 import org.n52.sta.data.vanilla.repositories.EntityGraphRepository;
 import org.n52.sta.data.vanilla.repositories.PlatformParameterRepository;
@@ -72,10 +74,10 @@ import java.util.stream.Collectors;
 @DependsOn({"springApplicationContext"})
 @Transactional
 public class ThingService
-    extends AbstractSensorThingsEntityServiceImpl<
-    ThingRepository,
-    ThingDTO,
-    PlatformEntity> {
+    extends CommonSTAServiceImpl<
+            ThingRepository,
+            ThingDTO,
+            PlatformEntity> {
 
     protected static final ThingQuerySpecifications tQS = new ThingQuerySpecifications();
     private static final Logger logger = LoggerFactory.getLogger(ThingService.class);
@@ -344,7 +346,7 @@ public class ThingService
             Set<AbstractDatasetEntity> datastreams = new HashSet<>();
             for (AbstractDatasetEntity datastream : thing.getDatasets()) {
                 datastream.setThing(thing);
-                datastreams.add(getDatastreamService().createOrfetch(datastream));
+                datastreams.add(getDatastreamService().createOrfetch((Dataset) datastream));
             }
             thing.setDatasets(datastreams);
         }

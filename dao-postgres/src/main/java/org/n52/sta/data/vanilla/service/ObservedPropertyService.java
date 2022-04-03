@@ -26,11 +26,13 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.vanilla.service;
 
 import org.hibernate.Hibernate;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractDatasetEntity;
+import org.n52.series.db.beans.Dataset;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.parameter.phenomenon.PhenomenonParameterEntity;
 import org.n52.shetland.filter.ExpandFilter;
@@ -69,14 +71,12 @@ import java.util.stream.Collectors;
 @DependsOn({"springApplicationContext"})
 @Transactional
 public class ObservedPropertyService
-    extends AbstractSensorThingsEntityServiceImpl<
-    PhenomenonRepository,
-    ObservedPropertyDTO,
-    PhenomenonEntity> {
+    extends
+    org.n52.sta.data.common.CommonSTAServiceImpl<PhenomenonRepository, ObservedPropertyDTO, PhenomenonEntity> {
 
     private static final Logger logger = LoggerFactory.getLogger(ObservedPropertyService.class);
 
-    private static final DatastreamQuerySpecifications dQS = new DatastreamQuerySpecifications();
+    private static final DatastreamQuerySpecifications<Dataset> dQS = new DatastreamQuerySpecifications<>();
     private static final ObservedPropertyQuerySpecifications oQS = new ObservedPropertyQuerySpecifications();
 
     private final DatastreamRepository datastreamRepository;

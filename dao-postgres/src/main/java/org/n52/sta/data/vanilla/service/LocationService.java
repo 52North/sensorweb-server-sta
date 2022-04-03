@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.vanilla.service;
 
 import org.hibernate.Hibernate;
@@ -44,6 +45,7 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.api.dto.LocationDTO;
+import org.n52.sta.data.common.CommonSTAServiceImpl;
 import org.n52.sta.data.vanilla.query.LocationQuerySpecifications;
 import org.n52.sta.data.vanilla.repositories.EntityGraphRepository;
 import org.n52.sta.data.vanilla.repositories.LocationEncodingRepository;
@@ -77,10 +79,10 @@ import java.util.stream.Collectors;
 @DependsOn({"springApplicationContext"})
 @Transactional
 public class LocationService
-    extends AbstractSensorThingsEntityServiceImpl<
-    LocationRepository,
-    LocationDTO,
-    LocationEntity> {
+    extends CommonSTAServiceImpl<
+            LocationRepository,
+            LocationDTO,
+            LocationEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LocationService.class);
 

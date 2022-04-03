@@ -26,30 +26,46 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data.vanilla.query;
+package org.n52.sta.data.common;
 
-import org.n52.sta.data.vanilla.service.util.HibernateSpatialCriteriaBuilder;
-import org.n52.svalbard.odata.core.expr.GeoValueExpr;
-import org.springframework.data.jpa.domain.Specification;
+import org.n52.sta.data.vanilla.repositories.EntityGraphRepository;
+import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Root;
+import java.util.Optional;
 
 /**
- * Interface providing functions for handling spatial
- *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public interface SpatialQuerySpecifications<T> {
+@NoRepositoryBean
+@Transactional
+public interface StaIdentifierRepository<T> extends EntityGraphRepository<T, Long> {
 
-    Specification<T> handleGeoSpatialPropertyFilter(
-        String propertyName,
-        String spatialFunctionName,
-        String... arguments);
+    /**
+     * Checks whether Entity with given id exists.
+     *
+     * @param identifier Identifier of the Entity
+     * @return true if Entity exists. false otherwise
+     */
+    boolean existsByStaIdentifier(String identifier);
 
-    Expression<Float> handleGeospatial(GeoValueExpr expr,
-                                       String spatialFunctionName,
-                                       String argument,
-                                       HibernateSpatialCriteriaBuilder builder,
-                                       Root root);
+    /**
+     * Finds Entity by identifier. Fetches Entity and all related Entities given by EntityGraphs
+     *
+     * @param identifier      Identifier of the wanted Entity
+     * @param relatedEntities EntityGraphs describing related Entities to be fetched. All graphs are merged into one
+     *                        graph internally. may be null.
+     * @return Entity found in Database. Optional.empty() otherwise
+     */
+    Optional<T> findByStaIdentifier(String identifier, FetchGraph... relatedEntities);
+
+    /**
+     * Deletes Entity with given Identifier
+     *
+     * @param identifier Identifier of the Entity
+     */
+    void deleteByStaIdentifier(String identifier);
+
+    T intermediateSave(T entity);
+
 }

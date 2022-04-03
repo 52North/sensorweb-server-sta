@@ -32,6 +32,7 @@ package org.n52.sta.data.vanilla.query;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.CategoryEntity;
 import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.Dataset;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.FeatureEntity;
@@ -41,11 +42,13 @@ import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.series.db.beans.parameter.dataset.DatasetParameterEntity;
-import org.n52.series.db.beans.sta.PartyEntity;
-import org.n52.series.db.beans.sta.ProjectEntity;
+import org.n52.series.db.beans.sta.plus.PartyEntity;
+import org.n52.series.db.beans.sta.plus.ProjectEntity;
+import org.n52.series.db.beans.sta.plus.StaPlusAbstractDatasetEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
+import org.n52.sta.data.common.query.EntityQuerySpecifications;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -61,24 +64,22 @@ import java.util.List;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public class DatastreamQuerySpecifications extends EntityQuerySpecifications<AbstractDatasetEntity> {
+public class DatastreamQuerySpecifications<T> extends EntityQuerySpecifications<T> {
 
     @Override
-    public Specification<AbstractDatasetEntity> withName(final String name) {
+    public Specification<T> withName(final String name) {
         return (root, query, builder) ->
             builder.and(builder.isNull(root.get(AbstractDatasetEntity.PROPERTY_AGGREGATION)),
                         builder.equal(root.get(DescribableEntity.PROPERTY_NAME), name));
     }
 
-    @Override
-    public Specification<AbstractDatasetEntity> withStaIdentifier(final String name) {
+    public Specification<T> withStaIdentifier(final String name) {
         return (root, query, builder) ->
             builder.and(builder.isNull(root.get(AbstractDatasetEntity.PROPERTY_AGGREGATION)),
                         builder.equal(root.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), name));
     }
 
-    @Override
-    public Specification<AbstractDatasetEntity> withStaIdentifier(final List<String> identifiers) {
+    public Specification<T> withStaIdentifier(final List<String> identifiers) {
         return (root, query, builder) ->
             builder.and(builder.isNull(root.get(AbstractDatasetEntity.PROPERTY_AGGREGATION)),
                         builder.in(root.get(DescribableEntity.PROPERTY_STA_IDENTIFIER))
@@ -92,7 +93,7 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Abs
      * @param propertyValue Supposed value of Property
      * @return BooleanExpression evaluating to true if Entity is not filtered out
      */
-    @Override protected Specification<AbstractDatasetEntity> handleRelatedPropertyFilter(
+    @Override protected Specification<T> handleRelatedPropertyFilter(
         String propertyName,
         Specification<?> propertyValue) {
         return (root, query, builder) -> {
@@ -144,12 +145,12 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Abs
         };
     }
 
-    @Override protected Specification<AbstractDatasetEntity> handleDirectPropertyFilter(
+    @Override protected Specification<T> handleDirectPropertyFilter(
         String propertyName,
         Expression<?> propertyValue,
         FilterConstants.ComparisonOperator operator,
         boolean switched) {
-        return (Specification<AbstractDatasetEntity>) (root, query, builder) -> {
+        return (root, query, builder) -> {
             try {
                 switch (propertyName) {
                     case StaConstants.PROP_ID:
@@ -289,7 +290,7 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Abs
         };
     }
 
-    public Specification<AbstractDatasetEntity> withObservedPropertyStaIdentifier(
+    public Specification<Dataset> withObservedPropertyStaIdentifier(
         final String observablePropertyIdentifier) {
         return (root, query, builder) -> {
             final Join<AbstractDatasetEntity, PhenomenonEntity> join =
@@ -300,13 +301,13 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Abs
 
     public Specification<AbstractDatasetEntity> withPartyStaIdentifier(
         final String partyIdentifier) {
-        return (root, query, builder) -> builder.equal(root.get(AbstractDatasetEntity.PROPERTY_PARTY)
+        return (root, query, builder) -> builder.equal(root.get(StaPlusAbstractDatasetEntity.PROPERTY_PARTY)
                                                            .get(PartyEntity.STA_IDENTIFIER), partyIdentifier);
     }
 
     public Specification<AbstractDatasetEntity> withProjectStaIdentifier(
         final String projectIdentifier) {
-        return (root, query, builder) -> builder.equal(root.get(AbstractDatasetEntity.PROPERTY_PROJECT)
+        return (root, query, builder) -> builder.equal(root.get(StaPlusAbstractDatasetEntity.PROPERTY_PROJECT)
                                                            .get(ProjectEntity.STA_IDENTIFIER), projectIdentifier);
     }
 
@@ -334,7 +335,7 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Abs
         };
     }
 
-    public Specification<AbstractDatasetEntity> withSensorStaIdentifier(final String sensorIdentifier) {
+    public Specification<T> withSensorStaIdentifier(final String sensorIdentifier) {
         return (root, query, builder) -> {
             final Join<AbstractDatasetEntity, ProcedureEntity> join =
                 root.join(AbstractDatasetEntity.PROCEDURE, JoinType.INNER);

@@ -76,7 +76,7 @@ public class ObservationRelationSerDes {
         public ObservationRelationSerializer(String rootUrl, String... activeExtensions) {
             super(ObservationRelationDTO.class, activeExtensions);
             this.rootUrl = rootUrl;
-            this.entitySetName = StaConstants.OBSERVATION_RELATIONS;
+            this.entitySetName = StaConstants.RELATIONS;
         }
 
         @Override
@@ -113,24 +113,24 @@ public class ObservationRelationSerDes {
             }
 
             if (!obsRelation.hasSelectOption() ||
-                obsRelation.getFieldsToSerialize().contains(StaConstants.NAV_SUBJECT)) {
+                obsRelation.getFieldsToSerialize().contains(StaConstants.SUBJECT)) {
                 if (!obsRelation.hasExpandOption() ||
-                    obsRelation.getFieldsToExpand().get(StaConstants.NAV_SUBJECT) == null) {
-                    writeNavigationProp(gen, StaConstants.NAV_SUBJECT, obsRelation.getId());
+                    obsRelation.getFieldsToExpand().get(StaConstants.SUBJECT) == null) {
+                    writeNavigationProp(gen, StaConstants.SUBJECT, obsRelation.getId());
                 } else {
-                    gen.writeFieldName(StaConstants.NAV_SUBJECT);
+                    gen.writeFieldName(StaConstants.SUBJECT);
                     writeNestedEntity(obsRelation.getSubject(),
                                       gen,
                                       serializers);
                 }
             }
             if (!obsRelation.hasSelectOption() ||
-                obsRelation.getFieldsToSerialize().contains(StaConstants.NAV_OBJECT)) {
+                obsRelation.getFieldsToSerialize().contains(StaConstants.OBJECT)) {
                 if (!obsRelation.hasExpandOption() ||
-                    obsRelation.getFieldsToExpand().get(StaConstants.NAV_OBJECT) == null) {
-                    writeNavigationProp(gen, StaConstants.NAV_OBJECT, obsRelation.getId());
+                    obsRelation.getFieldsToExpand().get(StaConstants.OBJECT) == null) {
+                    writeNavigationProp(gen, StaConstants.OBJECT, obsRelation.getId());
                 } else {
-                    gen.writeFieldName(StaConstants.NAV_OBJECT);
+                    gen.writeFieldName(StaConstants.OBJECT);
                     writeNestedEntity(obsRelation.getObject(),
                                       gen,
                                       serializers);
@@ -138,13 +138,13 @@ public class ObservationRelationSerDes {
             }
 
             if (!obsRelation.hasSelectOption() ||
-                obsRelation.getFieldsToSerialize().contains(STAEntityDefinition.OBSERVATION_GROUPS)) {
+                obsRelation.getFieldsToSerialize().contains(STAEntityDefinition.GROUPS)) {
                 if (!obsRelation.hasExpandOption()
-                    || obsRelation.getFieldsToExpand().get(STAEntityDefinition.OBSERVATION_GROUPS) == null) {
-                    writeNavigationProp(gen, STAEntityDefinition.OBSERVATION_GROUPS, obsRelation.getId());
+                    || obsRelation.getFieldsToExpand().get(STAEntityDefinition.GROUPS) == null) {
+                    writeNavigationProp(gen, STAEntityDefinition.GROUPS, obsRelation.getId());
                 } else {
                     if (obsRelation.getObservationGroups() != null) {
-                        gen.writeFieldName(STAEntityDefinition.OBSERVATION_GROUPS);
+                        gen.writeFieldName(STAEntityDefinition.GROUPS);
                         writeNestedCollection(obsRelation.getObservationGroups(),
                                               gen,
                                               serializers);

@@ -33,13 +33,13 @@ import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.series.db.beans.parameter.observationgroup.ObservationGroupParameterEntity;
-import org.n52.series.db.beans.sta.LicenseEntity;
-import org.n52.series.db.beans.sta.ObservationGroupEntity;
-import org.n52.series.db.beans.sta.ObservationRelationEntity;
+import org.n52.series.db.beans.sta.plus.LicenseEntity;
+import org.n52.series.db.beans.sta.plus.GroupEntity;
+import org.n52.series.db.beans.sta.plus.RelationEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
-import org.n52.sta.data.vanilla.query.EntityQuerySpecifications;
+import org.n52.sta.data.common.query.EntityQuerySpecifications;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.Expression;
@@ -51,72 +51,72 @@ import javax.persistence.criteria.Subquery;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public class ObservationGroupQuerySpecifications extends EntityQuerySpecifications<ObservationGroupEntity> {
+public class ObservationGroupQuerySpecifications extends EntityQuerySpecifications<GroupEntity> {
 
-    public static Specification<ObservationGroupEntity> withRelationStaIdentifier(final String relationIdentifier) {
+    public static Specification<GroupEntity> withRelationStaIdentifier(final String relationIdentifier) {
         return (root, query, builder) -> {
-            final Join<ObservationGroupEntity, ObservationRelationEntity> join =
-                root.join(ObservationGroupEntity.PROP_OBSERVATIONRELATIONS, JoinType.INNER);
+            final Join<GroupEntity, RelationEntity> join =
+                root.join(GroupEntity.PROP_RELATIONS, JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), relationIdentifier);
         };
     }
 
-    public static Specification<ObservationGroupEntity> withLicenseStaIdentifier(final String relationIdentifier) {
+    public static Specification<GroupEntity> withLicenseStaIdentifier(final String relationIdentifier) {
         return (root, query, builder) -> {
-            final Join<ObservationGroupEntity, LicenseEntity> join =
-                root.join(ObservationGroupEntity.PROPERTY_LICENSE, JoinType.INNER);
+            final Join<GroupEntity, LicenseEntity> join =
+                root.join(GroupEntity.PROPERTY_LICENSE, JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), relationIdentifier);
         };
     }
 
-    public static Specification<ObservationGroupEntity> withObservationStaIdentifier(final String observationId) {
+    public static Specification<GroupEntity> withObservationStaIdentifier(final String observationId) {
         return (root, query, builder) -> {
-            final Join<ObservationGroupEntity, DataEntity> join =
+            final Join<GroupEntity, DataEntity> join =
                 root.join("observations", JoinType.INNER);
             return builder.equal(join.get(DataEntity.PROPERTY_STA_IDENTIFIER), observationId);
         };
     }
 
-    @Override protected Specification<ObservationGroupEntity> handleRelatedPropertyFilter(
+    @Override protected Specification<GroupEntity> handleRelatedPropertyFilter(
         String propertyName,
         Specification<?> propertyValue) {
         return (root, query, builder) -> {
-            if (StaConstants.OBSERVATION_RELATIONS.equals(propertyName)) {
-                Subquery<ObservationGroupEntity> sq = query.subquery(ObservationGroupEntity.class);
-                Root<ObservationRelationEntity> obsRelation = sq.from(ObservationRelationEntity.class);
-                sq.select(obsRelation.get(ObservationRelationEntity.PROPERTY_GROUP))
-                    .where(((Specification<ObservationRelationEntity>) propertyValue).toPredicate(obsRelation,
+            if (StaConstants.RELATIONS.equals(propertyName)) {
+                Subquery<GroupEntity> sq = query.subquery(GroupEntity.class);
+                Root<RelationEntity> obsRelation = sq.from(RelationEntity.class);
+                sq.select(obsRelation.get(RelationEntity.PROPERTY_GROUPS))
+                    .where(((Specification<RelationEntity>) propertyValue).toPredicate(obsRelation,
                                                                                                   query,
                                                                                                   builder));
-                return builder.in(root.get(ObservationGroupEntity.ID)).value(sq);
+                return builder.in(root.get(GroupEntity.ID)).value(sq);
             } else {
                 throw new RuntimeException("Could not find related property: " + propertyName);
             }
         };
     }
 
-    @Override protected Specification<ObservationGroupEntity> handleDirectPropertyFilter(
+    @Override protected Specification<GroupEntity> handleDirectPropertyFilter(
         String propertyName,
         Expression<?> propertyValue,
         FilterConstants.ComparisonOperator operator,
         boolean switched) {
-        return (Specification<ObservationGroupEntity>) (root, query, builder) -> {
+        return (Specification<GroupEntity>) (root, query, builder) -> {
             try {
                 switch (propertyName) {
                     case StaConstants.PROP_ID:
-                        return handleDirectStringPropertyFilter(root.get(ObservationGroupEntity.STA_IDENTIFIER),
+                        return handleDirectStringPropertyFilter(root.get(GroupEntity.STA_IDENTIFIER),
                                                                 propertyValue,
                                                                 operator,
                                                                 builder,
                                                                 false);
                     case StaConstants.PROP_NAME:
-                        return handleDirectStringPropertyFilter(root.get(ObservationGroupEntity.NAME),
+                        return handleDirectStringPropertyFilter(root.get(GroupEntity.NAME),
                                                                 propertyValue,
                                                                 operator,
                                                                 builder,
                                                                 switched);
                     case StaConstants.PROP_DESCRIPTION:
-                        return handleDirectStringPropertyFilter(root.get(ObservationGroupEntity.DESCRIPTION),
+                        return handleDirectStringPropertyFilter(root.get(GroupEntity.DESCRIPTION),
                                                                 propertyValue,
                                                                 operator,
                                                                 builder,
