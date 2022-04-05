@@ -27,9 +27,9 @@
  */
 package org.n52.sta.api.dto;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.util.Set;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -52,10 +52,6 @@ public interface PartyDTO extends StaDTO {
 
     void setDatastreams(Set<DatastreamDTO> datastreams);
 
-    ObjectNode getProperties();
-
-    void setProperties(ObjectNode properties);
-
     String getDescription();
 
     void setDescription(String description);
@@ -63,6 +59,10 @@ public interface PartyDTO extends StaDTO {
     Set<ThingDTO> getThings();
 
     void setThings(Set<ThingDTO> things);
+
+    JsonNode getPersonalData();
+
+    void setPersonalData(JsonNode personalData);
 
     enum Role {
         individual, institution;

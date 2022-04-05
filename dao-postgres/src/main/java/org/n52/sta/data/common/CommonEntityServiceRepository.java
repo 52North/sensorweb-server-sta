@@ -120,7 +120,7 @@ public abstract class CommonEntityServiceRepository implements EntityServiceFact
     /**
      * Provides an entity data service for a entity type
      *
-     * @param entityType the type of the requested entity service
+     * @param entityTypeName the type of the requested entity service
      * @return the requested entity data service
      */
     public CommonSTAServiceImpl<?, ?, ?> getEntityServiceRaw(String entityTypeName) {

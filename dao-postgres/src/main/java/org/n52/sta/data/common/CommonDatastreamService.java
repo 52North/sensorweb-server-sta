@@ -457,8 +457,6 @@ public abstract class CommonDatastreamService
     /**
      * TODO: doc
      * Specific aggregation
-     *
-     * @return
      */
     protected abstract AggregationEntity createAggregation();
 

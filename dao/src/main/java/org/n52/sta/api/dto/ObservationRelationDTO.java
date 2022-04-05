@@ -34,17 +34,9 @@ import java.util.Set;
  */
 public interface ObservationRelationDTO extends StaDTO {
 
-    String getName();
-
-    void setName(String name);
-
     String getRole();
 
     void setRole(String role);
-
-    String getNamespace();
-
-    void setNamespace(String namespace);
 
     ObservationDTO getSubject();
 
