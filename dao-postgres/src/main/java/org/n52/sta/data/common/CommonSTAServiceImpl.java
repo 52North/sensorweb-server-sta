@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2018-2021 52°North Initiative for Geospatial Open Source
- * Software GmbH
+ * Copyright (C) 2018-2021 52°North Spatial Information Research GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -26,7 +25,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-
 package org.n52.sta.data.common;
 
 import org.hibernate.query.criteria.internal.CriteriaBuilderImpl;
