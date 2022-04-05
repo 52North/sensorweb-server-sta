@@ -49,15 +49,15 @@ import java.util.Set;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Component
-@DependsOn({"springApplicationContext"})
+@DependsOn({ "springApplicationContext" })
 @Transactional
 @Profile(StaConstants.STAPLUS)
 public class CitSciObservationService extends ObservationService {
 
     @Override
     protected DataEntity castToConcreteObservationType(DataEntity<?> observation,
-                                                       DatasetEntity dataset)
-        throws STACRUDException {
+            DatasetEntity dataset)
+            throws STACRUDException {
         DataEntity data = null;
         Object value = observation.getValue();
         switch (dataset.getOMObservationType().getFormat()) {
@@ -72,7 +72,7 @@ public class CitSciObservationService extends ObservationService {
                 break;
             default:
                 throw new STACRUDException(
-                    "Unable to handle OMObservation with type: " + dataset.getOMObservationType().getFormat());
+                        "Unable to handle OMObservation with type: " + dataset.getOMObservationType().getFormat());
         }
         return fillConcreteObservationType(data, observation, dataset);
     }
@@ -80,13 +80,14 @@ public class CitSciObservationService extends ObservationService {
     /**
      * Hook to add STAPlus-specific things
      *
-     * @param observation
-     * @param dataset
-     * @return
-     * @throws STACRUDException
+     * @param observation the observation to save
+     * @param dataset the dataset entity the observation to save relates to
+     * @return the saved data entity
+     * @throws STACRUDException in case saving fails
      */
-    @Override protected DataEntity<?> saveObservation(DataEntity<?> observation, DatasetEntity dataset)
-        throws STACRUDException {
+    @Override
+    protected DataEntity<?> saveObservation(DataEntity<?> observation, DatasetEntity dataset)
+            throws STACRUDException {
         StaPlusDataEntity<?> obs = (StaPlusDataEntity<?>) observation;
 
         if (obs.getSubjects() != null) {
@@ -102,10 +103,10 @@ public class CitSciObservationService extends ObservationService {
 
     @Override
     protected DataEntity<?> fillConcreteObservationType(DataEntity<?> data,
-                                                        DataEntity<?> observation,
-                                                        DatasetEntity dataset) throws STACRUDException {
-        StaPlusDataEntity<?> plusData =
-            (StaPlusDataEntity<?>) super.fillConcreteObservationType(data, observation, dataset);
+            DataEntity<?> observation,
+            DatasetEntity dataset) throws STACRUDException {
+        StaPlusDataEntity<?> plusData = (StaPlusDataEntity<?>) super.fillConcreteObservationType(data, observation,
+                dataset);
         StaPlusDataEntity<?> plusObservation = (StaPlusDataEntity<?>) observation;
         plusData.setSubjects(plusObservation.getSubjects());
         plusData.setObjects(plusObservation.getObjects());
@@ -114,12 +115,12 @@ public class CitSciObservationService extends ObservationService {
     }
 
     private LicenseService getLicenseService() {
-        return (LicenseService)
-            serviceRepository.getEntityServiceRaw(CitSciEntityServiceRepository.StaPlusEntityTypes.License.name());
+        return (LicenseService) serviceRepository
+                .getEntityServiceRaw(CitSciEntityServiceRepository.StaPlusEntityTypes.License.name());
     }
 
     private ObservationRelationService getObservationRelationService() {
-        return (ObservationRelationService)
-            serviceRepository.getEntityServiceRaw(CitSciEntityServiceRepository.StaPlusEntityTypes.ObservationRelation.name());
+        return (ObservationRelationService) serviceRepository
+                .getEntityServiceRaw(CitSciEntityServiceRepository.StaPlusEntityTypes.ObservationRelation.name());
     }
 }

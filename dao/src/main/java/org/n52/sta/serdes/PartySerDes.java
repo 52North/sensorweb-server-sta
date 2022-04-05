@@ -41,6 +41,7 @@ import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONParty;
 
 import java.io.IOException;
+import java.util.Set;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -85,44 +86,43 @@ public class PartySerDes {
             gen.writeStartObject();
 
             // olingo @iot links
-            if (!party.hasSelectOption() || party.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ID)) {
+            Set<String> fieldsToSerialize = party.getFieldsToSerialize();
+            if (!party.hasSelectOption() || fieldsToSerialize.contains(STAEntityDefinition.PROP_ID)) {
                 writeId(gen, party.getId());
             }
-            if (!party.hasSelectOption() || party.getFieldsToSerialize().contains(STAEntityDefinition.PROP_SELF_LINK)) {
+            if (!party.hasSelectOption() || fieldsToSerialize.contains(STAEntityDefinition.PROP_SELF_LINK)) {
                 writeSelfLink(gen, party.getId());
             }
 
-            if (!party.hasSelectOption() || party.getFieldsToSerialize().contains(PROP_AUTH_ID)) {
+            if (!party.hasSelectOption() || fieldsToSerialize.contains(PROP_AUTH_ID)) {
                 gen.writeStringField(PROP_AUTH_ID, party.getAuthId());
             }
-            if (!party.hasSelectOption() || party.getFieldsToSerialize().contains(STAEntityDefinition.PROP_NICKNAME)) {
-                gen.writeStringField(STAEntityDefinition.PROP_NICKNAME, party.getNickname());
+            if (!party.hasSelectOption() || fieldsToSerialize.contains(STAEntityDefinition.PROP_DISPLAY_NAME)) {
+                gen.writeStringField(STAEntityDefinition.PROP_DISPLAY_NAME, party.getNickname());
             }
             if (!party.hasSelectOption() ||
-                party.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
+                fieldsToSerialize.contains(STAEntityDefinition.PROP_DESCRIPTION)) {
                 gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, party.getDescription());
             }
-            if (!party.hasSelectOption() || party.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ROLE)) {
+            if (!party.hasSelectOption() || fieldsToSerialize.contains(STAEntityDefinition.PROP_ROLE)) {
                 gen.writeStringField(STAEntityDefinition.PROP_ROLE, party.getRole().name());
             }
             if (!party.hasSelectOption() ||
-                party.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PROPERTIES)) {
+                fieldsToSerialize.contains(STAEntityDefinition.PROP_PROPERTIES)) {
                 gen.writeObjectField(STAEntityDefinition.PROP_PROPERTIES, party.getProperties());
             }
 
-            if (!party.hasSelectOption() || party.getFieldsToSerialize().contains(STAEntityDefinition.DATASTREAMS)) {
+            if (!party.hasSelectOption() || fieldsToSerialize.contains(STAEntityDefinition.DATASTREAMS)) {
                 if (!party.hasExpandOption() ||
                     party.getFieldsToExpand().get(STAEntityDefinition.DATASTREAMS) == null) {
                     writeNavigationProp(gen, STAEntityDefinition.DATASTREAMS, party.getId());
                 } else {
                     gen.writeFieldName(STAEntityDefinition.DATASTREAMS);
-                    writeNestedCollection(party.getDatastreams(),
-                                          gen,
-                                          serializers);
+                    writeNestedCollection(party.getDatastreams(), gen, serializers);
                 }
             }
 
-            if (!party.hasSelectOption() || party.getFieldsToSerialize().contains(STAEntityDefinition.DATASTREAMS)) {
+            if (!party.hasSelectOption() || fieldsToSerialize.contains(STAEntityDefinition.DATASTREAMS)) {
                 if (!party.hasExpandOption() ||
                     party.getFieldsToExpand().get(STAEntityDefinition.DATASTREAMS) == null) {
                     writeNavigationProp(gen, STAEntityDefinition.DATASTREAMS, party.getId());

@@ -42,44 +42,46 @@ import javax.persistence.criteria.JoinType;
 
 public class StaPlusObservationQuerySpecifications extends EntityQuerySpecifications<StaPlusDataEntity<?>> {
 
-    ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
+    private ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
 
     public static Specification<StaPlusDataEntity<?>> withObservationGroupStaIdentifier(
-        final String obsGroupIdentifier) {
+            final String obsGroupIdentifier) {
         return (root, query, builder) -> {
-            final Join<StaPlusDataEntity, GroupEntity> join =
-                root.join(StaPlusDataEntity.PROPERTY_GROUPS, JoinType.INNER);
+            final Join<StaPlusDataEntity, GroupEntity> join = root.join(StaPlusDataEntity.PROPERTY_GROUPS,
+                    JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), obsGroupIdentifier);
         };
     }
 
     public static Specification<StaPlusDataEntity<?>> withObservationRelationStaIdentifierAsSubject(
-        final String relationIdentifier) {
+            final String relationIdentifier) {
         return (root, query, builder) -> {
-            final Join<StaPlusDataEntity, RelationEntity> join =
-                root.join(StaPlusDataEntity.PROPERTY_SUBJECTS, JoinType.INNER);
+            final Join<StaPlusDataEntity, RelationEntity> join = root.join(StaPlusDataEntity.PROPERTY_SUBJECTS,
+                    JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), relationIdentifier);
         };
     }
 
     public static Specification<StaPlusDataEntity<?>> withObservationRelationStaIdentifierAsObject(
-        final String relationIdentifier) {
+            final String relationIdentifier) {
         return (root, query, builder) -> {
-            final Join<StaPlusDataEntity, RelationEntity> join =
-                root.join(StaPlusDataEntity.PROPERTY_OBJECTS, JoinType.INNER);
+            final Join<StaPlusDataEntity, RelationEntity> join = root.join(StaPlusDataEntity.PROPERTY_OBJECTS,
+                    JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), relationIdentifier);
         };
     }
 
-    @Override protected Specification<StaPlusDataEntity<?>> handleRelatedPropertyFilter(String propertyName,
-                                                                                        Specification<?> propertyValue) {
-        throw new RuntimeException("not implemented yet");
+    @Override
+    protected Specification<StaPlusDataEntity<?>> handleRelatedPropertyFilter(String propertyName,
+            Specification<?> propertyValue) {
+        throw new UnsupportedOperationException();
     }
 
-    @Override protected Specification<StaPlusDataEntity<?>> handleDirectPropertyFilter(String propertyName,
-                                                                                       Expression<?> propertyValue,
-                                                                                       FilterConstants.ComparisonOperator operator,
-                                                                                       boolean switched) {
-        throw new RuntimeException("not implemented yet");
+    @Override
+    protected Specification<StaPlusDataEntity<?>> handleDirectPropertyFilter(String propertyName,
+            Expression<?> propertyValue,
+            FilterConstants.ComparisonOperator operator,
+            boolean switched) {
+        throw new UnsupportedOperationException();
     }
 }
