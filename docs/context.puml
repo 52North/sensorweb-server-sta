@@ -1,0 +1,47 @@
+@startuml Context SensorThings API, Status-Quo 2022-04-01
+
+
+
+file "War File" as war
+file "Executable Jar" as jar
+
+frame "SensorThings API" as sta {
+    [app]
+    [webapp]
+    
+    [http]
+    [dao]
+    [dao-postgres] as daopg
+    [dao-ufz] as daoufz
+    [mqtt]
+
+    http --> dao
+    mqtt --> dao
+    webapp .up.> war : //creates//
+    app .up.> jar : //creates//
+}
+
+frame "arctic-sea" as arcticsea {
+    [shetland] as shetland #dd6677
+    note bottom of shetland : Meta Definitions
+
+    [svalbard-odata] as svalbard #dd6677
+    note bottom of svalbard : OData Query Parsing
+}
+
+sta ..> arcticsea
+
+[helgoland-server-db-model] as 52n_db #dd6677
+
+dao --> daopg
+dao --> daoufz
+daopg ..> 52n_db
+daoufz --> daopg
+
+[UFZ] as ufz #dd6677
+() "Aggregata\n REST API" as api #dd6677
+ufz -up- api
+
+daoufz ..> api
+
+@enduml

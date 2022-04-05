@@ -1,0 +1,54 @@
+@startuml 52n SensorThings API, DAO Packages
+
+package "javax (persistence)" as javax_persistence #dd7766 {
+    class "CriteriaBuilder" as criterion_builder
+    class "Expression" as expression
+}
+
+package "criterion (hibernate)" as hibernate_criterion #dd7766 {
+    class "HibernateCriteriaBuilder" as hibernate_criterion_builder
+}
+
+package "data (spring)" as spring_data #dd7766 {
+    interface "JpaRepository" as jpa_repo
+    interface "Specification" as specifications
+    interface "JpaSpecificationExecutor" as spec_executor
+}
+
+package query {}
+note top of query {
+    Contains DDD Query Specifications
+}
+
+package repositories as repos {}
+note top of repos {
+    Provides cascaded Spring data JPA repositories 
+}
+package service as services {
+    class "DataStreamService" as ds_service
+    class "FilterExprVisitor" as visitor
+    class "HibernateSpatialCriteriaBuilderImpl" as spatial_criterion_builder
+    note bottom of visitor {
+        Creates Expression from $filter query parameter
+        which can be used in the CriteriaBuilder
+        
+    }
+}
+note top of services {
+    Contains services which are DDD Aggregate-like
+}
+
+
+ds_service ..> visitor : creates
+repos ..|> jpa_repo : extending
+repos ..|> spec_executor : extending
+ds_service -d-> repos : uses
+ds_service -r-> query : uses
+ds_service --> spatial_criterion_builder : creates
+spatial_criterion_builder --|> hibernate_criterion_builder
+query ..> specifications : creates
+
+hibernate_criterion_builder ..> criterion_builder : returns
+visitor ..> expression : returns
+
+@enduml
