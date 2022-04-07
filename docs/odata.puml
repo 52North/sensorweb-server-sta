@@ -1,8 +1,0 @@
-@startuml OData Query Handling
-
-class QueryOptions
-interface FilterClause 
-
-QueryOptions "1" o-- "*" FilterClause
-
-@enduml

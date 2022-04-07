@@ -1,0 +1,81 @@
+@startuml Modules and Dependencies
+
+node app
+node sta <<infrastructure layer>> {
+    package web
+    package mqtt
+}
+
+note as app_note
+  Bootstrapping and configuration.
+end note
+note as sta_note 
+  OGC REST interface.
+  
+  Controllers validating requests and 
+  topics delegating to services. Payload
+  de-/serialization. Converting to
+  Web Exceptions.
+end note
+
+sta_note .. sta
+app_note .r. app
+
+node api <<application layer>> {
+    package provider
+    package domain
+    provider -[norank]-> domain : uses
+}
+note as domain_note
+    Enforces entity conformance.
+
+    Verfifies that domain entities are
+    valid against certain rules.
+end note
+note as api_note 
+    STA application layer.
+
+    Defines an SPI to call data storage
+    specific logic. Verfies consistency.
+    Handles or delegates exceptions and 
+    prepares or intercept responses.
+end note
+
+api_note .. api
+domain_note .u. domain
+
+together {
+    node ufz <<infrastructure layer>>
+    node dao <<infrastructure layer>>
+}
+note as dao_note
+    Persistence provider using Hibernate.
+end note
+note as ufz_note
+    Remote provider accessing UFZ API.
+end note
+
+dao_note .u. dao
+ufz_note .u. ufz
+
+app --> sta : //configures//
+app --> provider : //configures//
+sta --> api
+
+dao .u.> provider : //implements//
+ufz .u.> provider : //implements//
+
+node plus
+note as plus_note 
+  STAplus Extension.
+
+  Vertical slice through all the modules
+  to self-contain the whole logic and its
+  configuration in one module.
+end note
+
+plus_note .. plus
+api -[hidden]l-> plus
+
+
+@enduml
