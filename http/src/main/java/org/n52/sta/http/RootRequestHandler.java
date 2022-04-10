@@ -30,6 +30,7 @@ package org.n52.sta.http;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.ServerProperties;
 import org.springframework.core.env.Environment;
@@ -100,7 +101,11 @@ public class RootRequestHandler {
 
         // parse Endpoints
         addToArray(rootUrl, mapper, endpoints, STAEntityDefinition.CORECOLLECTIONS);
-        addToArray(rootUrl, mapper, endpoints, STAEntityDefinition.CITSCICOLLECTIONS);
+        for (String activeProfile : environment.getActiveProfiles()) {
+            if (activeProfile.equals(StaConstants.STAPLUS)) {
+                addToArray(rootUrl, mapper, endpoints, STAEntityDefinition.CITSCICOLLECTIONS);
+            }
+        }
         ObjectNode node = mapper.createObjectNode();
         node.put("value", endpoints);
 
