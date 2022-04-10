@@ -28,9 +28,11 @@
 package org.n52.sta.data.citsci.repositories;
 
 import org.n52.series.db.beans.sta.StaPlusDataset;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.data.common.repositories.StaIdentifierRepository;
 import org.n52.sta.data.vanilla.repositories.AggregateRepository;
 import org.n52.sta.data.vanilla.repositories.NameRepository;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional
 @Repository
+@Profile(StaConstants.STAPLUS)
 public interface StaPlusDatastreamRepository
     extends NameRepository<StaPlusDataset>,
             StaIdentifierRepository<StaPlusDataset>,
