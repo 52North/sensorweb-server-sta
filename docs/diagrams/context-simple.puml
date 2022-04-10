@@ -1,0 +1,13 @@
+@startuml Simple Context
+
+actor "IoT Device" as iot_device #dd7766
+actor "Client" as client #dd7766
+[dataprovider] as data_provider #dd7766
+
+[SensorThings API] as sta
+
+iot_device --> sta : REST +\n MQTT
+client --> sta : REST +\n MQTT
+sta --> data_provider
+
+@enduml

@@ -1,0 +1,66 @@
+@startuml Detailed Context
+
+file "War File" as war
+file "Executable Jar" as jar
+
+frame "SensorThings API" as sta {
+    together {
+        [mqtt]
+        [http]
+    }
+    
+    together {
+        [dao]
+        [dao-postgres] as daopg
+        [dao-ufz] as daoufz
+    }
+
+    together {
+        [app]
+        [webapp]
+    }
+    webapp .up.> war : //creates//
+    app .up.> jar : //creates//
+    http --> dao
+    mqtt --> dao
+}
+
+frame "arctic-sea" as arcticsea {
+    [shetland] as shetland
+    note bottom of shetland : Meta Definitions
+
+    [svalbard-odata] as svalbard
+    note bottom of svalbard : OData Query Parsing
+}
+
+actor "data provider" as data_provider #dd7766
+actor "sensor" as sensor #dd7766
+actor "client" as client #dd7766
+
+() Rest as sta_api
+sta ..> arcticsea
+http -up- sta_api
+
+client ..> sta_api
+sensor ..> sta_api
+
+[helgoland-server-db-model] as 52n_db_model
+note right of 52n_db_model: Entities and mapping files
+database database #dd7766
+
+data_provider .d.> mqtt
+
+52n_db_model --> database
+
+dao --> daopg
+dao --> daoufz
+daopg ..> 52n_db_model
+daoufz --> daopg
+
+[UFZ] as ufz #dd7766
+() "Aggregata\n REST API" as api #dd7766
+ufz -- api
+
+daoufz ..> api
+
+@enduml

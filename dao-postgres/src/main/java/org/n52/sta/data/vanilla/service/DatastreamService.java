@@ -1,3 +1,30 @@
+/*
+ * Copyright (C) 2018-2021 52°North Spatial Information Research GmbH
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation.
+ *
+ * If the program is linked with libraries which are licensed under one of
+ * the following licenses, the combination of the program with the linked
+ * library is not considered a "derivative work" of the program:
+ *
+ *     - Apache License, version 2.0
+ *     - Apache Software License, version 1.0
+ *     - GNU Lesser General Public License, version 3
+ *     - Mozilla Public License, versions 1.0, 1.1 and 2.0
+ *     - Common Development and Distribution License (CDDL), version 1.0
+ *
+ * Therefore the distribution of the program linked with libraries licensed
+ * under the aforementioned licenses, is permitted by the copyright holders
+ * if the distribution is compliant with both the GNU General Public
+ * License version 2 and the aforementioned licenses.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details.
+ */
 package org.n52.sta.data.vanilla.service;
 
 import org.n52.series.db.beans.AbstractDatasetEntity;
@@ -31,60 +58,59 @@ import javax.persistence.EntityManager;
 import java.util.UUID;
 
 @Component
-@DependsOn({"springApplicationContext", "datastreamRepository"})
+@DependsOn({ "springApplicationContext", "datastreamRepository" })
 @Transactional
 public class DatastreamService extends CommonDatastreamService<Dataset, DatastreamRepository> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatastreamService.class);
 
     public DatastreamService(
-        DatastreamRepository repository,
-        @Value("${server.feature.isMobile:false}") boolean isMobileFeatureEnabled,
-        @Value("${server.feature.includeDatastreamCategory:false}") boolean includeDatastreamCategory,
-        UnitRepository unitRepository,
-        CategoryRepository categoryRepository,
-        ObservationRepository observationRepository,
-        DatastreamParameterRepository parameterRepository,
-        OfferingService offeringService,
-        FormatService formatService,
-        EntityManager em) {
+            DatastreamRepository repository,
+            @Value("${server.feature.isMobile:false}") boolean isMobileFeatureEnabled,
+            @Value("${server.feature.includeDatastreamCategory:false}") boolean includeDatastreamCategory,
+            UnitRepository unitRepository,
+            CategoryRepository categoryRepository,
+            ObservationRepository observationRepository,
+            DatastreamParameterRepository parameterRepository,
+            OfferingService offeringService,
+            FormatService formatService,
+            EntityManager em) {
         super(repository,
-              isMobileFeatureEnabled,
-              includeDatastreamCategory,
-              unitRepository,
-              categoryRepository,
-              observationRepository,
-              parameterRepository,
-              offeringService,
-              formatService,
-              em);
+                isMobileFeatureEnabled,
+                includeDatastreamCategory,
+                unitRepository,
+                categoryRepository,
+                observationRepository,
+                parameterRepository,
+                offeringService,
+                formatService,
+                em);
     }
 
     @Override
     protected Dataset createDataset(AbstractDatasetEntity datastream,
-                                                  AbstractFeatureEntity<?> feature,
-                                                  String staIdentifier) throws STACRUDException {
+            AbstractFeatureEntity<?> feature,
+            String staIdentifier) throws STACRUDException {
         return (Dataset) fillDataset(new DatasetEntity(), datastream, feature, staIdentifier);
     }
 
-
     private AbstractDatasetEntity fillDataset(DatasetEntity shell,
-                                AbstractDatasetEntity datastream,
-                                AbstractFeatureEntity<?> feature,
-                                String staIdentifier) throws STACRUDException {
+            AbstractDatasetEntity datastream,
+            AbstractFeatureEntity<?> feature,
+            String staIdentifier) throws STACRUDException {
         CategoryEntity category = categoryRepository.findByIdentifier(CategoryService.DEFAULT_CATEGORY)
-            .orElseThrow(() -> new STACRUDException("Could not find default SOS Category!"));
+                .orElseThrow(() -> new STACRUDException("Could not find default SOS Category!"));
         OfferingEntity offering = offeringService.createOrFetchOffering(datastream.getProcedure());
         AbstractDatasetEntity dataset = createDatasetSkeleton(shell,
-                                                              datastream.getOMObservationType().getFormat(),
-                                                              (isMobileFeatureEnabled
-                                                                  && datastream.getThing().hasParameters())
-                                                                  && datastream.getThing()
-                                                                  .getParameters()
-                                                                  .stream()
-                                                                  .filter(p -> p instanceof BooleanParameterEntity)
-                                                                  .filter(p -> p.getName().equals("isMobile"))
-                                                                  .anyMatch(p -> ((ParameterEntity<Boolean>) p).getValue()));
+                datastream.getOMObservationType().getFormat(),
+                (isMobileFeatureEnabled
+                        && datastream.getThing().hasParameters())
+                        && datastream.getThing()
+                                .getParameters()
+                                .stream()
+                                .filter(p -> p instanceof BooleanParameterEntity)
+                                .filter(p -> p.getName().equals("isMobile"))
+                                .anyMatch(p -> ((ParameterEntity<Boolean>) p).getValue()));
         dataset.setIdentifier(UUID.randomUUID().toString());
         dataset.setStaIdentifier(staIdentifier);
         dataset.setName(datastream.getName());
@@ -111,10 +137,10 @@ public class DatastreamService extends CommonDatastreamService<Dataset, Datastre
         dataset.setObservationType(ObservationType.simple);
         if (isMobile) {
             LOGGER.debug("Setting DatasetType to 'trajectory'");
-            dataset = dataset.setDatasetType(DatasetType.trajectory);
+            dataset.setDatasetType(DatasetType.trajectory);
             dataset.setMobile(true);
         } else {
-            dataset = dataset.setDatasetType(DatasetType.timeseries);
+            dataset.setDatasetType(DatasetType.timeseries);
         }
         switch (observationType) {
             case OmConstants.OBS_TYPE_MEASUREMENT:
