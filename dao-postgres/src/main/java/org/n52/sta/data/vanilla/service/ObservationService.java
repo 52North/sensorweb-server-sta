@@ -304,7 +304,7 @@ public class ObservationService
                 check(observation);
 
                 // Fetch dataset and check if FOI matches to reuse existing dataset
-                Dataset datastream = datastreamRepository
+                Dataset datastream = (Dataset) datastreamRepository
                     .findByStaIdentifier(entity.getDataset().getStaIdentifier(),
                                          EntityGraphRepository.FetchGraph.FETCHGRAPH_FEATURE)
                     .orElseThrow(() -> new STACRUDException("Unable to find Datastream!"));

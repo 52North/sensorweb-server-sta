@@ -60,7 +60,7 @@ import java.util.UUID;
 @Component
 @DependsOn({ "springApplicationContext", "datastreamRepository" })
 @Transactional
-public class DatastreamService extends CommonDatastreamService<Dataset, DatastreamRepository> {
+public class DatastreamService extends CommonDatastreamService<AbstractDatasetEntity, DatastreamRepository> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatastreamService.class);
 

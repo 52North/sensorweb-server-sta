@@ -27,9 +27,9 @@
  */
 package org.n52.sta.data.common;
 
+import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DataEntity;
-import org.n52.series.db.beans.Dataset;
 import org.n52.series.db.beans.HibernateRelations;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
@@ -40,6 +40,7 @@ import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.api.AbstractSensorThingsEntityService;
 import org.n52.sta.api.CollectionWrapper;
+import org.n52.sta.api.dto.StaDTO;
 import org.n52.sta.api.dto.vanilla.DatastreamDTO;
 import org.n52.sta.api.dto.vanilla.FeatureOfInterestDTO;
 import org.n52.sta.api.dto.vanilla.HistoricalLocationDTO;
@@ -47,7 +48,6 @@ import org.n52.sta.api.dto.vanilla.LocationDTO;
 import org.n52.sta.api.dto.vanilla.ObservationDTO;
 import org.n52.sta.api.dto.vanilla.ObservedPropertyDTO;
 import org.n52.sta.api.dto.vanilla.SensorDTO;
-import org.n52.sta.api.dto.StaDTO;
 import org.n52.sta.api.dto.vanilla.ThingDTO;
 import org.n52.sta.data.vanilla.DTOTransformerImpl;
 import org.n52.sta.data.vanilla.DaoSemaphore;
@@ -295,7 +295,7 @@ public abstract class CommonServiceFacade<R extends StaDTO, S extends HibernateR
 
 
     @Component
-    public static class DatastreamServiceFacade extends CommonServiceFacade<DatastreamDTO, Dataset> {
+    public static class DatastreamServiceFacade extends CommonServiceFacade<DatastreamDTO, AbstractDatasetEntity> {
 
         DatastreamServiceFacade(DatastreamService serviceImpl,
                                 DaoSemaphore semaphore,

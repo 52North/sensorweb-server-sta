@@ -27,7 +27,7 @@
  */
 package org.n52.sta.data.vanilla.repositories;
 
-import org.n52.series.db.beans.Dataset;
+import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.sta.data.common.repositories.StaIdentifierRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,8 +38,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Repository
 public interface DatastreamRepository
-    extends NameRepository<Dataset>,
-            StaIdentifierRepository<Dataset>,
-            AggregateRepository<Dataset> {
+    extends NameRepository<AbstractDatasetEntity>,
+            StaIdentifierRepository<AbstractDatasetEntity>,
+            AggregateRepository<AbstractDatasetEntity> {
 
 }

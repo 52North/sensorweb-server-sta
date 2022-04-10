@@ -30,7 +30,6 @@ package org.n52.sta.data.vanilla.query;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.CategoryEntity;
 import org.n52.series.db.beans.DataEntity;
-import org.n52.series.db.beans.Dataset;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.FeatureEntity;
@@ -288,7 +287,7 @@ public class DatastreamQuerySpecifications<T> extends EntityQuerySpecifications<
         };
     }
 
-    public Specification<Dataset> withObservedPropertyStaIdentifier(
+    public <S> Specification<S> withObservedPropertyStaIdentifier(
         final String observablePropertyIdentifier) {
         return (root, query, builder) -> {
             final Join<AbstractDatasetEntity, PhenomenonEntity> join =
@@ -333,7 +332,7 @@ public class DatastreamQuerySpecifications<T> extends EntityQuerySpecifications<
         };
     }
 
-    public Specification<T> withSensorStaIdentifier(final String sensorIdentifier) {
+    public <S> Specification<S> withSensorStaIdentifier(final String sensorIdentifier) {
         return (root, query, builder) -> {
             final Join<AbstractDatasetEntity, ProcedureEntity> join =
                 root.join(AbstractDatasetEntity.PROCEDURE, JoinType.INNER);

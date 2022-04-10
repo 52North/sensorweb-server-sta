@@ -43,7 +43,7 @@ import java.util.Map;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
-public abstract class CommonEntityServiceRepository implements EntityServiceFactory {
+public class CommonEntityServiceRepository implements EntityServiceFactory {
 
     protected Map<String, CommonServiceFacade<?, ?>> entityServices = new LinkedHashMap<>();
 

@@ -40,6 +40,7 @@ import org.springframework.context.annotation.Profile;
     "org.n52.sta.http.vanilla",
     "org.n52.sta.mqtt.vanilla",
     "org.n52.sta.data.vanilla",
+    "org.n52.sta.data.common",
 })
 public class VanillaLoader {
 

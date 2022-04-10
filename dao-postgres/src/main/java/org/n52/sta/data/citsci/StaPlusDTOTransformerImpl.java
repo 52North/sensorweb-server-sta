@@ -54,6 +54,7 @@ import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.StaFeatureEntity;
+import org.n52.series.db.beans.sta.StaPlusDataset;
 import org.n52.series.db.beans.sta.plus.GroupEntity;
 import org.n52.series.db.beans.sta.plus.LicenseEntity;
 import org.n52.series.db.beans.sta.plus.PartyEntity;
@@ -62,28 +63,13 @@ import org.n52.series.db.beans.sta.plus.RelationEntity;
 import org.n52.series.db.beans.sta.plus.StaPlusBlobDataEntity;
 import org.n52.series.db.beans.sta.plus.StaPlusDataEntity;
 import org.n52.series.db.beans.sta.plus.StaPlusDatasetEntity;
-import org.n52.series.db.beans.sta.plus.StaPlusQuantityDataEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryError;
-import org.n52.sta.api.dto.vanilla.DatastreamDTO;
-import org.n52.sta.api.dto.vanilla.FeatureOfInterestDTO;
-import org.n52.sta.api.dto.vanilla.HistoricalLocationDTO;
-import org.n52.sta.api.dto.plus.LicenseDTO;
-import org.n52.sta.api.dto.vanilla.LocationDTO;
-import org.n52.sta.api.dto.vanilla.ObservationDTO;
-import org.n52.sta.api.dto.plus.GroupDTO;
-import org.n52.sta.api.dto.plus.RelationDTO;
-import org.n52.sta.api.dto.vanilla.ObservedPropertyDTO;
-import org.n52.sta.api.dto.plus.PartyDTO;
-import org.n52.sta.api.dto.plus.ProjectDTO;
-import org.n52.sta.api.dto.vanilla.SensorDTO;
 import org.n52.sta.api.dto.StaDTO;
-import org.n52.sta.api.dto.vanilla.ThingDTO;
-import org.n52.sta.api.dto.impl.Datastream;
 import org.n52.sta.api.dto.impl.FeatureOfInterest;
 import org.n52.sta.api.dto.impl.HistoricalLocation;
 import org.n52.sta.api.dto.impl.Location;
@@ -91,11 +77,26 @@ import org.n52.sta.api.dto.impl.Observation;
 import org.n52.sta.api.dto.impl.ObservedProperty;
 import org.n52.sta.api.dto.impl.Sensor;
 import org.n52.sta.api.dto.impl.Thing;
-import org.n52.sta.api.dto.impl.citsci.License;
 import org.n52.sta.api.dto.impl.citsci.Group;
-import org.n52.sta.api.dto.impl.citsci.Relation;
+import org.n52.sta.api.dto.impl.citsci.License;
 import org.n52.sta.api.dto.impl.citsci.Party;
+import org.n52.sta.api.dto.impl.citsci.PlusDatastream;
 import org.n52.sta.api.dto.impl.citsci.Project;
+import org.n52.sta.api.dto.impl.citsci.Relation;
+import org.n52.sta.api.dto.plus.GroupDTO;
+import org.n52.sta.api.dto.plus.LicenseDTO;
+import org.n52.sta.api.dto.plus.PartyDTO;
+import org.n52.sta.api.dto.plus.PlusDatastreamDTO;
+import org.n52.sta.api.dto.plus.ProjectDTO;
+import org.n52.sta.api.dto.plus.RelationDTO;
+import org.n52.sta.api.dto.vanilla.DatastreamDTO;
+import org.n52.sta.api.dto.vanilla.FeatureOfInterestDTO;
+import org.n52.sta.api.dto.vanilla.HistoricalLocationDTO;
+import org.n52.sta.api.dto.vanilla.LocationDTO;
+import org.n52.sta.api.dto.vanilla.ObservationDTO;
+import org.n52.sta.api.dto.vanilla.ObservedPropertyDTO;
+import org.n52.sta.api.dto.vanilla.SensorDTO;
+import org.n52.sta.api.dto.vanilla.ThingDTO;
 import org.n52.sta.data.vanilla.DTOTransformerImpl;
 import org.n52.sta.data.vanilla.SerDesConfig;
 import org.n52.sta.data.vanilla.service.ServiceUtils;
@@ -155,7 +156,8 @@ public class StaPlusDTOTransformerImpl<R extends StaDTO, S extends HibernateRela
         }
     }
 
-    @Override public S fromDTO(R type) {
+    @Override
+    public S fromDTO(R type) {
         serialized = new HashMap<>();
         if (type instanceof LicenseDTO) {
             return (S) toLicenseEntity((LicenseDTO) type);
@@ -364,9 +366,9 @@ public class StaPlusDTOTransformerImpl<R extends StaDTO, S extends HibernateRela
                                          .map(this::toGroupEntity)
                                          .collect(Collectors.toSet()));
             }
-            if (raw.getDatastream() != null) {
-                dataEntity.setDataset(this.toDatasetEntity(raw.getDatastream()));
-            }
+            //if (raw.getDatastream() != null) {
+            //    dataEntity.setDataset(this.toDatasetEntity(raw.getDatastream()));
+            //}
             if (raw.getFeatureOfInterest() != null) {
                 dataEntity.setFeature(this.toAbstractFeatureEntity(raw.getFeatureOfInterest()));
             }
@@ -510,8 +512,8 @@ public class StaPlusDTOTransformerImpl<R extends StaDTO, S extends HibernateRela
         return platform;
     }
 
-    protected DatastreamDTO toDatastreamDTO(AbstractDatasetEntity raw, QueryOptions queryOptions) {
-        DatastreamDTO datastream = createDatastreamDTO(new Datastream(), raw, queryOptions);
+    protected DatastreamDTO toDatastreamDTO(StaPlusDataset raw, QueryOptions queryOptions) {
+        PlusDatastreamDTO datastream = createDatastreamDTO(new PlusDatastream(), raw, queryOptions);
 
         if (datastream.getFieldsToExpand().containsKey(StaConstants.OBSERVED_PROPERTY)) {
             datastream.setObservedProperty(
@@ -537,16 +539,13 @@ public class StaPlusDTOTransformerImpl<R extends StaDTO, S extends HibernateRela
             );
         }
 
-        if (datastream.getFieldsToExpand().containsKey(StaConstants.PARTY)) {
-            datastream.setParty(
-                toPartyDTO(raw.getParty(),
-                           datastream.getFieldsToExpand().get(StaConstants.PARTY)));
-        }
+        /*
         if (datastream.getFieldsToExpand().containsKey(StaConstants.PROJECT)) {
             datastream.setProject(
                 toProjectDTO(raw.getProject(),
                              datastream.getFieldsToExpand().get(StaConstants.PROJECT)));
         }
+        */
         return datastream;
     }
 
@@ -622,7 +621,7 @@ public class StaPlusDTOTransformerImpl<R extends StaDTO, S extends HibernateRela
         return thing;
     }
 
-    protected ObservationDTO toObservationDTO(DataEntity<?> raw, QueryOptions queryOptions) {
+    protected ObservationDTO toObservationDTO(StaPlusDataEntity<?> raw, QueryOptions queryOptions) {
         ObservationDTO observation = createObservationDTO(new Observation(), raw, queryOptions);
 
         if (observation.getFieldsToExpand().containsKey(StaConstants.FEATURE_OF_INTEREST)) {
@@ -655,7 +654,7 @@ public class StaPlusDTOTransformerImpl<R extends StaDTO, S extends HibernateRela
         }
         if (observation.getFieldsToExpand().containsKey(StaConstants.GROUPS)) {
             observation.setObservationGroups(
-                raw.getObservationGroups()
+                raw.getGroups()
                     .stream()
                     .map(o -> this.toObsGroupDTO(o,
                                                  observation.getFieldsToExpand()
@@ -845,7 +844,7 @@ public class StaPlusDTOTransformerImpl<R extends StaDTO, S extends HibernateRela
         project.setTermsOfUse(dto.getTermsOfUse());
         project.setPrivacyPolicy(dto.getPrivacyPolicy());
 
-        Time created = dto.getCreated();
+        Time created = dto.getCreationTime();
         if (created instanceof TimeInstant) {
             project.setCreationTime(((TimeInstant) created).getValue().toDate());
         }
@@ -862,9 +861,9 @@ public class StaPlusDTOTransformerImpl<R extends StaDTO, S extends HibernateRela
         }
         if (dto.getDatastreams() != null) {
             project.setDatastreams(dto.getDatastreams()
-                                    .stream()
-                                    .map(this::toDatasetEntity)
-                                    .collect(Collectors.toSet()));
+                                       .stream()
+                                       .map(this::toDatasetEntity)
+                                       .collect(Collectors.toSet()));
         }
         return project;
     }
@@ -873,14 +872,14 @@ public class StaPlusDTOTransformerImpl<R extends StaDTO, S extends HibernateRela
         PartyEntity party = new PartyEntity();
         party.setStaIdentifier(dto.getId());
         party.setAuthId(dto.getAuthId());
-        party.setDisplayName(dto.getNickname());
+        party.setDisplayName(dto.getDisplayName());
         party.setDescription(dto.getDescription());
 
         if (dto.getRole() != null) {
             party.setRole(PartyEntity.Role.valueOf(dto.getRole().name()));
         }
         if (dto.getDatastreams() != null) {
-            party.setDatasets(dto.getDatastreams()
+            party.setDatastreams(dto.getDatastreams()
                                   .stream()
                                   .map(this::toDatasetEntity)
                                   .collect(Collectors.toSet()));
@@ -899,17 +898,15 @@ public class StaPlusDTOTransformerImpl<R extends StaDTO, S extends HibernateRela
         dto.setTermsOfUse(raw.getTermsOfUse());
         dto.setPrivacyPolicy(raw.getPrivacyPolicy());
         if (raw.getStartTime() != null) {
-            dto.setCreated(TimeUtil.createTime(TimeUtil.createDateTime(raw.getCreatedStart()),
-                                               TimeUtil.createDateTime(raw.getCreatedEnd())));
+            dto.setCreationTime(TimeUtil.createTime(TimeUtil.createDateTime(raw.getCreationTime())));
         }
-        if (raw.getRuntimeStart() != null) {
-            dto.setStartTime(TimeUtil.createTime(TimeUtil.createDateTime(raw.getRuntimeStart()),
-                                                 TimeUtil.createDateTime(raw.getRuntimeEnd())));
+        if (raw.getEndTime() != null) {
+            dto.setStartTime(TimeUtil.createTime(TimeUtil.createDateTime(raw.getEndTime())));
         }
         dto.setUrl(raw.getUrl());
 
         if (dto.getFieldsToExpand().containsKey(StaConstants.DATASTREAMS)) {
-            dto.setDatastreams(raw.getDatasets()
+            dto.setDatastreams(raw.getDatastreams()
                                    .stream()
                                    .map(o -> toDatastreamDTO(o,
                                                              dto.getFieldsToExpand()
@@ -925,13 +922,12 @@ public class StaPlusDTOTransformerImpl<R extends StaDTO, S extends HibernateRela
 
         dto.setId(raw.getStaIdentifier());
         dto.setAuthId(raw.getAuthId());
-        dto.setNickname(raw.getNickname());
+        dto.setDisplayName(raw.getDisplayName());
         dto.setDescription(raw.getDescription());
         dto.setRole(PartyDTO.Role.valueOf(raw.getRole().name()));
-        dto.setProperties(parseProperties(raw));
 
         if (dto.getFieldsToExpand().containsKey(StaConstants.DATASTREAMS)) {
-            dto.setDatastreams(raw.getDatasets()
+            dto.setDatastreams(raw.getDatastreams()
                                    .stream()
                                    .map(o -> toDatastreamDTO(o,
                                                              dto.getFieldsToExpand()
@@ -951,11 +947,11 @@ public class StaPlusDTOTransformerImpl<R extends StaDTO, S extends HibernateRela
         dto.setDescription(raw.getDescription());
         dto.setPurpose(raw.getPurpose());
         if (raw.getRuntimeStart() != null) {
-            dto.setRuntime(TimeUtil.createTime(TimeUtil.createDateTime(raw.getRuntimeStart()),
-                                               TimeUtil.createDateTime(raw.getRuntimeEnd())));
+            dto.setCreationTime(TimeUtil.createTime(TimeUtil.createDateTime(raw.getRuntimeStart()),
+                                                    TimeUtil.createDateTime(raw.getRuntimeEnd())));
         }
         if (raw.getCreatedStart() != null) {
-            dto.setCreated(TimeUtil.createTime(TimeUtil.createDateTime(raw.getCreatedStart()),
+            dto.setEndTime(TimeUtil.createTime(TimeUtil.createDateTime(raw.getCreatedStart()),
                                                TimeUtil.createDateTime(raw.getCreatedEnd())));
         }
 
@@ -1029,7 +1025,7 @@ public class StaPlusDTOTransformerImpl<R extends StaDTO, S extends HibernateRela
         }
 
         if (dto.getRelations() != null) {
-            obsGroup.setObservationRelations(dto.getRelations().stream()
+            obsGroup.setRelations(dto.getRelations().stream()
                                                  .map(this::toRelationEntity)
                                                  .collect(Collectors.toSet()));
         }
@@ -1040,10 +1036,8 @@ public class StaPlusDTOTransformerImpl<R extends StaDTO, S extends HibernateRela
     private RelationEntity toRelationEntity(RelationDTO dto) {
         RelationEntity obsRel = new RelationEntity();
         obsRel.setStaIdentifier(dto.getId());
-        obsRel.setName(dto.getName());
         obsRel.setDescription(dto.getDescription());
         obsRel.setRole(dto.getRole());
-        obsRel.setNamespace(dto.getNamespace());
 
         if (dto.getObject() != null) {
             obsRel.setObject(toDataEntity(dto.getObject()));
@@ -1054,7 +1048,7 @@ public class StaPlusDTOTransformerImpl<R extends StaDTO, S extends HibernateRela
         }
 
         if (dto.getObservationGroups() != null) {
-            obsRel.setObservationGroups(dto.getObservationGroups().stream()
+            obsRel.setGroups(dto.getObservationGroups().stream()
                                             .map(this::toGroupEntity)
                                             .collect(Collectors.toSet()));
         }
