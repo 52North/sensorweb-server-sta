@@ -31,32 +31,32 @@ package org.n52.sta;
 
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
-import org.n52.sta.api.dto.DatastreamDTO;
-import org.n52.sta.api.dto.FeatureOfInterestDTO;
-import org.n52.sta.api.dto.HistoricalLocationDTO;
-import org.n52.sta.api.dto.LicenseDTO;
-import org.n52.sta.api.dto.LocationDTO;
-import org.n52.sta.api.dto.ObservationDTO;
-import org.n52.sta.api.dto.ObservationGroupDTO;
-import org.n52.sta.api.dto.ObservationRelationDTO;
-import org.n52.sta.api.dto.ObservedPropertyDTO;
-import org.n52.sta.api.dto.PartyDTO;
-import org.n52.sta.api.dto.ProjectDTO;
-import org.n52.sta.api.dto.SensorDTO;
-import org.n52.sta.api.dto.ThingDTO;
-import org.n52.sta.serdes.DatastreamSerDes;
-import org.n52.sta.serdes.FeatureOfInterestSerDes;
-import org.n52.sta.serdes.HistoricalLocationSerDes;
-import org.n52.sta.serdes.LicenseSerDes;
-import org.n52.sta.serdes.LocationSerDes;
-import org.n52.sta.serdes.ObservationGroupSerDes;
-import org.n52.sta.serdes.ObservationRelationSerDes;
-import org.n52.sta.serdes.ObservationSerDes;
-import org.n52.sta.serdes.ObservedPropertySerDes;
-import org.n52.sta.serdes.PartySerDes;
-import org.n52.sta.serdes.ProjectSerDes;
-import org.n52.sta.serdes.SensorSerDes;
-import org.n52.sta.serdes.ThingSerDes;
+import org.n52.sta.api.dto.vanilla.DatastreamDTO;
+import org.n52.sta.api.dto.vanilla.FeatureOfInterestDTO;
+import org.n52.sta.api.dto.vanilla.HistoricalLocationDTO;
+import org.n52.sta.api.dto.plus.LicenseDTO;
+import org.n52.sta.api.dto.vanilla.LocationDTO;
+import org.n52.sta.api.dto.vanilla.ObservationDTO;
+import org.n52.sta.api.dto.plus.GroupDTO;
+import org.n52.sta.api.dto.plus.RelationDTO;
+import org.n52.sta.api.dto.vanilla.ObservedPropertyDTO;
+import org.n52.sta.api.dto.plus.PartyDTO;
+import org.n52.sta.api.dto.plus.ProjectDTO;
+import org.n52.sta.api.dto.vanilla.SensorDTO;
+import org.n52.sta.api.dto.vanilla.ThingDTO;
+import org.n52.sta.serdes.vanilla.DatastreamSerDes;
+import org.n52.sta.serdes.vanilla.FeatureOfInterestSerDes;
+import org.n52.sta.serdes.vanilla.HistoricalLocationSerDes;
+import org.n52.sta.serdes.plus.LicenseSerDes;
+import org.n52.sta.serdes.vanilla.LocationSerDes;
+import org.n52.sta.serdes.plus.ObservationGroupSerDes;
+import org.n52.sta.serdes.plus.ObservationRelationSerDes;
+import org.n52.sta.serdes.vanilla.ObservationSerDes;
+import org.n52.sta.serdes.vanilla.ObservedPropertySerDes;
+import org.n52.sta.serdes.plus.PartySerDes;
+import org.n52.sta.serdes.plus.ProjectSerDes;
+import org.n52.sta.serdes.vanilla.SensorSerDes;
+import org.n52.sta.serdes.vanilla.ThingSerDes;
 import org.springframework.stereotype.Component;
 
 /**
@@ -84,9 +84,9 @@ public class DTOMapper {
             case StaConstants.FEATURES_OF_INTEREST:
                 return FeatureOfInterestDTO.class;
             case StaConstants.GROUPS:
-                return ObservationGroupDTO.class;
+                return GroupDTO.class;
             case StaConstants.RELATIONS:
-                return ObservationRelationDTO.class;
+                return RelationDTO.class;
             case StaConstants.LICENSES:
                 return LicenseDTO.class;
             case StaConstants.PROJECTS:

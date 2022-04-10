@@ -62,15 +62,15 @@ import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryError;
-import org.n52.sta.api.dto.DatastreamDTO;
-import org.n52.sta.api.dto.FeatureOfInterestDTO;
-import org.n52.sta.api.dto.HistoricalLocationDTO;
-import org.n52.sta.api.dto.LocationDTO;
-import org.n52.sta.api.dto.ObservationDTO;
-import org.n52.sta.api.dto.ObservedPropertyDTO;
-import org.n52.sta.api.dto.SensorDTO;
+import org.n52.sta.api.dto.vanilla.DatastreamDTO;
+import org.n52.sta.api.dto.vanilla.FeatureOfInterestDTO;
+import org.n52.sta.api.dto.vanilla.HistoricalLocationDTO;
+import org.n52.sta.api.dto.vanilla.LocationDTO;
+import org.n52.sta.api.dto.vanilla.ObservationDTO;
+import org.n52.sta.api.dto.vanilla.ObservedPropertyDTO;
+import org.n52.sta.api.dto.vanilla.SensorDTO;
 import org.n52.sta.api.dto.StaDTO;
-import org.n52.sta.api.dto.ThingDTO;
+import org.n52.sta.api.dto.vanilla.ThingDTO;
 import org.n52.sta.api.dto.impl.Datastream;
 import org.n52.sta.api.dto.impl.FeatureOfInterest;
 import org.n52.sta.api.dto.impl.HistoricalLocation;
@@ -403,7 +403,7 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
         return dataEntity;
     }
 
-    protected DatasetEntity toDatasetEntity(DatastreamDTO raw) {
+    private DatasetEntity toDatasetEntity(DatastreamDTO raw) {
         if (serialized.containsKey(genKey(raw))) {
             return (DatasetEntity) serialized.get(genKey(raw));
         } else {

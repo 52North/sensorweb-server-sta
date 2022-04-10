@@ -40,7 +40,7 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.ProjectEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.api.dto.ProjectDTO;
+import org.n52.sta.api.dto.plus.ProjectDTO;
 import org.n52.sta.data.citsci.query.ProjectQuerySpecifications;
 import org.n52.sta.data.citsci.repositories.ProjectRepository;
 import org.n52.sta.data.vanilla.repositories.EntityGraphRepository;

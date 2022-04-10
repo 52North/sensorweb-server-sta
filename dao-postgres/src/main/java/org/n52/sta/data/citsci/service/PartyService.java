@@ -41,7 +41,7 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.PartyEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.api.dto.PartyDTO;
+import org.n52.sta.api.dto.plus.PartyDTO;
 import org.n52.sta.data.citsci.query.PartyQuerySpecifications;
 import org.n52.sta.data.citsci.repositories.PartyRepository;
 import org.n52.sta.data.vanilla.repositories.EntityGraphRepository;

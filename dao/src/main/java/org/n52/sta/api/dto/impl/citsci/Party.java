@@ -29,11 +29,12 @@
 
 package org.n52.sta.api.dto.impl.citsci;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.n52.sta.api.dto.DatastreamDTO;
-import org.n52.sta.api.dto.PartyDTO;
-import org.n52.sta.api.dto.ThingDTO;
 import org.n52.sta.api.dto.impl.Entity;
+import org.n52.sta.api.dto.plus.GroupDTO;
+import org.n52.sta.api.dto.plus.PartyDTO;
+import org.n52.sta.api.dto.plus.RelationDTO;
+import org.n52.sta.api.dto.vanilla.DatastreamDTO;
+import org.n52.sta.api.dto.vanilla.ThingDTO;
 
 import java.util.Set;
 
@@ -42,67 +43,102 @@ import java.util.Set;
  */
 public class Party extends Entity implements PartyDTO {
 
-    private String nickname;
+    private String displayName;
     private Role role;
     private String authId;
     private String description;
+    private String personalData;
     private Set<DatastreamDTO> datastreams;
     private Set<ThingDTO> things;
-    private ObjectNode properties;
+    private Set<GroupDTO> groups;
+    private Set<RelationDTO> relations;
 
-    @Override public String getNickname() {
-        return nickname;
+    @Override
+    public String getDisplayName() {
+        return displayName;
     }
 
-    @Override public void setNickname(String nickname) {
-        this.nickname = nickname;
+    @Override
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
-    @Override public Role getRole() {
+    @Override
+    public Role getRole() {
         return role;
     }
 
-    @Override public void setRole(Role role) {
+    @Override
+    public void setRole(Role role) {
         this.role = role;
     }
 
-    @Override public String getAuthId() {
+    @Override
+    public String getAuthId() {
         return authId;
     }
 
-    @Override public void setAuthId(String authId) {
+    @Override
+    public void setAuthId(String authId) {
         this.authId = authId;
     }
 
-    @Override public Set<DatastreamDTO> getDatastreams() {
+    @Override
+    public Set<DatastreamDTO> getDatastreams() {
         return datastreams;
     }
 
-    @Override public void setDatastreams(Set<DatastreamDTO> datasets) {
+    @Override
+    public void setDatastreams(Set<DatastreamDTO> datasets) {
         this.datastreams = datasets;
     }
 
-    @Override public ObjectNode getProperties() {
-        return properties;
-    }
-
-    @Override public void setProperties(ObjectNode properties) {
-        this.properties = properties;
-    }
-
-    @Override public String getDescription() {
+    @Override
+    public String getDescription() {
         return description;
     }
 
-    @Override public void setDescription(String description) {
+    @Override
+    public void setDescription(String description) {
         this.description = description;
     }
 
-    @Override public Set<ThingDTO> getThings() {
+    @Override
+    public Set<ThingDTO> getThings() {
         return things;
     }
 
-    @Override public void setThings(Set<ThingDTO> things) {
+    @Override
+    public void setThings(Set<ThingDTO> things) {
         this.things = things;
+    }
+
+    @Override
+    public String getPersonalData() {
+        return personalData;
+    }
+
+    @Override
+    public void setPersonalData(String personalData) {
+        this.personalData = personalData;
+    }
+
+    @Override
+    public Set<GroupDTO> getGroups() {
+        return groups;
+    }
+
+    @Override
+    public void setGroups(Set<GroupDTO> groups) {
+        this.groups = groups;
+    }
+
+    public Set<RelationDTO> getRelations() {
+        return relations;
+    }
+
+    @Override
+    public void setRelations(Set<RelationDTO> relations) {
+        this.relations = relations;
     }
 }

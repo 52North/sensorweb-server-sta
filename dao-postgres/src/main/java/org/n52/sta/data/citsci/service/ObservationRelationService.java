@@ -38,7 +38,7 @@ import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.api.dto.ObservationRelationDTO;
+import org.n52.sta.api.dto.plus.RelationDTO;
 import org.n52.sta.data.citsci.query.ObservationRelationQuerySpecifications;
 import org.n52.sta.data.citsci.repositories.ObservationRelationRepository;
 import org.n52.sta.data.vanilla.repositories.EntityGraphRepository;
@@ -66,7 +66,7 @@ import java.util.stream.Collectors;
 @Profile(StaConstants.STAPLUS)
 public class ObservationRelationService
     extends CitSciSTAServiceImpl<ObservationRelationRepository,
-        ObservationRelationDTO,
+    RelationDTO,
         RelationEntity> {
 
     private static final ObservationRelationQuerySpecifications orQS = new ObservationRelationQuerySpecifications();

@@ -29,8 +29,8 @@
 package org.n52.sta.api.dto.impl;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.n52.sta.api.dto.DatastreamDTO;
-import org.n52.sta.api.dto.SensorDTO;
+import org.n52.sta.api.dto.vanilla.DatastreamDTO;
+import org.n52.sta.api.dto.vanilla.SensorDTO;
 
 import java.util.HashSet;
 import java.util.Set;

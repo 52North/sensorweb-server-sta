@@ -29,10 +29,10 @@
 package org.n52.sta.api.dto.impl;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.n52.sta.api.dto.DatastreamDTO;
-import org.n52.sta.api.dto.HistoricalLocationDTO;
-import org.n52.sta.api.dto.LocationDTO;
-import org.n52.sta.api.dto.ThingDTO;
+import org.n52.sta.api.dto.vanilla.DatastreamDTO;
+import org.n52.sta.api.dto.vanilla.HistoricalLocationDTO;
+import org.n52.sta.api.dto.vanilla.LocationDTO;
+import org.n52.sta.api.dto.vanilla.ThingDTO;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -51,7 +51,7 @@ import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.api.dto.DatastreamDTO;
+import org.n52.sta.api.dto.vanilla.DatastreamDTO;
 import org.n52.sta.data.common.repositories.StaIdentifierRepository;
 import org.n52.sta.data.vanilla.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.vanilla.repositories.AggregateRepository;

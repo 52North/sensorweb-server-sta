@@ -40,7 +40,7 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.GroupEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.api.dto.ObservationGroupDTO;
+import org.n52.sta.api.dto.plus.GroupDTO;
 import org.n52.sta.data.citsci.query.ObservationGroupQuerySpecifications;
 import org.n52.sta.data.citsci.repositories.ObservationGroupParameterRepository;
 import org.n52.sta.data.citsci.repositories.ObservationGroupRepository;
@@ -69,7 +69,7 @@ import java.util.stream.Collectors;
 @Transactional
 @Profile(StaConstants.STAPLUS)
 public class ObservationGroupService
-    extends CitSciSTAServiceImpl<ObservationGroupRepository, ObservationGroupDTO,
+    extends CitSciSTAServiceImpl<ObservationGroupRepository, GroupDTO,
     GroupEntity> {
 
     private static final ObservationGroupQuerySpecifications ogQS = new ObservationGroupQuerySpecifications();

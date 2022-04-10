@@ -30,9 +30,9 @@
 package org.n52.sta.api.dto.impl.citsci;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.n52.sta.api.dto.LicenseDTO;
-import org.n52.sta.api.dto.ObservationDTO;
-import org.n52.sta.api.dto.ObservationGroupDTO;
+import org.n52.sta.api.dto.plus.LicenseDTO;
+import org.n52.sta.api.dto.vanilla.ObservationDTO;
+import org.n52.sta.api.dto.plus.GroupDTO;
 import org.n52.sta.api.dto.impl.Entity;
 
 import java.util.Set;
@@ -47,7 +47,7 @@ public class License extends Entity implements LicenseDTO {
     private String description;
     private String logo;
     private Set<ObservationDTO> observations;
-    private Set<ObservationGroupDTO> observationGroups;
+    private Set<GroupDTO> observationGroups;
     private ObjectNode properties;
 
     @Override public String getName() {
@@ -90,11 +90,11 @@ public class License extends Entity implements LicenseDTO {
         this.properties = properties;
     }
 
-    @Override public Set<ObservationGroupDTO> getObservationGroups() {
+    @Override public Set<GroupDTO> getObservationGroups() {
         return observationGroups;
     }
 
-    @Override public void setObservationGroups(Set<ObservationGroupDTO> observationGroups) {
+    @Override public void setObservationGroups(Set<GroupDTO> observationGroups) {
         this.observationGroups = observationGroups;
     }
 

@@ -38,7 +38,7 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.LicenseEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.api.dto.LicenseDTO;
+import org.n52.sta.api.dto.plus.LicenseDTO;
 import org.n52.sta.data.citsci.query.LicenseQuerySpecifications;
 import org.n52.sta.data.citsci.repositories.LicenseRepository;
 import org.n52.sta.data.common.CommonSTAServiceImpl;

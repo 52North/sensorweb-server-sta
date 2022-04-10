@@ -31,9 +31,9 @@ package org.n52.sta.api.dto.impl.citsci;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.n52.shetland.ogc.gml.time.Time;
-import org.n52.sta.api.dto.DatastreamDTO;
-import org.n52.sta.api.dto.ProjectDTO;
 import org.n52.sta.api.dto.impl.Entity;
+import org.n52.sta.api.dto.plus.ProjectDTO;
+import org.n52.sta.api.dto.vanilla.DatastreamDTO;
 
 import java.util.Set;
 
@@ -44,8 +44,9 @@ public class Project extends Entity implements ProjectDTO {
 
     private String name;
     private String description;
-    private Time runtime;
-    private Time created;
+    private Time creationTime;
+    private Time startTime;
+    private Time endTime;
     private String privacyPolicy;
     private String termsOfUse;
     private String classification;
@@ -53,83 +54,113 @@ public class Project extends Entity implements ProjectDTO {
     private ObjectNode properties;
     private Set<DatastreamDTO> datastreams;
 
-    @Override public Set<DatastreamDTO> getDatastreams() {
+    @Override
+    public Set<DatastreamDTO> getDatastreams() {
         return datastreams;
     }
 
-    @Override public void setDatastreams(Set<DatastreamDTO> datastreams) {
+    @Override
+    public void setDatastreams(Set<DatastreamDTO> datastreams) {
         this.datastreams = datastreams;
     }
 
-    @Override public String getName() {
+    @Override
+    public String getName() {
         return name;
     }
 
-    @Override public void setName(String name) {
+    @Override
+    public void setName(String name) {
         this.name = name;
     }
 
-    @Override public String getDescription() {
+    @Override
+    public String getDescription() {
         return description;
     }
 
-    @Override public void setDescription(String description) {
+    @Override
+    public void setDescription(String description) {
         this.description = description;
     }
 
-    @Override public Time getRuntime() {
-        return runtime;
-    }
-
-    @Override public void setRuntime(Time runtime) {
-        this.runtime = runtime;
-    }
-
-    @Override public String getPrivacyPolicy() {
+    @Override
+    public String getPrivacyPolicy() {
         return privacyPolicy;
     }
 
-    @Override public void setPrivacyPolicy(String privacyPolicy) {
+    @Override
+    public void setPrivacyPolicy(String privacyPolicy) {
         this.privacyPolicy = privacyPolicy;
     }
 
-    @Override public String getTermsOfUse() {
+    @Override
+    public String getTermsOfUse() {
         return termsOfUse;
     }
 
-    @Override public void setTermsOfUse(String termsOfUse) {
+    @Override
+    public void setTermsOfUse(String termsOfUse) {
         this.termsOfUse = termsOfUse;
     }
 
-    @Override public String getClassification() {
+    @Override
+    public String getClassification() {
         return classification;
     }
 
-    @Override public void setClassification(String classification) {
+    @Override
+    public void setClassification(String classification) {
         this.classification = classification;
     }
 
-    @Override public String getUrl() {
+    @Override
+    public String getUrl() {
         return url;
     }
 
-    @Override public void setUrl(String url) {
+    @Override
+    public void setUrl(String url) {
         this.url = url;
     }
 
-    @Override public ObjectNode getProperties() {
+    @Override
+    public ObjectNode getProperties() {
         return properties;
     }
 
-    @Override public void setProperties(ObjectNode properties) {
+    @Override
+    public void setProperties(ObjectNode properties) {
         this.properties = properties;
     }
 
-    @Override public Time getCreated() {
-        return created;
+    @Override
+    public Time getEndTime() {
+        return endTime;
     }
 
-    @Override public void setCreated(Time created) {
-        this.created = created;
+    @Override
+    public void setEndTime(Time endTime) {
+        this.endTime = endTime;
+    }
+
+    @Override
+    public Time getCreationTime() {
+        return creationTime;
+    }
+
+    @Override
+    public void setCreationTime(Time creationTime) {
+        this.creationTime = creationTime;
+    }
+
+    @Override
+    public Time getStartTime() {
+        return startTime;
+    }
+
+    @Override
+    public void setStartTime(Time startTime) {
+        this.startTime = startTime;
     }
 }

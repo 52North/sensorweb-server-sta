@@ -35,7 +35,7 @@ import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.shetland.ogc.sta.model.ObservationEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.shetland.util.DateTimeHelper;
-import org.n52.sta.api.dto.ObservationDTO;
+import org.n52.sta.api.dto.vanilla.ObservationDTO;
 
 import java.io.IOException;
 

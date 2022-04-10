@@ -31,12 +31,12 @@ package org.n52.sta.api.dto.impl;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.n52.shetland.ogc.gml.time.Time;
-import org.n52.sta.api.dto.DatastreamDTO;
-import org.n52.sta.api.dto.FeatureOfInterestDTO;
-import org.n52.sta.api.dto.LicenseDTO;
-import org.n52.sta.api.dto.ObservationDTO;
-import org.n52.sta.api.dto.ObservationGroupDTO;
-import org.n52.sta.api.dto.ObservationRelationDTO;
+import org.n52.sta.api.dto.plus.GroupDTO;
+import org.n52.sta.api.dto.plus.LicenseDTO;
+import org.n52.sta.api.dto.plus.RelationDTO;
+import org.n52.sta.api.dto.vanilla.DatastreamDTO;
+import org.n52.sta.api.dto.vanilla.FeatureOfInterestDTO;
+import org.n52.sta.api.dto.vanilla.ObservationDTO;
 
 import java.util.Set;
 
@@ -66,33 +66,38 @@ public class Observation extends Entity implements ObservationDTO {
 
     private LicenseDTO license;
 
-    private Set<ObservationRelationDTO> subjects;
+    private Set<RelationDTO> subjects;
 
-    private Set<ObservationRelationDTO> objects;
+    private Set<RelationDTO> objects;
 
-    private Set<ObservationGroupDTO> observationGroups;
+    private Set<GroupDTO> observationGroups;
 
     public void setResultQuality(Object resultQuality) {
         this.resultQuality = resultQuality;
     }
 
-    @Override public Time getPhenomenonTime() {
+    @Override
+    public Time getPhenomenonTime() {
         return phenomenonTime;
     }
 
-    @Override public void setPhenomenonTime(Time phenomenonTime) {
+    @Override
+    public void setPhenomenonTime(Time phenomenonTime) {
         this.phenomenonTime = phenomenonTime;
     }
 
-    @Override public Time getResultTime() {
+    @Override
+    public Time getResultTime() {
         return resultTime;
     }
 
-    @Override public void setResultTime(Time resultTime) {
+    @Override
+    public void setResultTime(Time resultTime) {
         this.resultTime = resultTime;
     }
 
-    @Override public Object getResult() {
+    @Override
+    public Object getResult() {
         return result;
     }
 
@@ -100,15 +105,18 @@ public class Observation extends Entity implements ObservationDTO {
         this.result = result;
     }
 
-    @Override public Time getValidTime() {
+    @Override
+    public Time getValidTime() {
         return validTime;
     }
 
-    @Override public void setValidTime(Time validTime) {
+    @Override
+    public void setValidTime(Time validTime) {
         this.validTime = validTime;
     }
 
-    @Override public ObjectNode getParameters() {
+    @Override
+    public ObjectNode getParameters() {
         return parameters;
     }
 
@@ -116,7 +124,8 @@ public class Observation extends Entity implements ObservationDTO {
         this.parameters = parameters;
     }
 
-    @Override public FeatureOfInterestDTO getFeatureOfInterest() {
+    @Override
+    public FeatureOfInterestDTO getFeatureOfInterest() {
         return featureOfInterest;
     }
 
@@ -124,7 +133,8 @@ public class Observation extends Entity implements ObservationDTO {
         this.featureOfInterest = featureOfInterest;
     }
 
-    @Override public DatastreamDTO getDatastream() {
+    @Override
+    public DatastreamDTO getDatastream() {
         return datastream;
     }
 
@@ -132,35 +142,41 @@ public class Observation extends Entity implements ObservationDTO {
         this.datastream = datastream;
     }
 
-    @Override public Set<ObservationRelationDTO> getSubjects() {
+    @Override
+    public Set<RelationDTO> getSubjects() {
         return subjects;
     }
 
-    public void setSubjects(Set<ObservationRelationDTO> subjects) {
+    public void setSubjects(Set<RelationDTO> subjects) {
         this.subjects = subjects;
     }
 
-    @Override public Set<ObservationRelationDTO> getObjects() {
+    @Override
+    public Set<RelationDTO> getObjects() {
         return objects;
     }
 
-    public void setObjects(Set<ObservationRelationDTO> objects) {
+    public void setObjects(Set<RelationDTO> objects) {
         this.objects = objects;
     }
 
-    @Override public Set<ObservationGroupDTO> getObservationGroups() {
+    @Override
+    public Set<GroupDTO> getObservationGroups() {
         return observationGroups;
     }
 
-    @Override public void setObservationGroups(Set<ObservationGroupDTO> observationGroups) {
+    @Override
+    public void setObservationGroups(Set<GroupDTO> observationGroups) {
         this.observationGroups = observationGroups;
     }
 
-    @Override public LicenseDTO getLicense() {
+    @Override
+    public LicenseDTO getLicense() {
         return license;
     }
 
-    @Override public void setLicense(LicenseDTO license) {
+    @Override
+    public void setLicense(LicenseDTO license) {
         this.license = license;
     }
 }

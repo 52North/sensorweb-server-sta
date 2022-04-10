@@ -56,7 +56,7 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.api.CollectionWrapper;
-import org.n52.sta.api.dto.ObservationDTO;
+import org.n52.sta.api.dto.vanilla.ObservationDTO;
 import org.n52.sta.data.common.CommonSTAServiceImpl;
 import org.n52.sta.data.vanilla.OffsetLimitBasedPageRequest;
 import org.n52.sta.data.vanilla.query.ObservationQuerySpecifications;

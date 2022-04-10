@@ -6,11 +6,11 @@ import org.n52.series.db.beans.sta.plus.GroupEntity;
 import org.n52.series.db.beans.sta.plus.RelationEntity;
 import org.n52.series.db.beans.sta.plus.PartyEntity;
 import org.n52.series.db.beans.sta.plus.ProjectEntity;
-import org.n52.sta.api.dto.LicenseDTO;
-import org.n52.sta.api.dto.ObservationGroupDTO;
-import org.n52.sta.api.dto.ObservationRelationDTO;
-import org.n52.sta.api.dto.PartyDTO;
-import org.n52.sta.api.dto.ProjectDTO;
+import org.n52.sta.api.dto.plus.LicenseDTO;
+import org.n52.sta.api.dto.plus.GroupDTO;
+import org.n52.sta.api.dto.plus.RelationDTO;
+import org.n52.sta.api.dto.plus.PartyDTO;
+import org.n52.sta.api.dto.plus.ProjectDTO;
 import org.n52.sta.api.dto.StaDTO;
 import org.n52.sta.data.common.CommonSTAServiceImpl;
 import org.n52.sta.data.common.CommonServiceFacade;
@@ -61,7 +61,7 @@ public class CitSciServiceFacade<R extends StaDTO, S extends HibernateRelations.
 
     @Component
     static class ObservationRelationServiceFacade
-        extends CommonServiceFacade<ObservationRelationDTO, RelationEntity> {
+        extends CommonServiceFacade<RelationDTO, RelationEntity> {
 
         ObservationRelationServiceFacade(ObservationRelationService serviceImpl,
                                          DaoSemaphore semaphore,
@@ -73,7 +73,7 @@ public class CitSciServiceFacade<R extends StaDTO, S extends HibernateRelations.
 
     @Component
     static class ObservationGroupServiceFacade
-        extends CommonServiceFacade<ObservationGroupDTO, GroupEntity> {
+        extends CommonServiceFacade<GroupDTO, GroupEntity> {
 
         ObservationGroupServiceFacade(ObservationGroupService serviceImpl,
                                       DaoSemaphore semaphore,

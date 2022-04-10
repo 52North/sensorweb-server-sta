@@ -35,7 +35,7 @@ import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.shetland.ogc.sta.model.DatastreamEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.shetland.util.DateTimeHelper;
-import org.n52.sta.api.dto.DatastreamDTO;
+import org.n52.sta.api.dto.vanilla.DatastreamDTO;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -131,29 +131,6 @@ public class AbstractDatastreamSerializer<T extends DatastreamDTO> extends Abstr
             gen.writeObjectField(STAEntityDefinition.PROP_PROPERTIES, datastream.getProperties());
         }
 
-        if (!datastream.hasSelectOption() ||
-            datastream.getFieldsToSerialize().contains(STAEntityDefinition.PARTY)) {
-            if (datastream.getParty() == null) {
-                writeNavigationProp(gen, STAEntityDefinition.PARTY, datastream.getId());
-            } else {
-                gen.writeFieldName(STAEntityDefinition.PARTY);
-                writeNestedEntity(datastream.getParty(),
-                                  gen,
-                                  serializers);
-            }
-        }
-        if (!datastream.hasSelectOption() ||
-            datastream.getFieldsToSerialize().contains(STAEntityDefinition.PROJECT)) {
-            if (datastream.getParty() == null) {
-                writeNavigationProp(gen, STAEntityDefinition.PROJECT, datastream.getId());
-            } else {
-                gen.writeFieldName(STAEntityDefinition.PROJECT);
-                writeNestedEntity(datastream.getParty(),
-                                  gen,
-                                  serializers);
-            }
-        }
-
         // navigation properties
         for (String navigationProperty : DatastreamEntityDefinition.NAVIGATION_PROPERTIES) {
             if (!datastream.hasSelectOption() || datastream.getFieldsToSerialize().contains(navigationProperty)) {
@@ -198,16 +175,6 @@ public class AbstractDatastreamSerializer<T extends DatastreamDTO> extends Abstr
                             } else {
                                 gen.writeFieldName(navigationProperty);
                                 writeNestedEntity(datastream.getSensor(),
-                                                  gen,
-                                                  serializers);
-                            }
-                            break;
-                        case STAEntityDefinition.PARTY:
-                            if (datastream.getParty() == null) {
-                                writeNavigationProp(gen, navigationProperty, datastream.getId());
-                            } else {
-                                gen.writeFieldName(navigationProperty);
-                                writeNestedEntity(datastream.getParty(),
                                                   gen,
                                                   serializers);
                             }

@@ -32,13 +32,11 @@ package org.n52.sta.api.dto.impl;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.locationtech.jts.geom.Geometry;
 import org.n52.shetland.ogc.gml.time.Time;
-import org.n52.sta.api.dto.DatastreamDTO;
-import org.n52.sta.api.dto.ObservationDTO;
-import org.n52.sta.api.dto.ObservedPropertyDTO;
-import org.n52.sta.api.dto.PartyDTO;
-import org.n52.sta.api.dto.ProjectDTO;
-import org.n52.sta.api.dto.SensorDTO;
-import org.n52.sta.api.dto.ThingDTO;
+import org.n52.sta.api.dto.vanilla.DatastreamDTO;
+import org.n52.sta.api.dto.vanilla.ObservationDTO;
+import org.n52.sta.api.dto.vanilla.ObservedPropertyDTO;
+import org.n52.sta.api.dto.vanilla.SensorDTO;
+import org.n52.sta.api.dto.vanilla.ThingDTO;
 
 import java.util.Set;
 
@@ -70,10 +68,6 @@ public class Datastream extends Entity implements DatastreamDTO {
     private ObservedPropertyDTO observedProperty;
 
     private Set<ObservationDTO> observations;
-
-    private ProjectDTO project;
-
-    private PartyDTO party;
 
     public Datastream() {
     }
@@ -172,21 +166,5 @@ public class Datastream extends Entity implements DatastreamDTO {
 
     public void setObservations(Set<ObservationDTO> observations) {
         this.observations = observations;
-    }
-
-    @Override public ProjectDTO getProject() {
-        return project;
-    }
-
-    @Override public void setProject(ProjectDTO project) {
-        this.project = project;
-    }
-
-    @Override public PartyDTO getParty() {
-        return party;
-    }
-
-    @Override public void setParty(PartyDTO party) {
-        this.party = party;
     }
 }

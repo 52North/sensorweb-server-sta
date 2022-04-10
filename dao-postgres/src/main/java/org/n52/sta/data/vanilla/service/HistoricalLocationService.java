@@ -40,7 +40,7 @@ import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.api.dto.HistoricalLocationDTO;
+import org.n52.sta.api.dto.vanilla.HistoricalLocationDTO;
 import org.n52.sta.data.common.CommonSTAServiceImpl;
 import org.n52.sta.data.vanilla.query.HistoricalLocationQuerySpecifications;
 import org.n52.sta.data.vanilla.repositories.EntityGraphRepository;

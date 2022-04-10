@@ -35,7 +35,7 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STANotFoundException;
 import org.n52.sta.api.AbstractSensorThingsEntityService;
 import org.n52.sta.api.EntityServiceFactory;
-import org.n52.sta.api.dto.ObservationDTO;
+import org.n52.sta.api.dto.vanilla.ObservationDTO;
 import org.n52.sta.api.dto.StaDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -43,7 +43,7 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.shetland.ogc.sta.model.SensorEntityDefinition;
-import org.n52.sta.api.dto.SensorDTO;
+import org.n52.sta.api.dto.vanilla.SensorDTO;
 import org.n52.sta.data.common.CommonDatastreamService;
 import org.n52.sta.data.vanilla.query.DatastreamQuerySpecifications;
 import org.n52.sta.data.vanilla.query.SensorQuerySpecifications;
