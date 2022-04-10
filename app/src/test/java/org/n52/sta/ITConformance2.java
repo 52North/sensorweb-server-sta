@@ -107,7 +107,6 @@ public class ITConformance2 extends ConformanceTests implements TestUtil {
             String prefix = "$select=";
             String filter;
             Set<String> allProps = new HashSet<>();
-            allProps.addAll(definition.getEntityPropsOptional());
             allProps.addAll(definition.getEntityPropsMandatory());
 
             // Test single select

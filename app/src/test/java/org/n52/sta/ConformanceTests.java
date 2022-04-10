@@ -389,12 +389,12 @@ abstract class ConformanceTests implements TestUtil {
             Assertions.assertTrue(response.has(property),
                                   "Entity: "
                                       + response.toPrettyString()
-                                      + "does not have mandatory property:"
+                                      + " does not have mandatory property: "
                                       + property);
             Assertions.assertNotNull(response.get(property),
                                      "Entity: "
                                          + response.toPrettyString()
-                                         + "does not have mandatory property:"
+                                         + " does not have mandatory property: "
                                          + property);
         }
     }
