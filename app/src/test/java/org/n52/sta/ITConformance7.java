@@ -182,7 +182,6 @@ public class ITConformance7 extends ConformanceTests implements TestUtil {
 
         JsonNode response = getCollection(EntityType.OBSERVATION);
         Assertions.assertTrue(response.has(value));
-        Assertions.assertTrue(response.has(countKey));
 
         assertResponseCount(
             response,
@@ -209,7 +208,6 @@ public class ITConformance7 extends ConformanceTests implements TestUtil {
 
         JsonNode response = getCollection(EntityType.OBSERVATION);
         Assertions.assertTrue(response.has(value));
-        Assertions.assertTrue(response.has(countKey));
 
         assertResponseCount(
             response,
@@ -236,7 +234,6 @@ public class ITConformance7 extends ConformanceTests implements TestUtil {
 
         JsonNode response = getCollection(EntityType.OBSERVATION);
         Assertions.assertTrue(response.has(value));
-        Assertions.assertTrue(response.has(countKey));
 
         assertResponseCount(
             response,

@@ -104,7 +104,6 @@ public class ITExpand extends ConformanceTests implements TestUtil {
 
     private void checkSingleExpandOnCollection(EntityType type, String expanded) throws Exception {
         JsonNode response = getCollection(type, "$expand=" + expanded);
-        Assertions.assertTrue(response.has(countKey));
         Assertions.assertTrue(response.has(value));
         for (JsonNode item : response.get(value)) {
             if (item.get(expanded).isArray()) {
