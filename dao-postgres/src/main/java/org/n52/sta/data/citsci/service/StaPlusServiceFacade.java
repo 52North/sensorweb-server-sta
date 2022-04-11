@@ -45,11 +45,11 @@ import org.n52.sta.data.vanilla.DaoSemaphore;
 import org.n52.sta.data.vanilla.SerDesConfig;
 import org.springframework.stereotype.Component;
 
-public class CitSciServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
+public class StaPlusServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
     extends CommonServiceFacade<R, S> {
 
-    public CitSciServiceFacade(CommonSTAServiceImpl<?, R, S> serviceImpl,
-                               DaoSemaphore semaphore, SerDesConfig config) {
+    public StaPlusServiceFacade(CommonSTAServiceImpl<?, R, S> serviceImpl,
+                                DaoSemaphore semaphore, SerDesConfig config) {
         super(serviceImpl, semaphore, config);
     }
 
@@ -87,24 +87,24 @@ public class CitSciServiceFacade<R extends StaDTO, S extends HibernateRelations.
 
 
     @Component
-    static class ObservationRelationServiceFacade
+    static class RelationServiceFacade
         extends CommonServiceFacade<RelationDTO, RelationEntity> {
 
-        ObservationRelationServiceFacade(ObservationRelationService serviceImpl,
-                                         DaoSemaphore semaphore,
-                                         SerDesConfig config) {
+        RelationServiceFacade(RelationService serviceImpl,
+                              DaoSemaphore semaphore,
+                              SerDesConfig config) {
             super(serviceImpl, semaphore, config);
         }
     }
 
 
     @Component
-    static class ObservationGroupServiceFacade
+    static class GroupServiceFacade
         extends CommonServiceFacade<GroupDTO, GroupEntity> {
 
-        ObservationGroupServiceFacade(ObservationGroupService serviceImpl,
-                                      DaoSemaphore semaphore,
-                                      SerDesConfig config) {
+        GroupServiceFacade(GroupService serviceImpl,
+                           DaoSemaphore semaphore,
+                           SerDesConfig config) {
             super(serviceImpl, semaphore, config);
         }
     }

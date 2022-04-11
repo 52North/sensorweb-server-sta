@@ -62,14 +62,14 @@ import java.util.stream.Collectors;
 @DependsOn({"springApplicationContext"})
 @Transactional
 @Profile(StaConstants.STAPLUS)
-public class ObservationRelationService
+public class RelationService
     extends CitSciSTAServiceImpl<ObservationRelationRepository,
     RelationDTO,
         RelationEntity> {
 
     private static final ObservationRelationQuerySpecifications orQS = new ObservationRelationQuerySpecifications();
 
-    public ObservationRelationService(ObservationRelationRepository repository, EntityManager em) {
+    public RelationService(ObservationRelationRepository repository, EntityManager em) {
         super(repository, em, RelationEntity.class);
     }
 

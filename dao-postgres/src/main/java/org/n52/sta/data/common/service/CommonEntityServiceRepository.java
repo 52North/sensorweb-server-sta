@@ -25,11 +25,13 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data.common;
+package org.n52.sta.data.common.service;
 
 import org.n52.sta.api.AbstractSensorThingsEntityService;
 import org.n52.sta.api.EntityServiceFactory;
 import org.n52.sta.api.STAEventHandler;
+import org.n52.sta.data.common.CommonSTAServiceImpl;
+import org.n52.sta.data.common.CommonServiceFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

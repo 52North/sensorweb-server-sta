@@ -27,6 +27,7 @@
  */
 package org.n52.sta;
 
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -34,7 +35,7 @@ import org.springframework.context.annotation.Profile;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@Profile("vanilla")
+@Profile(StaConstants.VANILLA)
 @Configuration
 @ComponentScan(basePackages = {
     "org.n52.sta.http.vanilla",

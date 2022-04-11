@@ -40,6 +40,7 @@ import org.springframework.context.annotation.Profile;
 @Configuration
 @ComponentScan(
     excludeFilters = {
+        @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*common.service.CommonEntityServiceRepository.*"),
         @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*vanilla.service.ObservationService.*")
     },
     basePackages = {
@@ -47,7 +48,8 @@ import org.springframework.context.annotation.Profile;
         "org.n52.sta.mqtt.vanilla",
         "org.n52.sta.data.vanilla",
         "org.n52.sta.data.citsci",
-        "org.n52.sta.http.citsci"
+        "org.n52.sta.http.citsci",
+        "org.n52.sta.data.common",
     })
 public class CitSciLoader {
 

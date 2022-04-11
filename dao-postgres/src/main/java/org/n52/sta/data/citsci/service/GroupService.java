@@ -66,16 +66,16 @@ import java.util.stream.Collectors;
 @DependsOn({"springApplicationContext"})
 @Transactional
 @Profile(StaConstants.STAPLUS)
-public class ObservationGroupService
+public class GroupService
     extends CitSciSTAServiceImpl<GroupRepository, GroupDTO,
     GroupEntity> {
 
     private static final ObservationGroupQuerySpecifications ogQS = new ObservationGroupQuerySpecifications();
     private final GroupParameterRepository parameterRepository;
 
-    public ObservationGroupService(GroupRepository repository,
-                                   GroupParameterRepository parameterRepository,
-                                   EntityManager em) {
+    public GroupService(GroupRepository repository,
+                        GroupParameterRepository parameterRepository,
+                        EntityManager em) {
         super(repository, em, GroupEntity.class);
         this.parameterRepository = parameterRepository;
     }

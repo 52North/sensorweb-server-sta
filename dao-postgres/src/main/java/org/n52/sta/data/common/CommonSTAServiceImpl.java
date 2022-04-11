@@ -44,6 +44,7 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.api.CollectionWrapper;
 import org.n52.sta.api.dto.StaDTO;
 import org.n52.sta.data.common.repositories.StaIdentifierRepository;
+import org.n52.sta.data.common.service.CommonEntityServiceRepository;
 import org.n52.sta.data.vanilla.DTOTransformerImpl;
 import org.n52.sta.data.vanilla.MutexFactory;
 import org.n52.sta.data.vanilla.OffsetLimitBasedPageRequest;

@@ -94,8 +94,7 @@ import java.util.stream.Collectors;
 @DependsOn({"springApplicationContext"})
 @Transactional
 public class ObservationService
-    extends CommonSTAServiceImpl<ObservationRepository<DataEntity<?>>, ObservationDTO,
-        DataEntity<?>> {
+    extends CommonSTAServiceImpl<ObservationRepository<DataEntity<?>>, ObservationDTO, DataEntity<?>> {
 
     private static final ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
     private static final Logger LOGGER = LoggerFactory.getLogger(ObservationService.class);

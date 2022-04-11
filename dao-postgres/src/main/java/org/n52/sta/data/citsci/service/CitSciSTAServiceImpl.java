@@ -29,7 +29,7 @@ package org.n52.sta.data.citsci.service;
 
 import org.n52.series.db.beans.HibernateRelations;
 import org.n52.sta.api.dto.StaDTO;
-import org.n52.sta.data.common.CommonEntityServiceRepository;
+import org.n52.sta.data.common.service.CommonEntityServiceRepository;
 import org.n52.sta.data.common.CommonSTAServiceImpl;
 import org.n52.sta.data.common.repositories.StaIdentifierRepository;
 
@@ -45,14 +45,14 @@ public abstract class CitSciSTAServiceImpl<T extends StaIdentifierRepository<S>,
         super(repository, em, entityClass);
     }
 
-    protected ObservationGroupService getObservationGroupService() {
-        return (ObservationGroupService) serviceRepository.getEntityServiceRaw(
-                CitSciEntityServiceRepository.StaPlusEntityTypes.ObservationGroup.name());
+    protected GroupService getObservationGroupService() {
+        return (GroupService) serviceRepository.getEntityServiceRaw(
+                CitSciEntityServiceRepository.StaPlusEntityTypes.Group.name());
     }
 
-    protected ObservationRelationService getObservationRelationService() {
-        return (ObservationRelationService) serviceRepository
-                .getEntityServiceRaw(CitSciEntityServiceRepository.StaPlusEntityTypes.ObservationRelation.name());
+    protected RelationService getObservationRelationService() {
+        return (RelationService) serviceRepository
+                .getEntityServiceRaw(CitSciEntityServiceRepository.StaPlusEntityTypes.Relation.name());
     }
 
     protected LicenseService getLicenseService() {

@@ -27,36 +27,39 @@
  */
 package org.n52.sta.data.citsci.service;
 
-import org.n52.sta.data.common.CommonEntityServiceRepository;
+import org.n52.sta.data.common.service.CommonEntityServiceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 
+@Component
 public class CitSciEntityServiceRepository extends CommonEntityServiceRepository {
 
-    @Autowired private CitSciServiceFacade.ObservationGroupServiceFacade obsGroupService;
+    @Autowired private StaPlusServiceFacade.GroupServiceFacade groupService;
 
-    @Autowired private CitSciServiceFacade.ObservationRelationServiceFacade obsRelationService;
+    @Autowired private StaPlusServiceFacade.RelationServiceFacade relationService;
 
-    @Autowired private CitSciServiceFacade.LicenseServiceFacade licenseService;
+    @Autowired private StaPlusServiceFacade.LicenseServiceFacade licenseService;
 
-    @Autowired private CitSciServiceFacade.PartyServiceFacade partyService;
+    @Autowired private StaPlusServiceFacade.PartyServiceFacade partyService;
 
-    @Autowired private CitSciServiceFacade.ProjectServiceFacade projectService;
+    @Autowired private StaPlusServiceFacade.ProjectServiceFacade projectService;
 
     @PostConstruct
     public void postConstruct() {
-        entityServices.put(StaPlusEntityTypes.ObservationGroup.name(), obsGroupService);
-        entityServices.put(StaPlusEntityTypes.ObservationGroups.name(), obsGroupService);
+        super.postConstruct();
+        entityServices.put(StaPlusEntityTypes.Group.name(), groupService);
+        entityServices.put(StaPlusEntityTypes.Groups.name(), groupService);
 
-        entityServices.put(StaPlusEntityTypes.ObservationRelation.name(), obsRelationService);
-        entityServices.put(StaPlusEntityTypes.ObservationRelations.name(), obsRelationService);
+        entityServices.put(StaPlusEntityTypes.Relation.name(), relationService);
+        entityServices.put(StaPlusEntityTypes.Relations.name(), relationService);
 
-        entityServices.put(StaPlusEntityTypes.Objects.name(), obsRelationService);
-        entityServices.put(StaPlusEntityTypes.Object.name(), obsRelationService);
+        entityServices.put(StaPlusEntityTypes.Objects.name(), relationService);
+        entityServices.put(StaPlusEntityTypes.Object.name(), relationService);
 
-        entityServices.put(StaPlusEntityTypes.Subjects.name(), obsRelationService);
-        entityServices.put(StaPlusEntityTypes.Subject.name(), obsRelationService);
+        entityServices.put(StaPlusEntityTypes.Subjects.name(), relationService);
+        entityServices.put(StaPlusEntityTypes.Subject.name(), relationService);
 
         entityServices.put(StaPlusEntityTypes.License.name(), licenseService);
         entityServices.put(StaPlusEntityTypes.Licenses.name(), licenseService);
@@ -69,7 +72,7 @@ public class CitSciEntityServiceRepository extends CommonEntityServiceRepository
     }
 
     public enum StaPlusEntityTypes {
-        ObservationGroup, ObservationGroups, Subject, Subjects, Object, Objects,
-        ObservationRelation, ObservationRelations, License, Licenses, Party, Parties, Project, Projects
+        Group, Groups, Subject, Subjects, Object, Objects,
+        Relation, Relations, License, Licenses, Party, Parties, Project, Projects
     }
 }
