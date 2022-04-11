@@ -25,10 +25,11 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.citsci.service;
 
 import org.n52.janmayen.http.HTTPStatus;
-import org.n52.series.db.beans.sta.StaPlusDataset;
+import org.n52.series.db.beans.sta.plus.StaPlusDataset;
 import org.n52.series.db.beans.sta.plus.ProjectEntity;
 import org.n52.series.db.beans.sta.plus.StaPlusAbstractDatasetEntity;
 import org.n52.shetland.filter.ExpandFilter;
@@ -71,7 +72,8 @@ public class ProjectService
         super(repository, em, ProjectEntity.class);
     }
 
-    @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
+    @Override
+    protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
         throws STAInvalidQueryException {
         if (expandOption != null) {
             for (ExpandItem expandItem : expandOption.getItems()) {
@@ -94,7 +96,8 @@ public class ProjectService
         return new EntityGraphRepository.FetchGraph[0];
     }
 
-    @Override protected ProjectEntity fetchExpandEntitiesWithFilter(ProjectEntity entity, ExpandFilter expandOption)
+    @Override
+    protected ProjectEntity fetchExpandEntitiesWithFilter(ProjectEntity entity, ExpandFilter expandOption)
         throws STACRUDException, STAInvalidQueryException {
         for (ExpandItem expandItem : expandOption.getItems()) {
             // We have already handled $expand without filter and expand
@@ -118,9 +121,10 @@ public class ProjectService
         return entity;
     }
 
-    @Override protected Specification<ProjectEntity> byRelatedEntityFilter(String relatedId,
-                                                                           String relatedType,
-                                                                           String ownId) {
+    @Override
+    protected Specification<ProjectEntity> byRelatedEntityFilter(String relatedId,
+                                                                 String relatedType,
+                                                                 String ownId) {
         Specification<ProjectEntity> filter;
         switch (relatedType) {
             case STAEntityDefinition.DATASTREAMS:
@@ -136,7 +140,8 @@ public class ProjectService
         return filter;
     }
 
-    @Override public ProjectEntity createOrfetch(ProjectEntity entity) throws STACRUDException {
+    @Override
+    public ProjectEntity createOrfetch(ProjectEntity entity) throws STACRUDException {
         ProjectEntity project = entity;
         //if (!project.isProcessed()) {
         if (project.getStaIdentifier() != null && !project.isSetName()) {
@@ -170,7 +175,8 @@ public class ProjectService
         return project;
     }
 
-    @Override protected ProjectEntity updateEntity(String id, ProjectEntity entity, HttpMethod method)
+    @Override
+    protected ProjectEntity updateEntity(String id, ProjectEntity entity, HttpMethod method)
         throws STACRUDException {
         if (HttpMethod.PATCH.equals(method)) {
             synchronized (getLock(id)) {
@@ -187,18 +193,21 @@ public class ProjectService
         throw new STACRUDException(INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY, HTTPStatus.BAD_REQUEST);
     }
 
-    @Override public ProjectEntity createOrUpdate(ProjectEntity entity) throws STACRUDException {
+    @Override
+    public ProjectEntity createOrUpdate(ProjectEntity entity) throws STACRUDException {
         if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
             return updateEntity(entity.getStaIdentifier(), entity, HttpMethod.PATCH);
         }
         return createOrfetch(entity);
     }
 
-    @Override public String checkPropertyName(String property) {
+    @Override
+    public String checkPropertyName(String property) {
         return property;
     }
 
-    @Override protected ProjectEntity merge(ProjectEntity existing, ProjectEntity toMerge)
+    @Override
+    protected ProjectEntity merge(ProjectEntity existing, ProjectEntity toMerge)
         throws STACRUDException {
 
         if (toMerge.getStaIdentifier() != null) {
@@ -224,7 +233,8 @@ public class ProjectService
         return existing;
     }
 
-    @Override public void delete(String id) throws STACRUDException {
+    @Override
+    public void delete(String id) throws STACRUDException {
         synchronized (getLock(id)) {
             if (getRepository().existsByStaIdentifier(id)) {
                 ProjectEntity project = getRepository().findByStaIdentifier(id).get();

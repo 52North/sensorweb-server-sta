@@ -54,7 +54,7 @@ import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.StaFeatureEntity;
-import org.n52.series.db.beans.sta.StaPlusDataset;
+import org.n52.series.db.beans.sta.plus.StaPlusDataset;
 import org.n52.series.db.beans.sta.plus.GroupEntity;
 import org.n52.series.db.beans.sta.plus.LicenseEntity;
 import org.n52.series.db.beans.sta.plus.PartyEntity;
@@ -946,13 +946,11 @@ public class StaPlusDTOTransformerImpl<R extends StaDTO, S extends HibernateRela
         dto.setName(raw.getName());
         dto.setDescription(raw.getDescription());
         dto.setPurpose(raw.getPurpose());
-        if (raw.getRuntimeStart() != null) {
-            dto.setCreationTime(TimeUtil.createTime(TimeUtil.createDateTime(raw.getRuntimeStart()),
-                                                    TimeUtil.createDateTime(raw.getRuntimeEnd())));
+        if (raw.getCreationTime() != null) {
+            dto.setCreationTime(TimeUtil.createTime(TimeUtil.createDateTime(raw.getCreationTime())));
         }
-        if (raw.getCreatedStart() != null) {
-            dto.setEndTime(TimeUtil.createTime(TimeUtil.createDateTime(raw.getCreatedStart()),
-                                               TimeUtil.createDateTime(raw.getCreatedEnd())));
+        if (raw.getEndTime() != null) {
+            dto.setEndTime(TimeUtil.createTime(TimeUtil.createDateTime(raw.getEndTime())));
         }
 
         dto.setProperties(parseProperties(raw));
@@ -997,22 +995,8 @@ public class StaPlusDTOTransformerImpl<R extends StaDTO, S extends HibernateRela
         obsGroup.setPurpose(dto.getPurpose());
         // obsGroup.setParameters();
 
-        Time runtime = dto.getCreationTime();
-        if (runtime instanceof TimeInstant) {
-            obsGroup.setRuntimeStart(((TimeInstant) runtime).getValue().toDate());
-            obsGroup.setRuntimeEnd(((TimeInstant) runtime).getValue().toDate());
-        } else if (runtime instanceof TimePeriod) {
-            obsGroup.setRuntimeStart(((TimePeriod) runtime).getStart().toDate());
-            obsGroup.setRuntimeEnd(((TimePeriod) runtime).getEnd().toDate());
-        }
-        Time endTime = dto.getEndTime();
-        if (endTime instanceof TimeInstant) {
-            obsGroup.setCreatedStart(((TimeInstant) endTime).getValue().toDate());
-            obsGroup.setCreatedEnd(((TimeInstant) endTime).getValue().toDate());
-        } else if (endTime instanceof TimePeriod) {
-            obsGroup.setCreatedStart(((TimePeriod) endTime).getStart().toDate());
-            obsGroup.setCreatedEnd(((TimePeriod) endTime).getEnd().toDate());
-        }
+        obsGroup.setCreationTime(((TimeInstant) dto.getCreationTime()).getValue().toDate());
+        obsGroup.setEndTime(((TimeInstant) dto.getEndTime()).getValue().toDate());
 
         if (dto.getLicense() != null) {
             obsGroup.setLicense(toLicenseEntity(dto.getLicense()));

@@ -22,8 +22,13 @@
         <mapping-file>/hbm/transactional/core/UnitResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/VerticalMetadataResource.hbm.xml</mapping-file>
 
-        <mapping-file>/hbm/transactional/dataset/DataResourceCitSci.hbm.xml</mapping-file>
-        <mapping-file>/hbm/transactional/dataset/DatasetResourceCitSci.hbm.xml</mapping-file>
+        <mapping-file>/hbm/staplus/StaPlusDataResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/staplus/StaPlusDatasetResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/staplus/StaPlusPlatformResource.hbm.xml</mapping-file>
+
+        <mapping-file>/hbm/staplus/DatasetResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/dataset/DataResource.hbm.xml</mapping-file>
+
         <mapping-file>/hbm/transactional/core/TagResource.hbm.xml</mapping-file>
 
         <mapping-file>/hbm/transactional/core/LocationResource.hbm.xml</mapping-file>
@@ -41,11 +46,11 @@
         <mapping-file>/hbm/parameter/ProjectParameterResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/parameter/PartyParameterResource.hbm.xml</mapping-file>
 
-        <class>org.n52.series.db.beans.sta.ObservationGroupEntity</class>
-        <class>org.n52.series.db.beans.sta.ObservationRelationEntity</class>
-        <class>org.n52.series.db.beans.sta.LicenseEntity</class>
-        <class>org.n52.series.db.beans.sta.PartyEntity</class>
-        <class>org.n52.series.db.beans.sta.ProjectEntity</class>
+        <class>org.n52.series.db.beans.sta.plus.GroupEntity</class>
+        <class>org.n52.series.db.beans.sta.plus.RelationEntity</class>
+        <class>org.n52.series.db.beans.sta.plus.LicenseEntity</class>
+        <class>org.n52.series.db.beans.sta.plus.PartyEntity</class>
+        <class>org.n52.series.db.beans.sta.plus.ProjectEntity</class>
 
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>

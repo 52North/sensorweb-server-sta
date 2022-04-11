@@ -29,9 +29,8 @@ package org.n52.sta.data.citsci.repositories;
 
 import org.n52.series.db.beans.sta.plus.StaPlusDataEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
-import org.n52.sta.data.vanilla.repositories.IdentifierRepository;
 import org.n52.sta.data.common.repositories.StaIdentifierRepository;
-import org.springframework.context.annotation.DependsOn;
+import org.n52.sta.data.vanilla.repositories.IdentifierRepository;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,10 +38,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Set;
 
 @Transactional
-@DependsOn("DatastreamRepository")
 @Profile(StaConstants.STAPLUS)
 @Repository
-public interface ObservationRepository<T extends StaPlusDataEntity<?>>
+public interface StaPlusObservationRepository<T extends StaPlusDataEntity<?>>
     extends IdentifierRepository<T, Long>, StaIdentifierRepository<T> {
 
     StaPlusDataEntity<T> findFirstByDataset_idOrderBySamplingTimeStartAsc(Long datasetIdentifier);

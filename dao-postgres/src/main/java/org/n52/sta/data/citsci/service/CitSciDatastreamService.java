@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.citsci.service;
 
 import org.n52.series.db.beans.AbstractDatasetEntity;
@@ -32,7 +33,7 @@ import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.CategoryEntity;
 import org.n52.series.db.beans.OfferingEntity;
 import org.n52.series.db.beans.sta.AggregationEntity;
-import org.n52.series.db.beans.sta.StaPlusDataset;
+import org.n52.series.db.beans.sta.plus.StaPlusDataset;
 import org.n52.series.db.beans.sta.plus.StaPlusDatasetAggregationEntity;
 import org.n52.series.db.beans.sta.plus.StaPlusDatasetEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
@@ -111,9 +112,10 @@ public class CitSciDatastreamService extends CommonDatastreamService<StaPlusData
     }
     */
 
-    @Override protected StaPlusDatasetEntity createDataset(AbstractDatasetEntity datastream,
-                                                    AbstractFeatureEntity<?> feature,
-                                                    String staIdentifier) throws STACRUDException {
+    @Override
+    protected StaPlusDatasetEntity createDataset(AbstractDatasetEntity datastream,
+                                                 AbstractFeatureEntity<?> feature,
+                                                 String staIdentifier) throws STACRUDException {
         StaPlusDatasetEntity dataset = new StaPlusDatasetEntity();
         fillDataset(dataset, datastream, feature, staIdentifier);
         dataset.setParty(((StaPlusDatasetEntity) datastream).getParty());

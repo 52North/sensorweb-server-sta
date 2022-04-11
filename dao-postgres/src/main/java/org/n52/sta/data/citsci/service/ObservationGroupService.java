@@ -40,8 +40,8 @@ import org.n52.shetland.ogc.sta.model.GroupEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.api.dto.plus.GroupDTO;
 import org.n52.sta.data.citsci.query.ObservationGroupQuerySpecifications;
-import org.n52.sta.data.citsci.repositories.ObservationGroupParameterRepository;
-import org.n52.sta.data.citsci.repositories.ObservationGroupRepository;
+import org.n52.sta.data.citsci.repositories.GroupParameterRepository;
+import org.n52.sta.data.citsci.repositories.GroupRepository;
 import org.n52.sta.data.common.CommonSTAServiceImpl;
 import org.n52.sta.data.vanilla.repositories.EntityGraphRepository;
 import org.springframework.context.annotation.DependsOn;
@@ -67,14 +67,14 @@ import java.util.stream.Collectors;
 @Transactional
 @Profile(StaConstants.STAPLUS)
 public class ObservationGroupService
-    extends CitSciSTAServiceImpl<ObservationGroupRepository, GroupDTO,
+    extends CitSciSTAServiceImpl<GroupRepository, GroupDTO,
     GroupEntity> {
 
     private static final ObservationGroupQuerySpecifications ogQS = new ObservationGroupQuerySpecifications();
-    private final ObservationGroupParameterRepository parameterRepository;
+    private final GroupParameterRepository parameterRepository;
 
-    public ObservationGroupService(ObservationGroupRepository repository,
-                                   ObservationGroupParameterRepository parameterRepository,
+    public ObservationGroupService(GroupRepository repository,
+                                   GroupParameterRepository parameterRepository,
                                    EntityManager em) {
         super(repository, em, GroupEntity.class);
         this.parameterRepository = parameterRepository;

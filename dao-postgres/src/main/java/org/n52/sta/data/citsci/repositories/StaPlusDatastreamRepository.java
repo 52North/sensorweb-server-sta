@@ -25,9 +25,10 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.citsci.repositories;
 
-import org.n52.series.db.beans.sta.StaPlusDataset;
+import org.n52.series.db.beans.sta.plus.StaPlusDataset;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.data.common.repositories.StaIdentifierRepository;
 import org.n52.sta.data.vanilla.repositories.AggregateRepository;

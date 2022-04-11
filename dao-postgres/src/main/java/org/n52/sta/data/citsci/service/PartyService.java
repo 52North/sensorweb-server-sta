@@ -28,7 +28,7 @@
 package org.n52.sta.data.citsci.service;
 
 import org.n52.janmayen.http.HTTPStatus;
-import org.n52.series.db.beans.sta.StaPlusDataset;
+import org.n52.series.db.beans.sta.plus.StaPlusDataset;
 import org.n52.series.db.beans.sta.plus.PartyEntity;
 import org.n52.series.db.beans.sta.plus.StaPlusAbstractDatasetEntity;
 import org.n52.series.db.beans.sta.plus.StaPlusDatasetEntity;
