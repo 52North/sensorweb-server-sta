@@ -30,6 +30,7 @@ package org.n52.sta;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Profile;
 
 /**
@@ -39,6 +40,7 @@ import org.springframework.context.annotation.Profile;
 @Configuration
 @ComponentScan(
     excludeFilters = {
+        @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*vanilla.service.ObservationService.*")
     },
     basePackages = {
         "org.n52.sta.http.vanilla",
