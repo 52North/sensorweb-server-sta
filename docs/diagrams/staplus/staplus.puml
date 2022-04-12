@@ -1,6 +1,6 @@
 'diagram from https://plantuml.com/creole
 @startuml sta_plus_v4.7
-title sta-plus (<b>v4.7</b>, February 2022)
+title sta-plus (<b>v4.7</b>, 12/04/22)
 
 right footer <img:https://cos4cloud-eosc.eu/wp-content/uploads/2020/07/logo-cos4cloud-middle.png{scale=0.25}>
 
@@ -79,17 +79,18 @@ class Project #00EEDD {
     +termsOfUse: String
     +pricacyPolicy: String
     +creationTime: TM_Instant
-    +runTime: TM_Period
+    +startTime: TM_Instant
+    +endTime: TM_Instant
     +url: URI
     +properties: JSON_Object
 }
 
 class Party #00EEDD {
-    +name: String
     +description: String
     +authId: String
     +role: PartyRoleCode
     +displayName: String
+    +personalData: JSON_Object
 }
 
 enum PartyRoleCode #00EEDD {
@@ -109,7 +110,7 @@ class Group #00EEDD {
     +name: String
     +description: String
     +purpose: ValueCode
-    +runTime: TM_Period
+    +endTime: TM_Period
     +creationTime: TM_Instant
     +properties: JSON_Object
 }
@@ -142,7 +143,7 @@ Datastream "0..n" -up- "0..1" License
 
 
 Group "0..n" -- "0..1" License
-Group "0..n" -- "0..n" Party
+Group "0..n" -- "0..1" Party
 Group "0..n" -- "0..n" Observation
 Group "0..n" -- "0..n" Relation
 
