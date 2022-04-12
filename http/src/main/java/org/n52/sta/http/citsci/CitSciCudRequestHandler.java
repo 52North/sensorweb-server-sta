@@ -28,7 +28,6 @@
 package org.n52.sta.http.citsci;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.n52.series.db.beans.HibernateRelations;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
@@ -58,7 +57,7 @@ import java.io.IOException;
 @RestController
 @ConditionalOnProperty(value = "server.feature.httpReadOnly", havingValue = "false", matchIfMissing = true)
 @Profile(StaConstants.STAPLUS)
-public class CitSciCudRequestHandler<T extends HibernateRelations.HasId>
+public class CitSciCudRequestHandler<T extends StaDTO>
     extends CudRequestHandler implements CitSciExtensionRequestUtils {
 
     public CitSciCudRequestHandler(@Value("${server.rootUrl}") String rootUrl,
