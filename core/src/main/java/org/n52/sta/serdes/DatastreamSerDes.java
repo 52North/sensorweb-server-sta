@@ -121,8 +121,12 @@ public class DatastreamSerDes {
 
             if (!value.hasSelectOption() ||
                 value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_OBSERVATION_TYPE)) {
-                gen.writeObjectField(STAEntityDefinition.PROP_OBSERVATION_TYPE,
-                                     datastream.getOMObservationType().getFormat());
+                if (datastream.isSetOMObservationType()) {
+                    gen.writeObjectField(STAEntityDefinition.PROP_OBSERVATION_TYPE,
+                                         datastream.getOMObservationType().getFormat());
+                } else {
+                    gen.writeNullField(STAEntityDefinition.PROP_OBSERVATION_TYPE);
+                }
             }
             if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_UOM)) {
                 gen.writeObjectFieldStart(STAEntityDefinition.PROP_UOM);

@@ -122,7 +122,11 @@ public class FeatureOfInterestSerDes {
             }
             if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_FEATURE)) {
                 gen.writeFieldName(STAEntityDefinition.PROP_FEATURE);
-                gen.writeRawValue(GEO_JSON_WRITER.write(feature.getGeometryEntity().getGeometry()));
+                if (feature.isSetGeometry()) {
+                    gen.writeRawValue(GEO_JSON_WRITER.write(feature.getGeometryEntity().getGeometry()));
+                } else {
+                    gen.writeNull();
+                }
             }
             if (!value.hasSelectOption() ||
                 value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PROPERTIES)) {
