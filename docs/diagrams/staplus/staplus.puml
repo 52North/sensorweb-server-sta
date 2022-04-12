@@ -149,6 +149,8 @@ Group "0..n" -- "0..n" Relation
 
 Observation "1" - "0..n" Relation: "subject       "
 Observation "1" - "0..n" Relation: "object        "
+Relation "0..n" -up- "0..1" Party
+
 note bottom of Relation
     count(object) = 0: requires to use externalObject to
     express relation to subject.
@@ -156,6 +158,4 @@ note bottom of Relation
     count(object) = 1: expresses a relation between two 
     observations using the role.
 end note
-
-
 @enduml
