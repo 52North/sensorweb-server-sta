@@ -28,9 +28,9 @@
 package org.n52.sta.api.dto.impl;
 
 import org.n52.shetland.ogc.gml.time.Time;
-import org.n52.sta.api.dto.vanilla.HistoricalLocationDTO;
-import org.n52.sta.api.dto.vanilla.LocationDTO;
-import org.n52.sta.api.dto.vanilla.ThingDTO;
+import org.n52.sta.api.dto.HistoricalLocationDTO;
+import org.n52.sta.api.dto.LocationDTO;
+import org.n52.sta.api.dto.ThingDTO;
 
 import java.util.Set;
 

@@ -29,8 +29,8 @@ package org.n52.sta.api.dto.impl;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.locationtech.jts.geom.Geometry;
-import org.n52.sta.api.dto.vanilla.FeatureOfInterestDTO;
-import org.n52.sta.api.dto.vanilla.ObservationDTO;
+import org.n52.sta.api.dto.FeatureOfInterestDTO;
+import org.n52.sta.api.dto.ObservationDTO;
 
 import java.util.Set;
 

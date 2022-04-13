@@ -19,7 +19,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 public class DataStreamController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataStreamController.class);
-    
+
     private final DataStreamService service;
     private final ObjectMapper objectMapper;
 

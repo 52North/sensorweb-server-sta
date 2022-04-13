@@ -31,6 +31,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
+@SuppressWarnings("checkstyle:UncommentedMain")
 public class App {
 
     static {
@@ -40,9 +41,6 @@ public class App {
         System.setProperty("org.apache.catalina.connector.CoyoteAdapter.ALLOW_BACKSLASH", TRUE);
     }
 
-    /**
-     * Application Start
-     */
     public static void main(String[] args) {
         SpringApplication.run(App.class, args);
     }

@@ -28,13 +28,14 @@
     <modules>
         <module>app</module>
         <module>api</module>
-        <module>dao</module>
         <module>http</module>
         <module>mqtt</module>
         <!--        <module>webapp</module>-->
-        <module>dao-ufz</module>
-        <module>dao-postgres</module>
+        <module>data-provider</module>
+        <module>data-provider-ufz</module>
+        <module>data-provider-hibernate</module>
         <module>slice-sample</module>
+        <!-- <module>sta-plus</module> -->
     </modules>
 
     <properties>
@@ -73,17 +74,17 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>sta-dao</artifactId>
+                <artifactId>sta-data-provider</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>sta-dao-postgres</artifactId>
+                <artifactId>sta-data-provider-hibernate</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>sta-dao-ufz</artifactId>
+                <artifactId>sta-data-provider-ufz</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

@@ -17,8 +17,8 @@ public class DataStreamService {
 
 
         Collections.addAll(list, new DataStreamAggregate());
-        
-        
+
+
         return list.stream().map(serializer::serialize);
     }
 }

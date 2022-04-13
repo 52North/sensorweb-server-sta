@@ -27,9 +27,9 @@
  */
 package org.n52.sta.api;
 
-import org.n52.sta.api.dto.StaDTO;
 
 import java.util.List;
+import org.n52.sta.api.dto.common.StaDTO;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>

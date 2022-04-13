@@ -11,5 +11,5 @@ public class JsonSerializer<T> implements Serializer<T, JsonNode> {
         // TODO Auto-generated method stub
         return null;
     }
-    
+
 }

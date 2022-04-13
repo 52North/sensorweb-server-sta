@@ -29,6 +29,7 @@ package org.n52.sta;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.std.StdKeySerializers;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -40,14 +41,15 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.util.UriUtils;
 import org.testcontainers.junit.jupiter.Container;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -265,7 +267,8 @@ abstract class ConformanceTests implements TestUtil {
     }
 
     protected JsonNode getEntity(EntityType type, String id, String queryOption) throws IOException {
-        String query = UriUtils.encode(queryOption, Charset.defaultCharset());
+        String query = URLEncoder.encode(queryOption, StandardCharsets.UTF_8.toString());
+        //String query = UriUtils.encode(queryOption, Charset.defaultCharset());
         return getEntity(type.getVal() + "(" + id + ")" + "?" + query);
     }
 
@@ -346,7 +349,8 @@ abstract class ConformanceTests implements TestUtil {
     }
 
     protected JsonNode getCollection(String url, String filters) throws IOException {
-        String query = UriUtils.encode(filters, Charset.defaultCharset());
+        String query = URLEncoder.encode(filters, StandardCharsets.UTF_8.toString());
+        //String query = UriUtils.encode(filters, Charset.defaultCharset());
         logger.debug("GET Collection: " + url + "?" + query);
         HttpGet request = new HttpGet(url + "?" + query);
         HttpResponse response = HttpClientBuilder.create().build().execute(request);

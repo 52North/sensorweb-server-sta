@@ -27,10 +27,9 @@
  */
 package org.n52.sta.api;
 
-import org.n52.sta.api.dto.StaDTO;
-
 import java.util.Map;
 import java.util.Set;
+import org.n52.sta.api.dto.common.StaDTO;
 
 /**
  * Interface to be implemented by Handlers responding to Entity Creation (e.g. Handler for MQTT Subscription).

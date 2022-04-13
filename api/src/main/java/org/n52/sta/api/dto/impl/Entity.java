@@ -29,12 +29,12 @@ package org.n52.sta.api.dto.impl;
 
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
-import org.n52.sta.api.dto.StaDTO;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.n52.sta.api.dto.common.StaDTO;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -48,19 +48,23 @@ public abstract class Entity implements StaDTO {
     private Set<String> fieldsToSerialize = new HashSet<>();
     private Map<String, QueryOptions> fieldsToExpand = new HashMap<>();
 
-    @Override public String getId() {
+    @Override
+    public String getId() {
         return this.id;
     }
 
-    @Override public void setId(String id) {
+    @Override
+    public void setId(String id) {
         this.id = id;
     }
 
-    @Override public QueryOptions getQueryOptions() {
+    @Override
+    public QueryOptions getQueryOptions() {
         return queryOptions;
     }
 
-    @Override public void setAndParseQueryOptions(QueryOptions queryOptions) {
+    @Override
+    public void setAndParseQueryOptions(QueryOptions queryOptions) {
         if (queryOptions != null) {
             if (queryOptions.hasSelectFilter()) {
                 hasSelectOption = true;
@@ -82,11 +86,13 @@ public abstract class Entity implements StaDTO {
         this.queryOptions = queryOptions;
     }
 
-    @Override public Set<String> getFieldsToSerialize() {
+    @Override
+    public Set<String> getFieldsToSerialize() {
         return fieldsToSerialize;
     }
 
-    @Override public Map<String, QueryOptions> getFieldsToExpand() {
+    @Override
+    public Map<String, QueryOptions> getFieldsToExpand() {
         return fieldsToExpand;
     }
 

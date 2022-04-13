@@ -29,14 +29,10 @@ package org.n52.sta.api.dto.impl;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.n52.shetland.ogc.gml.time.Time;
-import org.n52.sta.api.dto.plus.GroupDTO;
-import org.n52.sta.api.dto.plus.LicenseDTO;
-import org.n52.sta.api.dto.plus.RelationDTO;
-import org.n52.sta.api.dto.vanilla.DatastreamDTO;
-import org.n52.sta.api.dto.vanilla.FeatureOfInterestDTO;
-import org.n52.sta.api.dto.vanilla.ObservationDTO;
+import org.n52.sta.api.dto.DatastreamDTO;
+import org.n52.sta.api.dto.FeatureOfInterestDTO;
+import org.n52.sta.api.dto.ObservationDTO;
 
-import java.util.Set;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -62,13 +58,13 @@ public class Observation extends Entity implements ObservationDTO {
 
     private FeatureOfInterestDTO featureOfInterest;
 
-    private LicenseDTO license;
-
-    private Set<RelationDTO> subjects;
-
-    private Set<RelationDTO> objects;
-
-    private Set<GroupDTO> observationGroups;
+//    private LicenseDTO license;
+//
+//    private Set<RelationDTO> subjects;
+//
+//    private Set<RelationDTO> objects;
+//
+//    private Set<GroupDTO> observationGroups;
 
     public void setResultQuality(Object resultQuality) {
         this.resultQuality = resultQuality;
@@ -140,41 +136,41 @@ public class Observation extends Entity implements ObservationDTO {
         this.datastream = datastream;
     }
 
-    @Override
-    public Set<RelationDTO> getSubjects() {
-        return subjects;
-    }
-
-    public void setSubjects(Set<RelationDTO> subjects) {
-        this.subjects = subjects;
-    }
-
-    @Override
-    public Set<RelationDTO> getObjects() {
-        return objects;
-    }
-
-    public void setObjects(Set<RelationDTO> objects) {
-        this.objects = objects;
-    }
-
-    @Override
-    public Set<GroupDTO> getObservationGroups() {
-        return observationGroups;
-    }
-
-    @Override
-    public void setObservationGroups(Set<GroupDTO> observationGroups) {
-        this.observationGroups = observationGroups;
-    }
-
-    @Override
-    public LicenseDTO getLicense() {
-        return license;
-    }
-
-    @Override
-    public void setLicense(LicenseDTO license) {
-        this.license = license;
-    }
+//    @Override
+//    public Set<RelationDTO> getSubjects() {
+//        return subjects;
+//    }
+//
+//    public void setSubjects(Set<RelationDTO> subjects) {
+//        this.subjects = subjects;
+//    }
+//
+//    @Override
+//    public Set<RelationDTO> getObjects() {
+//        return objects;
+//    }
+//
+//    public void setObjects(Set<RelationDTO> objects) {
+//        this.objects = objects;
+//    }
+//
+//    @Override
+//    public Set<GroupDTO> getObservationGroups() {
+//        return observationGroups;
+//    }
+//
+//    @Override
+//    public void setObservationGroups(Set<GroupDTO> observationGroups) {
+//        this.observationGroups = observationGroups;
+//    }
+//
+//    @Override
+//    public LicenseDTO getLicense() {
+//        return license;
+//    }
+//
+//    @Override
+//    public void setLicense(LicenseDTO license) {
+//        this.license = license;
+//    }
 }

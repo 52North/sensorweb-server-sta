@@ -29,7 +29,7 @@ package org.n52.sta.api;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
-import org.n52.sta.api.dto.StaDTO;
+import org.n52.sta.api.dto.common.StaDTO;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>

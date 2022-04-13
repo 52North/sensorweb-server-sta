@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DataStreamHibernateProvider {
-    
+
     //private final PlatformRepository platformRepository;
 
     // public DataStreamHibernateProvider(PlatformRepository platformRepository) {

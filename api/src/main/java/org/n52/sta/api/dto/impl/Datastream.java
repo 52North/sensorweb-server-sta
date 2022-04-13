@@ -30,11 +30,11 @@ package org.n52.sta.api.dto.impl;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.locationtech.jts.geom.Geometry;
 import org.n52.shetland.ogc.gml.time.Time;
-import org.n52.sta.api.dto.vanilla.DatastreamDTO;
-import org.n52.sta.api.dto.vanilla.ObservationDTO;
-import org.n52.sta.api.dto.vanilla.ObservedPropertyDTO;
-import org.n52.sta.api.dto.vanilla.SensorDTO;
-import org.n52.sta.api.dto.vanilla.ThingDTO;
+import org.n52.sta.api.dto.DatastreamDTO;
+import org.n52.sta.api.dto.ObservationDTO;
+import org.n52.sta.api.dto.ObservedPropertyDTO;
+import org.n52.sta.api.dto.SensorDTO;
+import org.n52.sta.api.dto.ThingDTO;
 
 import java.util.Set;
 
