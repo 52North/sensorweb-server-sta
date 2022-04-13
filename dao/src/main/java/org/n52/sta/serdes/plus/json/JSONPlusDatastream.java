@@ -9,6 +9,7 @@ import org.n52.sta.serdes.vanilla.json.JSONSensor;
 import org.n52.sta.serdes.vanilla.json.JSONThing;
 import org.springframework.util.Assert;
 
+@SuppressWarnings("checkstyle:VisibilityModifier")
 public class JSONPlusDatastream extends JSONDatastream {
 
     @JsonManagedReference
