@@ -119,8 +119,8 @@ public class CitSciObservationService extends ObservationService {
                 .getEntityServiceRaw(CitSciEntityServiceRepository.StaPlusEntityTypes.License.name());
     }
 
-    private ObservationRelationService getObservationRelationService() {
-        return (ObservationRelationService) serviceRepository
-                .getEntityServiceRaw(CitSciEntityServiceRepository.StaPlusEntityTypes.ObservationRelation.name());
+    private RelationService getObservationRelationService() {
+        return (RelationService) serviceRepository
+                .getEntityServiceRaw(CitSciEntityServiceRepository.StaPlusEntityTypes.Relation.name());
     }
 }
