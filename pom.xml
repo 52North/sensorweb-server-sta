@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.n52</groupId>
@@ -27,12 +27,14 @@
 
     <modules>
         <module>app</module>
+        <module>api</module>
         <module>dao</module>
         <module>http</module>
         <module>mqtt</module>
         <!--        <module>webapp</module>-->
         <module>dao-ufz</module>
         <module>dao-postgres</module>
+        <module>slice-sample</module>
     </modules>
 
     <properties>
@@ -43,6 +45,9 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <db-model.version>4.0.2-STA-SNAPSHOT</db-model.version>
         <arctic-sea.version>8.1.0-SNAPSHOT</arctic-sea.version>
+        <slf4j.version>1.7.30</slf4j.version>
+        <spotbugs.version>4.1.2</spotbugs.version>
+        <findbugs.version>3.0.2</findbugs.version>
         <spring-boot.version>2.3.5.RELEASE</spring-boot.version>
         <geolatte-geom.version>1.6.0</geolatte-geom.version>
         <hibernate.version>5.4.12.Final</hibernate.version>
@@ -50,16 +55,22 @@
         <hamcrest.version>2.2</hamcrest.version>
         <locationtech-jts.version>1.16.1</locationtech-jts.version>
         <h2database.version>1.4.200</h2database.version>
+        <mockito.version>4.4.0</mockito.version>
         <testcontainers.jupiter.version>1.16.3</testcontainers.jupiter.version>
         <testcontainers.postgres.version>1.16.3</testcontainers.postgres.version>
         <spotbugs.version>4.1.4</spotbugs.version>
         <paho.version>1.2.5</paho.version>
-        <antlr-runtime.version>4.9.2</antlr-runtime.version>
+        <antlr-runtime.version>4.8-1</antlr-runtime.version>
         <joda.version>2.10.8</joda.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>sta-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>sta-dao</artifactId>
@@ -100,6 +111,7 @@
                 <artifactId>sta-webapp</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            
             <dependency>
                 <!-- Import dependency management from Spring Boot -->
                 <groupId>org.springframework.boot</groupId>
@@ -107,12 +119,6 @@
                 <version>${spring-boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>javax</groupId>
-                <artifactId>javaee-api</artifactId>
-                <version>8.0.1</version>
-                <scope>provided</scope>
             </dependency>
 
             <dependency>
@@ -132,9 +138,29 @@
             </dependency>
 
             <dependency>
-                <groupId>com.h2database</groupId>
-                <artifactId>h2-mvstore</artifactId>
-                <version>${h2database.version}</version>
+                <groupId>org.n52.arctic-sea</groupId>
+                <artifactId>janmayen</artifactId>
+                <version>${arctic-sea.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.n52.arctic-sea</groupId>
+                <artifactId>shetland</artifactId>
+                <version>${arctic-sea.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.locationtech.jts</groupId>
+                        <artifactId>jts-core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.checkerframework</groupId>
+                        <artifactId>checker-qual</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.n52.arctic-sea</groupId>
+                <artifactId>svalbard-odata</artifactId>
+                <version>${arctic-sea.version}</version>
             </dependency>
 
             <dependency>
@@ -148,6 +174,11 @@
                 <version>${jackson.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>joda-time</groupId>
+                <artifactId>joda-time</artifactId>
+                <version>${joda.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.geolatte</groupId>
                 <artifactId>geolatte-geom</artifactId>
@@ -188,10 +219,29 @@
             </dependency>
 
             <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2-mvstore</artifactId>
+                <version>${h2database.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
-                <version>1.7.30</version>
+                <version>${slf4j.version}</version>
             </dependency>
+            
+            
+            <dependency>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-annotations</artifactId>
+                <version>${spotbugs.version}</version>
+            </dependency>
+<!--            <dependency>
+                <groupId>com.google.code.findbugs</groupId>
+                <artifactId>jsr305</artifactId>
+                <version>${findbugs.version}</version>
+            </dependency>-->
+            
             <dependency>
                 <groupId>org.hamcrest</groupId>
                 <artifactId>hamcrest-core</artifactId>
@@ -217,47 +267,18 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.eclipse.paho</groupId>
                 <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
                 <version>${paho.version}</version>
                 <scope>test</scope>
             </dependency>
-            <dependency>
-                <groupId>com.github.spotbugs</groupId>
-                <artifactId>spotbugs-annotations</artifactId>
-                <version>${spotbugs.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>joda-time</groupId>
-                <artifactId>joda-time</artifactId>
-                <version>${joda.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.n52.arctic-sea</groupId>
-                <artifactId>janmayen</artifactId>
-                <version>${arctic-sea.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.n52.arctic-sea</groupId>
-                <artifactId>shetland</artifactId>
-                <version>${arctic-sea.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.locationtech.jts</groupId>
-                        <artifactId>jts-core</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.checkerframework</groupId>
-                        <artifactId>checker-qual</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.n52.arctic-sea</groupId>
-                <artifactId>svalbard-odata</artifactId>
-                <version>${arctic-sea.version}</version>
-            </dependency>
+            
         </dependencies>
     </dependencyManagement>
 

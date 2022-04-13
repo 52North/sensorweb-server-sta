@@ -1,28 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>sta-parent</artifactId>
         <groupId>org.n52.sensorweb-server.sta</groupId>
         <version>4.0.0-SNAPSHOT</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
-
     <artifactId>sta-dao</artifactId>
-    <description>API to access STA Persistence Layer</description>
+    <description>STA Persistence Layer</description>
 
     <dependencies>
         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>sta-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.n52.arctic-sea</groupId>
             <artifactId>shetland</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.n52.arctic-sea</groupId>
+            <artifactId>svalbard-odata</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-autoconfigure</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-beans</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -34,7 +37,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
+            <artifactId>spring-beans</artifactId>
         </dependency>
 
         <dependency>
@@ -63,10 +66,6 @@
             <groupId>com.github.spotbugs</groupId>
             <artifactId>spotbugs-annotations</artifactId>
             <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.n52.arctic-sea</groupId>
-            <artifactId>svalbard-odata</artifactId>
         </dependency>
     </dependencies>
 

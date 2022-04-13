@@ -68,7 +68,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpMethod;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
@@ -217,7 +216,7 @@ public abstract class CommonSTAServiceImpl<T extends StaIdentifierRepository<S>,
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public R update(String id, S entity, HttpMethod method) throws STACRUDException {
+    public R update(String id, S entity, String method) throws STACRUDException {
         return this.createWrapper(updateEntity(id, entity, method), null);
     }
 
@@ -396,7 +395,7 @@ public abstract class CommonSTAServiceImpl<T extends StaIdentifierRepository<S>,
     protected abstract S createOrfetch(S entity) throws STACRUDException;
 
     @Transactional(rollbackFor = Exception.class)
-    protected abstract S updateEntity(String id, S entity, HttpMethod method) throws STACRUDException;
+    protected abstract S updateEntity(String id, S entity, String method) throws STACRUDException;
 
     @Transactional(rollbackFor = Exception.class)
     public S save(S entity) {

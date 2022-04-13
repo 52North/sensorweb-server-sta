@@ -141,7 +141,7 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
             serviceRepository.getEntityService(collectionName)).update(strippedId,
                                                                        (T) ((mapper.readValue(jsonBody.toString(),
                                                                                               clazz))).getEntity(),
-                                                                       HttpMethod.PATCH);
+                                                                       HttpMethod.PATCH.toString());
     }
 
     /**
@@ -181,7 +181,7 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
         // Do update
         return entityService.update(entityId,
                                     (T) ((mapper.readValue(jsonBody.toString(), clazz))).getEntity(),
-                                    HttpMethod.PATCH);
+                                    HttpMethod.PATCH.toString());
     }
 
     /**

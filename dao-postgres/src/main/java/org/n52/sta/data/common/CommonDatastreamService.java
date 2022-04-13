@@ -67,7 +67,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpMethod;
 
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.Predicate;
@@ -87,6 +86,7 @@ public abstract class CommonDatastreamService
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommonDatastreamService.class);
     private static final String UNKNOWN = "unknown";
+    private static final String PATCH = "PATCH";
 
     protected final UnitRepository unitRepository;
     protected final ObservationRepository observationRepository;
@@ -311,10 +311,9 @@ public abstract class CommonDatastreamService
     }
 
     @Override
-    public S updateEntity(String id, S entity, HttpMethod method)
-        throws STACRUDException {
+    public S updateEntity(String id, S entity, String method) throws STACRUDException {
         checkUpdate(entity);
-        if (HttpMethod.PATCH.equals(method)) {
+        if (PATCH.equals(method)) {
             synchronized (getLock(id)) {
                 Optional<S> existing =
                     getRepository().findOne(dQS.withStaIdentifier(id),
@@ -329,7 +328,7 @@ public abstract class CommonDatastreamService
                 }
                 throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }
-        } else if (HttpMethod.PUT.equals(method)) {
+        } else if ("PUT".equals(method)) {
             throw new STACRUDException(HTTP_PUT_IS_NOT_YET_SUPPORTED, HTTPStatus.NOT_IMPLEMENTED);
         }
         throw new STACRUDException(INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY, HTTPStatus.BAD_REQUEST);
@@ -337,7 +336,7 @@ public abstract class CommonDatastreamService
 
     @Override public S createOrUpdate(S entity) throws STACRUDException {
         if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
-            return updateEntity(entity.getStaIdentifier(), entity, HttpMethod.PATCH);
+            return updateEntity(entity.getStaIdentifier(), entity, PATCH);
         }
         return createOrfetch(entity);
     }

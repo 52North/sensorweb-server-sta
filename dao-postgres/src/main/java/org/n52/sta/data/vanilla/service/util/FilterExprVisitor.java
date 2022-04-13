@@ -51,6 +51,7 @@ import org.n52.svalbard.odata.core.expr.bool.ComparisonExpr;
 import org.n52.svalbard.odata.core.expr.temporal.TimeValueExpr;
 import org.springframework.data.jpa.domain.Specification;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
@@ -73,12 +74,12 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
     private static final String DOLLAR = "%";
     private static final String SLASH = "/";
 
-    private HibernateSpatialCriteriaBuilderImpl builder;
+    private CriteriaBuilder builder;
     private EntityQuerySpecifications<T> rootQS;
     private Root root;
     private CriteriaQuery query;
 
-    public FilterExprVisitor(Root root, CriteriaQuery query, HibernateSpatialCriteriaBuilderImpl builder)
+    public FilterExprVisitor(Root root, CriteriaQuery query, CriteriaBuilder builder)
         throws STAInvalidFilterExpressionException {
         this.builder = builder;
         this.query = query;
@@ -462,7 +463,7 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
                         expr.getParameters().get(0).asGeometry().get(),
                         expr.getName(),
                         null,
-                        builder,
+                        (HibernateSpatialCriteriaBuilder) builder,
                         root);
                 } else {
                     throw new STAInvalidQueryException(ERROR_NOT_SPATIAL);
@@ -553,7 +554,7 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
                         expr.getParameters().get(0).asGeometry().get(),
                         expr.getName(),
                         expr.getParameters().get(1).asGeometry().get().getGeometry(),
-                        builder,
+                        (HibernateSpatialCriteriaBuilder) builder,
                         root);
                 } else {
                     throw new STAInvalidQueryException(ERROR_NOT_SPATIAL);

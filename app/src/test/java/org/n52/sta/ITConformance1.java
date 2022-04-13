@@ -61,8 +61,8 @@ import java.util.Set;
  * @see <a href="http://docs.opengeospatial.org/is/15-078r6/15-078r6.html#54">
  * OGC SensorThings API Part 1: Sensing (15-078r6)</a>
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Testcontainers
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ITConformance1 extends ConformanceTests implements TestUtil {
 

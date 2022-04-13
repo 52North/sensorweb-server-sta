@@ -47,7 +47,6 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,7 +63,7 @@ import java.util.stream.Collectors;
 @Transactional
 @Profile(StaConstants.STAPLUS)
 public class PartyService
-    extends CitSciSTAServiceImpl<PartyRepository, PartyDTO, PartyEntity> {
+        extends CitSciSTAServiceImpl<PartyRepository, PartyDTO, PartyEntity> {
 
     private static final PartyQuerySpecifications pQS = new PartyQuerySpecifications();
 
@@ -72,8 +71,9 @@ public class PartyService
         super(repository, em, PartyEntity.class);
     }
 
-    @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
-        throws STAInvalidQueryException {
+    @Override
+    protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
+            throws STAInvalidQueryException {
         if (expandOption != null) {
             for (ExpandItem expandItem : expandOption.getItems()) {
                 // We cannot handle nested $filter or $expand
@@ -82,48 +82,49 @@ public class PartyService
                 }
                 String expandProperty = expandItem.getPath();
                 if (PartyEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
-                    return new EntityGraphRepository.FetchGraph[]
-                        {EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS};
+                    return new EntityGraphRepository.FetchGraph[]{EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS};
                 } else {
                     throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                                                                     expandProperty,
-                                                                     StaConstants.PARTY));
+                            expandProperty,
+                            StaConstants.PARTY));
                 }
             }
         }
         return new EntityGraphRepository.FetchGraph[0];
     }
 
-    @Override protected PartyEntity fetchExpandEntitiesWithFilter(PartyEntity entity, ExpandFilter expandOption)
-        throws STACRUDException, STAInvalidQueryException {
+    @Override
+    protected PartyEntity fetchExpandEntitiesWithFilter(PartyEntity entity, ExpandFilter expandOption)
+            throws STACRUDException, STAInvalidQueryException {
         if (expandOption != null) {
             for (ExpandItem expandItem : expandOption.getItems()) {
                 // We have already handled $expand without filter and expand
-                if (!(expandItem.getQueryOptions().hasFilterFilter() ||
-                    expandItem.getQueryOptions().hasExpandFilter())) {
+                if (!(expandItem.getQueryOptions().hasFilterFilter()
+                        || expandItem.getQueryOptions().hasExpandFilter())) {
                     continue;
                 }
                 String expandProperty = expandItem.getPath();
                 if (PartyEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
                     Page<StaPlusDatasetEntity> datastreams = getDatastreamService()
-                        .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
-                                                               STAEntityDefinition.PARTIES,
-                                                               expandItem.getQueryOptions());
+                            .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
+                                    STAEntityDefinition.PARTIES,
+                                    expandItem.getQueryOptions());
                     entity.setDatastreams(datastreams.get().collect(Collectors.toSet()));
                     break;
                 } else {
                     throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                                                                     expandProperty,
-                                                                     StaConstants.PARTY));
+                            expandProperty,
+                            StaConstants.PARTY));
                 }
             }
         }
         return entity;
     }
 
-    @Override protected Specification<PartyEntity> byRelatedEntityFilter(String relatedId,
-                                                                         String relatedType,
-                                                                         String ownId) {
+    @Override
+    protected Specification<PartyEntity> byRelatedEntityFilter(String relatedId,
+            String relatedType,
+            String ownId) {
         Specification<PartyEntity> filter;
         switch (relatedType) {
             case STAEntityDefinition.DATASTREAMS:
@@ -139,18 +140,19 @@ public class PartyService
         return filter;
     }
 
-    @Override public PartyEntity createOrfetch(PartyEntity entity) throws STACRUDException {
+    @Override
+    public PartyEntity createOrfetch(PartyEntity entity) throws STACRUDException {
         PartyEntity party = entity;
         //if (!party.isProcessed()) {
         if (party.getStaIdentifier() != null && party.getRole() == null) {
-            Optional<PartyEntity> optionalEntity =
-                getRepository().findByStaIdentifier(party.getStaIdentifier());
+            Optional<PartyEntity> optionalEntity
+                    = getRepository().findByStaIdentifier(party.getStaIdentifier());
             if (optionalEntity.isPresent()) {
                 return optionalEntity.get();
             } else {
                 throw new STACRUDException(String.format(NO_S_WITH_ID_S_FOUND,
-                                                         StaConstants.PARTY,
-                                                         party.getStaIdentifier()));
+                        StaConstants.PARTY,
+                        party.getStaIdentifier()));
             }
         } else if (party.getStaIdentifier() == null) {
             // Autogenerate Identifier
@@ -173,10 +175,21 @@ public class PartyService
         return party;
     }
 
-    @Override protected PartyEntity updateEntity(String id, PartyEntity entity, HttpMethod method)
-        throws STACRUDException {
-        if (HttpMethod.PATCH.equals(method)) {
-            synchronized (getLock(id)) {
+    @Override
+    protected PartyEntity updateEntity(String id, PartyEntity entity, String method)
+            throws STACRUDException {
+        if ("PATCH".equals(method)) {
+            return updateEntity(id, entity);
+        } else if ("PUT".equals(method)) {
+            throw new STACRUDException(HTTP_PUT_IS_NOT_YET_SUPPORTED, HTTPStatus.NOT_IMPLEMENTED);
+        } else {
+            throw new STACRUDException(INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY, HTTPStatus.BAD_REQUEST);
+        }
+    }
+
+    private PartyEntity updateEntity(String id, PartyEntity entity)
+            throws STACRUDException {
+        synchronized (getLock(id)) {
                 Optional<PartyEntity> existing = getRepository().findByStaIdentifier(id);
                 if (existing.isPresent()) {
                     PartyEntity merged = merge(existing.get(), entity);
@@ -184,25 +197,24 @@ public class PartyService
                 }
                 throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }
-        } else if (HttpMethod.PUT.equals(method)) {
-            throw new STACRUDException(HTTP_PUT_IS_NOT_YET_SUPPORTED, HTTPStatus.NOT_IMPLEMENTED);
-        }
-        throw new STACRUDException(INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY, HTTPStatus.BAD_REQUEST);
     }
 
-    @Override public PartyEntity createOrUpdate(PartyEntity entity) throws STACRUDException {
+    @Override
+    public PartyEntity createOrUpdate(PartyEntity entity) throws STACRUDException {
         if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
-            return updateEntity(entity.getStaIdentifier(), entity, HttpMethod.PATCH);
+            return updateEntity(entity.getStaIdentifier(), entity);
         }
         return createOrfetch(entity);
     }
 
-    @Override public String checkPropertyName(String property) {
+    @Override
+    public String checkPropertyName(String property) {
         return property;
     }
 
-    @Override protected PartyEntity merge(PartyEntity existing, PartyEntity toMerge)
-        throws STACRUDException {
+    @Override
+    protected PartyEntity merge(PartyEntity existing, PartyEntity toMerge)
+            throws STACRUDException {
 
         if (toMerge.getStaIdentifier() != null) {
             existing.setStaIdentifier(toMerge.getStaIdentifier());
@@ -217,7 +229,8 @@ public class PartyService
         return existing;
     }
 
-    @Override public void delete(String id) throws STACRUDException {
+    @Override
+    public void delete(String id) throws STACRUDException {
         synchronized (getLock(id)) {
             if (getRepository().existsByStaIdentifier(id)) {
                 PartyEntity party = getRepository().findByStaIdentifier(id).get();

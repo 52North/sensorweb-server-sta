@@ -65,7 +65,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -177,7 +176,7 @@ public class UfzAggregataObservationService extends ObservationService {
     }
 
     @Override
-    public DataEntity<?> updateEntity(String id, DataEntity<?> entity, HttpMethod method)
+    public DataEntity<?> updateEntity(String id, DataEntity<?> entity, String method)
         throws STACRUDException {
         throw new STACRUDException(NOT_YET_IMPLEMENTED);
     }

@@ -4,9 +4,9 @@ trace: false
 
 # General Server Configuration
 server:
-  port: 8081
+  port: 9999
   ## Used for response serialization + url parsing. Must be set correctly!
-  rootUrl: "http://localhost:8081/v1.1/"
+  rootUrl: "http://localhost:${server.port}${server.servlet.context-path}/"
   servlet:
     context-path: "/v1.1"
 
@@ -140,8 +140,10 @@ mqtt:
 # Logging
 logging:
   level:
-    root: ERROR
+    root: WARN
     org:
+      n52:
+        sta: DEBUG
       testcontainers: INFO
     com:
       github:

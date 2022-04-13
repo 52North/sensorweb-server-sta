@@ -39,12 +39,11 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableAsync
 @SuppressWarnings("uncommentedmain")
 @ComponentScan(excludeFilters = {
-    @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*vanilla.*"),
-    @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*citsci.*"),
-    @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*ufzaggregata.*"),
-    @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*common.*")
-}
-)
+        @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*vanilla.*"),
+        @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*citsci.*"),
+        @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*ufzaggregata.*"),
+        @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*common.*")
+})
 public class Application {
 
     static {

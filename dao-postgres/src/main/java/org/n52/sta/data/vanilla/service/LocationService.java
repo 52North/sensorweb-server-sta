@@ -58,7 +58,6 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -236,31 +235,37 @@ public class LocationService
     }
 
     @Override
-    public LocationEntity updateEntity(String id, LocationEntity entity, HttpMethod method) throws STACRUDException {
-        if (HttpMethod.PATCH.equals(method)) {
-            synchronized (getLock(id)) {
-                Optional<LocationEntity> existing = getRepository()
-                    .findByStaIdentifier(id,
-                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATIONS,
-                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_PLATFORMS);
-                if (existing.isPresent()) {
-                    LocationEntity merged = merge(existing.get(), entity);
-                    LocationEntity result = getRepository().save(merged);
-                    Hibernate.initialize(result.getParameters());
-                    return result;
-                }
-                throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
-            }
-        } else if (HttpMethod.PUT.equals(method)) {
+    public LocationEntity updateEntity(String id, LocationEntity entity, String method) throws STACRUDException {
+        if ("PATCH".equals(method)) {
+            return updateEntity(id, entity);
+        } else if ("PUT".equals(method)) {
             throw new STACRUDException(HTTP_PUT_IS_NOT_YET_SUPPORTED, HTTPStatus.NOT_IMPLEMENTED);
+        } else {
+            throw new STACRUDException(INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY, HTTPStatus.BAD_REQUEST);
         }
-        throw new STACRUDException(INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY, HTTPStatus.BAD_REQUEST);
+
+    }
+
+    private LocationEntity updateEntity(String id, LocationEntity entity) throws STACRUDException {
+        synchronized (getLock(id)) {
+            Optional<LocationEntity> existing = getRepository()
+                .findByStaIdentifier(id,
+                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATIONS,
+                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_PLATFORMS);
+            if (existing.isPresent()) {
+                LocationEntity merged = merge(existing.get(), entity);
+                LocationEntity result = getRepository().save(merged);
+                Hibernate.initialize(result.getParameters());
+                return result;
+            }
+            throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
+        }
     }
 
     @Override
     public LocationEntity createOrUpdate(LocationEntity entity) throws STACRUDException {
         if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
-            return updateEntity(entity.getStaIdentifier(), entity, HttpMethod.PATCH);
+            return updateEntity(entity.getStaIdentifier(), entity);
         }
         return createOrfetch(entity);
     }

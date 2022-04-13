@@ -60,26 +60,26 @@ import org.n52.sta.data.vanilla.service.ObservationService;
 import org.n52.sta.data.vanilla.service.ObservedPropertyService;
 import org.n52.sta.data.vanilla.service.SensorService;
 import org.n52.sta.data.vanilla.service.ThingService;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
 /**
- * Facade proxying actual Service implementations. Used to restrict the number of parallel threads accessing the Data
- * Persistence Layer. This is necessary as each Thread uses a seperate Database Transaction and therefore needs a
+ * Facade proxying actual Service implementations. Used to restrict the number
+ * of parallel threads accessing the Data Persistence Layer. This is necessary
+ * as each Thread uses a seperate Database Transaction and therefore needs a
  * dedicated DatabaseConnection.
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 public abstract class CommonServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
-    implements AbstractSensorThingsEntityService<R> {
+        implements AbstractSensorThingsEntityService<R> {
 
     protected final DaoSemaphore semaphore;
     protected final SerDesConfig config;
     protected final CommonSTAServiceImpl<?, R, S> serviceImpl;
 
     public CommonServiceFacade(CommonSTAServiceImpl<?, R, S> serviceImpl,
-                               DaoSemaphore semaphore,
-                               SerDesConfig config) {
+            DaoSemaphore semaphore,
+            SerDesConfig config) {
         this.serviceImpl = serviceImpl;
         this.semaphore = semaphore;
         this.config = config;
@@ -89,7 +89,8 @@ public abstract class CommonServiceFacade<R extends StaDTO, S extends HibernateR
         return serviceImpl;
     }
 
-    @Override public boolean existsEntity(String id) throws STACRUDException {
+    @Override
+    public boolean existsEntity(String id) throws STACRUDException {
         boolean result;
         try {
             semaphore.acquire();
@@ -102,7 +103,8 @@ public abstract class CommonServiceFacade<R extends StaDTO, S extends HibernateR
         return result;
     }
 
-    @Override public R getEntity(String id, QueryOptions queryOptions) throws STACRUDException {
+    @Override
+    public R getEntity(String id, QueryOptions queryOptions) throws STACRUDException {
         R result;
         try {
             semaphore.acquire();
@@ -115,7 +117,8 @@ public abstract class CommonServiceFacade<R extends StaDTO, S extends HibernateR
         return result;
     }
 
-    @Override public CollectionWrapper getEntityCollection(QueryOptions queryOptions) throws STACRUDException {
+    @Override
+    public CollectionWrapper getEntityCollection(QueryOptions queryOptions) throws STACRUDException {
         CollectionWrapper result;
         try {
             semaphore.acquire();
@@ -128,11 +131,12 @@ public abstract class CommonServiceFacade<R extends StaDTO, S extends HibernateR
         return result;
     }
 
-    @Override public R getEntityByRelatedEntity(String relatedId,
-                                                String relatedType,
-                                                String ownId,
-                                                QueryOptions queryOptions)
-        throws STACRUDException {
+    @Override
+    public R getEntityByRelatedEntity(String relatedId,
+            String relatedType,
+            String ownId,
+            QueryOptions queryOptions)
+            throws STACRUDException {
         R result;
         try {
             semaphore.acquire();
@@ -145,10 +149,11 @@ public abstract class CommonServiceFacade<R extends StaDTO, S extends HibernateR
         return result;
     }
 
-    @Override public CollectionWrapper getEntityCollectionByRelatedEntity(String relatedId,
-                                                                          String relatedType,
-                                                                          QueryOptions queryOptions)
-        throws STACRUDException {
+    @Override
+    public CollectionWrapper getEntityCollectionByRelatedEntity(String relatedId,
+            String relatedType,
+            QueryOptions queryOptions)
+            throws STACRUDException {
         CollectionWrapper result;
         try {
             semaphore.acquire();
@@ -161,7 +166,8 @@ public abstract class CommonServiceFacade<R extends StaDTO, S extends HibernateR
         return result;
     }
 
-    @Override public String getEntityIdByRelatedEntity(String relatedId, String relatedType) throws STACRUDException {
+    @Override
+    public String getEntityIdByRelatedEntity(String relatedId, String relatedType) throws STACRUDException {
         String result;
         try {
             semaphore.acquire();
@@ -174,8 +180,9 @@ public abstract class CommonServiceFacade<R extends StaDTO, S extends HibernateR
         return result;
     }
 
-    @Override public boolean existsEntityByRelatedEntity(String relatedId, String relatedType, String ownId)
-        throws STACRUDException {
+    @Override
+    public boolean existsEntityByRelatedEntity(String relatedId, String relatedType, String ownId)
+            throws STACRUDException {
         boolean result;
         try {
             semaphore.acquire();
@@ -188,7 +195,8 @@ public abstract class CommonServiceFacade<R extends StaDTO, S extends HibernateR
         return result;
     }
 
-    @Override public R create(R entity) throws STACRUDException {
+    @Override
+    public R create(R entity) throws STACRUDException {
         R result;
         try {
             semaphore.acquire();
@@ -201,7 +209,8 @@ public abstract class CommonServiceFacade<R extends StaDTO, S extends HibernateR
         return result;
     }
 
-    @Override public R update(String id, R entity, HttpMethod method) throws STACRUDException {
+    @Override
+    public R update(String id, R entity, String method) throws STACRUDException {
         R result;
         try {
             semaphore.acquire();
@@ -214,7 +223,8 @@ public abstract class CommonServiceFacade<R extends StaDTO, S extends HibernateR
         return result;
     }
 
-    @Override public void delete(String id) throws STACRUDException {
+    @Override
+    public void delete(String id) throws STACRUDException {
         try {
             semaphore.acquire();
             serviceImpl.delete(id);
@@ -229,89 +239,82 @@ public abstract class CommonServiceFacade<R extends StaDTO, S extends HibernateR
     public static class ThingServiceFacade extends CommonServiceFacade<ThingDTO, PlatformEntity> {
 
         ThingServiceFacade(ThingService serviceImpl,
-                           DaoSemaphore semaphore,
-                           SerDesConfig config) {
+                DaoSemaphore semaphore,
+                SerDesConfig config) {
             super(serviceImpl, semaphore, config);
         }
     }
-
 
     @Component
     public static class LocationServiceFacade extends CommonServiceFacade<LocationDTO, LocationEntity> {
 
         LocationServiceFacade(LocationService serviceImpl,
-                              DaoSemaphore semaphore,
-                              SerDesConfig config) {
+                DaoSemaphore semaphore,
+                SerDesConfig config) {
             super(serviceImpl, semaphore, config);
         }
     }
-
 
     @Component
     public static class HistoricalLocationServiceFacade
-        extends CommonServiceFacade<HistoricalLocationDTO, HistoricalLocationEntity> {
+            extends CommonServiceFacade<HistoricalLocationDTO, HistoricalLocationEntity> {
 
         HistoricalLocationServiceFacade(HistoricalLocationService serviceImpl,
-                                        DaoSemaphore semaphore,
-                                        SerDesConfig config) {
+                DaoSemaphore semaphore,
+                SerDesConfig config) {
             super(serviceImpl, semaphore, config);
         }
     }
-
 
     @Component
     public static class SensorServiceFacade extends CommonServiceFacade<SensorDTO, ProcedureEntity> {
 
         SensorServiceFacade(SensorService serviceImpl,
-                            DaoSemaphore semaphore,
-                            SerDesConfig config) {
+                DaoSemaphore semaphore,
+                SerDesConfig config) {
             super(serviceImpl, semaphore, config);
         }
     }
-
 
     @Component
     public static class ObservedPropertyServiceFacade
-        extends CommonServiceFacade<ObservedPropertyDTO, PhenomenonEntity> {
+            extends CommonServiceFacade<ObservedPropertyDTO, PhenomenonEntity> {
 
         ObservedPropertyServiceFacade(ObservedPropertyService serviceImpl,
-                                      DaoSemaphore semaphore,
-                                      SerDesConfig config) {
+                DaoSemaphore semaphore,
+                SerDesConfig config) {
             super(serviceImpl, semaphore, config);
         }
     }
-
 
     @Component
     public static class ObservationServiceFacade
-        extends CommonServiceFacade<ObservationDTO, DataEntity<?>> {
+            extends CommonServiceFacade<ObservationDTO, DataEntity<?>> {
 
         ObservationServiceFacade(ObservationService serviceImpl,
-                                 DaoSemaphore semaphore,
-                                 SerDesConfig config) {
+                DaoSemaphore semaphore,
+                SerDesConfig config) {
             super(serviceImpl, semaphore, config);
         }
     }
-
 
     @Component
     public static class DatastreamServiceFacade extends CommonServiceFacade<DatastreamDTO, AbstractDatasetEntity> {
 
         DatastreamServiceFacade(DatastreamService serviceImpl,
-                                DaoSemaphore semaphore,
-                                SerDesConfig config) {
+                DaoSemaphore semaphore,
+                SerDesConfig config) {
             super(serviceImpl, semaphore, config);
         }
     }
 
-
     @Component
     public static class FeatureOfInterestServiceFacade
-        extends CommonServiceFacade<FeatureOfInterestDTO, AbstractFeatureEntity<?>> {
+            extends CommonServiceFacade<FeatureOfInterestDTO, AbstractFeatureEntity<?>> {
 
         FeatureOfInterestServiceFacade(FeatureOfInterestService serviceImpl,
-                                       DaoSemaphore semaphore,
-                                       SerDesConfig config) {
+                DaoSemaphore semaphore,
+                SerDesConfig config) {
             super(serviceImpl, semaphore, config);
         }
     }

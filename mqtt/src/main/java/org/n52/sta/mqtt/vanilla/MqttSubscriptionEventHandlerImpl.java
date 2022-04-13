@@ -98,8 +98,8 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
         this.mapper = mapper;
     }
 
-    @Override
     @Async
+    @Override
     public void handleEvent(StaDTO rawObject,
                             String entityType,
                             Set<String> differenceMap,

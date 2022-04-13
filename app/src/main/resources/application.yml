@@ -7,7 +7,7 @@ server:
   port: 8080
 
   ## Used for response serialization + url parsing. Must be set correctly!
-  rootUrl: "http://localhost:${server.port}/v1.1/"
+  rootUrl: "http://localhost:${server.port}${server.servlet.context-path}/"
   servlet:
     context-path: "/v1.1"
     encoding:
@@ -94,7 +94,8 @@ spring:
     platform: postgres
     username: postgres
     password: postgres
-    url: jdbc:postgresql://localhost:5000/sta
+    #url: jdbc:postgresql://localhost:5000/sta
+    url: 
     initialization-mode: always
     hikari:
       maximum-pool-size: 10

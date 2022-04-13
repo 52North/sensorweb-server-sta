@@ -47,7 +47,6 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -176,27 +175,33 @@ public class ProjectService
     }
 
     @Override
-    protected ProjectEntity updateEntity(String id, ProjectEntity entity, HttpMethod method)
+    protected ProjectEntity updateEntity(String id, ProjectEntity entity, String method)
         throws STACRUDException {
-        if (HttpMethod.PATCH.equals(method)) {
-            synchronized (getLock(id)) {
-                Optional<ProjectEntity> existing = getRepository().findByStaIdentifier(id);
-                if (existing.isPresent()) {
-                    ProjectEntity merged = merge(existing.get(), entity);
-                    return getRepository().save(merged);
-                }
-                throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
-            }
-        } else if (HttpMethod.PUT.equals(method)) {
+        if ("PATCH".equals(method)) {
+            return updateEntity(id, entity);
+        } else if ("PUT".equals(method)) {
             throw new STACRUDException(HTTP_PUT_IS_NOT_YET_SUPPORTED, HTTPStatus.NOT_IMPLEMENTED);
+        } else {
+            throw new STACRUDException(INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY, HTTPStatus.BAD_REQUEST);
         }
-        throw new STACRUDException(INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY, HTTPStatus.BAD_REQUEST);
+
+    }
+
+    private ProjectEntity updateEntity(String id, ProjectEntity entity) throws STACRUDException {
+        synchronized (getLock(id)) {
+            Optional<ProjectEntity> existing = getRepository().findByStaIdentifier(id);
+            if (existing.isPresent()) {
+                ProjectEntity merged = merge(existing.get(), entity);
+                return getRepository().save(merged);
+            }
+            throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
+        }
     }
 
     @Override
     public ProjectEntity createOrUpdate(ProjectEntity entity) throws STACRUDException {
         if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
-            return updateEntity(entity.getStaIdentifier(), entity, HttpMethod.PATCH);
+            return updateEntity(entity.getStaIdentifier(), entity);
         }
         return createOrfetch(entity);
     }

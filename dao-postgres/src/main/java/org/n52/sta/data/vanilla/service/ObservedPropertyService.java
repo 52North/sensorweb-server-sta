@@ -53,7 +53,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -229,11 +228,21 @@ public class ObservedPropertyService
     }
 
     @Override
-    public PhenomenonEntity updateEntity(String id, PhenomenonEntity entity, HttpMethod method)
+    public PhenomenonEntity updateEntity(String id, PhenomenonEntity entity, String method)
         throws STACRUDException {
         checkUpdate(entity);
-        if (HttpMethod.PATCH.equals(method)) {
-            synchronized (getLock(id)) {
+        if ("PATCH".equals(method)) {
+            return updateEntity(id, entity);
+        } else if ("PUT".equals(method)) {
+            throw new STACRUDException(HTTP_PUT_IS_NOT_YET_SUPPORTED, HTTPStatus.NOT_IMPLEMENTED);
+        } else {
+            throw new STACRUDException(INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY, HTTPStatus.BAD_REQUEST);
+        }
+
+    }
+
+    private PhenomenonEntity updateEntity(String id, PhenomenonEntity entity) throws STACRUDException {
+        synchronized (getLock(id)) {
                 Optional<PhenomenonEntity> existing = getRepository().findByStaIdentifier(id);
                 if (existing.isPresent()) {
                     PhenomenonEntity merged = merge(existing.get(), entity);
@@ -243,16 +252,12 @@ public class ObservedPropertyService
                 }
                 throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }
-        } else if (HttpMethod.PUT.equals(method)) {
-            throw new STACRUDException(HTTP_PUT_IS_NOT_YET_SUPPORTED, HTTPStatus.NOT_IMPLEMENTED);
-        }
-        throw new STACRUDException(INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY, HTTPStatus.BAD_REQUEST);
     }
 
     @Override
     public PhenomenonEntity createOrUpdate(PhenomenonEntity entity) throws STACRUDException {
         if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
-            return updateEntity(entity.getStaIdentifier(), entity, HttpMethod.PATCH);
+            return updateEntity(entity.getStaIdentifier(), entity);
         }
         return createOrfetch(entity);
     }
