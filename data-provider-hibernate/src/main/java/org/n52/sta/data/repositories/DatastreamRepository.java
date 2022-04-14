@@ -34,11 +34,10 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@Transactional
 @Repository
+@Transactional
 public interface DatastreamRepository
     extends NameRepository<AbstractDatasetEntity>,
-            StaIdentifierRepository<AbstractDatasetEntity>,
             AggregateRepository<AbstractDatasetEntity> {
 
 }
