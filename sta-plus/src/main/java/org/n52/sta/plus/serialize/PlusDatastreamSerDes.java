@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2018-2021 52°North Initiative for Geospatial Open Source
- * Software GmbH
+ * Copyright (C) 2018-2021 52°North Spatial Information Research GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -26,26 +25,27 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-
 package org.n52.sta.plus.serialize;
+
+import java.io.IOException;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import org.n52.shetland.ogc.sta.model.DatastreamEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.api.dto.common.EntityPatch;
-import org.n52.sta.api.serdes.common.AbstractDatastreamSerializer;
-import org.n52.sta.api.serdes.common.JSONBase;
+import org.n52.sta.api.old.dto.common.EntityPatch;
+import org.n52.sta.api.old.serialize.common.AbstractDatastreamSerializer;
+import org.n52.sta.api.old.serialize.common.JSONBase;
+import org.n52.sta.plus.entity.PlusDatastreamDTO;
 import org.n52.sta.plus.serialize.json.JSONPlusDatastream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import org.n52.sta.plus.dto.PlusDatastreamDTO;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 public class PlusDatastreamSerDes {
 

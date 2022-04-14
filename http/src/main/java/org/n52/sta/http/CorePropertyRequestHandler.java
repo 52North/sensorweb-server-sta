@@ -30,7 +30,7 @@ package org.n52.sta.http;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.n52.sta.api.CoreRequestUtils;
 import org.n52.sta.api.EntityServiceFactory;
-import org.n52.sta.api.dto.common.StaDTO;
+import org.n52.sta.api.old.dto.common.StaDTO;
 import org.n52.sta.http.common.PropertyRequestHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;

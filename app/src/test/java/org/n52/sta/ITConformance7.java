@@ -53,7 +53,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 @ExtendWith(SpringExtension.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class ITConformance7 extends ConformanceTests implements TestUtil {
+public class ITConformance7 extends ConformanceTests {
 
     private static IMqttClient mqttClient;
 

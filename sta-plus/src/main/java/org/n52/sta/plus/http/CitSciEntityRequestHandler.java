@@ -31,7 +31,7 @@ import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.plus.CitSciExtensionRequestUtils;
 import org.n52.sta.api.EntityServiceFactory;
-import org.n52.sta.api.dto.common.StaDTO;
+import org.n52.sta.api.old.dto.common.StaDTO;
 import org.n52.sta.http.common.EntityRequestHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;

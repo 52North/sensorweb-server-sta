@@ -39,7 +39,7 @@ import org.n52.shetland.filter.FilterFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
-import org.n52.sta.data.common.support.FilterExprVisitor;
+import org.n52.sta.data.support.FilterExprVisitor;
 import org.n52.svalbard.odata.core.QueryOptionsFactory;
 import org.n52.svalbard.odata.core.expr.Expr;
 import org.springframework.data.jpa.domain.Specification;

@@ -36,7 +36,7 @@ import org.n52.sta.DTOMapper;
 import org.n52.sta.api.AbstractSensorThingsEntityService;
 import org.n52.sta.api.CoreRequestUtils;
 import org.n52.sta.api.EntityServiceFactory;
-import org.n52.sta.api.dto.common.StaDTO;
+import org.n52.sta.api.old.dto.common.StaDTO;
 import org.n52.sta.utils.AbstractSTARequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

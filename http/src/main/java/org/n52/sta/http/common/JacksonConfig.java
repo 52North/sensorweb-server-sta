@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2018-2021 52°North Initiative for Geospatial Open Source
- * Software GmbH
+ * Copyright (C) 2018-2021 52°North Spatial Information Research GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -26,8 +25,11 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-
 package org.n52.sta.http.common;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,33 +37,30 @@ import com.fasterxml.jackson.databind.module.SimpleDeserializers;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.module.SimpleSerializers;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
+
 import org.n52.sta.api.CollectionWrapper;
-import org.n52.sta.api.dto.DatastreamDTO;
-import org.n52.sta.api.dto.FeatureOfInterestDTO;
-import org.n52.sta.api.dto.HistoricalLocationDTO;
-import org.n52.sta.api.dto.LocationDTO;
-import org.n52.sta.api.dto.ObservationDTO;
-import org.n52.sta.api.dto.ObservedPropertyDTO;
-import org.n52.sta.api.dto.SensorDTO;
-import org.n52.sta.api.dto.ThingDTO;
-import org.n52.sta.api.serdes.common.CollectionSer;
-import org.n52.sta.api.serdes.DatastreamSerDes;
-import org.n52.sta.api.serdes.FeatureOfInterestSerDes;
-import org.n52.sta.api.serdes.HistoricalLocationSerDes;
-import org.n52.sta.api.serdes.LocationSerDes;
-import org.n52.sta.api.serdes.ObservationSerDes;
-import org.n52.sta.api.serdes.ObservedPropertySerDes;
-import org.n52.sta.api.serdes.SensorSerDes;
-import org.n52.sta.api.serdes.ThingSerDes;
+import org.n52.sta.api.old.entity.DatastreamDTO;
+import org.n52.sta.api.old.entity.FeatureOfInterestDTO;
+import org.n52.sta.api.old.entity.HistoricalLocationDTO;
+import org.n52.sta.api.old.entity.LocationDTO;
+import org.n52.sta.api.old.entity.ObservationDTO;
+import org.n52.sta.api.old.entity.ObservedPropertyDTO;
+import org.n52.sta.api.old.entity.SensorDTO;
+import org.n52.sta.api.old.entity.ThingDTO;
+import org.n52.sta.api.old.serialize.DatastreamSerDes;
+import org.n52.sta.api.old.serialize.FeatureOfInterestSerDes;
+import org.n52.sta.api.old.serialize.HistoricalLocationSerDes;
+import org.n52.sta.api.old.serialize.LocationSerDes;
+import org.n52.sta.api.old.serialize.ObservationSerDes;
+import org.n52.sta.api.old.serialize.ObservedPropertySerDes;
+import org.n52.sta.api.old.serialize.SensorSerDes;
+import org.n52.sta.api.old.serialize.ThingSerDes;
+import org.n52.sta.api.old.serialize.common.CollectionSer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 @Configuration
 public class JacksonConfig {

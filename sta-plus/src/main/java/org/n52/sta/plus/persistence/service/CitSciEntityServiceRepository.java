@@ -27,7 +27,7 @@
  */
 package org.n52.sta.plus.persistence.service;
 
-import org.n52.sta.data.common.service.CommonEntityServiceRepository;
+import org.n52.sta.data.service.CommonEntityServiceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

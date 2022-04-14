@@ -28,7 +28,7 @@
 package org.n52.sta.mqtt.subscription;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
-import org.n52.sta.api.dto.common.StaDTO;
+import org.n52.sta.api.old.dto.common.StaDTO;
 
 import java.util.Map;
 import java.util.Objects;

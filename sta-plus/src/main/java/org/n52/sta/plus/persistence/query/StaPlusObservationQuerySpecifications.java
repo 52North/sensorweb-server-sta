@@ -36,8 +36,8 @@ import org.n52.series.db.beans.sta.plus.GroupEntity;
 import org.n52.series.db.beans.sta.plus.RelationEntity;
 import org.n52.series.db.beans.sta.plus.StaPlusDataEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
-import org.n52.sta.data.common.query.EntityQuerySpecifications;
-import org.n52.sta.data.common.query.ObservationQuerySpecifications;
+import org.n52.sta.data.query.EntityQuerySpecifications;
+import org.n52.sta.data.query.ObservationQuerySpecifications;
 import org.springframework.data.jpa.domain.Specification;
 
 public class StaPlusObservationQuerySpecifications extends EntityQuerySpecifications<StaPlusDataEntity<?>> {

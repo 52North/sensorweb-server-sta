@@ -31,7 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.n52.shetland.filter.SelectFilter;
 import org.n52.shetland.ogc.filter.FilterClause;
 import org.n52.sta.api.EntityServiceFactory;
-import org.n52.sta.api.dto.common.StaDTO;
+import org.n52.sta.api.old.dto.common.StaDTO;
 import org.n52.sta.utils.AbstractSTARequestHandler;
 import org.springframework.web.servlet.HandlerMapping;
 

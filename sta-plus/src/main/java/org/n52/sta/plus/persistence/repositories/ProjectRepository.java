@@ -29,7 +29,7 @@ package org.n52.sta.plus.persistence.repositories;
 
 import org.n52.series.db.beans.sta.plus.ProjectEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
-import org.n52.sta.data.common.repositories.StaIdentifierRepository;
+import org.n52.sta.data.repositories.StaIdentifierRepository;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 

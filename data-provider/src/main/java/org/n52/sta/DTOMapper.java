@@ -29,22 +29,22 @@ package org.n52.sta;
 
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
-import org.n52.sta.api.dto.DatastreamDTO;
-import org.n52.sta.api.dto.FeatureOfInterestDTO;
-import org.n52.sta.api.dto.HistoricalLocationDTO;
-import org.n52.sta.api.dto.LocationDTO;
-import org.n52.sta.api.dto.ObservationDTO;
-import org.n52.sta.api.dto.ObservedPropertyDTO;
-import org.n52.sta.api.dto.SensorDTO;
-import org.n52.sta.api.dto.ThingDTO;
-import org.n52.sta.api.serdes.DatastreamSerDes;
-import org.n52.sta.api.serdes.FeatureOfInterestSerDes;
-import org.n52.sta.api.serdes.HistoricalLocationSerDes;
-import org.n52.sta.api.serdes.LocationSerDes;
-import org.n52.sta.api.serdes.ObservationSerDes;
-import org.n52.sta.api.serdes.ObservedPropertySerDes;
-import org.n52.sta.api.serdes.SensorSerDes;
-import org.n52.sta.api.serdes.ThingSerDes;
+import org.n52.sta.api.old.entity.DatastreamDTO;
+import org.n52.sta.api.old.entity.FeatureOfInterestDTO;
+import org.n52.sta.api.old.entity.HistoricalLocationDTO;
+import org.n52.sta.api.old.entity.LocationDTO;
+import org.n52.sta.api.old.entity.ObservationDTO;
+import org.n52.sta.api.old.entity.ObservedPropertyDTO;
+import org.n52.sta.api.old.entity.SensorDTO;
+import org.n52.sta.api.old.entity.ThingDTO;
+import org.n52.sta.api.old.serialize.DatastreamSerDes;
+import org.n52.sta.api.old.serialize.FeatureOfInterestSerDes;
+import org.n52.sta.api.old.serialize.HistoricalLocationSerDes;
+import org.n52.sta.api.old.serialize.LocationSerDes;
+import org.n52.sta.api.old.serialize.ObservationSerDes;
+import org.n52.sta.api.old.serialize.ObservedPropertySerDes;
+import org.n52.sta.api.old.serialize.SensorSerDes;
+import org.n52.sta.api.old.serialize.ThingSerDes;
 import org.springframework.stereotype.Component;
 
 /**

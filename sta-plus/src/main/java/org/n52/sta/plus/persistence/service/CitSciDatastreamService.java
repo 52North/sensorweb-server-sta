@@ -25,7 +25,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-
 package org.n52.sta.plus.persistence.service;
 
 import org.n52.series.db.beans.AbstractDatasetEntity;
@@ -38,14 +37,14 @@ import org.n52.series.db.beans.sta.plus.StaPlusDatasetAggregationEntity;
 import org.n52.series.db.beans.sta.plus.StaPlusDatasetEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
-import org.n52.sta.data.common.CommonDatastreamService;
-import org.n52.sta.data.common.repositories.CategoryRepository;
-import org.n52.sta.data.common.repositories.DatastreamParameterRepository;
-import org.n52.sta.data.common.repositories.ObservationRepository;
-import org.n52.sta.data.common.repositories.UnitRepository;
-import org.n52.sta.data.common.service.CategoryService;
-import org.n52.sta.data.common.service.FormatService;
-import org.n52.sta.data.common.service.OfferingService;
+import org.n52.sta.data.CommonDatastreamService;
+import org.n52.sta.data.repositories.CategoryRepository;
+import org.n52.sta.data.repositories.DatastreamParameterRepository;
+import org.n52.sta.data.repositories.ObservationRepository;
+import org.n52.sta.data.repositories.UnitRepository;
+import org.n52.sta.data.service.CategoryService;
+import org.n52.sta.data.service.FormatService;
+import org.n52.sta.data.service.OfferingService;
 import org.n52.sta.plus.persistence.repositories.StaPlusDatastreamRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;

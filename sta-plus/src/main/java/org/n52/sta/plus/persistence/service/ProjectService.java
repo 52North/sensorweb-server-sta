@@ -25,7 +25,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-
 package org.n52.sta.plus.persistence.service;
 
 import org.n52.janmayen.http.HTTPStatus;
@@ -39,8 +38,8 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.ProjectEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.data.common.repositories.EntityGraphRepository;
-import org.n52.sta.plus.dto.ProjectDTO;
+import org.n52.sta.data.repositories.EntityGraphRepository;
+import org.n52.sta.plus.entity.ProjectDTO;
 import org.n52.sta.plus.persistence.query.ProjectQuerySpecifications;
 import org.n52.sta.plus.persistence.repositories.ProjectRepository;
 import org.springframework.context.annotation.DependsOn;

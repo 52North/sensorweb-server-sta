@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2018-2021 52°North Initiative for Geospatial Open Source
- * Software GmbH
+ * Copyright (C) 2018-2021 52°North Spatial Information Research GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -26,11 +25,20 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-
 package org.n52.sta.plus.persistence;
+
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import org.joda.time.DateTime;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
@@ -54,7 +62,6 @@ import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.series.db.beans.sta.StaFeatureEntity;
-import org.n52.series.db.beans.sta.plus.StaPlusDataset;
 import org.n52.series.db.beans.sta.plus.GroupEntity;
 import org.n52.series.db.beans.sta.plus.LicenseEntity;
 import org.n52.series.db.beans.sta.plus.PartyEntity;
@@ -62,6 +69,7 @@ import org.n52.series.db.beans.sta.plus.ProjectEntity;
 import org.n52.series.db.beans.sta.plus.RelationEntity;
 import org.n52.series.db.beans.sta.plus.StaPlusBlobDataEntity;
 import org.n52.series.db.beans.sta.plus.StaPlusDataEntity;
+import org.n52.series.db.beans.sta.plus.StaPlusDataset;
 import org.n52.series.db.beans.sta.plus.StaPlusDatasetEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.gml.time.Time;
@@ -70,47 +78,38 @@ import org.n52.shetland.ogc.gml.time.TimePeriod;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryError;
 import org.n52.sta.SerDesConfig;
-import org.n52.sta.api.dto.DatastreamDTO;
-import org.n52.sta.api.dto.FeatureOfInterestDTO;
-import org.n52.sta.api.dto.HistoricalLocationDTO;
-import org.n52.sta.api.dto.LocationDTO;
-import org.n52.sta.api.dto.ObservationDTO;
-import org.n52.sta.api.dto.ObservedPropertyDTO;
-import org.n52.sta.api.dto.SensorDTO;
-import org.n52.sta.api.dto.ThingDTO;
-import org.n52.sta.api.dto.common.StaDTO;
-import org.n52.sta.api.dto.impl.FeatureOfInterest;
-import org.n52.sta.api.dto.impl.HistoricalLocation;
-import org.n52.sta.api.dto.impl.Location;
-import org.n52.sta.api.dto.impl.Observation;
-import org.n52.sta.api.dto.impl.ObservedProperty;
-import org.n52.sta.api.dto.impl.Sensor;
-import org.n52.sta.api.dto.impl.Thing;
-import org.n52.sta.data.common.DTOTransformerImpl;
-import org.n52.sta.data.common.service.ServiceUtils;
-import org.n52.sta.plus.dto.GroupDTO;
-import org.n52.sta.plus.dto.LicenseDTO;
-import org.n52.sta.plus.dto.PartyDTO;
-import org.n52.sta.plus.dto.PlusDatastreamDTO;
-import org.n52.sta.plus.dto.ProjectDTO;
-import org.n52.sta.plus.dto.RelationDTO;
-import org.n52.sta.plus.dto.impl.Group;
-import org.n52.sta.plus.dto.impl.License;
-import org.n52.sta.plus.dto.impl.Party;
-import org.n52.sta.plus.dto.impl.PlusDatastream;
-import org.n52.sta.plus.dto.impl.Project;
-import org.n52.sta.plus.dto.impl.Relation;
+import org.n52.sta.api.old.dto.FeatureOfInterest;
+import org.n52.sta.api.old.dto.HistoricalLocation;
+import org.n52.sta.api.old.dto.Location;
+import org.n52.sta.api.old.dto.Observation;
+import org.n52.sta.api.old.dto.ObservedProperty;
+import org.n52.sta.api.old.dto.Sensor;
+import org.n52.sta.api.old.dto.Thing;
+import org.n52.sta.api.old.dto.common.StaDTO;
+import org.n52.sta.api.old.entity.DatastreamDTO;
+import org.n52.sta.api.old.entity.FeatureOfInterestDTO;
+import org.n52.sta.api.old.entity.HistoricalLocationDTO;
+import org.n52.sta.api.old.entity.LocationDTO;
+import org.n52.sta.api.old.entity.ObservationDTO;
+import org.n52.sta.api.old.entity.ObservedPropertyDTO;
+import org.n52.sta.api.old.entity.SensorDTO;
+import org.n52.sta.api.old.entity.ThingDTO;
+import org.n52.sta.data.DTOTransformerImpl;
+import org.n52.sta.data.service.ServiceUtils;
+import org.n52.sta.plus.dto.Group;
+import org.n52.sta.plus.dto.License;
+import org.n52.sta.plus.dto.Party;
+import org.n52.sta.plus.dto.PlusDatastream;
+import org.n52.sta.plus.dto.Project;
+import org.n52.sta.plus.dto.Relation;
+import org.n52.sta.plus.entity.GroupDTO;
+import org.n52.sta.plus.entity.LicenseDTO;
+import org.n52.sta.plus.entity.PartyDTO;
+import org.n52.sta.plus.entity.PlusDatastreamDTO;
+import org.n52.sta.plus.entity.ProjectDTO;
+import org.n52.sta.plus.entity.RelationDTO;
 import org.n52.sta.utils.TimeUtil;
 import org.springframework.util.Assert;
-
-import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 // import org.n52.series.db.beans.SensorML20DataEntity;
 
@@ -346,26 +345,26 @@ public class StaPlusDTOTransformerImpl<R extends StaDTO, S extends HibernateRela
         } else {
             StaPlusBlobDataEntity dataEntity = createBlobDataEntity(raw);
 
-            if (raw.getSubjects() != null) {
-                dataEntity.setSubjects(raw.getSubjects()
-                                           .stream()
-                                           .map(this::toRelationEntity)
-                                           .collect(Collectors.toSet()));
-            }
+            // if (raw.getSubjects() != null) {
+            //     dataEntity.setSubjects(raw.getSubjects()
+            //                                .stream()
+            //                                .map(this::toRelationEntity)
+            //                                .collect(Collectors.toSet()));
+            // }
 
-            if (raw.getObjects() != null) {
-                dataEntity.setObjects(raw.getObjects()
-                                          .stream()
-                                          .map(this::toRelationEntity)
-                                          .collect(Collectors.toSet()));
-            }
+            // if (raw.getObjects() != null) {
+            //     dataEntity.setObjects(raw.getObjects()
+            //                               .stream()
+            //                               .map(this::toRelationEntity)
+            //                               .collect(Collectors.toSet()));
+            // }
 
-            if (raw.getObservationGroups() != null) {
-                dataEntity.setGroups(raw.getObservationGroups()
-                                         .stream()
-                                         .map(this::toGroupEntity)
-                                         .collect(Collectors.toSet()));
-            }
+            // if (raw.getObservationGroups() != null) {
+            //     dataEntity.setGroups(raw.getObservationGroups()
+            //                              .stream()
+            //                              .map(this::toGroupEntity)
+            //                              .collect(Collectors.toSet()));
+            // }
             //if (raw.getDatastream() != null) {
             //    dataEntity.setDataset(this.toDatasetEntity(raw.getDatastream()));
             //}
@@ -634,34 +633,34 @@ public class StaPlusDTOTransformerImpl<R extends StaDTO, S extends HibernateRela
                                                       observation.getFieldsToExpand().get(StaConstants.DATASTREAM)));
 
         }
-        if (observation.getFieldsToExpand().containsKey(StaConstants.SUBJECTS)) {
-            observation.setSubjects(raw.getSubjects()
-                                        .stream()
-                                        .map(o -> this.toObsRelDTO(o,
-                                                                   observation.getFieldsToExpand()
-                                                                       .get(StaConstants.SUBJECTS)))
-                                        .collect(Collectors.toSet()));
+        // if (observation.getFieldsToExpand().containsKey(StaConstants.SUBJECTS)) {
+        //     observation.setSubjects(raw.getSubjects()
+        //                                 .stream()
+        //                                 .map(o -> this.toObsRelDTO(o,
+        //                                                            observation.getFieldsToExpand()
+        //                                                                .get(StaConstants.SUBJECTS)))
+        //                                 .collect(Collectors.toSet()));
 
-        }
-        if (observation.getFieldsToExpand().containsKey(StaConstants.OBJECTS)) {
-            observation.setSubjects(raw.getObjects()
-                                        .stream()
-                                        .map(o -> this.toObsRelDTO(o,
-                                                                   observation.getFieldsToExpand()
-                                                                       .get(StaConstants.OBJECTS)))
-                                        .collect(Collectors.toSet()));
+        // }
+        // if (observation.getFieldsToExpand().containsKey(StaConstants.OBJECTS)) {
+        //     observation.setSubjects(raw.getObjects()
+        //                                 .stream()
+        //                                 .map(o -> this.toObsRelDTO(o,
+        //                                                            observation.getFieldsToExpand()
+        //                                                                .get(StaConstants.OBJECTS)))
+        //                                 .collect(Collectors.toSet()));
 
-        }
-        if (observation.getFieldsToExpand().containsKey(StaConstants.GROUPS)) {
-            observation.setObservationGroups(
-                raw.getGroups()
-                    .stream()
-                    .map(o -> this.toObsGroupDTO(o,
-                                                 observation.getFieldsToExpand()
-                                                     .get(StaConstants.GROUPS)))
-                    .collect(Collectors.toSet()));
+        // }
+        // if (observation.getFieldsToExpand().containsKey(StaConstants.GROUPS)) {
+        //     observation.setObservationGroups(
+        //         raw.getGroups()
+        //             .stream()
+        //             .map(o -> this.toObsGroupDTO(o,
+        //                                          observation.getFieldsToExpand()
+        //                                              .get(StaConstants.GROUPS)))
+        //             .collect(Collectors.toSet()));
 
-        }
+        // }
         return observation;
     }
 
