@@ -38,7 +38,7 @@ note as api_note
     Defines an SPI to call data storage
     specific logic. Verfies consistency.
     Handles or delegates exceptions and 
-    prepares or intercept responses.
+    holds additional features.
 end note
 
 api_note .. api

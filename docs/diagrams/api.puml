@@ -1,0 +1,80 @@
+@startuml SensorThings API, API
+
+node "sta" as sta {
+}
+
+package "api" {
+    package "provider" as pkg_provider {
+        interface "DataStreamProvider" as ds_provider
+    }
+    package "domain" as pkg_domain {
+        class "DataStreamAggregate" as ds_aggregate
+        rectangle "DomainEvent" as ds_event #CCCCCC {
+        }
+    }
+    note as note_domain
+        Maybe we find a way how to
+        make this configurable, so
+        that the STA can plug-in true
+        business rules.
+    end note
+    pkg_domain .u. note_domain 
+
+    package "event" as pkg_event {
+        interface "EventHandler" as event_handler
+    }
+    package "service" as pkg_service {
+        class "DataStreamService" as ds_service
+    }
+    note top of ds_service {
+        We may think of making
+        these composable, to hook
+        optional business services.
+    }
+    package "serializer" as pkg_serializer {
+        interface "Serializer" as ds_serializer
+        interface "Deserializer" as ds_deserializer
+    }
+}
+
+node "spring" {
+    interface "JpaRepository" as jpa_repo
+    interface "JpaSpecificationExecutor" as jpa_spec_executor
+}
+
+node "dao" {
+    class "DataStreamHibernateProvider" as ds_dao_provider
+    note left of ds_dao_provider {
+        Orchestrates access to
+        db entities. Operates on
+        aggregates and creates them
+        via factories.
+    }
+    package "repository" {
+        interface "StaJpaRepository" as sta_repo
+        interface "PlatformRepository"  as platform_repo
+        interface "ProcedureRepository" as procedure_repo
+        interface "xyzRepository" as xyz_repo
+    }
+}
+
+sta ..> pkg_serializer : //creates//
+sta --> ds_service : //delegates//
+ds_service --> ds_provider
+
+event_handler .r.> ds_event : //receives//
+
+ds_aggregate ..> ds_event : //sends//
+ds_aggregate <.. ds_dao_provider : //creates//\n//updates//\n//deletes//
+ds_provider <|.. ds_dao_provider : //implements//
+ds_dao_provider --> platform_repo
+ds_dao_provider --> procedure_repo
+ds_dao_provider --> xyz_repo
+
+sta_repo --|> jpa_repo
+sta_repo --|> jpa_spec_executor
+
+platform_repo ..|> sta_repo
+procedure_repo ..|> sta_repo
+
+@enduml

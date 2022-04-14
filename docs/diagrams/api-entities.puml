@@ -1,0 +1,69 @@
+@startuml SensorThings API, API Entities
+
+package "service" as pkg_service {
+    interface "StaEntityService" <T>
+    class "ThingEntityService" as thing_service <Thing>
+}
+
+package "provider" as pkg_provider {
+    class "DataProviderRegistry" as provider_registry
+    interface "StaEntityProvider" as data_provider
+}
+
+package "domain" as pkg_domain {
+    interface "StaDomainService" as domain_service <T> {
+        createAggregate(T entity)
+    }
+    class "ThingDomainService" as thing_domain_service <Thing>
+    class "ThingAggregate"
+}
+
+package "entity" {
+    interface "Identifiable" {
+        getId() : String
+        setId(String id)
+    }
+    interface "Thing"
+}
+
+package "serialize" {
+
+    interface "Serializer" as serializer {
+        serialize(entity, context) : JSONNode
+    }
+    interface "Deserializer" as deserializer {
+        deserialize(JSONNode, context)
+    }
+    class "SerializationContext" as context {
+        {static} create(QueryOptions options)
+
+        getQueryOptions() : QueryOptions
+        getFieldsToSelect() : Collection<String>
+        getFieldsToExpand() : Map<String, QueryOptions>
+    }
+}
+
+
+Thing --|> Identifiable
+serializer ..> Thing : reads
+deserializer ..> Thing : creates
+
+StaEntityService <|.. thing_service
+thing_service --> serializer
+thing_service --> deserializer
+Thing <|. ThingAggregate : implements
+provider_registry .> "1..n" data_provider
+
+
+domain_service <|.. thing_domain_service
+thing_domain_service <- thing_service 
+thing_domain_service --> provider_registry
+thing_domain_service .> data_provider : uses
+thing_domain_service .> ThingAggregate : creates
+
+context <.. thing_service : creates
+deserializer ..> context : uses
+serializer ..> context : uses
+
+
+@enduml
