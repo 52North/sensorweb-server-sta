@@ -27,6 +27,8 @@
  */
 package org.n52.sta.api;
 
+import org.n52.sta.api.provider.StaEntityProvider;
+
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
@@ -38,5 +40,5 @@ public interface EntityServiceFactory {
      * @param entityTypeName the type name of the requested entity service
      * @return the requested entity data service
      */
-    AbstractSensorThingsEntityService<?> getEntityService(String entityTypeName);
+    StaEntityProvider<?> getEntityService(String entityTypeName);
 }

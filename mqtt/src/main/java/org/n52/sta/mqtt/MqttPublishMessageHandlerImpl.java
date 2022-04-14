@@ -27,22 +27,6 @@
  */
 package org.n52.sta.mqtt;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.moquette.interception.messages.InterceptPublishMessage;
-import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
-import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.DTOMapper;
-import org.n52.sta.api.AbstractSensorThingsEntityService;
-import org.n52.sta.api.CoreRequestUtils;
-import org.n52.sta.api.EntityServiceFactory;
-import org.n52.sta.api.old.dto.common.StaDTO;
-import org.n52.sta.utils.AbstractSTARequestHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -50,6 +34,24 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.sta.DTOMapper;
+import org.n52.sta.api.CoreRequestUtils;
+import org.n52.sta.api.EntityServiceFactory;
+import org.n52.sta.api.old.dto.common.StaDTO;
+import org.n52.sta.api.provider.StaEntityProvider;
+import org.n52.sta.utils.AbstractSTARequestHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import io.moquette.interception.messages.InterceptPublishMessage;
 
 /**
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
@@ -149,7 +151,7 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
                 }
 
                 Class<T> clazz = dtoMapper.collectionNameToClass(collection);
-                ((AbstractSensorThingsEntityService<T>) serviceRepository.getEntityService(collection))
+                ((StaEntityProvider<T>) serviceRepository.getEntityService(collection))
                     .create(mapper.readValue(payload, clazz));
             } else {
                 throw new STAInvalidUrlException("Topic does not reference a Collection allowed for POSTing via mqtt");

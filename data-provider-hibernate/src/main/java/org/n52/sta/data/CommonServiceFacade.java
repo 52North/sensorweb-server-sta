@@ -39,7 +39,6 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.SerDesConfig;
-import org.n52.sta.api.AbstractSensorThingsEntityService;
 import org.n52.sta.api.CollectionWrapper;
 import org.n52.sta.api.old.dto.common.StaDTO;
 import org.n52.sta.api.old.entity.DatastreamDTO;
@@ -50,6 +49,7 @@ import org.n52.sta.api.old.entity.ObservationDTO;
 import org.n52.sta.api.old.entity.ObservedPropertyDTO;
 import org.n52.sta.api.old.entity.SensorDTO;
 import org.n52.sta.api.old.entity.ThingDTO;
+import org.n52.sta.api.provider.StaEntityProvider;
 import org.n52.sta.data.service.DatastreamService;
 import org.n52.sta.data.service.FeatureOfInterestService;
 import org.n52.sta.data.service.HistoricalLocationService;
@@ -69,7 +69,7 @@ import org.springframework.stereotype.Component;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 public abstract class CommonServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
-        implements AbstractSensorThingsEntityService<R> {
+        implements StaEntityProvider<R> {
 
     protected final DaoSemaphore semaphore;
     protected final SerDesConfig config;

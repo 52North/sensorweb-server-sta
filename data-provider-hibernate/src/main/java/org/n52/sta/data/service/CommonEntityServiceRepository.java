@@ -27,17 +27,18 @@
  */
 package org.n52.sta.data.service;
 
-import org.n52.sta.api.AbstractSensorThingsEntityService;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import javax.annotation.PostConstruct;
+
 import org.n52.sta.api.EntityServiceFactory;
 import org.n52.sta.api.STAEventHandler;
+import org.n52.sta.api.provider.StaEntityProvider;
 import org.n52.sta.data.CommonSTAServiceImpl;
 import org.n52.sta.data.CommonServiceFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * Repository for all Sensor Things entity data services
@@ -115,7 +116,7 @@ public class CommonEntityServiceRepository implements EntityServiceFactory {
      * @param entityTypeName the type name of the requested entity service
      * @return the requested entity data service
      */
-    @Override public AbstractSensorThingsEntityService<?> getEntityService(String entityTypeName) {
+    @Override public StaEntityProvider<?> getEntityService(String entityTypeName) {
         return entityServices.get(entityTypeName);
     }
 

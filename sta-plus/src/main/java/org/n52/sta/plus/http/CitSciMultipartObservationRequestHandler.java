@@ -40,10 +40,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STANotFoundException;
-import org.n52.sta.api.AbstractSensorThingsEntityService;
 import org.n52.sta.api.EntityServiceFactory;
 import org.n52.sta.api.old.dto.common.StaDTO;
 import org.n52.sta.api.old.entity.ObservationDTO;
+import org.n52.sta.api.provider.StaEntityProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -122,8 +122,8 @@ public class CitSciMultipartObservationRequestHandler {
         return getObservationRepository().create(observation);
     }
 
-    private AbstractSensorThingsEntityService<ObservationDTO> getObservationRepository() {
-        return (AbstractSensorThingsEntityService<ObservationDTO>) serviceRepository.getEntityService(
+    private StaEntityProvider<ObservationDTO> getObservationRepository() {
+        return (StaEntityProvider<ObservationDTO>) serviceRepository.getEntityService(
             "Observation");
     }
 

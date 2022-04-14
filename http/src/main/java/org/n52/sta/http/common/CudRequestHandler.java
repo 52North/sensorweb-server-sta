@@ -27,16 +27,21 @@
  */
 package org.n52.sta.http.common;
 
+import java.io.IOException;
+
+import javax.servlet.http.HttpServletRequest;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.sta.DTOMapper;
-import org.n52.sta.api.AbstractSensorThingsEntityService;
 import org.n52.sta.api.EntityServiceFactory;
 import org.n52.sta.api.old.dto.common.EntityPatch;
 import org.n52.sta.api.old.dto.common.StaDTO;
+import org.n52.sta.api.provider.StaEntityProvider;
 import org.n52.sta.utils.AbstractSTARequestHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -44,9 +49,6 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.servlet.HandlerMapping;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 
 /**
  * Handles all CUD requests (POST, PUT, DELETE)
@@ -80,7 +82,7 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
     public StaDTO handlePostDirect(String collectionName, String body)
         throws IOException, STACRUDException, STAInvalidUrlException {
         Class<T> clazz = dtoMapper.collectionNameToClass(collectionName);
-        return ((AbstractSensorThingsEntityService<T>)
+        return ((StaEntityProvider<T>)
             serviceRepository.getEntityService(collectionName)).create(mapper.readValue(body, clazz));
     }
 
@@ -112,7 +114,7 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
 
         Class<T> clazz = dtoMapper.collectionNameToClass(target);
         final T payload = mapper.readValue(jsonBody.toString(), clazz);
-        return ((AbstractSensorThingsEntityService<T>)
+        return ((StaEntityProvider<T>)
             serviceRepository.getEntityService(target)).create(payload);
     }
 
@@ -137,7 +139,7 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
         ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
         String strippedId = unescapeIdIfWanted(id.substring(1, id.length() - 1));
         jsonBody.put(StaConstants.AT_IOT_ID, strippedId);
-        return ((AbstractSensorThingsEntityService<T>)
+        return ((StaEntityProvider<T>)
             serviceRepository.getEntityService(collectionName)).update(strippedId,
                                                                        (T) ((mapper.readValue(jsonBody.toString(),
                                                                                               clazz))).getEntity(),
@@ -164,8 +166,8 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
         String[] split = splitId(entity);
         String sourceType = split[0];
         String sourceId = split[1];
-        AbstractSensorThingsEntityService<T> entityService =
-            (AbstractSensorThingsEntityService<T>) serviceRepository.getEntityService(target);
+        StaEntityProvider<T> entityService =
+            (StaEntityProvider<T>) serviceRepository.getEntityService(target);
 
         // Get Id from datastore
         String entityId = entityService.getEntityIdByRelatedEntity(sourceId, sourceType);
@@ -223,8 +225,8 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
         String[] split = splitId(entity);
         String sourceType = split[0];
         String sourceId = split[1];
-        AbstractSensorThingsEntityService<T> entityService =
-            (AbstractSensorThingsEntityService<T>) serviceRepository.getEntityService(target);
+        StaEntityProvider<T> entityService =
+            (StaEntityProvider<T>) serviceRepository.getEntityService(target);
 
         // Get Id from datastore
         String entityId = entityService.getEntityIdByRelatedEntity(sourceId, sourceType);

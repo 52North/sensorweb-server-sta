@@ -25,16 +25,17 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.api;
+package org.n52.sta.api.provider;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
+import org.n52.sta.api.CollectionWrapper;
 import org.n52.sta.api.old.dto.common.StaDTO;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public interface AbstractSensorThingsEntityService<R extends StaDTO> {
+public interface StaEntityProvider<R extends StaDTO> {
 
     /**
      * Checks if an Entity with given id exists
