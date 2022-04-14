@@ -25,7 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta;
+package org.n52.sta.utils;
 
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
@@ -45,15 +45,17 @@ import org.n52.sta.api.old.serialize.ObservationSerDes;
 import org.n52.sta.api.old.serialize.ObservedPropertySerDes;
 import org.n52.sta.api.old.serialize.SensorSerDes;
 import org.n52.sta.api.old.serialize.ThingSerDes;
-import org.springframework.stereotype.Component;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@Component
-public class DTOMapper {
+public final class DTOMapper {
 
-    public Class collectionNameToClass(String collectionName) throws STAInvalidUrlException {
+    private DTOMapper() {
+        // private
+    }
+
+    public static Class collectionNameToClass(String collectionName) throws STAInvalidUrlException {
         switch (collectionName) {
             case StaConstants.THINGS:
                 return ThingDTO.class;
@@ -86,7 +88,7 @@ public class DTOMapper {
         }
     }
 
-    public Class collectionNameToPatchClass(String collectionName) throws STAInvalidUrlException {
+    public static Class collectionNameToPatchClass(String collectionName) throws STAInvalidUrlException {
         switch (collectionName) {
             case StaConstants.THINGS:
             case StaConstants.THING:

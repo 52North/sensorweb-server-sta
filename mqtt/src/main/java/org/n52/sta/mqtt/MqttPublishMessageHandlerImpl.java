@@ -40,12 +40,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.DTOMapper;
 import org.n52.sta.api.CoreRequestUtils;
 import org.n52.sta.api.EntityServiceFactory;
 import org.n52.sta.api.old.dto.common.StaDTO;
 import org.n52.sta.api.provider.StaEntityProvider;
 import org.n52.sta.utils.AbstractSTARequestHandler;
+import org.n52.sta.utils.DTOMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -66,7 +66,6 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
     private final Set<String> publishTopics;
 
     private final boolean readOnly;
-    private final DTOMapper dtoMapper;
 
     public MqttPublishMessageHandlerImpl(
         @Value("${server.feature.mqttPublishTopics:Observations}") List<String> publishTopics,
@@ -74,12 +73,10 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
         @Value("${server.rootUrl}") String rootUrl,
         @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
         EntityServiceFactory serviceRepository,
-        ObjectMapper mapper,
-        DTOMapper dtoMapper) {
+        ObjectMapper mapper) {
         super(rootUrl, shouldEscapeId, serviceRepository);
         this.mapper = mapper;
         this.readOnly = readOnly;
-        this.dtoMapper = dtoMapper;
         Set topics = new HashSet<>(publishTopics);
 
         // Fallback to default if parameter was invalid
@@ -150,7 +147,7 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
                     payload = msg.getPayload().toString(Charset.defaultCharset());
                 }
 
-                Class<T> clazz = dtoMapper.collectionNameToClass(collection);
+                Class<T> clazz = DTOMapper.collectionNameToClass(collection);
                 ((StaEntityProvider<T>) serviceRepository.getEntityService(collection))
                     .create(mapper.readValue(payload, clazz));
             } else {

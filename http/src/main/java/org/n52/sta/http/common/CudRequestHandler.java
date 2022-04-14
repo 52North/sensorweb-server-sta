@@ -37,13 +37,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
-import org.n52.sta.DTOMapper;
 import org.n52.sta.api.EntityServiceFactory;
 import org.n52.sta.api.old.dto.common.EntityPatch;
 import org.n52.sta.api.old.dto.common.StaDTO;
 import org.n52.sta.api.provider.StaEntityProvider;
 import org.n52.sta.utils.AbstractSTARequestHandler;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.n52.sta.utils.DTOMapper;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -59,9 +58,6 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
 
     private static final String COULD_NOT_FIND_RELATED_ENTITY = "Could not find related Entity!";
     private final ObjectMapper mapper;
-
-    @Autowired
-    private DTOMapper dtoMapper;
 
     public CudRequestHandler(String rootUrl,
                              boolean shouldEscapeId,
@@ -81,7 +77,7 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
     @SuppressWarnings("unchecked")
     public StaDTO handlePostDirect(String collectionName, String body)
         throws IOException, STACRUDException, STAInvalidUrlException {
-        Class<T> clazz = dtoMapper.collectionNameToClass(collectionName);
+        Class<T> clazz = DTOMapper.collectionNameToClass(collectionName);
         return ((StaEntityProvider<T>)
             serviceRepository.getEntityService(collectionName)).create(mapper.readValue(body, clazz));
     }
