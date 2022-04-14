@@ -453,7 +453,7 @@
                     </excludes>
                     <strictCheck>true</strictCheck>
                     <properties>
-                        <year>${project.inceptionYear}-2021</year>
+                        <year>${project.inceptionYear}-2022</year>
                     </properties>
                     <mapping>
                         <java>SLASHSTAR_STYLE</java>
