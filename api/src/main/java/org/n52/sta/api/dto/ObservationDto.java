@@ -27,7 +27,8 @@
  */
 package org.n52.sta.api.dto;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.sta.api.entity.Datastream;
@@ -43,29 +44,26 @@ public class ObservationDto extends StaDto implements Observation {
 
     private Time resultTime;
 
-    // TODO: check if we can accept every possible object here or need to implement
-    // some kind of "serializableToJSON"
-    // interface
     private Object result;
 
-    // It is still pending what this actually is. Returning nothing for now
     private Object resultQuality;
 
     private Time validTime;
 
-    private ObjectNode parameters;
+    private Map<String, Object> properties;
 
     private Datastream datastream;
 
     private FeatureOfInterest featureOfInterest;
 
-    // private LicenseDTO license;
-    //
-    // private Set<RelationDTO> subjects;
-    //
-    // private Set<RelationDTO> objects;
-    //
-    // private Set<GroupDTO> observationGroups;
+    public ObservationDto() {
+        this.properties = new HashMap<>();
+    }
+
+    @Override
+    public Object getResultQuality() {
+        return resultQuality;
+    }
 
     public void setResultQuality(Object resultQuality) {
         this.resultQuality = resultQuality;
@@ -76,7 +74,6 @@ public class ObservationDto extends StaDto implements Observation {
         return phenomenonTime;
     }
 
-    @Override
     public void setPhenomenonTime(Time phenomenonTime) {
         this.phenomenonTime = phenomenonTime;
     }
@@ -86,7 +83,6 @@ public class ObservationDto extends StaDto implements Observation {
         return resultTime;
     }
 
-    @Override
     public void setResultTime(Time resultTime) {
         this.resultTime = resultTime;
     }
@@ -105,18 +101,21 @@ public class ObservationDto extends StaDto implements Observation {
         return validTime;
     }
 
-    @Override
     public void setValidTime(Time validTime) {
         this.validTime = validTime;
     }
 
     @Override
-    public ObjectNode getParameters() {
-        return parameters;
+    public Map<String, Object> getProperties() {
+        return new HashMap<>(properties);
     }
 
-    public void setParameters(ObjectNode parameters) {
-        this.parameters = parameters;
+    public void setProperties(Map<String, Object> properties) {
+        this.properties = new HashMap<>(properties);
+    }
+
+    public void addProperty(String key, Object value) {
+        this.properties.put(key, value);
     }
 
     @Override
@@ -137,41 +136,4 @@ public class ObservationDto extends StaDto implements Observation {
         this.datastream = datastream;
     }
 
-    // @Override
-    // public Set<RelationDTO> getSubjects() {
-    // return subjects;
-    // }
-    //
-    // public void setSubjects(Set<RelationDTO> subjects) {
-    // this.subjects = subjects;
-    // }
-    //
-    // @Override
-    // public Set<RelationDTO> getObjects() {
-    // return objects;
-    // }
-    //
-    // public void setObjects(Set<RelationDTO> objects) {
-    // this.objects = objects;
-    // }
-    //
-    // @Override
-    // public Set<GroupDTO> getObservationGroups() {
-    // return observationGroups;
-    // }
-    //
-    // @Override
-    // public void setObservationGroups(Set<GroupDTO> observationGroups) {
-    // this.observationGroups = observationGroups;
-    // }
-    //
-    // @Override
-    // public LicenseDTO getLicense() {
-    // return license;
-    // }
-    //
-    // @Override
-    // public void setLicense(LicenseDTO license) {
-    // this.license = license;
-    // }
 }

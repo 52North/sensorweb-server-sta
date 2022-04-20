@@ -30,8 +30,6 @@ package org.n52.sta.api.dto;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import org.locationtech.jts.geom.Geometry;
 import org.n52.sta.api.entity.HistoricalLocation;
 import org.n52.sta.api.entity.Location;
@@ -42,33 +40,20 @@ import org.n52.sta.api.entity.Thing;
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public class LocationDto extends StaDto implements Location {
+public class LocationDto extends BaseDto implements Location {
 
-    private String name;
-    private String description;
     private Geometry geometry;
+
     private Set<HistoricalLocation> historicalLocations;
+
     private Set<Thing> things;
-    private ObjectNode properties;
 
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public LocationDto() {
+        this.historicalLocations = new HashSet<>();
+        this.things = new HashSet<>();
     }
 
     @Override
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public String getEncodingType() {
         return "application/vnd.geo+json";
     }
@@ -82,38 +67,25 @@ public class LocationDto extends StaDto implements Location {
         this.geometry = geometry;
     }
 
-    @Override
-    public ObjectNode getProperties() {
-        return properties;
-    }
-
-    public void setProperties(ObjectNode properties) {
-        this.properties = properties;
-    }
-
-    @Override
     public void addHistoricalLocation(HistoricalLocation historicalLocation) {
-        if (this.historicalLocations == null) {
-            this.historicalLocations = new HashSet<>();
-        }
         this.historicalLocations.add(historicalLocation);
     }
 
     @Override
     public Set<HistoricalLocation> getHistoricalLocations() {
-        return historicalLocations;
+        return new HashSet<>(historicalLocations);
     }
 
     public void setHistoricalLocations(Set<HistoricalLocation> historicalLocations) {
-        this.historicalLocations = historicalLocations;
+        this.historicalLocations = new HashSet<>(historicalLocations);
     }
 
     @Override
     public Set<Thing> getThings() {
-        return things;
+        return new HashSet<>(things);
     }
 
     public void setThings(Set<Thing> things) {
-        this.things = things;
+        this.things = new HashSet<>(things);
     }
 }

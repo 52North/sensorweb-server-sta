@@ -39,26 +39,14 @@ public interface Sensor extends Identifiable {
 
     String getName();
 
-    void setName(String name);
-
     String getDescription();
-
-    void setDescription(String description);
 
     String getEncodingType();
 
-    void setEncodingType(String encodingType);
-
     String getMetadata();
-
-    void setMetadata(String metadata);
 
     Map<String, Object> getProperties();
 
-    void setProperties(Map<String, Object> properties);
-
     Set<Datastream> getDatastreams();
-
-    void setDatastreams(Set<Datastream> datastreams);
 
 }

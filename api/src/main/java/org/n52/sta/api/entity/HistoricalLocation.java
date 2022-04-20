@@ -41,13 +41,7 @@ public interface HistoricalLocation extends Identifiable {
 
     Time getTime();
 
-    void setTime(Time time);
-
     Set<Location> getLocations();
 
-    void setLocations(Set<Location> locations);
-
     Thing getThing();
-
-    void setThing(Thing thing);
 }

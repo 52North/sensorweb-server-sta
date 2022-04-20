@@ -27,6 +27,7 @@
  */
 package org.n52.sta.api.dto;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import org.n52.shetland.ogc.gml.time.Time;
@@ -45,7 +46,12 @@ public class HistoricalLocationDto extends StaDto implements HistoricalLocation 
 
     private Thing thing;
 
-    @Override public Time getTime() {
+    public HistoricalLocationDto() {
+        this.locations = new HashSet<>();
+    }
+
+    @Override
+    public Time getTime() {
         return time;
     }
 
@@ -53,15 +59,21 @@ public class HistoricalLocationDto extends StaDto implements HistoricalLocation 
         this.time = time;
     }
 
-    @Override public Set<Location> getLocations() {
-        return locations;
+    @Override
+    public Set<Location> getLocations() {
+        return new HashSet<>(locations);
     }
 
-    @Override public void setLocations(Set<Location> locations) {
-        this.locations = locations;
+    public void setLocations(Set<Location> locations) {
+        this.locations = new HashSet<>(locations);
     }
 
-    @Override public Thing getThing() {
+    public void addLocation(Location location) {
+        this.locations.add(location);
+    }
+
+    @Override
+    public Thing getThing() {
         return thing;
     }
 

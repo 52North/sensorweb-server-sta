@@ -39,25 +39,14 @@ public interface Thing extends Identifiable {
 
     String getName();
 
-    void setName(String name);
-
     String getDescription();
-
-    void setDescription(String description);
 
     Map<String, Object> getProperties();
 
-    void setProperties(Map<String, Object> properties);
-
     Set<HistoricalLocation> getHistoricalLocations();
-
-    void setHistoricalLocations(Set<HistoricalLocation> historicalLocations);
 
     Set<Location> getLocations();
 
-    void setLocations(Set<Location> locations);
-
     Set<Datastream> getDatastreams();
 
-    void setDatastreams(Set<Datastream> datastream);
 }

@@ -41,25 +41,13 @@ public interface FeatureOfInterest extends Identifiable {
 
     String getName();
 
-    void setName(String name);
-
     String getDescription();
-
-    void setDescription(String description);
 
     Map<String, Object> getProperties();
 
-    void setProperties(Map<String, Object> properties);
-
     String getEncodingType();
-
-    void setEncodingType(String encodingType);
 
     Geometry getFeature();
 
-    void setFeature(Geometry feature);
-
     Set<Observation> getObservations();
-
-    void setObservations(Set<Observation> observations);
 }

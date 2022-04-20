@@ -40,61 +40,33 @@ public interface Datastream extends Identifiable {
 
     String getName();
 
-    void setName(String name);
-
     String getDescription();
-
-    void setDescription(String description);
 
     Map<String, Object> getProperties();
 
-    void setProperties(Map<String, Object> properties);
-
     String getObservationType();
-
-    void setObservationType(String observationType);
 
     UnitOfMeasurement getUnitOfMeasurement();
 
-    void setUnitOfMeasurement(UnitOfMeasurement uom);
-
     Geometry getObservedArea();
-
-    void setObservedArea(Geometry observedArea);
 
     Time getPhenomenonTime();
 
-    void setPhenomenonTime(Time phenomenonTime);
-
     Time getResultTime();
-
-    void setResultTime(Time resultTimeStart);
 
     Thing getThing();
 
-    void setThing(Thing thing);
-
     Sensor getSensor();
-
-    void setSensor(Sensor sensor);
 
     ObservedProperty getObservedProperty();
 
-    void setObservedProperty(ObservedProperty observedProperty);
-
     Set<Observation> getObservations();
-
-    void setObservations(Set<Observation> observations);
 
     class UnitOfMeasurement {
 
-        private String symbol;
-        private String name;
-        private String definition;
-
-        public UnitOfMeasurement() {
-
-        }
+        private final String symbol;
+        private final String name;
+        private final String definition;
 
         public UnitOfMeasurement(String symbol, String name, String definition) {
             this.symbol = symbol;
@@ -106,24 +78,12 @@ public interface Datastream extends Identifiable {
             return symbol;
         }
 
-        public void setSymbol(String symbol) {
-            this.symbol = symbol;
-        }
-
         public String getName() {
             return name;
         }
 
-        public void setName(String name) {
-            this.name = name;
-        }
-
         public String getDefinition() {
             return definition;
-        }
-
-        public void setDefinition(String definition) {
-            this.definition = definition;
         }
     }
 }

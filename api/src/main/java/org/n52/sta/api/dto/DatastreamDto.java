@@ -27,9 +27,8 @@
  */
 package org.n52.sta.api.dto;
 
+import java.util.HashSet;
 import java.util.Set;
-
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import org.locationtech.jts.geom.Geometry;
 import org.n52.shetland.ogc.gml.time.Time;
@@ -42,11 +41,7 @@ import org.n52.sta.api.entity.Thing;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public class DatastreamDto extends StaDto implements Datastream {
-
-    private String name;
-
-    private String description;
+public class DatastreamDto extends BaseDto implements Datastream {
 
     private String observationType;
 
@@ -58,8 +53,6 @@ public class DatastreamDto extends StaDto implements Datastream {
 
     private Time resultTime;
 
-    private ObjectNode properties;
-
     private Thing thing;
 
     private Sensor sensor;
@@ -68,22 +61,8 @@ public class DatastreamDto extends StaDto implements Datastream {
 
     private Set<Observation> observations;
 
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Override
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
+    public DatastreamDto() {
+        this.observations = new HashSet<>();
     }
 
     @Override
@@ -118,7 +97,6 @@ public class DatastreamDto extends StaDto implements Datastream {
         return phenomenonTime;
     }
 
-    @Override
     public void setPhenomenonTime(Time phenomenonTime) {
         this.phenomenonTime = phenomenonTime;
     }
@@ -128,18 +106,8 @@ public class DatastreamDto extends StaDto implements Datastream {
         return resultTime;
     }
 
-    @Override
     public void setResultTime(Time resultTime) {
         this.resultTime = resultTime;
-    }
-
-    @Override
-    public ObjectNode getProperties() {
-        return properties;
-    }
-
-    public void setProperties(ObjectNode properties) {
-        this.properties = properties;
     }
 
     @Override
@@ -171,10 +139,14 @@ public class DatastreamDto extends StaDto implements Datastream {
 
     @Override
     public Set<Observation> getObservations() {
-        return observations;
+        return new HashSet<>(observations);
     }
 
     public void setObservations(Set<Observation> observations) {
-        this.observations = observations;
+        this.observations = new HashSet<>(observations);
+    }
+
+    public void addObservation(Observation observation) {
+        this.observations.add(observation);
     }
 }

@@ -41,15 +41,9 @@ public interface Observation extends Identifiable {
 
     Time getPhenomenonTime();
 
-    void setPhenomenonTime(Time phenomenonTimeEnd);
-
     Time getResultTime();
 
-    void setResultTime(Time resultTime);
-
     Object getResult();
-
-    void setResult(Object result);
 
     /**
      * It is currently unclear what this element actually contains.
@@ -60,22 +54,12 @@ public interface Observation extends Identifiable {
      */
     Object getResultQuality();
 
-    void setResultQuality(Object resultQuality);
-
     Time getValidTime();
-
-    void setValidTime(Time validTime);
 
     Map<String, Object> getProperties();
 
-    void setProperties(Map<String, Object> properties);
-
     FeatureOfInterest getFeatureOfInterest();
 
-    void setFeatureOfInterest(FeatureOfInterest featureOfInterest);
-
     Datastream getDatastream();
-
-    void setDatastream(Datastream datastream);
 
 }

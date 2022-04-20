@@ -30,8 +30,6 @@ package org.n52.sta.api.dto;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.HistoricalLocation;
 import org.n52.sta.api.entity.Location;
@@ -42,13 +40,7 @@ import org.n52.sta.api.entity.Thing;
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public class ThingDto extends StaDto implements Thing {
-
-    private String name;
-
-    private String description;
-
-    private ObjectNode properties;
+public class ThingDto extends BaseDto implements Thing {
 
     private Set<Datastream> datastreams;
 
@@ -56,79 +48,48 @@ public class ThingDto extends StaDto implements Thing {
 
     private Set<Location> locations;
 
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Override
-    public String getDescription() {
-        return description;
-    }
-
-    @Override
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    @Override
-    public ObjectNode getProperties() {
-        return properties;
-    }
-
-    @Override
-    public void setProperties(ObjectNode properties) {
-        this.properties = properties;
+    public ThingDto() {
+        this.datastreams = new HashSet<>();
+        this.historicalLocations = new HashSet<>();
+        this.locations = new HashSet<>();
     }
 
     @Override
     public Set<HistoricalLocation> getHistoricalLocations() {
-        return historicalLocations;
+        return new HashSet<>(historicalLocations);
     }
 
-    @Override
     public void setHistoricalLocations(Set<HistoricalLocation> historicalLocations) {
-        this.historicalLocations = historicalLocations;
+        this.historicalLocations = new HashSet<>(historicalLocations);
     }
 
-    @Override
     public void addHistoricalLocation(HistoricalLocation historicalLocation) {
-        if (this.historicalLocations == null) {
-            this.historicalLocations = new HashSet<>();
-        }
         this.historicalLocations.add(historicalLocation);
     }
 
     @Override
     public Set<Location> getLocations() {
-        return locations;
+        return new HashSet<>(locations);
     }
 
-    @Override
     public void setLocations(Set<Location> locations) {
-        this.locations = locations;
+        this.locations = new HashSet<>(locations);
     }
 
-    @Override
-    public void addLocations(Location location) {
-        if (this.locations == null) {
-            this.locations = new HashSet<>();
-        }
+    public void addLocation(Location location) {
         this.locations.add(location);
     }
 
     @Override
-    public Set<Datastream> getDatastream() {
-        return this.datastreams;
+    public Set<Datastream> getDatastreams() {
+        return new HashSet<>(datastreams);
     }
 
-    @Override
     public void setDatastreams(Set<Datastream> datastreams) {
-        this.datastreams = datastreams;
+        this.datastreams = new HashSet<>(datastreams);
+    }
+
+    public void addDatastream(Datastream datastream) {
+        this.datastreams.add(datastream);
     }
 }

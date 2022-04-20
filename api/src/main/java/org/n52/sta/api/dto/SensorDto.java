@@ -30,44 +30,22 @@ package org.n52.sta.api.dto;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.Sensor;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public class SensorDto extends StaDto implements Sensor {
-
-    private String name;
-
-    private String description;
+public class SensorDto extends BaseDto implements Sensor {
 
     private String encodingType;
 
     private String metadata;
 
-    private ObjectNode properties;
-
     private Set<Datastream> datastreams;
 
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Override
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
+    public SensorDto() {
+        this.datastreams = new HashSet<>();
     }
 
     @Override
@@ -89,28 +67,15 @@ public class SensorDto extends StaDto implements Sensor {
     }
 
     @Override
-    public ObjectNode getProperties() {
-        return properties;
-    }
-
-    public void setProperties(ObjectNode properties) {
-        this.properties = properties;
-    }
-
-    @Override
     public Set<Datastream> getDatastreams() {
-        return datastreams;
+        return new HashSet<>(datastreams);
     }
 
     public void setDatastreams(Set<Datastream> datastreams) {
-        this.datastreams = datastreams;
+        this.datastreams = new HashSet<>(datastreams);
     }
 
-    @Override
     public void addDatastream(Datastream datastream) {
-        if (this.datastreams == null) {
-            this.datastreams = new HashSet<>();
-        }
         this.datastreams.add(datastream);
     }
 }
