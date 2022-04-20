@@ -16,7 +16,6 @@ public class LocationFactory extends BaseDtoFactory<LocationDto, LocationFactory
 
     public static Location create(LocationEntity entity) {
         LocationFactory factory = create();
-
         factory.withMetadata(entity);
         factory.setProperties(entity);
         factory.setGeometry(entity.getGeometry());

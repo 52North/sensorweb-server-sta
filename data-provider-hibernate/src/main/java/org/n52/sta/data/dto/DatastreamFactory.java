@@ -10,6 +10,9 @@ import org.n52.janmayen.stream.Streams;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.FormatEntity;
+import org.n52.series.db.beans.PhenomenonEntity;
+import org.n52.series.db.beans.PlatformEntity;
+import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.UnitEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.sta.api.dto.DatastreamDto;
@@ -29,6 +32,9 @@ public class DatastreamFactory extends BaseDtoFactory<DatastreamDto, DatastreamF
         factory.setObservations(entity);
         factory.setObservationType(entity);
         factory.setObservedArea(entity.getGeometry());
+        factory.setObservedProperty(entity.getPhenomenon());
+        factory.setSensor(entity.getProcedure());
+        factory.setThing(entity.getPlatform());
 
         // TODO includeDatastreamCategory
         factory.setProperties(entity);
@@ -44,14 +50,26 @@ public class DatastreamFactory extends BaseDtoFactory<DatastreamDto, DatastreamF
         super(dto);
     }
 
+    private DatastreamFactory setThing(PlatformEntity entity) {
+        return setThing(ThingFactory.create(entity));
+    }
+
     public DatastreamFactory setThing(Thing thing) {
         get().setThing(thing);
         return this;
     }
 
+    private DatastreamFactory setSensor(ProcedureEntity entity) {
+        return setSensor(SensorFactory.create(entity));
+    }
+
     public DatastreamFactory setSensor(Sensor sensor) {
         get().setSensor(sensor);
         return this;
+    }
+
+    private DatastreamFactory setObservedProperty(PhenomenonEntity entity) {
+        return setObservedProperty(ObservedPropertyFactory.create(entity));
     }
 
     public DatastreamFactory setObservedProperty(ObservedProperty observedProperty) {

@@ -6,11 +6,13 @@ import java.util.Set;
 
 import org.joda.time.DateTime;
 import org.n52.janmayen.stream.Streams;
+import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.sta.api.dto.ObservationDto;
+import org.n52.sta.api.entity.FeatureOfInterest;
 import org.n52.sta.api.entity.Observation;
 import org.n52.sta.utils.TimeUtil;
 
@@ -20,6 +22,7 @@ public class ObservationFactory<T> {
         ObservationFactory<E> factory = create();
         factory.setIdentifier(entity.getStaIdentifier());
         factory.setResult(entity.getValue());
+        factory.setFeatureOfInterest(entity.getFeature());
 
         // TODO handle special properties (verticalTo, etc.)
         factory.setProperties(entity);
@@ -37,13 +40,22 @@ public class ObservationFactory<T> {
         this.dto = dto;
     }
 
+    public ObservationFactory<T> setIdentifier(String staIdentifier) {
+        dto.setId(staIdentifier);
+        return this;
+    }
+
     public ObservationFactory<T> setResult(T value) {
         dto.setResult(value);
         return this;
     }
 
-    public ObservationFactory<T> setIdentifier(String staIdentifier) {
-        dto.setId(staIdentifier);
+    private ObservationFactory<T> setFeatureOfInterest(AbstractFeatureEntity<?> entity) {
+        return setFeatureOfInterest(FeatureOfInterestFactory.create(entity));
+    }
+
+    public ObservationFactory<T> setFeatureOfInterest(FeatureOfInterest feature) {
+        dto.setFeatureOfInterest(feature);
         return this;
     }
 

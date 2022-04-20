@@ -5,6 +5,8 @@ import java.util.Set;
 import org.n52.janmayen.stream.Streams;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.PlatformEntity;
+import org.n52.series.db.beans.sta.HistoricalLocationEntity;
+import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.api.dto.ThingDto;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.HistoricalLocation;
@@ -17,9 +19,10 @@ public class ThingFactory extends BaseDtoFactory<ThingDto, ThingFactory> {
         ThingFactory factory = create();
 
         factory.withMetadata(entity);
-        factory.setDatastreams(entity);
         factory.setProperties(entity);
-        
+        factory.setDatastreams(entity);
+        factory.setLocations(entity.getLocations());
+        factory.setHistoricalLocations(entity.getHistoricalLocations());
 
         return factory.get();
     }
@@ -48,9 +51,27 @@ public class ThingFactory extends BaseDtoFactory<ThingDto, ThingFactory> {
         return this;
     }
 
+    private ThingFactory setLocations(Set<LocationEntity> locations) {
+        Streams.stream(locations).forEach(this::addLocation);
+        return this;
+    }
+
+    private ThingFactory addLocation(LocationEntity entity) {
+        return addLocation(LocationFactory.create(entity));
+    }
+
     public ThingFactory addLocation(Location location) {
         get().addLocation(location);
         return this;
+    }
+
+    private ThingFactory setHistoricalLocations(Set<HistoricalLocationEntity> locations) {
+        Streams.stream(locations).forEach(this::addLocation);
+        return this;
+    }
+
+    private ThingFactory addLocation(HistoricalLocationEntity entity) {
+        return addLocation(HistoricalLocationFactory.create(entity));
     }
 
     public ThingFactory addLocation(HistoricalLocation location) {

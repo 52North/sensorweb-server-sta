@@ -7,10 +7,12 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.n52.janmayen.stream.Streams;
+import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
 import org.n52.sta.api.dto.SensorDto;
+import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.Sensor;
 
 public class SensorFactory extends BaseDtoFactory<SensorDto, SensorFactory> {
@@ -19,7 +21,8 @@ public class SensorFactory extends BaseDtoFactory<SensorDto, SensorFactory> {
         SensorFactory factory = create();
         factory.withMetadata(entity);
         factory.setProperties(entity);
-        factory.setMetadata(entity);
+        factory.setSensorMetadata(entity);
+        factory.setDatastreams(entity);
 
         return factory.get();
     }
@@ -32,11 +35,11 @@ public class SensorFactory extends BaseDtoFactory<SensorDto, SensorFactory> {
         super(dto);
     }
 
-    private SensorFactory setMetadata(ProcedureEntity entity) {
+    private SensorFactory setSensorMetadata(ProcedureEntity entity) {
         FormatEntity format = entity.getFormat();
         String file = entity.getDescriptionFile();
         Optional<String> metadata = useLinkToFile(file).or(getXml(entity));
-        return setMetadata(format.getFormat(), metadata.orElse(null));
+        return setSensorMetadata(format.getFormat(), metadata.orElse(null));
     }
 
     private Optional<String> useLinkToFile(String file) {
@@ -58,11 +61,25 @@ public class SensorFactory extends BaseDtoFactory<SensorDto, SensorFactory> {
         return entity -> entity.getEndTime() == null;
     }
 
-    public SensorFactory setMetadata(String encodingType, String metadata) {
+    public SensorFactory setSensorMetadata(String encodingType, String metadata) {
         get().setEncodingType(encodingType);
         get().setMetadata(metadata);
         return this;
+    }
 
+    private SensorFactory setDatastreams(ProcedureEntity entity) {
+        Set<AbstractDatasetEntity> datasets = entity.getDatasets();
+        Streams.stream(datasets).forEach(this::addDatastream);
+        return this;
+    }
+
+    private SensorFactory addDatastream(AbstractDatasetEntity entity) {
+        return addDatastream(DatastreamFactory.create(entity));
+    }
+
+    public SensorFactory addDatastream(Datastream datastream) {
+        get().addDatastream(datastream);
+        return this;
     }
 
 }

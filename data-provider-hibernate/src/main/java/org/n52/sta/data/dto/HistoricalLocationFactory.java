@@ -24,7 +24,6 @@ public class HistoricalLocationFactory {
 
         return factory.get();
     }
-    
 
     public static HistoricalLocationFactory create() {
         return new HistoricalLocationFactory(new HistoricalLocationDto());
