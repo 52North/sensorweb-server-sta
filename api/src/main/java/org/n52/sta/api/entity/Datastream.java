@@ -60,7 +60,7 @@ public interface Datastream extends Identifiable {
 
     ObservedProperty getObservedProperty();
 
-    Set<Observation> getObservations();
+    Set<Observation<?>> getObservations();
 
     class UnitOfMeasurement {
 

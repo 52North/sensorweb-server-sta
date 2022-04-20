@@ -38,13 +38,13 @@ import org.n52.sta.api.entity.Observation;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public class ObservationDto extends StaDto implements Observation {
+public class ObservationDto<T> extends StaDto implements Observation<T> {
 
     private Time phenomenonTime;
 
     private Time resultTime;
 
-    private Object result;
+    private T result;
 
     private Object resultQuality;
 
@@ -88,11 +88,11 @@ public class ObservationDto extends StaDto implements Observation {
     }
 
     @Override
-    public Object getResult() {
+    public T getResult() {
         return result;
     }
 
-    public void setResult(Object result) {
+    public void setResult(T result) {
         this.result = result;
     }
 

@@ -88,4 +88,8 @@ public class LocationDto extends BaseDto implements Location {
     public void setThings(Set<Thing> things) {
         this.things = new HashSet<>(things);
     }
+
+    public void addThing(Thing thing) {
+        this.things.add(thing);
+    }
 }

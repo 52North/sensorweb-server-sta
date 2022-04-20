@@ -3,13 +3,17 @@ package org.n52.sta.api.dto;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BaseDto extends StaDto {
+public abstract class BaseDto extends StaDto {
      
     private String name;
 
     private String description;
 
     private Map<String, Object> properties;
+
+    protected BaseDto() {
+        this.properties = new HashMap<>();
+    }
 
     public String getName() {
         return name;
@@ -33,6 +37,10 @@ public class BaseDto extends StaDto {
 
     public void setProperties(Map<String, Object> properties) {
         this.properties = new HashMap<>(properties);
+    }
+
+    public void addProperty(String key, Object value) {
+        this.properties.put(key, value);
     }
 
 }

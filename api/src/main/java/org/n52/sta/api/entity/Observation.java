@@ -37,13 +37,13 @@ import org.n52.shetland.ogc.gml.time.Time;
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public interface Observation extends Identifiable {
+public interface Observation<T> extends Identifiable {
 
     Time getPhenomenonTime();
 
     Time getResultTime();
 
-    Object getResult();
+    T getResult();
 
     /**
      * It is currently unclear what this element actually contains.

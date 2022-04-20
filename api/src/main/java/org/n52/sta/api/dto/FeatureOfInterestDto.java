@@ -39,23 +39,12 @@ import org.n52.sta.api.entity.Observation;
  */
 public class FeatureOfInterestDto extends BaseDto implements FeatureOfInterest {
 
-    private String encodingType;
-
     private Geometry feature;
 
-    private Set<Observation> observations;
+    private Set<Observation<?>> observations;
 
     public FeatureOfInterestDto() {
         this.observations = new HashSet<>();
-    }
-
-    @Override
-    public String getEncodingType() {
-        return encodingType;
-    }
-
-    public void setEncodingType(String encodingType) {
-        this.encodingType = encodingType;
     }
 
     @Override
@@ -68,15 +57,15 @@ public class FeatureOfInterestDto extends BaseDto implements FeatureOfInterest {
     }
 
     @Override
-    public Set<Observation> getObservations() {
+    public Set<Observation<?>> getObservations() {
         return new HashSet<>(observations);
     }
 
-    public void setObservations(Set<Observation> observations) {
+    public void setObservations(Set<Observation<?>> observations) {
         this.observations = new HashSet<>(observations);
     }
 
-    public void addObservation(Observation observation) {
+    public void addObservation(Observation<?> observation) {
         this.observations.add(observation);
     }
 }

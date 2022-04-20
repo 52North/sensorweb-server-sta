@@ -45,9 +45,7 @@ public interface FeatureOfInterest extends Identifiable {
 
     Map<String, Object> getProperties();
 
-    String getEncodingType();
-
     Geometry getFeature();
 
-    Set<Observation> getObservations();
+    Set<Observation<?>> getObservations();
 }
