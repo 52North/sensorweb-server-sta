@@ -27,9 +27,8 @@
  */
 package org.n52.sta.api.entity;
 
+import java.util.Map;
 import java.util.Set;
-
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * Data Transfer Object for handling a Sensor as specified in 18-088 OGC SensorThingsAPI Part I Section 8.2.5
@@ -54,13 +53,12 @@ public interface Sensor extends Identifiable {
 
     void setMetadata(String metadata);
 
-    ObjectNode getProperties();
+    Map<String, Object> getProperties();
 
-    void setProperties(ObjectNode properties);
+    void setProperties(Map<String, Object> properties);
 
     Set<Datastream> getDatastreams();
 
     void setDatastreams(Set<Datastream> datastreams);
 
-    void addDatastream(Datastream datastream);
 }

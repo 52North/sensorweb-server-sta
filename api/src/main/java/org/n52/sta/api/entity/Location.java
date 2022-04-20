@@ -27,9 +27,8 @@
  */
 package org.n52.sta.api.entity;
 
+import java.util.Map;
 import java.util.Set;
-
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import org.locationtech.jts.geom.Geometry;
 
@@ -42,29 +41,15 @@ public interface Location extends Identifiable {
 
     String getName();
 
-    void setName(String name);
-
     String getDescription();
 
-    void setDescription(String description);
+    Map<String, Object> getProperties();
 
     String getEncodingType();
 
     Geometry getGeometry();
 
-    void setGeometry(Geometry geometry);
-
-    ObjectNode getProperties();
-
-    void setProperties(ObjectNode properties);
-
-    void addHistoricalLocation(HistoricalLocation historicalLocations);
-
     Set<HistoricalLocation> getHistoricalLocations();
 
-    void setHistoricalLocations(Set<HistoricalLocation> historicalLocations);
-
     Set<Thing> getThings();
-
-    void setThings(Set<Thing> things);
 }

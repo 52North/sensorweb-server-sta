@@ -27,9 +27,8 @@
  */
 package org.n52.sta.api.entity;
 
+import java.util.Map;
 import java.util.Set;
-
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * Data Transfer Object for handling an ObservedProperty as specified in 18-088 OGC SensorThingsAPI Part I Section 8.2.6
@@ -50,13 +49,11 @@ public interface ObservedProperty extends Identifiable {
 
     void setDefinition(String definition);
 
-    ObjectNode getProperties();
+    Map<String, Object> getProperties();
 
-    void setProperties(ObjectNode properties);
+    void setProperties(Map<String, Object> properties);
 
     Set<Datastream> getDatastreams();
 
     void setDatastreams(Set<Datastream> datastreams);
-
-    void addDatastream(Datastream datastream);
 }

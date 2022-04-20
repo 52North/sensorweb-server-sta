@@ -27,9 +27,8 @@
  */
 package org.n52.sta.api.entity;
 
+import java.util.Map;
 import java.util.Set;
-
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * Data Transfer Object for handling a Thing as specified in 18-088 OGC SensorThingsAPI Part I Section 8.2.1
@@ -46,23 +45,19 @@ public interface Thing extends Identifiable {
 
     void setDescription(String description);
 
-    ObjectNode getProperties();
+    Map<String, Object> getProperties();
 
-    void setProperties(ObjectNode properties);
+    void setProperties(Map<String, Object> properties);
 
     Set<HistoricalLocation> getHistoricalLocations();
 
     void setHistoricalLocations(Set<HistoricalLocation> historicalLocations);
 
-    void addHistoricalLocation(HistoricalLocation historicalLocation);
-
     Set<Location> getLocations();
 
     void setLocations(Set<Location> locations);
 
-    void addLocations(Location location);
-
-    Set<Datastream> getDatastream();
+    Set<Datastream> getDatastreams();
 
     void setDatastreams(Set<Datastream> datastream);
 }

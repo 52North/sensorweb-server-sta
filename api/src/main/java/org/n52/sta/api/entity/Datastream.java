@@ -27,9 +27,8 @@
  */
 package org.n52.sta.api.entity;
 
+import java.util.Map;
 import java.util.Set;
-
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import org.locationtech.jts.geom.Geometry;
 import org.n52.shetland.ogc.gml.time.Time;
@@ -47,6 +46,10 @@ public interface Datastream extends Identifiable {
 
     void setDescription(String description);
 
+    Map<String, Object> getProperties();
+
+    void setProperties(Map<String, Object> properties);
+
     String getObservationType();
 
     void setObservationType(String observationType);
@@ -57,7 +60,7 @@ public interface Datastream extends Identifiable {
 
     Geometry getObservedArea();
 
-    void setObservedArea(Geometry ObservedArea);
+    void setObservedArea(Geometry observedArea);
 
     Time getPhenomenonTime();
 
@@ -66,10 +69,6 @@ public interface Datastream extends Identifiable {
     Time getResultTime();
 
     void setResultTime(Time resultTimeStart);
-
-    ObjectNode getProperties();
-
-    void setProperties(ObjectNode properties);
 
     Thing getThing();
 

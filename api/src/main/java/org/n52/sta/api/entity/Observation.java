@@ -27,7 +27,7 @@
  */
 package org.n52.sta.api.entity;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Map;
 
 import org.n52.shetland.ogc.gml.time.Time;
 
@@ -52,23 +52,23 @@ public interface Observation extends Identifiable {
     void setResult(Object result);
 
     /**
-     * It is currently unclear what this element actually contains, so it is
-     * omitted for now. See:
-     * https://github.com/opengeospatial/sensorthings/issues/68
+     * It is currently unclear what this element actually contains.
      *
      * @return DQ_Element
+     * 
+     * @see https://github.com/opengeospatial/sensorthings/issues/68
      */
-    default Object getResultQuality() {
-        return null;
-    }
+    Object getResultQuality();
+
+    void setResultQuality(Object resultQuality);
 
     Time getValidTime();
 
     void setValidTime(Time validTime);
 
-    ObjectNode getParameters();
+    Map<String, Object> getProperties();
 
-    void setParameters(ObjectNode parameters);
+    void setProperties(Map<String, Object> properties);
 
     FeatureOfInterest getFeatureOfInterest();
 
@@ -78,19 +78,4 @@ public interface Observation extends Identifiable {
 
     void setDatastream(Datastream datastream);
 
-//    Set<RelationDTO> getSubjects();
-//
-//    void setSubjects(Set<RelationDTO> subjects);
-//
-//    Set<RelationDTO> getObjects();
-//
-//    void setObjects(Set<RelationDTO> objects);
-//
-//    Set<GroupDTO> getObservationGroups();
-//
-//    void setObservationGroups(Set<GroupDTO> groups);
-//
-//    LicenseDTO getLicense();
-//
-//    void setLicense(LicenseDTO license);
 }

@@ -27,9 +27,8 @@
  */
 package org.n52.sta.api.entity;
 
+import java.util.Map;
 import java.util.Set;
-
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import org.locationtech.jts.geom.Geometry;
 
@@ -48,6 +47,10 @@ public interface FeatureOfInterest extends Identifiable {
 
     void setDescription(String description);
 
+    Map<String, Object> getProperties();
+
+    void setProperties(Map<String, Object> properties);
+
     String getEncodingType();
 
     void setEncodingType(String encodingType);
@@ -55,10 +58,6 @@ public interface FeatureOfInterest extends Identifiable {
     Geometry getFeature();
 
     void setFeature(Geometry feature);
-
-    ObjectNode getProperties();
-
-    void setProperties(ObjectNode properties);
 
     Set<Observation> getObservations();
 
