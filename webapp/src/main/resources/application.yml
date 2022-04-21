@@ -5,7 +5,7 @@ trace: false
 # General Server Configuration
 server:
   ## Used for response serialization + url parsing. Must be set correctly!
-  rootUrl: "http://localhost:8080/52n-sensorthings-webapp/"
+  rootUrl: "http://localhost:8080/v1.1/"
 
   ## Used for enabling/disabling custom 52N-STA Features
   feature:
