@@ -39,9 +39,11 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.locationtech.jts.io.geojson.GeoJsonWriter;
+import org.n52.series.db.beans.CountDataEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.HibernateRelations;
 import org.n52.series.db.beans.ProfileDataEntity;
+import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.TrajectoryDataEntity;
 import org.n52.series.db.beans.parameter.JsonParameterEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
@@ -153,6 +155,10 @@ public class ObservationSerDes {
                                           trajectoryResultSchema,
                                           gen,
                                           serializers);
+                } else if (observation instanceof QuantityDataEntity) {
+                    gen.writeNumber(((QuantityDataEntity) observation).getValue());
+                } else if (observation instanceof CountDataEntity) {
+                    gen.writeNumber(((CountDataEntity) observation).getValue());
                 } else {
                     gen.writeString(observation.getValue().toString());
                 }
