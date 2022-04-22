@@ -37,12 +37,13 @@ import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.geojson.GeoJsonReader;
 import org.n52.series.db.beans.FormatEntity;
+import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.springframework.util.Assert;
 
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -160,7 +161,9 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
                         if (self.getThings() != null) {
                             self.getThings().add(((JSONThing) backReference).getEntity());
                         } else {
-                            self.setThings(Collections.singleton(((JSONThing) backReference).getEntity()));
+                            HashSet<PlatformEntity> things = new HashSet<>();
+                            things.add(((JSONThing) backReference).getEntity());
+                            self.setThings(things);
                         }
                     } else {
                         JSONHistoricalLocation backRef = (JSONHistoricalLocation) backReference;
