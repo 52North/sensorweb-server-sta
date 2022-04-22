@@ -106,7 +106,6 @@ public class ITExpand extends ConformanceTests implements TestUtil {
 
     private void checkSingleExpandOnCollection(EntityType type, String expanded) throws Exception {
         JsonNode response = getCollection(type, "$expand=" + expanded);
-        Assertions.assertTrue(response.has(countKey));
         Assertions.assertTrue(response.has(value));
         for (JsonNode item : response.get(value)) {
             if (item.get(expanded).isArray()) {
@@ -169,7 +168,6 @@ public class ITExpand extends ConformanceTests implements TestUtil {
                 expand.append(expanded[i]);
             }
             JsonNode response = getCollection(type, "$expand=" + expand.toString());
-            Assertions.assertTrue(response.has(countKey));
             Assertions.assertTrue(response.has(value));
             for (JsonNode item : response.get(value)) {
                 for (int i = 0; i < length; i++) {
