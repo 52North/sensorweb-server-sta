@@ -112,15 +112,6 @@
                 <artifactId>sta-webapp</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            
-            <dependency>
-                <!-- Import dependency management from Spring Boot -->
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring-boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
 
             <dependency>
                 <groupId>org.n52.sensorweb-server.db-model</groupId>
@@ -162,6 +153,15 @@
                 <groupId>org.n52.arctic-sea</groupId>
                 <artifactId>svalbard-odata</artifactId>
                 <version>${arctic-sea.version}</version>
+            </dependency>
+
+            <dependency>
+                <!-- Import dependency management from Spring Boot -->
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
             <dependency>
@@ -230,19 +230,19 @@
                 <artifactId>slf4j-api</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
-            
-            
+
+
             <dependency>
                 <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-annotations</artifactId>
                 <version>${spotbugs.version}</version>
             </dependency>
-<!--            <dependency>
+            <!--            <dependency>
                 <groupId>com.google.code.findbugs</groupId>
                 <artifactId>jsr305</artifactId>
                 <version>${findbugs.version}</version>
             </dependency>-->
-            
+
             <dependency>
                 <groupId>org.hamcrest</groupId>
                 <artifactId>hamcrest-core</artifactId>
@@ -279,7 +279,7 @@
                 <version>${paho.version}</version>
                 <scope>test</scope>
             </dependency>
-            
+
         </dependencies>
     </dependencyManagement>
 
