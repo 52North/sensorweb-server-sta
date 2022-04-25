@@ -29,7 +29,7 @@ package org.n52.sta.plus.persistence.repositories;
 
 import org.n52.series.db.beans.sta.plus.GroupEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
-import org.n52.sta.data.repositories.NameRepository;
+import org.n52.sta.data.old.repositories.NameRepository;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;

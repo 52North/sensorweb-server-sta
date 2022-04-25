@@ -1,9 +1,35 @@
+/*
+ * Copyright (C) 2018-2022 52°North Spatial Information Research GmbH
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation.
+ *
+ * If the program is linked with libraries which are licensed under one of
+ * the following licenses, the combination of the program with the linked
+ * library is not considered a "derivative work" of the program:
+ *
+ *     - Apache License, version 2.0
+ *     - Apache Software License, version 1.0
+ *     - GNU Lesser General Public License, version 3
+ *     - Mozilla Public License, versions 1.0, 1.1 and 2.0
+ *     - Common Development and Distribution License (CDDL), version 1.0
+ *
+ * Therefore the distribution of the program linked with libraries licensed
+ * under the aforementioned licenses, is permitted by the copyright holders
+ * if the distribution is compliant with both the GNU General Public
+ * License version 2 and the aforementioned licenses.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details.
+ */
 package org.n52.sta.data.dto;
 
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.n52.janmayen.stream.Streams;
@@ -15,7 +41,11 @@ import org.n52.sta.api.dto.SensorDto;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.Sensor;
 
-public class SensorFactory extends BaseDtoFactory<SensorDto, SensorFactory> {
+public final class SensorFactory extends BaseDtoFactory<SensorDto, SensorFactory> {
+
+    private SensorFactory(SensorDto dto) {
+        super(dto);
+    }
 
     public static Sensor create(ProcedureEntity entity) {
         SensorFactory factory = create();
@@ -31,37 +61,14 @@ public class SensorFactory extends BaseDtoFactory<SensorDto, SensorFactory> {
         return new SensorFactory(new SensorDto());
     }
 
-    private SensorFactory(SensorDto dto) {
-        super(dto);
-    }
-
     private SensorFactory setSensorMetadata(ProcedureEntity entity) {
         FormatEntity format = entity.getFormat();
         String file = entity.getDescriptionFile();
-        Optional<String> metadata = useLinkToFile(file).or(getXml(entity));
-        return setSensorMetadata(format.getFormat(), metadata.orElse(null));
+        String metadata = useLinkToFile(file).orElse(getXml(entity).orElse(null));
+        return setSensorMetadata(format.getFormat(), metadata);
     }
 
-    private Optional<String> useLinkToFile(String file) {
-        return Optional.ofNullable(file).filter(f -> !f.isEmpty());
-    }
-
-    private Supplier<Optional<String>> getXml(ProcedureEntity entity) {
-        return () -> {
-            Set<ProcedureHistoryEntity> history = entity.getProcedureHistory();
-            return findCurrentFrom(history).map(ProcedureHistoryEntity::getXml).findFirst();
-        };
-    }
-
-    private Stream<ProcedureHistoryEntity> findCurrentFrom(Set<ProcedureHistoryEntity> history) {
-        return Streams.stream(history).filter(isLatest());
-    }
-
-    private Predicate<? super ProcedureHistoryEntity> isLatest() {
-        return entity -> entity.getEndTime() == null;
-    }
-
-    public SensorFactory setSensorMetadata(String encodingType, String metadata) {
+     public SensorFactory setSensorMetadata(String encodingType, String metadata) {
         get().setEncodingType(encodingType);
         get().setMetadata(metadata);
         return this;
@@ -80,6 +87,23 @@ public class SensorFactory extends BaseDtoFactory<SensorDto, SensorFactory> {
     public SensorFactory addDatastream(Datastream datastream) {
         get().addDatastream(datastream);
         return this;
+    }
+
+    private Optional<String> useLinkToFile(String file) {
+        return Optional.ofNullable(file).filter(f -> !f.isEmpty());
+    }
+
+    private Optional<String> getXml(ProcedureEntity entity) {
+        Set<ProcedureHistoryEntity> history = entity.getProcedureHistory();
+        return findCurrentFrom(history).map(ProcedureHistoryEntity::getXml).findFirst();
+    }
+
+    private Stream<ProcedureHistoryEntity> findCurrentFrom(Set<ProcedureHistoryEntity> history) {
+        return Streams.stream(history).filter(isLatest());
+    }
+
+    private Predicate<? super ProcedureHistoryEntity> isLatest() {
+        return entity -> entity.getEndTime() == null;
     }
 
 }

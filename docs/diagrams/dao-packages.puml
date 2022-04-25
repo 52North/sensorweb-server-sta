@@ -1,54 +1,94 @@
 @startuml 52n SensorThings API, DAO Packages
 
-package "javax (persistence)" as javax_persistence #dd7766 {
-    class "CriteriaBuilder" as criterion_builder
-    class "Expression" as expression
+package "javax.persistence.*" as javax_persistence #dd7766 {
+    interface "EntityManager" as em
+    interface "CriteriaBuilder" as criteria_builder
+    interface "Predicate" as predicate
 }
 
-package "criterion (hibernate)" as hibernate_criterion #dd7766 {
-    class "HibernateCriteriaBuilder" as hibernate_criterion_builder
+package "hibernate.query.*" as hibernate_criterion #dd7766 {
+    class "HibernateCriteriaBuilder" as hibernate_criteria_builder
 }
 
 package "data (spring)" as spring_data #dd7766 {
+    class "SimpleJpaRepository" as simple_jpa_repo
     interface "JpaRepository" as jpa_repo
-    interface "Specification" as specifications
+    interface "Specification" as spring_spec
     interface "JpaSpecificationExecutor" as spec_executor
+
 }
 
-package query {}
-note top of query {
-    Contains DDD Query Specifications
+package "arctic-sea" as pkg_arcticsea #dd7766 {
+    class "QueryOptions" as query_options
 }
 
-package repositories as repos {}
-note top of repos {
-    Provides cascaded Spring data JPA repositories 
-}
-package service as services {
-    class "DataStreamService" as ds_service
-    class "FilterExprVisitor" as visitor
-    class "HibernateSpatialCriteriaBuilderImpl" as spatial_criterion_builder
+package query as pkg_query{
+    package specifications as specs {
+        class "QuerySpecificationFactory" as spec_factory
+        interface "BaseQuerySpecification" as base_spec
+
+    }
+    class "HibernateSpatialCriteriaBuilderImpl" as spatial_criteria_builder
+    class "FilterQueryVisitor" as visitor
     note bottom of visitor {
-        Creates Expression from $filter query parameter
-        which can be used in the CriteriaBuilder
+        Creates a Predicate from $filter query
+        which can be used with CriteriaBuilder
         
     }
 }
-note top of services {
-    Contains services which are DDD Aggregate-like
+
+package repositories as pkg_repos_base {
+    interface "BaseRepository" as base_repo
+    class "BaseRepositoryImpl" as base_repo_impl
+    
+    package "value" as pkg_repos_values {}
+    package "parameter" as pkg_repos_params {}
+    package "entity" as pkg_repos_entity {
+        interface "DataStreamRepository" as datastream_repo 
+    }
 }
 
+package entity as entity {
+    interface "DataStream" as ds_entity
+    interface "EntityProvider" as entity_provider <T>
+    class "DataStreamEntityProvider" as ds_provider
+}
 
-ds_service ..> visitor : creates
-repos ..|> jpa_repo : extending
-repos ..|> spec_executor : extending
-ds_service -d-> repos : uses
-ds_service -r-> query : uses
-ds_service --> spatial_criterion_builder : creates
-spatial_criterion_builder --|> hibernate_criterion_builder
-query ..> specifications : creates
+package domain as domain {
+    interface "DomainService" as domain_service
+    interface "AggregateFactory" as aggregate_factory
+    class "DataStreamService" as ds_service {
+        entityProvider
+        domainService
+    }
+    
+}
 
-hibernate_criterion_builder ..> criterion_builder : returns
-visitor ..> expression : returns
+domain_service <|.. ds_service : implements
+domain_service <-- ds_service : uses
+entity_provider <-- ds_service
+
+spring_spec <|.. base_spec : creates
+simple_jpa_repo <|-- base_repo_impl
+base_repo <|.. base_repo_impl
+base_repo <|.. datastream_repo
+
+base_spec <|.. spec_factory : creates
+spec_factory <-- visitor
+
+ds_entity <.. ds_provider  : creates
+entity_provider <|.. ds_provider : implements
+ds_provider ..> query_options : parses
+jpa_repo <|.. base_repo : extends
+spec_executor <|.. base_repo: extends
+
+'ds_provider --> repos : uses
+'ds_provider --> query : uses
+'query ..> specifications : creates
+'ds_provider --> spatial_criteria_builder : creates
+'spatial_criteria_builder --|> hibernate_criteria_builder
+
+hibernate_criteria_builder ..> criteria_builder : returns
+visitor ..> predicate : returns
 
 @enduml

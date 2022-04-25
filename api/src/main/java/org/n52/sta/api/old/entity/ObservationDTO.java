@@ -79,19 +79,4 @@ public interface ObservationDTO extends StaDTO {
 
     void setDatastream(DatastreamDTO datastream);
 
-//    Set<RelationDTO> getSubjects();
-//
-//    void setSubjects(Set<RelationDTO> subjects);
-//
-//    Set<RelationDTO> getObjects();
-//
-//    void setObjects(Set<RelationDTO> objects);
-//
-//    Set<GroupDTO> getObservationGroups();
-//
-//    void setObservationGroups(Set<GroupDTO> groups);
-//
-//    LicenseDTO getLicense();
-//
-//    void setLicense(LicenseDTO license);
 }

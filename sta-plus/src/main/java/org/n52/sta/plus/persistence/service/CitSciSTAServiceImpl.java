@@ -27,13 +27,13 @@
  */
 package org.n52.sta.plus.persistence.service;
 
+import javax.persistence.EntityManager;
+
 import org.n52.series.db.beans.HibernateRelations;
 import org.n52.sta.api.old.dto.common.StaDTO;
-import org.n52.sta.data.CommonSTAServiceImpl;
-import org.n52.sta.data.repositories.StaIdentifierRepository;
-import org.n52.sta.data.service.CommonEntityServiceRepository;
-
-import javax.persistence.EntityManager;
+import org.n52.sta.data.old.common.CommonSTAServiceImpl;
+import org.n52.sta.data.old.common.service.CommonEntityServiceRepository;
+import org.n52.sta.data.old.repositories.StaIdentifierRepository;
 
 @SuppressWarnings("checkstyle:LineLength")
 public abstract class CitSciSTAServiceImpl<T extends StaIdentifierRepository<S>, R extends StaDTO, S extends HibernateRelations.HasId>

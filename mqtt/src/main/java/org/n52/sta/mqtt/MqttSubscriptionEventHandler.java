@@ -27,11 +27,12 @@
  */
 package org.n52.sta.mqtt;
 
+import org.n52.sta.api.old.RequestUtils;
+import org.n52.sta.api.old.STAEventHandler;
+
 import io.moquette.broker.Server;
 import io.moquette.interception.messages.InterceptSubscribeMessage;
 import io.moquette.interception.messages.InterceptUnsubscribeMessage;
-import org.n52.sta.api.RequestUtils;
-import org.n52.sta.api.STAEventHandler;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>

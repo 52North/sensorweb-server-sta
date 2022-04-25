@@ -38,7 +38,7 @@ import org.n52.shetland.filter.SkipTopFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.filter.FilterClause;
 import org.n52.shetland.ogc.filter.FilterConstants;
-import org.n52.sta.api.CollectionWrapper;
+import org.n52.sta.api.old.CollectionWrapper;
 import org.n52.sta.api.old.dto.common.StaDTO;
 
 /**
@@ -50,8 +50,9 @@ public class CollectionSer extends StdSerializer<CollectionWrapper> {
         super(t);
     }
 
-    @Override public void serialize(CollectionWrapper value, JsonGenerator gen, SerializerProvider provider)
-        throws IOException {
+    @Override
+    public void serialize(CollectionWrapper value, JsonGenerator gen, SerializerProvider provider)
+            throws IOException {
         gen.writeStartObject();
 
         if (value.getTotalEntityCount() != -1) {
@@ -67,10 +68,9 @@ public class CollectionSer extends StdSerializer<CollectionWrapper> {
             allFilters.remove(queryOptions.getSkipFilter());
             allFilters.add(new SkipTopFilter(FilterConstants.SkipTopOperator.Skip, oldSkip + oldTop));
             gen.writeStringField("@iot.nextLink",
-                                 value.getRequestURL()
-                                     + "?"
-                                     + new QueryOptions("", allFilters).toString()
-            );
+                    value.getRequestURL()
+                            + "?"
+                            + new QueryOptions("", allFilters).toString());
         }
 
         gen.writeArrayFieldStart("value");

@@ -27,6 +27,20 @@
  */
 package org.n52.sta.mqtt;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Properties;
+
+import org.h2.mvstore.Cursor;
+import org.h2.mvstore.MVMap;
+import org.h2.mvstore.MVStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
+
 import io.moquette.BrokerConstants;
 import io.moquette.broker.Server;
 import io.moquette.broker.config.IConfig;
@@ -40,95 +54,92 @@ import io.moquette.interception.messages.InterceptDisconnectMessage;
 import io.moquette.interception.messages.InterceptPublishMessage;
 import io.moquette.interception.messages.InterceptSubscribeMessage;
 import io.moquette.interception.messages.InterceptUnsubscribeMessage;
-import org.h2.mvstore.Cursor;
-import org.h2.mvstore.MVMap;
-import org.h2.mvstore.MVStore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Properties;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@Component
 public class MqttBroker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttBroker.class);
 
-    @Value("${mqtt.broker.persistence.path:}")
-    private String MOQUETTE_STORE_PATH;
+    private final String storePath;
 
-    @Value("${mqtt.broker.persistence.filename:52N-STA-MQTTBroker.h2}")
-    private String MOQUETTE_STORE_FILENAME;
+    private final String storeFilename;
 
-    @Value("${mqtt.broker.persistence.autosave_interval:300}")
-    private String AUTOSAVE_INTERVAL_PROPERTY;
+    private final String autosaveIntervalProperty;
 
-    @Value("${mqtt.broker.persistence.enabled}")
-    private Boolean MOQUETTE_PERSISTENCE_ENABLED;
+    private final boolean persistenceEnabled;
 
-    @Value("${mqtt.broker.websocket.enabled}")
-    private Boolean MOQUETTE_WEBSOCKET_ENABLED;
+    private final boolean websocketEnabled;
 
-    @Value("${mqtt.broker.websocket.port:8080}")
-    private String MOQUETTE_WEBSOCKET_PORT;
+    private final String websocketPort;
 
-    @Value("${mqtt.broker.plaintcp.enabled}")
-    private Boolean MOQUETTE_PLAINTCP_ENABLED;
+    private final boolean plainTcpEnabled;
 
-    @Value("${mqtt.broker.plain_tcp.port:1883}")
-    private String MOQUETTE_PLAINTCP_PORT;
+    private final String plainTcpPort;
 
-    @Autowired
-    private MqttSubscriptionEventHandler handler;
+    private final MqttSubscriptionEventHandler subscriptionHandler;
 
-    @Autowired
-    private MqttPublishMessageHandler publishHandler;
+    private final MqttPublishMessageHandler publishHandler;
 
     private IConfig brokerConfig;
 
     private Server mqttServer;
 
-    @Bean(destroyMethod = "stopServer")
-    public Server initMQTTBroker() {
-        mqttServer = new Server();
-        brokerConfig = parseConfig();
-        handler.setMqttBroker(mqttServer);
-        return mqttServer;
+    public MqttBroker(
+            String storePath,
+            String storeFilename,
+            String autosaveIntervalProperty,
+            boolean persistenceEnabled,
+            boolean websocketEnabled,
+            String websocketPort,
+            boolean plainTcpEnabled,
+            String plainTcpPort,
+            MqttSubscriptionEventHandler subscriptionHandler,
+            MqttPublishMessageHandler publishHandler) {
+
+        this.storePath = "".equals(storePath)
+                ? getDefaultStorePath()
+                : storePath;
+
+        this.storeFilename = storeFilename;
+        this.autosaveIntervalProperty = autosaveIntervalProperty;
+        this.persistenceEnabled = persistenceEnabled;
+        this.websocketEnabled = websocketEnabled;
+        this.websocketPort = websocketPort;
+        this.plainTcpEnabled = plainTcpEnabled;
+        this.plainTcpPort = plainTcpPort;
+        this.subscriptionHandler = subscriptionHandler;
+        this.publishHandler = publishHandler;
+        this.brokerConfig = parseConfig();
     }
 
-    @EventListener({ContextRefreshedEvent.class})
-    private void restoreSubscriptionsAndStartServer() {
-        if (MOQUETTE_PERSISTENCE_ENABLED) {
+    public void init() {
+        this.mqttServer = new Server();
+        subscriptionHandler.setMqttBroker(mqttServer);
+    }
+
+    @EventListener({ ContextRefreshedEvent.class })
+    private void startMqttServerOnContextRefresh() {
+        if (persistenceEnabled) {
             MVStore mvStore = new MVStore.Builder()
-                .fileName(brokerConfig.getProperty(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME))
-                .autoCommitDisabled()
-                .open();
+                    .fileName(brokerConfig.getProperty(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME))
+                    .autoCommitDisabled()
+                    .open();
             MVMap<Object, Object> subscriptions = mvStore.openMap("subscriptions");
             Cursor<Object, Object> subscriptionsCursor = subscriptions.cursor(null);
             while (subscriptionsCursor.hasNext()) {
                 try {
                     subscriptionsCursor.next();
                     Subscription sub = (Subscription) subscriptionsCursor.getValue();
-                    handler.processSubscribeMessage(new InterceptSubscribeMessage(sub, sub.getClientId()));
+                    subscriptionHandler.processSubscribeMessage(new InterceptSubscribeMessage(sub, sub.getClientId()));
                     LOGGER.info("Restored Subscription of client: {} to topic {}.",
-                                sub.getClientId(), sub.getTopicFilter().toString());
+                            sub.getClientId(), sub.getTopicFilter().toString());
                 } catch (Exception e) {
                     subscriptions.remove(subscriptionsCursor.getKey());
                     LOGGER.error("Error while restoring MQTT subscription. " +
-                                     "Invalid Subscription: {} was removed from storage.",
-                                 subscriptionsCursor.getValue());
+                            "Invalid Subscription: {} was removed from storage.",
+                            subscriptionsCursor.getValue());
                     LOGGER.debug("Error while restoring MQTT subscription: {}", e);
                 }
             }
@@ -144,7 +155,7 @@ public class MqttBroker {
     }
 
     private InterceptHandler initMessageHandler() {
-        InterceptHandler messageHandler = new AbstractInterceptHandler() {
+        return new AbstractInterceptHandler() {
 
             @Override
             public String getID() {
@@ -171,12 +182,12 @@ public class MqttBroker {
                 if (!msg.getClientID().equals(MqttSubscriptionEventHandlerImpl.INTERNAL_CLIENT_ID)) {
                     LOGGER.debug("Received publication for topic: {}", msg.getTopicName());
                     LOGGER.debug("with publication message content: {}",
-                                 msg.getPayload().toString(StandardCharsets.UTF_8));
+                            msg.getPayload().toString(StandardCharsets.UTF_8));
                     try {
                         publishHandler.processPublishMessage(msg);
                     } catch (Exception e) {
                         LOGGER.error("Error while processing MQTT message: {} {}",
-                                     e.getClass().getName(), e.getMessage());
+                                e.getClass().getName(), e.getMessage());
                     }
                 }
             }
@@ -185,11 +196,11 @@ public class MqttBroker {
             public void onSubscribe(InterceptSubscribeMessage msg) {
                 LOGGER.debug("Client with ID: {} is trying to subscribe", msg.getClientID());
                 try {
-                    handler.processSubscribeMessage(msg);
+                    subscriptionHandler.processSubscribeMessage(msg);
                     LOGGER.debug("Client successfully subscribed");
                 } catch (Exception e) {
                     LOGGER.error("Error while processing MQTT subscription: {} {}",
-                                 e.getClass().getName(), e.getMessage());
+                            e.getClass().getName(), e.getMessage());
                 }
             }
 
@@ -197,45 +208,45 @@ public class MqttBroker {
             public void onUnsubscribe(InterceptUnsubscribeMessage msg) {
                 LOGGER.debug("Client with ID: {} has unsubscribed ", msg.getClientID());
                 try {
-                    handler.processUnsubscribeMessage(msg);
+                    subscriptionHandler.processUnsubscribeMessage(msg);
                     LOGGER.debug("Removed MQTT subscription");
                 } catch (Exception e) {
                     LOGGER.error("Error while processing MQTT unsubscription: {} {}",
-                                 e.getClass().getName(), e.getMessage());
+                            e.getClass().getName(), e.getMessage());
                 }
             }
 
         };
-        return messageHandler;
     }
 
     private IConfig parseConfig() {
         Properties props = new Properties();
 
-        if (MOQUETTE_PERSISTENCE_ENABLED) {
-            // Fallback to default path if not set
-            if (MOQUETTE_STORE_PATH.equals("")) {
-                MOQUETTE_STORE_PATH = System.getProperty("user.dir") + File.separator + MOQUETTE_STORE_FILENAME;
-            }
-            LOGGER.info("Initialized MQTT Broker Persistence with Path: {}", MOQUETTE_STORE_PATH);
-            LOGGER.info("Initialized MQTT Broker Persistence with Filename: {}", MOQUETTE_STORE_FILENAME);
-            props.put(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, MOQUETTE_STORE_PATH);
-            props.put(BrokerConstants.DEFAULT_MOQUETTE_STORE_H2_DB_FILENAME, MOQUETTE_STORE_FILENAME);
+        if (persistenceEnabled) {
+            LOGGER.info("Initialized MQTT Broker Persistence with Path: {}", storePath);
+            LOGGER.info("Initialized MQTT Broker Persistence with Filename: {}", storeFilename);
+            props.put(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, storePath);
+            props.put(BrokerConstants.DEFAULT_MOQUETTE_STORE_H2_DB_FILENAME, storeFilename);
 
-            LOGGER.info("Initialized MQTT Broker Persistence with Autosave Interval: {}", AUTOSAVE_INTERVAL_PROPERTY);
-            props.put(BrokerConstants.AUTOSAVE_INTERVAL_PROPERTY_NAME, AUTOSAVE_INTERVAL_PROPERTY);
+            LOGGER.info("Initialized MQTT Broker Persistence with Autosave Interval: {}", autosaveIntervalProperty);
+            props.put(BrokerConstants.AUTOSAVE_INTERVAL_PROPERTY_NAME, autosaveIntervalProperty);
         } else {
             // In-Memory Subscription Store
             props.put(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, "");
         }
 
         props.put(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME,
-                  MOQUETTE_WEBSOCKET_ENABLED ? MOQUETTE_WEBSOCKET_PORT : BrokerConstants.DISABLED_PORT_BIND);
+                websocketEnabled ? websocketPort : BrokerConstants.DISABLED_PORT_BIND);
         props.put(BrokerConstants.PORT_PROPERTY_NAME,
-                  MOQUETTE_PLAINTCP_ENABLED ? MOQUETTE_PLAINTCP_PORT : BrokerConstants.DISABLED_PORT_BIND);
+                plainTcpEnabled ? plainTcpPort : BrokerConstants.DISABLED_PORT_BIND);
 
         props.put(BrokerConstants.ALLOW_ANONYMOUS_PROPERTY_NAME, Boolean.TRUE.toString());
         return new MemoryConfig(props);
+    }
+
+    private String getDefaultStorePath() {
+        String userDirectory = System.getProperty("user.dir");
+        return Paths.get(userDirectory, storeFilename).toString();
     }
 
 }

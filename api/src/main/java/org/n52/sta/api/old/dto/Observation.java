@@ -59,14 +59,6 @@ public class Observation extends DtoEntity implements ObservationDTO {
 
     private FeatureOfInterestDTO featureOfInterest;
 
-//    private LicenseDTO license;
-//
-//    private Set<RelationDTO> subjects;
-//
-//    private Set<RelationDTO> objects;
-//
-//    private Set<GroupDTO> observationGroups;
-
     public void setResultQuality(Object resultQuality) {
         this.resultQuality = resultQuality;
     }
@@ -137,41 +129,4 @@ public class Observation extends DtoEntity implements ObservationDTO {
         this.datastream = datastream;
     }
 
-//    @Override
-//    public Set<RelationDTO> getSubjects() {
-//        return subjects;
-//    }
-//
-//    public void setSubjects(Set<RelationDTO> subjects) {
-//        this.subjects = subjects;
-//    }
-//
-//    @Override
-//    public Set<RelationDTO> getObjects() {
-//        return objects;
-//    }
-//
-//    public void setObjects(Set<RelationDTO> objects) {
-//        this.objects = objects;
-//    }
-//
-//    @Override
-//    public Set<GroupDTO> getObservationGroups() {
-//        return observationGroups;
-//    }
-//
-//    @Override
-//    public void setObservationGroups(Set<GroupDTO> observationGroups) {
-//        this.observationGroups = observationGroups;
-//    }
-//
-//    @Override
-//    public LicenseDTO getLicense() {
-//        return license;
-//    }
-//
-//    @Override
-//    public void setLicense(LicenseDTO license) {
-//        this.license = license;
-//    }
 }

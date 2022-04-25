@@ -27,7 +27,7 @@
  */
 package org.n52.sta.plus.persistence.service;
 
-import org.n52.sta.data.service.CommonEntityServiceRepository;
+import org.n52.sta.data.old.common.service.CommonEntityServiceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,15 +36,20 @@ import javax.annotation.PostConstruct;
 @Component
 public class CitSciEntityServiceRepository extends CommonEntityServiceRepository {
 
-    @Autowired private StaPlusServiceFacade.GroupServiceFacade groupService;
+    @Autowired
+    private StaPlusServiceFacade.GroupServiceFacade groupService;
 
-    @Autowired private StaPlusServiceFacade.RelationServiceFacade relationService;
+    @Autowired
+    private StaPlusServiceFacade.RelationServiceFacade relationService;
 
-    @Autowired private StaPlusServiceFacade.LicenseServiceFacade licenseService;
+    @Autowired
+    private StaPlusServiceFacade.LicenseServiceFacade licenseService;
 
-    @Autowired private StaPlusServiceFacade.PartyServiceFacade partyService;
+    @Autowired
+    private StaPlusServiceFacade.PartyServiceFacade partyService;
 
-    @Autowired private StaPlusServiceFacade.ProjectServiceFacade projectService;
+    @Autowired
+    private StaPlusServiceFacade.ProjectServiceFacade projectService;
 
     @PostConstruct
     public void postConstruct() {

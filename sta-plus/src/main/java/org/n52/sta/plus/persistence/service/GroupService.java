@@ -27,6 +27,14 @@
  */
 package org.n52.sta.plus.persistence.service;
 
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
+
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.parameter.observationgroup.ObservationGroupParameterEntity;
 import org.n52.series.db.beans.sta.plus.GroupEntity;
@@ -38,9 +46,9 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.GroupEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.data.CommonSTAServiceImpl;
-import org.n52.sta.data.repositories.EntityGraphRepository;
-import org.n52.sta.plus.entity.GroupDTO;
+import org.n52.sta.data.old.common.CommonSTAServiceImpl;
+import org.n52.sta.data.old.repositories.EntityGraphRepository;
+import org.n52.sta.plus.old.entity.GroupDTO;
 import org.n52.sta.plus.persistence.query.ObservationGroupQuerySpecifications;
 import org.n52.sta.plus.persistence.repositories.GroupParameterRepository;
 import org.n52.sta.plus.persistence.repositories.GroupRepository;
@@ -48,21 +56,15 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Component
-@DependsOn({"springApplicationContext"})
+@DependsOn({ "springApplicationContext" })
 @Transactional
 @Profile(StaConstants.STAPLUS)
 public class GroupService
@@ -170,8 +172,7 @@ public class GroupService
         GroupEntity obsGroup = entity;
         if (!obsGroup.isProcessed()) {
             if (obsGroup.getStaIdentifier() != null && !obsGroup.isSetName()) {
-                Optional<GroupEntity> optionalEntity
-                        = getRepository().findByStaIdentifier(obsGroup.getStaIdentifier());
+                Optional<GroupEntity> optionalEntity = getRepository().findByStaIdentifier(obsGroup.getStaIdentifier());
                 if (optionalEntity.isPresent()) {
                     return optionalEntity.get();
                 } else {
@@ -191,13 +192,13 @@ public class GroupService
                 } else {
                     obsGroup.setProcessed(true);
                     /*
-                    if (obsGroup.getObservations() != null) {
-                        Set<StaPlusDataEntity<?>> persisted = new HashSet<>();
-                        for (StaPlusDataEntity<?> obs : obsGroup.getObservations()) {
-                            persisted.add(getObservationService().createOrfetch(obs));
-                        }
-                        obsGroup.setObservations(persisted);
-                    }
+                     * if (obsGroup.getObservations() != null) {
+                     * Set<StaPlusDataEntity<?>> persisted = new HashSet<>();
+                     * for (StaPlusDataEntity<?> obs : obsGroup.getObservations()) {
+                     * persisted.add(getObservationService().createOrfetch(obs));
+                     * }
+                     * obsGroup.setObservations(persisted);
+                     * }
                      */
 
                     if (obsGroup.getRelations() != null) {
@@ -236,28 +237,26 @@ public class GroupService
     @Override
     protected GroupEntity updateEntity(String id, GroupEntity entity, String method)
             throws STACRUDException {
-        if ("PATCH".equals(method)) {
+        if (PATCH.equals(method)) {
             return updateEntity(id, entity);
-        } else if ("PUT".equals(method)) {
+        } else if (PUT.equals(method)) {
             throw new STACRUDException(HTTP_PUT_IS_NOT_YET_SUPPORTED,
                     HTTPStatus.NOT_IMPLEMENTED);
-        } else {
-            throw new STACRUDException(INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY,
-                    HTTPStatus.BAD_REQUEST);
         }
+        throw new STACRUDException(INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY,
+                HTTPStatus.BAD_REQUEST);
     }
 
-    private GroupEntity updateEntity(String id, GroupEntity entity)
-            throws STACRUDException {
+    private GroupEntity updateEntity(String id, GroupEntity entity) throws STACRUDException {
         synchronized (getLock(id)) {
-                Optional<GroupEntity> existing = getRepository().findByStaIdentifier(id);
-                if (existing.isPresent()) {
-                    GroupEntity merged = merge(existing.get(), entity);
-                    return getRepository().save(merged);
-                }
-                throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND,
-                        HTTPStatus.NOT_FOUND);
+            Optional<GroupEntity> existing = getRepository().findByStaIdentifier(id);
+            if (existing.isPresent()) {
+                GroupEntity merged = merge(existing.get(), entity);
+                return getRepository().save(merged);
             }
+            throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND,
+                    HTTPStatus.NOT_FOUND);
+        }
     }
 
     @Override
@@ -311,8 +310,8 @@ public class GroupService
             if (getRepository().existsByStaIdentifier(id)) {
                 // delete related relations
                 // observations are not deleted!
-                //getObservationRelationService().de.deleteAllByGroupStaIdentifier(id);
-                //TODO: fix!
+                // getObservationRelationService().de.deleteAllByGroupStaIdentifier(id);
+                // TODO: fix!
                 getRepository().deleteByStaIdentifier(id);
             } else {
                 throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND,
@@ -325,13 +324,13 @@ public class GroupService
             GroupEntity toMerge) {
 
         /*
-        if (existing.getEntities() == null) {
-            existing.setEntities(toMerge.getEntities());
-        } else {
-            if (toMerge.getEntities() != null) {
-                existing.getEntities().addAll(toMerge.getEntities());
-            }
-        }
+         * if (existing.getEntities() == null) {
+         * existing.setEntities(toMerge.getEntities());
+         * } else {
+         * if (toMerge.getEntities() != null) {
+         * existing.getEntities().addAll(toMerge.getEntities());
+         * }
+         * }
          */
     }
 }

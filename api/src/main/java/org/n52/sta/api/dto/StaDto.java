@@ -41,4 +41,16 @@ public abstract class StaDto implements Identifiable {
         this.id = id;
     }
 
+    protected void assertNonEmpty(String toAssert, String errorMessage) {
+        if (toAssert == null || toAssert.isEmpty()) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+    }
+
+    protected void assertNonNull(Object toAssert, String errorMessage) {
+        if (toAssert == null) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+    }
+
 }

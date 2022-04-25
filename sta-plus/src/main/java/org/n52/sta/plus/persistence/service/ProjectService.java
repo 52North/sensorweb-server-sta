@@ -27,10 +27,16 @@
  */
 package org.n52.sta.plus.persistence.service;
 
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
+
 import org.n52.janmayen.http.HTTPStatus;
-import org.n52.series.db.beans.sta.plus.StaPlusDataset;
 import org.n52.series.db.beans.sta.plus.ProjectEntity;
 import org.n52.series.db.beans.sta.plus.StaPlusAbstractDatasetEntity;
+import org.n52.series.db.beans.sta.plus.StaPlusDataset;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.ogc.sta.StaConstants;
@@ -38,8 +44,8 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.ProjectEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.data.repositories.EntityGraphRepository;
-import org.n52.sta.plus.entity.ProjectDTO;
+import org.n52.sta.data.old.repositories.EntityGraphRepository;
+import org.n52.sta.plus.old.entity.ProjectDTO;
 import org.n52.sta.plus.persistence.query.ProjectQuerySpecifications;
 import org.n52.sta.plus.persistence.repositories.ProjectRepository;
 import org.springframework.context.annotation.DependsOn;
@@ -49,20 +55,15 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Component
-@DependsOn({"springApplicationContext"})
+@DependsOn({ "springApplicationContext" })
 @Transactional
 @Profile(StaConstants.STAPLUS)
 public class ProjectService
-    extends CitSciSTAServiceImpl<ProjectRepository, ProjectDTO, ProjectEntity> {
+        extends CitSciSTAServiceImpl<ProjectRepository, ProjectDTO, ProjectEntity> {
 
     private static final ProjectQuerySpecifications pQS = new ProjectQuerySpecifications();
 
@@ -72,7 +73,7 @@ public class ProjectService
 
     @Override
     protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
-        throws STAInvalidQueryException {
+            throws STAInvalidQueryException {
         if (expandOption != null) {
             for (ExpandItem expandItem : expandOption.getItems()) {
                 // We cannot handle nested $filter or $expand
@@ -82,12 +83,12 @@ public class ProjectService
                 String expandProperty = expandItem.getPath();
                 if (ProjectEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
                     return new EntityGraphRepository.FetchGraph[] {
-                        EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS,
+                            EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS,
                     };
                 } else {
                     throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                                                                     expandProperty,
-                                                                     StaConstants.PROJECT));
+                            expandProperty,
+                            StaConstants.PROJECT));
                 }
             }
         }
@@ -96,7 +97,7 @@ public class ProjectService
 
     @Override
     protected ProjectEntity fetchExpandEntitiesWithFilter(ProjectEntity entity, ExpandFilter expandOption)
-        throws STACRUDException, STAInvalidQueryException {
+            throws STACRUDException, STAInvalidQueryException {
         for (ExpandItem expandItem : expandOption.getItems()) {
             // We have already handled $expand without filter and expand
             if (!(expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter())) {
@@ -105,15 +106,15 @@ public class ProjectService
             String expandProperty = expandItem.getPath();
             if (ProjectEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
                 Page<StaPlusDataset> datastreams = getDatastreamService()
-                    .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
-                                                           STAEntityDefinition.PROJECTS,
-                                                           expandItem.getQueryOptions());
+                        .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
+                                STAEntityDefinition.PROJECTS,
+                                expandItem.getQueryOptions());
                 entity.setDatastreams(datastreams.get().collect(Collectors.toSet()));
                 return entity;
             } else {
                 throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                                                                 expandProperty,
-                                                                 StaConstants.PROJECT));
+                        expandProperty,
+                        StaConstants.PROJECT));
             }
         }
         return entity;
@@ -121,8 +122,8 @@ public class ProjectService
 
     @Override
     protected Specification<ProjectEntity> byRelatedEntityFilter(String relatedId,
-                                                                 String relatedType,
-                                                                 String ownId) {
+            String relatedType,
+            String ownId) {
         Specification<ProjectEntity> filter;
         switch (relatedType) {
             case STAEntityDefinition.DATASTREAMS:
@@ -141,16 +142,15 @@ public class ProjectService
     @Override
     public ProjectEntity createOrfetch(ProjectEntity entity) throws STACRUDException {
         ProjectEntity project = entity;
-        //if (!project.isProcessed()) {
+        // if (!project.isProcessed()) {
         if (project.getStaIdentifier() != null && !project.isSetName()) {
-            Optional<ProjectEntity> optionalEntity =
-                getRepository().findByStaIdentifier(project.getStaIdentifier());
+            Optional<ProjectEntity> optionalEntity = getRepository().findByStaIdentifier(project.getStaIdentifier());
             if (optionalEntity.isPresent()) {
                 return optionalEntity.get();
             } else {
                 throw new STACRUDException(String.format(NO_S_WITH_ID_S_FOUND,
-                                                         StaConstants.PROJECT,
-                                                         project.getStaIdentifier()));
+                        StaConstants.PROJECT,
+                        project.getStaIdentifier()));
             }
         } else if (project.getStaIdentifier() == null) {
             // Autogenerate Identifier
@@ -169,24 +169,21 @@ public class ProjectService
                 getRepository().save(project);
             }
         }
-        //}
+        // }
         return project;
     }
 
     @Override
-    protected ProjectEntity updateEntity(String id, ProjectEntity entity, String method)
-        throws STACRUDException {
-        if ("PATCH".equals(method)) {
-            return updateEntity(id, entity);
-        } else if ("PUT".equals(method)) {
+    protected ProjectEntity updateEntity(String id, ProjectEntity entity, String method) throws STACRUDException {
+        if (PATCH.equals(method)) {
+            return udpateEntity(id, entity);
+        } else if (PUT.equals(method)) {
             throw new STACRUDException(HTTP_PUT_IS_NOT_YET_SUPPORTED, HTTPStatus.NOT_IMPLEMENTED);
-        } else {
-            throw new STACRUDException(INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY, HTTPStatus.BAD_REQUEST);
         }
-
+        throw new STACRUDException(INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY, HTTPStatus.BAD_REQUEST);
     }
 
-    private ProjectEntity updateEntity(String id, ProjectEntity entity) throws STACRUDException {
+    private ProjectEntity udpateEntity(String id, ProjectEntity entity) throws STACRUDException {
         synchronized (getLock(id)) {
             Optional<ProjectEntity> existing = getRepository().findByStaIdentifier(id);
             if (existing.isPresent()) {
@@ -200,7 +197,7 @@ public class ProjectService
     @Override
     public ProjectEntity createOrUpdate(ProjectEntity entity) throws STACRUDException {
         if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
-            return updateEntity(entity.getStaIdentifier(), entity);
+            return udpateEntity(entity.getStaIdentifier(), entity);
         }
         return createOrfetch(entity);
     }
@@ -212,7 +209,7 @@ public class ProjectService
 
     @Override
     protected ProjectEntity merge(ProjectEntity existing, ProjectEntity toMerge)
-        throws STACRUDException {
+            throws STACRUDException {
 
         if (toMerge.getStaIdentifier() != null) {
             existing.setStaIdentifier(toMerge.getStaIdentifier());
@@ -221,11 +218,11 @@ public class ProjectService
             existing.setName(toMerge.getName());
         }
         /*
-        if (toMerge.getRuntimeStart() != null) {
-            existing.setRuntimeStart(toMerge.getRuntimeStart());
-        }
-        if (toMerge.getRuntimeEnd() != null)
-        */
+         * if (toMerge.getRuntimeStart() != null) {
+         * existing.setRuntimeStart(toMerge.getRuntimeStart());
+         * }
+         * if (toMerge.getRuntimeEnd() != null)
+         */
         if (toMerge.getDescription() != null) {
             existing.setDescription(toMerge.getDescription());
         }
@@ -233,7 +230,7 @@ public class ProjectService
             existing.setUrl(toMerge.getUrl());
         }
 
-        //mergeDatastreams(existing, toMerge);
+        // mergeDatastreams(existing, toMerge);
         return existing;
     }
 

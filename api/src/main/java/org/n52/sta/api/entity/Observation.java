@@ -49,8 +49,9 @@ public interface Observation<T> extends Identifiable {
      * It is currently unclear what this element actually contains.
      *
      * @return DQ_Element
-     * 
-     * @see https://github.com/opengeospatial/sensorthings/issues/68
+     * @see <a href=
+     *      "https://github.com/opengeospatial/sensorthings/issues/68">
+     *      https://github.com/opengeospatial/sensorthings/issues/68</a>
      */
     Object getResultQuality();
 

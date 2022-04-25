@@ -27,6 +27,10 @@
  */
 package org.n52.sta.plus.persistence.service;
 
+import java.util.UUID;
+
+import javax.persistence.EntityManager;
+
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.CategoryEntity;
@@ -37,14 +41,14 @@ import org.n52.series.db.beans.sta.plus.StaPlusDatasetAggregationEntity;
 import org.n52.series.db.beans.sta.plus.StaPlusDatasetEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
-import org.n52.sta.data.CommonDatastreamService;
-import org.n52.sta.data.repositories.CategoryRepository;
-import org.n52.sta.data.repositories.DatastreamParameterRepository;
-import org.n52.sta.data.repositories.ObservationRepository;
-import org.n52.sta.data.repositories.UnitRepository;
-import org.n52.sta.data.service.CategoryService;
-import org.n52.sta.data.service.FormatService;
-import org.n52.sta.data.service.OfferingService;
+import org.n52.sta.data.old.common.CommonDatastreamService;
+import org.n52.sta.data.old.repositories.CategoryRepository;
+import org.n52.sta.data.old.repositories.DatastreamParameterRepository;
+import org.n52.sta.data.old.repositories.ObservationRepository;
+import org.n52.sta.data.old.repositories.UnitRepository;
+import org.n52.sta.data.old.service.CategoryService;
+import org.n52.sta.data.old.service.FormatService;
+import org.n52.sta.data.old.service.OfferingService;
 import org.n52.sta.plus.persistence.repositories.StaPlusDatastreamRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
@@ -52,69 +56,69 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import java.util.UUID;
-
 @Component
-@DependsOn({"springApplicationContext", "datastreamRepository"})
+@DependsOn({ "springApplicationContext", "datastreamRepository" })
 @Profile(StaConstants.STAPLUS)
 @Transactional
 public class CitSciDatastreamService extends CommonDatastreamService<StaPlusDataset, StaPlusDatastreamRepository> {
 
     public CitSciDatastreamService(
-        StaPlusDatastreamRepository repository,
-        @Value("${server.feature.isMobile:false}") boolean isMobileFeatureEnabled,
-        @Value("${server.feature.includeDatastreamCategory:false}") boolean includeDatastreamCategory,
-        UnitRepository unitRepository,
-        CategoryRepository categoryRepository,
-        ObservationRepository observationRepository,
-        DatastreamParameterRepository parameterRepository,
-        OfferingService offeringService,
-        FormatService formatService,
-        EntityManager em) {
+            StaPlusDatastreamRepository repository,
+            @Value("${server.feature.isMobile:false}") boolean isMobileFeatureEnabled,
+            @Value("${server.feature.includeDatastreamCategory:false}") boolean includeDatastreamCategory,
+            UnitRepository unitRepository,
+            CategoryRepository categoryRepository,
+            ObservationRepository observationRepository,
+            DatastreamParameterRepository parameterRepository,
+            OfferingService offeringService,
+            FormatService formatService,
+            EntityManager em) {
         super(repository,
-              isMobileFeatureEnabled,
-              includeDatastreamCategory,
-              unitRepository,
-              categoryRepository,
-              observationRepository,
-              parameterRepository,
-              offeringService,
-              formatService,
-              em);
+                isMobileFeatureEnabled,
+                includeDatastreamCategory,
+                unitRepository,
+                categoryRepository,
+                observationRepository,
+                parameterRepository,
+                offeringService,
+                formatService,
+                em);
     }
 
     /*
-    protected DatasetEntity createandSaveDataset(AbstractDatasetEntity datastream,
-                                                 AbstractFeatureEntity<?> feature,
-                                                 String staIdentifier) throws STACRUDException {
-        if (datastream.getParty() != null) {
-            datastream.setParty(getPartyService().createOrfetch(datastream.getParty()));
-        }
-
-        if (datastream.getProject() != null) {
-            datastream.setProject(getProjectService().createOrfetch(datastream.getProject()));
-        }
-
-        DatasetEntity saved = getRepository().save(createDataset(datastream, feature, staIdentifier));
-        if (datastream.getParameters() != null) {
-            parameterRepository.saveAll(datastream.getParameters()
-                                            .stream()
-                                            .filter(t -> t instanceof DatasetParameterEntity)
-                                            .map(t -> {
-                                                ((DatasetParameterEntity) t).setDataset(saved);
-                                                return (DatasetParameterEntity) t;
-                                            })
-                                            .collect(Collectors.toSet()));
-        }
-        return saved;
-    }
-    */
+     * protected DatasetEntity createandSaveDataset(AbstractDatasetEntity
+     * datastream,
+     * AbstractFeatureEntity<?> feature,
+     * String staIdentifier) throws STACRUDException {
+     * if (datastream.getParty() != null) {
+     * datastream.setParty(getPartyService().createOrfetch(datastream.getParty()));
+     * }
+     *
+     * if (datastream.getProject() != null) {
+     * datastream.setProject(getProjectService().createOrfetch(datastream.getProject
+     * ()));
+     * }
+     *
+     * DatasetEntity saved = getRepository().save(createDataset(datastream, feature,
+     * staIdentifier));
+     * if (datastream.getParameters() != null) {
+     * parameterRepository.saveAll(datastream.getParameters()
+     * .stream()
+     * .filter(t -> t instanceof DatasetParameterEntity)
+     * .map(t -> {
+     * ((DatasetParameterEntity) t).setDataset(saved);
+     * return (DatasetParameterEntity) t;
+     * })
+     * .collect(Collectors.toSet()));
+     * }
+     * return saved;
+     * }
+     */
 
     @Override
     protected StaPlusDatasetEntity createDataset(AbstractDatasetEntity datastream,
-                                                 AbstractFeatureEntity<?> feature,
-                                                 String staIdentifier) throws STACRUDException {
+            AbstractFeatureEntity<?> feature,
+            String staIdentifier) throws STACRUDException {
         StaPlusDatasetEntity dataset = new StaPlusDatasetEntity();
         fillDataset(dataset, datastream, feature, staIdentifier);
         dataset.setParty(((StaPlusDatasetEntity) datastream).getParty());
@@ -123,11 +127,11 @@ public class CitSciDatastreamService extends CommonDatastreamService<StaPlusData
     }
 
     protected AbstractDatasetEntity fillDataset(StaPlusDatasetEntity dataset,
-                                                AbstractDatasetEntity datastream,
-                                                AbstractFeatureEntity<?> feature,
-                                                String staIdentifier) throws STACRUDException {
+            AbstractDatasetEntity datastream,
+            AbstractFeatureEntity<?> feature,
+            String staIdentifier) throws STACRUDException {
         CategoryEntity category = categoryRepository.findByIdentifier(CategoryService.DEFAULT_CATEGORY)
-            .orElseThrow(() -> new STACRUDException("Could not find default SOS Category!"));
+                .orElseThrow(() -> new STACRUDException("Could not find default SOS Category!"));
         OfferingEntity offering = offeringService.createOrFetchOffering(datastream.getProcedure());
 
         // dataset.setObservationType(ObservationType.simple);

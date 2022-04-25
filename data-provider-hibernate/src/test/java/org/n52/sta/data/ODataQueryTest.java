@@ -32,14 +32,13 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import org.junit.Test;
 import org.mockito.Mock;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.shetland.filter.FilterFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
-import org.n52.sta.data.support.FilterExprVisitor;
+import org.n52.sta.data.old.util.FilterExprVisitor;
 import org.n52.svalbard.odata.core.QueryOptionsFactory;
 import org.n52.svalbard.odata.core.expr.Expr;
 import org.springframework.data.jpa.domain.Specification;

@@ -27,10 +27,16 @@
  */
 package org.n52.sta.plus.persistence.service;
 
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
+
 import org.n52.janmayen.http.HTTPStatus;
-import org.n52.series.db.beans.sta.plus.StaPlusDataset;
 import org.n52.series.db.beans.sta.plus.PartyEntity;
 import org.n52.series.db.beans.sta.plus.StaPlusAbstractDatasetEntity;
+import org.n52.series.db.beans.sta.plus.StaPlusDataset;
 import org.n52.series.db.beans.sta.plus.StaPlusDatasetEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
@@ -39,27 +45,23 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.PartyEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.data.repositories.EntityGraphRepository;
-import org.n52.sta.plus.entity.PartyDTO;
+import org.n52.sta.data.old.repositories.EntityGraphRepository;
+import org.n52.sta.plus.old.entity.PartyDTO;
 import org.n52.sta.plus.persistence.query.PartyQuerySpecifications;
 import org.n52.sta.plus.persistence.repositories.PartyRepository;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Component
-@DependsOn({"springApplicationContext"})
+@DependsOn({ "springApplicationContext" })
 @Transactional
 @Profile(StaConstants.STAPLUS)
 public class PartyService
@@ -82,7 +84,8 @@ public class PartyService
                 }
                 String expandProperty = expandItem.getPath();
                 if (PartyEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
-                    return new EntityGraphRepository.FetchGraph[]{EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS};
+                    return new EntityGraphRepository.FetchGraph[] {
+                            EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS };
                 } else {
                     throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
                             expandProperty,
@@ -99,8 +102,8 @@ public class PartyService
         if (expandOption != null) {
             for (ExpandItem expandItem : expandOption.getItems()) {
                 // We have already handled $expand without filter and expand
-                if (!(expandItem.getQueryOptions().hasFilterFilter()
-                        || expandItem.getQueryOptions().hasExpandFilter())) {
+                if (!(expandItem.getQueryOptions().hasFilterFilter() ||
+                        expandItem.getQueryOptions().hasExpandFilter())) {
                     continue;
                 }
                 String expandProperty = expandItem.getPath();
@@ -143,10 +146,9 @@ public class PartyService
     @Override
     public PartyEntity createOrfetch(PartyEntity entity) throws STACRUDException {
         PartyEntity party = entity;
-        //if (!party.isProcessed()) {
+        // if (!party.isProcessed()) {
         if (party.getStaIdentifier() != null && party.getRole() == null) {
-            Optional<PartyEntity> optionalEntity
-                    = getRepository().findByStaIdentifier(party.getStaIdentifier());
+            Optional<PartyEntity> optionalEntity = getRepository().findByStaIdentifier(party.getStaIdentifier());
             if (optionalEntity.isPresent()) {
                 return optionalEntity.get();
             } else {
@@ -171,32 +173,30 @@ public class PartyService
                 getRepository().save(party);
             }
         }
-        //}
+        // }
         return party;
     }
 
     @Override
     protected PartyEntity updateEntity(String id, PartyEntity entity, String method)
             throws STACRUDException {
-        if ("PATCH".equals(method)) {
+        if (PATCH.equals(method)) {
             return updateEntity(id, entity);
-        } else if ("PUT".equals(method)) {
+        } else if (PUT.equals(method)) {
             throw new STACRUDException(HTTP_PUT_IS_NOT_YET_SUPPORTED, HTTPStatus.NOT_IMPLEMENTED);
-        } else {
-            throw new STACRUDException(INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY, HTTPStatus.BAD_REQUEST);
         }
+        throw new STACRUDException(INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY, HTTPStatus.BAD_REQUEST);
     }
 
-    private PartyEntity updateEntity(String id, PartyEntity entity)
-            throws STACRUDException {
+    private PartyEntity updateEntity(String id, PartyEntity entity) throws STACRUDException {
         synchronized (getLock(id)) {
-                Optional<PartyEntity> existing = getRepository().findByStaIdentifier(id);
-                if (existing.isPresent()) {
-                    PartyEntity merged = merge(existing.get(), entity);
-                    return getRepository().save(merged);
-                }
-                throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
+            Optional<PartyEntity> existing = getRepository().findByStaIdentifier(id);
+            if (existing.isPresent()) {
+                PartyEntity merged = merge(existing.get(), entity);
+                return getRepository().save(merged);
             }
+            throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
+        }
     }
 
     @Override

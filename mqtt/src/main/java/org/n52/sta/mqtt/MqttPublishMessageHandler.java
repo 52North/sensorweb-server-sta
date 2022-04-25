@@ -27,9 +27,10 @@
  */
 package org.n52.sta.mqtt;
 
-import io.moquette.interception.messages.InterceptPublishMessage;
-import org.n52.sta.api.RequestUtils;
+import org.n52.sta.api.old.RequestUtils;
 import org.n52.sta.api.old.dto.common.StaDTO;
+
+import io.moquette.interception.messages.InterceptPublishMessage;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>

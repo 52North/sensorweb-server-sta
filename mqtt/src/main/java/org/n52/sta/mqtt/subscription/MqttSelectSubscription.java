@@ -27,18 +27,18 @@
  */
 package org.n52.sta.mqtt.subscription;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.regex.Matcher;
+
 import org.n52.shetland.filter.SelectFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.filter.FilterClause;
-import org.n52.sta.api.RequestUtils;
+import org.n52.sta.api.old.RequestUtils;
 import org.n52.svalbard.odata.core.QueryOptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
-
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.regex.Matcher;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>

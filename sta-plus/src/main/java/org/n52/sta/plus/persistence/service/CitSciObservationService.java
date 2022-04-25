@@ -27,6 +27,10 @@
  */
 package org.n52.sta.plus.persistence.service;
 
+import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.sta.plus.RelationEntity;
@@ -35,15 +39,11 @@ import org.n52.series.db.beans.sta.plus.StaPlusQuantityDataEntity;
 import org.n52.shetland.ogc.om.OmConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
-import org.n52.sta.data.service.ObservationService;
+import org.n52.sta.data.old.service.ObservationService;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -81,7 +81,7 @@ public class CitSciObservationService extends ObservationService {
      * Hook to add STAPlus-specific things
      *
      * @param observation the observation to save
-     * @param dataset the dataset entity the observation to save relates to
+     * @param dataset     the dataset entity the observation to save relates to
      * @return the saved data entity
      * @throws STACRUDException in case saving fails
      */

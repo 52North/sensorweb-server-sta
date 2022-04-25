@@ -27,6 +27,14 @@
  */
 package org.n52.sta.plus.persistence.service;
 
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
+
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.sta.plus.GroupEntity;
 import org.n52.series.db.beans.sta.plus.RelationEntity;
@@ -36,35 +44,27 @@ import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.data.repositories.EntityGraphRepository;
-import org.n52.sta.plus.entity.RelationDTO;
+import org.n52.sta.data.old.repositories.EntityGraphRepository;
+import org.n52.sta.plus.old.entity.RelationDTO;
 import org.n52.sta.plus.persistence.query.ObservationRelationQuerySpecifications;
 import org.n52.sta.plus.persistence.repositories.ObservationRelationRepository;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Component
-@DependsOn({"springApplicationContext"})
+@DependsOn({ "springApplicationContext" })
 @Transactional
 @Profile(StaConstants.STAPLUS)
 public class RelationService
-    extends CitSciSTAServiceImpl<ObservationRelationRepository,
-    RelationDTO,
-        RelationEntity> {
+        extends CitSciSTAServiceImpl<ObservationRelationRepository, RelationDTO, RelationEntity> {
 
     private static final ObservationRelationQuerySpecifications orQS = new ObservationRelationQuerySpecifications();
 
@@ -72,8 +72,9 @@ public class RelationService
         super(repository, em, RelationEntity.class);
     }
 
-    @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
-        throws STAInvalidQueryException {
+    @Override
+    protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
+            throws STAInvalidQueryException {
         Set<EntityGraphRepository.FetchGraph> fetchGraphs = new HashSet<>();
         if (expandOption != null) {
             for (ExpandItem expandItem : expandOption.getItems()) {
@@ -92,18 +93,19 @@ public class RelationService
                         break;
                     default:
                         throw new STAInvalidQueryException(
-                            String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                                          expandProperty,
-                                          StaConstants.RELATION));
+                                String.format(INVALID_EXPAND_OPTION_SUPPLIED,
+                                        expandProperty,
+                                        StaConstants.RELATION));
                 }
             }
         }
         return fetchGraphs.toArray(new EntityGraphRepository.FetchGraph[0]);
     }
 
-    @Override protected RelationEntity fetchExpandEntitiesWithFilter(RelationEntity entity,
-                                                                                ExpandFilter expandOption)
-        throws STACRUDException, STAInvalidQueryException {
+    @Override
+    protected RelationEntity fetchExpandEntitiesWithFilter(RelationEntity entity,
+            ExpandFilter expandOption)
+            throws STACRUDException, STAInvalidQueryException {
         for (ExpandItem expandItem : expandOption.getItems()) {
             // We have already handled $expand without filter and expand
             if (!(expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter())) {
@@ -114,36 +116,37 @@ public class RelationService
             switch (expandProperty) {
                 case STAEntityDefinition.GROUPS:
                     Page<GroupEntity> groups = getObservationGroupService()
-                        .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
-                                                               STAEntityDefinition.RELATIONS,
-                                                               expandItem.getQueryOptions());
+                            .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
+                                    STAEntityDefinition.RELATIONS,
+                                    expandItem.getQueryOptions());
                     entity.setGroups(groups.get().collect(Collectors.toSet()));
                     break;
                 /*
-                case STAEntityDefinition.SUBJECTS:
-                    entity.setSubject(getObservationService()
-                                          .getEntityByIdRaw(entity.getSubject().getId(),
-                                                            expandItem.getQueryOptions()));
-                    break;
-                case STAEntityDefinition.OBJECTS:
-                    entity.setObject(getObservationService()
-                                         .getEntityByIdRaw(entity.getObject().getId(),
-                                                           expandItem.getQueryOptions()));
-                    break;
-                    */
+                 * case STAEntityDefinition.SUBJECTS:
+                 * entity.setSubject(getObservationService()
+                 * .getEntityByIdRaw(entity.getSubject().getId(),
+                 * expandItem.getQueryOptions()));
+                 * break;
+                 * case STAEntityDefinition.OBJECTS:
+                 * entity.setObject(getObservationService()
+                 * .getEntityByIdRaw(entity.getObject().getId(),
+                 * expandItem.getQueryOptions()));
+                 * break;
+                 */
                 default:
                     throw new STAInvalidQueryException(
-                        String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                                      expandProperty,
-                                      StaConstants.RELATION));
+                            String.format(INVALID_EXPAND_OPTION_SUPPLIED,
+                                    expandProperty,
+                                    StaConstants.RELATION));
             }
         }
         return entity;
     }
 
-    @Override protected Specification<RelationEntity> byRelatedEntityFilter(String relatedId,
-                                                                                       String relatedType,
-                                                                                       String ownId) {
+    @Override
+    protected Specification<RelationEntity> byRelatedEntityFilter(String relatedId,
+            String relatedType,
+            String ownId) {
         Specification<RelationEntity> filter;
         switch (relatedType) {
             case STAEntityDefinition.GROUPS:
@@ -157,8 +160,8 @@ public class RelationService
                 break;
             default:
                 throw new IllegalStateException(
-                    String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE,
-                                  relatedType));
+                        String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE,
+                                relatedType));
         }
 
         if (ownId != null) {
@@ -167,18 +170,17 @@ public class RelationService
         return filter;
     }
 
-    @Override public RelationEntity createOrfetch(RelationEntity entity) throws STACRUDException {
+    @Override
+    public RelationEntity createOrfetch(RelationEntity entity) throws STACRUDException {
         RelationEntity obsRel = entity;
         if (obsRel.getStaIdentifier() != null && obsRel.getRole() == null) {
-            Optional<RelationEntity> optionalEntity =
-                getRepository().findByStaIdentifier(obsRel.getStaIdentifier());
+            Optional<RelationEntity> optionalEntity = getRepository().findByStaIdentifier(obsRel.getStaIdentifier());
             if (optionalEntity.isPresent()) {
                 return optionalEntity.get();
             } else {
                 throw new STACRUDException(String.format(NO_S_WITH_ID_S_FOUND,
-                                                         StaConstants.RELATION,
-                                                         obsRel.getStaIdentifier())
-                );
+                        StaConstants.RELATION,
+                        obsRel.getStaIdentifier()));
             }
         } else if (obsRel.getStaIdentifier() == null) {
             // Autogenerate Identifier
@@ -188,18 +190,21 @@ public class RelationService
         synchronized (getLock(obsRel.getStaIdentifier())) {
             if (getRepository().existsByStaIdentifier(obsRel.getStaIdentifier())) {
                 throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS,
-                                           HTTPStatus.CONFLICT);
+                        HTTPStatus.CONFLICT);
             } else {
                 /*
-                GroupEntity group = getObservationGroupService().createOrfetch(obsRel.getGroup());
-                obsRel.setGroup(group);
-
-                DataEntity<?> obj = getObservationService().createOrfetch(obsRel.getObject());
-                obsRel.setObject(obj);
-
-                DataEntity<?> sub = getObservationService().createOrfetch(obsRel.getSubject());
-                obsRel.setSubject(sub);
-                */
+                 * GroupEntity group =
+                 * getObservationGroupService().createOrfetch(obsRel.getGroup());
+                 * obsRel.setGroup(group);
+                 *
+                 * DataEntity<?> obj =
+                 * getObservationService().createOrfetch(obsRel.getObject());
+                 * obsRel.setObject(obj);
+                 *
+                 * DataEntity<?> sub =
+                 * getObservationService().createOrfetch(obsRel.getSubject());
+                 * obsRel.setSubject(sub);
+                 */
                 return getRepository().save(obsRel);
             }
         }
@@ -207,38 +212,41 @@ public class RelationService
 
     @Override
     protected RelationEntity updateEntity(String id, RelationEntity entity, String method)
-        throws STACRUDException {
-        if ("PATCH".equals(method)) {
+            throws STACRUDException {
+        if (PATCH.equals(method)) {
             return updateEntity(id, entity);
-        } else if ("PUT".equals(method)) {
+        } else if (PUT.equals(method)) {
             throw new STACRUDException(HTTP_PUT_IS_NOT_YET_SUPPORTED,
-                                       HTTPStatus.NOT_IMPLEMENTED);
+                    HTTPStatus.NOT_IMPLEMENTED);
         } else {
-            throw new STACRUDException(INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY, HTTPStatus.BAD_REQUEST);
+            throw new STACRUDException(INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY,
+                    HTTPStatus.BAD_REQUEST);
         }
     }
 
     private RelationEntity updateEntity(String id, RelationEntity entity) throws STACRUDException {
         synchronized (getLock(id)) {
-                Optional<RelationEntity> existing = getRepository().findByStaIdentifier(id);
-                if (existing.isPresent()) {
-                    RelationEntity merged = merge(existing.get(), entity);
-                    return getRepository().save(merged);
-                }
-                throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND,
-                                           HTTPStatus.NOT_FOUND);
+            Optional<RelationEntity> existing = getRepository().findByStaIdentifier(id);
+            if (existing.isPresent()) {
+                RelationEntity merged = merge(existing.get(), entity);
+                return getRepository().save(merged);
             }
+            throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND,
+                    HTTPStatus.NOT_FOUND);
+        }
     }
 
-    @Override public RelationEntity createOrUpdate(RelationEntity entity)
-        throws STACRUDException {
+    @Override
+    public RelationEntity createOrUpdate(RelationEntity entity)
+            throws STACRUDException {
         if (entity.getStaIdentifier() != null && getRepository().existsByStaIdentifier(entity.getStaIdentifier())) {
             return updateEntity(entity.getStaIdentifier(), entity);
         }
         return createOrfetch(entity);
     }
 
-    @Override public String checkPropertyName(String property) {
+    @Override
+    public String checkPropertyName(String property) {
         return property;
     }
 
@@ -253,13 +261,14 @@ public class RelationService
         return existing;
     }
 
-    @Override public void delete(String id) throws STACRUDException {
+    @Override
+    public void delete(String id) throws STACRUDException {
         synchronized (getLock(id)) {
             if (getRepository().existsByStaIdentifier(id)) {
                 getRepository().deleteByStaIdentifier(id);
             } else {
                 throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND,
-                                           HTTPStatus.NOT_FOUND);
+                        HTTPStatus.NOT_FOUND);
             }
         }
     }

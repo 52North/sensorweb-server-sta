@@ -27,8 +27,30 @@
  */
 package org.n52.sta.mqtt;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.sta.api.old.CoreRequestUtils;
+import org.n52.sta.api.old.EntityServiceFactory;
+import org.n52.sta.api.old.dto.common.StaDTO;
+import org.n52.sta.mqtt.subscription.AbstractMqttSubscription;
+import org.n52.sta.mqtt.subscription.MqttEntityCollectionSubscription;
+import org.n52.sta.mqtt.subscription.MqttEntitySubscription;
+import org.n52.sta.mqtt.subscription.MqttPropertySubscription;
+import org.n52.sta.mqtt.subscription.MqttSelectSubscription;
+import org.n52.sta.old.utils.AbstractSTARequestHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
+
 import io.moquette.broker.Server;
 import io.moquette.interception.messages.InterceptSubscribeMessage;
 import io.moquette.interception.messages.InterceptUnsubscribeMessage;
@@ -39,70 +61,43 @@ import io.netty.handler.codec.mqtt.MqttMessageType;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import io.netty.handler.codec.mqtt.MqttPublishVariableHeader;
 import io.netty.handler.codec.mqtt.MqttQoS;
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
-import org.n52.sta.api.CoreRequestUtils;
-import org.n52.sta.api.EntityServiceFactory;
-import org.n52.sta.api.old.dto.common.StaDTO;
-import org.n52.sta.mqtt.subscription.AbstractMqttSubscription;
-import org.n52.sta.mqtt.subscription.MqttEntityCollectionSubscription;
-import org.n52.sta.mqtt.subscription.MqttEntitySubscription;
-import org.n52.sta.mqtt.subscription.MqttPropertySubscription;
-import org.n52.sta.mqtt.subscription.MqttSelectSubscription;
-import org.n52.sta.utils.AbstractSTARequestHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Component;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@Component
 public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
-    implements MqttSubscriptionEventHandler, CoreRequestUtils {
+        implements MqttSubscriptionEventHandler, CoreRequestUtils {
 
     private static final String BASE_URL = "";
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttSubscriptionEventHandlerImpl.class);
     private final MqttFixedHeader mqttFixedHeader = new MqttFixedHeader(
-        MqttMessageType.PUBLISH,
-        false,
-        MqttQoS.AT_LEAST_ONCE,
-        false,
-        0);
+            MqttMessageType.PUBLISH,
+            false,
+            MqttQoS.AT_LEAST_ONCE,
+            false,
+            0);
 
-    private final MqttUtil config;
     private final ObjectMapper mapper;
     private EntityServiceFactory serviceRepository;
     private Server mqttBroker;
     private Map<AbstractMqttSubscription, HashSet<String>> subscriptions = new HashMap<>();
     /*
-     * List of all Entity Types that are currently subscribed to. Used for fail-fast.
+     * List of all Entity Types that are currently subscribed to. Used for
+     * fail-fast.
      */
     private Set<String> watchedEntityTypes = new HashSet<>();
 
-    public MqttSubscriptionEventHandlerImpl(@Value("${server.rootUrl}") String rootUrl,
-                                            @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
-                                            MqttUtil config,
-                                            ObjectMapper mapper) {
-        super(rootUrl, shouldEscapeId, null);
-        this.config = config;
+    public MqttSubscriptionEventHandlerImpl(String rootUrl, boolean escapeId, ObjectMapper mapper) {
+        super(rootUrl, escapeId, null);
         this.mapper = mapper;
     }
 
     @Async
     @Override
     public void handleEvent(StaDTO rawObject,
-                            String entityType,
-                            Set<String> differenceMap,
-                            Map<String, Set<String>> collections) {
+            String entityType,
+            Set<String> differenceMap,
+            Map<String, Set<String>> collections) {
         try {
             // Invariant: As watchedEntityTypes contains rawObject->class
             // there is at least one subscription that matches.
@@ -128,9 +123,9 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
                         serializedCache.put(subscrip.getQueryOptions(), out);
                     }
                     MqttPublishMessage msg = new MqttPublishMessage(mqttFixedHeader,
-                                                                    new MqttPublishVariableHeader(MQTT_PREFIX + topic,
-                                                                                                  52),
-                                                                    out);
+                            new MqttPublishVariableHeader(MQTT_PREFIX + topic,
+                                    52),
+                            out);
                     mqttBroker.internalPublish(msg, INTERNAL_CLIENT_ID);
                     LOGGER.debug("Posted Message to Topic: {}", topic);
                 } else {
@@ -147,7 +142,8 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
         return watchedEntityTypes;
     }
 
-    @Override public void setServiceRepository(EntityServiceFactory serviceRepository) {
+    @Override
+    public void setServiceRepository(EntityServiceFactory serviceRepository) {
         this.serviceRepository = serviceRepository;
     }
 
@@ -175,15 +171,18 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
         }
     }
 
-    @Override public void processSubscribeMessage(InterceptSubscribeMessage msg) throws MqttHandlerException {
+    @Override
+    public void processSubscribeMessage(InterceptSubscribeMessage msg) throws MqttHandlerException {
         addSubscription(createMqttSubscription(msg.getTopicFilter()), msg.getClientID());
     }
 
-    @Override public void processUnsubscribeMessage(InterceptUnsubscribeMessage msg) throws MqttHandlerException {
+    @Override
+    public void processUnsubscribeMessage(InterceptUnsubscribeMessage msg) throws MqttHandlerException {
         removeSubscription(createMqttSubscription(msg.getTopicFilter()), msg.getClientID());
     }
 
-    @Override public void setMqttBroker(Server mqttBroker) {
+    @Override
+    public void setMqttBroker(Server mqttBroker) {
         this.mqttBroker = mqttBroker;
     }
 

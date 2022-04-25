@@ -33,16 +33,16 @@
 
 package org.n52.sta.mqtt.subscription;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
-import org.n52.sta.api.RequestUtils;
+import org.n52.sta.api.old.RequestUtils;
 import org.n52.sta.api.old.dto.common.StaDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
-
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher;
 
 /**
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>

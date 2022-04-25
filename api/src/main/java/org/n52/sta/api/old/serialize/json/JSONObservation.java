@@ -54,14 +54,6 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationDTO> imp
     public JSONFeatureOfInterest FeatureOfInterest;
     @JsonManagedReference
     public JSONDatastream Datastream;
-//    @JsonManagedReference
-//    public JSONGroup[] ObservationGroups;
-//    @JsonManagedReference
-//    public JSONRelation[] Subjects;
-//    @JsonManagedReference
-//    public JSONRelation[] Objects;
-//    @JsonManagedReference
-//    public JSONLicense License;
 
     public JSONObservation() {
         self = new Observation();
@@ -145,10 +137,6 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationDTO> imp
             self.setFeatureOfInterest(FeatureOfInterest.parseToDTO(JSONBase.EntityType.REFERENCE));
         }
 
-//        if (License != null) {
-//            self.setLicense(License.parseToDTO(JSONBase.EntityType.REFERENCE));
-//        }
-
         return self;
     }
 
@@ -193,38 +181,6 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationDTO> imp
         } else if (backReference instanceof JSONFeatureOfInterest) {
             self.setFeatureOfInterest(((JSONFeatureOfInterest) backReference).getEntity());
         }
-
-//        if (Subjects != null) {
-//            Set<RelationDTO> subjects = new HashSet<>();
-//            for (JSONRelation sub : Subjects) {
-//                subjects.add(sub.parseToDTO(JSONBase.EntityType.FULL,
-//                                            JSONBase.EntityType.REFERENCE));
-//            }
-//            self.setSubjects(subjects);
-//        }
-//
-//        if (Objects != null) {
-//            Set<RelationDTO> objects = new HashSet<>();
-//            for (JSONRelation obj : Objects) {
-//                objects.add(obj.parseToDTO(JSONBase.EntityType.FULL,
-//                                           JSONBase.EntityType.REFERENCE));
-//            }
-//            self.setObjects(objects);
-//        }
-//
-//        if (ObservationGroups != null) {
-//            Set<GroupDTO> objects = new HashSet<>();
-//            for (JSONGroup obj : ObservationGroups) {
-//                objects.add(obj.parseToDTO(JSONBase.EntityType.FULL,
-//                                           JSONBase.EntityType.REFERENCE));
-//            }
-//            self.setObservationGroups(objects);
-//        }
-//
-//        if (License != null) {
-//            self.setLicense(License.parseToDTO(JSONBase.EntityType.FULL,
-//              JSONBase.EntityType.REFERENCE));
-//        }
 
         return self;
     }

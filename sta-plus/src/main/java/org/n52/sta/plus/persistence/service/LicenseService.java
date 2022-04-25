@@ -27,6 +27,11 @@
  */
 package org.n52.sta.plus.persistence.service;
 
+import java.util.Optional;
+import java.util.UUID;
+
+import javax.persistence.EntityManager;
+
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.sta.plus.LicenseEntity;
 import org.n52.shetland.filter.ExpandFilter;
@@ -36,26 +41,23 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.LicenseEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.data.CommonSTAServiceImpl;
-import org.n52.sta.data.repositories.EntityGraphRepository;
-import org.n52.sta.plus.entity.LicenseDTO;
+import org.n52.sta.data.old.common.CommonSTAServiceImpl;
+import org.n52.sta.data.old.repositories.EntityGraphRepository;
+import org.n52.sta.plus.old.entity.LicenseDTO;
 import org.n52.sta.plus.persistence.query.LicenseQuerySpecifications;
 import org.n52.sta.plus.persistence.repositories.LicenseRepository;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import java.util.Optional;
-import java.util.UUID;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Component
-@DependsOn({"springApplicationContext"})
+@DependsOn({ "springApplicationContext" })
 @Transactional
 @Profile(StaConstants.STAPLUS)
 public class LicenseService
@@ -82,7 +84,8 @@ public class LicenseService
                 String expandProperty = expandItem.getPath();
                 if (LicenseEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
                     return new EntityGraphRepository.FetchGraph[] {
-                        EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS};
+                            EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS,
+                    };
                 } else {
                     throw new STAInvalidQueryException(
                             String.format(CommonSTAServiceImpl.INVALID_EXPAND_OPTION_SUPPLIED,
@@ -106,13 +109,13 @@ public class LicenseService
 
             String expandProperty = expandItem.getPath();
             if (LicenseEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
-                //TODO: expand
+                // TODO: expand
                 /*
-                Page<AbstractDatasetEntity> datastreams = getDatastreamService()
-                    .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
-                                                           STAEntityDefinition.LICENSES,
-                                                           expandItem.getQueryOptions());
-                entity.setDatasets(datastreams.get().collect(Collectors.toSet()));
+                 * Page<AbstractDatasetEntity> datastreams = getDatastreamService()
+                 * .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
+                 * STAEntityDefinition.LICENSES,
+                 * expandItem.getQueryOptions());
+                 * entity.setDatasets(datastreams.get().collect(Collectors.toSet()));
                  */
                 return entity;
             } else {
@@ -149,10 +152,9 @@ public class LicenseService
     @Override
     public LicenseEntity createOrfetch(LicenseEntity entity) throws STACRUDException {
         LicenseEntity license = entity;
-        //if (!license.isProcessed()) {
+        // if (!license.isProcessed()) {
         if (license.getStaIdentifier() != null && !license.isSetName()) {
-            Optional<LicenseEntity> optionalEntity
-                    = getRepository().findByStaIdentifier(license.getStaIdentifier());
+            Optional<LicenseEntity> optionalEntity = getRepository().findByStaIdentifier(license.getStaIdentifier());
             if (optionalEntity.isPresent()) {
                 return optionalEntity.get();
             } else {
@@ -170,38 +172,37 @@ public class LicenseService
                 throw new STACRUDException(CommonSTAServiceImpl.IDENTIFIER_ALREADY_EXISTS,
                         HTTPStatus.CONFLICT);
             } else {
-                //TODO: nested
+                // TODO: nested
                 getRepository().save(license);
             }
         }
-        //}
+        // }
         return license;
     }
 
     @Override
     protected LicenseEntity updateEntity(String id, LicenseEntity entity, String method)
             throws STACRUDException {
-        if ("PATCH".equals(method)) {
+        if (PATCH.equals(method)) {
             return updateEntity(id, entity);
-        } else if ("PUT".equals(method)) {
+        } else if (PUT.equals(method)) {
             throw new STACRUDException(CommonSTAServiceImpl.HTTP_PUT_IS_NOT_YET_SUPPORTED,
                     HTTPStatus.NOT_IMPLEMENTED);
-        } else {
-            throw new STACRUDException(CommonSTAServiceImpl.INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY,
-                    HTTPStatus.BAD_REQUEST);
         }
+        throw new STACRUDException(CommonSTAServiceImpl.INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY,
+                HTTPStatus.BAD_REQUEST);
     }
 
     private LicenseEntity updateEntity(String id, LicenseEntity entity) throws STACRUDException {
         synchronized (getLock(id)) {
-                Optional<LicenseEntity> existing = getRepository().findByStaIdentifier(id);
-                if (existing.isPresent()) {
-                    LicenseEntity merged = merge(existing.get(), entity);
-                    return getRepository().save(merged);
-                }
-                throw new STACRUDException(CommonSTAServiceImpl.UNABLE_TO_UPDATE_ENTITY_NOT_FOUND,
-                        HTTPStatus.NOT_FOUND);
+            Optional<LicenseEntity> existing = getRepository().findByStaIdentifier(id);
+            if (existing.isPresent()) {
+                LicenseEntity merged = merge(existing.get(), entity);
+                return getRepository().save(merged);
             }
+            throw new STACRUDException(CommonSTAServiceImpl.UNABLE_TO_UPDATE_ENTITY_NOT_FOUND,
+                    HTTPStatus.NOT_FOUND);
+        }
     }
 
     @Override

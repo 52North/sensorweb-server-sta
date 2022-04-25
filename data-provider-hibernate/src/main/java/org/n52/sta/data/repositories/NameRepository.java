@@ -27,14 +27,13 @@
  */
 package org.n52.sta.data.repositories;
 
-import org.n52.series.db.beans.HibernateRelations;
-import org.springframework.data.repository.NoRepositoryBean;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.Optional;
 
+import org.n52.series.db.beans.HibernateRelations;
+import org.n52.sta.data.old.repositories.AbstractStaRepository;
+import org.springframework.data.repository.NoRepositoryBean;
+
 @NoRepositoryBean
-@Transactional
 public interface NameRepository<T extends HibernateRelations.HasName> extends AbstractStaRepository<T> {
 
     boolean existsByName(String name);

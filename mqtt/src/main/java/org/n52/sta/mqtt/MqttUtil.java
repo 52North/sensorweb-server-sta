@@ -27,8 +27,6 @@
  */
 package org.n52.sta.mqtt;
 
-import org.springframework.stereotype.Component;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,8 +34,7 @@ import java.util.Map;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@Component
-public class MqttUtil {
+public final class MqttUtil {
 
     public static final String OBSERVATION_ENTITY = "org.n52.series.db.beans.ObservationEntity";
     public static final String DATASTREAM_ENTITY = "org.n52.series.db.beans.sta.AbstractDatasetEntity";
@@ -83,6 +80,10 @@ public class MqttUtil {
         map.put(SENSOR_ENTITY, SENSOR);
         map.put(THING_ENTITY, THING);
         TYPEMAP = Collections.unmodifiableMap(map);
+    }
+
+    private MqttUtil() {
+        // private
     }
 
 }
