@@ -31,7 +31,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.n52.sta.api.old.EntityServiceLookup;
+import org.n52.sta.api.old.EntityServiceFactory;
 import org.n52.sta.mqtt.old.MqttBroker;
 import org.n52.sta.mqtt.old.MqttPublishMessageHandler;
 import org.n52.sta.mqtt.old.MqttPublishMessageHandlerImpl;
@@ -77,7 +77,7 @@ public class MqttConfiguration {
             @Value("${server.feature.mqttReadOnly}") boolean readOnly,
             @Value("${server.rootUrl}") String rootUrl,
             @Value("${server.feature.escapeId:true}") boolean escapeId,
-            EntityServiceLookup serviceRepository,
+            EntityServiceFactory serviceRepository,
             ObjectMapper mapper,
             DTOMapper dtoMapper) {
 

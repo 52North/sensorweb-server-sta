@@ -33,8 +33,7 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.n52.sta.api.old.AbstractSensorThingsEntityService;
-import org.n52.sta.api.old.EntityServiceLookup;
-import org.n52.sta.api.old.STAEventHandler;
+import org.n52.sta.api.old.EntityServiceFactory;
 import org.n52.sta.data.old.common.CommonSTAServiceImpl;
 import org.n52.sta.data.old.common.CommonServiceFacade;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +44,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 // @Component
-public class CommonEntityServiceRepository implements EntityServiceLookup {
+public class CommonEntityServiceRepository implements EntityServiceFactory {
 
     protected Map<String, CommonServiceFacade<?, ?>> entityServices = new LinkedHashMap<>();
 
@@ -73,9 +72,6 @@ public class CommonEntityServiceRepository implements EntityServiceLookup {
     @Autowired
     private CommonServiceFacade.FeatureOfInterestServiceFacade featureOfInterestService;
 
-    @Autowired
-    private STAEventHandler mqttSubscriptionEventHandler;
-
     @PostConstruct
     public void postConstruct() {
         entityServices.put(EntityTypes.Thing.name(), thingServiceFacade);
@@ -102,8 +98,6 @@ public class CommonEntityServiceRepository implements EntityServiceLookup {
         entityServices.put(EntityTypes.FeatureOfInterest.name(), featureOfInterestService);
         entityServices.put(EntityTypes.FeaturesOfInterest.name(), featureOfInterestService);
 
-        mqttSubscriptionEventHandler.setServiceRepository(this);
-
         entityServices.forEach(
                 (t, e) -> e.getServiceImpl().setServiceRepository(this));
     }
@@ -115,7 +109,7 @@ public class CommonEntityServiceRepository implements EntityServiceLookup {
      * @return the requested entity data service
      */
     @Override
-    public AbstractSensorThingsEntityService<?> lookupService(String entityTypeName) {
+    public AbstractSensorThingsEntityService<?> getEntityService(String entityTypeName) {
         return entityServices.get(entityTypeName);
     }
 

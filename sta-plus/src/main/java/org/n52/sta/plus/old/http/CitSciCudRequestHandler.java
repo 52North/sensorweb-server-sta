@@ -36,7 +36,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
-import org.n52.sta.api.old.EntityServiceLookup;
+import org.n52.sta.api.old.EntityServiceFactory;
 import org.n52.sta.api.old.RequestUtils;
 import org.n52.sta.api.old.dto.common.StaDTO;
 import org.n52.sta.http.old.common.CudRequestHandler;
@@ -65,7 +65,7 @@ public class CitSciCudRequestHandler<T extends StaDTO>
 
     public CitSciCudRequestHandler(@Value("${server.rootUrl}") String rootUrl,
                                    @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
-                                   EntityServiceLookup serviceRepository,
+                                   EntityServiceFactory serviceRepository,
                                    ObjectMapper mapper,
                                    DTOMapper dtoMapper) {
         super(rootUrl, shouldEscapeId, serviceRepository, mapper, dtoMapper);

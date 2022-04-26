@@ -31,7 +31,7 @@ import javax.servlet.Filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.n52.sta.api.old.EntityServiceLookup;
+import org.n52.sta.api.old.EntityServiceFactory;
 import org.n52.sta.http.old.CoreCollectionRequestHandler;
 import org.n52.sta.http.old.CoreCudRequestHandler;
 import org.n52.sta.http.old.CoreEntityRequestHandler;
@@ -71,7 +71,7 @@ public class WebConfiguration implements WebMvcConfigurer {
     public EntityRequestHandler getEntityRequestHandler(
             @Value("${server.rootUrl}") String rootUrl,
             @Value("${server.feature.escapeId:true}") boolean escapeId,
-            EntityServiceLookup serviceRepository) {
+            EntityServiceFactory serviceRepository) {
         return new CoreEntityRequestHandler(rootUrl, escapeId, serviceRepository);
     }
 
@@ -79,7 +79,7 @@ public class WebConfiguration implements WebMvcConfigurer {
     public PropertyRequestHandler getPropertyRequestHandler(
             @Value("${server.rootUrl}") String rootUrl,
             @Value("${server.feature.escapeId:true}") boolean escapeId,
-            EntityServiceLookup serviceRepository,
+            EntityServiceFactory serviceRepository,
             ObjectMapper mapper) {
         return new CorePropertyRequestHandler(rootUrl, escapeId, serviceRepository, mapper);
     }
@@ -88,7 +88,7 @@ public class WebConfiguration implements WebMvcConfigurer {
     public CollectionRequestHandler getCollectionRequestHandler(
             @Value("${server.rootUrl}") String rootUrl,
             @Value("${server.feature.escapeId:true}") boolean escapeId,
-            EntityServiceLookup serviceRepository) {
+            EntityServiceFactory serviceRepository) {
         return new CoreCollectionRequestHandler(rootUrl, escapeId, serviceRepository);
     }
 
@@ -97,7 +97,7 @@ public class WebConfiguration implements WebMvcConfigurer {
     public CoreCudRequestHandler getWritableRequestHandler(
             @Value("${server.rootUrl}") String rootUrl,
             @Value("${server.feature.escapeId:true}") boolean escapeId,
-            EntityServiceLookup serviceRepository,
+            EntityServiceFactory serviceRepository,
             ObjectMapper mapper,
             DTOMapper dtoMapper) {
         return new CoreCudRequestHandler(rootUrl, escapeId, serviceRepository, mapper, dtoMapper);

@@ -31,7 +31,7 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.shetland.ogc.sta.exception.STANotFoundException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.api.old.EntityServiceLookup;
+import org.n52.sta.api.old.EntityServiceFactory;
 import org.n52.sta.api.old.RequestUtils;
 
 /**
@@ -42,12 +42,12 @@ import org.n52.sta.api.old.RequestUtils;
 public abstract class AbstractSTARequestHandler implements RequestUtils {
 
     protected final boolean escapeId;
-    protected final EntityServiceLookup serviceRepository;
+    protected final EntityServiceFactory serviceRepository;
     protected final String rootUrl;
 
     protected AbstractSTARequestHandler(String rootUrl,
             boolean escapeId,
-            EntityServiceLookup serviceRepository) {
+            EntityServiceFactory serviceRepository) {
         this.escapeId = escapeId;
         this.serviceRepository = serviceRepository;
         this.rootUrl = rootUrl;
@@ -123,7 +123,7 @@ public abstract class AbstractSTARequestHandler implements RequestUtils {
         sourceId = unescapeIdIfWanted(sourceId.replaceAll("%2F", "/"));
         String sourceType = sourceEntity[0];
 
-        if (!serviceRepository.lookupService(sourceType).existsEntity(sourceId)) {
+        if (!serviceRepository.getEntityService(sourceType).existsEntity(sourceId)) {
             return createNotFoundExceptionNoEntity(uriResources[0]);
         }
 
@@ -136,7 +136,7 @@ public abstract class AbstractSTARequestHandler implements RequestUtils {
                 // Resource is addressed by related Entity
                 // e.g. /Datastreams(1)/Thing/
                 // Getting id directly as it is needed for next iteration
-                targetId = serviceRepository.lookupService(targetType)
+                targetId = serviceRepository.getEntityService(targetType)
                         .getEntityIdByRelatedEntity(sourceId, sourceType);
                 if (targetId == null) {
                     return createInvalidUrlExceptionNoEntityAssociated(uriResources[i], uriResources[i - 1]);
@@ -146,7 +146,7 @@ public abstract class AbstractSTARequestHandler implements RequestUtils {
                 // e.g. /Things(1)/
                 // Only checking exists as Id is already known
                 targetId = targetEntity[1];
-                if (!serviceRepository.lookupService(targetType)
+                if (!serviceRepository.getEntityService(targetType)
                         .existsEntityByRelatedEntity(sourceId, sourceType, targetId)) {
                     return createInvalidUrlExceptionNoEntityAssociated(uriResources[i], uriResources[i - 1]);
                 }

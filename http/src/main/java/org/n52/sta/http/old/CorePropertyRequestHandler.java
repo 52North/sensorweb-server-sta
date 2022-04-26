@@ -32,7 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.n52.sta.api.old.CoreRequestUtils;
-import org.n52.sta.api.old.EntityServiceLookup;
+import org.n52.sta.api.old.EntityServiceFactory;
 import org.n52.sta.api.old.dto.common.StaDTO;
 import org.n52.sta.http.old.common.PropertyRequestHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -50,7 +50,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 public class CorePropertyRequestHandler extends PropertyRequestHandler implements CoreRequestUtils {
 
     public CorePropertyRequestHandler(String rootUrl, boolean escapeId,
-            EntityServiceLookup serviceRepository,
+            EntityServiceFactory serviceRepository,
             ObjectMapper mapper) {
         super(rootUrl, escapeId, serviceRepository, mapper);
     }
