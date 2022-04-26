@@ -216,8 +216,8 @@ public class ObservationService
                     returned.setDataset(datastream);
                     break;
                 case STAEntityDefinition.FEATURE_OF_INTEREST:
-                    AbstractFeatureEntity<?> foi = getFeatureOfInterestService().getEntityByDatasetIdRaw(returned.getDataset().getId(),
-                                                                                                         expandItem.getQueryOptions());
+                    AbstractFeatureEntity<?> foi = getFeatureOfInterestService()
+                            .getEntityByDatasetIdRaw(returned.getDataset().getId(), expandItem.getQueryOptions());
                     returned.setFeature(foi);
                     break;
                 default:

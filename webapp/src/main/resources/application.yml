@@ -5,7 +5,7 @@ trace: false
 # General Server Configuration
 server:
   ## Used for response serialization + url parsing. Must be set correctly!
-  rootUrl: "http://localhost:8080/v1.1/"
+  rootUrl: "http://localhost:8080/52n-sensorthings-webapp/v1.1/"
 
   ## Used for enabling/disabling custom 52N-STA Features
   feature:
@@ -18,7 +18,7 @@ server:
     # Controls whether properties referenced from $expand need to be explicitly referenced from $select if $select is used or are implicitly included
     # Resolves ambiguity as discussed in https://github.com/opengeospatial/sensorthings/issues/106
     # Defaults to false.
-    implicitExpand: true
+    implicitExpand: false
 
     ## Automatically updates a FeatureOfInterest linked in Thing->properties under
     ## key "updateFOI" with new Locations of the Thing
@@ -62,11 +62,17 @@ server:
 # Database Configuration
 database:
   jpa:
+    # Mappings to be loaded. See https://github.com/52North/sensorweb-server-sta/wiki for details
+    # Options:
+    # - Vanilla STA: sta-vanilla.xml
     persistence-location: classpath:META-INF/sta-vanilla.xml
 spring:
+  # Profile of the application.
+  # Options:
+  # - Vanilla STA: vanilla
+  # - [not implemented yet] STA with MultiDatastream Extension: multiDatastreamExtension
   profiles:
     active: vanilla
-
   datasource:
     platform: postgres
     # the db user name
@@ -98,6 +104,12 @@ spring:
         # disable driver's feature detection
         # see https://stackoverflow.com/questions/46493500/hibernate-with-c3p0-createclob-is-not-yet-implemented
         temp.use_jdbc_metadata_defaults: false
+        query:
+          fail_on_pagination_over_collection_fetch: true
+
+        show_sql: false
+        format_sql: false
+        use_sql_comments: false
   jmx:
     enabled: false
   http:
@@ -107,7 +119,7 @@ spring:
       force: true
   mvc:
     servlet:
-      path: /
+      path: /v1.1
 
 # HTTP Configuration
 http:
@@ -122,18 +134,28 @@ mqtt:
   broker:
     plaintcp:
       enabled: false
+      host: "mqtt://localhost"
       port: 1883
     websocket:
       enabled: false
+      host: "ws://localhost"
       port: 8883
     persistence:
       enabled: false
       path: "" # Empty for default path (java "user.dir")
       filename: "52N-STA-MQTTBroker.h2"
       autosave_interval: "30"
-    
+
 # Logging
 logging:
   level:
     root: INFO
-    org.n52.sta: INFO
+#    org.opengis.cite: TRACE
+#    org.apache.coyote.http11.Http11InputBuffer: TRACE
+#    org.hibernate: INFO
+#    org.hibernate.type: INFO
+#    org.hibernate: TRACE
+#    io.moquette: TRACE
+#    org.n52: TRACE
+#    org.springframework.orm.jpa: TRACE
+#    org.springframework.web: DEBUG
