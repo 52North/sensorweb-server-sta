@@ -25,57 +25,33 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta;
+package org.n52.sta.conformance;
+
+import java.io.IOException;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.n52.shetland.ogc.filter.FilterConstants;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Consumer;
-
 /**
- * Test precedence of query options.
- * Prior to applying any server-driven pagination:
- * 1. $filter
- * 2. $count
- * 3. $orderby
- * 4. $skip
- * 5. $top
- * After applying any server-driven pagination:
- * 6. $expand
- * 7. $select
+ * Test $orderby Query Option
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Testcontainers
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class ITQueryOptionPrecedence extends ConformanceTests implements TestUtil {
+public class ITOrderBy extends ConformanceTests implements TestUtil {
 
-    private static final Logger logger = LoggerFactory.getLogger(ITQueryOptionPrecedence.class);
+    final String result = "result";
 
-    private final String countFilter = "$count=true";
-    private final String orderByFilter = "$orderby=id";
-    private final String selectFilter = "$select=id";
-    private final String skipFilter = "$skip=0";
-    private final String topFilter = "$top=1";
-    private final String filterFilter = "$filter=id eq '52N'";
-    private final String expandFilter = "$expand=Datastreams";
-
-    private final String[] allFilters = {
-        countFilter, orderByFilter, selectFilter, skipFilter, topFilter,
-        filterFilter, expandFilter
-    };
-
-    public ITQueryOptionPrecedence(@Value("${server.rootUrl}") String rootUrl) throws Exception {
+    public ITOrderBy(@Value("${server.rootUrl}") String rootUrl) throws Exception {
         super(rootUrl);
 
         // Create required test harness
@@ -103,37 +79,56 @@ public class ITQueryOptionPrecedence extends ConformanceTests implements TestUti
             "\"result\": 5 }, { \"phenomenonTime\": \"2015-03-06T00:00:00Z\", \"result\": 6 } ] } ] }");
     }
 
-    /**
-     * Code taken from https://stackoverflow.com/a/14444037
-     * Licensed under MIT License as stated here: https://meta.stackexchange
-     * .com/questions/271080/the-mit-license-clarity-on-using-code-on-stack-overflow-and-stack-exchange
-     */
-    private static void testPermutations(java.util.List<Integer> arr,
-                                         int k,
-                                         Consumer<List<Integer>> consumer) {
-        for (int i = k; i < arr.size(); i++) {
-            java.util.Collections.swap(arr, i, k);
-            testPermutations(arr, k + 1, consumer);
-            java.util.Collections.swap(arr, k, i);
-        }
-        if (k == arr.size() - 1) {
-            consumer.accept(arr);
-        }
+    @Test
+    public void testOrderByResultOnObservationCollection() throws IOException {
+        // Check directly on Collection
+        // default ascending
+        JsonNode allObservations = getCollection(EntityType.OBSERVATION, "$orderby=result");
+        assertResponseCount(allObservations, 4, 4);
+        assertValueIsOrdered(allObservations.get("value"), FilterConstants.SortOrder.ASC);
+
+        // Explicit ascending
+        allObservations = getCollection(EntityType.OBSERVATION, "$orderby=result asc");
+        assertResponseCount(allObservations, 4, 4);
+        assertValueIsOrdered(allObservations.get("value"), FilterConstants.SortOrder.ASC);
+
+        // Descending
+        allObservations = getCollection(EntityType.OBSERVATION, "$orderby=result desc");
+        assertResponseCount(allObservations, 4, 4);
+        assertValueIsOrdered(allObservations.get("value"), FilterConstants.SortOrder.DESC);
+
+        // Check on related Collection
+        JsonNode datastreams = getCollection(EntityType.DATASTREAM);
+        assertResponseCount(datastreams, 2, 2);
+        JsonNode collection;
+        collection =
+            getCollection(rootUrl
+                              + "Datastreams("
+                              + datastreams.get(value).get(0).get(idKey).asText()
+                              + ")/Observations",
+                          "$orderby=result");
+        assertResponseCount(collection, 2, 2);
+        assertValueIsOrdered(collection.get("value"), FilterConstants.SortOrder.ASC);
+
+        collection = getCollection(rootUrl
+                                       + "Datastreams("
+                                       + datastreams.get(value).get(1).get(idKey).asText()
+                                       + ")/Observations",
+                                   "$orderby=result desc");
+        assertResponseCount(collection, 2, 2);
+        assertValueIsOrdered(collection.get("value"), FilterConstants.SortOrder.DESC);
     }
 
-    @Test
-    public void testAllOrderingsThrowNoError() {
-        testPermutations(Arrays.asList(0, 1, 2, 3, 4, 5, 6), 0, (list) -> {
-            StringBuilder filters = new StringBuilder();
-            for (Integer integer : list) {
-                filters.append("&").append(allFilters[integer]);
+    private void assertValueIsOrdered(JsonNode value, FilterConstants.SortOrder sortOrder) {
+        Long lastValue = (sortOrder.equals(FilterConstants.SortOrder.ASC)) ? Long.MIN_VALUE : Long.MAX_VALUE;
+        for (int i = 0; i < value.size(); i++) {
+            Long actual = value.get(i).get(result).asLong();
+            if (sortOrder.equals(FilterConstants.SortOrder.ASC)) {
+                Assertions.assertTrue(actual >= lastValue);
+            } else {
+                Assertions.assertTrue(actual <= lastValue);
             }
-            logger.debug(filters.substring(1));
-            try {
-                getCollection(EntityType.THING, filters.substring(1));
-            } catch (IOException e) {
-                Assertions.fail("Caught IOException:" + e.getMessage());
-            }
-        });
+            lastValue = actual;
+        }
     }
 }

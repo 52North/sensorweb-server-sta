@@ -25,9 +25,16 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta;
+package org.n52.sta.conformance;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
 import org.junit.jupiter.api.Test;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.slf4j.Logger;
@@ -36,12 +43,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Implements Conformance Tests according to Section A.2 in OGC SensorThings API Part 1: Sensing (15-078r6)

@@ -30,10 +30,13 @@
 //@AutoConfigureTestDatabase
 //@DataJpaTest
 
-package org.n52.sta;
+package org.n52.sta.conformance;
+
+import java.io.IOException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -44,8 +47,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
-import java.io.IOException;
 
 /**
  * This class tests various different things not covered directly by the official cite tests
