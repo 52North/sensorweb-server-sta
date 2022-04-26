@@ -39,6 +39,7 @@ import org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl;
 import org.hibernate.jpa.boot.spi.TypeContributorList;
 import org.hibernate.type.BasicType;
 import org.n52.hibernate.type.SmallBooleanType;
+import org.n52.sta.data.repositories.BaseRepositoryImpl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -55,7 +56,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class DataProviderConfiguration {
 
     @Configuration
-    @EnableJpaRepositories(basePackages = "org.n52.sta.data.repositories")
+    @EnableJpaRepositories(
+            repositoryBaseClass = BaseRepositoryImpl.class,
+            basePackages = "org.n52.sta.data.repositories")
     public static class RepositoryConfig {
         // inject via annotations
     }

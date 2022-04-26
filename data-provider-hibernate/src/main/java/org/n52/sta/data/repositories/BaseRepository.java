@@ -37,8 +37,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
@@ -52,7 +50,7 @@ import org.springframework.data.repository.NoRepositoryBean;
  * @see BaseRepositoryImpl
  */
 @NoRepositoryBean
-public interface BaseRepository<T> extends JpaSpecificationExecutor<T>, JpaRepository<T, Long> {
+public interface BaseRepository<T> {
 
     /**
      * Gets the property value of a single entity matching the given
