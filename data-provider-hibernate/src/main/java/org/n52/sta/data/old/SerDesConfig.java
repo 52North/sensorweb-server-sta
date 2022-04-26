@@ -28,12 +28,11 @@
 package org.n52.sta.data.old;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@Component
+//@Component
 public class SerDesConfig {
 
     private final String samplingGeometryMapping;

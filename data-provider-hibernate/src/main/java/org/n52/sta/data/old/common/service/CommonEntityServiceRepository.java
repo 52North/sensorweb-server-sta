@@ -38,14 +38,13 @@ import org.n52.sta.api.old.STAEventHandler;
 import org.n52.sta.data.old.common.CommonSTAServiceImpl;
 import org.n52.sta.data.old.common.CommonServiceFacade;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * Repository for all Sensor Things entity data services
  *
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
-@Component
+// @Component
 public class CommonEntityServiceRepository implements EntityServiceFactory {
 
     protected Map<String, CommonServiceFacade<?, ?>> entityServices = new LinkedHashMap<>();

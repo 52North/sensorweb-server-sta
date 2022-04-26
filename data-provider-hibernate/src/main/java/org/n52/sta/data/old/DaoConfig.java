@@ -39,25 +39,20 @@ import org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl;
 import org.hibernate.jpa.boot.spi.TypeContributorList;
 import org.hibernate.type.BasicType;
 import org.n52.hibernate.type.SmallBooleanType;
-import org.n52.sta.data.old.repositories.MessageBusRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@Configuration
-@EnableJpaRepositories(repositoryBaseClass = MessageBusRepository.class, basePackages = {
-        "org.n52.sta.data.vanilla.repositories" })
-@EnableTransactionManagement
-@ConfigurationProperties(prefix = "dao-postgres")
+// @Configuration
+// @EnableJpaRepositories(repositoryBaseClass = MessageBusRepository.class, basePackages = {
+//         "org.n52.sta.data.vanilla.repositories" })
+// @EnableTransactionManagement
+// @ConfigurationProperties(prefix = "dao-postgres")
 public class DaoConfig {
 
     @Value("${database.jpa.persistence-location}")

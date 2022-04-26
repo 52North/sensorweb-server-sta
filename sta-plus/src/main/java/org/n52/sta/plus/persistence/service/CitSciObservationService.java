@@ -37,21 +37,15 @@ import org.n52.series.db.beans.sta.plus.RelationEntity;
 import org.n52.series.db.beans.sta.plus.StaPlusDataEntity;
 import org.n52.series.db.beans.sta.plus.StaPlusQuantityDataEntity;
 import org.n52.shetland.ogc.om.OmConstants;
-import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.old.service.ObservationService;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@Component
-@DependsOn({ "springApplicationContext" })
-@Transactional
-@Profile(StaConstants.STAPLUS)
+// @Component
+// @DependsOn({ "springApplicationContext" })
+// @Profile(StaConstants.STAPLUS)
 public class CitSciObservationService extends ObservationService {
 
     @Override

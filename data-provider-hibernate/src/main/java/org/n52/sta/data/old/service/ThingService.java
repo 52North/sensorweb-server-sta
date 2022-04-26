@@ -61,18 +61,16 @@ import org.n52.sta.data.old.repositories.ThingRepository;
 import org.n52.sta.data.repositories.parameter.PlatformParameterRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
-@Component
-@DependsOn({ "springApplicationContext" })
-@Transactional
+// @Component
+// @DependsOn({ "springApplicationContext" })
+// @Transactional
 public class ThingService
         extends CommonSTAServiceImpl<ThingRepository, ThingDTO, PlatformEntity> {
 

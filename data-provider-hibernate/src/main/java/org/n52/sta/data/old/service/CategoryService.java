@@ -28,15 +28,14 @@
 package org.n52.sta.data.old.service;
 
 import org.n52.series.db.beans.CategoryEntity;
-import org.n52.sta.data.repositories.entity.CategoryRepository;
+import org.n52.sta.data.old.repositories.CategoryRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@Component
+// @Component
 public class CategoryService {
 
     public static final String DEFAULT_CATEGORY = "DEFAULT_STA_CATEGORY";

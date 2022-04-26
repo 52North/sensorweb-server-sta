@@ -48,20 +48,16 @@ import org.n52.sta.data.old.repositories.EntityGraphRepository;
 import org.n52.sta.plus.old.entity.ProjectDTO;
 import org.n52.sta.plus.persistence.query.ProjectQuerySpecifications;
 import org.n52.sta.plus.persistence.repositories.ProjectRepository;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@Component
-@DependsOn({ "springApplicationContext" })
-@Transactional
-@Profile(StaConstants.STAPLUS)
+// @Component
+// @DependsOn({ "springApplicationContext" })
+// @Transactional
+// @Profile(StaConstants.STAPLUS)
 public class ProjectService
         extends CitSciSTAServiceImpl<ProjectRepository, ProjectDTO, ProjectEntity> {
 

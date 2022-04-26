@@ -70,14 +70,11 @@ import org.n52.svalbard.odata.core.expr.temporal.TimeValueExpr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -87,9 +84,9 @@ import org.springframework.web.client.RestTemplate;
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@Component("ObservationService")
-@DependsOn({ "springApplicationContext" })
-@Transactional
+// @Component("ObservationService")
+// @DependsOn({ "springApplicationContext" })
+// @Transactional
 public class UfzAggregataObservationService extends ObservationService {
 
     protected static final String SLASH = "/";

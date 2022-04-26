@@ -34,9 +34,7 @@ import org.n52.sta.data.old.service.SensorService;
 import org.n52.sta.data.ufzaggregata.UfzAggregataObservationService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Profile;
 
 /**
@@ -48,9 +46,9 @@ import org.springframework.context.annotation.Profile;
  */
 @Configuration
 @Profile(StaConstants.UFZAGGREGATA)
-@ComponentScan(excludeFilters = {
-                @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*service.ObservationService.*")
-})
+// @ComponentScan(excludeFilters = {
+//                 @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*service.ObservationService.*")
+// })
 public class UfzConfiguration {
 
         @Bean

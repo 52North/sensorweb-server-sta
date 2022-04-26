@@ -34,15 +34,13 @@ import org.n52.sta.data.old.MutexFactory;
 import org.n52.sta.data.old.repositories.OfferingRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@Component
-@DependsOn({ "springApplicationContext" })
+// @Component
+// @DependsOn({ "springApplicationContext" })
 public class OfferingService {
 
     public static final String DEFAULT_CATEGORY = "DEFAULT_STA_CATEGORY";

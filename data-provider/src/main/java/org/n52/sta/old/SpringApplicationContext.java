@@ -30,14 +30,13 @@ package org.n52.sta.old;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.stereotype.Component;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * Wrapper to always return a reference to the Spring Application Context from
  **/
-@Component
+//@Component
 public class SpringApplicationContext implements ApplicationContextAware {
 
     private static ApplicationContext CONTEXT;

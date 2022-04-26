@@ -60,7 +60,6 @@ import org.n52.sta.data.old.service.ObservationService;
 import org.n52.sta.data.old.service.ObservedPropertyService;
 import org.n52.sta.data.old.service.SensorService;
 import org.n52.sta.data.old.service.ThingService;
-import org.springframework.stereotype.Component;
 
 /**
  * Facade proxying actual Service implementations. Used to restrict the number
@@ -236,7 +235,7 @@ public abstract class CommonServiceFacade<R extends StaDTO, S extends HibernateR
         }
     }
 
-    @Component
+    //@Component
     public static class ThingServiceFacade extends CommonServiceFacade<ThingDTO, PlatformEntity> {
 
         ThingServiceFacade(ThingService serviceImpl,
@@ -246,7 +245,7 @@ public abstract class CommonServiceFacade<R extends StaDTO, S extends HibernateR
         }
     }
 
-    @Component
+    //@Component
     public static class LocationServiceFacade extends CommonServiceFacade<LocationDTO, LocationEntity> {
 
         LocationServiceFacade(LocationService serviceImpl,
@@ -256,7 +255,7 @@ public abstract class CommonServiceFacade<R extends StaDTO, S extends HibernateR
         }
     }
 
-    @Component
+    //@Component
     public static class HistoricalLocationServiceFacade
             extends CommonServiceFacade<HistoricalLocationDTO, HistoricalLocationEntity> {
 
@@ -267,7 +266,7 @@ public abstract class CommonServiceFacade<R extends StaDTO, S extends HibernateR
         }
     }
 
-    @Component
+    //@Component
     public static class SensorServiceFacade extends CommonServiceFacade<SensorDTO, ProcedureEntity> {
 
         SensorServiceFacade(SensorService serviceImpl,
@@ -277,7 +276,7 @@ public abstract class CommonServiceFacade<R extends StaDTO, S extends HibernateR
         }
     }
 
-    @Component
+    //@Component
     public static class ObservedPropertyServiceFacade
             extends CommonServiceFacade<ObservedPropertyDTO, PhenomenonEntity> {
 
@@ -288,7 +287,7 @@ public abstract class CommonServiceFacade<R extends StaDTO, S extends HibernateR
         }
     }
 
-    @Component
+    //@Component
     public static class ObservationServiceFacade
             extends CommonServiceFacade<ObservationDTO, DataEntity<?>> {
 
@@ -299,7 +298,7 @@ public abstract class CommonServiceFacade<R extends StaDTO, S extends HibernateR
         }
     }
 
-    @Component
+    //@Component
     public static class DatastreamServiceFacade extends CommonServiceFacade<DatastreamDTO, AbstractDatasetEntity> {
 
         DatastreamServiceFacade(DatastreamService serviceImpl,
@@ -309,7 +308,7 @@ public abstract class CommonServiceFacade<R extends StaDTO, S extends HibernateR
         }
     }
 
-    @Component
+    //@Component
     public static class FeatureOfInterestServiceFacade
             extends CommonServiceFacade<FeatureOfInterestDTO, AbstractFeatureEntity<?>> {
 

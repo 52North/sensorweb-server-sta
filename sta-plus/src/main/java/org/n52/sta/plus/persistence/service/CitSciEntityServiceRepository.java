@@ -27,13 +27,12 @@
  */
 package org.n52.sta.plus.persistence.service;
 
-import org.n52.sta.data.old.common.service.CommonEntityServiceRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import javax.annotation.PostConstruct;
 
-@Component
+import org.n52.sta.data.old.common.service.CommonEntityServiceRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+
+// @Component
 public class CitSciEntityServiceRepository extends CommonEntityServiceRepository {
 
     @Autowired

@@ -75,18 +75,15 @@ import org.n52.sta.data.old.repositories.ObservationRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@Component
-@DependsOn({ "springApplicationContext" })
-@Transactional
+// @Component
+// @DependsOn({ "springApplicationContext" })
+// @Transactional
 public class FeatureOfInterestService
         extends CommonSTAServiceImpl<FeatureOfInterestRepository, FeatureOfInterestDTO, AbstractFeatureEntity<?>> {
 

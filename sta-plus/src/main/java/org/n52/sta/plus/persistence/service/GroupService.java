@@ -52,21 +52,16 @@ import org.n52.sta.plus.old.entity.GroupDTO;
 import org.n52.sta.plus.persistence.query.ObservationGroupQuerySpecifications;
 import org.n52.sta.plus.persistence.repositories.GroupParameterRepository;
 import org.n52.sta.plus.persistence.repositories.GroupRepository;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpMethod;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@Component
-@DependsOn({ "springApplicationContext" })
-@Transactional
-@Profile(StaConstants.STAPLUS)
+// @Component
+// @DependsOn({ "springApplicationContext" })
+// @Transactional
+// @Profile(StaConstants.STAPLUS)
 public class GroupService
         extends CitSciSTAServiceImpl<GroupRepository, GroupDTO, GroupEntity> {
 

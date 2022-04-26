@@ -36,15 +36,15 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.scheduling.annotation.EnableAsync;
 
+@EnableAsync
 @SpringBootApplication
 @EnableConfigurationProperties
-@EnableAsync
 @SuppressWarnings("uncommentedmain")
-@ComponentScan(excludeFilters = {
-    @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*vanilla.*"),
-    @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*citsci.*"),
-    @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*ufzaggregata.*")
-}
+// @ComponentScan(excludeFilters = {
+//     @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*vanilla.*"),
+//     @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*citsci.*"),
+//     @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*ufzaggregata.*")
+// }
 )
 public class Application extends SpringBootServletInitializer {
 

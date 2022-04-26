@@ -49,21 +49,16 @@ import org.n52.sta.data.old.repositories.EntityGraphRepository;
 import org.n52.sta.plus.old.entity.PartyDTO;
 import org.n52.sta.plus.persistence.query.PartyQuerySpecifications;
 import org.n52.sta.plus.persistence.repositories.PartyRepository;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpMethod;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@Component
-@DependsOn({ "springApplicationContext" })
-@Transactional
-@Profile(StaConstants.STAPLUS)
+// @Component
+// @DependsOn({ "springApplicationContext" })
+// @Transactional
+// @Profile(StaConstants.STAPLUS)
 public class PartyService
         extends CitSciSTAServiceImpl<PartyRepository, PartyDTO, PartyEntity> {
 

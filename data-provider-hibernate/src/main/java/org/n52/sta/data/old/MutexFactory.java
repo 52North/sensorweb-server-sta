@@ -30,13 +30,12 @@ package org.n52.sta.data.old;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@Component
+// @Component
 public class MutexFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MutexFactory.class);

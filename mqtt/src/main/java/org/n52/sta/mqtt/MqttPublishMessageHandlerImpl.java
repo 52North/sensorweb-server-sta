@@ -49,14 +49,12 @@ import org.n52.sta.old.utils.DTOMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import io.moquette.interception.messages.InterceptPublishMessage;
 
 /**
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
-@Component
 public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
         implements MqttPublishMessageHandler, CoreRequestUtils {
 

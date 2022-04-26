@@ -39,7 +39,6 @@ import org.n52.series.db.beans.sta.AggregationEntity;
 import org.n52.series.db.beans.sta.plus.StaPlusDataset;
 import org.n52.series.db.beans.sta.plus.StaPlusDatasetAggregationEntity;
 import org.n52.series.db.beans.sta.plus.StaPlusDatasetEntity;
-import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.old.common.CommonDatastreamService;
 import org.n52.sta.data.old.repositories.CategoryRepository;
@@ -51,14 +50,11 @@ import org.n52.sta.data.old.service.FormatService;
 import org.n52.sta.data.old.service.OfferingService;
 import org.n52.sta.plus.persistence.repositories.StaPlusDatastreamRepository;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Component
-@DependsOn({ "springApplicationContext", "datastreamRepository" })
-@Profile(StaConstants.STAPLUS)
+// @Component
+// @DependsOn({ "springApplicationContext", "datastreamRepository" })
+// @Profile(StaConstants.STAPLUS)
 @Transactional
 public class CitSciDatastreamService extends CommonDatastreamService<StaPlusDataset, StaPlusDatastreamRepository> {
 

@@ -43,7 +43,6 @@ import org.n52.sta.plus.old.entity.LicenseDTO;
 import org.n52.sta.plus.old.entity.PartyDTO;
 import org.n52.sta.plus.old.entity.ProjectDTO;
 import org.n52.sta.plus.old.entity.RelationDTO;
-import org.springframework.stereotype.Component;
 
 public class StaPlusServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
         extends CommonServiceFacade<R, S> {
@@ -53,7 +52,7 @@ public class StaPlusServiceFacade<R extends StaDTO, S extends HibernateRelations
         super(serviceImpl, semaphore, config);
     }
 
-    @Component
+    //@Component
     static class LicenseServiceFacade extends CommonServiceFacade<LicenseDTO, LicenseEntity> {
 
         LicenseServiceFacade(LicenseService serviceImpl,
@@ -63,7 +62,7 @@ public class StaPlusServiceFacade<R extends StaDTO, S extends HibernateRelations
         }
     }
 
-    @Component
+    //@Component
     static class PartyServiceFacade extends CommonServiceFacade<PartyDTO, PartyEntity> {
 
         PartyServiceFacade(PartyService serviceImpl,
@@ -73,7 +72,7 @@ public class StaPlusServiceFacade<R extends StaDTO, S extends HibernateRelations
         }
     }
 
-    @Component
+    //@Component
     static class ProjectServiceFacade extends CommonServiceFacade<ProjectDTO, ProjectEntity> {
 
         ProjectServiceFacade(ProjectService serviceImpl,
@@ -83,7 +82,7 @@ public class StaPlusServiceFacade<R extends StaDTO, S extends HibernateRelations
         }
     }
 
-    @Component
+    //@Component
     static class RelationServiceFacade
             extends CommonServiceFacade<RelationDTO, RelationEntity> {
 
@@ -94,7 +93,7 @@ public class StaPlusServiceFacade<R extends StaDTO, S extends HibernateRelations
         }
     }
 
-    @Component
+    //@Component
     static class GroupServiceFacade
             extends CommonServiceFacade<GroupDTO, GroupEntity> {
 
