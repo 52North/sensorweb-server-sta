@@ -34,7 +34,6 @@
         <module>data-provider</module>
         <module>data-provider-ufz</module>
         <module>data-provider-hibernate</module>
-        <module>slice-sample</module>
         <module>sta-plus</module>
     </modules>
 
