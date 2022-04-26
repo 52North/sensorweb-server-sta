@@ -95,14 +95,15 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         "Invalid expandOption supplied. Cannot find %s on Entity of type '%s'";
     protected static final String NO_S_WITH_ID_S_FOUND = "No %s with id %s found.";
 
+    protected final EntityManager em;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSensorThingsEntityServiceImpl.class);
-    private final EntityManager em;
     private final Class<S> entityClass;
     private EntityServiceRepository serviceRepository;
 
     @Autowired
     private MutexFactory lock;
-    private T repository;
+    private final T repository;
 
     public AbstractSensorThingsEntityServiceImpl(T repository,
                                                  EntityManager em,

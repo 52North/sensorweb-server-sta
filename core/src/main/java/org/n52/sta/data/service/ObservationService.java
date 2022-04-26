@@ -60,13 +60,16 @@ import org.n52.sta.data.repositories.EntityGraphRepository;
 import org.n52.sta.data.repositories.LocationRepository;
 import org.n52.sta.data.repositories.ObservationParameterRepository;
 import org.n52.sta.data.repositories.ObservationRepository;
+import org.n52.sta.data.service.util.CollectionWrapper;
 import org.n52.sta.data.service.util.FilterExprVisitor;
 import org.n52.sta.data.service.util.HibernateSpatialCriteriaBuilderImpl;
+import org.n52.sta.serdes.util.ElementWithQueryOptions;
 import org.n52.svalbard.odata.core.expr.Expr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
@@ -111,6 +114,68 @@ public class ObservationService
     }
 
     @Override
+    public ElementWithQueryOptions getEntity(String id, QueryOptions queryOptions) throws STACRUDException {
+        try {
+            DataEntity<?> entity =
+                getRepository().findByStaIdentifier(id, createFetchGraph(queryOptions.getExpandFilter())).get();
+            this.fetchValueIfCompositeDataEntity(entity);
+            if (queryOptions.hasExpandFilter()) {
+                return this.createWrapper(fetchExpandEntitiesWithFilter(entity, queryOptions.getExpandFilter()),
+                                          queryOptions);
+            } else {
+                return this.createWrapper(entity, queryOptions);
+            }
+        } catch (RuntimeException | STAInvalidQueryException e) {
+            throw new STACRUDException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public CollectionWrapper getEntityCollection(QueryOptions queryOptions) throws STACRUDException {
+        try {
+            Page<DataEntity<?>> pages = getRepository().findAll(getFilterPredicate(entityClass, queryOptions),
+                                                                createPageableRequest(queryOptions),
+                                                                queryOptions.hasCountFilter() &&
+                                                                    queryOptions.getCountFilter().getValue(),
+                                                                createFetchGraph(queryOptions.getExpandFilter()));
+            pages.forEach(this::fetchValueIfCompositeDataEntity);
+            return createCollectionWrapperAndExpand(queryOptions, pages);
+        } catch (RuntimeException e) {
+            throw new STACRUDException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    protected Page getEntityCollectionByRelatedEntityRaw(String relatedId,
+                                                         String relatedType,
+                                                         QueryOptions queryOptions)
+        throws STACRUDException {
+        try {
+            Page<DataEntity<?>> pages = getRepository()
+                .findAll(byRelatedEntityFilter(relatedId, relatedType, null)
+                             .and(getFilterPredicate(entityClass, queryOptions)),
+                         createPageableRequest(queryOptions),
+                         queryOptions.hasCountFilter() && queryOptions.getCountFilter().getValue(),
+                         createFetchGraph(queryOptions.getExpandFilter()));
+            pages.forEach(this::fetchValueIfCompositeDataEntity);
+            if (queryOptions.hasExpandFilter()) {
+                return pages.map(e -> {
+                    try {
+                        em.detach(e);
+                        return fetchExpandEntitiesWithFilter(e, queryOptions.getExpandFilter());
+                    } catch (STACRUDException | STAInvalidQueryException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                });
+            } else {
+                return pages;
+            }
+        } catch (RuntimeException e) {
+            throw new STACRUDException(e.getMessage(), e);
+        }
+    }
+
+    @Override
     public DataEntity<?> getEntityByIdRaw(Long id, QueryOptions queryOptions) throws STACRUDException {
         DataEntity<?> entity = super.getEntityByIdRaw(id, queryOptions);
         fetchValueIfCompositeDataEntity(entity);
@@ -128,52 +193,10 @@ public class ObservationService
         return entity;
     }
 
-    /*
-    public Page getEntityCollectionByRelatedEntityRaw(String relatedId,
-                                                      String relatedType,
-                                                      QueryOptions queryOptions)
-        throws STACRUDException {
-        try {
-            OffsetLimitBasedPageRequest pageableRequest = createPageableRequest(queryOptions);
-            Specification<DataEntity<?>> spec =
-                byRelatedEntityFilter(relatedId, relatedType, null)
-                    .and(getFilterPredicate(DataEntity.class, queryOptions));
-
-            List<String> identifierList = getRepository().getColumnList(spec,
-                                                                        createPageableRequest(queryOptions),
-                                                                        STAIDENTIFIER);
-            if (identifierList.isEmpty()) {
-                return Page.empty();
-            } else {
-                Page<DataEntity<?>> pages = getRepository().findAll(
-                    oQS.withStaIdentifier(identifierList),
-                    new OffsetLimitBasedPageRequest(0,
-                                                    pageableRequest.getPageSize(),
-                                                    pageableRequest.getSort()),
-                    EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS);
-
-                pages.forEach(this::fetchValueIfCompositeDataEntity);
-                if (queryOptions.hasExpandFilter()) {
-                    return pages.map(e -> {
-                        try {
-                            return fetchExpandEntitiesWithFilter(e, queryOptions.getExpandFilter());
-                        } catch (STACRUDException | STAInvalidQueryException ex) {
-                            throw new RuntimeException(ex);
-                        }
-                    });
-                } else {
-                    return pages;
-                }
-            }
-        } catch (RuntimeException e) {
-            throw new STACRUDException(e.getMessage(), e);
-        }
-    }
-    */
-
-    @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption) {
+    @Override
+    protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption) {
         return new EntityGraphRepository.FetchGraph[] {
-            EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS,
+            EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS
         };
     }
 
@@ -193,9 +216,8 @@ public class ObservationService
                     returned.setDataset(datastream);
                     break;
                 case STAEntityDefinition.FEATURE_OF_INTEREST:
-                    AbstractFeatureEntity<?> foi = ((FeatureOfInterestService)
-                        getFeatureOfInterestService()).getEntityByDatasetIdRaw(returned.getDataset().getId(),
-                                                                               expandItem.getQueryOptions());
+                    AbstractFeatureEntity<?> foi = getFeatureOfInterestService().getEntityByDatasetIdRaw(returned.getDataset().getId(),
+                                                                                                         expandItem.getQueryOptions());
                     returned.setFeature(foi);
                     break;
                 default:
@@ -432,7 +454,9 @@ public class ObservationService
         // As we unproxy later anyway this is no overhead.
         DataEntity<?> unproxy = (DataEntity<?>) Hibernate.unproxy(entity);
         if (unproxy instanceof CompositeDataEntity) {
-            Hibernate.initialize(unproxy.getParameters());
+            ((Set<DataEntity<?>>) unproxy.getValue())
+                .forEach(v -> Hibernate.initialize(v.getParameters())
+            );
         }
         return unproxy;
     }
@@ -545,8 +569,8 @@ public class ObservationService
             if (getRepository().existsByStaIdentifier(identifier)) {
                 DataEntity<?> observation =
                     getRepository().findByStaIdentifier(
-                        identifier,
-                        EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASET_FIRSTLAST_OBSERVATION)
+                            identifier,
+                            EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASET_FIRSTLAST_OBSERVATION)
                         .get();
                 deleteReferenceFromDatasetFirstLast(observation);
 
