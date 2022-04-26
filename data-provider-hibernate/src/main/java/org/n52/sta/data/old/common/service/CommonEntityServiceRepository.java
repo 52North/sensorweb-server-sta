@@ -45,7 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 // @Component
-public class CommonEntityServiceLookup implements EntityServiceLookup {
+public class CommonEntityServiceRepository implements EntityServiceLookup {
 
     protected Map<String, CommonServiceFacade<?, ?>> entityServices = new LinkedHashMap<>();
 

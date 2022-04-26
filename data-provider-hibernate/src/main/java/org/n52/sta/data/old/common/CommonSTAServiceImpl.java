@@ -53,7 +53,7 @@ import org.n52.sta.data.old.DTOTransformerImpl;
 import org.n52.sta.data.old.MutexFactory;
 import org.n52.sta.data.old.OffsetLimitBasedPageRequest;
 import org.n52.sta.data.old.SerDesConfig;
-import org.n52.sta.data.old.common.service.CommonEntityServiceLookup;
+import org.n52.sta.data.old.common.service.CommonEntityServiceRepository;
 import org.n52.sta.data.old.repositories.EntityGraphRepository;
 import org.n52.sta.data.old.repositories.StaIdentifierRepository;
 import org.n52.sta.data.old.service.DatastreamService;
@@ -104,7 +104,7 @@ public abstract class CommonSTAServiceImpl<T extends StaIdentifierRepository<S>,
     protected static final String INVALID_EXPAND_OPTION_SUPPLIED = "Invalid expandOption supplied. Cannot find %s on Entity of type '%s'";
     protected static final String NO_S_WITH_ID_S_FOUND = "No %s with id %s found.";
     private static final Logger LOGGER = LoggerFactory.getLogger(CommonSTAServiceImpl.class);
-    protected CommonEntityServiceLookup serviceRepository;
+    protected CommonEntityServiceRepository serviceRepository;
     private final EntityManager em;
     private final Class<S> entityClass;
     private T repository;
@@ -127,7 +127,7 @@ public abstract class CommonSTAServiceImpl<T extends StaIdentifierRepository<S>,
         this.repository = repository;
     }
 
-    public void setServiceRepository(CommonEntityServiceLookup serviceRepository) {
+    public void setServiceRepository(CommonEntityServiceRepository serviceRepository) {
         this.serviceRepository = serviceRepository;
     }
 
@@ -576,41 +576,41 @@ public abstract class CommonSTAServiceImpl<T extends StaIdentifierRepository<S>,
 
     protected LocationService getLocationService() {
         return (LocationService) serviceRepository
-                .getEntityServiceRaw(CommonEntityServiceLookup.EntityTypes.Location.name());
+                .getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.Location.name());
     }
 
     protected HistoricalLocationService getHistoricalLocationService() {
         return (HistoricalLocationService) serviceRepository
-                .getEntityServiceRaw(CommonEntityServiceLookup.EntityTypes.HistoricalLocation.name());
+                .getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.HistoricalLocation.name());
     }
 
     protected DatastreamService getDatastreamService() {
         return (DatastreamService) serviceRepository
-                .getEntityServiceRaw(CommonEntityServiceLookup.EntityTypes.Datastream.name());
+                .getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.Datastream.name());
     }
 
     protected FeatureOfInterestService getFeatureOfInterestService() {
         return (FeatureOfInterestService) serviceRepository
-                .getEntityServiceRaw(CommonEntityServiceLookup.EntityTypes.FeatureOfInterest.name());
+                .getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.FeatureOfInterest.name());
     }
 
     protected ThingService getThingService() {
         return (ThingService) serviceRepository
-                .getEntityServiceRaw(CommonEntityServiceLookup.EntityTypes.Thing.name());
+                .getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.Thing.name());
     }
 
     protected SensorService getSensorService() {
         return (SensorService) serviceRepository
-                .getEntityServiceRaw(CommonEntityServiceLookup.EntityTypes.Sensor.name());
+                .getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.Sensor.name());
     }
 
     protected ObservedPropertyService getObservedPropertyService() {
         return (ObservedPropertyService) serviceRepository
-                .getEntityServiceRaw(CommonEntityServiceLookup.EntityTypes.ObservedProperty.name());
+                .getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.ObservedProperty.name());
     }
 
     protected ObservationService getObservationService() {
         return (ObservationService) serviceRepository
-                .getEntityServiceRaw(CommonEntityServiceLookup.EntityTypes.Observation.name());
+                .getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.Observation.name());
     }
 }

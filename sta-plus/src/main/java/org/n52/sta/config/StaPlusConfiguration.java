@@ -28,9 +28,9 @@
 package org.n52.sta.config;
 
 import org.n52.shetland.ogc.sta.StaConstants;
-import org.n52.sta.data.old.common.service.CommonEntityServiceLookup;
+import org.n52.sta.data.old.common.service.CommonEntityServiceRepository;
 import org.n52.sta.data.old.service.ObservationService;
-import org.n52.sta.plus.persistence.service.CitSciEntityServiceLookup;
+import org.n52.sta.plus.persistence.service.CitSciEntityServiceRepository;
 import org.n52.sta.plus.persistence.service.CitSciObservationService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,10 +39,10 @@ import org.springframework.context.annotation.Profile;
 
 /**
  * Loads an alternate implementations for {@link ObservationService} and
- * {@link CommonEntityServiceLookup}.
+ * {@link CommonEntityServiceRepository}.
  *
  * @see CitSciObservationService
- * @see CitSciEntityServiceLookup
+ * @see CitSciEntityServiceRepository
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Configuration
@@ -57,7 +57,7 @@ public class StaPlusConfiguration {
 
     @Bean
     @Primary
-    public CitSciEntityServiceLookup getEntityServiceRepository() {
-        return new CitSciEntityServiceLookup();
+    public CitSciEntityServiceRepository getEntityServiceRepository() {
+        return new CitSciEntityServiceRepository();
     }
 }
