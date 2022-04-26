@@ -25,14 +25,14 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.mqtt.subscription;
-
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
-import org.n52.sta.api.old.dto.common.StaDTO;
+package org.n52.sta.mqtt.old.subscription;
 
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.sta.api.old.dto.common.StaDTO;
 
 /**
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>

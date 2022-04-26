@@ -31,9 +31,10 @@
  * and open the template in the editor.
  */
 
-package org.n52.sta.mqtt.subscription;
+package org.n52.sta.mqtt.old.subscription;
 
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 
@@ -45,57 +46,40 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
 /**
+ * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
-public class MqttEntitySubscription extends AbstractMqttSubscription {
+public class MqttEntityCollectionSubscription extends AbstractMqttSubscription {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MqttEntitySubscription.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MqttEntityCollectionSubscription.class);
 
-    private String wantedIdentifier;
-
-    public MqttEntitySubscription(String topic, Matcher mt) {
+    public MqttEntityCollectionSubscription(String topic, Matcher mt) {
         super(topic);
         init(mt);
         LOGGER.debug(this.toString());
     }
 
-    public MqttEntitySubscription(String topic, Matcher mt, boolean calledFromSubclass) {
+    public MqttEntityCollectionSubscription(String topic, Matcher mt, boolean calledFromSubclass) {
         super(topic);
         init(mt);
     }
 
     private void init(Matcher mt) {
-        // Referenced Entity
-        // E.g. /Datastream(52)/Sensor
-        if (mt.group(RequestUtils.GROUPNAME_WANTED_IDENTIFIER) == null) {
+        // Root collection
+        // E.g. /Things
+        if (!mt.pattern().pattern().contains(RequestUtils.GROUPNAME_SOURCE_IDENTIFIER)) {
+            wantedEntityType = mt.group(1);
+        } else {
+            // Related collection
+            // E.g. /Things(52)/Datastreams
             sourceEntityType = mt.group(RequestUtils.GROUPNAME_SOURCE_NAME);
             sourceId = mt.group(RequestUtils.GROUPNAME_SOURCE_IDENTIFIER);
             sourceId = sourceId.substring(1, sourceId.length() - 1);
             wantedEntityType = mt.group(RequestUtils.GROUPNAME_WANTED_NAME);
-            Assert.notNull(sourceId, "Unable to parse topic. Could not extract sourceId");
             Assert.notNull(sourceEntityType, "Unable to parse topic. Could not extract sourceEntityType");
-        } else {
-            // Direct Entity
-            // E.g. /Things(52)
-            wantedEntityType = mt.group(RequestUtils.GROUPNAME_WANTED_NAME);
-            wantedIdentifier = mt.group(RequestUtils.GROUPNAME_WANTED_IDENTIFIER);
-            wantedIdentifier = wantedIdentifier.substring(1, wantedIdentifier.length() - 1);
-            Assert.notNull(wantedIdentifier, "Unable to parse topic. Could not extract wantedIdentifier");
+            Assert.notNull(sourceId, "Unable to parse topic. Could not extract sourceId");
         }
-
         Assert.notNull(wantedEntityType, "Unable to parse topic. Could not extract wantedEntityType");
-    }
-
-    @Override
-    public String toString() {
-        String base = super.toString();
-        return new StringBuilder()
-            .append(base)
-            .deleteCharAt(base.length() - 1)
-            .append(",wantedIdentifier=")
-            .append(wantedIdentifier)
-            .append("]")
-            .toString();
     }
 
     @Override public QueryOptions getQueryOptions() {
@@ -107,28 +91,27 @@ public class MqttEntitySubscription extends AbstractMqttSubscription {
                            String realEntityType,
                            Map<String, Set<String>> collections,
                            Set<String> differenceMap) {
-
         // Check type and fail-fast on type mismatch
         if (!(wantedEntityType.equals(realEntityType))) {
             return false;
         }
 
-        // Direct Entity
-        if (wantedIdentifier != null) {
-            return wantedIdentifier.equals(entity.getId());
-        } else {
-            // Referenced Entity
-            // Check if Entity belongs to collection of this Subscription
-            if (collections != null) {
-                for (Map.Entry<String, Set<String>> collection : collections.entrySet()) {
-                    if (collection.getKey().equals(sourceEntityType)) {
-                        for (String id : collection.getValue()) {
-                            if (id.equals(sourceId)) {
-                                return true;
-                            }
+        // Check if Subscription is on root level (e.g. `/Things`)
+        // Type was already checked so we can success-fast
+        if (sourceId == null) {
+            return true;
+        }
+
+        // Check if Entity belongs to collection of this Subscription
+        if (collections != null) {
+            for (Entry<String, Set<String>> collection : collections.entrySet()) {
+                if (collection.getKey().equals(sourceEntityType)) {
+                    for (String id : collection.getValue()) {
+                        if (id.equals(sourceId)) {
+                            return true;
                         }
-                        return false;
                     }
+                    return false;
                 }
             }
         }

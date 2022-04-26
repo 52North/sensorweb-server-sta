@@ -27,19 +27,6 @@
  */
 package org.n52.sta.config;
 
-import java.util.List;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.n52.sta.api.old.EntityServiceFactory;
-import org.n52.sta.mqtt.MqttBroker;
-import org.n52.sta.mqtt.MqttPublishMessageHandler;
-import org.n52.sta.mqtt.MqttPublishMessageHandlerImpl;
-import org.n52.sta.mqtt.MqttSubscriptionEventHandler;
-import org.n52.sta.mqtt.MqttSubscriptionEventHandlerImpl;
-import org.n52.sta.old.utils.DTOMapper;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -47,49 +34,5 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class StaConfiguration {
-
-    @Configuration
-    public static class MqttConfiguration {
-
-        @Bean(initMethod = "init", destroyMethod = "stopServer")
-        public MqttBroker getMqttBroker(
-            @Value("${mqtt.broker.persistence.path:}") String storePath,
-            @Value("${mqtt.broker.persistence.filename:52N-STA-MQTTBroker.h2}") String storeFilename,
-            @Value("${mqtt.broker.persistence.autosave_interval:300}") String autosaveIntervalProperty,
-            @Value("${mqtt.broker.persistence.enabled}") Boolean persistenceEnabled,
-            @Value("${mqtt.broker.websocket.enabled}") Boolean websocketEnabled,
-            @Value("${mqtt.broker.websocket.port:8080}") String websocketPort,
-            @Value("${mqtt.broker.plaintcp.enabled}") Boolean plainTcpEnabled,
-            @Value("${mqtt.broker.plain_tcp.port:1883}") String plainTcpPort,
-            MqttSubscriptionEventHandler subscriptionHandler,
-            MqttPublishMessageHandler publishHandler) {
-
-            return new MqttBroker(storePath, storeFilename, autosaveIntervalProperty, persistenceEnabled,
-                    websocketEnabled, websocketPort, plainTcpEnabled, plainTcpPort, subscriptionHandler,
-                    publishHandler);
-        }
-
-        @Bean
-        public MqttSubscriptionEventHandler getMqttMessageHandler(
-                @Value("${server.rootUrl}") String rootUrl,
-                @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
-                ObjectMapper mapper) {
-            return new MqttSubscriptionEventHandlerImpl(rootUrl, shouldEscapeId, mapper);
-        }
-
-        @Bean
-        public MqttPublishMessageHandler getMqttMessageHandler(
-                @Value("${server.feature.mqttPublishTopics:Observations}") List<String> publishTopics,
-                @Value("${server.feature.mqttReadOnly}") boolean readOnly,
-                @Value("${server.rootUrl}") String rootUrl,
-                @Value("${server.feature.escapeId:true}") boolean escapeId,
-                EntityServiceFactory serviceRepository,
-                ObjectMapper mapper,
-                DTOMapper dtoMapper) {
-
-            return new MqttPublishMessageHandlerImpl(publishTopics, readOnly, rootUrl, escapeId,
-                    serviceRepository, mapper, dtoMapper);
-        }
-    }
 
 }

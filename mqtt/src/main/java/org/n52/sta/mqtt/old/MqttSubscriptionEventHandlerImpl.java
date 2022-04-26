@@ -25,7 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.mqtt;
+package org.n52.sta.mqtt.old;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,11 +41,11 @@ import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.old.CoreRequestUtils;
 import org.n52.sta.api.old.EntityServiceFactory;
 import org.n52.sta.api.old.dto.common.StaDTO;
-import org.n52.sta.mqtt.subscription.AbstractMqttSubscription;
-import org.n52.sta.mqtt.subscription.MqttEntityCollectionSubscription;
-import org.n52.sta.mqtt.subscription.MqttEntitySubscription;
-import org.n52.sta.mqtt.subscription.MqttPropertySubscription;
-import org.n52.sta.mqtt.subscription.MqttSelectSubscription;
+import org.n52.sta.mqtt.old.subscription.AbstractMqttSubscription;
+import org.n52.sta.mqtt.old.subscription.MqttEntityCollectionSubscription;
+import org.n52.sta.mqtt.old.subscription.MqttEntitySubscription;
+import org.n52.sta.mqtt.old.subscription.MqttPropertySubscription;
+import org.n52.sta.mqtt.old.subscription.MqttSelectSubscription;
 import org.n52.sta.old.utils.AbstractSTARequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

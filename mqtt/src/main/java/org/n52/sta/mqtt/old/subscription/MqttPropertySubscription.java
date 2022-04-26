@@ -31,7 +31,7 @@
  * and open the template in the editor.
  */
 
-package org.n52.sta.mqtt.subscription;
+package org.n52.sta.mqtt.old.subscription;
 
 import java.util.HashSet;
 import java.util.Map;

@@ -25,7 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.mqtt;
+package org.n52.sta.mqtt.old;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;

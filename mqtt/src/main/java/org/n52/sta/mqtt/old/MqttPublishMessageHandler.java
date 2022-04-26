@@ -25,19 +25,17 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.mqtt;
+package org.n52.sta.mqtt.old;
+
+import org.n52.sta.api.old.RequestUtils;
+import org.n52.sta.api.old.dto.common.StaDTO;
+
+import io.moquette.interception.messages.InterceptPublishMessage;
 
 /**
- * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
+ * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public class MqttHandlerException extends Exception {
+public interface MqttPublishMessageHandler extends RequestUtils {
 
-    public MqttHandlerException(String message) {
-        super(message);
-    }
-
-    public MqttHandlerException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
+    <T extends StaDTO> void processPublishMessage(InterceptPublishMessage msg);
 }
