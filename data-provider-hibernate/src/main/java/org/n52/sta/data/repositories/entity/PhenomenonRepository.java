@@ -27,12 +27,12 @@
  */
 package org.n52.sta.data.repositories.entity;
 
-import org.springframework.context.annotation.DependsOn;
+import org.n52.series.db.beans.PhenomenonEntity;
+import org.n52.sta.data.repositories.BaseRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-@DependsOn("DatastreamRepository")
-public interface PhenomenonRepository {
+public interface PhenomenonRepository extends BaseRepository<PhenomenonEntity> {
 
 }
 

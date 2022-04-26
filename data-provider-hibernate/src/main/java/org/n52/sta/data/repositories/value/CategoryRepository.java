@@ -25,13 +25,18 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data.repositories.entity;
+package org.n52.sta.data.repositories.value;
 
-import org.n52.series.db.beans.ProcedureHistoryEntity;
+import java.util.Optional;
+
+import org.n52.series.db.beans.CategoryEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ProcedureHistoryRepository extends JpaRepository<ProcedureHistoryEntity, Long> {
+public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> {
 
+    boolean existsByIdentifier(String identifier);
+
+    Optional<CategoryEntity> findByIdentifier(String identifier);
 }

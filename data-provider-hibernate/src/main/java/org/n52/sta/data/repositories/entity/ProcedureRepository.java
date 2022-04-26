@@ -27,8 +27,10 @@
  */
 package org.n52.sta.data.repositories.entity;
 
+import org.n52.series.db.beans.ProcedureEntity;
+import org.n52.sta.data.repositories.BaseRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ProcedureRepository {
+public interface ProcedureRepository extends BaseRepository<ProcedureEntity> {
 }

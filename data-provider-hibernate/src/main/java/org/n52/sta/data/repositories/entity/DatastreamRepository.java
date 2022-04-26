@@ -30,13 +30,14 @@ package org.n52.sta.data.repositories.entity;
 import java.util.Set;
 
 import org.n52.series.db.beans.AbstractDatasetEntity;
+import org.n52.sta.data.repositories.BaseRepository;
 import org.springframework.stereotype.Repository;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Repository
-public interface DatastreamRepository {
+public interface DatastreamRepository extends BaseRepository<AbstractDatasetEntity> {
 
     Set<AbstractDatasetEntity> findAllByAggregationId(Long id);
 }

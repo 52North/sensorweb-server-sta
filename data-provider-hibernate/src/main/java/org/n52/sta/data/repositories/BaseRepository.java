@@ -37,6 +37,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
@@ -50,7 +52,7 @@ import org.springframework.data.repository.NoRepositoryBean;
  * @see BaseRepositoryImpl
  */
 @NoRepositoryBean
-public interface BaseRepository<T> {
+public interface BaseRepository<T> extends JpaSpecificationExecutor<T>, JpaRepository<T,Long> {
 
     /**
      * Gets the property value of a single entity matching the given
@@ -78,6 +80,12 @@ public interface BaseRepository<T> {
      *         otherwise
      */
     List<String> getColumnList(String columnName, Specification<T> spec, Pageable pageable);
+
+    boolean existsByStaIdentifier(String staIdentifier);
+
+    Optional<T> findByStaIdentifier(String identifier, EntityGraphBuilder<T> graphBuilder);
+
+    void deleteByStaIdentifier(String identifier);
 
     Optional<T> findById(Long id, EntityGraphBuilder<T> entityGraphBuilder);
 

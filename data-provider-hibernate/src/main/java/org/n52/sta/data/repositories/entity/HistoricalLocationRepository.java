@@ -27,12 +27,14 @@
  */
 package org.n52.sta.data.repositories.entity;
 
+import org.n52.series.db.beans.sta.HistoricalLocationEntity;
+import org.n52.sta.data.repositories.BaseRepository;
 import org.springframework.stereotype.Repository;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Repository
-public interface HistoricalLocationRepository {
+public interface HistoricalLocationRepository extends BaseRepository<HistoricalLocationEntity> {
 
 }

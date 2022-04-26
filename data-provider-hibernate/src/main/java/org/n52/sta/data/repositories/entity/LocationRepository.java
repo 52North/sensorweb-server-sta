@@ -30,13 +30,14 @@ package org.n52.sta.data.repositories.entity;
 import java.util.Set;
 
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.sta.data.repositories.BaseRepository;
 import org.springframework.stereotype.Repository;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Repository
-public interface LocationRepository {
+public interface LocationRepository extends BaseRepository<LocationEntity> {
 
     Set<LocationEntity> findAllByPlatformsIdEquals(Long id);
 

@@ -29,13 +29,12 @@ package org.n52.sta.data.repositories.entity;
 
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.sta.data.repositories.BaseRepository;
-import org.n52.sta.data.repositories.StaIdentifierRepository;
 import org.springframework.stereotype.Repository;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Repository
-public interface ThingRepository extends StaIdentifierRepository<PlatformEntity>, BaseRepository<PlatformEntity> {
+public interface ThingRepository extends BaseRepository<PlatformEntity> {
 
 }
