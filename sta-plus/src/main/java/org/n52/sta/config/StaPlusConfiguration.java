@@ -28,6 +28,7 @@
 package org.n52.sta.config;
 
 import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.sta.data.old.common.service.CommonEntityServiceRepository;
 import org.n52.sta.data.old.service.ObservationService;
 import org.n52.sta.plus.persistence.service.CitSciEntityServiceRepository;
 import org.n52.sta.plus.persistence.service.CitSciObservationService;
