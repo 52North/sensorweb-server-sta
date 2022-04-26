@@ -41,14 +41,14 @@ import org.n52.sta.api.old.RequestUtils;
  */
 public abstract class AbstractSTARequestHandler implements RequestUtils {
 
-    protected final boolean shouldEscapeId;
+    protected final boolean escapeId;
     protected final EntityServiceLookup serviceRepository;
     protected final String rootUrl;
 
-    public AbstractSTARequestHandler(String rootUrl,
-            boolean shouldEscapeId,
+    protected AbstractSTARequestHandler(String rootUrl,
+            boolean escapeId,
             EntityServiceLookup serviceRepository) {
-        this.shouldEscapeId = shouldEscapeId;
+        this.escapeId = escapeId;
         this.serviceRepository = serviceRepository;
         this.rootUrl = rootUrl;
     }
@@ -57,25 +57,19 @@ public abstract class AbstractSTARequestHandler implements RequestUtils {
      * Validates a given Resource Path. Checks Syntax + Semantics
      *
      * @param requestURI        URL to the Resource.
-     * @param serviceRepository Backend Repository Factory
      * @throws Exception if URL is not valid
      */
-    protected void validateResource(StringBuffer requestURI,
-            EntityServiceLookup serviceRepository)
-            throws Exception {
-        validateResource(requestURI.toString(), serviceRepository);
+    protected void validateResource(StringBuffer requestURI)            throws Exception {
+        validateResource(requestURI.toString());
     }
 
     /**
      * Validates a given Resource Path. Checks Syntax + Semantics
      *
      * @param requestURI        URL to the Resource.
-     * @param serviceRepository Backend Repository Factory
      * @throws Exception if URL is not valid
      */
-    protected void validateResource(String requestURI,
-            EntityServiceLookup serviceRepository)
-            throws Exception {
+    protected void validateResource(String requestURI)            throws Exception {
         String[] uriResources;
         if (requestURI.startsWith("/")) {
             uriResources = requestURI.substring(1).split(SLASH);
@@ -88,7 +82,7 @@ public abstract class AbstractSTARequestHandler implements RequestUtils {
         if (ex != null) {
             throw ex;
         }
-        ex = validateURISemantic(uriResources, serviceRepository);
+        ex = validateURISemantic(uriResources);
         if (ex != null) {
             throw ex;
         }
@@ -116,11 +110,9 @@ public abstract class AbstractSTARequestHandler implements RequestUtils {
      * exists. As URI is syntactically valid indices can be hard-coded.
      *
      * @param uriResources      URI of the Request split by SLASH
-     * @param serviceRepository Repository for EntityServices
      * @return STAInvalidUrlException if URI is malformed
      */
-    protected Exception validateURISemantic(String[] uriResources,
-            EntityServiceLookup serviceRepository) throws STACRUDException {
+    protected Exception validateURISemantic(String[] uriResources) throws STACRUDException {
         // Check if this is Request to root collection. They are always valid
         if (uriResources.length == 1 && !uriResources[0].contains(ROUND_BRACKET_OPEN)) {
             return null;
@@ -183,7 +175,7 @@ public abstract class AbstractSTARequestHandler implements RequestUtils {
     }
 
     protected String unescapeIdIfWanted(String id) {
-        if (shouldEscapeId && id.startsWith("'") && id.endsWith("'")) {
+        if (escapeId && id.startsWith("'") && id.endsWith("'")) {
             return id.substring(1, id.length() - 1);
         } else {
             return id;

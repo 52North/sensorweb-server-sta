@@ -39,7 +39,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.old.CoreRequestUtils;
-import org.n52.sta.api.old.EntityServiceLookup;
 import org.n52.sta.api.old.dto.common.StaDTO;
 import org.n52.sta.mqtt.old.subscription.AbstractMqttSubscription;
 import org.n52.sta.mqtt.old.subscription.MqttEntityCollectionSubscription;
@@ -78,7 +77,6 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
             0);
 
     private final ObjectMapper mapper;
-    private EntityServiceLookup serviceRepository;
     private Server mqttBroker;
     private Map<AbstractMqttSubscription, HashSet<String>> subscriptions = new HashMap<>();
     /*
@@ -142,11 +140,6 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
         return watchedEntityTypes;
     }
 
-    @Override
-    public void setServiceRepository(EntityServiceLookup serviceRepository) {
-        this.serviceRepository = serviceRepository;
-    }
-
     public void addSubscription(AbstractMqttSubscription subscription, String clientId) {
         HashSet<String> clients = subscriptions.get(subscription);
         if (clients == null) {
@@ -199,7 +192,7 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
             // Check topic for syntax+semantics
             if (topic.contains("?")) {
                 // only check path part of the topic (excluding the select parameter)
-                validateResource(topic.substring(0, topic.indexOf("?")), serviceRepository);
+                validateResource(topic.substring(0, topic.indexOf("?")));
                 for (Pattern namedSelectPattern : NAMED_SELECT_PATTERNS) {
                     mt = namedSelectPattern.matcher(topic);
                     if (mt.matches()) {
@@ -211,7 +204,7 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
                 // check full topic
                 // This will fail if we have a PropertySubscription
                 try {
-                    validateResource(topic, serviceRepository);
+                    validateResource(topic);
                     for (Pattern collectionPattern : NAMED_COLL_PATTERNS) {
                         mt = collectionPattern.matcher(topic);
                         if (mt.matches()) {
@@ -234,7 +227,7 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
                             // OGC-15-078r6 14.2.3
                             // Only check path part of the topic (excluding the property)
                             String path = topic.substring(0, topic.lastIndexOf("/"));
-                            validateResource(path, serviceRepository);
+                            validateResource(path);
                             return new MqttPropertySubscription(topic, mt);
                         }
                     }

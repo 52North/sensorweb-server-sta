@@ -94,7 +94,7 @@ public class CitSciEntityRequestHandler extends EntityRequestHandler implements 
                                     HttpServletRequest request)
         throws Exception {
         if (target.equals(StaConstants.SUBJECT) || target.equals(StaConstants.OBJECT)) {
-            validateResource((String) request.getAttribute(HandlerMapping.LOOKUP_PATH), serviceRepository);
+            validateResource((String) request.getAttribute(HandlerMapping.LOOKUP_PATH));
 
             String[] split = splitId(entity);
             String sourceType = split[0];

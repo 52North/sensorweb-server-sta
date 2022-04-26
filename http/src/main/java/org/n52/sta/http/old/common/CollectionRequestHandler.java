@@ -123,7 +123,7 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
                                                    @PathVariable String target,
                                                    HttpServletRequest request)
         throws Exception {
-        validateResource((String) request.getAttribute(HandlerMapping.LOOKUP_PATH), serviceRepository);
+        validateResource((String) request.getAttribute(HandlerMapping.LOOKUP_PATH));
 
         String[] split = splitId(entity);
         String sourceType = split[0];
@@ -151,7 +151,7 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
                                                       HttpServletRequest request)
         throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
-        validateResource(lookupPath.substring(0, lookupPath.length() - 5), serviceRepository);
+        validateResource(lookupPath.substring(0, lookupPath.length() - 5));
 
         String[] split = splitId(entity);
         String sourceType = split[0];

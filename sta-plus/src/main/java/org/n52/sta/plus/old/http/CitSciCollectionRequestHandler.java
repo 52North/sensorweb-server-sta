@@ -107,7 +107,7 @@ public class CitSciCollectionRequestHandler extends CollectionRequestHandler imp
                                                    HttpServletRequest request)
         throws Exception {
         if (target.equals(StaConstants.SUBJECTS) || target.equals(StaConstants.OBJECTS)) {
-            validateResource((String) request.getAttribute(HandlerMapping.LOOKUP_PATH), serviceRepository);
+            validateResource((String) request.getAttribute(HandlerMapping.LOOKUP_PATH));
 
             String[] split = splitId(entity);
             String sourceType = split[0];

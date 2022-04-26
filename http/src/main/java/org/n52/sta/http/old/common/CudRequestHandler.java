@@ -107,7 +107,7 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
                         HttpServletRequest request)
                         throws Exception {
                 String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
-                validateResource(lookupPath, serviceRepository);
+                validateResource(lookupPath);
 
                 // Add information about the related Entity to json payload to be used during
                 // deserialization
@@ -140,7 +140,7 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
                         HttpServletRequest request)
                         throws Exception {
                 String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
-                validateResource(lookupPath, serviceRepository);
+                validateResource(lookupPath);
 
                 Class<EntityPatch> clazz = dtoMapper.collectionNameToPatchClass(collectionName);
                 ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
@@ -171,7 +171,7 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
                         HttpServletRequest request)
                         throws Exception {
                 String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
-                validateResource(lookupPath, serviceRepository);
+                validateResource(lookupPath);
 
                 String[] split = splitId(entity);
                 String sourceType = split[0];
@@ -213,7 +213,7 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
                         HttpServletRequest request)
                         throws Exception {
                 String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
-                validateResource(lookupPath, serviceRepository);
+                validateResource(lookupPath);
                 serviceRepository.lookupService(collectionName).delete(
                                 unescapeIdIfWanted(id.substring(1, id.length() - 1)));
                 return null;
@@ -236,7 +236,7 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
                         HttpServletRequest request)
                         throws Exception {
                 String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
-                validateResource(lookupPath, serviceRepository);
+                validateResource(lookupPath);
 
                 String[] split = splitId(entity);
                 String sourceType = split[0];

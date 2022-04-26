@@ -119,7 +119,7 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
             topic = topic.substring(5);
 
             // Check topic for syntax+semantics
-            validateResource(new StringBuffer(topic), serviceRepository);
+            validateResource(new StringBuffer(topic));
 
             // Check if topic references valid Collection
             boolean valid = false;

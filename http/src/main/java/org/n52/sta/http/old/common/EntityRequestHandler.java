@@ -78,7 +78,7 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
             String id,
             HttpServletRequest request) throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
-        validateResource(lookupPath, serviceRepository);
+        validateResource(lookupPath);
 
         String entityId = unescapeIdIfWanted(id.substring(1, id.length() - 1));
         QueryOptions options = decodeQueryString(request);
@@ -102,7 +102,7 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
 
         // '/$ref'
         int until = lookupPath.length() - 5;
-        validateResource(lookupPath.substring(0, until), serviceRepository);
+        validateResource(lookupPath.substring(0, until));
 
         String entityId = unescapeIdIfWanted(id.substring(1, id.length() - 1));
         HashSet<FilterClause> filters = new HashSet<>();
@@ -127,7 +127,7 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
             HttpServletRequest request)
             throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
-        validateResource(lookupPath, serviceRepository);
+        validateResource(lookupPath);
 
         String[] split = splitId(entity);
         String sourceType = split[0];
@@ -157,7 +157,7 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
             HttpServletRequest request)
             throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
-        validateResource(lookupPath.substring(0, lookupPath.length() - 5), serviceRepository);
+        validateResource(lookupPath.substring(0, lookupPath.length() - 5));
 
         String[] split = splitId(entity);
         String sourceType = split[0];

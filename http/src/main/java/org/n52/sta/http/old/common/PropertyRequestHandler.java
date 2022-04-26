@@ -82,8 +82,7 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
                                             String id,
                                             String property,
                                             String url) throws Exception {
-        validateResource(url.substring(0, url.length() - property.length() - 1),
-                         serviceRepository);
+        validateResource(url.substring(0, url.length() - property.length() - 1));
         validateProperty(entity, property);
 
         String entityId = unescapeIdIfWanted(id.substring(1, id.length() - 1));
@@ -118,8 +117,7 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
                                              String target,
                                              String property,
                                              String url) throws Exception {
-        validateResource(url.substring(0, url.length() - property.length() - 1),
-                         serviceRepository);
+        validateResource(url.substring(0, url.length() - property.length() - 1));
 
         String[] split = splitId(entity);
         String sourceType = split[0];
