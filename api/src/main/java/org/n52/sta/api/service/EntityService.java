@@ -25,16 +25,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.api;
+package org.n52.sta.api.service;
 
-public class ProviderException extends RuntimeException {
-
-    public ProviderException(String message) {
-        super(message);
-    }
-
-    public ProviderException(String message, Throwable cause) {
-        super(message, cause);
-    }
+public interface EntityService {
 
 }

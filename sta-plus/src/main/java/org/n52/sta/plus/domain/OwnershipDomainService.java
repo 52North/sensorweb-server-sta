@@ -25,17 +25,16 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.api.domain;
+package org.n52.sta.plus.domain;
 
-@FunctionalInterface
-public interface AggregateFactory<T> {
+import org.n52.sta.api.EntityProvider;
+import org.n52.sta.api.domain.DomainService.DomainServiceAdapter;
+import org.n52.sta.plus.data.entity.StaPlusThing;
 
-    /**
-     * Creates an entity aggregate factory.
-     * <p>
-     * Passes a domain service which may be used during creation.
-     *
-     * @param domainService to be used during creation
-     */
-    Aggregate<T> create(DomainService<T> domainService) throws AggregateException;
+public class OwnershipDomainService extends DomainServiceAdapter<StaPlusThing> {
+
+    public OwnershipDomainService(EntityProvider<StaPlusThing> entityProvider) {
+        super(entityProvider);
+    }
+
 }

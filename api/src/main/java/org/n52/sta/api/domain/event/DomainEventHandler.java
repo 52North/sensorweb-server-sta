@@ -25,16 +25,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.api;
+package org.n52.sta.api.domain.event;
 
-public class ProviderException extends RuntimeException {
+public interface DomainEventHandler {
 
-    public ProviderException(String message) {
-        super(message);
-    }
-
-    public ProviderException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
+    void handle(DomainEvent domainEvent);
 }

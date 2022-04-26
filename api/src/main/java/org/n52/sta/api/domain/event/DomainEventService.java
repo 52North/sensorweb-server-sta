@@ -25,16 +25,21 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.api;
+package org.n52.sta.api.domain.event;
 
-public class ProviderException extends RuntimeException {
+import java.util.ArrayList;
+import java.util.List;
 
-    public ProviderException(String message) {
-        super(message);
+public final class DomainEventService {
+
+    private final List<DomainEventHandler> eventHandlers;
+
+    public DomainEventService()  {
+        this.eventHandlers = new ArrayList<>();
     }
 
-    public ProviderException(String message, Throwable cause) {
-        super(message, cause);
+    public void handleDomainEvent(DomainEvent domainEvent) {
+        eventHandlers.forEach(handler -> handler.handle(domainEvent));
     }
 
 }

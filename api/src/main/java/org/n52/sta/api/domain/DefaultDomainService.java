@@ -27,7 +27,14 @@
  */
 package org.n52.sta.api.domain;
 
-public abstract class Aggregate<T> {
+import org.n52.sta.api.EntityProvider;
+import org.n52.sta.api.domain.DomainService.DomainServiceAdapter;
+import org.n52.sta.api.entity.Identifiable;
 
+public final class DefaultDomainService<T extends Identifiable> extends DomainServiceAdapter<T> {
+
+    public DefaultDomainService(EntityProvider<T> entityProvider) {
+        super(entityProvider);
+    }
 
 }

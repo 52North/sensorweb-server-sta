@@ -30,60 +30,53 @@ package org.n52.sta.api.domain;
 import java.util.Map;
 import java.util.Set;
 
+import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.HistoricalLocation;
 import org.n52.sta.api.entity.Location;
 import org.n52.sta.api.entity.Thing;
 
-public class ThingAggregate extends Aggregate<Thing> implements Thing {
+public class ThingAggregate extends EntityAggregate<Thing> implements Thing {
 
     private final Thing thing;
 
-    public ThingAggregate(Thing thing) {
+    public ThingAggregate(Thing thing, DomainService<Thing> domainService) {
+        this(thing, domainService, null);
+    }
+
+    public ThingAggregate(Thing thing, DomainService<Thing> domainService, EntityEditor<Thing> editor) {
+        super(thing, domainService, editor);
         this.thing = thing;
     }
 
-    @Override
     public String getId() {
-        // TODO Auto-generated method stub
-        return null;
+        return thing.getId();
     }
 
-    @Override
     public String getName() {
-        // TODO Auto-generated method stub
-        return null;
+        return thing.getName();
     }
 
-    @Override
     public String getDescription() {
-        // TODO Auto-generated method stub
-        return null;
+        return thing.getDescription();
     }
 
-    @Override
     public Map<String, Object> getProperties() {
-        // TODO Auto-generated method stub
-        return null;
+        return thing.getProperties();
     }
 
-    @Override
     public Set<HistoricalLocation> getHistoricalLocations() {
-        // TODO Auto-generated method stub
-        return null;
+        return thing.getHistoricalLocations();
     }
 
-    @Override
     public Set<Location> getLocations() {
-        // TODO Auto-generated method stub
-        return null;
+        return thing.getLocations();
     }
 
-    @Override
     public Set<Datastream> getDatastreams() {
-        // TODO Auto-generated method stub
-        return null;
+        return thing.getDatastreams();
     }
+
 
 
 }

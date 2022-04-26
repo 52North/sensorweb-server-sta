@@ -27,22 +27,30 @@
  */
 package org.n52.sta.api.domain;
 
-import org.n52.sta.api.EntityProvider;
+import org.n52.sta.api.ProviderException;
+import org.n52.sta.api.domain.DomainService.DomainServiceAdapter;
 import org.n52.sta.api.entity.Thing;
 
-public class ThingDomainService implements DomainService<Thing> {
+public class ThingDomainService extends DomainServiceAdapter<Thing> {
 
-    private final EntityProvider<Thing> thingProvider;
+    private final DomainService<Thing> domainService;
 
-    public ThingDomainService(EntityProvider<Thing> thingProvider) {
-        this.thingProvider = thingProvider;
+    public ThingDomainService(DomainService<Thing> domainService) {
+        super(domainService);
+        this.domainService = domainService;
     }
 
     @Override
-    public Aggregate<Thing> create(Thing entity) throws DomainException {
-        // TODO Auto-generated method stub
+    public boolean exists(String id) throws ProviderException {
 
-        return null;
+        // TODO action before
+
+        boolean exists = domainService.exists(id);
+
+        // TODO action after
+
+        return exists;
     }
+
 
 }

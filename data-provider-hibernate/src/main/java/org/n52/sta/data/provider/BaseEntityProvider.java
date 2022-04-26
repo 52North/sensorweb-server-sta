@@ -31,9 +31,10 @@ import org.n52.janmayen.stream.Streams;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityProvider;
+import org.n52.sta.api.entity.Identifiable;
 import org.n52.sta.data.support.EntityGraphBuilder;
 
-public abstract class BaseEntityProvider<T> implements EntityProvider<T> {
+public abstract class BaseEntityProvider<T extends Identifiable> implements EntityProvider<T> {
 
     /**
      * Creates an entity graph for unfiltered entity members.

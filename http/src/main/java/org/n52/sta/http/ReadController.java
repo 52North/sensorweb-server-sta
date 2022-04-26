@@ -31,8 +31,9 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.n52.sta.api.EntityProvider;
+import org.n52.sta.api.entity.Identifiable;
 
-public abstract class ReadController<T> {
+public abstract class ReadController<T extends Identifiable> {
 
     private final EntityProvider<T> entityProvider;
 

@@ -25,16 +25,18 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.api;
+package org.n52.sta.api.domain.event;
 
-public class ProviderException extends RuntimeException {
+import org.n52.sta.api.entity.Identifiable;
 
-    public ProviderException(String message) {
-        super(message);
-    }
+public final class EntityUpdateEvent<T extends Identifiable> implements DomainEvent<T> {
 
-    public ProviderException(String message, Throwable cause) {
-        super(message, cause);
+    private final T oldEntity;
+    private final T newEntity;
+
+    public EntityUpdateEvent(T oldEntity, T newEntity) {
+        this.oldEntity = oldEntity;
+        this.newEntity = newEntity;
     }
 
 }

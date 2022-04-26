@@ -27,8 +27,55 @@
  */
 package org.n52.sta.api.domain;
 
-public interface DomainService<T> {
+import java.util.Optional;
 
-    Aggregate<T> create(T entity) throws DomainException;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.sta.api.EntityPage;
+import org.n52.sta.api.EntityProvider;
+import org.n52.sta.api.ProviderException;
+import org.n52.sta.api.domain.event.DomainEvent;
+import org.n52.sta.api.domain.event.DomainEventService;
+import org.n52.sta.api.entity.Identifiable;
+
+public interface DomainService<T extends Identifiable> extends EntityProvider<T> {
+
+    void sendDomainEvent(DomainEvent<T> event);
+
+    abstract class DomainServiceAdapter<T extends Identifiable> implements DomainService<T> {
+
+        private final EntityProvider<T> entityProvider;
+
+        private Optional<DomainEventService> domainEventService;
+
+        protected DomainServiceAdapter(EntityProvider<T> entityProvider) {
+            this.entityProvider = entityProvider;
+            this.domainEventService = Optional.empty();
+        }
+
+        @Override
+        public void sendDomainEvent(DomainEvent<T> event) {
+            domainEventService.ifPresent(service -> service.handleDomainEvent(event));
+        }
+
+        @Override
+        public boolean exists(String id) throws ProviderException {
+            return entityProvider.exists(id);
+        }
+
+        @Override
+        public Optional<T> getEntity(String id, QueryOptions options) throws ProviderException {
+            return entityProvider.getEntity(id, options);
+        }
+
+        @Override
+        public EntityPage<T> getEntities(QueryOptions options) throws ProviderException {
+            return entityProvider.getEntities(options);
+        }
+
+        public void setDomainEventService(DomainEventService domainEventService) {
+            this.domainEventService = Optional.ofNullable(domainEventService);
+        }
+
+    }
 
 }

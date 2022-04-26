@@ -25,16 +25,10 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.api;
+package org.n52.sta.api.domain.event;
 
-public class ProviderException extends RuntimeException {
+import org.n52.sta.api.entity.Identifiable;
 
-    public ProviderException(String message) {
-        super(message);
-    }
-
-    public ProviderException(String message, Throwable cause) {
-        super(message, cause);
-    }
+public interface DomainEvent<T extends Identifiable> {
 
 }
